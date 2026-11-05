@@ -15,7 +15,7 @@ Umfang: <was dazu gehört, was ausdrücklich nicht>
 ```
 
 ## Programmrahmen und Selbst-Update
-Status: freigegeben
+Status: erledigt (05.11.2026)
 Datum: 05.11.2026
 Was: Lauffähiges Windows-Programm mit Hauptfenster, Datenordner, SQLite-Speicher,
 Versionsanzeige und Selbst-Update über die Releases dieses Repositorys.
