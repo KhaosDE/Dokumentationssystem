@@ -22,6 +22,9 @@ BESCHLUSS_KEINER = "kein_beschluss"
 BESCHLUSS_ZUSTAENDE = (BESCHLUSS_ENDE, BESCHLUSS_KEINER, NICHT_ERFASST)
 
 _DATUM = re.compile(r"^(\d{1,2})\.(\d{1,2})\.(\d{4})$")
+# Fehler erscheinen in der Reihenfolge des Formulars
+_REIHENFOLGE = ("Vorname", "Nachname", "Zimmernummer", "Geburtsdatum", "Aufnahmedatum", "Das Aufnahmedatum",
+                "Beschluss", "Allergien")
 
 
 class Eingabefehler(Exception):
@@ -148,8 +151,12 @@ def aus_eingabe(eingabe: dict[str, str], id: int | None = None, bild: str | None
         if f not in fehler and not any(f.startswith(feld) for feld in unlesbar):
             fehler.append(f)
     if fehler:
-        raise Eingabefehler(fehler)
+        raise Eingabefehler(sorted(fehler, key=_rang))
     return b
+
+
+def _rang(satz: str) -> int:
+    return next((i for i, wort in enumerate(_REIHENFOLGE) if satz.startswith(wort)), len(_REIHENFOLGE))
 
 
 def als_eingabe(b: Bewohner) -> dict[str, str]:

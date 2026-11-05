@@ -48,8 +48,8 @@ class PruefregelnTest(unittest.TestCase):
 
     def test_pflichtfelder(self):
         fehler = fehler_von(eingabe(vorname=" ", nachname="", zimmer="", geburtsdatum="", aufnahmedatum=""))
-        self.assertEqual(fehler, ["Geburtsdatum fehlt.", "Aufnahmedatum fehlt.", "Vorname fehlt.",
-                                  "Nachname fehlt.", "Zimmernummer fehlt."])
+        self.assertEqual(fehler, ["Vorname fehlt.", "Nachname fehlt.", "Zimmernummer fehlt.",
+                                  "Geburtsdatum fehlt.", "Aufnahmedatum fehlt."])
 
     def test_aufnahme_nicht_vor_geburt(self):
         self.assertEqual(fehler_von(eingabe(geburtsdatum="14.03.1962", aufnahmedatum="13.03.1962")),
