@@ -1,14 +1,15 @@
 # STAND — Dokumentationssystem
 
-Stand: 05.11.2026. Version: **0.1.0** (Programmrahmen und Selbst-Update).
+Stand: 05.11.2026. Version: **0.2.0** (Bewohnerakte).
 
 ## Aktuell
 
-Das Programm läuft als Windows-Programm (`.exe`) mit Hauptfenster, Datenordner,
-SQLite-Speicher, Versionsanzeige und Selbst-Update. Der Bereich „Bewohner“ ist noch ein
-Platzhalter.
+Das Programm läuft als Windows-Programm (`.exe`) mit Selbst-Update. Der Bereich
+„Bewohner“ zeigt alle ausgedachten Demo-Bewohner als Kacheln; jede Akte hat die
+wichtigsten Angaben auf einen Blick, Allergiehinweis oben.
 
-**Nächster Schritt:** „Bewohnerakte“ (in `IDEEN.md` freigegeben).
+**Nächster Schritt:** In `IDEEN.md` ist nichts mehr freigegeben. Offen: „Tägliche
+Dokumentation“ (wird im Chat ausgearbeitet) und die Vorschläge unter „Offene Punkte“.
 
 ## Fertig
 
@@ -26,11 +27,28 @@ Platzhalter.
   - GitHub Actions: Tests unter Windows, `.exe` bauen, Selbsttest der `.exe`, Release
     `build-<Laufnummer>` bei Push nach `main` (nicht bei reinen `.md`-Änderungen).
   - README: Herunterladen, SmartScreen-Warnung, Update abschalten.
+- 0.2.0 — Bewohnerakte:
+  - Übersicht: alle Bewohner als Kacheln mit Bild (sonst Initialen), Name und Zimmer,
+    sortiert nach Nachname. Klick öffnet die Akte.
+  - Akte: Name, Zimmer, Bild, Geburtsdatum, Aufnahmedatum, Beschlussende. Allergiehinweis
+    oben, je Zustand deutlich anders: rot (eingetragen), grün (keine bekannt), orange
+    gestrichelt (nicht erfasst – bitte klären).
+  - Formular „Neuer Bewohner …“ / „Bearbeiten …“ mit Prüfung: Pflichtfelder, Datum
+    TT.MM.JJJJ, Aufnahmedatum nicht vor dem Geburtsdatum. Neue Bewohner stehen bei
+    Allergien und Beschluss auf „nicht erfasst“.
+  - Bewohnerbild per Dateiauswahl, Ablage im Datenordner (`bilder\`).
+  - 10 ausgedachte Demo-Bewohner (`daten/demo/bewohner.json`), gemischt bei Allergien und
+    Beschluss, ohne Bilder. Werden beim ersten Start geladen; Knopf „Demo-Daten
+    zurücksetzen …“ unten links.
+  - Behoben: Absturz beim Beenden, der mit den neuen Fenstern auftreten konnte (Fenster
+    werden jetzt am Programmende ausdrücklich abgebaut).
 
 ## Offene Punkte
 
 - Bewohnerakte: Vorschläge Beschlusswarnung, „offen geführt“, Altersanzeige — Tobi
   entscheidet.
+- Bewohner löschen oder als ausgezogen markieren gibt es noch nicht (war nicht
+  beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
 - Tägliche Dokumentation: Inhalt wird im Chat ausgearbeitet.
 - PySide6 steht unter LGPLv3 — vor einem späteren Verkauf prüfen (siehe `CLAUDE.md`).
 
@@ -62,8 +80,43 @@ Platzhalter.
   dem Zielsystem.
 - 05.11.2026 (Claude Code): Zusätzliche Abhängigkeit nur zum Bauen: PyInstaller (macht
   die `.exe`, wie in N3XTBYT3). Im Programm selbst nur PySide6.
+- 05.11.2026 (Claude Code): **Name als Vorname und Nachname** (zwei Felder). Grund:
+  Sortieren nach Nachname und Initialen im Platzhalter gehen damit ohne Raten.
+- 05.11.2026 (Claude Code): **Beschlussende mit drei Zuständen** wie die Allergien:
+  Datum / „kein Beschluss“ / „nicht erfasst“. Grund: Ein leeres Feld könnte sonst wie
+  „kein Beschluss“ gelesen werden (Gedanke von Regel 5). Eine Warnung vor dem Ende ist
+  ausdrücklich nicht gebaut.
+- 05.11.2026 (Claude Code): Pflichtfelder sind Vorname, Nachname, Zimmer, Geburtsdatum,
+  Aufnahmedatum. Datum darf auch ohne führende Nullen eingegeben werden (3.4.1965),
+  angezeigt wird immer TT.MM.JJJJ.
+- 05.11.2026 (Claude Code): Übersicht als Kacheln (nicht als Liste), sortiert nach
+  Nachname. Grund: Bild, Name und Zimmer sind so auf einen Blick zu sehen.
+- 05.11.2026 (Claude Code): Bilder werden unverändert in den Datenordner kopiert (PNG,
+  JPG, BMP, GIF), nicht verkleinert. Grund: einfachster Weg; für eine Demo reicht das.
+  Im Formular steht der Hinweis „Demo: bitte keine Fotos echter Personen“ (Regel 2).
+- 05.11.2026 (Claude Code): Demo-Daten werden genau einmal automatisch geladen (Merker in
+  der Datenbank). „Demo-Daten zurücksetzen“ löscht alle Bewohner und hinterlegten Bilder
+  und lädt die Demo-Datei neu – mit Rückfrage.
 
 ## Testliste für Tobi
+
+Version 0.2.0 (Bewohnerakte):
+
+1. Programm starten (läuft schon 0.1.0, kommt 0.2.0 über das Update). Unten links steht
+   „Version 0.2.0 · Build …“.
+2. Unter „Bewohner“ stehen 10 ausgedachte Bewohner als Kacheln mit Initialen.
+3. Akte öffnen und die drei Allergie-Anzeigen vergleichen: Anton Ahorn (rot,
+   „Haselnüsse“), Berta Birke (grün, „keine bekannt“), Clara Clematis (orange
+   gestrichelt, „nicht erfasst – bitte klären“).
+4. Beschlussende vergleichen: Ahorn (Datum), Birke („kein Beschluss“), Ginster („nicht
+   erfasst“).
+5. „Neuer Bewohner …“: Aufnahmedatum vor das Geburtsdatum setzen → Fehlermeldung, nichts
+   gespeichert. Danach richtig ausfüllen → neue Kachel; Allergien stehen auf „nicht
+   erfasst“.
+6. „Bearbeiten …“: ein ausgedachtes Bild (keine echte Person) hinterlegen → erscheint in
+   Akte und Übersicht.
+7. „Demo-Daten zurücksetzen …“ → Rückfrage, danach wieder die 10 Demo-Bewohner, eigene
+   Änderungen und Bilder sind weg.
 
 Version 0.1.0:
 

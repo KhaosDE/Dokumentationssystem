@@ -31,8 +31,10 @@ class HauptfensterTest(unittest.TestCase):
     def _fenster(self):
         from dokusystem.oberflaeche.hauptfenster import Hauptfenster
 
+        from dokusystem.oberflaeche.app import abbauen
+
         fenster = Hauptfenster(self.speicher)
-        self.addCleanup(fenster.close)
+        self.addCleanup(abbauen, fenster)
         fenster.show()
         self.app.processEvents()
         return fenster

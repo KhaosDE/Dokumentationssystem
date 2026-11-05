@@ -7,9 +7,11 @@ import sys
 import tempfile
 import traceback
 
-from PySide6.QtWidgets import QApplication, QMessageBox
+import shiboken6
+from PySide6.QtGui import QImageReader
+from PySide6.QtWidgets import QApplication, QMessageBox, QWidget
 
-from dokusystem.kern import pfade
+from dokusystem.kern import bilder, pfade
 from dokusystem.kern.speicher import Speicher, SpeicherFehler
 
 from .hauptfenster import Hauptfenster
@@ -24,6 +26,17 @@ def anwendung() -> QApplication:
     return app
 
 
+def abbauen(fenster: QWidget) -> None:
+    """Fenster sofort löschen, solange die QApplication noch lebt.
+
+    Signal-Verbindungen halten Fenster über Referenzkreise am Leben; ohne diesen Schritt
+    räumt PySide sie erst beim Python-Ende ab – und das kann abstürzen.
+    """
+    if shiboken6.isValid(fenster):
+        fenster.close()
+        shiboken6.delete(fenster)
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if "--selbsttest" in argv:
@@ -31,12 +44,14 @@ def main(argv: list[str] | None = None) -> int:
     app = anwendung()
     try:
         speicher = Speicher()
+        speicher.demo_beim_ersten_start()
     except SpeicherFehler as e:
         QMessageBox.critical(None, "Dokumentationssystem", str(e))
         return 1
     fenster = Hauptfenster(speicher)
     fenster.show()
     ergebnis = app.exec()
+    abbauen(fenster)
     speicher.schliessen()
     return ergebnis
 
@@ -52,10 +67,17 @@ def selbsttest() -> int:
         os.environ[pfade.UMLENKUNG] = ordner
         try:
             app = anwendung()
+            formate = {bytes(f).decode() for f in QImageReader.supportedImageFormats()}
+            fehlend = {e.lstrip(".") for e in bilder.ENDUNGEN} - formate
+            if fehlend:
+                raise RuntimeError(f"Bildformate fehlen: {sorted(fehlend)}")
             speicher = Speicher()
+            if not speicher.demo_beim_ersten_start() or not speicher.alle_bewohner():
+                raise RuntimeError("Demo-Daten fehlen.")
             fenster = Hauptfenster(speicher)
+            fenster.bewohner.akte_zeigen(speicher.alle_bewohner()[0].id)
             app.processEvents()
-            fenster.close()
+            abbauen(fenster)
             speicher.schliessen()
             return 0
         except Exception:  # noqa: BLE001 – jeder Fehler heißt: Selbsttest nicht bestanden

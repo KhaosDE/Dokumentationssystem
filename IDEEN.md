@@ -34,7 +34,7 @@ Umfang:
 - Ausdrücklich nicht: Benutzerkonten, Anmeldung, Netzwerkbetrieb mit mehreren Rechnern.
 
 ## Bewohnerakte
-Status: freigegeben
+Status: erledigt (05.11.2026)
 Datum: 05.11.2026
 Was: Eine Akte pro Bewohner mit den wichtigsten Angaben auf einen Blick, dazu eine
 Übersicht aller Bewohner des Wohnbereichs.

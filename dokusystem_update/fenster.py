@@ -8,11 +8,15 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QProgressDialog
 
 SCHRITTE = 1000
+# Bleibt bestehen, wenn das Fenster weg ist: Scheitert das Update, startet danach das Programm
+# mit derselben QApplication, statt eine zweite anzulegen.
+_app: QApplication | None = None
 
 
 class Fortschrittsfenster:
     def __init__(self) -> None:
-        self.app = QApplication.instance() or QApplication(sys.argv)
+        global _app
+        _app = self.app = QApplication.instance() or QApplication(sys.argv)
         self.dialog = QProgressDialog("Neue Version wird geladen …", "Abbrechen und alte Version starten",
                                       0, SCHRITTE)
         self.dialog.setWindowTitle("Dokumentationssystem – Update")
