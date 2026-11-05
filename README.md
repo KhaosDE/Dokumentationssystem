@@ -28,6 +28,16 @@ Demo lohnt sich das nicht. So startest du trotzdem:
 
 Danach fragt Windows für diese Datei nicht mehr.
 
+## Bedienung in Kürze
+
+- **Bewohner** (links): alle Bewohner als Kacheln. Ein Klick öffnet die Akte.
+- In der Akte steht oben der **Allergiehinweis**: rot = Allergien eingetragen,
+  grün = keine bekannt, orange gestrichelt = noch nicht erfasst.
+- **Neuer Bewohner …** und **Bearbeiten …** öffnen das Formular. Datum immer als
+  TT.MM.JJJJ (z. B. 03.04.1965).
+- **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
+  her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren.
+
 ## Updates
 
 Bei jedem Start fragt das Programm kurz bei GitHub nach, ob es eine neuere Version gibt –
@@ -51,6 +61,7 @@ Im Datenordner `%APPDATA%\Dokumentationssystem` (im Windows-Explorer oben in die
 Adresszeile eingeben). Dort liegen:
 
 - `dokusystem.sqlite3` – die Datenbank,
+- `bilder\` – hinterlegte Bewohnerbilder,
 - `einstellungen.json` – die Einstellungen,
 - `update.log` – was beim Update passiert ist (zum Nachsehen, wenn etwas nicht klappt).
 
