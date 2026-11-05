@@ -9,6 +9,8 @@ from PySide6.QtWidgets import (
     QLabel,
     QListWidget,
     QMainWindow,
+    QMessageBox,
+    QPushButton,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
@@ -19,25 +21,13 @@ from dokusystem._version import VERSION
 from dokusystem.kern import einstellungen
 from dokusystem.kern.speicher import Speicher
 
+from .bewohner_ansicht import BewohnerBereich
 from .stil import DEMO_HINWEIS
 
 
 def versions_text() -> str:
     build = f"Build {BUILD}" if BUILD else "Entwicklerversion"
     return f"Version {VERSION} · {build}"
-
-
-class Platzhalter(QWidget):
-    """Bereich, der noch gebaut wird."""
-
-    def __init__(self, titel: str, text: str) -> None:
-        super().__init__()
-        layout = QVBoxLayout(self)
-        ueberschrift = QLabel(titel)
-        ueberschrift.setObjectName("seitenTitel")
-        layout.addWidget(ueberschrift)
-        layout.addWidget(QLabel(text))
-        layout.addStretch()
 
 
 class Hauptfenster(QMainWindow):
@@ -54,9 +44,9 @@ class Hauptfenster(QMainWindow):
         self.bereiche = QStackedWidget()
         self.navigation = QListWidget()
         self.navigation.currentRowChanged.connect(self.bereiche.setCurrentIndex)
-        self._bereich_hinzufuegen(
-            "Bewohner", Platzhalter("Bewohner", "Hier entsteht die Übersicht aller Bewohner.")
-        )
+        self.bewohner = BewohnerBereich(speicher)
+        self._bereich_hinzufuegen("Bewohner", self.bewohner)
+        self.navigation.itemClicked.connect(self._bereich_neu_zeigen)
 
         self.version = QLabel(versions_text())
         self.version.setObjectName("version")
@@ -64,12 +54,15 @@ class Hauptfenster(QMainWindow):
         self.auto_update.setObjectName("autoUpdate")
         self.auto_update.setChecked(einstellungen.lade()["auto_update"])
         self.auto_update.toggled.connect(self._auto_update_umschalten)
+        zuruecksetzen = QPushButton("Demo-Daten zurücksetzen …")
+        zuruecksetzen.clicked.connect(lambda: self.demo_zuruecksetzen())
 
         leiste = QWidget()
         leiste.setObjectName("navigation")
         leiste.setFixedWidth(240)
         leisten_layout = QVBoxLayout(leiste)
         leisten_layout.addWidget(self.navigation, 1)
+        leisten_layout.addWidget(zuruecksetzen)
         leisten_layout.addWidget(self.auto_update)
         leisten_layout.addWidget(self.version)
 
@@ -100,3 +93,23 @@ class Hauptfenster(QMainWindow):
         werte = einstellungen.lade()
         werte["auto_update"] = an
         einstellungen.speichere(werte)
+
+    def _bereich_neu_zeigen(self) -> None:
+        """Klick auf „Bewohner“ in der Navigation führt immer zur Übersicht zurück."""
+        if self.bereiche.currentWidget() is self.bewohner:
+            self.bewohner.uebersicht_zeigen()
+
+    def demo_zuruecksetzen(self, nachfragen: bool = True) -> bool:
+        if nachfragen:
+            antwort = QMessageBox.question(
+                self, "Demo-Daten zurücksetzen",
+                "Alle Änderungen und hinterlegten Bilder werden gelöscht und die ausgedachten "
+                "Demo-Bewohner neu geladen.\n\nFortfahren?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No)
+            if antwort != QMessageBox.StandardButton.Yes:
+                return False
+        self.speicher.demo_zuruecksetzen()
+        self.navigation.setCurrentRow(0)
+        self.bewohner.uebersicht_zeigen()
+        return True
