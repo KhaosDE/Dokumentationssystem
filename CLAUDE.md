@@ -38,7 +38,10 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 - Anhalten und fragen nur, wenn eine Regel aus „Unverhandelbar“ verletzt würde oder
   etwas Unumkehrbares nötig ist.
 - Kleine, lauffähige Schritte: ändern, testen, committen, `STAND.md` aktualisieren.
-- Zweig: Arbeitszweig mit Pull Request, `main` enthält nur Geprüftes.
+- Zweig: Arbeitszweig mit Pull Request. Zusammenführen nach `main` erst, wenn Tests und
+  Windows-Build grün sind; dann darfst du selbst zusammenführen. Jeder Push nach `main`
+  erzeugt ein Release, das Tobis Programm als Update bekommt.
+- `IDEEN.md` ist der einzige Weg, auf dem Aufträge aus den Chats zu dir kommen.
 - Jede ausgelieferte Änderung bekommt eine neue Versionsnummer (in `STAND.md`).
 
 ## Stand-Dateien (Brücke zu den Chats)
@@ -51,8 +54,27 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 
 ## Technik
 
-**Noch offen** (Entscheidung Tobi steht aus, siehe `STAND.md`). Fest steht nur: Das
-Programm bekommt eine **Update-Funktion**, die über dieses öffentliche Repository läuft.
+**Windows-Programm** (Entscheidung Tobi, 05.11.2026).
+
+- Python 3.12, Oberfläche mit **PySide6** (Qt; Lizenz LGPLv3 — vor einem späteren Verkauf
+  prüfen), Tests mit `unittest`. Weitere Abhängigkeiten nur mit Begründung in `STAND.md`.
+- **Kern ohne Oberfläche:** Datenmodell, Speichern, Prüfregeln und Demo-Daten liegen in
+  `dokusystem/kern/` und sind ohne PySide6 testbar. Die Oberfläche
+  (`dokusystem/oberflaeche/`) ruft nur den Kern auf.
+- **Speicher:** SQLite-Datei im Datenordner `%APPDATA%\Dokumentationssystem\` (sonst
+  `~/.local/share/dokumentationssystem/`). Hinterlegte Bilder ebenfalls dort, nie im
+  Repository.
+- **Demo-Daten:** liegen als lesbare Datei im Repository (`daten/demo/`), werden beim ersten
+  Start geladen und lassen sich über „Demo-Daten zurücksetzen“ wiederherstellen.
+- **Programmdatei und Selbst-Update nach Vorbild von `KhaosDE/N3XTBYT3`** (öffentlich; dort
+  Paket `n3xtbyt3_update` und `.github/workflows/tests-und-exe.yml`): GitHub Actions testet
+  bei jedem Push nach `main` unter Windows, baut die `.exe` (PyInstaller) und veröffentlicht
+  sie mit SHA-256-Prüfsumme als Release `build-<Laufnummer>`. Die `.exe` fragt beim Start
+  nach dem neuesten Release *dieses* Repositorys, lädt, prüft die Prüfsumme, tauscht sich
+  aus und startet neu. Nur diese Adressen, kein anderer Netzzugriff. Abschaltbar
+  (`--kein-update` und Einstellung). Schlägt etwas fehl, startet die alte Version.
+- Die `.exe` ist nicht signiert; Windows SmartScreen warnt beim ersten Start. Im README in
+  einfachen Worten erklären.
 
 ## Sprache
 

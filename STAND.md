@@ -4,11 +4,10 @@ Stand: 05.11.2026. Version: noch keine (nur Grundgerüst).
 
 ## Aktuell
 
-Grundgerüst angelegt: Regeln (`CLAUDE.md`), Aufträge (`IDEEN.md`), Stand-Dateien.
-Erster Auftrag „Bewohnerakte“ steht in `IDEEN.md`, noch nicht freigegeben.
+Grundgerüst und Regeln stehen. In `IDEEN.md` freigegeben: „Programmrahmen und
+Selbst-Update“, dann „Bewohnerakte“.
 
-**Nächster Schritt:** Tobi entscheidet die Technik (Windows-Programm oder Web-App im
-Browser). Danach Plan, dann Freigabe der Bewohnerakte.
+**Nächster Schritt:** Claude Code baut die beiden freigegebenen Einträge.
 
 ## Fertig
 
@@ -17,9 +16,9 @@ Browser). Danach Plan, dann Freigabe der Bewohnerakte.
 
 ## Offene Punkte
 
-- Technik und Weg der Update-Funktion.
-- Bewohnerakte: Anzahl der Demo-Bewohner; Vorschläge Beschlusswarnung, „offen geführt“,
-  Altersanzeige.
+- Bewohnerakte: Vorschläge Beschlusswarnung, „offen geführt“, Altersanzeige — Tobi
+  entscheidet.
+- Tägliche Dokumentation: Inhalt wird im Chat ausgearbeitet.
 
 ## Entscheidungen
 
@@ -28,6 +27,11 @@ Browser). Danach Plan, dann Freigabe der Bewohnerakte.
   sind Bewohnerführung und tägliche Dokumentation.
 - 05.11.2026 (Tobi): Repository öffentlich, damit eine Update-Funktion gebaut und erprobt
   werden kann.
+- 05.11.2026 (Tobi): Windows-Programm. Ideen werden im Chat besprochen, landen in
+  `IDEEN.md`, Claude Code setzt sie um.
+- 05.11.2026 (Chat): Python + PySide6 + SQLite, Build und Selbst-Update nach Vorbild
+  N3XTBYT3. Grund: Formulare und Listen gehen mit Qt gut, Python und der Update-Weg sind
+  aus N3XTBYT3 schon erprobt.
 
 ## Testliste für Tobi
 
