@@ -5,3 +5,9 @@ venv/
 build/
 dist/
 *.spec
+bin/
+obj/
+publish/
+*.user
+.vs/
+TestResults/
