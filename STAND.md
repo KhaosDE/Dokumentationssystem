@@ -1,48 +1,42 @@
 # STAND — Dokumentationssystem
 
-Stand: 05.11.2026. Version: **0.2.0** (Bewohnerakte).
+Stand: 06.11.2026. Version: **0.3.0** (Umstieg auf C# / .NET 10, Gestaltung nach Vorbild der
+Ausgangsliste).
 
 ## Aktuell
 
-Das Programm läuft als Windows-Programm (`.exe`) mit Selbst-Update. Der Bereich
-„Bewohner“ zeigt alle ausgedachten Demo-Bewohner als Kacheln; jede Akte hat die
-wichtigsten Angaben auf einen Blick, Allergiehinweis oben.
+Das Programm ist neu in C# / .NET 10 mit Windows Forms geschrieben und kann alles, was die
+Python-Version 0.2.0 konnte. Es sieht aus wie die Ausgangsliste: Kopf mit Farbverlauf,
+Bewohner als Kartenraster, Seitenleiste links. Die Python-Version ist entfernt (sie bleibt in
+der Git-Geschichte).
 
-**Nächster Schritt (06.11.2026):** Freigegeben in `IDEEN.md`: „Umstieg auf C# / .NET 10“
-mit „Gestaltung nach Vorbild der Ausgangsliste“ → Version 0.3.0. Für die Sitzung das
-Repository `KhaosDE/Ausgangsliste` zusätzlich anhängen (Bausteine, siehe `CLAUDE.md`).
+**Nächster Schritt:** In `IDEEN.md` ist nichts mehr freigegeben. Offen und im Chat zu klären:
+„Tägliche Dokumentation“, „Wochenplan“, „HEB-Bogen aus Berichten“, „Medikation“,
+„Medikamentendatenbank“, „Startseite als Übersicht“, „Therapie-Bereich“,
+„Wohnbereichskalender“.
 
 ## Fertig
 
 - Repository `KhaosDE/Dokumentationssystem` (öffentlich, wegen der Update-Funktion).
-- `CLAUDE.md`, `IDEEN.md`, `STAND.md`, `SITZUNGEN.md`, `README.md`.
-- 0.1.0 — Programmrahmen und Selbst-Update:
-  - Hauptfenster: oben dauerhaft „Demo — ausgedachte Daten“, links Navigation (zunächst
-    nur „Bewohner“), unten links Versionsnummer und Häkchen „Beim Start nach Updates
-    suchen“.
-  - Datenordner `%APPDATA%\Dokumentationssystem` mit `dokusystem.sqlite3`,
-    `einstellungen.json`, `update.log`.
-  - Selbst-Update: fragt beim Start nach dem neuesten Release, zeigt „Neue Version wird
-    geladen …“, prüft die SHA-256-Prüfsumme, tauscht die `.exe` aus, startet neu. Jeder
-    Schritt steht in `update.log`. Abschaltbar (Häkchen oder `--kein-update`).
-  - GitHub Actions: Tests unter Windows, `.exe` bauen, Selbsttest der `.exe`, Release
-    `build-<Laufnummer>` bei Push nach `main` (nicht bei reinen `.md`-Änderungen).
-  - README: Herunterladen, SmartScreen-Warnung, Update abschalten.
-- 0.2.0 — Bewohnerakte:
-  - Übersicht: alle Bewohner als Kacheln mit Bild (sonst Initialen), Name und Zimmer,
-    sortiert nach Nachname. Klick öffnet die Akte.
-  - Akte: Name, Zimmer, Bild, Geburtsdatum, Aufnahmedatum, Beschlussende. Allergiehinweis
-    oben, je Zustand deutlich anders: rot (eingetragen), grün (keine bekannt), orange
-    gestrichelt (nicht erfasst – bitte klären).
-  - Formular „Neuer Bewohner …“ / „Bearbeiten …“ mit Prüfung: Pflichtfelder, Datum
-    TT.MM.JJJJ, Aufnahmedatum nicht vor dem Geburtsdatum. Neue Bewohner stehen bei
-    Allergien und Beschluss auf „nicht erfasst“.
-  - Bewohnerbild per Dateiauswahl, Ablage im Datenordner (`bilder\`).
-  - 10 ausgedachte Demo-Bewohner (`daten/demo/bewohner.json`), gemischt bei Allergien und
-    Beschluss, ohne Bilder. Werden beim ersten Start geladen; Knopf „Demo-Daten
-    zurücksetzen …“ unten links.
-  - Behoben: Absturz beim Beenden, der mit den neuen Fenstern auftreten konnte (Fenster
-    werden jetzt am Programmende ausdrücklich abgebaut).
+- `CLAUDE.md`, `IDEEN.md`, `STAND.md`, `SITZUNGEN.md`, `README.md`, `docs/`.
+- 0.1.0 und 0.2.0 (Python, 05.11.2026): Programmrahmen mit Selbst-Update, Bewohnerakte.
+- 0.3.0 — Umstieg auf C# / .NET 10 und Gestaltung (06.11.2026):
+  - Aufbau: `src/Dokusystem.Kern` (ohne Fenster, auch unter Linux testbar),
+    `src/Dokusystem.Update` (einziges Projekt mit Internet), `src/Dokusystem` (Windows Forms),
+    Tests in `tests/`. Projektmappe `Dokumentationssystem.sln`.
+  - Gleicher Funktionsumfang wie 0.2.0: Hauptfenster mit Demo-Hinweis, Navigation, Version
+    und Build; Datenordner; Update-Häkchen und `--kein-update`; `update.log`; Bewohnerakte
+    mit Übersicht, Akte, Formular, Prüfregeln, drei Zuständen bei Allergien und
+    Beschlussende, Bild per Dateiauswahl, „Demo-Daten zurücksetzen“.
+  - Gestaltung nach `docs/gestaltung.md`: zentrale Klasse `Stil` (übernommen aus der
+    Ausgangsliste, bereinigt), Kopf mit Farbverlauf, Kartenraster, Seitenleiste mit hellem
+    Akzent für den aktiven Eintrag, eine Hauptaktion pro Ansicht in Akzentblau, Haarlinien
+    statt Schatten, Radien 4/8, Abschnittsbeschriftung „STAMMDATEN“ in der Akte.
+  - Selbst-Update in C# nach demselben Ablauf; die installierte Python-Version ersetzt sich
+    über ihr eigenes Update durch die C#-Version (geprüft, siehe Entscheidungen).
+  - `.exe`: eine Datei, mit .NET, nicht komprimiert; Selbsttest in GitHub Actions.
+  - Tests: 50 für Kern und Update (xUnit), dazu Oberflächentests unter Windows, die auch
+    Bildschirmfotos als Artefakt „Bildschirmfotos“ ablegen.
 
 ## Offene Punkte
 
@@ -50,8 +44,14 @@ Repository `KhaosDE/Ausgangsliste` zusätzlich anhängen (Bausteine, siehe `CLAU
   entscheidet.
 - Bewohner löschen oder als ausgezogen markieren gibt es noch nicht (war nicht
   beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
-- Tägliche Dokumentation: Inhalt wird im Chat ausgearbeitet.
-- PySide6 steht unter LGPLv3 — vor einem späteren Verkauf prüfen (siehe `CLAUDE.md`).
+- Dunkle Darstellung und ein selbst gewähltes Bild im Kopf (Logofeld) sind nicht gebaut:
+  `docs/gestaltung.md` sieht sie vor, freigegeben war „zunächst nur die helle Darstellung“
+  ohne neue Funktionen.
+- Aus der Ausgangsliste noch nicht übernommen (nicht im Umfang von 0.2.0): Datenbank mit
+  Mehrplatz-Schutz, Sicherung, Druckvorschau.
+- Der Wechsel 0.2.0 → 0.3.0 über das Update ist am Code geprüft und mit dem echten Release
+  durchgespielt (Laden, Prüfsumme), aber nicht auf einem echten Windows-Rechner – bitte
+  Testliste Punkt 1.
 
 ## Entscheidungen
 
@@ -62,78 +62,89 @@ Repository `KhaosDE/Ausgangsliste` zusätzlich anhängen (Bausteine, siehe `CLAU
   werden kann.
 - 05.11.2026 (Tobi): Windows-Programm. Ideen werden im Chat besprochen, landen in
   `IDEEN.md`, Claude Code setzt sie um.
-- 05.11.2026 (Chat): Python + PySide6 + SQLite, Build und Selbst-Update nach Vorbild
-  N3XTBYT3. Grund: Formulare und Listen gehen mit Qt gut, Python und der Update-Weg sind
-  aus N3XTBYT3 schon erprobt. **Abgelöst am 06.11.2026** (nächster Punkt).
+- 05.11.2026 (Chat): Python + PySide6 + SQLite. **Abgelöst am 06.11.2026** (nächster Punkt).
 - 06.11.2026 (Tobi): Umstieg auf C# / .NET 10 mit Windows Forms. Grund: Die Ausgangsliste
   ist bereits ein C#-Programm mit vielen passenden Bausteinen (Kartenraster, Mehrplatz-
   Datenbank, Druck, Installer); ein späterer Server geht in derselben Sprache; freie
   Lizenzen. .NET 10 statt 8, weil .NET 8 ab 10.11.2026 keine Updates mehr bekommt.
 - 06.11.2026 (Tobi): Keine KI und keine Internetverbindung außer dem Update (Datenschutz).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
-- 05.11.2026 (Claude Code): **Zwei Nummern.** Die Versionsnummer (z. B. 0.1.0) steht von
-  Hand in `dokusystem/_version.py` und in dieser Datei; die Build-Nummer ist die
-  Laufnummer von GitHub Actions. Das Update vergleicht nur Build-Nummern. Grund: Die
-  Versionsnummer muss schon vor dem Build in `STAND.md` stehen, die Laufnummer kennt man
-  erst danach. Im Fenster steht beides („Version 0.1.0 · Build 7“).
-- 05.11.2026 (Claude Code): **Update-Einstellung** als Häkchen unten links im Hauptfenster,
-  gespeichert in `einstellungen.json` (nicht in der Datenbank). Grund: Die Update-Prüfung
-  läuft vor dem Öffnen der Datenbank, und die Datei lässt sich notfalls von Hand ändern.
-- 05.11.2026 (Claude Code): `update.log` wird fortgeschrieben (ein Eintrag pro Schritt,
-  die letzten 300 Zeilen bleiben), damit man mehrere Starts nachvollziehen kann.
-- 05.11.2026 (Claude Code): Der Workflow läuft auch bei Pull Requests (Tests, `.exe`,
-  Selbsttest – ohne Release). Grund: Vor dem Zusammenführen muss feststehen, dass der
-  Windows-Build grün ist (`CLAUDE.md`, „Arbeitsweise“). Tests laufen nur unter Windows,
-  dem Zielsystem.
-- 05.11.2026 (Claude Code): Zusätzliche Abhängigkeit nur zum Bauen: PyInstaller (macht
-  die `.exe`, wie in N3XTBYT3). Im Programm selbst nur PySide6.
-- 05.11.2026 (Claude Code): **Name als Vorname und Nachname** (zwei Felder). Grund:
-  Sortieren nach Nachname und Initialen im Platzhalter gehen damit ohne Raten.
-- 05.11.2026 (Claude Code): **Beschlussende mit drei Zuständen** wie die Allergien:
-  Datum / „kein Beschluss“ / „nicht erfasst“. Grund: Ein leeres Feld könnte sonst wie
-  „kein Beschluss“ gelesen werden (Gedanke von Regel 5). Eine Warnung vor dem Ende ist
-  ausdrücklich nicht gebaut.
-- 05.11.2026 (Claude Code): Pflichtfelder sind Vorname, Nachname, Zimmer, Geburtsdatum,
-  Aufnahmedatum. Datum darf auch ohne führende Nullen eingegeben werden (3.4.1965),
-  angezeigt wird immer TT.MM.JJJJ.
-- 05.11.2026 (Claude Code): Übersicht als Kacheln (nicht als Liste), sortiert nach
-  Nachname. Grund: Bild, Name und Zimmer sind so auf einen Blick zu sehen.
-- 05.11.2026 (Claude Code): Bilder werden unverändert in den Datenordner kopiert (PNG,
-  JPG, BMP, GIF), nicht verkleinert. Grund: einfachster Weg; für eine Demo reicht das.
-  Im Formular steht der Hinweis „Demo: bitte keine Fotos echter Personen“ (Regel 2).
-- 05.11.2026 (Claude Code): Demo-Daten werden genau einmal automatisch geladen (Merker in
-  der Datenbank). „Demo-Daten zurücksetzen“ löscht alle Bewohner und hinterlegten Bilder
-  und lädt die Demo-Datei neu – mit Rückfrage.
+
+Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- **Zwei Nummern.** Die Versionsnummer (jetzt 0.3.0) steht von Hand in
+  `Directory.Build.props` und in dieser Datei; die Build-Nummer ist die Laufnummer von
+  GitHub Actions und wird beim Bauen in die `.exe` geschrieben. Das Update vergleicht nur
+  Build-Nummern. Im Fenster steht beides („Version 0.3.0 · Build 7“).
+- **Workflow-Datei bleibt `tests-und-exe.yml`.** Die Laufnummer zählt je Workflow-Datei;
+  eine umbenannte Datei finge wieder bei 1 an, und installierte Programme sähen kein neueres
+  Release mehr.
+- **Übergang ohne Neuinstallation (06.11.2026), geprüft am Code des Python-Updaters:** Er
+  nimmt jedes Release `build-N` mit höherer Nummer, das `Dokumentationssystem.exe` und
+  `Dokumentationssystem.exe.sha256` enthält, prüft die Prüfsumme, tauscht die Datei aus und
+  startet sie – welche Sprache die neue Datei hat, spielt keine Rolle. Die C#-Version löscht
+  beim Start die alte Programmdatei (`.exe.alt`) und fragt nach dem Wechsel nicht gleich
+  erneut (gleiche Umgebungsvariable wie die Python-Version). Ein Durchlauf mit dem echten
+  Release (Laden, Prüfsumme) klappte mit dem C#-Code.
+- **Eigene Datenbankdatei `dokumentationssystem.db`.** Die Datei der Python-Version
+  (`dokusystem.sqlite3`) wird nicht gelesen und nicht gelöscht (Eintrag „Umstieg“).
+  `einstellungen.json` (Update-Häkchen) und `update.log` werden weiter gemeinsam benutzt.
+- **„Demo-Daten zurücksetzen“ löscht nur die Bilder der Bewohner in der Datenbank**, nicht
+  mehr den ganzen Ordner `bilder\`. Grund: Bilder der Python-Version bleiben so unberührt.
+- **Update-Projekt getrennt** (`Dokusystem.Update`): einziges Projekt mit Internetzugriff;
+  ein Test prüft, dass Kern und Oberfläche keine Netzbausteine und keine Adressen
+  enthalten. Der Dateiname der `.exe` darf abweichen (z. B. „Dokumentationssystem (1).exe“
+  nach doppeltem Herunterladen) – wie bei der Python-Version.
+- **Abhängigkeiten** (alle mit freier Lizenz): im Programm nur `Microsoft.Data.Sqlite` (MIT,
+  Speicher). Nur für Tests: `xunit` und `xunit.runner.visualstudio` (Apache-2.0),
+  `Microsoft.NET.Test.Sdk` (MIT). Windows Forms und Segoe UI gehören zu .NET bzw. Windows.
+- **Übernommen aus der Ausgangsliste**, angepasst und bereinigt (kein Logo, kein Name der
+  Einrichtung oder des Wohnbereichs, keine Personenkürzel, auch nicht in Kommentaren):
+  `Stil` (Farben, Schriften, Abstände, Knöpfe, abgerundete Flächen), Kopfbereich mit
+  Farbverlauf, Kartenraster, Aufbau der Bewohnerkarte. Die Update-Funktion der Ausgangsliste
+  (Update-Ordner) passt nicht; es bleibt der GitHub-Weg.
+- **Gestaltung im Einzelnen:** Wo `docs/gestaltung.md` die Ausgangsliste verfeinert, gilt
+  `docs/gestaltung.md` (Hauch von Schatten statt mehrlagig, Radius 8 statt 12/16).
+  Allergiehinweis mit den Markenfarben: eingetragen = „Beschluss“ (rot), keine bekannt =
+  „Offen“ (grün), nicht erfasst = „Achtung“ (gelb, gestrichelt) – immer mit Text und einem
+  farbigen Balken links.
+- **Demo-Hinweis** rechts oben im Kopf (dort, wo die Ausgangsliste ihr Logofeld hat), als
+  Marke „Achtung“; zusätzlich im Fenstertitel und oben im Formular.
+- **Karten zeigen wie in 0.2.0 nur Bild, Name und Zimmer** – keine Marken für Beschluss oder
+  Allergie. Grund: Der Eintrag erlaubt keine neuen Funktionen; Marken gehören zur
+  „Startseite als Übersicht“ (offen).
+- **Oberflächentests nur unter Windows** (Windows Forms läuft nicht unter Linux); sie laufen
+  in GitHub Actions vor jedem Zusammenführen und legen Bildschirmfotos ab.
+- 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
+  `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
+  bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
+  Zuständen; Pflichtfelder Vorname, Nachname, Zimmer, Geburtsdatum, Aufnahmedatum; Datum
+  auch ohne führende Nullen; Übersicht sortiert nach Nachname; Bilder werden unverändert in
+  den Datenordner kopiert (PNG, JPG, BMP, GIF); Demo-Daten werden genau einmal automatisch
+  geladen.
 
 ## Testliste für Tobi
 
-Version 0.2.0 (Bewohnerakte):
+Version 0.3.0:
 
-1. Programm starten (läuft schon 0.1.0, kommt 0.2.0 über das Update). Unten links steht
-   „Version 0.2.0 · Build …“.
-2. Unter „Bewohner“ stehen 10 ausgedachte Bewohner als Kacheln mit Initialen.
-3. Akte öffnen und die drei Allergie-Anzeigen vergleichen: Anton Ahorn (rot,
-   „Haselnüsse“), Berta Birke (grün, „keine bekannt“), Clara Clematis (orange
-   gestrichelt, „nicht erfasst – bitte klären“).
-4. Beschlussende vergleichen: Ahorn (Datum), Birke („kein Beschluss“), Ginster („nicht
+1. **Wechsel von 0.2.0:** Die vorhandene 0.2.0 starten. Erwartet: „Neue Version wird
+   geladen …“, danach startet das Programm neu – jetzt mit neuem Aussehen. Unten links
+   steht „Version 0.3.0 · Build …“. In `%APPDATA%\Dokumentationssystem\update.log` stehen
+   die Schritte. Klappt das nicht: neue `.exe` über den Link im README von Hand laden.
+2. Oben rechts im Kopf steht „Demo — ausgedachte Daten“, auch im Fenstertitel.
+3. Unter „Bewohner“ stehen 10 ausgedachte Bewohner als Karten mit Initialen (die Demo-Daten
+   beginnen neu; Änderungen aus 0.2.0 sind nicht übernommen).
+4. Akte öffnen und die drei Allergie-Anzeigen vergleichen: Anton Ahorn (rot,
+   „Haselnüsse“), Berta Birke (grün, „keine bekannt“), Clara Clematis (gelb gestrichelt,
+   „nicht erfasst – bitte klären“).
+5. Beschlussende vergleichen: Ahorn (Datum), Birke („kein Beschluss“), Ginster („nicht
    erfasst“).
-5. „Neuer Bewohner …“: Aufnahmedatum vor das Geburtsdatum setzen → Fehlermeldung, nichts
-   gespeichert. Danach richtig ausfüllen → neue Kachel; Allergien stehen auf „nicht
-   erfasst“.
-6. „Bearbeiten …“: ein ausgedachtes Bild (keine echte Person) hinterlegen → erscheint in
-   Akte und Übersicht.
-7. „Demo-Daten zurücksetzen …“ → Rückfrage, danach wieder die 10 Demo-Bewohner, eigene
-   Änderungen und Bilder sind weg.
-
-Version 0.1.0:
-
-1. `.exe` über den Link im README laden, in „Dokumente“ legen, starten. SmartScreen-Warnung
-   wie im README beschrieben wegklicken.
-2. Oben steht orange „Demo — ausgedachte Daten“, links „Bewohner“, unten links
-   „Version 0.1.0 · Build …“.
-3. Update erproben: Sobald eine neuere Version erschienen ist, beim nächsten Start auf die
-   Meldung „Neue Version wird geladen …“ achten. Danach startet das Programm neu, unten
-   links steht die neue Nummer. In `%APPDATA%\Dokumentationssystem\update.log` stehen die
-   Schritte.
-4. Häkchen „Beim Start nach Updates suchen“ entfernen, Programm neu starten: In
-   `update.log` steht „in den Einstellungen abgeschaltet“.
+6. „Neuer Bewohner …“: Aufnahmedatum vor das Geburtsdatum setzen → Fehlermeldung, nichts
+   gespeichert. Danach richtig ausfüllen → Akte öffnet sich, neue Karte in der Übersicht;
+   Allergien stehen auf „nicht erfasst“.
+7. „Bearbeiten …“: ein ausgedachtes Bild (keine echte Person) hinterlegen → erscheint in
+   Akte und Karte.
+8. „Demo-Daten zurücksetzen …“ → Rückfrage, danach wieder die 10 Demo-Bewohner.
+9. Häkchen „Beim Start nach Updates suchen“ entfernen, neu starten: In `update.log` steht
+   „in den Einstellungen abgeschaltet“.
+10. Windows-Anzeige auf 125 % oder 150 % stellen: Nichts darf abgeschnitten sein.

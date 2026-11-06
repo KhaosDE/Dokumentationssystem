@@ -2,6 +2,9 @@ name: Tests und Windows-Programm
 
 # Vorbild: KhaosDE/N3XTBYT3. Release nur bei Push nach main – nicht, wenn sich nur
 # .md-Dateien ändern (der Chat schreibt Aufträge direkt in IDEEN.md auf main).
+# Wichtig: Dateiname dieses Workflows nicht ändern. Die Laufnummer (= Build-Nummer im
+# Release-Namen build-<Nummer>) zählt je Workflow-Datei; eine neue Datei finge wieder bei 1
+# an, und installierte Programme sähen kein neueres Release mehr.
 on:
   push:
     branches: [main]
@@ -12,23 +15,31 @@ on:
 permissions:
   contents: read
 
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+
 jobs:
   tests:
     name: Tests (Windows)
     runs-on: windows-latest
-    env:
-      QT_QPA_PLATFORM: offscreen
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-dotnet@v4
         with:
-          python-version: "3.12"
-      - name: Abhängigkeiten installieren
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-      - name: Tests
-        run: python -m unittest -v
+          dotnet-version: 10.0.x
+      - name: Tests (Kern, Update, Oberfläche)
+        env:
+          DOKUSYSTEM_BILDSCHIRMFOTOS: ${{ github.workspace }}\bildschirmfotos
+        run: dotnet test Dokumentationssystem.sln -c Release --logger "console;verbosity=normal"
+      - name: Bildschirmfotos zur Sichtprüfung bereitstellen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Bildschirmfotos
+          path: bildschirmfotos/
+          retention-days: 14
+          if-no-files-found: ignore
 
   exe:
     name: Windows-Programm (.exe)
@@ -38,34 +49,31 @@ jobs:
       contents: write  # für das Release, aus dem sich die .exe selbst aktualisiert
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-dotnet@v4
         with:
-          python-version: "3.12"
-      - name: Abhängigkeiten installieren
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt "pyinstaller>=6,<7"
-      - name: Build-Nummer eintragen (= Laufnummer)
-        run: python -c "open('dokusystem/_build.py', 'w', encoding='utf-8').write('BUILD = ${{ github.run_number }}\n')"
-      - name: .exe bauen
+          dotnet-version: 10.0.x
+      - name: .exe bauen (eine Datei, mit .NET, nicht komprimiert)
         run: >
-          pyinstaller --noconfirm --clean --onefile --windowed --name Dokumentationssystem
-          --add-data "daten;daten"
-          start_dokusystem.py
+          dotnet publish src/Dokusystem/Dokusystem.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:BuildNummer=${{ github.run_number }}
+          -o publish
       - name: Selbsttest der .exe
         shell: pwsh
         run: |
-          $p = Start-Process -FilePath "dist\Dokumentationssystem.exe" -ArgumentList "--selbsttest" -Wait -PassThru
+          $p = Start-Process -FilePath "publish\Dokumentationssystem.exe" -ArgumentList "--selbsttest" -Wait -PassThru
           if ($p.ExitCode -ne 0) {
             if (Test-Path selbsttest.log) { Get-Content selbsttest.log }
             throw "Selbsttest fehlgeschlagen (Exit-Code $($p.ExitCode))"
           }
-          Write-Host "Selbsttest bestanden."
+          Write-Host "Selbsttest bestanden. Größe: $([math]::Round((Get-Item publish\Dokumentationssystem.exe).Length / 1MB)) MB"
       - name: .exe zum Herunterladen bereitstellen
         uses: actions/upload-artifact@v4
         with:
           name: Dokumentationssystem-Windows
-          path: dist/Dokumentationssystem.exe
+          path: publish/Dokumentationssystem.exe
           retention-days: 30
       - name: Release veröffentlichen (für das Selbst-Update und den festen Download-Link)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -73,11 +81,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $hash = (Get-FileHash dist\Dokumentationssystem.exe -Algorithm SHA256).Hash.ToLower()
-          "$hash  Dokumentationssystem.exe" | Set-Content -NoNewline -Encoding utf8NoBOM dist\Dokumentationssystem.exe.sha256
-          $version = python -c "from dokusystem._version import VERSION; print(VERSION)"
+          $hash = (Get-FileHash publish\Dokumentationssystem.exe -Algorithm SHA256).Hash.ToLower()
+          "$hash  Dokumentationssystem.exe" | Set-Content -NoNewline -Encoding utf8NoBOM publish\Dokumentationssystem.exe.sha256
+          [xml]$props = Get-Content Directory.Build.props
+          $version = @($props.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ })[0]
           $tag = "build-${{ github.run_number }}"
-          gh release create $tag dist\Dokumentationssystem.exe dist\Dokumentationssystem.exe.sha256 `
+          gh release create $tag publish\Dokumentationssystem.exe publish\Dokumentationssystem.exe.sha256 `
             --repo "${{ github.repository }}" --target "${{ github.sha }}" --latest `
             --title "Dokumentationssystem $version (Build ${{ github.run_number }})" `
             --notes "Version $version, automatisch gebaut aus ${{ github.sha }}. Die .exe aktualisiert sich beim Start selbst auf den neuesten Build. Demo – nur ausgedachte Daten."

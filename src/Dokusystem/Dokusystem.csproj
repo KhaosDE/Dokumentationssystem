@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Die Oberfläche (Windows Forms). Ruft nur Kern und Update auf. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Dokumentationssystem</AssemblyName>
+    <RootNamespace>Dokusystem</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <Product>Dokumentationssystem</Product>
+    <AssemblyTitle>Dokumentationssystem (Demo)</AssemblyTitle>
+    <Description>Dokumentationssystem für einen Wohnbereich – Demo mit ausgedachten Daten</Description>
+    <!-- Bewusst NICHT komprimieren: Gepackte .exe-Dateien lösen öfter Virenwarnungen aus. -->
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <!-- WFO1000 betrifft nur den Formular-Designer von Visual Studio; die Fenster hier sind von Hand gebaut. -->
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dokusystem.Kern\Dokusystem.Kern.csproj" />
+    <ProjectReference Include="..\Dokusystem.Update\Dokusystem.Update.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Build-Nummer in die .exe schreiben (GitHub Actions setzt -p:BuildNummer=<Laufnummer>). -->
+    <AssemblyMetadata Include="BuildNummer" Value="$(BuildNummer)" />
+    <InternalsVisibleTo Include="Dokusystem.Oberflaeche.Tests" />
+  </ItemGroup>
+</Project>

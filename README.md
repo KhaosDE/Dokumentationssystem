@@ -15,7 +15,8 @@ Stand der Entwicklung: [`STAND.md`](STAND.md).
 2. Die Datei in einen Ordner legen, in dem du schreiben darfst – zum Beispiel
    „Dokumente“ oder „Downloads“, **nicht** „Programme“. (Das Update tauscht die Datei
    dort aus.)
-3. Doppelklicken. Der erste Start dauert ein paar Sekunden.
+3. Doppelklicken. Der erste Start dauert ein paar Sekunden. Mehr ist nicht nötig: Die Datei
+   bringt alles mit, was sie braucht.
 
 ### Die Warnung „Der Computer wurde durch Windows geschützt“
 
@@ -30,11 +31,11 @@ Danach fragt Windows für diese Datei nicht mehr.
 
 ## Bedienung in Kürze
 
-- **Bewohner** (links): alle Bewohner als Kacheln. Ein Klick öffnet die Akte.
+- **Bewohner** (links): alle Bewohner als Karten. Ein Klick öffnet die Akte.
 - In der Akte steht oben der **Allergiehinweis**: rot = Allergien eingetragen,
-  grün = keine bekannt, orange gestrichelt = noch nicht erfasst.
-- **Neuer Bewohner …** und **Bearbeiten …** öffnen das Formular. Datum immer als
-  TT.MM.JJJJ (z. B. 03.04.1965).
+  grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
+- **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
+  als TT.MM.JJJJ (z. B. 03.04.1965).
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
   her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren.
 
@@ -55,32 +56,49 @@ nur bei den Releases dieses Repositorys, sonst geht es nirgends ins Internet.
 - Oder die `.exe` mit `--kein-update` starten (Verknüpfung anlegen, Rechtsklick →
   Eigenschaften → bei „Ziel“ hinten ` --kein-update` anhängen).
 
+### Von Version 0.2.0 auf 0.3.0
+
+Ab Version 0.3.0 ist das Programm in C# geschrieben statt in Python. Die installierte
+Version 0.2.0 holt sich die neue Version über ihr Update selbst – du musst nichts tun.
+Falls das nicht klappt (z. B. weil das Update abgeschaltet ist), die neue `.exe` einmal über
+den Link oben von Hand laden und die alte Datei ersetzen.
+
+Die neue Version beginnt mit den Demo-Daten. Was du in 0.2.0 geändert hast, wird nicht
+übernommen; die alte Datenbank bleibt aber unberührt im Datenordner liegen.
+
 ## Wo liegen die Daten?
 
 Im Datenordner `%APPDATA%\Dokumentationssystem` (im Windows-Explorer oben in die
 Adresszeile eingeben). Dort liegen:
 
-- `dokusystem.sqlite3` – die Datenbank,
+- `dokumentationssystem.db` – die Datenbank,
 - `bilder\` – hinterlegte Bewohnerbilder,
 - `einstellungen.json` – die Einstellungen,
-- `update.log` – was beim Update passiert ist (zum Nachsehen, wenn etwas nicht klappt).
+- `update.log` – was beim Update passiert ist (zum Nachsehen, wenn etwas nicht klappt),
+- `dokusystem.sqlite3` – nur falls vorhanden: die alte Datenbank der Version 0.2.0
+  (wird nicht mehr benutzt).
 
-## Für Entwickler: Start aus dem Quelltext
+## Für Entwickler
 
-Python 3.12, dann im Projektordner:
+C# mit .NET 10 und Windows Forms. Aufbau:
+
+| Ordner | Inhalt |
+|---|---|
+| `src/Dokusystem.Kern` | Datenmodell, Prüfregeln, Speicher (SQLite), Demo-Daten – ohne Fenster |
+| `src/Dokusystem.Update` | Selbst-Update – das einzige Projekt mit Internetzugriff |
+| `src/Dokusystem` | Oberfläche (Windows Forms), ergibt `Dokumentationssystem.exe` |
+| `tests/Dokusystem.Tests` | Tests für Kern und Update (laufen auch unter Linux) |
+| `tests/Dokusystem.Oberflaeche.Tests` | Tests für die Oberfläche (nur Windows) |
+| `daten/demo` | Demo-Daten als lesbare Datei (werden in die `.exe` eingebaut) |
+
+Mit dem .NET 10 SDK im Projektordner:
 
 ```bash
-pip install -r requirements.txt
+dotnet test Dokumentationssystem.sln
 ```
 
 ```bash
-python -m dokusystem
-```
-
-Tests:
-
-```bash
-python -m unittest
+dotnet run --project src/Dokusystem
 ```
 
 Die `.exe` baut GitHub Actions (`.github/workflows/tests-und-exe.yml`) bei jedem Push nach
