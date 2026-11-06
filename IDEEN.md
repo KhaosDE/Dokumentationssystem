@@ -75,9 +75,14 @@ Im bisherigen System gibt es keinen übersichtlichen Wochenplan für den Bewohne
 Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
 - Ansicht je Bewohner: Montag bis Sonntag als Spalten, Uhrzeiten als Zeilen; jeder Termin
   mit Therapie, Uhrzeit von–bis, Ort und Hinweis. Erreichbar aus der Bewohnerakte.
-- Therapien kommen aus einer Auswahlliste (in der Demo ausgedachte, allgemeine Angebote),
-  die sich ergänzen lässt; daneben freie Einträge.
+- Therapien kommen aus dem Bereich „Therapie“ (eigener Eintrag unten): Dort zugeteilte
+  Therapien erscheinen automatisch im Wochenplan. Daneben freie Einträge (z. B. Termine im
+  Wohnbereich).
 - Termine anlegen, verschieben, ändern, löschen — jederzeit.
+- **Ausdruck** (Entscheidung Tobi, 06.11.2026: viele Bewohner brauchen ihn): Wochenplan als
+  A4-Seite, gut lesbar (große Schrift), nur Name und Plan — keine Allergien, Medikation oder
+  andere Angaben aus der Akte. Druckvorschau vor dem Drucken; Speichern als PDF über den
+  Windows-Druckdialog („Microsoft Print to PDF“).
 - **Verlauf bleibt erhalten:** Jede Änderung gilt „ab Datum …“; frühere Fassungen werden
   nicht überschrieben. Grund: Der HEB-Bogen muss zeigen können, welcher Plan in seinem
   Zeitraum galt.
@@ -87,7 +92,6 @@ Offene Fragen (nicht bauen, bevor geklärt):
   oder wird jede Kalenderwoche einzeln geplant?
 - Soll festgehalten werden, ob der Bewohner einen Termin wahrgenommen hat (teilgenommen,
   abgesagt, ausgefallen)? Das wäre für den HEB-Bogen aussagekräftig.
-- Braucht es einen Ausdruck für den Bewohner?
 
 ## HEB-Bogen aus Berichten
 Status: offen
@@ -98,26 +102,47 @@ Zeitraums.
 Warum: Die Bewohner des beschützenden Wohnbereichs haben meist für ein oder mehrere Jahre
 einen Beschluss. Für ihre Entwicklung ist ein HEB-Bogen nötig; die Inhalte stehen schon in
 den Berichten und sollen nicht noch einmal zusammengesucht werden.
-Umfang (Rahmen, Einzelheiten folgen aus dem Chat):
-- Zeitraum wählen, Berichte des Zeitraums werden gesammelt und den Feldern des Bogens
-  zugeordnet.
-- Zweite Quelle neben den Berichten: der Wochenplan, der im Zeitraum galt (siehe
-  „Wochenplan“).
-- Nichts erfinden: Im Bogen steht nur, was in den Berichten steht. Fehlt zu einem Feld
-  etwas, steht dort sichtbar „keine Berichte zu diesem Bereich im Zeitraum“.
-- Keine klinische Bewertung durch das Programm.
-- Ergebnis ist ein **Entwurf**, den ein Mensch prüft, ändert und erst dann als fertig
-  markiert. Jede Aussage im Entwurf zeigt, aus welchem Bericht (Datum) sie stammt.
-- Ausdrücklich nicht: Versand an den Kostenträger.
+Fachgrundlage: `docs/heb-wissen.md` (Bogenarten, Lebensbereiche, Felder, Zeichengrenzen,
+Formulierungsregeln).
+Umfang (Entscheidungen Tobi, 06.11.2026, Rest Vorschlag aus dem Chat):
+- **Keine KI und keine Internetverbindung** (Datenschutz, `CLAUDE.md`, Regel 6). Das Programm
+  formuliert keine Texte. Es stellt zusammen, zählt, prüft und bietet Textbausteine an;
+  schreiben tut ein Mensch.
+- **Vorlage ist der PDF-Bogen des Bezirks Oberbayern.** In den Einstellungen wird je
+  Bogenart (A, B, C) eine PDF-Datei zugeteilt. Die Datei bleibt im Datenordner bzw. dort,
+  wo sie liegt, und kommt nie ins Repository. Das Programm liest die Formularfelder der
+  PDF aus und zeigt sie an; eine Zuordnung „Programmfeld → PDF-Feld“ wird in den
+  Einstellungen gespeichert.
+- Ablauf: Bewohner wählen → Bogenart wählen → Zeitraum „von … bis …“ (Vorschlag nach
+  `docs/heb-wissen.md`, z. B. HEB B: Datum des letzten Bogens bis heute) → Eingabemaske je
+  Lebensbereich mit den Feldern der Bogenart.
+- Neben jedem Feld: die Berichte des Zeitraums zu diesem Lebensbereich (Quelle 1) und der
+  Wochenplan, der im Zeitraum galt (Quelle 2, siehe „Wochenplan“). Fehlt etwas: sichtbar
+  „keine Berichte zu diesem Bereich im Zeitraum“.
+- **Zeichenzähler** je Feld mit der Grenze aus `docs/heb-wissen.md`, z. B. „912 / 940“; über
+  der Grenze rot.
+- **Kopfdaten** aus der Bewohnerakte (Name, Aufnahmedatum, Beschlussende). HEB B: Rahmenziele,
+  Leitziel und Nahziele des letzten Bogens im Programm werden zum Fortschreiben vorgelegt.
+  Planungszeitraum (6/12/24/frei) wird aus Beschlussende berechnet und vorgeschlagen.
+- Hilfebedarf-Stufe: wird **nie** vorgeschlagen oder vorbelegt.
+- **Textbausteine** aus `docs/heb-wissen.md` (Verben für Rahmenziele und Maßnahmen,
+  feststehende Formulierungen, Häufigkeitsmarker) zum Einfügen per Klick.
+- **Stilprüfung** als Hinweisliste (nie automatisch ändern): die Prüfregeln aus
+  `docs/heb-wissen.md`, Abschnitt „Regeln, die das Programm prüfen kann“.
+- Speichern als Entwurf; „fertig“ setzt ein Mensch. Danach **PDF ausfüllen**: Programm
+  schreibt die Texte in die Formularfelder einer Kopie der zugeteilten PDF und speichert sie
+  im Datenordner. Die Vorlage selbst bleibt unverändert.
+- Demo: Tests laufen mit einer selbst gebauten Test-PDF mit Formularfeldern (im
+  Repository erlaubt, weil ausgedacht), nicht mit dem Bogen des Bezirks.
+- Neue Abhängigkeit nur zum PDF-Ausfüllen: `pypdf` (BSD-Lizenz) — Begründung in `STAND.md`.
+- Ausdrücklich nicht: Versand an den Kostenträger, Unterschrift.
 Offene Fragen (nicht bauen, bevor geklärt):
-- Wie entsteht der Text: Programm stellt die Berichte je Bereich zusammen und ein Mensch
-  formuliert — oder eine KI formuliert einen Entwurf (bräuchte Netzzugriff zu einem
-  KI-Anbieter, einen Schlüssel und kostet Geld; widerspricht heute `CLAUDE.md`, Technik:
-  „kein anderer Netzzugriff“)?
-- Welche Bogenart(en) und Felder in der Demo, mit Zeichengrenzen je Feld. Die Felderliste
-  liefert der Chat nach (Quelle: Tobis Vault, `Psychiatrie/HEB-Berichte`).
+- Hat der Bogen des Bezirks ausfüllbare Formularfelder, und wie heißen sie? Der Chat trägt
+  die Feldnamen nach, sobald Tobi einen leeren Bogen bereitstellt.
 - Gibt es einen Zwischenschritt (Monats- oder Quartalsreflexion) zwischen Berichten und
   HEB-Bogen?
+- Weitere Felder außerhalb der Lebensbereiche (Sichtweise des Leistungsberechtigten,
+  ergänzende Ausführungen, Erläuterung zur Beendigung) — Aufbau noch nicht erfasst.
 
 ## Medikation: Grundverordnung, Pause, Stufenplan
 Status: offen
@@ -165,3 +190,64 @@ Umfang (Vorschlag aus dem Chat):
 Offen: Eine vollständige echte Datenbank (z. B. vom BfArM oder einem kommerziellen
 Anbieter) erst klären, wenn das Programm über eine Demo hinausgeht — Nutzungsrechte sind
 nicht geprüft.
+
+## Startseite als Übersicht (Dashboard)
+Status: offen
+Datum: 06.11.2026
+Was: Die Hauptseite zeigt alle Bewohner des Wohnbereichs auf einen Blick und ist immer
+aktuell.
+Warum: Wer den Dienst beginnt, soll sofort sehen, was heute wichtig ist, ohne jede Akte zu
+öffnen.
+Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+- Kartenraster wie in der Ausgangsliste (`docs/gestaltung.md`): je Bewohner Bild, Name,
+  Zimmer und Marken.
+- Marken (nur wenn zutreffend, Farbe nie allein): Allergie eingetragen, Angabe „nicht
+  erfasst“, Beschluss endet bald, heute Änderung in der Medikation (Pause beginnt/endet,
+  neue Stufe), heute Termine laut Wochenplan, HEB fällig.
+- Bereich „Heute“ oben: Anzahl Bewohner, Termine des Tages, Medikationsänderungen des Tages.
+- **Immer aktuell:** Die Ansicht baut sich nach jeder Änderung im Programm und beim
+  Datumswechsel um Mitternacht neu auf.
+- Klick auf eine Karte öffnet die Bewohnerakte.
+- Bezieht Daten aus Einträgen, die noch nicht gebaut sind; zeigt nur, was es schon gibt.
+Offene Fragen:
+- Ab wie vielen Tagen vor Beschlussende soll „Beschluss endet bald“ erscheinen?
+
+## Therapie-Bereich
+Status: offen
+Datum: 06.11.2026
+Was: Ein eigener Bereich in der Navigation, in dem die Therapie ihre Angebote verwaltet,
+einträgt und Bewohnern zuteilt. Zugeteilte Therapien erscheinen in den Wochenplänen.
+Warum: Die Therapie plant ihre Angebote selbst; der Wohnbereich soll das Ergebnis im
+Wochenplan sehen, ohne es abzuschreiben.
+Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+- Therapieangebote anlegen: Name, Art (Einzel/Gruppe), Therapeut (ausgedacht), Ort,
+  Wochentag(e) und Uhrzeit, höchste Teilnehmerzahl, Hinweis. In der Demo ausgedachte,
+  allgemeine Angebote.
+- Bewohner einem Angebot zuteilen (ab Datum, optional bis Datum) → erscheint im Wochenplan
+  des Bewohners. Änderungen gelten „ab Datum …“, der Verlauf bleibt.
+- Warnung bei Überschneidung mit einem anderen Termin des Bewohners.
+- Übersicht je Angebot: wer nimmt teil, freie Plätze.
+- Ausdrücklich nicht in der Demo: Anmeldung und Rechte (wer darf was) — das braucht den
+  Mehrplatzbetrieb (Eintrag unten).
+
+## Mehrplatzbetrieb über einen Server (später)
+Status: offen
+Datum: 06.11.2026
+Was: Das Programm arbeitet über einen Server auf allen Bereichen (Wohnbereiche, Therapie).
+Dann lässt sich zu jedem Bewohner eine Statusmeldung machen, die alle Bereiche sehen.
+Warum: Laut Tobi der Weg, wie das Programm im Betrieb funktionieren würde.
+Umfang: **nicht für die Demo.** Voraussetzungen, bevor es überhaupt geplant wird: Freigabe
+durch Einrichtung und Datenschutz, Beteiligung der Mitarbeitervertretung, Anmeldung und
+Rechte, Server der Einrichtung. Vorhandene Vorarbeit: Die Ausgangsliste (C#) hat bereits
+eine gemeinsame Datenbank für mehrere Arbeitsplätze mit Konfliktschutz.
+
+## Gestaltung nach Vorbild der Ausgangsliste
+Status: offen
+Datum: 06.11.2026
+Was: Das Programm übernimmt das Aussehen der Ausgangsliste und verfeinert es mit einzelnen
+Regeln aus Tobis Designvorlagen.
+Warum: Wunsch Tobi (06.11.2026); beide Programme sollen zusammengehören.
+Umfang: alle Werte und Regeln in `docs/gestaltung.md`. Umsetzung in PySide6 über ein
+zentrales Stylesheet und eine Datei mit allen Farben und Maßen (ein Wert, ein Ort).
+Bestehende Ansichten (Bewohner-Übersicht, Akte, Formular) werden angepasst.
+Ausdrücklich nicht: Logo oder Name der Einrichtung im Repository.

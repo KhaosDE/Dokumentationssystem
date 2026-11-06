@@ -29,6 +29,12 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 5. **Leere Felder sind nicht „nichts“.** Bei Sicherheitsangaben (z. B. Allergien) gibt es
    drei Zustände: *eingetragen*, *keine bekannt*, *nicht erfasst*. Ein leeres Feld darf nie
    wie „keine Allergie“ aussehen.
+6. **Keine KI, kein Internet** außer dem Selbst-Update (Entscheidung Tobi, 06.11.2026,
+   Datenschutz). Das Programm formuliert keine Texte selbst; es stellt zusammen, zählt,
+   prüft und bietet Textbausteine an.
+7. **Fremde Vorlagen bleiben draußen.** PDF-Bögen des Kostenträgers, Logos und Namen der
+   Einrichtung kommen nie ins Repository; das Programm lässt sie in den Einstellungen
+   zuteilen und speichert sie im Datenordner.
 
 ## Arbeitsweise
 
