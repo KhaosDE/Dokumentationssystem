@@ -62,3 +62,80 @@ Datum: 05.11.2026
 Was: Tägliche schriftliche Dokumentation je Bewohner. Zweiter Teil des Kerns.
 Warum: Laut Tobi Hauptteil des Programms neben der Bewohnerführung.
 Umfang: wird im Chat ausgearbeitet. Nicht bauen.
+- Bekannte Anforderung aus „HEB-Bogen aus Berichten“: Berichte müssen sich später einem
+  Zeitraum und einem Lebensbereich bzw. Ziel zuordnen lassen.
+
+## HEB-Bogen aus Berichten
+Status: offen
+Datum: 06.11.2026
+Was: Für einen Bewohner einen HEB-Bogen (Hilfe- und Entwicklungsbogen) für einen Zeitraum
+„von … bis …“ erstellen. Das Programm nutzt dafür die eingetragenen Berichte dieses
+Zeitraums.
+Warum: Die Bewohner des beschützenden Wohnbereichs haben meist für ein oder mehrere Jahre
+einen Beschluss. Für ihre Entwicklung ist ein HEB-Bogen nötig; die Inhalte stehen schon in
+den Berichten und sollen nicht noch einmal zusammengesucht werden.
+Umfang (Rahmen, Einzelheiten folgen aus dem Chat):
+- Zeitraum wählen, Berichte des Zeitraums werden gesammelt und den Feldern des Bogens
+  zugeordnet.
+- Nichts erfinden: Im Bogen steht nur, was in den Berichten steht. Fehlt zu einem Feld
+  etwas, steht dort sichtbar „keine Berichte zu diesem Bereich im Zeitraum“.
+- Keine klinische Bewertung durch das Programm.
+- Ergebnis ist ein **Entwurf**, den ein Mensch prüft, ändert und erst dann als fertig
+  markiert. Jede Aussage im Entwurf zeigt, aus welchem Bericht (Datum) sie stammt.
+- Ausdrücklich nicht: Versand an den Kostenträger.
+Offene Fragen (nicht bauen, bevor geklärt):
+- Wie entsteht der Text: Programm stellt die Berichte je Bereich zusammen und ein Mensch
+  formuliert — oder eine KI formuliert einen Entwurf (bräuchte Netzzugriff zu einem
+  KI-Anbieter, einen Schlüssel und kostet Geld; widerspricht heute `CLAUDE.md`, Technik:
+  „kein anderer Netzzugriff“)?
+- Welche Bogenart(en) und Felder in der Demo, mit Zeichengrenzen je Feld. Die Felderliste
+  liefert der Chat nach (Quelle: Tobis Vault, `Psychiatrie/HEB-Berichte`).
+- Gibt es einen Zwischenschritt (Monats- oder Quartalsreflexion) zwischen Berichten und
+  HEB-Bogen?
+
+## Medikation: Grundverordnung, Pause, Stufenplan
+Status: offen
+Datum: 06.11.2026
+Was: Medikation je Bewohner. Die Grundverordnung bleibt immer erhalten; Pausen und
+Änderungen in Etappen (ansetzen, absetzen) liegen als eigene Einträge darüber.
+Warum: Im bisherigen System lassen sich Medikamente nicht pausieren, und eine Anpassung
+über mehrere Tage geht nur, indem das Medikament mehrfach angelegt wird.
+Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+- **Grundverordnung:** Medikament (aus der Medikamentendatenbank), Dosis je Einnahmezeit
+  (morgens, mittags, abends, nachts), Beginn, Anordnung (Arzt und Datum, ausgedacht),
+  Hinweis. Bedarfsmedikation getrennt davon.
+- Die Grundverordnung wird nie überschrieben oder gelöscht. Jede Änderung ist ein eigener
+  Eintrag mit Datum und Anordnung; der Verlauf bleibt sichtbar.
+- **Pause:** von … bis … oder „bis auf Weiteres“. Danach gilt wieder die Grundverordnung,
+  ohne dass jemand etwas neu anlegen muss.
+- **Stufenplan** (ansetzen oder absetzen in Etappen): Liste von Stufen „ab Datum X:
+  Dosis Y“. Anzeige z. B. „Stufe 2 von 4, nächste Stufe ab …“.
+- **Ansicht „Was gilt heute“** (oder an einem gewählten Tag): berechnet aus Grundverordnung,
+  Pausen und Stufenplänen. Pausierte Medikamente stehen sichtbar als „pausiert bis …“ da,
+  nicht einfach nicht.
+- Ausdrücklich nicht: Dosisvorschläge, Prüfung auf Wechselwirkungen, Stellen und Ausgabe
+  abzeichnen, Bestand und Ablaufdaten.
+Offene Fragen (nicht bauen, bevor geklärt):
+- Was gilt am Ende eines Stufenplans: Beim Ansetzen oder Umstellen wird die letzte Stufe
+  zur neuen Grundverordnung? Beim Absetzen auf null bleibt die Grundverordnung als
+  „abgesetzt am …“ im Verlauf stehen?
+
+## Medikamentendatenbank
+Status: offen
+Datum: 06.11.2026
+Was: Eine vorgefertigte Liste von Medikamenten, aus der beim Verordnen ausgewählt wird,
+statt den Namen frei einzutippen.
+Warum: Weniger Tippfehler, einheitliche Schreibweise, Stärken und Darreichungsformen
+stehen schon bereit.
+Umfang (Vorschlag aus dem Chat):
+- Felder: Wirkstoff, Handelsname(n), Stärke(n), Darreichungsform, Quelle (Adresse der
+  Fach- oder Gebrauchsinformation).
+- Demo: kleine, selbst zusammengestellte Liste gängiger Medikamente. Jeder Eintrag hat
+  `pruefstatus: ungeprueft` und eine Quelle; nur Tobi setzt „bestätigt“. In der Oberfläche
+  sichtbar: „Demo-Bestand, nicht zum Verordnen verwenden“.
+- Fehlt ein Medikament: von Hand anlegen, gekennzeichnet als „selbst angelegt“.
+- Echte Wirkstoff- und Handelsnamen sind hier erlaubt; das sind keine Bewohnerdaten
+  (`CLAUDE.md`, Regel 1).
+Offen: Eine vollständige echte Datenbank (z. B. vom BfArM oder einem kommerziellen
+Anbieter) erst klären, wenn das Programm über eine Demo hinausgeht — Nutzungsrechte sind
+nicht geprüft.

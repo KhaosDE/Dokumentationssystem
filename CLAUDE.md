@@ -17,6 +17,8 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 1. **Nur ausgedachte Daten.** Keine echten Namen, Geburtsdaten, Diagnosen, Medikamente,
    Fotos oder Texte von Bewohnern, Kolleginnen oder Kollegen — nicht im Code, nicht in
    Testdaten, nicht in Commits, nicht in Bildern. Demo-Namen sind erkennbar ausgedacht.
+   Ausnahme: Allgemeine Nachschlagedaten wie echte Wirkstoff- und Handelsnamen in einer
+   Medikamentendatenbank sind erlaubt; verboten ist nur die Zuordnung zu echten Personen.
    Das Repository ist **öffentlich**.
 2. **Bewohnerbilder:** In den Demo-Daten nur Platzhalter (Initialen oder Silhouette),
    keine Fotos von Menschen und keine KI-Gesichter.
