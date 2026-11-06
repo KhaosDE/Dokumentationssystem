@@ -8,8 +8,9 @@ Das Programm läuft als Windows-Programm (`.exe`) mit Selbst-Update. Der Bereich
 „Bewohner“ zeigt alle ausgedachten Demo-Bewohner als Kacheln; jede Akte hat die
 wichtigsten Angaben auf einen Blick, Allergiehinweis oben.
 
-**Nächster Schritt:** In `IDEEN.md` ist nichts mehr freigegeben. Offen: „Tägliche
-Dokumentation“ (wird im Chat ausgearbeitet) und die Vorschläge unter „Offene Punkte“.
+**Nächster Schritt (06.11.2026):** Freigegeben in `IDEEN.md`: „Umstieg auf C# / .NET 10“
+mit „Gestaltung nach Vorbild der Ausgangsliste“ → Version 0.3.0. Für die Sitzung das
+Repository `KhaosDE/Ausgangsliste` zusätzlich anhängen (Bausteine, siehe `CLAUDE.md`).
 
 ## Fertig
 
@@ -63,7 +64,13 @@ Dokumentation“ (wird im Chat ausgearbeitet) und die Vorschläge unter „Offen
   `IDEEN.md`, Claude Code setzt sie um.
 - 05.11.2026 (Chat): Python + PySide6 + SQLite, Build und Selbst-Update nach Vorbild
   N3XTBYT3. Grund: Formulare und Listen gehen mit Qt gut, Python und der Update-Weg sind
-  aus N3XTBYT3 schon erprobt.
+  aus N3XTBYT3 schon erprobt. **Abgelöst am 06.11.2026** (nächster Punkt).
+- 06.11.2026 (Tobi): Umstieg auf C# / .NET 10 mit Windows Forms. Grund: Die Ausgangsliste
+  ist bereits ein C#-Programm mit vielen passenden Bausteinen (Kartenraster, Mehrplatz-
+  Datenbank, Druck, Installer); ein späterer Server geht in derselben Sprache; freie
+  Lizenzen. .NET 10 statt 8, weil .NET 8 ab 10.11.2026 keine Updates mehr bekommt.
+- 06.11.2026 (Tobi): Keine KI und keine Internetverbindung außer dem Update (Datenschutz).
+- 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 - 05.11.2026 (Claude Code): **Zwei Nummern.** Die Versionsnummer (z. B. 0.1.0) steht von
   Hand in `dokusystem/_version.py` und in dieser Datei; die Build-Nummer ist die
   Laufnummer von GitHub Actions. Das Update vergleicht nur Build-Nummern. Grund: Die

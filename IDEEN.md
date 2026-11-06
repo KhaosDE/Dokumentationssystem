@@ -56,6 +56,35 @@ Umfang:
   ja/nein“, Alter aus dem Geburtsdatum berechnet.
 - Ausdrücklich nicht: Tagesdokumentation, Medikation, Ausgang (eigene Einträge).
 
+## Umstieg auf C# / .NET 10
+Status: freigegeben
+Datum: 06.11.2026
+Was: Das Programm wird in C# mit .NET 10 und Windows Forms neu aufgesetzt. Alles, was die
+Python-Version 0.2.0 kann, funktioniert danach genauso in C#. Die Python-Version wird
+entfernt (sie bleibt in der Git-Geschichte).
+Warum: Entscheidung Tobi (06.11.2026): die Sprache mit den meisten und besten Möglichkeiten.
+C# erlaubt, die Ausgangsliste (C#, Windows Forms) später als Bereich zu übernehmen, und
+einen späteren Server in derselben Sprache; die Bausteine stehen unter MIT-Lizenz.
+Umfang:
+- Technik, Aufbau und Bereinigungsregeln wie in `CLAUDE.md`, Abschnitt „Technik“.
+- **Gleicher Funktionsumfang wie 0.2.0:** Hauptfenster mit Demo-Hinweis, Navigation,
+  Version und Build; Datenordner; Update-Häkchen und `--kein-update`; `update.log`;
+  Bewohnerakte mit Übersicht, Akte, Formular, Prüfregeln, drei Zuständen bei Allergien und
+  Beschlussende, Bild per Dateiauswahl, „Demo-Daten zurücksetzen“. Die Entscheidungen in
+  `STAND.md` (Vor-/Nachname, Pflichtfelder, Datumseingabe usw.) gelten weiter.
+- Demo-Daten: `daten/demo/bewohner.json` weiterverwenden.
+- Aussehen gleich nach Eintrag „Gestaltung nach Vorbild der Ausgangsliste“ (freigegeben,
+  unten): Bewohner-Übersicht als Kartenraster wie in der Ausgangsliste.
+- **Übergang ohne Neuinstallation:** Die installierte Python-Version soll sich über ihr
+  Update selbst durch die C#-Version ersetzen. Dafür Release-Namen (`build-<Laufnummer>`),
+  Dateinamen (`Dokumentationssystem.exe`, `.sha256`) und steigende Laufnummer beibehalten.
+  Vorher am Code des Python-Updaters prüfen, ob das so klappt; falls nicht, im README und
+  in `STAND.md` erklären, dass die neue `.exe` einmal von Hand geladen werden muss.
+- Daten der Python-Version müssen nicht übernommen werden (nur Demo-Daten). Liegt im
+  Datenordner eine alte Datenbank, wird sie nicht gelöscht, sondern ignoriert.
+- Neue Version: **0.3.0**.
+- Ausdrücklich nicht: neue Funktionen über 0.2.0 hinaus (außer dem Aussehen).
+
 ## Tägliche Dokumentation
 Status: offen
 Datum: 05.11.2026
@@ -134,7 +163,9 @@ Umfang (Entscheidungen Tobi, 06.11.2026, Rest Vorschlag aus dem Chat):
   im Datenordner. Die Vorlage selbst bleibt unverändert.
 - Demo: Tests laufen mit einer selbst gebauten Test-PDF mit Formularfeldern (im
   Repository erlaubt, weil ausgedacht), nicht mit dem Bogen des Bezirks.
-- Neue Abhängigkeit nur zum PDF-Ausfüllen: `pypdf` (BSD-Lizenz) — Begründung in `STAND.md`.
+- Neue Abhängigkeit nur zum PDF-Ausfüllen: `PDFsharp` (MIT) — Begründung in `STAND.md`.
+  Ob es die Formularfelder des Bezirks-Bogens sauber füllt, ist ungeprüft; zuerst mit der
+  Test-PDF erproben.
 - Ausdrücklich nicht: Versand an den Kostenträger, Unterschrift.
 Offene Fragen (nicht bauen, bevor geklärt):
 - Hat der Bogen des Bezirks ausfüllbare Formularfelder, und wie heißen sie? Der Chat trägt
@@ -242,13 +273,14 @@ Rechte, Server der Einrichtung. Vorhandene Vorarbeit: Die Ausgangsliste (C#) hat
 eine gemeinsame Datenbank für mehrere Arbeitsplätze mit Konfliktschutz.
 
 ## Gestaltung nach Vorbild der Ausgangsliste
-Status: offen
+Status: freigegeben (wird zusammen mit „Umstieg auf C# / .NET 10“ gebaut)
 Datum: 06.11.2026
 Was: Das Programm übernimmt das Aussehen der Ausgangsliste und verfeinert es mit einzelnen
 Regeln aus Tobis Designvorlagen.
 Warum: Wunsch Tobi (06.11.2026); beide Programme sollen zusammengehören.
-Umfang: alle Werte und Regeln in `docs/gestaltung.md`. Umsetzung in PySide6 über ein
-zentrales Stylesheet und eine Datei mit allen Farben und Maßen (ein Wert, ein Ort).
+Umfang: alle Werte und Regeln in `docs/gestaltung.md`. Umsetzung über eine zentrale
+Stil-Klasse nach Vorbild `Stil.cs` der Ausgangsliste (ein Wert, ein Ort), ergänzt um die
+Verfeinerungen aus `docs/gestaltung.md`. Zunächst nur die helle Darstellung.
 Bestehende Ansichten (Bewohner-Übersicht, Akte, Formular) werden angepasst.
 Ausdrücklich nicht: Logo oder Name der Einrichtung im Repository.
 

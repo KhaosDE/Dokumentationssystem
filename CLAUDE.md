@@ -62,25 +62,37 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 
 ## Technik
 
-**Windows-Programm** (Entscheidung Tobi, 05.11.2026).
+**Windows-Programm in C# / .NET 10** (Entscheidung Tobi, 06.11.2026; vorher Python/PySide6
+bis Version 0.2.0, abgelöst durch den Eintrag „Umstieg auf C# / .NET 10“ in `IDEEN.md`).
 
-- Python 3.12, Oberfläche mit **PySide6** (Qt; Lizenz LGPLv3 — vor einem späteren Verkauf
-  prüfen), Tests mit `unittest`. Weitere Abhängigkeiten nur mit Begründung in `STAND.md`.
-- **Kern ohne Oberfläche:** Datenmodell, Speichern, Prüfregeln und Demo-Daten liegen in
-  `dokusystem/kern/` und sind ohne PySide6 testbar. Die Oberfläche
-  (`dokusystem/oberflaeche/`) ruft nur den Kern auf.
-- **Speicher:** SQLite-Datei im Datenordner `%APPDATA%\Dokumentationssystem\` (sonst
-  `~/.local/share/dokumentationssystem/`). Hinterlegte Bilder ebenfalls dort, nie im
-  Repository.
-- **Demo-Daten:** liegen als lesbare Datei im Repository (`daten/demo/`), werden beim ersten
-  Start geladen und lassen sich über „Demo-Daten zurücksetzen“ wiederherstellen.
-- **Programmdatei und Selbst-Update nach Vorbild von `KhaosDE/N3XTBYT3`** (öffentlich; dort
-  Paket `n3xtbyt3_update` und `.github/workflows/tests-und-exe.yml`): GitHub Actions testet
-  bei jedem Push nach `main` unter Windows, baut die `.exe` (PyInstaller) und veröffentlicht
-  sie mit SHA-256-Prüfsumme als Release `build-<Laufnummer>`. Die `.exe` fragt beim Start
-  nach dem neuesten Release *dieses* Repositorys, lädt, prüft die Prüfsumme, tauscht sich
-  aus und startet neu. Nur diese Adressen, kein anderer Netzzugriff. Abschaltbar
-  (`--kein-update` und Einstellung). Schlägt etwas fehl, startet die alte Version.
+- **.NET 10 (LTS, Unterstützung bis November 2028)**, `net10.0-windows`, Oberfläche mit
+  **Windows Forms** wie die Ausgangsliste. Nicht .NET 8: Dessen Unterstützung endet am
+  10.11.2026.
+- Abhängigkeiten nur mit Begründung in `STAND.md`, nur mit freier Lizenz (MIT, Apache-2.0,
+  BSD). Vorgesehen: `Microsoft.Data.Sqlite` (Speicher), ein Testrahmen (z. B. xUnit),
+  später `PDFsharp` (MIT) für den HEB-Bogen.
+- **Kern ohne Oberfläche:** Datenmodell, Speichern, Prüfregeln und Demo-Daten in einem
+  eigenen Projekt (`src/Dokusystem.Kern/`), testbar ohne Fenster. Die Oberfläche
+  (`src/Dokusystem/`) ruft nur den Kern auf. Tests in `tests/`.
+- **Vorbild und Bausteine: `KhaosDE/Ausgangsliste`** (privat, C#, Windows Forms; in der
+  Sitzung als zweites Repository anhängen). Übernehmen und anpassen statt neu erfinden:
+  `Stil.cs` (Farben, Schriften, Abstände), Karten- und Kopfbereich, Druckvorschau,
+  Datenbank mit Mehrplatz-Schutz, Sicherung. **Beim Übernehmen bereinigen:** kein Logo,
+  kein Name der Einrichtung oder des Wohnbereichs, keine Namen von Personen — auch nicht
+  in Kommentaren (Regel 1 und 7). Gestaltung: `docs/gestaltung.md`.
+- **Speicher:** SQLite-Datei im Datenordner `%APPDATA%\Dokumentationssystem\`. Hinterlegte
+  Bilder und zugeteilte Vorlagen ebenfalls dort, nie im Repository.
+- **Demo-Daten:** lesbare Datei im Repository (`daten/demo/`), beim ersten Start geladen,
+  über „Demo-Daten zurücksetzen“ wiederherstellbar.
+- **Programmdatei:** eine einzelne `.exe` (self-contained, single-file, **nicht**
+  komprimiert — gepackte Dateien lösen öfter Virenwarnungen aus, Erfahrung Ausgangsliste).
+- **Selbst-Update** über die Releases dieses Repositorys, Ablauf wie bisher (Vorbild
+  `KhaosDE/N3XTBYT3`): GitHub Actions testet bei jedem Push nach `main` unter Windows, baut
+  die `.exe` und veröffentlicht sie mit SHA-256-Prüfsumme als Release `build-<Laufnummer>`
+  (nicht bei reinen `.md`-Änderungen). Die `.exe` fragt beim Start nach dem neuesten
+  Release, lädt, prüft die Prüfsumme, tauscht sich aus und startet neu. Nur diese Adressen,
+  kein anderer Netzzugriff. Abschaltbar (`--kein-update` und Einstellung). Schlägt etwas
+  fehl, startet die alte Version.
 - Die `.exe` ist nicht signiert; Windows SmartScreen warnt beim ersten Start. Im README in
   einfachen Worten erklären.
 
