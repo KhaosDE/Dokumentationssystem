@@ -251,3 +251,25 @@ Umfang: alle Werte und Regeln in `docs/gestaltung.md`. Umsetzung in PySide6 übe
 zentrales Stylesheet und eine Datei mit allen Farben und Maßen (ein Wert, ein Ort).
 Bestehende Ansichten (Bewohner-Übersicht, Akte, Formular) werden angepasst.
 Ausdrücklich nicht: Logo oder Name der Einrichtung im Repository.
+
+## Wohnbereichskalender
+Status: offen
+Datum: 06.11.2026
+Was: Ein Kalender für den ganzen Wohnbereich. Er zeigt Termine, die Bewohner betreffen, und
+dient zum Planen von Heimfahrten und Tagesausflügen.
+Warum: Wunsch Tobi (06.11.2026). Termine einzelner Bewohner und gemeinsame Unternehmungen
+stehen an einer Stelle, statt verstreut.
+Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+- Ansichten Monat, Woche, Tag; Filter „alle“ oder ein Bewohner.
+- Terminarten: Termin eines Bewohners (z. B. Arzttermin), Termin des Wohnbereichs,
+  **Heimfahrt** (von Datum/Uhrzeit bis Datum/Uhrzeit, auch über mehrere Tage),
+  **Tagesausflug** (Ziel, Treffpunkt, Uhrzeit, teilnehmende Bewohner, Begleitung).
+- Ein Termin kann mehreren Bewohnern zugeordnet sein; er erscheint dann bei jedem von ihnen.
+- Termine eines Bewohners erscheinen auch in seinem Wochenplan und auf der Startseite
+  („heute“). Während einer Heimfahrt zeigt die Startseite „abwesend: Heimfahrt bis …“.
+- Ausdruck: Monats- oder Wochenansicht des Kalenders; Teilnehmerliste eines Ausflugs.
+- Ausdrücklich nicht: Abgleich mit Outlook oder anderen Kalendern (kein Internet,
+  `CLAUDE.md`, Regel 6).
+Offene Fragen:
+- Muss bei einer Heimfahrt etwas mitgeplant werden (z. B. mitgegebene Medikation,
+  Rückkehrzeit)?

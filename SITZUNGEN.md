@@ -8,3 +8,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 06.11.2026 — Drei Ideen als „offen“ eingetragen: HEB-Bogen aus Berichten, Medikation (Grundverordnung, Pause, Stufenplan), Medikamentendatenbank; CLAUDE.md Regel 1 um Nachschlagedaten ergänzt (Chat „Programme/Apps“).
 - 06.11.2026 — Idee „Wochenplan“ als „offen“ eingetragen, als zweite Quelle im HEB-Eintrag ergänzt (Chat „Programme/Apps“).
 - 06.11.2026 — HEB-Eintrag ausgearbeitet (PDF-Bogen über Einstellungen, keine KI), docs/heb-wissen.md und docs/gestaltung.md angelegt, Wochenplan mit Ausdruck, neue Einträge Startseite, Therapie-Bereich, Mehrplatzbetrieb (später), Gestaltung nach Ausgangsliste — alle offen; CLAUDE.md Regeln 6 und 7 (Chat „Programme/Apps“).
+- 06.11.2026 — Idee „Wohnbereichskalender“ als „offen“ eingetragen (Chat „Programme/Apps“).
