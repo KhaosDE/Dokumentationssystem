@@ -117,12 +117,14 @@ public sealed class KopfBereich : Panel
         FleckMalen(g, new PointF(f.Left + f.Width * 0.80f, f.Bottom), f.Width * 0.62f, f.Height * 1.9f,
             Stil.VerlaufBlau, Color.FromArgb(140, 174, 224), (int)(0.40 * 255), (int)(0.18 * 255), 0.50f, 0.15f);
         // Rechts in reine Fläche auslaufen (dort steht der Demo-Hinweis).
+        // TileFlipX: Am letzten Pixel springt der Verlauf sonst auf „durchsichtig“ zurück – ein feiner
+        // senkrechter Strich. Die volle Fläche beginnt deshalb auch einen Pixel früher.
         float von = f.Left + f.Width * 0.70f, bis = f.Left + f.Width * 0.84f;
-        using (var auslauf = new LinearGradientBrush(new PointF(von - 1, 0), new PointF(bis + 1, 0),
-                   Color.FromArgb(0, Stil.Flaeche), Stil.Flaeche))
+        using (var auslauf = new LinearGradientBrush(new PointF(von, 0), new PointF(bis, 0),
+                   Color.FromArgb(0, Stil.Flaeche), Stil.Flaeche) { WrapMode = WrapMode.TileFlipX })
             g.FillRectangle(auslauf, von, f.Top, bis - von, f.Height);
         using (var voll = new SolidBrush(Stil.Flaeche))
-            g.FillRectangle(voll, bis, f.Top, f.Right - bis, f.Height);
+            g.FillRectangle(voll, bis - 1, f.Top, f.Right - bis + 1, f.Height);
         g.Clip = vorher;
 
         using (var rand = new Pen(Stil.KarteRand, 1f)) g.DrawPath(rand, pfad);

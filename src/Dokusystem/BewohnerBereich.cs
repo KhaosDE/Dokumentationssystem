@@ -15,7 +15,9 @@ public sealed class BewohnerBereich : Panel
 
     public KartenRaster Raster { get; } = new() { Dock = DockStyle.Fill };
     public AkteAnsicht Akte { get; } = new() { Dock = DockStyle.Fill, Visible = false };
-    public bool AkteSichtbar => Akte.Visible;
+    // Eigenes Feld statt Akte.Visible: Visible meldet „unsichtbar“, solange das Fenster selbst
+    // noch nicht angezeigt ist.
+    public bool AkteSichtbar { get; private set; }
 
     // Zum Testen ersetzbar: öffnet das Formular als Dialog und gibt den gespeicherten Bewohner zurück.
     internal Func<BewohnerFormular, Bewohner?> FormularZeigen { get; set; } =
@@ -48,6 +50,7 @@ public sealed class BewohnerBereich : Panel
         }));
         Akte.Visible = false;
         Raster.Visible = true;
+        AkteSichtbar = false;
         kopf.TexteSetzen(alle.Count == 1 ? "1 Bewohner" : $"{alle.Count} Bewohner", "Bewohner");
         kopf.KnoepfeSetzen(neuKnopf);
     }
@@ -62,6 +65,7 @@ public sealed class BewohnerBereich : Panel
         Akte.Zeigen(b);
         Raster.Visible = false;
         Akte.Visible = true;
+        AkteSichtbar = true;
         kopf.TexteSetzen("Bewohnerakte", b.Name);
         kopf.KnoepfeSetzen(zurueckKnopf, bearbeitenKnopf);
     }

@@ -52,6 +52,7 @@ public sealed class Hauptfenster : Form
         Navigation.Add(bewohnerEintrag);
 
         DemoKnopf.AutoSize = false;
+        DemoKnopf.Padding = new Padding(Stil.AbstandMini, 0, Stil.AbstandMini, 0);   // passt so in eine Zeile
         DemoKnopf.Click += (_, _) => DemoZuruecksetzen();
         AutoUpdate.Text = "Beim Start nach Updates suchen";
         AutoUpdate.Font = Stil.Klein;

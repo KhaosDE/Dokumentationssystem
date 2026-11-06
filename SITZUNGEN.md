@@ -10,3 +10,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 06.11.2026 — HEB-Eintrag ausgearbeitet (PDF-Bogen über Einstellungen, keine KI), docs/heb-wissen.md und docs/gestaltung.md angelegt, Wochenplan mit Ausdruck, neue Einträge Startseite, Therapie-Bereich, Mehrplatzbetrieb (später), Gestaltung nach Ausgangsliste — alle offen; CLAUDE.md Regeln 6 und 7 (Chat „Programme/Apps“).
 - 06.11.2026 — Idee „Wohnbereichskalender“ als „offen“ eingetragen (Chat „Programme/Apps“).
 - 06.11.2026 — Umstieg auf C# / .NET 10 (Windows Forms) beschlossen und freigegeben, zusammen mit „Gestaltung nach Vorbild der Ausgangsliste“; CLAUDE.md Technik neu, STAND Entscheidungen ergänzt (Chat „Programme/Apps“).
+- 06.11.2026 — Claude Code: Umstieg auf C# / .NET 10 mit Windows Forms und Gestaltung nach Vorbild der Ausgangsliste (Version 0.3.0); Funktionsumfang wie 0.2.0, Python-Version entfernt, Übergang über das Selbst-Update geprüft.

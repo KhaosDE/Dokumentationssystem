@@ -57,7 +57,7 @@ Umfang:
 - Ausdrücklich nicht: Tagesdokumentation, Medikation, Ausgang (eigene Einträge).
 
 ## Umstieg auf C# / .NET 10
-Status: freigegeben
+Status: erledigt (06.11.2026)
 Datum: 06.11.2026
 Was: Das Programm wird in C# mit .NET 10 und Windows Forms neu aufgesetzt. Alles, was die
 Python-Version 0.2.0 kann, funktioniert danach genauso in C#. Die Python-Version wird
@@ -273,7 +273,7 @@ Rechte, Server der Einrichtung. Vorhandene Vorarbeit: Die Ausgangsliste (C#) hat
 eine gemeinsame Datenbank für mehrere Arbeitsplätze mit Konfliktschutz.
 
 ## Gestaltung nach Vorbild der Ausgangsliste
-Status: freigegeben (wird zusammen mit „Umstieg auf C# / .NET 10“ gebaut)
+Status: erledigt (06.11.2026; gebaut zusammen mit „Umstieg auf C# / .NET 10“)
 Datum: 06.11.2026
 Was: Das Programm übernimmt das Aussehen der Ausgangsliste und verfeinert es mit einzelnen
 Regeln aus Tobis Designvorlagen.
