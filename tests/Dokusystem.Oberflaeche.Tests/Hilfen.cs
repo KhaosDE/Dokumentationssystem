@@ -26,18 +26,22 @@ public static class Hilfe
         if (fehler is not null) ExceptionDispatchInfo.Capture(fehler).Throw();
     }
 
+    // Fenster wirklich anzeigen: Windows Forms führt PerformClick nur bei sichtbaren Knöpfen aus.
+    public static void Zeigen(Form fenster)
+    {
+        fenster.StartPosition = FormStartPosition.Manual;
+        fenster.Location = new Point(0, 0);
+        fenster.Show();
+        Application.DoEvents();
+    }
+
     // Bildschirmfoto eines Fensters oder Steuerelements, nur wenn DOKUSYSTEM_BILDSCHIRMFOTOS gesetzt ist.
     public static void Foto(Control element, string name)
     {
         string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
         if (string.IsNullOrWhiteSpace(ordner)) return;
         Directory.CreateDirectory(ordner);
-        if (element is Form fenster && !fenster.Visible)
-        {
-            fenster.StartPosition = FormStartPosition.Manual;
-            fenster.Location = new Point(0, 0);
-            fenster.Show();
-        }
+        if (element is Form fenster && !fenster.Visible) Zeigen(fenster);
         Application.DoEvents();
         using var bild = new Bitmap(element.Width, element.Height);
         element.DrawToBitmap(bild, new Rectangle(Point.Empty, element.Size));

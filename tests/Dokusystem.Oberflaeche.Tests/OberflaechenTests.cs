@@ -61,6 +61,7 @@ public class BewohnerOberflaechenTests
     {
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
         Karten(f)[1].Waehlen();
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Berta Birke", f.Kopf.TitelText);
@@ -108,6 +109,7 @@ public class BewohnerOberflaechenTests
     {
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
         f.Bewohner.FormularZeigen = formular =>
         {
             Assert.Equal("nicht_erfasst", formular.Allergie.Zustand);
