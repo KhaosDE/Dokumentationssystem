@@ -187,9 +187,12 @@ public static partial class Aktualisierung
 
     // ------------------------------------------------------------------ Ablauf
 
+    // Als fertige .exe gestartet (Build-Nummer von GitHub Actions, unter Windows, nicht über dotnet.exe)?
+    // Der Dateiname selbst darf abweichen, z. B. „Dokumentationssystem (1).exe“ nach doppeltem Herunterladen.
     public static bool AlsWindowsProgramm(int build) =>
-        build > 0 && OperatingSystem.IsWindows() &&
-        string.Equals(Path.GetFileName(Environment.ProcessPath), Datei, StringComparison.OrdinalIgnoreCase);
+        build > 0 && OperatingSystem.IsWindows() && Environment.ProcessPath is string pfad &&
+        pfad.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) &&
+        !Path.GetFileName(pfad).Equals("dotnet.exe", StringComparison.OrdinalIgnoreCase);
 
     // Warum diesmal nicht nachgefragt wird – oder null, wenn nachgefragt werden soll.
     public static string? GrundOhneUpdate(IReadOnlyList<string> argumente, int build, bool? alsWindowsProgramm = null)

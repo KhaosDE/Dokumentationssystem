@@ -1,0 +1,231 @@
+using System.Drawing.Drawing2D;
+
+namespace Dokusystem;
+
+// Eine weiße Fläche mit 1-px-Rand und abgerundeten Ecken (Radius 8) auf der Seitenfarbe.
+// Darin liegende Steuerelemente bekommen die Kartenfarbe als Hintergrund.
+public class KartenFlaeche : Panel
+{
+    public KartenFlaeche()
+    {
+        DoubleBuffered = true;
+        ResizeRedraw = true;
+        BackColor = Stil.Flaeche;
+        Padding = new Padding(Stil.AbstandGross);
+    }
+
+    protected override void OnPaintBackground(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? Stil.Seite);
+        Stil.FlaecheZeichnen(g, new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f),
+            Stil.RadiusKarte * Stil.Skala(this), Stil.Flaeche, Stil.KarteRand);
+    }
+}
+
+// Eine kleine Marke (z. B. „Zimmer 101“ oder „Demo — ausgedachte Daten“).
+public sealed class MarkenFeld : Control
+{
+    private Stil.Marke marke;
+
+    public MarkenFeld(string text, Stil.Marke marke)
+    {
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
+                 ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+        this.marke = marke;
+        Text = text;
+        AccessibleRole = AccessibleRole.StaticText;
+        Size = GetPreferredSize(Size.Empty);
+    }
+
+    public Stil.Marke Marke
+    {
+        get => marke;
+        set { marke = value; Invalidate(); }
+    }
+
+    protected override void OnTextChanged(EventArgs e)
+    {
+        base.OnTextChanged(e);
+        AccessibleName = Text;
+        Size = GetPreferredSize(Size.Empty);
+        Invalidate();
+    }
+
+    public override Size GetPreferredSize(Size proposedSize) => new(
+        TextRenderer.MeasureText(Text, Stil.MarkeSchrift, Size.Empty, TextFormatFlags.NoPadding).Width + Stil.Px(this, 16) + 1,
+        Stil.Px(this, 22) + 1);
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? Stil.Flaeche);
+        Stil.MarkeZeichnen(g, Text, 0, 0, marke, Stil.Skala(this));
+    }
+}
+
+// Ein deutlicher Hinweis über die volle Breite, z. B. der Allergiehinweis in der Akte.
+// Farbe nie allein: Der Text sagt immer, was gilt; links ein farbiger Balken.
+public sealed class HinweisFeld : Control
+{
+    private Stil.Marke marke = Stil.Achtung;
+    private bool gestrichelt;
+
+    public HinweisFeld()
+    {
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
+                 ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+        Font = new Font("Segoe UI Semibold", 11F);
+        AccessibleRole = AccessibleRole.StaticText;
+        Height = Stil.Px(this, 48);
+    }
+
+    public Stil.Marke Marke => marke;
+    public bool Gestrichelt => gestrichelt;
+
+    public void Setzen(string text, Stil.Marke neueMarke, bool mitStrichelrand)
+    {
+        Text = text;
+        AccessibleName = text;
+        marke = neueMarke;
+        gestrichelt = mitStrichelrand;
+        Invalidate();
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? Stil.Seite);
+        float s = Stil.Skala(this);
+        var feld = new RectangleF(0.5f + s, 0.5f + s, Width - 1.5f - 2 * s, Height - 1.5f - 2 * s);
+        Color rand = marke.Rand ?? Stil.Mischen(marke.Flaeche, marke.Text, 0.25);
+        Stil.FlaecheZeichnen(g, feld, Stil.RadiusKarte * s, marke.Flaeche, rand, gestrichelt ? 2f * s : 1f, gestrichelt);
+        using (var balken = new SolidBrush(marke.Text))
+        using (var pfad = Stil.Abgerundet(new RectangleF(feld.Left, feld.Top, 4 * s, feld.Height), 2 * s))
+            g.FillPath(balken, pfad);
+        var text = Rectangle.Round(new RectangleF(feld.Left + Stil.Px(this, Stil.AbstandGross), feld.Top,
+            feld.Width - 2 * Stil.Px(this, Stil.AbstandGross), feld.Height));
+        TextRenderer.DrawText(g, Text, Font, text, marke.Text,
+            TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis);
+    }
+}
+
+// Ein Eintrag in der Seitenleiste. Aktiv: heller Akzent als Fläche, Akzent als Textfarbe,
+// links ein schmaler Balken (docs/gestaltung.md).
+public sealed class SeitenleistenEintrag : Control
+{
+    private bool aktiv;
+    private bool maus;
+
+    public SeitenleistenEintrag(string text)
+    {
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
+                 ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable, true);
+        Text = text;
+        Font = Stil.Standard;
+        Cursor = Cursors.Hand;
+        TabStop = true;
+        AccessibleRole = AccessibleRole.PageTab;
+        AccessibleName = text;
+        Height = Stil.Px(this, 40);
+    }
+
+    public bool Aktiv
+    {
+        get => aktiv;
+        set { aktiv = value; Invalidate(); }
+    }
+
+    protected override void OnMouseEnter(EventArgs e) { maus = true; Invalidate(); base.OnMouseEnter(e); }
+    protected override void OnMouseLeave(EventArgs e) { maus = false; Invalidate(); base.OnMouseLeave(e); }
+    protected override void OnGotFocus(EventArgs e) { Invalidate(); base.OnGotFocus(e); }
+    protected override void OnLostFocus(EventArgs e) { Invalidate(); base.OnLostFocus(e); }
+
+    // Wie ein Klick (auch für Tastatur: Eingabe oder Leertaste).
+    public void Ausloesen() => OnClick(EventArgs.Empty);
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.KeyCode is Keys.Enter or Keys.Space) { Ausloesen(); e.Handled = true; }
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? Stil.Fensterhintergrund);
+        float s = Stil.Skala(this);
+        var feld = new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f);
+        Color? flaeche = aktiv ? Stil.AkzentHell : maus ? Stil.Mischen(Stil.Fensterhintergrund, Stil.Akzent, 0.06) : null;
+        if (flaeche is Color f)
+            Stil.FlaecheZeichnen(g, feld, Stil.RadiusKnopf * s, f, Focused ? Stil.Fokus : f);
+        else if (Focused)
+            Stil.FlaecheZeichnen(g, feld, Stil.RadiusKnopf * s, Stil.Fensterhintergrund, Stil.Fokus);
+        if (aktiv)
+        {
+            using var balken = new SolidBrush(Stil.Akzent);
+            using var pfad = Stil.Abgerundet(new RectangleF(feld.Left + 2 * s, feld.Top + Height * 0.25f, 3 * s, Height * 0.5f), 1.5f * s);
+            g.FillPath(balken, pfad);
+        }
+        TextRenderer.DrawText(g, Text, aktiv ? Stil.Fett : Stil.Standard,
+            new Rectangle(Stil.Px(this, Stil.AbstandGross), 0, Width - Stil.Px(this, Stil.AbstandGross), Height),
+            aktiv ? Stil.Akzent : Stil.TextNormal, TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+    }
+}
+
+// Drei Zustände (Regel 5): eingetragen (mit Eingabefeld) / zweite Möglichkeit / nicht erfasst.
+// Vorgabe ist immer „nicht erfasst“.
+public sealed class Dreiwahl : TableLayoutPanel
+{
+    private readonly string[] kuerzel;
+    public RadioButton[] Knoepfe { get; }
+    public TextBox Feld { get; } = new();
+
+    public Dreiwahl(string[] kuerzel, string[] beschriftungen, string platzhalter)
+    {
+        this.kuerzel = kuerzel;
+        ColumnCount = 2;
+        RowCount = 3;
+        AutoSize = true;
+        AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        Margin = new Padding(0);
+        ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        Knoepfe = beschriftungen.Select(t => new RadioButton
+        {
+            Text = t, AutoSize = true, Font = Stil.Standard, ForeColor = Stil.TextNormal,
+            Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandKlein, Stil.AbstandMini),
+        }).ToArray();
+        for (int i = 0; i < 3; i++) Controls.Add(Knoepfe[i], 0, i);
+        Feld.PlaceholderText = platzhalter;
+        Feld.Font = Stil.Standard;
+        Feld.Dock = DockStyle.Fill;
+        Feld.Margin = new Padding(0, 0, 0, Stil.AbstandMini);
+        Controls.Add(Feld, 1, 0);
+        foreach (var knopf in Knoepfe) knopf.CheckedChanged += (_, _) => Feld.Enabled = Knoepfe[0].Checked;
+        Setzen(kuerzel[2], "");
+    }
+
+    // Unbekannter Zustand oder nichts gewählt: immer „nicht erfasst“ (Index 2), nie „eingetragen“.
+    public void Setzen(string zustand, string text)
+    {
+        int i = Array.IndexOf(kuerzel, zustand);
+        if (i < 0) i = 2;
+        Knoepfe[i].Checked = true;
+        Feld.Text = text;
+        Feld.Enabled = i == 0;
+    }
+
+    public string Zustand
+    {
+        get
+        {
+            int i = Array.FindIndex(Knoepfe, k => k.Checked);
+            return kuerzel[i < 0 ? 2 : i];
+        }
+    }
+}
