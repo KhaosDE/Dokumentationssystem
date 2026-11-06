@@ -65,6 +65,30 @@ Umfang: wird im Chat ausgearbeitet. Nicht bauen.
 - Bekannte Anforderung aus „HEB-Bogen aus Berichten“: Berichte müssen sich später einem
   Zeitraum und einem Lebensbereich bzw. Ziel zuordnen lassen.
 
+## Wochenplan
+Status: offen
+Datum: 06.11.2026
+Was: Eine Anzeige, in der man für jeden Bewohner einzeln seinen Wochenplan sieht. Der Plan
+lässt sich jederzeit mit Therapien bearbeiten.
+Warum: Der Wochenplan gibt dem Bewohner Struktur und ist eine Grundlage für den HEB-Bogen.
+Im bisherigen System gibt es keinen übersichtlichen Wochenplan für den Bewohner.
+Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+- Ansicht je Bewohner: Montag bis Sonntag als Spalten, Uhrzeiten als Zeilen; jeder Termin
+  mit Therapie, Uhrzeit von–bis, Ort und Hinweis. Erreichbar aus der Bewohnerakte.
+- Therapien kommen aus einer Auswahlliste (in der Demo ausgedachte, allgemeine Angebote),
+  die sich ergänzen lässt; daneben freie Einträge.
+- Termine anlegen, verschieben, ändern, löschen — jederzeit.
+- **Verlauf bleibt erhalten:** Jede Änderung gilt „ab Datum …“; frühere Fassungen werden
+  nicht überschrieben. Grund: Der HEB-Bogen muss zeigen können, welcher Plan in seinem
+  Zeitraum galt.
+- Ausdrücklich nicht: Dienstplan der Mitarbeiter, Raumbelegung, Abgleich mit Kalendern.
+Offene Fragen (nicht bauen, bevor geklärt):
+- Ist der Wochenplan eine Regelwoche, die jede Woche gleich gilt, bis man sie ändert —
+  oder wird jede Kalenderwoche einzeln geplant?
+- Soll festgehalten werden, ob der Bewohner einen Termin wahrgenommen hat (teilgenommen,
+  abgesagt, ausgefallen)? Das wäre für den HEB-Bogen aussagekräftig.
+- Braucht es einen Ausdruck für den Bewohner?
+
 ## HEB-Bogen aus Berichten
 Status: offen
 Datum: 06.11.2026
@@ -77,6 +101,8 @@ den Berichten und sollen nicht noch einmal zusammengesucht werden.
 Umfang (Rahmen, Einzelheiten folgen aus dem Chat):
 - Zeitraum wählen, Berichte des Zeitraums werden gesammelt und den Feldern des Bogens
   zugeordnet.
+- Zweite Quelle neben den Berichten: der Wochenplan, der im Zeitraum galt (siehe
+  „Wochenplan“).
 - Nichts erfinden: Im Bogen steht nur, was in den Berichten steht. Fehlt zu einem Feld
   etwas, steht dort sichtbar „keine Berichte zu diesem Bereich im Zeitraum“.
 - Keine klinische Bewertung durch das Programm.

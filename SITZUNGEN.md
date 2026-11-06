@@ -6,3 +6,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 05.11.2026 — Technik festgelegt (Windows-Programm, Python/PySide6/SQLite, Selbst-Update nach Vorbild N3XTBYT3); „Programmrahmen und Selbst-Update“ und „Bewohnerakte“ freigegeben, „Tägliche Dokumentation“ offen (Chat „Programme/Apps“).
 - 05.11.2026 — Claude Code: „Programmrahmen und Selbst-Update“ (Version 0.1.0) und „Bewohnerakte“ (Version 0.2.0) gebaut, getestet, über Pull Requests nach `main` gebracht.
 - 06.11.2026 — Drei Ideen als „offen“ eingetragen: HEB-Bogen aus Berichten, Medikation (Grundverordnung, Pause, Stufenplan), Medikamentendatenbank; CLAUDE.md Regel 1 um Nachschlagedaten ergänzt (Chat „Programme/Apps“).
+- 06.11.2026 — Idee „Wochenplan“ als „offen“ eingetragen, als zweite Quelle im HEB-Eintrag ergänzt (Chat „Programme/Apps“).
