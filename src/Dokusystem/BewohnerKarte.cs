@@ -25,12 +25,12 @@ public sealed class BewohnerKarte : Control
 
     // ungeleseneUebergaben: offene Übergabe-Einträge, die das eigene Kürzel noch nicht gelesen hat;
     // wichtigeBerichte: als „Wichtig“ gekennzeichnete Berichte der letzten 7 Tage.
-    // modulMarken: Marken eingeschalteter Module (z. B. „abwesend: Heimfahrt bis …“), vorne.
+    // modulMarken: Marken eingeschalteter Module (z. B. „abwesend: Heimfahrt bis …“), hinten.
     public BewohnerKarte(Bewohner bewohner, DateOnly heute, int ungeleseneUebergaben = 0, int wichtigeBerichte = 0,
         IEnumerable<Marke>? modulMarken = null)
     {
         Bewohner = bewohner;
-        Marken = [.. modulMarken ?? [], .. Kennzeichen.Marken(bewohner, ungeleseneUebergaben, wichtigeBerichte)];
+        Marken = [.. Kennzeichen.Marken(bewohner, ungeleseneUebergaben, wichtigeBerichte), .. modulMarken ?? []];
         AufenthaltText = Kennzeichen.Aufenthalt(bewohner.Aufnahmedatum, heute);
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
                  ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable, true);

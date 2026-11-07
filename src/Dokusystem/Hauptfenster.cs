@@ -43,6 +43,7 @@ public sealed class Hauptfenster : Form
     public Hauptfenster(Speicher speicher)
     {
         this.speicher = speicher;
+        Modulverwaltung.Anmelden(speicher);   // schon beim Start geschehen; sicherheitshalber (legt nur fehlende Tabellen an)
         Text = $"Dokumentationssystem – {KopfBereich.DemoHinweis}";
         BackColor = Stil.Seite;
         Font = Stil.Standard;

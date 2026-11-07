@@ -124,7 +124,7 @@ public class BewohnerOberflaechenTests
         Assert.Equal("seit 15.02.2016 · 10 Jahre, 8 Monate", birke.AufenthaltText);
         var ginster = Karten(f).Single(k => k.Bewohner.Nachname == "Ginster");
         Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst"],
-            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst).Select(m => m.Text));
+            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst && !m.Text.StartsWith("überfällig")).Select(m => m.Text));   // ohne Marke des Moduls
         Assert.Equal("Übergabe 1", ginster.Marken[0].Text);
     });
 

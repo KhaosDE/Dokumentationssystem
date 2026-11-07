@@ -64,6 +64,7 @@ public class AusgangslisteOberflaechenTests
             using (new DialogErsatz(fenster =>
             {
                 var a = Assert.IsType<AusgangFenster>(fenster);
+                Hilfe.Zeigen(a);   // PerformClick wirkt nur bei angezeigten Fenstern
                 a.AlleinPlus.PerformClick();
                 a.MbwMinus.PerformClick();
                 a.InfoAbfragen = () => "Geld mitnehmen";
@@ -99,6 +100,7 @@ public class AusgangslisteOberflaechenTests
             using (new DialogErsatz(fenster =>
             {
                 var st = Assert.IsType<StatusFenster>(fenster);
+                Hilfe.Zeigen(st);   // Visible stimmt nur bei angezeigten Fenstern
                 Assert.False(st.BeschraenkungKnopf.Enabled);
                 Assert.Equal(Platz.HinweisNurMitBeschluss, st.Hinweis.Text);
                 st.Rueckfrage = _ => DialogResult.Yes;
@@ -123,8 +125,7 @@ public class AusgangslisteOberflaechenTests
 
             f.BereichWaehlen("Bewohner");
             var birke = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().Single(k => k.Bewohner.Nachname == "Birke");
-            Assert.Equal("abwesend: Heimfahrt bis 20.11.2026", birke.Marken[0].Text);
-            Assert.Equal(MarkenArt.Abwesend, birke.Marken[0].Art);
+            Assert.Contains(birke.Marken, m => m.Art == MarkenArt.Abwesend && m.Text == "abwesend: Heimfahrt bis 20.11.2026");
         }
     });
 
@@ -181,6 +182,7 @@ public class AusgangslisteOberflaechenTests
             using (new DialogErsatz(fenster =>
             {
                 var n = Assert.IsType<NachtberichtFenster>(fenster);
+                Hilfe.Zeigen(n);
                 n.Kopieren = text => kopiert = text;
                 n.AlleKnopf.PerformClick();
                 return DialogResult.Cancel;
