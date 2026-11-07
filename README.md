@@ -67,6 +67,9 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Wochenplan** (Reiter in der Akte): die Regelwoche mit zugeteilten Therapien und freien
   Einträgen; Teilnahme an Therapien eintragen; Änderungen gelten „ab Datum“; Ausdruck in
   großer Schrift nur mit Name und Plan.
+- **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
+  Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Kein Abgleich mit
+  anderen Kalendern.
 - Die Wortliste für den Hinweis „Soll das in die Übergabe?“ lässt sich ergänzen: eine Datei
   `uebergabe-woerter.txt` in den Datenordner legen, ein Wort pro Zeile.
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder

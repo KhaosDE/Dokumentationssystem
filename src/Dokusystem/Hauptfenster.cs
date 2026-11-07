@@ -29,6 +29,7 @@ public sealed class Hauptfenster : Form
     public NachrichtenSeite Nachrichten { get; }
     public MedikamenteSeite Medikamente { get; }
     public TherapieSeite Therapie { get; }
+    public KalenderSeite Kalender { get; }
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
     public Button DemoKnopf { get; } = Stil.NebenKnopf("Demo-Daten zurücksetzen …");
@@ -72,6 +73,9 @@ public sealed class Hauptfenster : Form
         Therapie = new TherapieSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Therapie"] = Therapie;
         Therapie.Geaendert += () => { if (AktiverBereich == "Therapie") Kopf.TexteSetzen(Therapie.KopfText, "Therapie"); };
+        Kalender = new KalenderSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Kalender"] = Kalender;
+        Kalender.Geaendert += () => { if (AktiverBereich == "Kalender") Kopf.TexteSetzen(Kalender.KopfText, "Kalender"); };
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);
@@ -169,6 +173,13 @@ public sealed class Hauptfenster : Form
             else Nachrichten.BewohnerZeigen(null);
             Kopf.TexteSetzen(Nachrichten.KopfText, "Nachrichten");
             Kopf.KnoepfeSetzen(Nachrichten.NeuKnopf);
+            return;
+        }
+        if (schluessel == "Kalender")
+        {
+            Kalender.Zeigen();
+            Kopf.TexteSetzen(Kalender.KopfText, "Kalender");
+            Kopf.KnoepfeSetzen(Kalender.NeuKnopf);
             return;
         }
         if (schluessel == "Therapie")

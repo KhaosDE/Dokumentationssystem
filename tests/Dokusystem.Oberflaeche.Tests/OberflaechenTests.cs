@@ -23,7 +23,6 @@ public class HauptfensterTests
 
     [Theory]
     [InlineData("Übersicht", "0.17.0")]
-    [InlineData("Kalender", "0.13.0")]
     [InlineData("Ausgangsliste", "0.14.0")]
     public void Noch_nicht_gebaute_Bereiche_zeigen_ihre_Version(string bereich, string version) => Hilfe.Sta(() =>
     {
@@ -393,7 +392,17 @@ public class BildschirmfotoTests
             Hilfe.Foto(neu, "19_neue_aufgabe");
         }
         f.Navigation.Single(n => n.Text == "Kalender").Ausloesen();
-        Hilfe.Foto(f, "9_platzhalter_kalender");
+        Hilfe.Foto(f, "36_kalender_monat");
+        f.Kalender.AnsichtWaehlen(KalenderAnsicht.Woche);
+        Hilfe.Foto(f, "37_kalender_woche");
+        f.Kalender.AnsichtWaehlen(KalenderAnsicht.Tag);
+        f.Kalender.TagWaehlen(DateOnly.FromDateTime(DateTime.Today.AddDays(8)));
+        Hilfe.Foto(f, "38_kalender_tag_ausflug");
+        f.Kalender.AnsichtWaehlen(KalenderAnsicht.Monat);
+        using (var termin = new KalenderFenster(u.Speicher, null, DateOnly.FromDateTime(DateTime.Today), u.Demo("Eiche").Id))
+            Hilfe.Foto(termin, "39_kalender_termin");
+        f.Navigation.Single(n => n.Text == "Übersicht").Ausloesen();
+        Hilfe.Foto(f, "9_platzhalter_uebersicht");
         string logo = Path.Combine(u.Ordner, "eigenes-bild.png");
         Hilfe.Testbild(logo, 180, 60);
         Einstellungen.LogoSetzen(logo);
