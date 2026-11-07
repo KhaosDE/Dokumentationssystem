@@ -77,6 +77,7 @@ public class HauptfensterTests
         {
             Assert.True(einstellungen.HatLogo);
             Assert.Equal("TS", einstellungen.Kuerzel.Text);
+            Hilfe.Zeigen(einstellungen);   // PerformClick wirkt nur bei angezeigtem Fenster
             einstellungen.LogoWeg.PerformClick();
             return einstellungen.Speichern();
         };
