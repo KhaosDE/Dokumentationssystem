@@ -228,7 +228,7 @@ public sealed class AufgabeKarte : KartenFlaeche
     {
         base.OnPaint(e);
         // Überfällige Aufgaben: roter Balken links (zusätzlich zum Wort „überfällig“).
-        if (MarkenTexte.Count > 0 && MarkenTexte[0].StartsWith("überfällig"))
+        if (MarkenTexte?.Count > 0 && MarkenTexte[0].StartsWith("überfällig"))
         {
             using var balken = new SolidBrush(Stil.Beschluss.Text);
             e.Graphics.FillRectangle(balken, Stil.Px(this, 2), Stil.Px(this, Stil.RadiusKarte), Stil.Px(this, 4), Height - 2 * Stil.Px(this, Stil.RadiusKarte));
@@ -249,7 +249,7 @@ public sealed class AufgabeKarte : KartenFlaeche
             label.Location = new Point(innen, y);
             y = label.Bottom + Stil.Px(this, 2);
         }
-        if (Aufgabe.Offen)
+        if (Aufgabe?.Offen == true)   // OnLayout läuft schon im Konstruktor der Basisklasse, vor dem Setzen
         {
             knoepfe.Bounds = new Rectangle(new Point(innen, y + Stil.Px(this, Stil.AbstandKlein)), knoepfe.GetPreferredSize(new Size(breite, 0)));
             y = knoepfe.Bottom;
