@@ -14,3 +14,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 07.11.2026 — Alle gesammelten Ideen freigegeben (Entscheidung Tobi): Bauplan mit 13 Schritten (0.4.0–0.16.0) in IDEEN.md, offene Fragen durch Festlegungen ersetzt; neu: Programmgerüst, Gestaltung Stufe 2, Ausgang, Biografie, Monatsreflexion (Chat „Programme/Apps“).
 - 07.11.2026 — Claude Code: Bauplan Schritt 1 „Programmgerüst mit allen Bereichen und Einstellungen“ (0.4.0).
 - 07.11.2026 — Tägliche Dokumentation geschärft: zwei Kennzeichen „Wichtig“ und „Übergabe“, Hinweis vor dem Speichern, Kenntnisnahme, Übergabe-Ansicht und Marken auf den Karten (Chat „Programme/Apps“).
+- 07.11.2026 — Übergabe als eigener Bereich nur mit Übergabe-Einträgen; Einträge bleiben bis Ablauf oder „erledigt“ stehen (mehrtägig), Wohnbereich-allgemein-Notizen (Chat „Programme/Apps“).

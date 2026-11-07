@@ -147,10 +147,22 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   (mit Bewohnerauswahl).
 - Liste je Bewohner, neueste oben; Filter nach Zeitraum, Lebensbereich und Schicht; Suche im
   Text.
-- **Übergabe-Ansicht** (Bereich „Übergabe“ in der Seitenleiste): alle Berichte mit
-  „Übergabe“ seit Beginn der vorigen Schicht, nach Bewohner gruppiert; darunter aufklappbar
-  die übrigen Berichte dieses Zeitraums. Zeitraum umstellbar (vorige Schicht, 24 Stunden,
-  3 Tage). Ausdruck als Übergabeblatt.
+- **Bereich „Übergabe“** (eigener Bereich in der Seitenleiste, Wunsch Tobi 07.11.2026): Hier
+  steht **nur** die Übergabe, keine übrigen Berichte. So bleibt es auf das Wichtige
+  eingegrenzt.
+  - **Übergabe-Einträge bleiben stehen, bis sie nicht mehr gebraucht werden** — nicht nur
+    eine Schicht lang. Beim Setzen von „Übergabe“ wählt man, wie lange: nächste Schicht
+    (Vorgabe), 3 Tage, 1 Woche, bis Datum … oder „bis erledigt“. So geht nichts unter, was
+    über mehrere Tage weitergegeben werden muss.
+  - Jeder Eintrag lässt sich **verlängern** oder als **erledigt** markieren (mit Kürzel und
+    Zeit). Erledigte und abgelaufene Einträge verschwinden aus der Liste, bleiben aber unter
+    „Erledigt / abgelaufen“ einsehbar. Gelöscht wird nichts.
+  - Anzeige nach Bewohner gruppiert; oben ein Abschnitt „Wohnbereich allgemein“ für
+    Übergaben, die keinen einzelnen Bewohner betreffen (eigene kurze Übergabe-Notiz, ohne
+    Bericht). Marke „läuft heute ab“ und „neu seit deiner letzten Schicht“.
+  - Der Übergabe-Text ist der Bericht selbst; ein kurzer eigener Übergabe-Satz ist möglich
+    (z. B. „Arzttermin Do 10 Uhr, Begleitung nötig“), der Bericht bleibt per Klick lesbar.
+  - Ausdruck als Übergabeblatt (nur die offenen Einträge).
 - **Auf den Karten** (Übersicht und Bewohner): Marke „Übergabe 2“ mit der Zahl der noch
   ungelesenen Übergabe-Einträge, Marke „Wichtig“ bei wichtigen Berichten der letzten 7 Tage.
 - Bericht schreiben geht schnell: Fenster öffnet mit dem aktuellen Datum, der aktuellen
