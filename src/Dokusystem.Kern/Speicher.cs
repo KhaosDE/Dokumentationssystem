@@ -17,6 +17,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoGeladen = "demo_geladen";
     private const string DemoBerichte = "demo_berichte";
     private const string DemoAufgaben = "demo_aufgaben";
+    private const string DemoNachrichten = "demo_nachrichten";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -129,6 +130,49 @@ public sealed partial class Speicher : IDisposable
             BEGIN SELECT RAISE(ABORT, 'Aufgaben werden nicht überschrieben – Änderungen sind Ereignisse.'); END;
         CREATE TRIGGER aufgabe_ereignisse_bleiben BEFORE UPDATE ON aufgabe_ereignisse
             BEGIN SELECT RAISE(ABORT, 'Ereignisse werden nicht überschrieben.'); END;
+        """,
+        // 4 – Nachrichten: Kollegen und Teams (Demo), Nachrichten mit Empfängern (Personen und
+        //     Teams), „gelesen“ und „archiviert“ je Person. Nachrichten werden nicht geändert.
+        """
+        CREATE TABLE kollegen (
+            kuerzel  TEXT PRIMARY KEY,
+            vorname  TEXT NOT NULL,
+            nachname TEXT NOT NULL
+        );
+        CREATE TABLE team_mitglieder (
+            team    TEXT NOT NULL,
+            kuerzel TEXT NOT NULL REFERENCES kollegen(kuerzel) ON DELETE CASCADE,
+            PRIMARY KEY (team, kuerzel)
+        );
+        CREATE TABLE nachrichten (
+            id          INTEGER PRIMARY KEY,
+            verlauf_id  INTEGER REFERENCES nachrichten(id) ON DELETE CASCADE,   -- NULL = erste Nachricht
+            von         TEXT NOT NULL,
+            betreff     TEXT NOT NULL,
+            text        TEXT NOT NULL,
+            gesendet    TEXT NOT NULL,
+            bewohner_id INTEGER REFERENCES bewohner(id) ON DELETE CASCADE
+        );
+        CREATE TABLE nachricht_empfaenger (
+            nachricht_id INTEGER NOT NULL REFERENCES nachrichten(id) ON DELETE CASCADE,
+            art          TEXT NOT NULL CHECK (art IN ('person', 'team')),
+            ziel         TEXT NOT NULL,
+            PRIMARY KEY (nachricht_id, art, ziel)
+        );
+        CREATE TABLE nachricht_gelesen (
+            nachricht_id INTEGER NOT NULL REFERENCES nachrichten(id) ON DELETE CASCADE,
+            kuerzel      TEXT NOT NULL,
+            zeit         TEXT NOT NULL,
+            PRIMARY KEY (nachricht_id, kuerzel)
+        );
+        CREATE TABLE verlauf_archiv (
+            verlauf_id INTEGER NOT NULL REFERENCES nachrichten(id) ON DELETE CASCADE,
+            kuerzel    TEXT NOT NULL,
+            zeit       TEXT NOT NULL,
+            PRIMARY KEY (verlauf_id, kuerzel)
+        );
+        CREATE TRIGGER nachrichten_bleiben BEFORE UPDATE ON nachrichten
+            BEGIN SELECT RAISE(ABORT, 'Nachrichten werden nicht überschrieben.'); END;
         """,
     ];
 
@@ -256,11 +300,12 @@ public sealed partial class Speicher : IDisposable
             return true;
         }
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
-        bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null;
-        if (!berichte && !aufgaben) return false;
+        bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null;
+        if (!berichte && !aufgaben && !nachrichten) return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
+        if (nachrichten) DemoNachrichtenEinfuegen(transaktion);
         transaktion.Commit();
         return true;
     }
@@ -279,10 +324,12 @@ public sealed partial class Speicher : IDisposable
             SetzeMeta(DemoGeladen, "1", transaktion);
             DemoBerichteEinfuegen(transaktion);
             DemoAufgabenEinfuegen(transaktion);
+            DemoNachrichtenEinfuegen(transaktion);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
         AufgabenGeaendert?.Invoke();
+        NachrichtenGeaendert?.Invoke();
     }
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)

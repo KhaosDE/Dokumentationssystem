@@ -182,6 +182,77 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Nachrichten -----
+
+    private sealed class NachrichtenDatei
+    {
+        public List<KollegeVorlage> Kollegen { get; set; } = [];
+        public List<VerlaufVorlage> Verlaeufe { get; set; } = [];
+    }
+
+    public sealed class KollegeVorlage
+    {
+        public string Kuerzel { get; set; } = "";
+        public string Vorname { get; set; } = "";
+        public string Nachname { get; set; } = "";
+        public List<string> Teams { get; set; } = [];
+    }
+
+    public sealed class VerlaufVorlage
+    {
+        public string Betreff { get; set; } = "";
+        public string? Bewohner { get; set; }
+        public List<string> ArchiviertVon { get; set; } = [];
+        public List<NachrichtVorlage> Nachrichten { get; set; } = [];
+    }
+
+    public sealed class NachrichtVorlage
+    {
+        public string Von { get; set; } = "";
+        public List<string>? An { get; set; }          // „team:Name“ oder Kürzel; fehlt = Antwort an alle
+        public double VorStunden { get; set; }
+        public string Text { get; set; } = "";
+        public List<string> GelesenVon { get; set; } = [];
+    }
+
+    public sealed record DemoNachricht(Nachricht Nachricht);
+    public sealed record DemoVerlauf(List<DemoNachricht> Nachrichten, List<string> ArchiviertVon);
+    public sealed record DemoPost(List<Kollege> Kollegen, List<DemoVerlauf> Verlaeufe);
+
+    // Kollegen, Teams und Verläufe aus daten/demo/nachrichten.json, Zeiten relativ zu „jetzt“.
+    // Fehlt der genannte Bewohner (z. B. umbenannt), entfällt der Verlauf.
+    public static DemoPost Nachrichten(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var datei = Lesen<NachrichtenDatei>("nachrichten.json");
+        var kollegen = datei.Kollegen.Select(k => new Kollege(k.Kuerzel, k.Vorname, k.Nachname, k.Teams)).ToList();
+        DateTime Minute(DateTime t) => new(t.Year, t.Month, t.Day, t.Hour, t.Minute, 0);
+        var verlaeufe = new List<DemoVerlauf>();
+        foreach (var v in datei.Verlaeufe)
+        {
+            Bewohner? b = null;
+            if (v.Bewohner is string name && (b = bewohner.FirstOrDefault(x => x.Nachname == name)) is null) continue;
+            var bisher = new List<Nachricht>();
+            foreach (var d in v.Nachrichten)
+            {
+                var an = d.An is null
+                    ? NachrichtenRegeln.AntwortAn(bisher, d.Von)
+                    : d.An.Select(z => z.StartsWith("team:") ? Empfaenger.Team(z[5..]) : Empfaenger.Person(z)).ToList();
+                bisher.Add(new Nachricht
+                {
+                    Von = d.Von,
+                    Betreff = v.Betreff,
+                    Text = d.Text.Replace("{vorname}", b?.Vorname ?? ""),
+                    Gesendet = Minute(jetzt.AddHours(-d.VorStunden)),
+                    BewohnerId = b?.Id,
+                    An = an,
+                    GelesenVon = d.GelesenVon,
+                });
+            }
+            verlaeufe.Add(new DemoVerlauf(bisher.Select(x => new DemoNachricht(x)).ToList(), v.ArchiviertVon));
+        }
+        return new DemoPost(kollegen, verlaeufe);
+    }
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein

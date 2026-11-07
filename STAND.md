@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.7.0** (Wohnbereich-ToDo, Bauplan Schritt 4).
+Stand: 07.11.2026. Version: **0.8.0** (Nachrichten, Bauplan Schritt 5).
 
 ## Aktuell
 
@@ -9,10 +9,11 @@ Seitenleiste; was noch nicht gebaut ist, sagt „Kommt in Version …“. Gebaut
 Bewohnerakte und jetzt die **tägliche Dokumentation**: Berichte je Bewohner mit den
 Kennzeichen „Wichtig“ und „Übergabe“, Nachträge statt Überschreiben, Ausdruck, und der
 Bereich **„Übergabe“**, in dem nur die Übergabe-Einträge stehen, bis sie ablaufen oder
-erledigt sind. Neu ist das **Wohnbereich-ToDo** („Aufgaben“): Aufgaben an die nächste Schicht,
-die stehen bleiben, bis sie erledigt sind.
+erledigt sind. Dazu das **Wohnbereich-ToDo** („Aufgaben“) und **Nachrichten** zwischen
+ausgedachten Kolleginnen und Kollegen; oben rechts „Angemeldet als …“ (ohne Passwort, nur für
+die Vorführung).
 
-**Nächster Schritt:** Bauplan Schritt 5 „Nachrichten“ (0.8.0), danach der Reihe nach bis
+**Nächster Schritt:** Bauplan Schritt 6 „Medikamentendatenbank“ (0.9.0), danach der Reihe nach bis
 Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
 `KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
 
@@ -102,6 +103,23 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
   - Ausdruck der offenen Aufgaben (Druckvorschau).
   - Demo: sechs ausgedachte Aufgaben relativ zu heute, eine überfällig und schon einmal
     weitergegeben, eine erledigt. „Wichtig“ steht in den Demo-Berichten seltener.
+
+- 0.8.0 — Nachrichten (07.11.2026, Bauplan Schritt 5):
+  - Ausgedachte Kolleginnen und Kollegen mit Kürzel und Team (Wohnbereich A, Wohnbereich B,
+    Therapie, Leitung) in `daten/demo/nachrichten.json`.
+  - Oben rechts im Kopf „Angemeldet als …“: Klick öffnet die Liste, Wechsel ohne Passwort.
+    Dasselbe steht in den Einstellungen („Angemeldet als“ statt des freien Kürzel-Felds); das
+    Kürzel gilt für Berichte, Übergabe und Aufgaben.
+  - Bereich „Nachrichten“ mit Zähler ungelesener Nachrichten: Posteingang, Gesendet, Archiv.
+    Verläufe mit Marken „2 neu“, Bewohner, Anzahl; Klick öffnet den Verlauf (gilt dann als
+    gelesen), dort „Antworten …“ (an alle Beteiligten) und „Archivieren“ bzw. „Zurück in den
+    Posteingang“.
+  - „Neue Nachricht …“: an Personen und/oder Teams, Betreff, Text, optional Bezug zu einem
+    Bewohner. Team-Nachrichten sieht jedes Teammitglied.
+  - In der Akte „Nachrichten …“: zeigt die Verläufe zu diesem Bewohner; eine neue Nachricht
+    hat den Bewohner dann schon gewählt.
+  - Über den Bewohnerkarten ein Hinweis „3 ungelesene Nachrichten für …“ mit „Öffnen …“.
+  - Nichts wird gelöscht; kein E-Mail-Versand, kein Internet.
 
 ## Offene Punkte
 
@@ -237,6 +255,28 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
     Übergabe); ohne Kürzel sind die Knöpfe gesperrt, mit Hinweis.
   - Erledigte Aufgaben lassen sich nicht wieder öffnen; dafür legt man eine neue an (nichts
     wird überschrieben).
+- **Nachrichten (0.8.0), wo der Eintrag etwas offen ließ:**
+  - Kolleginnen, Kollegen und Teams sind Demo-Daten (wie die Bewohner) und werden mit
+    „Demo-Daten zurücksetzen“ neu geladen. Pflegen lassen sie sich noch nicht.
+  - „Angemeldet als …“ steht unter dem Demo-Hinweis oben rechts. Ohne Anmeldung zeigt der
+    Bereich „Nachrichten“ nur einen Hinweis. Ein früher frei eingetragenes Kürzel bleibt
+    gültig, bis man jemanden aus der Liste wählt; für Nachrichten braucht es einen Benutzer
+    aus der Liste.
+  - Sichtbar ist ein Verlauf nur für Beteiligte: wer geschrieben hat oder angeschrieben wurde
+    (direkt oder über ein Team).
+  - Ordner: Posteingang = Verläufe, in denen ich etwas bekommen habe und die ich nicht
+    archiviert habe; Gesendet = Verläufe, in denen ich geschrieben habe; Archiv = von mir
+    archiviert. Archivieren gilt je Person; kommt danach eine neue Nachricht an mich, steht
+    der Verlauf wieder im Posteingang.
+  - „Gelesen“: beim Öffnen eines Verlaufs, je Person. Der Absender sieht nicht, wer gelesen
+    hat (ausdrücklich nicht in der Demo).
+  - Antworten gehen an alle Beteiligten außer an mich (Absender, Personen und Teams des
+    Verlaufs); Betreff und Bewohner übernimmt die Antwort von der ersten Nachricht.
+  - „Aus der Akte heraus aufrufbar“: Knopf „Nachrichten …“ in der Akte zeigt die Verläufe zu
+    diesem Bewohner (eingegrenzt mit „Bewohner: … ✕“).
+  - Zähler und Hinweis zählen ungelesene Nachrichten, Ordnerknöpfe zählen Verläufe.
+  - Hinweis aus `IDEEN.md` für einen späteren Echtbetrieb (Mitarbeitervertretung beteiligen,
+    auch für „gelesen“ in der Übergabe) gilt weiter.
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -246,6 +286,22 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.8.0:
+
+1. Unten links „Version 0.8.0 · Build …“. Oben rechts unter dem Demo-Hinweis „Nicht angemeldet
+   – Benutzer wählen ▾“ (oder dein früheres Kürzel).
+2. Darauf klicken → „Anna Bachstelze (AB)“ wählen. Links bei „Nachrichten“ steht „3“, über den
+   Bewohnerkarten „3 ungelesene Nachrichten für Anna Bachstelze“.
+3. Nachrichten: Posteingang mit drei Verläufen, „Arzttermin am Donnerstag“ oben mit „2 neu“
+   und „Bewohner: Anton Ahorn“. Öffnen → beide Nachrichten, der Zähler sinkt auf 1.
+4. „Antworten …“ → geht an Emma Fink, Team Wohnbereich A, Karin Lerche. Senden → steht unten im
+   Verlauf. „Archivieren“ → Verlauf steht unter „Archiv“.
+5. „Neue Nachricht …“ an „Team Therapie“ mit Betreff und Text → danach oben rechts zu „Olga
+   Pirol (OP)“ wechseln: Sie hat die Nachricht im Posteingang.
+6. Akte Clara Clematis → „Nachrichten …“: nur Verläufe zu Clara; „Bewohner: … ✕“ hebt das auf.
+7. Einstellungen: „Angemeldet als“ zeigt dieselbe Person wie oben rechts.
+8. „Demo-Daten zurücksetzen …“ → Nachrichten wieder im Demo-Zustand.
 
 Version 0.7.0:
 

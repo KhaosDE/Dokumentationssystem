@@ -39,14 +39,14 @@ public class BerichteOberflaechenTests
     public void Neuer_Bericht_aus_der_Seitenleiste_mit_Hinweis_auf_die_Uebergabe() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        Einstellungen.Aendern(w => w with { Kuerzel = "TS" });
+        Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         string? rueckfrage = null;
         using var ersatz = new DialogErsatz(fenster =>
         {
             var formular = Assert.IsType<BerichtFormular>(fenster);
-            Assert.Equal("TS", formular.Verfasser.Text);                // eigenes Kürzel vorbelegt
+            Assert.Equal("CD", formular.Verfasser.Text);                // eigenes Kürzel vorbelegt
             Assert.Matches(@"^\d\d\.\d\d\.\d{4}$", formular.Datum.Text);  // heutiges Datum vorbelegt
             Assert.Equal(-1, formular.BewohnerWahl.SelectedIndex);      // Bewohner muss man wählen
             formular.BewohnerWaehlen(u.Demo("Distel").Id!.Value);
@@ -86,7 +86,7 @@ public class BerichteOberflaechenTests
     public void Nachtrag_haengt_an_und_der_Text_bleibt() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        Einstellungen.Aendern(w => w with { Kuerzel = "TS" });
+        Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.Bewohner.AkteZeigen(u.Demo("Clematis").Id!.Value);
@@ -96,7 +96,7 @@ public class BerichteOberflaechenTests
         using var ersatz = new DialogErsatz(fenster =>
         {
             var formular = Assert.IsType<NachtragFormular>(fenster);
-            Assert.Equal("TS", formular.Verfasser.Text);
+            Assert.Equal("CD", formular.Verfasser.Text);
             formular.Inhalt.Text = "Uhrzeit korrigiert: es war eine halbe Stunde später.";
             return formular.Speichern() ? DialogResult.OK : DialogResult.Cancel;
         });
@@ -110,7 +110,7 @@ public class BerichteOberflaechenTests
 [Collection("Oberflaeche")]
 public class UebergabeOberflaechenTests
 {
-    private static (Umgebung, Hauptfenster) Oeffnen(string kuerzel = "TS")
+    private static (Umgebung, Hauptfenster) Oeffnen(string kuerzel = "CD")
     {
         var u = new Umgebung();
         if (kuerzel.Length > 0) Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
@@ -163,7 +163,7 @@ public class UebergabeOberflaechenTests
             UebergabeKarte Karte() => seite.Karten.Single(k => k.Uebergabe.Id == id);
 
             Karte().Gelesen.PerformClick();
-            Assert.Contains("TS (", Karte().GelesenText.Text);
+            Assert.Contains("CD (", Karte().GelesenText.Text);
             Assert.Equal("Gelesen ✓", Karte().Gelesen.Text);
             Assert.False(Karte().Gelesen.Enabled);
 
@@ -187,7 +187,7 @@ public class UebergabeOberflaechenTests
             Assert.Contains(seite.Abschnitte, a => a.StartsWith("ERLEDIGT / ABGELAUFEN"));
             var erledigt = Karte();
             Assert.StartsWith("erledigt ", erledigt.MarkenTexte.Last());
-            Assert.EndsWith("· TS", erledigt.MarkenTexte.Last());
+            Assert.EndsWith("· CD", erledigt.MarkenTexte.Last());
             Assert.False(erledigt.Erledigt.Visible);
             Assert.Contains(seite.Karten, k => k.MarkenTexte.Last().StartsWith("abgelaufen "));   // Demo: ein abgelaufener Eintrag
         }
@@ -215,7 +215,7 @@ public class UebergabeOberflaechenTests
             Assert.Contains("Text der Notiz fehlt", fehler);
             var karte = seite.Karten.Single(k => k.Uebergabe.Text == "Heizungsableser kommt morgen zwischen 8 und 12 Uhr.");
             Assert.True(karte.Uebergabe.Allgemein);
-            Assert.Equal("TS", karte.Uebergabe.Verfasser);
+            Assert.Equal("CD", karte.Uebergabe.Verfasser);
             Assert.False(karte.BerichtLesen.Visible);
         }
     });
