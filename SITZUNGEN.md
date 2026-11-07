@@ -29,3 +29,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 07.11.2026 — Claude Code: Bauplan Schritt 10 „Wohnbereichskalender“ (0.13.0).
 - 07.11.2026 — Claude Code: Bauplan Schritt 11 „Modul Ausgangsliste (mit Modulverwaltung)“ (0.14.0).
 - 07.11.2026 — Claude Code: Bauplan Schritt 12 „Biografie“ (0.15.0).
+- 07.11.2026 — Claude Code: Bauplan Schritt 13 „Monatsreflexion“ (0.16.0).

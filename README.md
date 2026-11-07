@@ -72,6 +72,11 @@ Danach fragt Windows für diese Datei nicht mehr.
   Formulierung „gibt an, dass …“). Leere Abschnitte stehen unten als „Fehlende Angaben“.
   „Als Fließtext kopieren“ legt alles als reinen Text in die Zwischenablage. Jede Änderung ist
   eine neue Fassung mit Datum und Kürzel („Verlauf …“).
+- **Reflexion** (Reiter in der Akte): je Monat ein kurzer Text je Lebensbereich, daneben die
+  Berichte des Monats zu diesem Bereich und oben die Teilnahme an Therapien laut Wochenplan.
+  Das Programm zählt die Zeichen und gibt Stilhinweise (z. B. Semikolon, Datum im Text), ändert
+  aber nichts selbst. „Speichern“ hält einen Entwurf fest, „Als fertig markieren“ setzt ein
+  Mensch.
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
   Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Kein Abgleich mit
   anderen Kalendern.

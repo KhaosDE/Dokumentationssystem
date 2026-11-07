@@ -494,7 +494,7 @@ Umfang (Regeln aus Tobis Arbeitsweise für Biografieeinträge):
 - Verlauf: Änderungen mit Datum und Kürzel, frühere Fassung bleibt einsehbar.
 
 ## Monatsreflexion
-Status: freigegeben (Bauplan Schritt 13)
+Status: erledigt (07.11.2026)
 Datum: 07.11.2026
 Was: Je Bewohner und Monat eine kurze Reflexion je Lebensbereich, geschrieben mit den
 Berichten des Monats daneben.

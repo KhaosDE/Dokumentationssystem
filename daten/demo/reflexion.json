@@ -1,0 +1,49 @@
+{
+  "hinweis": "Ausgedachte, kurze und wertneutrale Monatsreflexionen für die Demo (vergangener Monat). Keine Diagnosen, keine Datumsangaben im Text. Texte in der Reihenfolge der Lebensbereiche 1–5; leer = noch nichts geschrieben.",
+  "reflexionen": [
+    {
+      "bewohner": "Ahorn",
+      "fertig": true,
+      "texte": [
+        "Herr Ahorn hält regelmäßig telefonischen Kontakt zu seiner Schwester. Im Haus sucht er meist das Gespräch mit zwei Mitbewohnern und beteiligt sich an Gruppengesprächen, wenn er dazu eingeladen wird.",
+        "Er hält sein Zimmer nach Aufforderung in Ordnung. Den Wochenputz erledigt er unter Begleitung und kommt seinem Küchendienst nach.",
+        "In der Holzwerkstatt arbeitet er wöchentlich mit und benötigt zu Beginn Aufforderung. Er bringt eigene Ideen für kleine Arbeiten ein.",
+        "Er geht nachmittags gern spazieren und nimmt den vereinbarten Ausgang meist wahr. An der Hausversammlung nahm er teil.",
+        "Er gibt an, dass ihm feste Abläufe Sicherheit geben. Bei Unruhe nimmt er das Gesprächsangebot des Personals an."
+      ]
+    },
+    {
+      "bewohner": "Birke",
+      "fertig": true,
+      "texte": [
+        "Frau Birke telefoniert wöchentlich mit ihrem Bruder. Im Haus pflegt sie Kontakt zu einer Mitbewohnerin.",
+        "Sie versorgt sich weitgehend selbstständig und kauft bei Bedarf mit Begleitung ein.",
+        "",
+        "Sie besucht gelegentlich das Café im Ort und liest viel. Am Ausflug zur Eisdiele nahm sie teil.",
+        "Sie spricht Belastungen von sich aus an und nimmt Unterstützung durch das Personal an."
+      ]
+    },
+    {
+      "bewohner": "Clematis",
+      "fertig": false,
+      "texte": [
+        "Frau Clematis sucht vermehrt den Kontakt zu Mitbewohnern; das gemeinsame Kochen nutzt sie dafür regelmäßig.",
+        "",
+        "",
+        "Sie nimmt zuletzt regelmäßig an der Malgruppe teil – laut eigener Aussage – gern auch länger.",
+        ""
+      ]
+    },
+    {
+      "bewohner": "Eiche",
+      "fertig": false,
+      "texte": [
+        "Herr Eiche nimmt Kontakt zu seiner Familie über Telefonate auf, die das Personal begleitet.",
+        "Er kommt seinen Aufgaben im Zimmer unter Begleitung und Aufforderung nach.",
+        "",
+        "Er nutzt den Garten des Hauses täglich und ließ sich auf das Angebot der Gartengruppe ein.",
+        ""
+      ]
+    }
+  ]
+}
