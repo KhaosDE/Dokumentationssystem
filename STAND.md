@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.15.0** (Biografie, Bauplan Schritt 12).
+Stand: 07.11.2026. Version: **0.16.0** (Monatsreflexion, Bauplan Schritt 13).
 
 ## Aktuell
 
@@ -16,11 +16,11 @@ die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) 
 **Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze), der **Wochenplan** je Bewohner, der
 **Wohnbereichskalender** (Termine, Heimfahrten, Ausflüge) und neu die **Modulverwaltung** mit dem
 ersten Modul **Ausgangsliste** (Ausgang, Anwesenheit, Unterbringung, Tagesliste, Küchendienst,
-Digitaler Ausgang), übernommen aus der Ausgangsliste. Neu ist die **Biografie** als Reiter in der
-Akte.
+Digitaler Ausgang), übernommen aus der Ausgangsliste. Dazu kommen die **Biografie** und neu die
+**Monatsreflexion** als Reiter in der Akte.
 
-**Nächster Schritt:** Bauplan Schritt 13 „Monatsreflexion“ (0.16.0), danach der Reihe nach bis
-Schritt 15 (`IDEEN.md`, oben).
+**Nächster Schritt:** Bauplan Schritt 14 „Startseite als Übersicht (Dashboard)“ (0.17.0), danach
+Schritt 15 „HEB-Bogen aus Berichten“ (`IDEEN.md`, oben).
 
 ## Fertig
 
@@ -231,6 +231,22 @@ Schritt 15 (`IDEEN.md`, oben).
   - Demo `daten/demo/biografie.json`: kurze, wertneutrale, ausgedachte Biografien für sechs
     Bewohner (einige Abschnitte leer, eine Änderung mit Verlauf, ein Hinweis auf die
     Formulierung), vier Bewohner ohne Biografie.
+
+- 0.16.0 — Monatsreflexion (Bauplan Schritt 13, 07.11.2026):
+  - Reiter „Reflexion“ in der Akte: Monat wählen (◀ ▶, vorgeschlagen ist der vergangene
+    Monat), fünf Textfelder nach den Lebensbereichen des HEB-Bogens, daneben je Bereich die
+    Berichte des Monats („Keine Berichte zu diesem Bereich im Monat.“, wenn keine da sind),
+    oben die Teilnahme an Therapien laut Wochenplan.
+  - Zeichenzahl je Feld und Stilprüfung als Hinweisliste nach `docs/heb-wissen.md` (Semikolon,
+    Datum im Text, gemiedene Wörter, Floskeln, „nicht …, sondern …“, „Mitarbeitende“,
+    Gendersternchen, abgekürzter Nachname ohne Punkt, mehrere Gedankenstriche) – nie
+    automatisch geändert. Die Prüfung liegt im Kern (`Stilpruefung`) und dient später auch dem
+    HEB-Bogen.
+  - Status Entwurf / fertig; fertig ist schreibgeschützt, „Wieder als Entwurf“ öffnet es. Jede
+    Änderung ist eine neue Fassung („Verlauf …“). Beim Monatswechsel mit ungespeicherten
+    Änderungen kommt eine Rückfrage.
+  - Demo `daten/demo/reflexion.json`: Reflexionen des vergangenen Monats für vier Bewohner, zwei
+    fertig, zwei Entwurf (einer mit Stilhinweisen).
 
 ## Offene Punkte
 
@@ -501,8 +517,30 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 07.11.2026 (Schritt 12): „Als Fließtext kopieren“: Überschrift „Biografie Name“, je Abschnitt
   Titel und Text, bei Angaben des Bewohners darunter „(vom Bewohner angegeben, nicht
   überprüft)“, am Ende „Fehlende Angaben: …“ – ohne Formatierung.
+- 07.11.2026 (Schritt 13): Vorgeschlagen wird der vergangene Monat – eine Reflexion schreibt man
+  im Rückblick. Für kommende Monate ist keine möglich.
+- 07.11.2026 (Schritt 13): Die Therapien stehen einmal oben für den ganzen Monat, nicht je
+  Lebensbereich – der Wochenplan ordnet Therapien keinem Lebensbereich zu.
+- 07.11.2026 (Schritt 13): Ein Bericht erscheint bei jedem Lebensbereich, dem er zugeordnet ist;
+  „allgemeine“ Berichte erscheinen bei keinem.
+- 07.11.2026 (Schritt 13): Stilregeln, die nur für bestimmte Felder des HEB-Bogens gelten
+  (Ich-Form bei Rahmenzielen), kommen mit dem HEB-Bogen dazu. Datumsangaben gelten als Hinweis,
+  weil sie im HEB nur in den Kopffeldern stehen dürfen.
 
 ## Testliste für Tobi
+
+Version 0.16.0:
+
+1. Unten links „Version 0.16.0 · Build …“. Akte Clara Clematis → Reiter „Reflexion“: der
+   vergangene Monat, Status „Entwurf“; im ersten Bereich Hinweise (Semikolon, Gedankenstriche).
+2. Neben jedem Bereich die Berichte des Monats zu diesem Bereich; oben die Therapien mit
+   Teilnahme.
+3. Angemeldet einen Text ändern → Zeichenzahl und Hinweise ändern sich beim Tippen;
+   „Speichern“ → „Entwurf gespeichert.“
+4. „Als fertig markieren“ → Felder grau und schreibgeschützt; „Wieder als Entwurf“ öffnet sie.
+   „Verlauf …“ zeigt alle Fassungen.
+5. Text ändern und mit ◀ den Monat wechseln → Rückfrage „Jetzt speichern?“.
+6. Akte Anton Ahorn → Reflexion „fertig“, ohne Hinweise.
 
 Version 0.15.0:
 

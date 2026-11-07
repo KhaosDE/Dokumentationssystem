@@ -217,8 +217,8 @@ public class BewohnerOberflaechenTests
         Assert.Equal(["Stammdaten", "Berichte", "Medikation", "Wochenplan", "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
-        akte.Reiter.Waehlen("Reflexion");
-        Assert.Equal("Kommt in Version 0.16.0", akte.ReiterPlatzhalter.Titel.Text);
+        akte.Reiter.Waehlen("HEB");
+        Assert.Equal("Kommt in Version 0.18.0", akte.ReiterPlatzhalter.Titel.Text);
         Assert.Equal("Allergien: Haselnüsse", akte.Allergie.Text);   // Allergiehinweis bleibt oben
         f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);   // neue Akte beginnt bei den Stammdaten
@@ -411,6 +411,9 @@ public class BildschirmfotoTests
         Hilfe.Foto(f, "47_akte_biografie");
         using (var bio = new BiografieFenster(u.Speicher, u.Demo("Distel"), u.Speicher.Biografie(u.Demo("Distel").Id!.Value)[3]))
             Hilfe.Foto(bio, "48_biografie_bearbeiten");
+        f.Bewohner.AkteZeigen(u.Demo("Clematis").Id!.Value);
+        f.Bewohner.Akte.Reiter.Waehlen("Reflexion");
+        Hilfe.Foto(f, "49_akte_reflexion");
         var db = new Dokusystem.Modul.Ausgangsliste.Datenbank(u.Speicher);
         using (var ausgang = new Dokusystem.Modul.Ausgangsliste.AusgangFenster(db, db.Platz(u.Demo("Ahorn").Id!.Value)!))
             Hilfe.Foto(ausgang, "42_ausgang_fenster");

@@ -636,6 +636,37 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Monatsreflexion -----
+
+    private sealed class ReflexionDatei
+    {
+        public List<ReflexionVorlage> Reflexionen { get; set; } = [];
+    }
+
+    private sealed class ReflexionVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public bool Fertig { get; set; }
+        public List<string> Texte { get; set; } = [];
+    }
+
+    // Reflexionen für den vergangenen Monat aus daten/demo/reflexion.json. Fertige haben zwei
+    // Fassungen (Entwurf, dann fertig), damit der Verlauf etwas zeigt.
+    public static List<ReflexionFassung> Reflexionen(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var monat = ReflexionRegeln.Vorschlag(DateOnly.FromDateTime(jetzt));
+        var entwurf = jetzt.Date.AddDays(-Math.Min(6, jetzt.Day + 2)).AddHours(14);
+        var liste = new List<ReflexionFassung>();
+        foreach (var v in Lesen<ReflexionDatei>("reflexion.json").Reflexionen)
+        {
+            if (bewohner.FirstOrDefault(b => b.Nachname == v.Bewohner) is not Bewohner b) continue;
+            var f = new ReflexionFassung { BewohnerId = b.Id!.Value, Monat = monat, Texte = v.Texte, Erstellt = entwurf, Kuerzel = "AB" };
+            liste.Add(f);
+            if (v.Fertig) liste.Add(f with { Fertig = true, Erstellt = entwurf.AddDays(1).AddHours(1), Kuerzel = "CD" });
+        }
+        return liste;
+    }
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein
