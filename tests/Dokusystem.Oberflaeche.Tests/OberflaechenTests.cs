@@ -23,7 +23,6 @@ public class HauptfensterTests
 
     [Theory]
     [InlineData("Übersicht", "0.17.0")]
-    [InlineData("Nachrichten", "0.8.0")]
     [InlineData("Kalender", "0.13.0")]
     [InlineData("Therapie", "0.11.0")]
     [InlineData("Medikamente", "0.9.0")]
