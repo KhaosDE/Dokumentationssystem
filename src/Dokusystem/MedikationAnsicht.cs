@@ -138,7 +138,7 @@ public sealed class MedikationAnsicht : Panel
     {
         base.OnLayout(levent);
         leiste.MaximumSize = new Size(Width, 0);
-        leiste.Location = Point.Empty;
+        leiste.Bounds = new Rectangle(Point.Empty, leiste.GetPreferredSize(new Size(Math.Max(100, Width), 0)));   // AutoSize greift hier zu spät
         int y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
         foreach (var c in inhalt)
         {
@@ -599,6 +599,7 @@ public sealed class MedikationDruck(Bewohner bewohner, DateOnly tag, IReadOnlyLi
         y += 4f;
         g.DrawString("Bei Bedarf", fett, Brushes.Black, links, y);
         y += 6f;
+        if (!staende.Any(x => x.Sichtbar && x.Verordnung.Bedarf)) g.DrawString("Keine Bedarfsmedikation.", normal, Brushes.DimGray, links, y);
         foreach (var s in staende.Where(x => x.Sichtbar && x.Verordnung.Bedarf))
         {
             var v = s.Verordnung;
