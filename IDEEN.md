@@ -177,7 +177,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
 - Ausdrücklich nicht: Pflegeplanung, Vitalwerte.
 
 ## Wochenplan
-Status: freigegeben (Bauplan Schritt 9)
+Status: erledigt (07.11.2026; Bauplan Schritt 9, Version 0.12.0)
 Datum: 06.11.2026
 Was: Eine Anzeige, in der man für jeden Bewohner einzeln seinen Wochenplan sieht. Der Plan
 lässt sich jederzeit mit Therapien bearbeiten.

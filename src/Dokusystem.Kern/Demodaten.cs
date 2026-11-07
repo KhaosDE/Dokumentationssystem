@@ -447,6 +447,73 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Wochenplan -----
+
+    private sealed class WochenplanDatei
+    {
+        public List<PlanVorlage> Eintraege { get; set; } = [];
+    }
+
+    public sealed class PlanVorlage
+    {
+        public string Titel { get; set; } = "";
+        public string Tag { get; set; } = "Mo";
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+        public string Ort { get; set; } = "";
+        public System.Text.Json.JsonElement Fuer { get; set; }
+        public int AbVorTagen { get; set; }
+        public int? EntferntVorTagen { get; set; }
+        public PlanAenderungVorlage? Aenderung { get; set; }
+    }
+
+    public sealed class PlanAenderungVorlage
+    {
+        public string Fuer { get; set; } = "";
+        public string Tag { get; set; } = "Mo";
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+        public int AbVorTagen { get; set; }
+        public string Hinweis { get; set; } = "";
+    }
+
+    public sealed record DemoPlan(PlanEintrag Eintrag, PlanEintrag? Ersatz, DateOnly? EntferntAb);
+
+    // Freie Einträge aus daten/demo/wochenplan.json, relativ zu heute.
+    public static List<DemoPlan> Wochenplan(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        static TimeOnly Zeit(string s) => TimeOnly.ParseExact(s, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        var liste = new List<DemoPlan>();
+        foreach (var v in Lesen<WochenplanDatei>("wochenplan.json").Eintraege)
+        {
+            var namen = v.Fuer.ValueKind == System.Text.Json.JsonValueKind.String && v.Fuer.GetString() == "alle"
+                ? bewohner.Select(b => b.Nachname).ToList()
+                : v.Fuer.EnumerateArray().Select(x => x.GetString() ?? "").ToList();
+            foreach (var b in bewohner.Where(b => namen.Contains(b.Nachname)))
+            {
+                var ab = heute.AddDays(-v.AbVorTagen);
+                var eintrag = new PlanEintrag
+                {
+                    BewohnerId = b.Id!.Value, Termin = new Wochentermin(Kurztage[v.Tag], Zeit(v.Von), Zeit(v.Bis)), Titel = v.Titel, Ort = v.Ort,
+                    Ab = ab, Erstellt = ab.AddDays(-1).ToDateTime(new TimeOnly(10, 0)), Kuerzel = "AB",
+                };
+                PlanEintrag? ersatz = null;
+                if (v.Aenderung is PlanAenderungVorlage a && a.Fuer == b.Nachname)
+                {
+                    var neuAb = heute.AddDays(-a.AbVorTagen);
+                    ersatz = eintrag with
+                    {
+                        Termin = new Wochentermin(Kurztage[a.Tag], Zeit(a.Von), Zeit(a.Bis)), Hinweis = a.Hinweis, Ab = neuAb,
+                        Erstellt = neuAb.AddDays(-1).ToDateTime(new TimeOnly(11, 0)), Kuerzel = "CD",
+                    };
+                }
+                liste.Add(new DemoPlan(eintrag, ersatz, v.EntferntVorTagen is int e ? heute.AddDays(-e) : null));
+            }
+        }
+        return liste;
+    }
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein

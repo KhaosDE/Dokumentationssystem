@@ -65,7 +65,12 @@ public sealed partial class Speicher
     {
         var alle = Angebote();
         var neu = alle.FirstOrDefault(a => a.Id == angebotId) ?? throw new Eingabefehler(["Dieses Angebot gibt es nicht mehr."]);
-        return TherapieRegeln.Ueberschneidungen(neu, bewohnerId, ab, bis, alle);
+        var liste = TherapieRegeln.Ueberschneidungen(neu, bewohnerId, ab, bis, alle);
+        // Freie Einträge des Wochenplans im selben Zeitraum.
+        foreach (var e in PlanEintraege(bewohnerId).Where(e => (e.EndetAb is not DateOnly ende || ende > ab) && (bis is not DateOnly b || e.Ab <= b)))
+            foreach (var t in neu.Am(ab).Termine.Where(t => t.Ueberschneidet(e.Termin)))
+                liste.Add(new Ueberschneidung(e.Titel, e.Termin));
+        return liste;
     }
 
     public Zuteilung Zuteilen(long angebotId, long bewohnerId, DateOnly ab, DateOnly? bis, string kuerzel, DateTime jetzt)

@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.11.0** (Therapie-Bereich, Bauplan Schritt 8).
+Stand: 07.11.2026. Version: **0.12.0** (Wochenplan, Bauplan Schritt 9).
 
 ## Aktuell
 
@@ -12,10 +12,10 @@ Bereich **„Übergabe“**, in dem nur die Übergabe-Einträge stehen, bis sie 
 erledigt sind. Dazu das **Wohnbereich-ToDo** („Aufgaben“) und **Nachrichten** zwischen
 ausgedachten Kolleginnen und Kollegen; oben rechts „Angemeldet als …“ (ohne Passwort, nur für
 die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) und neu die
-**Medikation** je Bewohner (Grundverordnung, Pause, Stufenplan, „Was gilt heute“) und neu der
-**Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze).
+**Medikation** je Bewohner (Grundverordnung, Pause, Stufenplan, „Was gilt heute“), der
+**Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze) und neu der **Wochenplan** je Bewohner.
 
-**Nächster Schritt:** Bauplan Schritt 9 „Wochenplan“ (0.12.0), danach der Reihe nach bis
+**Nächster Schritt:** Bauplan Schritt 10 „Wohnbereichskalender“ (0.13.0), danach der Reihe nach bis
 Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
 `KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
 
@@ -162,6 +162,22 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
     anderen Therapie des Bewohners; „Teilnahme beenden …“ als eigener Eintrag; „Verlauf …“.
   - Demo `daten/demo/therapie.json`: sieben ausgedachte, allgemeine Angebote mit Zuteilungen
     relativ zu heute (eine Zeitänderung, eine beendete Teilnahme, eine beginnt später).
+
+- 0.12.0 — Wochenplan (07.11.2026, Bauplan Schritt 9):
+  - Reiter „Wochenplan“ in der Akte: Montag bis Sonntag als Spalten, Uhrzeiten als Zeilen;
+    zugeteilte Therapien erscheinen von selbst (blaugrün), freie Einträge blaugrau; heute
+    hervorgehoben; Blättern nach Kalenderwochen.
+  - Klick auf eine Therapie: Teilnahme „teilgenommen“, „abgesagt“, „ausgefallen“ oder zurück
+    auf „offen“. Klick auf einen freien Eintrag: „Ändern ab …“ oder „Entfernen ab …“.
+  - „Neuer Eintrag …“ (jede Woche am …, von–bis, Ort, Hinweis, gilt ab) mit Warnung bei
+    Überschneidung; „Verlauf …“ zeigt alle Fassungen.
+  - Ausdruck: A4 quer, große Schrift, nur Name und Plan (Druckvorschau, „Microsoft Print to
+    PDF“ möglich).
+  - Die Zuteilung im Therapie-Bereich warnt jetzt auch vor Überschneidungen mit freien
+    Einträgen des Wochenplans.
+  - Demo `daten/demo/wochenplan.json`: Spaziergang, Zimmer aufräumen, Wäschetag, Einkaufen,
+    Telefonat – eine Änderung „ab Datum“, ein entfernter Eintrag; Teilnahmen der letzten vier
+    Wochen (meist teilgenommen, ab und zu abgesagt oder ausgefallen).
 
 ## Offene Punkte
 
@@ -362,6 +378,16 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   - Therapeutinnen und Therapeuten sind Text (in der Demo ausgedacht, z. B. „Olga Pirol“ aus
     den Demo-Kollegen); Anmeldung und Rechte gibt es nicht (laut Eintrag).
   - Die Teilnehmer erscheinen ab 0.12.0 im Wochenplan des Bewohners.
+- **Wochenplan (0.12.0), wo der Eintrag etwas offen ließ:**
+  - „Verschieben, ändern“ heißt: Der bisherige Eintrag endet an einem Datum, ein neuer
+    beginnt; „löschen“ heißt „entfernen ab …“. So lässt sich für jeden Tag zeigen, welcher Plan
+    galt (für den HEB-Bogen).
+  - Teilnahme: Der zuletzt eingetragene Stand gilt, frühere bleiben in der Datenbank.
+    „Teilgenommen“ geht erst am Tag selbst; „abgesagt“ auch vorher.
+  - Überschneidungen sind eine Warnung (zweites „Speichern“ speichert trotzdem), kein Verbot.
+  - Einzelne Termine aus dem Kalender kommen mit 0.13.0 dazu.
+  - Der Ausdruck listet die Termine je Tag untereinander (lesbarer als ein Stundenraster in
+    großer Schrift); keine Allergien, Medikation oder anderen Angaben aus der Akte.
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -371,6 +397,20 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.12.0:
+
+1. Unten links „Version 0.12.0 · Build …“.
+2. Akte Anton Ahorn → Reiter „Wochenplan“: diese Woche mit Holzwerkstatt (Mo, Mi),
+   Bewegungsgruppe (Do), Wäschetag (Di), Einkaufen (Sa), Spaziergang (So); heute hervorgehoben.
+3. ◀ ▶ blättern; „Diese Woche“ springt zurück. In vergangenen Wochen stehen bei Therapien
+   „TEILGENOMMEN“, „ABGESAGT“ oder „AUSGEFALLEN“.
+4. Angemeldet auf eine Therapie klicken → Teilnahme wählen. Auf einen freien Eintrag klicken
+   → „Ändern ab …“ (z. B. ab nächster Woche eine andere Uhrzeit) → diese Woche alt, nächste
+   Woche neu; „Entfernen ab …“.
+5. „Neuer Eintrag …“ am Montag 10–11 Uhr → Warnung „Überschneidung mit: Holzwerkstatt …“.
+6. „Verlauf …“ zeigt neu/geändert/entfernt mit Datum und Kürzel.
+7. „Drucken …“ → A4 quer, große Schrift, nur Name und Plan.
 
 Version 0.11.0:
 

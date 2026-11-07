@@ -1,0 +1,14 @@
+{
+  "hinweis": "Ausgedachte freie Einträge der Regelwoche (zusätzlich zu den Therapien). 'fuer': 'alle' oder Liste von Nachnamen. Zeiten so gewählt, dass sie sich nicht mit den Demo-Therapien überschneiden.",
+  "eintraege": [
+    { "titel": "Spaziergang mit der Wohngruppe", "tag": "So", "von": "14:00", "bis": "15:00", "ort": "Treffpunkt Eingang", "fuer": "alle", "abVorTagen": 200 },
+    { "titel": "Zimmer aufräumen", "tag": "Fr", "von": "14:00", "bis": "15:00", "ort": "eigenes Zimmer", "fuer": "alle", "abVorTagen": 200 },
+    { "titel": "Wäschetag", "tag": "Mo", "von": "16:30", "bis": "17:30", "ort": "Waschküche", "fuer": [ "Ahorn", "Birke", "Clematis" ], "abVorTagen": 200,
+      "aenderung": { "fuer": "Ahorn", "tag": "Di", "von": "16:30", "bis": "17:30", "abVorTagen": 7, "hinweis": "neuer Tag nach Absprache" } },
+    { "titel": "Wäschetag", "tag": "Mi", "von": "16:30", "bis": "17:30", "ort": "Waschküche", "fuer": [ "Distel", "Eiche", "Fichte", "Ginster" ], "abVorTagen": 200 },
+    { "titel": "Wäschetag", "tag": "Do", "von": "16:30", "bis": "17:30", "ort": "Waschküche", "fuer": [ "Holunder", "Immergrün", "Kiefer" ], "abVorTagen": 200 },
+    { "titel": "Einkaufen mit Bezugsbetreuung", "tag": "Sa", "von": "10:00", "bis": "11:30", "ort": "Supermarkt", "fuer": [ "Ahorn", "Clematis", "Eiche", "Ginster", "Immergrün" ], "abVorTagen": 200 },
+    { "titel": "Einkaufen mit Bezugsbetreuung", "tag": "Sa", "von": "10:00", "bis": "11:30", "ort": "Supermarkt", "fuer": [ "Birke" ], "abVorTagen": 200, "entferntVorTagen": 3 },
+    { "titel": "Telefonat mit der Familie", "tag": "So", "von": "17:00", "bis": "17:30", "ort": "Büro", "fuer": [ "Distel", "Holunder" ], "abVorTagen": 90 }
+  ]
+}
