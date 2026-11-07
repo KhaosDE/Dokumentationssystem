@@ -1,17 +1,18 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.4.0** (Programmgerüst mit allen Bereichen und Einstellungen,
-Bauplan Schritt 1).
+Stand: 07.11.2026. Version: **0.5.0** (Gestaltung Stufe 2, Bauplan Schritt 2).
 
 ## Aktuell
 
 Das Programm (C# / .NET 10, Windows Forms) zeigt jetzt alle geplanten Bereiche in der
 Seitenleiste; was noch nicht gebaut ist, sagt „Kommt in Version …“. Die Bewohnerakte hat
-Reiter, und es gibt ein Einstellungsfenster (Kürzel, Update, eigenes Bild im Kopf).
+Reiter, und es gibt ein Einstellungsfenster (Kürzel, Update, eigenes Bild im Kopf). Die
+Bewohnerkarten zeigen wie in der Ausgangsliste Marken und die Aufenthaltsdauer; darüber stehen
+Filterknöpfe mit Zählern, unten eine Statusleiste mit Farbschlüssel.
 
-**Nächster Schritt:** Bauplan Schritt 2 „Gestaltung Stufe 2“ (0.5.0), danach der Reihe nach
-bis Schritt 13 (`IDEEN.md`, oben). Für die Schritte 2 und 9 das Repository
-`KhaosDE/Ausgangsliste` anhängen.
+**Nächster Schritt:** Bauplan Schritt 3 „Tägliche Dokumentation“ (0.6.0), danach der Reihe
+nach bis Schritt 13 (`IDEEN.md`, oben). Für Schritt 9 das Repository `KhaosDE/Ausgangsliste`
+anhängen.
 
 ## Fertig
 
@@ -45,6 +46,15 @@ bis Schritt 13 (`IDEEN.md`, oben). Für die Schritte 2 und 9 das Repository
   - Einstellungsfenster: eigenes Kürzel (bis 6 Buchstaben/Ziffern), Update-Häkchen (von unten
     links hierher verschoben), eigenes Bild für den Kopf, Hinweis auf spätere Einstellungen.
   - Kopf: Logofeld rechts oben mit dem gewählten Bild; der Demo-Hinweis steht daneben.
+
+- 0.5.0 — Gestaltung Stufe 2 (07.11.2026, Bauplan Schritt 2):
+  - Bewohnerkarte nach Vorbild der Ausgangsliste: Bild/Initialen, Name, Zimmer-Marke, darunter
+    Marken „Beschluss bis …“, „Allergie: …“, „Allergien nicht erfasst“, „Beschluss nicht
+    erfasst“, unten die Aufenthaltsdauer („seit 01.09.2019 · 7 Jahre, 2 Monate“); weicher
+    Schatten, Rand unter der Maus kräftiger.
+  - Filterknöpfe über dem Raster mit Zählern: Alle, Beschluss, Allergie, Nicht erfasst.
+  - Statusleiste unten mit Farbschlüssel der Marken.
+  - Logofeld im Kopf (seit 0.4.0, Bild aus den Einstellungen).
 
 ## Offene Punkte
 
@@ -117,9 +127,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   farbigen Balken links.
 - **Demo-Hinweis** rechts oben im Kopf (dort, wo die Ausgangsliste ihr Logofeld hat), als
   Marke „Achtung“; zusätzlich im Fenstertitel und oben im Formular.
-- **Karten zeigen wie in 0.2.0 nur Bild, Name und Zimmer** – keine Marken für Beschluss oder
-  Allergie. Grund: Der Eintrag erlaubt keine neuen Funktionen; Marken gehören zur
-  „Startseite als Übersicht“ (offen).
+- **Marken auf den Karten (0.5.0):** Nur was Aufmerksamkeit braucht, bekommt eine Marke
+  (Farbe sparsam): Beschluss mit Enddatum, eingetragene Allergie, „nicht erfasst“ bei
+  Allergien oder Beschluss. „Keine bekannt“ und „kein Beschluss“ sind der Normalfall ohne
+  Marke – „nicht erfasst“ bleibt dadurch immer sichtbar (Regel 5). Allergie und Beschluss
+  teilen sich Rot (wichtig, wie der Allergiehinweis in der Akte), „nicht erfasst“ ist Gelb;
+  jede Marke trägt ein Wort. Lange Allergietexte werden auf der Karte mit „…“ gekürzt.
+- **Schatten (0.5.0):** Die Karten haben den weichen, mehrlagigen Schatten der Ausgangsliste
+  (Eintrag „Gestaltung Stufe 2“ verlangt ihn); `docs/gestaltung.md` sah nur einen Hauch vor.
+- **Filterknöpfe** mit Radius 4 statt Pillenform (`docs/gestaltung.md`: keine Pillen-Knöpfe).
+  „Nicht erfasst“ zählt Bewohner, bei denen Allergien oder Beschluss nicht erfasst sind. Der
+  gewählte Filter bleibt, bis man einen anderen wählt.
+- **Farbschlüssel in der Statusleiste:** Die Ausgangsliste hat ihren abgeschafft; hier
+  verlangt ihn der Eintrag. Er erklärt Rot, Gelb und Blaugrau mit Worten.
 - **Oberflächentests nur unter Windows** (Windows Forms läuft nicht unter Linux); sie laufen
   in GitHub Actions vor jedem Zusammenführen und legen Bildschirmfotos ab.
 - **Programmgerüst (07.11.2026):** Das Programm startet im Bereich „Bewohner“, solange die
@@ -140,6 +160,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.5.0:
+
+1. Unten links „Version 0.5.0 · Build …“.
+2. Bewohnerkarten zeigen Bild/Initialen, Name, „Zi. …“, darunter Marken: Anton Ahorn
+   „Beschluss bis 30.06.2027“ und „Allergie: Haselnüsse“ (rot), Gustav Ginster „Allergien
+   nicht erfasst“ und „Beschluss nicht erfasst“ (gelb), Berta Birke keine Marke. Unten auf
+   jeder Karte „seit … · … Jahre, … Monate“.
+3. Filterknöpfe über den Karten: Alle 10, Beschluss 5, Allergie 4, Nicht erfasst 4. Ein Klick
+   zeigt nur die passenden Karten, oben steht „4 von 10 Bewohner“.
+4. Unten die Statusleiste mit Farbschlüssel (Rot: Beschluss, Allergie; Gelb: nicht erfasst;
+   Blaugrau: Zimmer).
+5. Maus über eine Karte: Der Rand wird blauer.
 
 Version 0.4.0:
 

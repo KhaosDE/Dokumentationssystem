@@ -229,3 +229,121 @@ public sealed class Dreiwahl : TableLayoutPanel
         }
     }
 }
+
+// Ein Filterknopf mit Zähler („Beschluss 5“), nach Vorbild der Ausgangsliste; Ecken mit Radius 4
+// statt Pillenform (docs/gestaltung.md). Aktiv: Akzent als Fläche, weiße Schrift.
+public sealed class FilterKnopf : Control
+{
+    private bool aktiv;
+    private bool maus;
+    private int anzahl;
+
+    public FilterKnopf(string text)
+    {
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
+                 ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable, true);
+        Text = text;
+        Font = Stil.Standard;
+        Cursor = Cursors.Hand;
+        TabStop = true;
+        AccessibleRole = AccessibleRole.PushButton;
+        Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
+        Aktualisieren();
+    }
+
+    public bool Aktiv
+    {
+        get => aktiv;
+        set { aktiv = value; Invalidate(); }
+    }
+
+    public int Anzahl
+    {
+        get => anzahl;
+        set { anzahl = value; Aktualisieren(); }
+    }
+
+    public void Ausloesen() => OnClick(EventArgs.Empty);
+
+    private void Aktualisieren()
+    {
+        Size = GetPreferredSize(Size.Empty);
+        AccessibleName = $"{Text}: {anzahl}";
+        Invalidate();
+    }
+
+    public override Size GetPreferredSize(Size proposedSize)
+    {
+        Size text = TextRenderer.MeasureText(Text, Stil.Standard, Size.Empty, TextFormatFlags.NoPadding);
+        Size zahl = TextRenderer.MeasureText(anzahl.ToString(), Stil.Fett, Size.Empty, TextFormatFlags.NoPadding);
+        return new Size(text.Width + zahl.Width + Stil.Px(this, Stil.AbstandKlein + 2 * Stil.AbstandMittel), Stil.Px(this, 32));
+    }
+
+    protected override void OnMouseEnter(EventArgs e) { maus = true; Invalidate(); base.OnMouseEnter(e); }
+    protected override void OnMouseLeave(EventArgs e) { maus = false; Invalidate(); base.OnMouseLeave(e); }
+    protected override void OnGotFocus(EventArgs e) { Invalidate(); base.OnGotFocus(e); }
+    protected override void OnLostFocus(EventArgs e) { Invalidate(); base.OnLostFocus(e); }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.KeyCode is Keys.Enter or Keys.Space) { Ausloesen(); e.Handled = true; }
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(Parent?.BackColor ?? Stil.Seite);
+        float s = Stil.Skala(this);
+        var feld = new RectangleF(0.5f, 0.5f, Width - 1.5f, Height - 1.5f);
+        Color flaeche = aktiv ? Stil.Akzent : maus ? Stil.Mischen(Stil.Flaeche, Stil.Akzent, 0.08) : Stil.Flaeche;
+        Color rand = aktiv ? Stil.Akzent : (maus || Focused) ? Stil.Mischen(Stil.KarteRand, Stil.Fokus, 0.5) : Stil.KarteRand;
+        Color schrift = aktiv ? Color.White : Stil.TextNormal;
+        Stil.FlaecheZeichnen(g, feld, Stil.RadiusKnopf * s, flaeche, rand, Focused ? 2f : 1f);
+        Size text = TextRenderer.MeasureText(g, Text, Stil.Standard, Size.Empty, TextFormatFlags.NoPadding);
+        int x = Stil.Px(this, Stil.AbstandMittel);
+        TextRenderer.DrawText(g, Text, Stil.Standard, new Rectangle(x, 0, text.Width, Height), schrift,
+            TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+        TextRenderer.DrawText(g, anzahl.ToString(), Stil.Fett,
+            new Rectangle(x + text.Width + Stil.Px(this, Stil.AbstandKlein), 0, Width, Height), schrift,
+            TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+    }
+}
+
+// Statusleiste unten mit dem Farbschlüssel der Marken (Farbe nie allein, docs/gestaltung.md).
+public sealed class Statusleiste : Control
+{
+    public Statusleiste()
+    {
+        SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
+                 ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+        BackColor = Stil.Fensterhintergrund;
+        Height = Stil.Px(this, 30);
+        AccessibleRole = AccessibleRole.StatusBar;
+        AccessibleName = "Farbschlüssel: " + string.Join("; ", Stil.Farbschluessel.Select(f => f.Text));
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        var g = e.Graphics;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.Clear(BackColor);
+        float s = Stil.Skala(this);
+        using (var linie = new Pen(Stil.Trennlinie)) g.DrawLine(linie, 0, 0, Width, 0);
+        int x = Stil.Px(this, Stil.AbstandGross);
+        var flags = TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
+        const string titel = "Farbschlüssel:";
+        TextRenderer.DrawText(g, titel, Stil.Klein, new Rectangle(x, 0, Width, Height), Stil.TextLeise, flags);
+        x += TextRenderer.MeasureText(g, titel, Stil.Klein, Size.Empty, TextFormatFlags.NoPadding).Width + Stil.Px(this, Stil.AbstandMittel);
+        foreach (var (marke, text) in Stil.Farbschluessel)
+        {
+            int seite = Stil.Px(this, 12);
+            var feld = new RectangleF(x, (Height - seite) / 2f, seite, seite);
+            Stil.FlaecheZeichnen(g, feld, 2.5f * s, marke.Flaeche, marke.Rand ?? marke.Text);
+            x += seite + Stil.Px(this, Stil.AbstandMini + 2);
+            TextRenderer.DrawText(g, text, Stil.Klein, new Rectangle(x, 0, Width, Height), Stil.TextMittel, flags);
+            x += TextRenderer.MeasureText(g, text, Stil.Klein, Size.Empty, TextFormatFlags.NoPadding).Width + Stil.Px(this, Stil.AbstandGross);
+        }
+    }
+}
