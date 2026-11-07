@@ -24,7 +24,6 @@ public class HauptfensterTests
     [Theory]
     [InlineData("Übersicht", "0.17.0")]
     [InlineData("Kalender", "0.13.0")]
-    [InlineData("Therapie", "0.11.0")]
     [InlineData("Ausgangsliste", "0.14.0")]
     public void Noch_nicht_gebaute_Bereiche_zeigen_ihre_Version(string bereich, string version) => Hilfe.Sta(() =>
     {
@@ -431,6 +430,10 @@ public class BildschirmfotoTests
             string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
             if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "29_medikation_druck.png"), System.Drawing.Imaging.ImageFormat.Png);
         }
+        f.Navigation.Single(n => n.Text == "Therapie").Ausloesen();
+        Hilfe.Foto(f, "30_therapie");
+        using (var angebot = new AngebotFenster(u.Speicher, u.Speicher.Angebote()[0]))
+            Hilfe.Foto(angebot, "31_angebot_aendern");
         f.Navigation.Single(n => n.Text == "Medikamente").Ausloesen();
         Hilfe.Foto(f, "23_medikamente");
         using (var aendern = new MedikamentFenster(u.Speicher, u.Speicher.Medikamente()[0]))

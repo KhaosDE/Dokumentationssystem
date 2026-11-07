@@ -345,7 +345,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
 - Abwesende (Heimfahrt, Ausgang) werden auf der Karte gekennzeichnet.
 
 ## Therapie-Bereich
-Status: freigegeben (Bauplan Schritt 8)
+Status: erledigt (07.11.2026; Bauplan Schritt 8, Version 0.11.0)
 Datum: 06.11.2026
 Was: Ein eigener Bereich in der Navigation, in dem die Therapie ihre Angebote verwaltet,
 einträgt und Bewohnern zuteilt. Zugeteilte Therapien erscheinen in den Wochenplänen.

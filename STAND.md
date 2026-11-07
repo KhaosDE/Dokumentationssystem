@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.10.0** (Medikation, Bauplan Schritt 7).
+Stand: 07.11.2026. Version: **0.11.0** (Therapie-Bereich, Bauplan Schritt 8).
 
 ## Aktuell
 
@@ -12,9 +12,10 @@ Bereich **„Übergabe“**, in dem nur die Übergabe-Einträge stehen, bis sie 
 erledigt sind. Dazu das **Wohnbereich-ToDo** („Aufgaben“) und **Nachrichten** zwischen
 ausgedachten Kolleginnen und Kollegen; oben rechts „Angemeldet als …“ (ohne Passwort, nur für
 die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) und neu die
-**Medikation** je Bewohner (Grundverordnung, Pause, Stufenplan, „Was gilt heute“).
+**Medikation** je Bewohner (Grundverordnung, Pause, Stufenplan, „Was gilt heute“) und neu der
+**Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze).
 
-**Nächster Schritt:** Bauplan Schritt 8 „Therapie-Bereich“ (0.11.0), danach der Reihe nach bis
+**Nächster Schritt:** Bauplan Schritt 9 „Wochenplan“ (0.12.0), danach der Reihe nach bis
 Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
 `KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
 
@@ -149,6 +150,18 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
   - Demo: Verordnungen für alle Bewohner relativ zu heute – eine Pause, ein Stufenplan zum
     Ansetzen, einer zum Ausschleichen, ein abgeschlossener, ein abgesetztes Medikament, zwei
     Bedarfsmedikationen; Ärzte erkennbar ausgedacht („Dr. Ulme (ausgedacht)“).
+
+- 0.11.0 — Therapie-Bereich (07.11.2026, Bauplan Schritt 8):
+  - Bereich „Therapie“: alle Angebote mit Art (Gruppe/Einzel), Terminen der Regelwoche,
+    Therapeut, Ort, Teilnehmern und freien Plätzen („4 Plätze frei“, „voll“); „Stand am …“
+    für einen anderen Tag.
+  - „Neues Angebot …“ und „Ändern ab …“: Name, Art, Therapeut/in, Ort, bis zu drei Termine je
+    Woche, höchste Teilnehmerzahl, Hinweis; Änderungen gelten ab einem Datum, die bisherige
+    Fassung bleibt.
+  - „Bewohner zuteilen …“ (ab, optional bis) mit Warnung bei Überschneidung mit einer
+    anderen Therapie des Bewohners; „Teilnahme beenden …“ als eigener Eintrag; „Verlauf …“.
+  - Demo `daten/demo/therapie.json`: sieben ausgedachte, allgemeine Angebote mit Zuteilungen
+    relativ zu heute (eine Zeitänderung, eine beendete Teilnahme, eine beginnt später).
 
 ## Offene Punkte
 
@@ -338,6 +351,17 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
     Anmeldung (Kürzel) sind Pflicht.
   - Ausdrücklich nicht gebaut (laut Eintrag): Dosisvorschläge, Wechselwirkungen, Stellen und
     Ausgabe, Bestand.
+- **Therapie-Bereich (0.11.0), wo der Eintrag etwas offen ließ:**
+  - Bei der Überschneidung warnt das Fenster einmal; ein zweiter Klick auf „Zuteilen“ teilt
+    trotzdem zu (Warnung, kein Verbot). Geprüft werden bis 0.12.0 nur andere Therapien;
+    Einträge des Wochenplans und des Kalenders kommen mit den jeweiligen Schritten dazu.
+  - Ist ein Angebot an einem Tag des Zeitraums voll, wird nicht zugeteilt (Hinweis „voll“).
+    Einzel-Angebote haben immer einen Platz.
+  - „Teilnahme beenden ab …“: ab diesem Tag nicht mehr dabei; die Zuteilung bleibt im
+    Verlauf. Eine Änderung „ab Datum“ darf die Teilnehmerzahl nicht unter die Belegung senken.
+  - Therapeutinnen und Therapeuten sind Text (in der Demo ausgedacht, z. B. „Olga Pirol“ aus
+    den Demo-Kollegen); Anmeldung und Rechte gibt es nicht (laut Eintrag).
+  - Die Teilnehmer erscheinen ab 0.12.0 im Wochenplan des Bewohners.
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -347,6 +371,20 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.11.0:
+
+1. Unten links „Version 0.11.0 · Build …“. Links „Therapie“: sieben Angebote, oben
+   „7 Angebote · … Teilnahmen · … freie Plätze“.
+2. „Holzwerkstatt“: Gruppe, Mo und Mi 9:00–11:30, „4 Plätze frei“, Teilnehmer Anton Ahorn und
+   Dieter Distel. „Einzelgespräch“: „voll“.
+3. „Stand am“ auf ein Datum vor drei Wochen → Bewegungsgruppe noch Do 14:00–15:00 und
+   „geändert ab …“.
+4. Angemeldet „Neues Angebot …“ (z. B. Montag 10–11 Uhr) → Karte erscheint. „Bewohner
+   zuteilen …“ Anton Ahorn → Warnung „Überschneidung mit: Holzwerkstatt …“; nochmals
+   „Zuteilen“ → er steht als Teilnehmer da.
+5. „Teilnahme beenden …“ ab morgen → „(bis heute)“ hinter dem Namen; „Verlauf …“ zeigt alles.
+6. „Ändern ab …“ mit einem Datum in einer Woche → bis dahin gilt die alte Zeit.
 
 Version 0.10.0:
 

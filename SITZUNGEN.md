@@ -24,3 +24,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 07.11.2026 — Claude Code: Bauplan Schritt 6 „Medikamentendatenbank“ (0.9.0).
 - 07.11.2026 — Claude Code: Bauplan Schritt 7 „Medikation: Grundverordnung, Pause, Stufenplan“ (0.10.0).
 - 07.11.2026 — Brücke umgedreht (Entscheidung Tobi): Dokumentationssystem ist Muttersystem, Ausgangsliste bleibt eigenständige Version und bekommt das Modul per Abgleich; Modul als eigenes Projekt (Chat „Programme/Apps“).
+- 07.11.2026 — Claude Code: Bauplan Schritt 8 „Therapie-Bereich“ (0.11.0).

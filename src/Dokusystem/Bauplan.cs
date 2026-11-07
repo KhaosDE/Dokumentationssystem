@@ -10,7 +10,6 @@ public static class Bauplan
     {
         ["Übersicht"] = new("0.17.0", "Alle Bewohner auf einen Blick: was heute wichtig ist – Termine, Änderungen in der Medikation, Beschlüsse, die bald enden, fällige HEB-Bögen."),
         ["Kalender"] = new("0.13.0", "Termine des Wohnbereichs: Arzttermine, Heimfahrten, Tagesausflüge – als Monat, Woche oder Tag."),
-        ["Therapie"] = new("0.11.0", "Die Therapieangebote mit Teilnehmern und freien Plätzen; zugeteilte Angebote erscheinen im Wochenplan."),
         ["Ausgangsliste"] = new("0.14.0", "Ausgänge, An- und Abwesenheit und Unterbringung – als Modul, das sich in den Einstellungen abschalten lässt."),
     };
 
