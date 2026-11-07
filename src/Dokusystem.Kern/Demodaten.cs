@@ -354,6 +354,99 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Therapie -----
+
+    private sealed class TherapieDatei
+    {
+        public List<AngebotVorlage> Angebote { get; set; } = [];
+    }
+
+    public sealed class TerminVorlage
+    {
+        public string Tag { get; set; } = "Mo";
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+    }
+
+    public sealed class AenderungVorlage
+    {
+        public int GiltAbVorTagen { get; set; }
+        public List<TerminVorlage> Termine { get; set; } = [];
+        public string Hinweis { get; set; } = "";
+    }
+
+    public sealed class TeilnehmerVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public int AbVorTagen { get; set; }
+        public int? BeendetVorTagen { get; set; }
+    }
+
+    public sealed class AngebotVorlage
+    {
+        public string Name { get; set; } = "";
+        public string Art { get; set; } = "gruppe";
+        public string Therapeut { get; set; } = "";
+        public string Ort { get; set; } = "";
+        public int Hoechstens { get; set; }
+        public string Hinweis { get; set; } = "";
+        public int SeitTagen { get; set; }
+        public List<TerminVorlage> Termine { get; set; } = [];
+        public AenderungVorlage? Aenderung { get; set; }
+        public List<TeilnehmerVorlage> Teilnehmer { get; set; } = [];
+    }
+
+    public sealed record DemoAngebot(List<AngebotFassung> Fassungen, List<Zuteilung> Zuteilungen);
+
+    private static readonly Dictionary<string, DayOfWeek> Kurztage = new()
+    {
+        ["Mo"] = DayOfWeek.Monday, ["Di"] = DayOfWeek.Tuesday, ["Mi"] = DayOfWeek.Wednesday, ["Do"] = DayOfWeek.Thursday,
+        ["Fr"] = DayOfWeek.Friday, ["Sa"] = DayOfWeek.Saturday, ["So"] = DayOfWeek.Sunday,
+    };
+
+    // Angebote aus daten/demo/therapie.json; Zuteilungen relativ zu heute. Fehlt ein Bewohner,
+    // entfällt nur seine Zuteilung.
+    public static List<DemoAngebot> Therapie(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        static List<Wochentermin> Termine(IEnumerable<TerminVorlage> t) => t.Select(x => new Wochentermin(Kurztage[x.Tag],
+            TimeOnly.ParseExact(x.Von, "HH:mm", System.Globalization.CultureInfo.InvariantCulture),
+            TimeOnly.ParseExact(x.Bis, "HH:mm", System.Globalization.CultureInfo.InvariantCulture))).ToList();
+        var liste = new List<DemoAngebot>();
+        foreach (var v in Lesen<TherapieDatei>("therapie.json").Angebote)
+        {
+            var erste = new AngebotFassung
+            {
+                GiltAb = heute.AddDays(-v.SeitTagen), Name = v.Name, Art = v.Art == "einzel" ? AngebotArt.Einzel : AngebotArt.Gruppe,
+                Therapeut = v.Therapeut, Ort = v.Ort, Termine = Termine(v.Termine), Hoechstens = v.Hoechstens, Hinweis = v.Hinweis,
+                Erstellt = heute.AddDays(-v.SeitTagen - 3).ToDateTime(new TimeOnly(9, 0)), Kuerzel = "OP",
+            };
+            var fassungen = new List<AngebotFassung> { erste };
+            if (v.Aenderung is AenderungVorlage a)
+                fassungen.Add(erste with
+                {
+                    GiltAb = heute.AddDays(-a.GiltAbVorTagen), Termine = Termine(a.Termine), Hinweis = a.Hinweis,
+                    Erstellt = heute.AddDays(-a.GiltAbVorTagen - 2).ToDateTime(new TimeOnly(9, 0)),
+                });
+            var zuteilungen = new List<Zuteilung>();
+            foreach (var t in v.Teilnehmer)
+            {
+                if (bewohner.FirstOrDefault(b => b.Nachname == t.Bewohner) is not Bewohner b) continue;
+                var ab = heute.AddDays(-t.AbVorTagen);
+                zuteilungen.Add(new Zuteilung
+                {
+                    BewohnerId = b.Id!.Value, Ab = ab, Kuerzel = "OP",
+                    Erstellt = (t.AbVorTagen > 0 ? ab.AddDays(-2) : heute.AddDays(-1)).ToDateTime(new TimeOnly(10, 0)),
+                    BeendetAb = t.BeendetVorTagen is int e ? heute.AddDays(-e) : null,
+                    BeendetVon = t.BeendetVorTagen is null ? null : "OP",
+                    BeendetErstellt = t.BeendetVorTagen is int e2 ? heute.AddDays(-e2 - 1).ToDateTime(new TimeOnly(11, 0)) : null,
+                });
+            }
+            liste.Add(new DemoAngebot(fassungen, zuteilungen));
+        }
+        return liste;
+    }
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein

@@ -20,6 +20,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoNachrichten = "demo_nachrichten";
     private const string DemoMedikamente = "demo_medikamente";
     private const string DemoMedikation = "demo_medikation";
+    private const string DemoTherapie = "demo_therapie";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -252,6 +253,48 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER stufen_bleiben BEFORE UPDATE ON stufen
             BEGIN SELECT RAISE(ABORT, 'Stufen werden nicht überschrieben.'); END;
         """,
+        // 7 – Therapie: Angebote mit Fassungen („gilt ab“), Zuteilungen von Bewohnern und
+        //     „beendet ab“ als eigener Eintrag. Termine je Fassung als JSON (Wochentag, von, bis).
+        """
+        CREATE TABLE angebote (
+            id INTEGER PRIMARY KEY
+        );
+        CREATE TABLE angebot_fassungen (
+            id         INTEGER PRIMARY KEY,
+            angebot_id INTEGER NOT NULL REFERENCES angebote(id) ON DELETE CASCADE,
+            gilt_ab    TEXT NOT NULL,
+            name       TEXT NOT NULL,
+            art        TEXT NOT NULL CHECK (art IN ('gruppe', 'einzel')),
+            therapeut  TEXT NOT NULL,
+            ort        TEXT NOT NULL DEFAULT '',
+            termine    TEXT NOT NULL,
+            hoechstens INTEGER NOT NULL CHECK (hoechstens BETWEEN 1 AND 50),
+            hinweis    TEXT NOT NULL DEFAULT '',
+            erstellt   TEXT NOT NULL,
+            kuerzel    TEXT NOT NULL
+        );
+        CREATE TABLE zuteilungen (
+            id          INTEGER PRIMARY KEY,
+            angebot_id  INTEGER NOT NULL REFERENCES angebote(id) ON DELETE CASCADE,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            ab          TEXT NOT NULL,
+            bis         TEXT,
+            erstellt    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TABLE zuteilung_ende (
+            zuteilung_id INTEGER PRIMARY KEY REFERENCES zuteilungen(id) ON DELETE CASCADE,
+            ab           TEXT NOT NULL,
+            erstellt     TEXT NOT NULL,
+            kuerzel      TEXT NOT NULL
+        );
+        CREATE TRIGGER angebot_fassungen_bleiben BEFORE UPDATE ON angebot_fassungen
+            BEGIN SELECT RAISE(ABORT, 'Fassungen werden nicht überschrieben.'); END;
+        CREATE TRIGGER zuteilungen_bleiben BEFORE UPDATE ON zuteilungen
+            BEGIN SELECT RAISE(ABORT, 'Zuteilungen werden nicht überschrieben – Beenden ist ein eigener Eintrag.'); END;
+        CREATE TRIGGER zuteilung_ende_bleibt BEFORE UPDATE ON zuteilung_ende
+            BEGIN SELECT RAISE(ABORT, 'Einträge werden nicht überschrieben.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -379,14 +422,16 @@ public sealed partial class Speicher : IDisposable
         }
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
-             medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation) return false;
+             medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
+             therapie = Meta(DemoTherapie) is null;
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie) return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
         if (nachrichten) DemoNachrichtenEinfuegen(transaktion);
         if (medikamente) DemoMedikamenteEinfuegen(transaktion);
         if (medikamente || medikation) DemoMedikationEinfuegen(transaktion);   // hängt am Medikamenten-Bestand
+        if (therapie) DemoTherapieEinfuegen(transaktion);
         transaktion.Commit();
         return true;
     }
@@ -408,12 +453,14 @@ public sealed partial class Speicher : IDisposable
             DemoNachrichtenEinfuegen(transaktion);
             DemoMedikamenteEinfuegen(transaktion);
             DemoMedikationEinfuegen(transaktion);
+            DemoTherapieEinfuegen(transaktion);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
         AufgabenGeaendert?.Invoke();
         NachrichtenGeaendert?.Invoke();
         MedikationGeaendert?.Invoke();
+        TherapieGeaendert?.Invoke();
     }
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)

@@ -1,0 +1,73 @@
+{
+  "hinweis": "Ausgedachte, allgemeine Therapieangebote für die Demo. Zeiten relativ zum Laden der Demo-Daten (Tage vor/nach heute).",
+  "angebote": [
+    {
+      "name": "Holzwerkstatt", "art": "gruppe", "therapeut": "Olga Pirol", "ort": "Werkraum", "hoechstens": 6,
+      "hinweis": "Arbeitskleidung mitbringen", "seitTagen": 300,
+      "termine": [ { "tag": "Mo", "von": "09:00", "bis": "11:30" }, { "tag": "Mi", "von": "09:00", "bis": "11:30" } ],
+      "teilnehmer": [
+        { "bewohner": "Ahorn", "abVorTagen": 200 },
+        { "bewohner": "Distel", "abVorTagen": 120 },
+        { "bewohner": "Kiefer", "abVorTagen": 90, "beendetVorTagen": 10 }
+      ]
+    },
+    {
+      "name": "Kochgruppe", "art": "gruppe", "therapeut": "Olga Pirol", "ort": "Lehrküche", "hoechstens": 5,
+      "hinweis": "Einkauf am Vortag", "seitTagen": 300,
+      "termine": [ { "tag": "Di", "von": "10:00", "bis": "12:30" } ],
+      "teilnehmer": [
+        { "bewohner": "Birke", "abVorTagen": 150 },
+        { "bewohner": "Fichte", "abVorTagen": 60 },
+        { "bewohner": "Eiche", "abVorTagen": -7 }
+      ]
+    },
+    {
+      "name": "Bewegungsgruppe", "art": "gruppe", "therapeut": "Ben Amsel", "ort": "Turnhalle", "hoechstens": 8,
+      "hinweis": "", "seitTagen": 300,
+      "termine": [ { "tag": "Do", "von": "14:00", "bis": "15:00" } ],
+      "aenderung": { "giltAbVorTagen": 14, "termine": [ { "tag": "Do", "von": "15:00", "bis": "16:00" } ], "hinweis": "neue Zeit wegen Hallenbelegung" },
+      "teilnehmer": [
+        { "bewohner": "Ahorn", "abVorTagen": 100 },
+        { "bewohner": "Clematis", "abVorTagen": 80 },
+        { "bewohner": "Ginster", "abVorTagen": 40 },
+        { "bewohner": "Holunder", "abVorTagen": 20 }
+      ]
+    },
+    {
+      "name": "Gesprächsgruppe", "art": "gruppe", "therapeut": "Olga Pirol", "ort": "Gruppenraum", "hoechstens": 8,
+      "hinweis": "", "seitTagen": 300,
+      "termine": [ { "tag": "Fr", "von": "10:00", "bis": "11:00" } ],
+      "teilnehmer": [
+        { "bewohner": "Birke", "abVorTagen": 150 },
+        { "bewohner": "Clematis", "abVorTagen": 80 },
+        { "bewohner": "Immergrün", "abVorTagen": 30 }
+      ]
+    },
+    {
+      "name": "Musikgruppe", "art": "gruppe", "therapeut": "Ben Amsel", "ort": "Musikraum", "hoechstens": 6,
+      "hinweis": "", "seitTagen": 300,
+      "termine": [ { "tag": "Mo", "von": "15:00", "bis": "16:00" } ],
+      "teilnehmer": [
+        { "bewohner": "Eiche", "abVorTagen": 90 },
+        { "bewohner": "Fichte", "abVorTagen": 60 },
+        { "bewohner": "Kiefer", "abVorTagen": 90 }
+      ]
+    },
+    {
+      "name": "Einzelgespräch", "art": "einzel", "therapeut": "Olga Pirol", "ort": "Therapieraum 1", "hoechstens": 1,
+      "hinweis": "", "seitTagen": 300,
+      "termine": [ { "tag": "Mi", "von": "14:00", "bis": "14:45" } ],
+      "teilnehmer": [ { "bewohner": "Ginster", "abVorTagen": 40 } ]
+    },
+    {
+      "name": "Kreativwerkstatt", "art": "gruppe", "therapeut": "Ben Amsel", "ort": "Atelier", "hoechstens": 6,
+      "hinweis": "", "seitTagen": 300,
+      "termine": [ { "tag": "Do", "von": "09:30", "bis": "11:30" } ],
+      "teilnehmer": [
+        { "bewohner": "Holunder", "abVorTagen": 20 },
+        { "bewohner": "Immergrün", "abVorTagen": 30 },
+        { "bewohner": "Distel", "abVorTagen": 120 }
+      ]
+    }
+  ]
+}

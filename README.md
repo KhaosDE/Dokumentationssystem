@@ -62,6 +62,8 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Medikation** (Reiter in der Akte): „Was gilt am …“ aus Grundverordnung, Pausen und
   Stufenplänen. Die Grundverordnung wird nie überschrieben; Pause, Stufenplan und Absetzen sind
   eigene Einträge mit Anordnung. **Demo — nicht zum Stellen verwenden.**
+- **Therapie** (links): Angebote mit Terminen, Teilnehmern und freien Plätzen; Bewohner
+  zuteilen (mit Warnung bei Überschneidung), Teilnahme beenden, Änderungen „ab Datum“.
 - Die Wortliste für den Hinweis „Soll das in die Übergabe?“ lässt sich ergänzen: eine Datei
   `uebergabe-woerter.txt` in den Datenordner legen, ein Wort pro Zeile.
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
