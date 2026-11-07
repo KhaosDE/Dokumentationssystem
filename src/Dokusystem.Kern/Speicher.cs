@@ -23,6 +23,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoTherapie = "demo_therapie";
     private const string DemoWochenplan = "demo_wochenplan";
     private const string DemoKalender = "demo_kalender";
+    private const string DemoBiografie = "demo_biografie";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -361,6 +362,20 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER kalender_fassungen_bleiben BEFORE UPDATE ON kalender_fassungen
             BEGIN SELECT RAISE(ABORT, 'Termine werden nicht überschrieben – Änderungen sind neue Fassungen.'); END;
         """,
+        // 10 – Biografie: je Bewohner und Abschnitt Fassungen (ändern ist eine neue Fassung).
+        """
+        CREATE TABLE biografie (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            abschnitt   INTEGER NOT NULL CHECK (abschnitt BETWEEN 0 AND 5),
+            text        TEXT NOT NULL,
+            angegeben   INTEGER NOT NULL DEFAULT 0 CHECK (angegeben IN (0, 1)),
+            erstellt    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TRIGGER biografie_bleibt BEFORE UPDATE ON biografie
+            BEGIN SELECT RAISE(ABORT, 'Die Biografie wird nicht überschrieben – Änderungen sind neue Fassungen.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -497,10 +512,11 @@ public sealed partial class Speicher : IDisposable
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
-             therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null;
+             therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null,
+             biografie = Meta(DemoBiografie) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
@@ -511,6 +527,7 @@ public sealed partial class Speicher : IDisposable
         if (therapie) DemoTherapieEinfuegen(transaktion);
         if (therapie || wochenplan) DemoWochenplanEinfuegen(transaktion);   // Teilnahmen hängen an den Zuteilungen
         if (kalender) DemoKalenderEinfuegen(transaktion);
+        if (biografie) DemoBiografieEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
         transaktion.Commit();
         if (modulNeu) ModuleGeaendert?.Invoke();
@@ -537,6 +554,7 @@ public sealed partial class Speicher : IDisposable
             DemoTherapieEinfuegen(transaktion);
             DemoWochenplanEinfuegen(transaktion);
             DemoKalenderEinfuegen(transaktion);
+            DemoBiografieEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
             transaktion.Commit();
         }

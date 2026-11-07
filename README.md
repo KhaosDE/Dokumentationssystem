@@ -67,6 +67,11 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Wochenplan** (Reiter in der Akte): die Regelwoche mit zugeteilten Therapien und freien
   Einträgen; Teilnahme an Therapien eintragen; Änderungen gelten „ab Datum“; Ausdruck in
   großer Schrift nur mit Name und Plan.
+- **Biografie** (Reiter in der Akte): Lebensgeschichte in festen Abschnitten als Fließtext.
+  „Vom Bewohner angegeben, nicht überprüft“ lässt sich je Abschnitt ankreuzen (Hinweis auf die
+  Formulierung „gibt an, dass …“). Leere Abschnitte stehen unten als „Fehlende Angaben“.
+  „Als Fließtext kopieren“ legt alles als reinen Text in die Zwischenablage. Jede Änderung ist
+  eine neue Fassung mit Datum und Kürzel („Verlauf …“).
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
   Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Kein Abgleich mit
   anderen Kalendern.
