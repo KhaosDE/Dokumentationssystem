@@ -50,7 +50,9 @@ und Abgleiche eingespielt.
 3. Fehler, die in der eigenständigen Ausgangsliste auffallen und das Modul betreffen, werden
    **im Muttersystem** behoben (Eintrag in `IDEEN.md` hier) und dann abgeglichen.
 
-**Einmalige Übernahme aus Ausgangsliste-Version:** noch keine (Modul nicht gebaut).
+**Einmalige Übernahme aus Ausgangsliste-Version:** 0.23.0 (Stand c57dd0e), übernommen in
+Dokumentationssystem 0.14.0 am 07.11.2026. Was angepasst wurde:
+`src/Dokusystem.Modul.Ausgangsliste/AENDERUNGEN.md`.
 **Zuletzt an die Ausgangsliste abgeglichen:** noch nichts.
 
 ## Zuordnung
@@ -63,6 +65,8 @@ und Abgleiche eingespielt.
 | `AufnahmeFenster.cs`, `BearbeitenFenster.cs`, `BewohnerAuswahlFenster.cs`, `DatumFenster.cs`, Entlassung, Zimmerwechsel | Kern: Bewohnerakte |
 | `Demodaten.cs` | Kern und Modul (jeder Teil seine eigenen Demo-Daten) |
 | `AusgangFenster.cs`, `AusgangText.cs` | Modul Ausgangsliste: Ausgangszeiten |
+| `BewohnerKarte.cs` (Klasse `KartenText`) | Modul: `KartenText.cs`; die Karte selbst heißt im Modul `PlatzKarte` |
+| `Verlauf.cs`, `VerlaufFenster.cs` | Modul: `Verlauf.cs`, Anzeige im Akte-Reiter „Ausgang“ und über „Verlauf …“ |
 | `StatusFenster.cs`, `Platz.cs` (Anwesenheitsstatus) | Modul Ausgangsliste: Anwesenheit und Abwesenheit |
 | `UnterbringungFenster.cs` | Modul Ausgangsliste: Unterbringung, Fristen, Rechtsregel |
 | `Druckliste.cs` | Modul Ausgangsliste: Tagesliste |

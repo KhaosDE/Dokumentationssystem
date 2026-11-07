@@ -16,6 +16,7 @@ public static class Selbsttest
         {
             using (var speicher = new Speicher())
             {
+                Modulverwaltung.Anmelden(speicher);
                 if (!speicher.DemoBeimErstenStart() || speicher.AlleBewohner().Count == 0)
                     throw new InvalidOperationException("Demo-Daten fehlen.");
                 using var fenster = new Hauptfenster(speicher);

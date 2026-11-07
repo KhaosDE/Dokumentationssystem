@@ -11,15 +11,17 @@ public sealed class Hauptfenster : Form
     private const int LeisteBreite = 232;
 
     // Reihenfolge der Seitenleiste. „Neuer Bericht …“ und „Einstellungen“ öffnen ein Fenster statt einer Seite.
+    // Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
     public static readonly string[] Bereiche =
         ["Übersicht", "Bewohner", "Neuer Bericht …", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
-         "Medikamente", "Ausgangsliste", "Einstellungen"];
+         "Medikamente", "Einstellungen"];
 
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
     private readonly Label programmName = new();
     private readonly Panel bereichsFlaeche = new() { Dock = DockStyle.Fill, BackColor = Stil.Seite };
     private readonly Dictionary<string, Control> seiten = [];
+    private readonly Dictionary<string, ModulSeite> modulSeiten = [];
 
     public KopfBereich Kopf { get; } = new() { Dock = DockStyle.Top };
     public Statusleiste Statusleiste { get; } = new() { Dock = DockStyle.Bottom };
@@ -41,6 +43,7 @@ public sealed class Hauptfenster : Form
     public Hauptfenster(Speicher speicher)
     {
         this.speicher = speicher;
+        Modulverwaltung.Anmelden(speicher);   // schon beim Start geschehen; sicherheitshalber (legt nur fehlende Tabellen an)
         Text = $"Dokumentationssystem – {KopfBereich.DemoHinweis}";
         BackColor = Stil.Seite;
         Font = Stil.Standard;
@@ -115,6 +118,8 @@ public sealed class Hauptfenster : Form
         foreach (var eintrag in Navigation) leiste.Controls.Add(eintrag);
         leiste.Controls.AddRange([DemoKnopf, VersionText]);
         leiste.Layout += (_, _) => LeisteAnordnen();
+        ModuleAnzeigen();
+        speicher.ModuleGeaendert += ModuleAnzeigen;
 
         // ----- Inhalt rechts: Kopf oben, Bereich darunter -----
         var inhalt = new Panel { Dock = DockStyle.Fill, BackColor = Stil.Seite };
@@ -162,6 +167,13 @@ public sealed class Hauptfenster : Form
         AktiverBereich = name;
         foreach (var eintrag in Navigation) eintrag.Aktiv = eintrag.Text == name;
         foreach (var (key, seite) in seiten) seite.Visible = key == schluessel;
+        if (modulSeiten.TryGetValue(schluessel, out var modulSeite))
+        {
+            modulSeite.Zeigen();
+            Kopf.TexteSetzen(modulSeite.KopfText, schluessel);
+            Kopf.KnoepfeSetzen([.. modulSeite.Knoepfe]);
+            return;
+        }
         if (schluessel == "Bewohner")
         {
             Bewohner.UebersichtZeigen();
@@ -286,12 +298,59 @@ public sealed class Hauptfenster : Form
 
     public bool EinstellungenOeffnen()
     {
-        using var fenster = new EinstellungenFenster(speicher.Kollegen());
+        using var fenster = new EinstellungenFenster(speicher.Kollegen(), speicher);
         if (!EinstellungenZeigen(fenster)) return false;
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
         BenutzerAnzeigen();
         AufgabenZaehlen();
         return true;
+    }
+
+    // Seitenleiste und Seiten der Module: Eingeschaltete Module bekommen einen Eintrag vor
+    // „Einstellungen“ und einen Reiter in der Akte; ausgeschaltete verschwinden ganz (die Daten bleiben).
+    public void ModuleAnzeigen()
+    {
+        foreach (var (name, seite) in modulSeiten)
+        {
+            seiten.Remove(name);
+            bereichsFlaeche.Controls.Remove(seite);
+            seite.Dispose();
+        }
+        foreach (var eintrag in Navigation.Where(e => modulSeiten.ContainsKey(e.Text)).ToList())
+        {
+            Navigation.Remove(eintrag);
+            leiste.Controls.Remove(eintrag);
+            eintrag.Dispose();
+        }
+        modulSeiten.Clear();
+        int vor = Navigation.FindIndex(e => e.Text == "Einstellungen");
+        foreach (var m in Modulverwaltung.Eingeschaltet(speicher))
+        {
+            string name = m.Name;
+            var seite = m.SeiteBauen(speicher);
+            seite.Dock = DockStyle.Fill;
+            seite.Visible = false;
+            seite.Geaendert += () => { if (AktiverBereich == name) Kopf.TexteSetzen(seite.KopfText, name); };
+            seiten[name] = seite;
+            modulSeiten[name] = seite;
+            bereichsFlaeche.Controls.Add(seite);
+            var eintrag = new SeitenleistenEintrag(name);
+            eintrag.Click += (_, _) => BereichWaehlen(name);
+            Navigation.Insert(vor++, eintrag);
+            leiste.Controls.Add(eintrag);
+        }
+        Bewohner.Akte.ModuleAktualisieren();
+        leiste.PerformLayout();
+        if (AktiverBereich.Length == 0) return;
+        if (!seiten.ContainsKey(Schluessel(AktiverBereich))) BereichWaehlen("Bewohner");
+        else if (AktiverBereich == "Bewohner" && !Bewohner.AkteSichtbar) Bewohner.UebersichtZeigen();   // Marken der Module
+        else if (modulSeiten.ContainsKey(AktiverBereich)) BereichWaehlen(AktiverBereich);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) speicher.ModuleGeaendert -= ModuleAnzeigen;
+        base.Dispose(disposing);
     }
 
     private void LeisteAnordnen()

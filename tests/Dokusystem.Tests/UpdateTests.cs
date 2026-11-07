@@ -223,6 +223,8 @@ public class NetzNurImUpdateTests
     [Theory]
     [InlineData("Dokusystem.Kern")]
     [InlineData("Dokusystem")]
+    [InlineData("Dokusystem.Bausteine")]
+    [InlineData("Dokusystem.Modul.Ausgangsliste")]
     public void Programm_selbst_geht_nie_ins_Netz(string projekt)
     {
         var verboten = new Regex(@"\b(HttpClient|WebClient|WebRequest|Socket|TcpClient|System\.Net\.Http|https?://)");

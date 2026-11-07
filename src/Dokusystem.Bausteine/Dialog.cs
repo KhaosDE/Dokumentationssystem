@@ -19,7 +19,7 @@ public static class Druckvorschau
         using var dokument = dokumentBauen();
         using var fenster = new Form
         {
-            Text = $"{titel} ({KopfBereich.DemoHinweis})",
+            Text = $"{titel} ({Stil.DemoHinweis})",
             StartPosition = FormStartPosition.CenterParent,
             WindowState = FormWindowState.Maximized,
             MinimizeBox = false,

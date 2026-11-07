@@ -20,10 +20,15 @@ public sealed class EinstellungenFenster : Form
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");
     public Label Fehler { get; } = new();
     public string? NeuesLogo { get; private set; }
+
+    // Abschnitt „Module“: ein Häkchen je Modul und Untermodul (Schlüssel wie in Speicher.ModulAn).
+    public Dictionary<string, CheckBox> Module { get; } = [];
+    private readonly Speicher? speicher;
     public bool LogoEntfernen { get; private set; }
 
-    public EinstellungenFenster(IReadOnlyList<Kollege>? kollegen = null)
+    public EinstellungenFenster(IReadOnlyList<Kollege>? kollegen = null, Speicher? speicher = null)
     {
+        this.speicher = speicher;
         var werte = Einstellungen.Laden();
         Text = $"Einstellungen ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -112,6 +117,38 @@ public sealed class EinstellungenFenster : Form
             Text = "Erscheint oben rechts. Die Datei wird in den Datenordner kopiert und nie mitgeliefert.",
             AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
         });
+
+        if (speicher is not null)
+        {
+            Ganz(Abschnitt("MODULE"));
+            foreach (var m in Modulverwaltung.Alle)
+            {
+                var haken = new CheckBox
+                {
+                    Text = m.Name, AutoSize = true, Font = Stil.Fett, Checked = speicher.ModulAn(m.Daten.Schluessel),
+                    Margin = new Padding(0, Stil.AbstandKlein, 0, 0),
+                };
+                Module[m.Daten.Schluessel] = haken;
+                Ganz(haken);
+                Ganz(new Label
+                {
+                    Text = $"{m.Beschreibung} Ausgeschaltet verschwindet es aus Seitenleiste, Akte und Karten; die Daten bleiben erhalten.",
+                    AutoSize = true, MaximumSize = new Size(540, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+                    Margin = new Padding(Stil.AbstandGross + Stil.AbstandMini, 0, 0, Stil.AbstandMini),
+                });
+                foreach (var u in m.Untermodule)
+                {
+                    var unter = new CheckBox
+                    {
+                        Text = $"{u.Name} – {u.Beschreibung}", AutoSize = true, Checked = speicher.ModulAn(u.Schluessel),
+                        Enabled = haken.Checked, Margin = new Padding(Stil.AbstandGross + Stil.AbstandMini, 0, 0, 0),
+                    };
+                    haken.CheckedChanged += (_, _) => unter.Enabled = haken.Checked;
+                    Module[u.Schluessel] = unter;
+                    Ganz(unter);
+                }
+            }
+        }
 
         Ganz(Abschnitt("SPÄTER"));
         Ganz(new Label
@@ -212,6 +249,8 @@ public sealed class EinstellungenFenster : Form
             Einstellungen.Aendern(w => w with { Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked });
             if (logoGeaendert && NeuesLogo is not null) Einstellungen.LogoSetzen(NeuesLogo);
             else if (LogoEntfernen) Einstellungen.LogoSetzen(null);
+            foreach (var (schluessel, haken) in Module)
+                if (speicher!.ModulAn(schluessel) != haken.Checked) speicher.ModulSetzen(schluessel, haken.Checked);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException)
         {

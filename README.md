@@ -70,12 +70,20 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
   Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Kein Abgleich mit
   anderen Kalendern.
+- **Ausgangsliste** (links, Modul): je Bewohner Ausgangszeiten (allein / mit Bewohner),
+  Anwesenheit und Abwesenheit mit Grund und Frist, Unterbringung mit Fristen (eine
+  Ausgangsbeschränkung geht nur mit Beschluss oder Forensik), Verlauf je Person und die
+  druckbare Tagesliste. Dazu Küchendienst (Plan reihum, Tausch) und Digitaler Ausgang (per
+  Klick, Nachtbericht zum Kopieren). In der Akte steht der Reiter „Ausgang“. Unter
+  **Einstellungen → Module** lässt sich das Modul (und jeder Teil) abschalten; es verschwindet
+  dann ganz, die Daten bleiben.
 - Die Wortliste für den Hinweis „Soll das in die Übergabe?“ lässt sich ergänzen: eine Datei
   `uebergabe-woerter.txt` in den Datenordner legen, ein Wort pro Zeile.
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
   her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren.
-- **Einstellungen** (links): wer angemeldet ist, Update beim Start, eigenes Bild für den Kopf
-  (z. B. ein Logo – die Datei wird nur in den Datenordner kopiert).
+- **Einstellungen** (links): wer angemeldet ist, Update beim Start, Module ein- und
+  ausschalten, eigenes Bild für den Kopf (z. B. ein Logo – die Datei wird nur in den
+  Datenordner kopiert).
 
 ## Updates
 

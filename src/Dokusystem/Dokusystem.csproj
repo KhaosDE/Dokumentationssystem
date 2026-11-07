@@ -19,6 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Dokusystem.Kern\Dokusystem.Kern.csproj" />
     <ProjectReference Include="..\Dokusystem.Update\Dokusystem.Update.csproj" />
+    <ProjectReference Include="..\Dokusystem.Bausteine\Dokusystem.Bausteine.csproj" />
+    <ProjectReference Include="..\Dokusystem.Modul.Ausgangsliste\Dokusystem.Modul.Ausgangsliste.csproj" />
   </ItemGroup>
 
   <ItemGroup>

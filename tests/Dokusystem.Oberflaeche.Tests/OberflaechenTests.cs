@@ -23,7 +23,6 @@ public class HauptfensterTests
 
     [Theory]
     [InlineData("Übersicht", "0.17.0")]
-    [InlineData("Ausgangsliste", "0.14.0")]
     public void Noch_nicht_gebaute_Bereiche_zeigen_ihre_Version(string bereich, string version) => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
@@ -125,7 +124,7 @@ public class BewohnerOberflaechenTests
         Assert.Equal("seit 15.02.2016 · 10 Jahre, 8 Monate", birke.AufenthaltText);
         var ginster = Karten(f).Single(k => k.Bewohner.Nachname == "Ginster");
         Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst"],
-            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst).Select(m => m.Text));
+            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst && !m.Text.StartsWith("überfällig")).Select(m => m.Text));   // ohne Marke des Moduls
         Assert.Equal("Übergabe 1", ginster.Marken[0].Text);
     });
 
@@ -215,7 +214,7 @@ public class BewohnerOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         var akte = f.Bewohner.Akte;
-        Assert.Equal(["Stammdaten", "Berichte", "Medikation", "Wochenplan", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
+        Assert.Equal(["Stammdaten", "Berichte", "Medikation", "Wochenplan", "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
         akte.Reiter.Waehlen("Biografie");
@@ -401,6 +400,23 @@ public class BildschirmfotoTests
         f.Kalender.AnsichtWaehlen(KalenderAnsicht.Monat);
         using (var termin = new KalenderFenster(u.Speicher, null, DateOnly.FromDateTime(DateTime.Today), u.Demo("Eiche").Id))
             Hilfe.Foto(termin, "39_kalender_termin");
+        f.Navigation.Single(n => n.Text == "Ausgangsliste").Ausloesen();
+        Hilfe.Foto(f, "40_ausgangsliste");
+        f.BereichWaehlen("Bewohner");
+        f.Bewohner.AkteZeigen(u.Demo("Eiche").Id!.Value);
+        f.Bewohner.Akte.Reiter.Waehlen("Ausgang");
+        Hilfe.Foto(f, "41_akte_ausgang");
+        var db = new Dokusystem.Modul.Ausgangsliste.Datenbank(u.Speicher);
+        using (var ausgang = new Dokusystem.Modul.Ausgangsliste.AusgangFenster(db, db.Platz(u.Demo("Ahorn").Id!.Value)!))
+            Hilfe.Foto(ausgang, "42_ausgang_fenster");
+        using (var status = new Dokusystem.Modul.Ausgangsliste.StatusFenster(db, db.Platz(u.Demo("Birke").Id!.Value)!))
+            Hilfe.Foto(status, "43_anwesenheit_offen_gefuehrt");
+        using (var kueche = new Dokusystem.Modul.Ausgangsliste.KuechendienstFenster(db))
+            Hilfe.Foto(kueche, "44_kuechendienst");
+        using (var nacht = new Dokusystem.Modul.Ausgangsliste.NachtberichtFenster(db.Laden(), db.AusgaengeLaden(DateTime.Now)))
+            Hilfe.Foto(nacht, "45_nachtbericht");
+        using (var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
+            Hilfe.Foto(einstellungen, "46_einstellungen_module");
         f.Navigation.Single(n => n.Text == "Übersicht").Ausloesen();
         Hilfe.Foto(f, "9_platzhalter_uebersicht");
         string logo = Path.Combine(u.Ordner, "eigenes-bild.png");

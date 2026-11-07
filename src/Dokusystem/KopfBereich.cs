@@ -10,7 +10,7 @@ namespace Dokusystem;
 // dauerhaft sichtbare Hinweis „Demo — ausgedachte Daten“ (Regel 4). Darunter rechts die Knöpfe.
 public sealed class KopfBereich : Panel
 {
-    public const string DemoHinweis = "Demo — ausgedachte Daten";
+    public const string DemoHinweis = Stil.DemoHinweis;
 
     // Logische Maße (100 % Skalierung).
     private const int Rand = 16, RandOben = 16, RandUnten = 8;   // Abstand zum Fensterrand

@@ -442,7 +442,7 @@ Umfang (Vorbild `KhaosDE/Ausgangsliste`: `BewohnerKarte.cs`, `KopfBereich.cs`,
 - Bereinigungsregeln aus `CLAUDE.md` gelten.
 
 ## Modul Ausgangsliste (mit Modulverwaltung)
-Status: freigegeben (Bauplan Schritt 11)
+Status: erledigt (07.11.2026)
 Datum: 07.11.2026 (ersetzt den Eintrag „Ausgang (aus der Ausgangsliste)“)
 Was: Die Ausgangsliste wird ein **zuschaltbares Modul** des Dokumentationssystems. Dazu
 bekommt das Programm eine Modulverwaltung.
