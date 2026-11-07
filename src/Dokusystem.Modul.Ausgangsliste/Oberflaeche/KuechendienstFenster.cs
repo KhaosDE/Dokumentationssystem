@@ -132,10 +132,10 @@ public sealed class KuechendienstFenster : Form
         t.Columns.Add("zimmer", "Zimmer");
         t.Columns.Add("tausch", "Tausch");
         t.Columns.Add("dienst", "Dienst (anwesend)");
-        t.Columns["datum"]!.FillWeight = 24;
-        t.Columns["zimmer"]!.FillWeight = 14;
-        t.Columns["tausch"]!.FillWeight = 14;
-        t.Columns["dienst"]!.FillWeight = 48;
+        t.Columns["datum"]!.FillWeight = 30;
+        t.Columns["zimmer"]!.FillWeight = 12;
+        t.Columns["tausch"]!.FillWeight = 12;
+        t.Columns["dienst"]!.FillWeight = 46;
         foreach (DataGridViewColumn s in t.Columns) s.SortMode = DataGridViewColumnSortMode.NotSortable;
         t.Columns["tausch"]!.DefaultCellStyle.Font = Stil.Fett; // ein Tausch fällt auf
         t.CellDoubleClick += (_, e) => { if (e.RowIndex >= 0) TauschBearbeiten(); };

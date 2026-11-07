@@ -125,7 +125,7 @@ public class AusgangslisteOberflaechenTests
 
             f.BereichWaehlen("Bewohner");
             var birke = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().Single(k => k.Bewohner.Nachname == "Birke");
-            Assert.Contains(birke.Marken, m => m.Art == MarkenArt.Abwesend && m.Text == "abwesend: Heimfahrt bis 20.11.2026");
+            Assert.Contains(birke.Marken, m => m.Art == MarkenArt.Abwesend && m.Text == "abwesend: Heimfahrt bis 20.11.");   // schmal: ohne Jahr
         }
     });
 

@@ -37,7 +37,7 @@ public sealed class PlatzKarte : KartenFlaeche
         if (p.HatStatus)
         {
             string frist = KartenText.Frist(p.StatusGrund, jetzt, out _);
-            ausgang = $"{Verlauf.Status(p.Status)}: {p.StatusGrund}" + (frist.Length > 0 ? $" ({frist})" : "") +
+            ausgang = $"{Verlauf.Status(p.Status)}: {KartenText.GrundOhneTitel(p)}" + (frist.Length > 0 ? $" ({frist})" : "") +
                       (p.Ausgang.Length > 0 ? $" · danach wieder: {p.Ausgang}" : "");
         }
         else if (p.Stunden > 0) ausgang = $"Ausgang {p.Stunden} Std: {KartenText.Aufteilung(p)}";
@@ -50,7 +50,7 @@ public sealed class PlatzKarte : KartenFlaeche
         };
         var infos = new List<string>();
         if (KartenText.Info(p) is { Length: > 0 } info) infos.Add($"Info: {info}");
-        infos.AddRange(KartenText.Hinweise(p));
+        if (!p.HatStatus && p.Stunden > 0) infos.AddRange(KartenText.Hinweise(p));   // sonst steht der Text schon in der Ausgangszeile
         if (digital is not null && digital.Erledigt.Count > 0)
             infos.Add("Heute: " + string.Join(", ", digital.Erledigt.Select(e => $"{e.Zeitraum} (Hz. {e.Handzeichen})")));
 

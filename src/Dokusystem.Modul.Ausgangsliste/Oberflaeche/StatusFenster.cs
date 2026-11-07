@@ -15,7 +15,7 @@ public sealed class StatusFenster : Form
     public ComboBox Grund { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 560 };
     public Button BeschraenkungKnopf { get; } = Stil.NebenKnopf("Ausgangsbeschränkung");
     public Button AbwesenheitKnopf { get; } = Stil.NebenKnopf("Abwesenheit");
-    public Button AufhebenKnopf { get; } = Stil.HauptKnopf("Status aufheben");
+    public Button AufhebenKnopf { get; } = Stil.NebenKnopf("Status aufheben");
     public List<Button> Schnellwahl { get; } = [];
     public Label Hinweis { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
