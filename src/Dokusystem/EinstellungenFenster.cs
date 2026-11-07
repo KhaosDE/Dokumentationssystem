@@ -17,6 +17,7 @@ public sealed class EinstellungenFenster : Form
     public ComboBox Benutzer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
     private readonly List<string> benutzerKuerzel = [];
     public CheckBox AutoUpdate { get; } = new();
+    public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");
     public Label Fehler { get; } = new();
     public string? NeuesLogo { get; private set; }
@@ -150,11 +151,18 @@ public sealed class EinstellungenFenster : Form
             }
         }
 
+        Ganz(Abschnitt("FRISTEN"));
+        BeschlussFrist.Value = werte.BeschlussFristTage;
+        BeschlussFrist.Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandKlein, Stil.AbstandMini);
+        raster.Controls.Add(Beschriftung("Beschluss endet bald"));
+        var frist = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
+        frist.Controls.AddRange([BeschlussFrist, new Label { Text = "Tage vorher (Marke auf der Übersicht)", AutoSize = true, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) }]);
+        raster.Controls.Add(frist);
+
         Ganz(Abschnitt("SPÄTER"));
         Ganz(new Label
         {
-            Text = "Hier kommen weitere Einstellungen dazu: Fristen für die Übersicht (Version 0.17.0) " +
-                   "und die PDF-Vorlagen für den HEB-Bogen (Version 0.18.0).",
+            Text = "Hier kommen die PDF-Vorlagen für den HEB-Bogen dazu (Version 0.18.0).",
             AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.TextLeise,
         });
 
@@ -246,7 +254,7 @@ public sealed class EinstellungenFenster : Form
         try
         {
             string kuerzel = benutzerKuerzel[Math.Max(0, Benutzer.SelectedIndex)];
-            Einstellungen.Aendern(w => w with { Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked });
+            Einstellungen.Aendern(w => w with { Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked, BeschlussFristTage = (int)BeschlussFrist.Value });
             if (logoGeaendert && NeuesLogo is not null) Einstellungen.LogoSetzen(NeuesLogo);
             else if (LogoEntfernen) Einstellungen.LogoSetzen(null);
             foreach (var (schluessel, haken) in Module)

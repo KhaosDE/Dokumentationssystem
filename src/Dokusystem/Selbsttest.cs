@@ -20,6 +20,7 @@ public static class Selbsttest
                 if (!speicher.DemoBeimErstenStart() || speicher.AlleBewohner().Count == 0)
                     throw new InvalidOperationException("Demo-Daten fehlen.");
                 using var fenster = new Hauptfenster(speicher);
+                fenster.BereichWaehlen(Hauptfenster.Startbereich);
                 fenster.Bewohner.AkteZeigen(speicher.AlleBewohner()[0].Id!.Value);
                 using var formular = fenster.Bewohner.FormularErstellen(speicher.AlleBewohner()[0]);
                 using var bild = new Bitmap(fenster.Width, fenster.Height);

@@ -8,7 +8,6 @@ public static class Bauplan
 
     public static readonly IReadOnlyDictionary<string, Vorhaben> Bereiche = new Dictionary<string, Vorhaben>
     {
-        ["Übersicht"] = new("0.17.0", "Alle Bewohner auf einen Blick: was heute wichtig ist – Termine, Änderungen in der Medikation, Beschlüsse, die bald enden, fällige HEB-Bögen."),
     };
 
     // Reiter der Bewohnerakte, in dieser Reihenfolge. Stammdaten gibt es schon.

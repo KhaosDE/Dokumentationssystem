@@ -8,9 +8,10 @@ namespace Dokusystem.Kern;
 //   auto_update – beim Start nach einer neuen Version fragen (Vorgabe: ja)
 //   kuerzel     – eigenes Kürzel, z. B. für Berichte (Vorgabe: leer)
 //   logo        – Dateiname des eigenen Bildes für den Kopf im Ordner „logo“ (Vorgabe: keins)
+//   beschluss_frist_tage – Startseite: „Beschluss endet bald“ ab so vielen Tagen vorher (Vorgabe: 90)
 // Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben.
 // Dieselbe Datei hat schon die Python-Version (bis 0.2.0) benutzt.
-public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null);
+public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90);
 
 public static partial class Einstellungen
 {
@@ -33,6 +34,8 @@ public static partial class Einstellungen
                 werte = werte with { Kuerzel = kuerzel.Trim() };
             if (knoten["logo"] is JsonValue l && l.TryGetValue(out string? logo) && !string.IsNullOrWhiteSpace(logo))
                 werte = werte with { Logo = logo };
+            if (knoten["beschluss_frist_tage"] is JsonValue f && f.TryGetValue(out int tage) && FristPruefen(tage) is null)
+                werte = werte with { BeschlussFristTage = tage };
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
@@ -44,6 +47,7 @@ public static partial class Einstellungen
     public static void Speichern(EinstellungsWerte werte)
     {
         if (KuerzelPruefen(werte.Kuerzel) is string fehler) throw new Eingabefehler([fehler]);
+        if (FristPruefen(werte.BeschlussFristTage) is string fristFehler) throw new Eingabefehler([fristFehler]);
         string ziel = Pfade.ImDatenordner(Datei);
         Directory.CreateDirectory(Path.GetDirectoryName(ziel)!);
         string zwischen = ziel + ".neu";
@@ -52,6 +56,7 @@ public static partial class Einstellungen
             ["auto_update"] = werte.AutoUpdate,
             ["kuerzel"] = werte.Kuerzel.Trim(),
             ["logo"] = werte.Logo,
+            ["beschluss_frist_tage"] = werte.BeschlussFristTage,
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen
@@ -65,6 +70,9 @@ public static partial class Einstellungen
         if (!KuerzelMuster().IsMatch(k)) return "Kürzel: nur Buchstaben und Ziffern.";
         return null;
     }
+
+    public static string? FristPruefen(int tage) =>
+        tage is >= 1 and <= 365 ? null : "Frist „Beschluss endet bald“: 1 bis 365 Tage.";
 
     // Ändert einen Wert und speichert sofort.
     public static EinstellungsWerte Aendern(Func<EinstellungsWerte, EinstellungsWerte> aenderung)

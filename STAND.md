@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.16.0** (Monatsreflexion, Bauplan Schritt 13).
+Stand: 07.11.2026. Version: **0.17.0** (Startseite als Übersicht, Bauplan Schritt 14).
 
 ## Aktuell
 
@@ -17,10 +17,11 @@ die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) 
 **Wohnbereichskalender** (Termine, Heimfahrten, Ausflüge) und neu die **Modulverwaltung** mit dem
 ersten Modul **Ausgangsliste** (Ausgang, Anwesenheit, Unterbringung, Tagesliste, Küchendienst,
 Digitaler Ausgang), übernommen aus der Ausgangsliste. Dazu kommen die **Biografie** und neu die
-**Monatsreflexion** als Reiter in der Akte.
+**Monatsreflexion** als Reiter in der Akte. Das Programm öffnet mit der **Übersicht** (was heute
+wichtig ist).
 
-**Nächster Schritt:** Bauplan Schritt 14 „Startseite als Übersicht (Dashboard)“ (0.17.0), danach
-Schritt 15 „HEB-Bogen aus Berichten“ (`IDEEN.md`, oben).
+**Nächster Schritt:** Bauplan Schritt 15 „HEB-Bogen aus Berichten“ (0.18.0), der letzte Schritt
+des Bauplans (`IDEEN.md`, oben).
 
 ## Fertig
 
@@ -247,6 +248,21 @@ Schritt 15 „HEB-Bogen aus Berichten“ (`IDEEN.md`, oben).
     Änderungen kommt eine Rückfrage.
   - Demo `daten/demo/reflexion.json`: Reflexionen des vergangenen Monats für vier Bewohner, zwei
     fertig, zwei Entwurf (einer mit Stilhinweisen).
+
+- 0.17.0 — Startseite als Übersicht (Bauplan Schritt 14, 07.11.2026):
+  - Bereich „Übersicht“ (erster Eintrag, öffnet beim Programmstart): oben „Heute“ mit Anzahl
+    Bewohner, Abwesenden, Terminen des Tages (gleiche Termine zusammengefasst, mit Namen) und
+    Änderungen in der Medikation; darunter das Kartenraster aller Bewohner.
+  - Marken je Karte (nur wenn zutreffend): abwesend (Heimfahrt laut Kalender oder Modul
+    Ausgangsliste – nur einmal), Beschluss endet bald / abgelaufen, Allergie eingetragen,
+    nicht erfasst, Medikation heute (neu verordnet, Pause beginnt/endet, neue Dosis,
+    abgesetzt), Termine heute laut Wochenplan (erster mit Uhrzeit, „+n“), dazu die Marken der
+    Module. Klick öffnet die Akte.
+  - Immer aktuell: Neuaufbau beim Öffnen, nach Änderungen an Medikation, Therapie, Wochenplan,
+    Kalender und Modulen und beim Datumswechsel um Mitternacht.
+  - Einstellungen → „FRISTEN“: „Beschluss endet bald“ ab 90 Tagen (1–365).
+  - Demo: Bei Frieda Fichte beginnt heute eine Pause (Metformin), damit „Medikation heute“
+    etwas zeigt.
 
 ## Offene Punkte
 
@@ -526,8 +542,31 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 07.11.2026 (Schritt 13): Stilregeln, die nur für bestimmte Felder des HEB-Bogens gelten
   (Ich-Form bei Rahmenzielen), kommen mit dem HEB-Bogen dazu. Datumsangaben gelten als Hinweis,
   weil sie im HEB nur in den Kopffeldern stehen dürfen.
+- 07.11.2026 (Schritt 14): „HEB fällig“ fehlt noch – den HEB-Bogen gibt es erst mit Schritt 15;
+  die Startseite zeigt nur, was es schon gibt. Die Frist dafür kommt mit dem HEB-Bogen.
+- 07.11.2026 (Schritt 14): Das Programm öffnet mit der Übersicht (`Hauptfenster.Startbereich`,
+  gesetzt in `Program.cs` und im Selbsttest). Das Hauptfenster selbst beginnt weiter bei
+  „Bewohner“, damit die vorhandenen Oberflächentests unverändert gelten.
+- 07.11.2026 (Schritt 14): Die Frist „Beschluss endet bald“ steht in der Einstellungsdatei des
+  Arbeitsplatzes (wie Kürzel und Update), nicht in der Datenbank.
+- 07.11.2026 (Schritt 14): Termine heute = Wochenplan des Bewohners (Regelwoche, Therapien,
+  Kalender); abgesagte und ausgefallene Therapien zählen nicht. Abwesend = Heimfahrt laut
+  Kalender oder Abwesenheit im Modul Ausgangsliste; meldet beides, steht die Marke nur einmal da.
 
 ## Testliste für Tobi
+
+Version 0.17.0:
+
+1. Programm starten: Es öffnet die „Übersicht“. Unten links „Version 0.17.0 · Build …“.
+2. Oben „Heute“: Anzahl Bewohner, Abwesende, Termine, Änderungen in der Medikation; darunter
+   die Termine des Tages und „Frieda Fichte: Metformin … – Pause beginnt“.
+3. Karten: Hanna Holunder „abwesend: …“ (nur einmal), Clara Clematis „Beschluss endet in …
+   Tagen“, Termine „heute …“.
+4. Klick auf eine Karte → Akte.
+5. Einstellungen → „FRISTEN“ auf 14 Tage → in der Übersicht verschwindet „Beschluss endet …“ bei
+   Clara Clematis.
+6. Im Kalender einen Termin für heute anlegen, zurück zur Übersicht → er steht unter „Termine
+   heute“.
 
 Version 0.16.0:
 

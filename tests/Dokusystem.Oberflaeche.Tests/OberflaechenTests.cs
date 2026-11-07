@@ -21,24 +21,6 @@ public class HauptfensterTests
         Assert.Matches(@"^Version \d+\.\d+\.\d+ · ", fenster.VersionText.Text);
     });
 
-    [Theory]
-    [InlineData("Übersicht", "0.17.0")]
-    public void Noch_nicht_gebaute_Bereiche_zeigen_ihre_Version(string bereich, string version) => Hilfe.Sta(() =>
-    {
-        using var u = new Umgebung();
-        using var fenster = new Hauptfenster(u.Speicher);
-        fenster.Navigation.Single(n => n.Text == bereich).Ausloesen();
-        Assert.Equal(bereich, fenster.AktiverBereich);
-        Assert.True(fenster.Navigation.Single(n => n.Text == bereich).Aktiv);
-        Assert.False(fenster.Navigation.Single(n => n.Text == "Bewohner").Aktiv);
-        Assert.Equal($"Kommt in Version {version}", fenster.Kopf.KleinText);
-        Assert.Equal(bereich.Replace(" …", ""), fenster.Kopf.TitelText);
-        Assert.Empty(fenster.Kopf.Knoepfe);
-        var seite = Assert.IsType<PlatzhalterSeite>(fenster.Seite(bereich));
-        Assert.Equal($"Kommt in Version {version}", seite.Karte.Titel.Text);
-        Assert.False(string.IsNullOrWhiteSpace(seite.Karte.Beschreibung.Text));
-    });
-
     [Fact]
     public void Einstellungen_Benutzer_Update_und_Logo() => Hilfe.Sta(() =>
     {
@@ -426,7 +408,7 @@ public class BildschirmfotoTests
         using (var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
             Hilfe.Foto(einstellungen, "46_einstellungen_module");
         f.Navigation.Single(n => n.Text == "Übersicht").Ausloesen();
-        Hilfe.Foto(f, "9_platzhalter_uebersicht");
+        Hilfe.Foto(f, "9_uebersicht");
         string logo = Path.Combine(u.Ordner, "eigenes-bild.png");
         Hilfe.Testbild(logo, 180, 60);
         Einstellungen.LogoSetzen(logo);
