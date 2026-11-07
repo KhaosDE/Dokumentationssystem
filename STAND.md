@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.8.0** (Nachrichten, Bauplan Schritt 5).
+Stand: 07.11.2026. Version: **0.9.0** (Medikamentendatenbank, Bauplan Schritt 6).
 
 ## Aktuell
 
@@ -11,9 +11,9 @@ Kennzeichen „Wichtig“ und „Übergabe“, Nachträge statt Überschreiben, 
 Bereich **„Übergabe“**, in dem nur die Übergabe-Einträge stehen, bis sie ablaufen oder
 erledigt sind. Dazu das **Wohnbereich-ToDo** („Aufgaben“) und **Nachrichten** zwischen
 ausgedachten Kolleginnen und Kollegen; oben rechts „Angemeldet als …“ (ohne Passwort, nur für
-die Vorführung).
+die Vorführung). Neu ist die **Medikamentendatenbank** (Demo-Bestand mit Quellen).
 
-**Nächster Schritt:** Bauplan Schritt 6 „Medikamentendatenbank“ (0.9.0), danach der Reihe nach bis
+**Nächster Schritt:** Bauplan Schritt 7 „Medikation: Grundverordnung, Pause, Stufenplan“ (0.10.0), danach der Reihe nach bis
 Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
 `KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
 
@@ -120,6 +120,17 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
     hat den Bewohner dann schon gewählt.
   - Über den Bewohnerkarten ein Hinweis „3 ungelesene Nachrichten für …“ mit „Öffnen …“.
   - Nichts wird gelöscht; kein E-Mail-Versand, kein Internet.
+
+- 0.9.0 — Medikamentendatenbank (07.11.2026, Bauplan Schritt 6):
+  - Bereich „Medikamente“: Liste mit Suche (Wirkstoff, Handelsname, Form), dauerhaft der
+    Hinweis „Demo-Bestand, nicht zum Verordnen verwenden“. Je Eintrag Wirkstoff,
+    Handelsnamen, Marken für Prüfstatus, Darreichungsform und Stärken, die Quelle als
+    Adresse mit „Adresse kopieren“.
+  - „Neues Medikament …“ (gekennzeichnet „selbst angelegt“) und „Ändern …“: jede Änderung ist
+    eine neue Fassung mit Datum und Kürzel; „Verlauf …“ zeigt alle Fassungen und was sich
+    geändert hat.
+  - Demo-Bestand `daten/demo/medikamente.json`: 36 gängige Wirkstoffe (Psychiatrie und
+    Allgemeinmedizin), alle „ungeprüft“, jede Angabe mit Quelle.
 
 ## Offene Punkte
 
@@ -277,6 +288,24 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   - Zähler und Hinweis zählen ungelesene Nachrichten, Ordnerknöpfe zählen Verläufe.
   - Hinweis aus `IDEEN.md` für einen späteren Echtbetrieb (Mitarbeitervertretung beteiligen,
     auch für „gelesen“ in der Übergabe) gilt weiter.
+- **Medikamentendatenbank (0.9.0), wo der Eintrag etwas offen ließ:**
+  - Quellen: Für jeden Eintrag eine öffentlich abrufbare Fachinformation (34 auf fachinfo.de,
+    Duloxetin aus der deutschen Produktinformation der EMA, Lithium vom Hersteller),
+    Abschnitte 1–3, abgerufen am 07.11.2026. Übernommen wurde nur, was dort steht. Stichprobe
+    nachgeprüft (Quetiapin, Paracetamol).
+  - Wo keine Fachinformation des Erstanbieters frei zugänglich war, steht ein Generikum als
+    Handelsname (Haloperidol, Melperon, Pipamperon, Diazepam, Biperiden, Ibuprofen, Macrogol).
+    Manche Einträge nennen nur einzelne Stärken, weil die Quelle nur diese abdeckt
+    (z. B. Pantoprazol 40 mg, Amlodipin 5 mg). Bei einigen Wirkstoffen bezieht sich die
+    Stärke auf das Salz, wie auf der Packung (z. B. Metforminhydrochlorid).
+  - „Bestätigt“ setzt man im Fenster „Ändern …“ (Häkchen), nur mit Quelle. Einen Schutz, dass
+    nur Tobi das darf, gibt es in der Demo nicht; jede Änderung steht mit Kürzel im Verlauf.
+  - Die Quelle wird im Programm nicht geöffnet (kein Internet, Regel 6), sondern lässt sich
+    kopieren und im Browser aufrufen.
+  - Wirkstoff und Darreichungsform zusammen gibt es nur einmal (sonst Hinweis „gibt es
+    schon“). Ohne Anmeldung (Kürzel) kein Speichern.
+  - „Demo-Daten zurücksetzen“ lädt den Demo-Bestand neu; selbst angelegte Einträge und
+    Änderungen sind danach weg.
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -286,6 +315,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.9.0:
+
+1. Unten links „Version 0.9.0 · Build …“. Links „Medikamente“ öffnen: oben „36 Medikamente ·
+   Demo-Bestand“ und der Hinweis „Demo-Bestand, nicht zum Verordnen verwenden“.
+2. Suche „Seroquel“ → Quetiapin mit 25, 100, 200, 300 mg, Filmtablette, „ungeprüft“.
+3. „Adresse kopieren“ und die Adresse im Browser öffnen: Die Fachinformation zeigt dieselben
+   Stärken.
+4. Angemeldet (oben rechts) „Neues Medikament …“ mit Wirkstoff, Form und Stärke → Eintrag mit
+   „selbst angelegt“.
+5. Bei einem Eintrag „Ändern …“ eine Stärke ergänzen → Marke „geändert (2 Fassungen)“,
+   „Verlauf …“ zeigt die Änderung mit Kürzel.
+6. Bei einem Eintrag „bestätigt“ anhaken (nach eigener Prüfung der Quelle) → Marke grün.
 
 Version 0.8.0:
 

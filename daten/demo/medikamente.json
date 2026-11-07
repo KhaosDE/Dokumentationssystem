@@ -1,0 +1,498 @@
+{
+  "hinweis": "Demo-Bestand: Nachschlagedaten, keine Bewohnerdaten (CLAUDE.md, Regel 1). Nicht zum Verordnen verwenden. Jede Angabe stammt aus der genannten Quelle (Abschnitte 1-3 der Fach- bzw. Gebrauchsinformation, abgerufen am 07.11.2026); was dort nicht stand, bleibt leer. Alle Einträge sind ungeprüft, bis Tobi sie bestätigt.",
+  "medikamente": [
+    {
+      "wirkstoff": "Quetiapin",
+      "handelsnamen": [
+        "Seroquel"
+      ],
+      "staerken": [
+        "25 mg",
+        "100 mg",
+        "200 mg",
+        "300 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/001458",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Olanzapin",
+      "handelsnamen": [
+        "Zyprexa"
+      ],
+      "staerken": [
+        "2,5 mg",
+        "5 mg",
+        "7,5 mg",
+        "10 mg",
+        "15 mg",
+        "20 mg"
+      ],
+      "darreichungsform": "überzogene Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/000024",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Risperidon",
+      "handelsnamen": [
+        "Risperdal"
+      ],
+      "staerken": [
+        "0,5 mg",
+        "1 mg",
+        "2 mg",
+        "3 mg",
+        "4 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/020807",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Aripiprazol",
+      "handelsnamen": [
+        "Abilify"
+      ],
+      "staerken": [
+        "5 mg",
+        "10 mg",
+        "15 mg",
+        "30 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/008415",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Haloperidol",
+      "handelsnamen": [
+        "Haloperidol-neuraxpharm"
+      ],
+      "staerken": [
+        "1 mg",
+        "4 mg",
+        "5 mg",
+        "12 mg",
+        "20 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/021362",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Clozapin",
+      "handelsnamen": [
+        "Leponex"
+      ],
+      "staerken": [
+        "25 mg",
+        "100 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/021241",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Amisulprid",
+      "handelsnamen": [
+        "Solian"
+      ],
+      "staerken": [
+        "100 mg",
+        "200 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/004729",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Melperon",
+      "handelsnamen": [
+        "Melperon-neuraxpharm"
+      ],
+      "staerken": [
+        "10 mg",
+        "25 mg",
+        "50 mg",
+        "100 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/021380",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Pipamperon",
+      "handelsnamen": [
+        "Pipamperon-neuraxpharm"
+      ],
+      "staerken": [
+        "40 mg",
+        "120 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/021396",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Promethazin",
+      "handelsnamen": [
+        "Atosil"
+      ],
+      "staerken": [
+        "25 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/000187",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Sertralin",
+      "handelsnamen": [
+        "Zoloft"
+      ],
+      "staerken": [
+        "50 mg",
+        "100 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/000405",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Citalopram",
+      "handelsnamen": [
+        "Cipramil"
+      ],
+      "staerken": [
+        "20 mg",
+        "40 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/002148",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Escitalopram",
+      "handelsnamen": [
+        "Cipralex"
+      ],
+      "staerken": [
+        "10 mg",
+        "20 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/005936",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Mirtazapin",
+      "handelsnamen": [
+        "Remergil SolTab"
+      ],
+      "staerken": [
+        "15 mg",
+        "30 mg",
+        "45 mg"
+      ],
+      "darreichungsform": "Schmelztablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/006081",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Venlafaxin",
+      "handelsnamen": [
+        "Trevilor retard"
+      ],
+      "staerken": [
+        "37,5 mg",
+        "75 mg",
+        "150 mg"
+      ],
+      "darreichungsform": "Hartkapsel, retardiert",
+      "quelle": "https://www.fachinfo.de/fi/pdf/004226",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Duloxetin",
+      "handelsnamen": [
+        "Cymbalta"
+      ],
+      "staerken": [
+        "30 mg",
+        "60 mg"
+      ],
+      "darreichungsform": "magensaftresistente Hartkapsel",
+      "quelle": "https://www.ema.europa.eu/de/documents/product-information/cymbalta-epar-product-information_de.pdf",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Agomelatin",
+      "handelsnamen": [
+        "Valdoxan"
+      ],
+      "staerken": [
+        "25 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/011672",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Lithiumcarbonat",
+      "handelsnamen": [
+        "Quilonum retard"
+      ],
+      "staerken": [
+        "450 mg"
+      ],
+      "darreichungsform": "Retardtablette",
+      "quelle": "https://www.teofarmasrl.it/wp-content/uploads/2021/01/DE_Quilonum_retard_FI.pdf",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Valproinsäure (Natriumvalproat)",
+      "handelsnamen": [
+        "Ergenyl chrono"
+      ],
+      "staerken": [
+        "300 mg",
+        "500 mg"
+      ],
+      "darreichungsform": "Retardtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/006301",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Lamotrigin",
+      "handelsnamen": [
+        "Lamictal"
+      ],
+      "staerken": [
+        "2 mg",
+        "5 mg",
+        "25 mg",
+        "50 mg",
+        "100 mg",
+        "200 mg"
+      ],
+      "darreichungsform": "Kautablette bzw. Tablette zur Herstellung einer Suspension zum Einnehmen",
+      "quelle": "https://www.fachinfo.de/fi/pdf/007443",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Lorazepam",
+      "handelsnamen": [
+        "Tavor"
+      ],
+      "staerken": [
+        "0,5 mg",
+        "1,0 mg",
+        "2,0 mg",
+        "2,5 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/002029",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Diazepam",
+      "handelsnamen": [
+        "Diazepam-ratiopharm"
+      ],
+      "staerken": [
+        "10 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/011210",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Zopiclon",
+      "handelsnamen": [
+        "Ximovan"
+      ],
+      "staerken": [
+        "7,5 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/003899",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Biperiden",
+      "handelsnamen": [
+        "Biperiden-neuraxpharm"
+      ],
+      "staerken": [
+        "2 mg",
+        "4 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/023617",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Metformin",
+      "handelsnamen": [
+        "Glucophage"
+      ],
+      "staerken": [
+        "500 mg",
+        "850 mg",
+        "1000 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/000959",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Ramipril",
+      "handelsnamen": [
+        "Delix",
+        "Delix protect"
+      ],
+      "staerken": [
+        "2,5 mg",
+        "5 mg",
+        "10 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/005496",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Amlodipin",
+      "handelsnamen": [
+        "Norvasc"
+      ],
+      "staerken": [
+        "5 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/007631",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Bisoprolol",
+      "handelsnamen": [
+        "Concor"
+      ],
+      "staerken": [
+        "5 mg",
+        "10 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/003991",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Simvastatin",
+      "handelsnamen": [
+        "Zocor",
+        "Zocor forte"
+      ],
+      "staerken": [
+        "10 mg",
+        "20 mg",
+        "40 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/004748",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Pantoprazol",
+      "handelsnamen": [
+        "Pantozol"
+      ],
+      "staerken": [
+        "40 mg"
+      ],
+      "darreichungsform": "magensaftresistente Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/006633",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Levothyroxin-Natrium",
+      "handelsnamen": [
+        "L-Thyroxin Henning"
+      ],
+      "staerken": [
+        "25 Mikrogramm",
+        "50 Mikrogramm",
+        "75 Mikrogramm",
+        "100 Mikrogramm",
+        "125 Mikrogramm",
+        "150 Mikrogramm",
+        "175 Mikrogramm",
+        "200 Mikrogramm"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/003011",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Ibuprofen",
+      "handelsnamen": [
+        "Ibu-ratiopharm"
+      ],
+      "staerken": [
+        "400 mg",
+        "600 mg",
+        "800 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/001206",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Paracetamol",
+      "handelsnamen": [
+        "ben-u-ron"
+      ],
+      "staerken": [
+        "500 mg"
+      ],
+      "darreichungsform": "Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/005407",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Metamizol-Natrium",
+      "handelsnamen": [
+        "Novalgin"
+      ],
+      "staerken": [
+        "500 mg"
+      ],
+      "darreichungsform": "Filmtablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/014708",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Macrogol",
+      "handelsnamen": [
+        "Macrogol-ratiopharm Balance"
+      ],
+      "staerken": [
+        "13,125 g"
+      ],
+      "darreichungsform": "Pulver zur Herstellung einer Lösung zum Einnehmen",
+      "quelle": "https://www.fachinfo.de/fi/pdf/013278",
+      "pruefstatus": "ungeprueft"
+    },
+    {
+      "wirkstoff": "Acetylsalicylsäure",
+      "handelsnamen": [
+        "Aspirin protect"
+      ],
+      "staerken": [
+        "100 mg"
+      ],
+      "darreichungsform": "magensaftresistente Tablette",
+      "quelle": "https://www.fachinfo.de/fi/pdf/001915",
+      "pruefstatus": "ungeprueft"
+    }
+  ]
+}

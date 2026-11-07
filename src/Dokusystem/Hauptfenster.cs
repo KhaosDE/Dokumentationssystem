@@ -27,6 +27,7 @@ public sealed class Hauptfenster : Form
     public UebergabeSeite Uebergabe { get; }
     public AufgabenSeite Aufgaben { get; }
     public NachrichtenSeite Nachrichten { get; }
+    public MedikamenteSeite Medikamente { get; }
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
     public Button DemoKnopf { get; } = Stil.NebenKnopf("Demo-Daten zurücksetzen …");
@@ -64,6 +65,9 @@ public sealed class Hauptfenster : Form
             BereichWaehlen("Nachrichten", filterBehalten: true);
         };
         Kopf.BenutzerKnopf.Click += (_, _) => BenutzerMenueZeigen();
+        Medikamente = new MedikamenteSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Medikamente"] = Medikamente;
+        Medikamente.Geaendert += () => { if (AktiverBereich == "Medikamente") Kopf.TexteSetzen(Medikamente.KopfText, "Medikamente"); };
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);
@@ -161,6 +165,13 @@ public sealed class Hauptfenster : Form
             else Nachrichten.BewohnerZeigen(null);
             Kopf.TexteSetzen(Nachrichten.KopfText, "Nachrichten");
             Kopf.KnoepfeSetzen(Nachrichten.NeuKnopf);
+            return;
+        }
+        if (schluessel == "Medikamente")
+        {
+            Medikamente.Aktualisieren();
+            Kopf.TexteSetzen(Medikamente.KopfText, "Medikamente");
+            Kopf.KnoepfeSetzen(Medikamente.NeuKnopf);
             return;
         }
         if (schluessel == "Aufgaben")

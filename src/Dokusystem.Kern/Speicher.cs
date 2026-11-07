@@ -18,6 +18,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoBerichte = "demo_berichte";
     private const string DemoAufgaben = "demo_aufgaben";
     private const string DemoNachrichten = "demo_nachrichten";
+    private const string DemoMedikamente = "demo_medikamente";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -174,6 +175,30 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER nachrichten_bleiben BEFORE UPDATE ON nachrichten
             BEGIN SELECT RAISE(ABORT, 'Nachrichten werden nicht überschrieben.'); END;
         """,
+        // 5 – Medikamentendatenbank: je Medikament Fassungen (älteste zuerst); jede Änderung ist
+        //     eine neue Fassung mit Datum und Kürzel. Listen (Handelsnamen, Stärken) als JSON.
+        """
+        CREATE TABLE medikamente (
+            id              INTEGER PRIMARY KEY,
+            selbst_angelegt INTEGER NOT NULL DEFAULT 0 CHECK (selbst_angelegt IN (0, 1))
+        );
+        CREATE TABLE medikament_fassungen (
+            id               INTEGER PRIMARY KEY,
+            medikament_id    INTEGER NOT NULL REFERENCES medikamente(id) ON DELETE CASCADE,
+            wirkstoff        TEXT NOT NULL,
+            handelsnamen     TEXT NOT NULL DEFAULT '[]',
+            staerken         TEXT NOT NULL DEFAULT '[]',
+            darreichungsform TEXT NOT NULL DEFAULT '',
+            quelle           TEXT NOT NULL DEFAULT '',
+            pruefstatus      TEXT NOT NULL CHECK (pruefstatus IN ('ungeprueft', 'bestaetigt')),
+            geaendert        TEXT NOT NULL,
+            kuerzel          TEXT NOT NULL
+        );
+        CREATE TRIGGER medikamente_bleiben BEFORE UPDATE ON medikamente
+            BEGIN SELECT RAISE(ABORT, 'Medikamente werden nicht überschrieben – Änderungen sind neue Fassungen.'); END;
+        CREATE TRIGGER medikament_fassungen_bleiben BEFORE UPDATE ON medikament_fassungen
+            BEGIN SELECT RAISE(ABORT, 'Fassungen werden nicht überschrieben.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -300,12 +325,14 @@ public sealed partial class Speicher : IDisposable
             return true;
         }
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
-        bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null;
-        if (!berichte && !aufgaben && !nachrichten) return false;
+        bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
+             medikamente = Meta(DemoMedikamente) is null;
+        if (!berichte && !aufgaben && !nachrichten && !medikamente) return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
         if (nachrichten) DemoNachrichtenEinfuegen(transaktion);
+        if (medikamente) DemoMedikamenteEinfuegen(transaktion);
         transaktion.Commit();
         return true;
     }
@@ -325,6 +352,7 @@ public sealed partial class Speicher : IDisposable
             DemoBerichteEinfuegen(transaktion);
             DemoAufgabenEinfuegen(transaktion);
             DemoNachrichtenEinfuegen(transaktion);
+            DemoMedikamenteEinfuegen(transaktion);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);

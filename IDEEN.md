@@ -293,7 +293,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   „Demo — nicht zum Stellen verwenden“.
 
 ## Medikamentendatenbank
-Status: freigegeben (Bauplan Schritt 6)
+Status: erledigt (07.11.2026; Bauplan Schritt 6, Version 0.9.0)
 Datum: 06.11.2026
 Was: Eine vorgefertigte Liste von Medikamenten, aus der beim Verordnen ausgewählt wird,
 statt den Namen frei einzutippen.

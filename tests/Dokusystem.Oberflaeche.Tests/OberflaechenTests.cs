@@ -25,7 +25,6 @@ public class HauptfensterTests
     [InlineData("Übersicht", "0.17.0")]
     [InlineData("Kalender", "0.13.0")]
     [InlineData("Therapie", "0.11.0")]
-    [InlineData("Medikamente", "0.9.0")]
     [InlineData("Ausgangsliste", "0.14.0")]
     public void Noch_nicht_gebaute_Bereiche_zeigen_ihre_Version(string bereich, string version) => Hilfe.Sta(() =>
     {
@@ -403,6 +402,10 @@ public class BildschirmfotoTests
         f.BenutzerWaehlen("AB");
         f.BereichWaehlen("Bewohner");
         Hilfe.Foto(f, "10_kopf_mit_bild");
+        f.Navigation.Single(n => n.Text == "Medikamente").Ausloesen();
+        Hilfe.Foto(f, "23_medikamente");
+        using (var aendern = new MedikamentFenster(u.Speicher, u.Speicher.Medikamente()[0]))
+            Hilfe.Foto(aendern, "24_medikament_aendern");
         f.Navigation.Single(n => n.Text == "Nachrichten").Ausloesen();
         Hilfe.Foto(f, "20_nachrichten");
         f.Nachrichten.Karten[0].Waehlen();

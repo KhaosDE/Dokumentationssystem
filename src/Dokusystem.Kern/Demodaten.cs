@@ -253,6 +253,39 @@ public static class Demodaten
         return new DemoPost(kollegen, verlaeufe);
     }
 
+    // ----- Medikamentendatenbank (echte Nachschlagedaten, keine Bewohnerdaten) -----
+
+    private sealed class MedikamenteDatei
+    {
+        public List<MedikamentVorlage> Medikamente { get; set; } = [];
+    }
+
+    public sealed class MedikamentVorlage
+    {
+        public string Wirkstoff { get; set; } = "";
+        public List<string> Handelsnamen { get; set; } = [];
+        public List<string> Staerken { get; set; } = [];
+        public string Darreichungsform { get; set; } = "";
+        public string Quelle { get; set; } = "";
+        public string Pruefstatus { get; set; } = "ungeprueft";
+    }
+
+    // Kürzel der ersten Fassung im Demo-Bestand (kein Mensch, sondern die Datei).
+    public const string DemoKuerzel = "DEMO";
+
+    public static List<MedikamentFassung> Medikamente(DateTime jetzt) =>
+        Lesen<MedikamenteDatei>("medikamente.json").Medikamente.Select(v => new MedikamentFassung
+        {
+            Wirkstoff = v.Wirkstoff,
+            Handelsnamen = v.Handelsnamen,
+            Staerken = v.Staerken,
+            Darreichungsform = v.Darreichungsform,
+            Quelle = v.Quelle,
+            Pruefstatus = v.Pruefstatus == "bestaetigt" ? Pruefstatus.Bestaetigt : Pruefstatus.Ungeprueft,
+            Geaendert = jetzt.Date,
+            Kuerzel = DemoKuerzel,
+        }).ToList();
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein
