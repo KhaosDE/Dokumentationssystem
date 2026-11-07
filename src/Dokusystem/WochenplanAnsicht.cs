@@ -155,7 +155,7 @@ public sealed class WochenplanAnsicht : Panel
 // Einträge blaugrau, einzelne Termine (Kalender) violett. Teilnahme als Wort im Kästchen.
 public sealed class WochenRaster : Control
 {
-    private const int KopfHoehe = 42, StundeHoehe = 44, ZeitBreite = 52;
+    private const int KopfHoehe = 42, StundeHoehe = 44, ZeitBreite = 52, GanztagsZeile = 40;
     private DateOnly montag;
     private DateOnly heute;
     private int vonStunde = 7, bisStunde = 21;
@@ -188,7 +188,32 @@ public sealed class WochenRaster : Control
         Invalidate();
     }
 
-    public int BenoetigteHoehe() => S(KopfHoehe) + (Termine.Any(t => t.Ganztags) ? S(28) : 0) + (bisStunde - vonStunde) * S(StundeHoehe) + 1;
+    public int BenoetigteHoehe() => S(KopfHoehe) + GanztagsHoehe() + (bisStunde - vonStunde) * S(StundeHoehe) + 1;
+
+    // Ganztägige Termine stehen oben untereinander, je Termin eine Zeile mit Platz für zwei Textzeilen.
+    private int GanztagsZeilen() => Termine.Where(t => t.Ganztags).GroupBy(t => t.Tag).Select(g => g.Count()).DefaultIfEmpty(0).Max();
+    private int GanztagsHoehe() => GanztagsZeilen() == 0 ? 0 : GanztagsZeilen() * S(GanztagsZeile) + S(4);
+
+    // Spur je Termin: gleichzeitige Termine eines Tages stehen nebeneinander, ganztägige untereinander.
+    private (int Nr, int Anzahl)[] Spuren()
+    {
+        var spuren = new (int Nr, int Anzahl)[Termine.Count];
+        foreach (var tag in Termine.Select((t, i) => (t, i)).GroupBy(x => x.t.Tag))
+        {
+            int ganz = 0;
+            foreach (var (t, i) in tag.Where(x => x.t.Ganztags)) spuren[i] = (ganz++, 1);
+            var enden = new List<TimeOnly>();
+            var mitZeit = tag.Where(x => !x.t.Ganztags).OrderBy(x => x.t.Von).ToList();
+            foreach (var (t, i) in mitZeit)
+            {
+                int nr = enden.FindIndex(e => e <= t.Von);
+                if (nr < 0) { nr = enden.Count; enden.Add(t.Bis); } else enden[nr] = t.Bis;
+                spuren[i] = (nr, 0);
+            }
+            foreach (var (_, i) in mitZeit) spuren[i] = (spuren[i].Nr, enden.Count);
+        }
+        return spuren;
+    }
 
     protected override void OnMouseClick(MouseEventArgs e)
     {
@@ -205,7 +230,8 @@ public sealed class WochenRaster : Control
         kaestchen.Clear();
         var flaeche = new Rectangle(0, 0, Width - 1, Height - 1);
         Stil.FlaecheZeichnen(g, flaeche, Stil.RadiusKarte * Stil.Skala(this), Stil.Flaeche, Stil.KarteRand);
-        int zeit = S(ZeitBreite), kopf = S(KopfHoehe), ganztags = Termine.Any(t => t.Ganztags) ? S(28) : 0;
+        int zeit = S(ZeitBreite), kopf = S(KopfHoehe), ganztags = GanztagsHoehe();
+        var spuren = Spuren();
         float spalte = (Width - zeit - S(8)) / 7f;
         using var linie = new Pen(Stil.Trennlinie);
         var de = CultureInfo.GetCultureInfo("de-DE");
@@ -227,27 +253,32 @@ public sealed class WochenRaster : Control
             if (h < bisStunde)
                 TextRenderer.DrawText(g, $"{h:00}:00", Stil.Klein, new Rectangle(S(4), y + S(2), zeit - S(8), S(18)), Stil.TextLeise, TextFormatFlags.Right);
         }
-        foreach (var t in Termine)
+        for (int k = 0; k < Termine.Count; k++)
         {
+            var t = Termine[k];
             int i = t.Tag.DayNumber - montag.DayNumber;
             if (i is < 0 or > 6) continue;
             float x = zeit + i * spalte + S(3);
             Rectangle feld;
-            if (t.Ganztags) feld = new Rectangle((int)x, kopf + S(2), (int)spalte - S(6), ganztags - S(4));
+            if (t.Ganztags) feld = new Rectangle((int)x, kopf + S(2) + spuren[k].Nr * S(GanztagsZeile), (int)spalte - S(6), S(GanztagsZeile) - S(4));
             else
             {
+                float breite = (spalte - S(6)) / Math.Max(1, spuren[k].Anzahl);
                 float y1 = kopf + ganztags + (float)((t.Von.ToTimeSpan().TotalHours - vonStunde) * S(StundeHoehe));
                 float y2 = kopf + ganztags + (float)((t.Bis.ToTimeSpan().TotalHours - vonStunde) * S(StundeHoehe));
-                feld = new Rectangle((int)x, (int)y1 + S(1), (int)spalte - S(6), Math.Max(S(20), (int)(y2 - y1) - S(2)));
+                feld = new Rectangle((int)(x + spuren[k].Nr * breite), (int)y1 + S(1), (int)breite - (spuren[k].Anzahl > 1 ? S(2) : 0),
+                    Math.Max(S(20), (int)(y2 - y1) - S(2)));
             }
             var marke = t.Quelle switch { TerminQuelle.Therapie => Stil.Unterwegs, TerminQuelle.Kalender => Stil.Hinweis, _ => Stil.Zimmer };
             bool weg = t.Teilnahme is Teilnahme.Abgesagt or Teilnahme.Ausgefallen;
             Stil.FlaecheZeichnen(g, feld, Stil.RadiusKnopf * Stil.Skala(this), marke.Flaeche, marke.Rand ?? Stil.Mischen(marke.Flaeche, marke.Text, 0.25));
             // Titel, Uhrzeit, dann die Teilnahme (falls eingetragen) oder der Ort – passt auch in ein Stunden-Kästchen.
             string dritte = t.Quelle == TerminQuelle.Therapie && t.Teilnahme != Teilnahme.Offen ? WochenplanRegeln.TeilnahmeText(t.Teilnahme) : t.Ort;
-            string text = t.Titel + (t.Ganztags ? "" : $"\n{t.ZeitText}") + (dritte.Length > 0 ? $"\n{dritte}" : "");
+            // „\r\n“: Mit TextBoxControl gilt nur dieser Zeilenumbruch.
+            string text = t.Titel + (t.Ganztags ? "" : $"\r\n{t.ZeitText}") + (dritte.Length > 0 ? $"\r\n{dritte}" : "");
+            // TextBoxControl: keine halb abgeschnittene letzte Zeile.
             TextRenderer.DrawText(g, text, Stil.Klein, Rectangle.Inflate(feld, -S(4), -S(2)), weg ? Stil.TextLeise : marke.Text,
-                TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+                TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding | TextFormatFlags.TextBoxControl);
             kaestchen.Add((feld, t));
         }
     }

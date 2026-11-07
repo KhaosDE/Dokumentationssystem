@@ -123,7 +123,11 @@ public sealed partial class Speicher
     public List<Termin> Woche(long bewohnerId, DateOnly montag)
     {
         var therapien = Angebote().SelectMany(a => a.Zuteilungen.Where(z => z.BewohnerId == bewohnerId).Select(z => (a, z))).ToList();
-        return WochenplanRegeln.Woche(montag, PlanEintraege(bewohnerId), therapien, Teilnahmen());
+        // Einzelne Termine aus dem Kalender (Arzttermine, Heimfahrten, Ausflüge) zusätzlich.
+        var kalender = Kalender(montag, montag.AddDays(6), bewohnerId);
+        var einzelne = Enumerable.Range(0, 7).Select(montag.AddDays)
+            .SelectMany(tag => kalender.Where(k => k.Am(tag)).Select(k => KalenderRegeln.AlsTermin(k, tag)));
+        return WochenplanRegeln.Woche(montag, PlanEintraege(bewohnerId), therapien, Teilnahmen(), einzelne);
     }
 
     public List<string> PlanUeberschneidungen(PlanEintrag neu)

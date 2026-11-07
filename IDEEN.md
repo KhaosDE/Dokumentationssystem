@@ -386,7 +386,7 @@ Bestehende Ansichten (Bewohner-Übersicht, Akte, Formular) werden angepasst.
 Ausdrücklich nicht: Logo oder Name der Einrichtung im Repository.
 
 ## Wohnbereichskalender
-Status: freigegeben (Bauplan Schritt 10)
+Status: erledigt (07.11.2026; Bauplan Schritt 10, Version 0.13.0)
 Datum: 06.11.2026
 Was: Ein Kalender für den ganzen Wohnbereich. Er zeigt Termine, die Bewohner betreffen, und
 dient zum Planen von Heimfahrten und Tagesausflügen.

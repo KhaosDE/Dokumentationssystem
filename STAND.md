@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.12.0** (Wochenplan, Bauplan Schritt 9).
+Stand: 07.11.2026. Version: **0.13.0** (Wohnbereichskalender, Bauplan Schritt 10).
 
 ## Aktuell
 
@@ -13,9 +13,10 @@ erledigt sind. Dazu das **Wohnbereich-ToDo** („Aufgaben“) und **Nachrichten*
 ausgedachten Kolleginnen und Kollegen; oben rechts „Angemeldet als …“ (ohne Passwort, nur für
 die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) und neu die
 **Medikation** je Bewohner (Grundverordnung, Pause, Stufenplan, „Was gilt heute“), der
-**Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze) und neu der **Wochenplan** je Bewohner.
+**Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze), der **Wochenplan** je Bewohner und neu
+der **Wohnbereichskalender** (Termine, Heimfahrten, Ausflüge).
 
-**Nächster Schritt:** Bauplan Schritt 10 „Wohnbereichskalender“ (0.13.0), danach der Reihe nach bis
+**Nächster Schritt:** Bauplan Schritt 11 „Modul Ausgangsliste (mit Modulverwaltung)“ (0.14.0), danach der Reihe nach bis
 Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
 `KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
 
@@ -178,6 +179,23 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
   - Demo `daten/demo/wochenplan.json`: Spaziergang, Zimmer aufräumen, Wäschetag, Einkaufen,
     Telefonat – eine Änderung „ab Datum“, ein entfernter Eintrag; Teilnahmen der letzten vier
     Wochen (meist teilgenommen, ab und zu abgesagt oder ausgefallen).
+
+- 0.13.0 — Wohnbereichskalender (07.11.2026, Bauplan Schritt 10):
+  - Bereich „Kalender“: Monat (Raster, je Tag bis zu drei Termine, Klick öffnet den Tag),
+    Woche (wie der Wochenplan, alle Bewohner), Tag (Karten mit allen Angaben); Filter „alle“
+    oder ein Bewohner; ◀ ▶ und „Heute“.
+  - Terminarten: Termin eines Bewohners, Termin des Wohnbereichs, Heimfahrt (auch über
+    mehrere Tage), Tagesausflug (Ziel, Treffpunkt, Teilnehmer, Begleitung). Ein Termin kann
+    mehreren Bewohnern gehören.
+  - „Neuer Termin …“, „Ändern …“, „Absagen …“ (mit Rückfrage) – jeweils neue Fassung,
+    „Verlauf …“ zeigt alle.
+  - Termine eines Bewohners erscheinen in seinem Wochenplan (violett; mehrtägige Heimfahrt an
+    den Tagen dazwischen ganztags).
+  - Ausdruck: Monat (A4 quer) oder Woche (A4 hoch), Teilnehmerliste eines Ausflugs zum
+    Abhaken.
+  - Demo `daten/demo/kalender.json`: Arzttermine, Friseur, Teamsitzung, Hausversammlung, eine
+    laufende und eine geplante Heimfahrt, zwei Ausflüge, ein verschobener und ein abgesagter
+    Termin – alles relativ zu heute.
 
 ## Offene Punkte
 
@@ -388,6 +406,17 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   - Einzelne Termine aus dem Kalender kommen mit 0.13.0 dazu.
   - Der Ausdruck listet die Termine je Tag untereinander (lesbarer als ein Stundenraster in
     großer Schrift); keine Allergien, Medikation oder anderen Angaben aus der Akte.
+- **Wohnbereichskalender (0.13.0), wo der Eintrag etwas offen ließ:**
+  - Ändern und Absagen sind neue Fassungen (nichts wird überschrieben); ein abgesagter Termin
+    verschwindet aus den Ansichten, bleibt aber im Verlauf. Löschen gibt es nicht.
+  - Eine Heimfahrt gehört zu genau einem Bewohner. Mitgegebene Medikation wird nicht
+    berechnet; das Hinweisfeld genügt (laut Eintrag).
+  - Die Wochenansicht des Kalenders nutzt dasselbe Raster wie der Wochenplan, mit den Vornamen
+    der Beteiligten im Kästchen; ein Klick springt zum Tag mit allen Angaben und Knöpfen.
+  - „Abwesend: Heimfahrt bis …“ auf der Startseite kommt mit der Startseite (0.17.0); der Kern
+    kennt die laufende Heimfahrt schon.
+  - Die Therapie-Zuteilung warnt nicht vor einzelnen Kalenderterminen (die Regelwoche
+    überschneidet sich nur an einzelnen Tagen); der Wochenplan zeigt beides nebeneinander.
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -397,6 +426,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.13.0:
+
+1. Unten links „Version 0.13.0 · Build …“. Links „Kalender“: Monatsansicht mit farbigen
+   Einträgen; heute hervorgehoben; Hanna Holunder ist auf Heimfahrt (über mehrere Tage).
+2. „Woche“ und „Tag“ umschalten; ◀ ▶ blättern; Filter „Anton Ahorn“ zeigt nur seine Termine.
+3. Klick auf einen Tag im Monat → Tagesansicht mit Karten (Art, Zeit, Bewohner, Ort, Hinweis).
+4. Angemeldet „Neuer Termin …“ → „Tagesausflug“ mit Ziel, Treffpunkt, zwei Bewohnern →
+   Karte mit „Teilnehmerliste drucken …“.
+5. „Ändern …“ → Marke „geändert“; „Absagen …“ → Rückfrage, dann weg; „Verlauf …“ zeigt alles.
+6. Akte Anton Ahorn → Reiter „Wochenplan“, Woche mit seinem Hausarzttermin → violettes
+   Kästchen.
+7. „Drucken …“ im Kalender (Monat und Woche).
 
 Version 0.12.0:
 

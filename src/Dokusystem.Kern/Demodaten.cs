@@ -514,6 +514,79 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Kalender -----
+
+    private sealed class KalenderDatei
+    {
+        public List<KalenderVorlage> Termine { get; set; } = [];
+    }
+
+    public sealed class KalenderVorlage
+    {
+        public string Art { get; set; } = "bewohner";
+        public string Titel { get; set; } = "";
+        public List<string> Bewohner { get; set; } = [];
+        public int? InTagen { get; set; }
+        public string? Naechster { get; set; }
+        public string Von { get; set; } = "";
+        public int? EndeInTagen { get; set; }
+        public string Bis { get; set; } = "";
+        public string Ort { get; set; } = "";
+        public string Hinweis { get; set; } = "";
+        public string Treffpunkt { get; set; } = "";
+        public string Begleitung { get; set; } = "";
+        public bool Abgesagt { get; set; }
+        public KalenderAenderungVorlage? Aenderung { get; set; }
+    }
+
+    public sealed class KalenderAenderungVorlage
+    {
+        public int InTagen { get; set; }
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+        public string Hinweis { get; set; } = "";
+    }
+
+    // Termine aus daten/demo/kalender.json, relativ zu heute; je Termin die Fassungen.
+    // Fehlt ein genannter Bewohner, entfällt der Termin.
+    public static List<List<KalenderFassung>> Kalender(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        static TimeOnly Zeit(string s) => TimeOnly.ParseExact(s, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        var liste = new List<List<KalenderFassung>>();
+        foreach (var v in Lesen<KalenderDatei>("kalender.json").Termine)
+        {
+            var ids = v.Bewohner.Select(n => bewohner.FirstOrDefault(b => b.Nachname == n)?.Id).ToList();
+            if (ids.Any(i => i is null)) continue;
+            DateOnly tag = heute.AddDays(v.InTagen ?? 0);
+            if (v.Naechster is string w)
+            {
+                int abstand = ((int)Kurztage[w] - (int)heute.DayOfWeek + 7) % 7;
+                tag = heute.AddDays(abstand == 0 ? 7 : abstand);   // der nächste solche Wochentag nach heute
+            }
+            var ende = v.EndeInTagen is int e ? heute.AddDays(e) : tag;
+            var erste = new KalenderFassung
+            {
+                Art = KalenderRegeln.ArtAus(v.Art), Titel = v.Titel, Beginn = tag.ToDateTime(Zeit(v.Von)), Ende = ende.ToDateTime(Zeit(v.Bis)),
+                Ort = v.Ort, Hinweis = v.Hinweis, Bewohner = ids.Select(i => i!.Value).ToList(), Treffpunkt = v.Treffpunkt, Begleitung = v.Begleitung,
+                Erstellt = (tag < heute ? tag : heute).AddDays(-7).ToDateTime(new TimeOnly(9, 0)), Kuerzel = "AB",
+            };
+            var fassungen = new List<KalenderFassung> { erste };
+            if (v.Aenderung is KalenderAenderungVorlage a)
+            {
+                var neu = heute.AddDays(a.InTagen);
+                fassungen.Add(erste with
+                {
+                    Beginn = neu.ToDateTime(Zeit(a.Von)), Ende = neu.ToDateTime(Zeit(a.Bis)), Hinweis = a.Hinweis,
+                    Erstellt = jetzt.AddHours(-5), Kuerzel = "CD",
+                });
+            }
+            if (v.Abgesagt) fassungen.Add(fassungen[^1] with { Abgesagt = true, Erstellt = jetzt.AddHours(-3), Kuerzel = "CD" });
+            liste.Add(fassungen);
+        }
+        return liste;
+    }
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein

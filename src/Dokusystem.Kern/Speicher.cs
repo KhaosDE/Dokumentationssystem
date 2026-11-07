@@ -22,6 +22,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoMedikation = "demo_medikation";
     private const string DemoTherapie = "demo_therapie";
     private const string DemoWochenplan = "demo_wochenplan";
+    private const string DemoKalender = "demo_kalender";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -334,6 +335,32 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER teilnahmen_bleiben BEFORE UPDATE ON teilnahmen
             BEGIN SELECT RAISE(ABORT, 'Teilnahmen werden nicht überschrieben – ein neuer Eintrag gilt.'); END;
         """,
+        // 9 – Kalender: je Termin Fassungen (ändern und absagen sind neue Fassungen). Die
+        //     beteiligten Bewohner als JSON-Liste der Ids.
+        """
+        CREATE TABLE kalender (
+            id INTEGER PRIMARY KEY
+        );
+        CREATE TABLE kalender_fassungen (
+            id         INTEGER PRIMARY KEY,
+            termin_id  INTEGER NOT NULL REFERENCES kalender(id) ON DELETE CASCADE,
+            art        TEXT NOT NULL CHECK (art IN ('bewohner', 'wohnbereich', 'heimfahrt', 'ausflug')),
+            titel      TEXT NOT NULL,
+            beginn     TEXT NOT NULL,
+            ende       TEXT NOT NULL,
+            ganztags   INTEGER NOT NULL DEFAULT 0 CHECK (ganztags IN (0, 1)),
+            ort        TEXT NOT NULL DEFAULT '',
+            hinweis    TEXT NOT NULL DEFAULT '',
+            bewohner   TEXT NOT NULL DEFAULT '[]',
+            treffpunkt TEXT NOT NULL DEFAULT '',
+            begleitung TEXT NOT NULL DEFAULT '',
+            abgesagt   INTEGER NOT NULL DEFAULT 0 CHECK (abgesagt IN (0, 1)),
+            erstellt   TEXT NOT NULL,
+            kuerzel    TEXT NOT NULL
+        );
+        CREATE TRIGGER kalender_fassungen_bleiben BEFORE UPDATE ON kalender_fassungen
+            BEGIN SELECT RAISE(ABORT, 'Termine werden nicht überschrieben – Änderungen sind neue Fassungen.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -462,8 +489,8 @@ public sealed partial class Speicher : IDisposable
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
-             therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan) return false;
+             therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null;
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender) return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
@@ -472,6 +499,7 @@ public sealed partial class Speicher : IDisposable
         if (medikamente || medikation) DemoMedikationEinfuegen(transaktion);   // hängt am Medikamenten-Bestand
         if (therapie) DemoTherapieEinfuegen(transaktion);
         if (therapie || wochenplan) DemoWochenplanEinfuegen(transaktion);   // Teilnahmen hängen an den Zuteilungen
+        if (kalender) DemoKalenderEinfuegen(transaktion);
         transaktion.Commit();
         return true;
     }
@@ -495,6 +523,7 @@ public sealed partial class Speicher : IDisposable
             DemoMedikationEinfuegen(transaktion);
             DemoTherapieEinfuegen(transaktion);
             DemoWochenplanEinfuegen(transaktion);
+            DemoKalenderEinfuegen(transaktion);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
@@ -503,6 +532,7 @@ public sealed partial class Speicher : IDisposable
         MedikationGeaendert?.Invoke();
         TherapieGeaendert?.Invoke();
         WochenplanGeaendert?.Invoke();
+        KalenderGeaendert?.Invoke();
     }
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)
