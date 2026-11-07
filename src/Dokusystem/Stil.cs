@@ -39,6 +39,7 @@ public static class Stil
     public static readonly Marke Zimmer = new(Color.FromArgb(238, 242, 251), Color.FromArgb(42, 63, 107));
     public static readonly Marke Achtung = new(Color.FromArgb(255, 248, 230), Color.FromArgb(122, 74, 0), Color.FromArgb(243, 213, 140));
     public static readonly Marke Offen = new(Color.FromArgb(227, 244, 230), Color.FromArgb(30, 107, 46));
+    public static readonly Marke Unterwegs = new(Color.FromArgb(221, 244, 241), Color.FromArgb(14, 102, 94));   // hier: Übergabe
 
     // ----- Abstandsraster: jeder Abstand ist eines dieser Maße -----
     public const int AbstandMini = 4;     // innerhalb zusammengehöriger Texte
@@ -111,6 +112,8 @@ public static class Stil
     {
         Kern.MarkenArt.Beschluss => Beschluss,
         Kern.MarkenArt.Allergie => Beschluss,
+        Kern.MarkenArt.Uebergabe => Unterwegs,
+        Kern.MarkenArt.Wichtig => Hinweis,
         _ => Achtung,
     };
 
@@ -119,7 +122,9 @@ public static class Stil
     [
         (Beschluss, "Beschluss, Allergie"),
         (Achtung, "nicht erfasst – bitte klären"),
-        (Zimmer, "Zimmer"),
+        (Unterwegs, "Übergabe"),
+        (Hinweis, "wichtig"),
+        (Zimmer, "Zimmer, Lebensbereich"),
     ];
 
     // Weiße Fläche mit 1-px-Rand und abgerundeten Ecken (Karten, Kopf, Hinweise).

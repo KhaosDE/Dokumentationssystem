@@ -1,0 +1,73 @@
+{
+  "hinweis": "Ausgedachte Textbausteine für Demo-Berichte und Übergaben (Bauplan Schritt 3). Kurz, wertneutral, ohne Namen und ohne Diagnosen (docs/heb-wissen.md). Das Programm erzeugt daraus Berichte der letzten vier Wochen und Übergabe-Einträge, relativ zum heutigen Tag. Kürzel sind ausgedacht. {tag} wird durch einen Wochentag in zwei Tagen ersetzt.",
+  "kuerzel": [
+    "AB",
+    "CD",
+    "EF",
+    "GH",
+    "KL"
+  ],
+  "texte": {
+    "1": [
+      "Hat am Nachmittag mit einem Mitbewohner im Gemeinschaftsraum Karten gespielt.",
+      "Hat mit der Schwester telefoniert und wirkte danach ruhig.",
+      "Gibt an, sich auf den Besuch am Wochenende zu freuen.",
+      "Hat sich beim Abendessen an den Gesprächen am Tisch beteiligt.",
+      "Zog sich nach dem Mittagessen in das Zimmer zurück und kam zum Abendessen wieder dazu.",
+      "Hat einem Mitbewohner beim Tragen der Einkäufe geholfen."
+    ],
+    "2": [
+      "Hat das Zimmer nach Aufforderung aufgeräumt.",
+      "Hat die Wäsche selbstständig in die Waschküche gebracht.",
+      "Benötigte Aufforderung zur Körperpflege und kam dieser nach.",
+      "Hat beim Tischdecken geholfen.",
+      "Hat den Einkauf für die Wohngruppe unter Begleitung erledigt.",
+      "Hat das Bett frisch bezogen, nachdem daran erinnert wurde."
+    ],
+    "3": [
+      "War pünktlich in der Arbeitstherapie.",
+      "Hat die Arbeitstherapie nach einer Stunde beendet und gibt an, müde gewesen zu sein.",
+      "Hat in der Holzwerkstatt mitgearbeitet.",
+      "Ließ sich auf das Angebot in der Gärtnerei ein.",
+      "Kam der Aufgabe im Küchendienst nach.",
+      "Hat in der Arbeitstherapie neue Aufgaben kennengelernt und nachgefragt, wie sie gehen."
+    ],
+    "4": [
+      "Hat am Spaziergang der Gruppe teilgenommen.",
+      "Hat den Nachmittag mit Musikhören im Zimmer verbracht.",
+      "Nahm am Kochangebot im Haus teil.",
+      "Hat sich für den Ausflug am Wochenende angemeldet.",
+      "Verbrachte den Abend vor dem Fernseher im Gemeinschaftsraum.",
+      "Hat in der Bibliothek im Haus Bücher ausgeliehen."
+    ],
+    "5": [
+      "Hat die Medikamente zur vereinbarten Zeit eingenommen.",
+      "Gibt an, schlecht geschlafen zu haben. Ein Gespräch wurde angeboten und angenommen.",
+      "War unter Begleitung beim Arzttermin.",
+      "Wirkte am Vormittag angespannt und nahm das Gesprächsangebot an.",
+      "Hat die Medikamente nach Erinnerung eingenommen.",
+      "Hat von sich aus um ein Gespräch gebeten und danach berichtet, dass es geholfen habe."
+    ],
+    "allgemein": [
+      "Ruhiger Dienst, keine Besonderheiten.",
+      "Hat das Haus für einen vereinbarten Ausgang verlassen und ist pünktlich zurückgekehrt.",
+      "Keine Besonderheiten im Dienst."
+    ]
+  },
+  "nachtraege": [
+    "Korrektur: Die Uhrzeit war eine halbe Stunde später.",
+    "Ergänzung: Der Termin wird nächste Woche fortgesetzt.",
+    "Ergänzung: Hat sich später für die Unterstützung bedankt."
+  ],
+  "uebergabe": {
+    "saetze": [
+      "Arzttermin {tag} 10 Uhr, Begleitung nötig.",
+      "Bitte heute Abend nach dem Befinden fragen, der Tag war unruhig.",
+      "Neue Telefonnummer der Schwester liegt im Büro."
+    ],
+    "notizen": [
+      "Getränkelieferung kommt {tag}, bitte Leergut im Keller bereitstellen.",
+      "Waschmaschine im Keller ist defekt, der Hausmeister ist informiert."
+    ]
+  }
+}

@@ -64,6 +64,19 @@ public static class Hilfe
     }
 }
 
+// Ersetzt Dialog.Zeigen für einen Test: Der Test füllt das Fenster aus, statt auf einen Menschen
+// zu warten. Danach gilt wieder das Vorherige.
+public sealed class DialogErsatz : IDisposable
+{
+    private readonly Func<Form, IWin32Window?, DialogResult> vorher = Dialog.Zeigen;
+    public List<string> Titel { get; } = [];
+
+    public DialogErsatz(Func<Form, DialogResult> aktion) =>
+        Dialog.Zeigen = (fenster, _) => { Titel.Add(fenster.Text); return aktion(fenster); };
+
+    public void Dispose() => Dialog.Zeigen = vorher;
+}
+
 // Leerer Datenordner mit Demo-Daten und offenem Speicher für einen Test.
 public sealed class Umgebung : IDisposable
 {

@@ -1,0 +1,18 @@
+# Wörter, die oft übergaberelevant sind (Tägliche Dokumentation, Hinweis vor dem Speichern).
+# Kommt eines davon im Bericht vor und ist „Übergabe“ nicht gesetzt, fragt das Programm einmal nach.
+# Ein Wort pro Zeile; Groß/klein egal; Wortteile genügen („Arzt“ findet auch „Arzttermin“).
+# Eigene Wörter: Datei „uebergabe-woerter.txt“ mit demselben Aufbau in den Datenordner legen.
+Arzt
+Termin
+Krise
+Sturz
+gestürzt
+verweigert
+abgängig
+Notfall
+Krankenhaus
+Klinik
+Fieber
+verletzt
+Verletzung
+Polizei

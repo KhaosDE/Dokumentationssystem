@@ -8,12 +8,13 @@ public static class Bauplan
 
     public static readonly IReadOnlyDictionary<string, Vorhaben> Bereiche = new Dictionary<string, Vorhaben>
     {
-        ["Übersicht"] = new("0.15.0", "Alle Bewohner auf einen Blick: was heute wichtig ist – Termine, Änderungen in der Medikation, Beschlüsse, die bald enden, fällige HEB-Bögen."),
-        ["Neuer Bericht"] = new("0.6.0", "Hier entsteht ein Bericht zu einem Bewohner: Schicht, Lebensbereiche, Text, „für die Übergabe wichtig“."),
-        ["Übergabe"] = new("0.6.0", "Alle Berichte seit Beginn der vorigen Schicht, die wichtigen oben."),
-        ["Kalender"] = new("0.11.0", "Termine des Wohnbereichs: Arzttermine, Heimfahrten, Tagesausflüge – als Monat, Woche oder Tag."),
-        ["Therapie"] = new("0.9.0", "Die Therapieangebote mit Teilnehmern und freien Plätzen; zugeteilte Angebote erscheinen im Wochenplan."),
-        ["Medikamente"] = new("0.7.0", "Eine Liste gängiger Medikamente zum Auswählen beim Verordnen (Demo-Bestand)."),
+        ["Übersicht"] = new("0.17.0", "Alle Bewohner auf einen Blick: was heute wichtig ist – Termine, Änderungen in der Medikation, Beschlüsse, die bald enden, fällige HEB-Bögen."),
+        ["Aufgaben"] = new("0.7.0", "Die Aufgabenliste des Wohnbereichs: Aufgaben an die nächste Schicht weitergeben, bis sie erledigt sind."),
+        ["Nachrichten"] = new("0.8.0", "Nachrichten an Kolleginnen und Kollegen – an einzelne Personen oder an Teams."),
+        ["Kalender"] = new("0.13.0", "Termine des Wohnbereichs: Arzttermine, Heimfahrten, Tagesausflüge – als Monat, Woche oder Tag."),
+        ["Therapie"] = new("0.11.0", "Die Therapieangebote mit Teilnehmern und freien Plätzen; zugeteilte Angebote erscheinen im Wochenplan."),
+        ["Medikamente"] = new("0.9.0", "Eine Liste gängiger Medikamente zum Auswählen beim Verordnen (Demo-Bestand)."),
+        ["Ausgangsliste"] = new("0.14.0", "Ausgänge, An- und Abwesenheit und Unterbringung – als Modul, das sich in den Einstellungen abschalten lässt."),
     };
 
     // Reiter der Bewohnerakte, in dieser Reihenfolge. Stammdaten gibt es schon.
@@ -21,12 +22,11 @@ public static class Bauplan
 
     public static readonly IReadOnlyDictionary<string, Vorhaben> Reiter = new Dictionary<string, Vorhaben>
     {
-        ["Berichte"] = new("0.6.0", "Die täglichen Berichte zu diesem Bewohner, neueste oben, mit Filtern und Druckvorschau."),
-        ["Medikation"] = new("0.8.0", "Grundverordnung, Pausen und Stufenpläne – und was heute gilt."),
-        ["Wochenplan"] = new("0.10.0", "Der Wochenplan mit Therapien und Terminen, auch zum Ausdrucken."),
-        ["Biografie"] = new("0.13.0", "Lebensgeschichte in Abschnitten, mit Verlauf und Liste fehlender Angaben."),
-        ["Reflexion"] = new("0.14.0", "Je Monat eine kurze Reflexion je Lebensbereich, mit den Berichten des Monats daneben."),
-        ["HEB"] = new("0.16.0", "Der HEB-Bogen für einen Zeitraum, zusammengestellt aus Berichten, Wochenplan und Reflexionen."),
+        ["Medikation"] = new("0.10.0", "Grundverordnung, Pausen und Stufenpläne – und was heute gilt."),
+        ["Wochenplan"] = new("0.12.0", "Der Wochenplan mit Therapien und Terminen, auch zum Ausdrucken."),
+        ["Biografie"] = new("0.15.0", "Lebensgeschichte in Abschnitten, mit Verlauf und Liste fehlender Angaben."),
+        ["Reflexion"] = new("0.16.0", "Je Monat eine kurze Reflexion je Lebensbereich, mit den Berichten des Monats daneben."),
+        ["HEB"] = new("0.18.0", "Der HEB-Bogen für einen Zeitraum, zusammengestellt aus Berichten, Wochenplan und Reflexionen."),
     };
 }
 

@@ -123,7 +123,7 @@ Umfang:
 - Ausdrücklich nicht: neue Funktionen über 0.2.0 hinaus (außer dem Aussehen).
 
 ## Tägliche Dokumentation
-Status: freigegeben (Bauplan Schritt 3)
+Status: erledigt (07.11.2026; Bauplan Schritt 3, Version 0.6.0)
 Datum: 05.11.2026
 Was: Tägliche schriftliche Dokumentation je Bewohner: der Teil, in dem Berichte über
 Bewohner geschrieben werden. **Wichtigster Bereich des Programms** (Tobi, 07.11.2026).
