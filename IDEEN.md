@@ -426,7 +426,7 @@ Umfang:
 - Einstellungen in `einstellungen.json` bzw. Datenbank, wie bisher entschieden.
 
 ## Gestaltung Stufe 2
-Status: freigegeben (Bauplan Schritt 2)
+Status: erledigt (07.11.2026; Bauplan Schritt 2, Version 0.5.0)
 Datum: 07.11.2026
 Was: Das Aussehen rückt näher an die Ausgangsliste: reichere Karten, Marken, Logofeld,
 Farbschlüssel.

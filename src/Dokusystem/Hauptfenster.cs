@@ -3,7 +3,8 @@ using Dokusystem.Kern;
 namespace Dokusystem;
 
 // Hauptfenster: Seitenleiste links mit allen Bereichen (unten Demo-Daten und Version), rechts der
-// Kopf mit Logofeld und dauerhaft sichtbarem Demo-Hinweis, darunter der aktive Bereich.
+// Kopf mit Logofeld und dauerhaft sichtbarem Demo-Hinweis, darunter der aktive Bereich, ganz unten
+// die Statusleiste mit dem Farbschlüssel.
 // Noch nicht gebaute Bereiche zeigen „Kommt in Version …“ (Bauplan in IDEEN.md).
 public sealed class Hauptfenster : Form
 {
@@ -20,6 +21,7 @@ public sealed class Hauptfenster : Form
     private readonly Dictionary<string, Control> seiten = [];
 
     public KopfBereich Kopf { get; } = new() { Dock = DockStyle.Top };
+    public Statusleiste Statusleiste { get; } = new() { Dock = DockStyle.Bottom };
     public BewohnerBereich Bewohner { get; }
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
@@ -86,6 +88,7 @@ public sealed class Hauptfenster : Form
         var inhalt = new Panel { Dock = DockStyle.Fill, BackColor = Stil.Seite };
         inhalt.Controls.Add(bereichsFlaeche);
         inhalt.Controls.Add(Kopf);
+        inhalt.Controls.Add(Statusleiste);
         bereichsFlaeche.BringToFront();   // Fill wird zuletzt angeordnet und nimmt den Rest
 
         Controls.Add(inhalt);

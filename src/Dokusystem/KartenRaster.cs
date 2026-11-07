@@ -4,8 +4,8 @@ namespace Dokusystem;
 // die Karten in so viele Spalten, wie in die Breite passen, und zieht sie auf die volle Breite.
 public sealed class KartenRaster : Panel
 {
-    private const int Abstand = Stil.AbstandMittel;   // zwischen den Karten (logische Pixel)
-    private const int Rand = Stil.AbstandGross;       // zum Rand des Bereichs
+    private const int Abstand = Stil.AbstandMini;     // zwischen den Karten (dazu kommt ihr Schattenrand)
+    private const int Rand = Stil.AbstandGross - BewohnerKarte.RandSeite;   // Kartenfläche 16 px vom Rand
 
     public KartenRaster()
     {

@@ -87,6 +87,41 @@ public static class Stil
         g.FillPath(pinsel, pfad);
     }
 
+    // Weicher Schatten unter einer Karte (aus der Ausgangsliste, Gestaltung Stufe 2): mehrere
+    // Lagen, nach außen immer durchsichtiger – die Karte wirkt leicht angehoben.
+    public static void SchattenZeichnen(Graphics g, RectangleF flaeche, float radius, float skala)
+    {
+        const int lagen = 6, grundAlpha = 12;
+        float versatz = 2f * skala;
+        for (int i = lagen; i >= 1; i--)
+        {
+            float w = i * skala;
+            var r = RectangleF.Inflate(flaeche, w * 0.6f, w * 0.6f);
+            r.Offset(0, versatz + w * 0.35f);
+            int alpha = Math.Max(1, grundAlpha * (lagen - i + 1) / lagen / 2);
+            using var pinsel = new SolidBrush(Color.FromArgb(alpha, Schatten));
+            using var pfad = Abgerundet(r, radius + w * 0.6f);
+            g.FillPath(pinsel, pfad);
+        }
+    }
+
+    // Farbe der Marken auf den Karten. Farbe nie allein: Jede Marke trägt ein Wort, und die
+    // Statusleiste erklärt die Farben.
+    public static Marke MarkeFuer(Kern.MarkenArt art) => art switch
+    {
+        Kern.MarkenArt.Beschluss => Beschluss,
+        Kern.MarkenArt.Allergie => Beschluss,
+        _ => Achtung,
+    };
+
+    // Der Farbschlüssel der Statusleiste: Farbe und was sie bedeutet.
+    public static readonly (Marke Marke, string Text)[] Farbschluessel =
+    [
+        (Beschluss, "Beschluss, Allergie"),
+        (Achtung, "nicht erfasst – bitte klären"),
+        (Zimmer, "Zimmer"),
+    ];
+
     // Weiße Fläche mit 1-px-Rand und abgerundeten Ecken (Karten, Kopf, Hinweise).
     public static void FlaecheZeichnen(Graphics g, RectangleF flaeche, float radius, Color grund, Color rand,
         float randDicke = 1f, bool gestrichelt = false)

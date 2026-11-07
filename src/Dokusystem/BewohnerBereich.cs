@@ -2,7 +2,7 @@ using Dokusystem.Kern;
 
 namespace Dokusystem;
 
-// Bereich „Bewohner“: Übersicht als Kartenraster, Klick öffnet die Akte.
+// Bereich „Bewohner“: Übersicht als Kartenraster mit Filterknöpfen, Klick öffnet die Akte.
 // Der Kopf (KopfBereich) zeigt je Ansicht passende Texte und Knöpfe; pro Ansicht genau eine
 // Hauptaktion in Akzentfarbe.
 public sealed class BewohnerBereich : Panel
@@ -14,6 +14,16 @@ public sealed class BewohnerBereich : Panel
     private readonly Button bearbeitenKnopf = Stil.HauptKnopf("Bearbeiten …");
 
     public KartenRaster Raster { get; } = new() { Dock = DockStyle.Fill };
+    public FlowLayoutPanel FilterLeiste { get; } = new()
+    {
+        Dock = DockStyle.Top, AutoSize = true, WrapContents = true, BackColor = Stil.Seite,
+        Padding = new Padding(Stil.AbstandGross, Stil.AbstandMini, Stil.AbstandGross, 0),
+    };
+    public Dictionary<BewohnerFilter, FilterKnopf> FilterKnoepfe { get; } = [];
+    public BewohnerFilter AktiverFilter { get; private set; } = BewohnerFilter.Alle;
+
+    // Der heutige Tag (für die Aufenthaltsdauer); zum Testen ersetzbar.
+    internal Func<DateOnly> Heute { get; set; } = () => DateOnly.FromDateTime(DateTime.Today);
     public AkteAnsicht Akte { get; } = new() { Dock = DockStyle.Fill, Visible = false };
     // Eigenes Feld statt Akte.Visible: Visible meldet „unsichtbar“, solange das Fenster selbst
     // noch nicht angezeigt ist.
@@ -28,8 +38,18 @@ public sealed class BewohnerBereich : Panel
         this.speicher = speicher;
         this.kopf = kopf;
         BackColor = Stil.Seite;
+        foreach (var filter in Enum.GetValues<BewohnerFilter>())
+        {
+            var knopf = new FilterKnopf(Kennzeichen.FilterText(filter));
+            knopf.Click += (_, _) => FilterSetzen(filter);
+            FilterKnoepfe[filter] = knopf;
+            FilterLeiste.Controls.Add(knopf);
+        }
         Controls.Add(Raster);
         Controls.Add(Akte);
+        Controls.Add(FilterLeiste);
+        Raster.BringToFront();
+        Akte.BringToFront();
         neuKnopf.Click += (_, _) => Formular(null);
         zurueckKnopf.Click += (_, _) => UebersichtZeigen();
         bearbeitenKnopf.Click += (_, _) =>
@@ -38,20 +58,34 @@ public sealed class BewohnerBereich : Panel
         };
     }
 
-    // Kopf und Inhalt für die Übersicht.
+    public void FilterSetzen(BewohnerFilter filter)
+    {
+        AktiverFilter = filter;
+        UebersichtZeigen();
+    }
+
+    // Kopf und Inhalt für die Übersicht: Filterknöpfe mit Zählern, darunter die passenden Karten.
     public void UebersichtZeigen()
     {
         var alle = speicher.AlleBewohner();
-        Raster.KartenSetzen(alle.Select(b =>
+        foreach (var (filter, knopf) in FilterKnoepfe)
         {
-            var karte = new BewohnerKarte(b);
+            knopf.Anzahl = alle.Count(b => Kennzeichen.Passt(b, filter));
+            knopf.Aktiv = filter == AktiverFilter;
+        }
+        var sichtbar = alle.Where(b => Kennzeichen.Passt(b, AktiverFilter)).ToList();
+        DateOnly heute = Heute();
+        Raster.KartenSetzen(sichtbar.Select(b =>
+        {
+            var karte = new BewohnerKarte(b, heute);
             karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
             return karte;
         }));
         Akte.Visible = false;
-        Raster.Visible = true;
+        Raster.Visible = FilterLeiste.Visible = true;
         AkteSichtbar = false;
-        kopf.TexteSetzen(alle.Count == 1 ? "1 Bewohner" : $"{alle.Count} Bewohner", "Bewohner");
+        string anzahl = alle.Count == 1 ? "1 Bewohner" : $"{alle.Count} Bewohner";
+        kopf.TexteSetzen(AktiverFilter == BewohnerFilter.Alle ? anzahl : $"{sichtbar.Count} von {anzahl}", "Bewohner");
         kopf.KnoepfeSetzen(neuKnopf);
     }
 
@@ -63,7 +97,7 @@ public sealed class BewohnerBereich : Panel
             return;
         }
         Akte.Zeigen(b);
-        Raster.Visible = false;
+        Raster.Visible = FilterLeiste.Visible = false;
         Akte.Visible = true;
         AkteSichtbar = true;
         kopf.TexteSetzen("Bewohnerakte", b.Name);
