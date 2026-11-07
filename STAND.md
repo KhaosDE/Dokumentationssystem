@@ -10,10 +10,10 @@ Python-Version 0.2.0 konnte. Es sieht aus wie die Ausgangsliste: Kopf mit Farbve
 Bewohner als Kartenraster, Seitenleiste links. Die Python-Version ist entfernt (sie bleibt in
 der Git-Geschichte).
 
-**Nächster Schritt:** In `IDEEN.md` ist nichts mehr freigegeben. Offen und im Chat zu klären:
-„Tägliche Dokumentation“, „Wochenplan“, „HEB-Bogen aus Berichten“, „Medikation“,
-„Medikamentendatenbank“, „Startseite als Übersicht“, „Therapie-Bereich“,
-„Wohnbereichskalender“.
+**Nächster Schritt (07.11.2026):** Tobi hat alle gesammelten Ideen freigegeben. Bauplan mit
+13 Schritten (Versionen 0.4.0 bis 0.16.0) oben in `IDEEN.md`; begonnen wird mit Schritt 1
+„Programmgerüst mit allen Bereichen und Einstellungen“. Für die Schritte 2 und 9 das
+Repository `KhaosDE/Ausgangsliste` anhängen.
 
 ## Fertig
 

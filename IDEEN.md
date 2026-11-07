@@ -14,6 +14,40 @@ Warum: <wofür Tobi es braucht>
 Umfang: <was dazu gehört, was ausdrücklich nicht>
 ```
 
+## Bauplan ab 07.11.2026 (gilt vor der Reihenfolge in dieser Datei)
+
+Entscheidung Tobi (07.11.2026): **Alle gesammelten Ideen werden umgesetzt**, damit die Demo
+alle Bereiche zeigt. Gebaut wird in dieser Reihenfolge, jeder Eintrag als eigener Pull
+Request mit eigener Version und Testliste in `STAND.md`:
+
+| Schritt | Eintrag | Version |
+|---|---|---|
+| 1 | Programmgerüst mit allen Bereichen und Einstellungen | 0.4.0 |
+| 2 | Gestaltung Stufe 2 | 0.5.0 |
+| 3 | Tägliche Dokumentation | 0.6.0 |
+| 4 | Medikamentendatenbank | 0.7.0 |
+| 5 | Medikation: Grundverordnung, Pause, Stufenplan | 0.8.0 |
+| 6 | Therapie-Bereich | 0.9.0 |
+| 7 | Wochenplan | 0.10.0 |
+| 8 | Wohnbereichskalender | 0.11.0 |
+| 9 | Ausgang (aus der Ausgangsliste) | 0.12.0 |
+| 10 | Biografie | 0.13.0 |
+| 11 | Monatsreflexion | 0.14.0 |
+| 12 | Startseite als Übersicht (Dashboard) | 0.15.0 |
+| 13 | HEB-Bogen aus Berichten | 0.16.0 |
+
+Für alle Schritte gilt:
+- Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
+  `erledigt` ist.
+- **Jeder Bereich bekommt ausgedachte Demo-Daten**, damit er sich vorführen lässt. Datumsangaben
+  in Demo-Daten **relativ zum heutigen Tag** erzeugen (z. B. „vor 3 Tagen“, „in 2 Wochen“),
+  damit die Demo an jedem Tag etwas zeigt. „Demo-Daten zurücksetzen“ setzt alle Bereiche zurück.
+- Demo-Texte (Berichte, Biografien) sind erkennbar ausgedacht, kurz und wertneutral nach
+  `docs/heb-wissen.md`; keine Diagnosen.
+- Steht in einem Eintrag „Festlegungen für die Demo“, sind das Annahmen. Weicht etwas davon
+  ab, in `STAND.md` unter „Entscheidungen“ festhalten.
+- „Mehrplatzbetrieb über einen Server (später)“ gehört **nicht** dazu.
+
 ## Programmrahmen und Selbst-Update
 Status: erledigt (05.11.2026)
 Datum: 05.11.2026
@@ -86,22 +120,35 @@ Umfang:
 - Ausdrücklich nicht: neue Funktionen über 0.2.0 hinaus (außer dem Aussehen).
 
 ## Tägliche Dokumentation
-Status: offen
+Status: freigegeben (Bauplan Schritt 3)
 Datum: 05.11.2026
 Was: Tägliche schriftliche Dokumentation je Bewohner. Zweiter Teil des Kerns.
 Warum: Laut Tobi Hauptteil des Programms neben der Bewohnerführung.
-Umfang: wird im Chat ausgearbeitet. Nicht bauen.
-- Bekannte Anforderung aus „HEB-Bogen aus Berichten“: Berichte müssen sich später einem
-  Zeitraum und einem Lebensbereich bzw. Ziel zuordnen lassen.
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- Ein Bericht hat: Bewohner, Datum und Uhrzeit, Schicht (Früh, Spät, Nacht), Verfasser
+  (Kürzel; eigenes Kürzel in den Einstellungen), **Lebensbereich(e)** 1–5 aus
+  `docs/heb-wissen.md` (Mehrfachauswahl, mindestens einer oder „allgemein“), Text, Häkchen
+  „für die Übergabe wichtig“.
+- Eingabe aus der Akte (Reiter „Berichte“) und über „Neuer Bericht …“ in der Seitenleiste
+  (mit Bewohnerauswahl).
+- Liste je Bewohner, neueste oben; Filter nach Zeitraum, Lebensbereich und Schicht; Suche im
+  Text.
+- **Übergabe-Ansicht:** alle Berichte aller Bewohner seit Beginn der vorigen Schicht, die als
+  wichtig markierten oben.
+- **Nichts wird gelöscht oder überschrieben:** Korrekturen sind Nachträge mit eigenem
+  Zeitstempel, der ursprüngliche Text bleibt sichtbar.
+- Ausdruck: Berichte eines Bewohners für einen Zeitraum (Druckvorschau).
+- Demo: für jeden Bewohner Berichte der letzten vier Wochen, über alle Lebensbereiche verteilt.
+- Ausdrücklich nicht: Pflegeplanung, Vitalwerte.
 
 ## Wochenplan
-Status: offen
+Status: freigegeben (Bauplan Schritt 7)
 Datum: 06.11.2026
 Was: Eine Anzeige, in der man für jeden Bewohner einzeln seinen Wochenplan sieht. Der Plan
 lässt sich jederzeit mit Therapien bearbeiten.
 Warum: Der Wochenplan gibt dem Bewohner Struktur und ist eine Grundlage für den HEB-Bogen.
 Im bisherigen System gibt es keinen übersichtlichen Wochenplan für den Bewohner.
-Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+Umfang (Vorschlag aus dem Chat, freigegeben 07.11.2026):
 - Ansicht je Bewohner: Montag bis Sonntag als Spalten, Uhrzeiten als Zeilen; jeder Termin
   mit Therapie, Uhrzeit von–bis, Ort und Hinweis. Erreichbar aus der Bewohnerakte.
 - Therapien kommen aus dem Bereich „Therapie“ (eigener Eintrag unten): Dort zugeteilte
@@ -116,14 +163,16 @@ Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
   nicht überschrieben. Grund: Der HEB-Bogen muss zeigen können, welcher Plan in seinem
   Zeitraum galt.
 - Ausdrücklich nicht: Dienstplan der Mitarbeiter, Raumbelegung, Abgleich mit Kalendern.
-Offene Fragen (nicht bauen, bevor geklärt):
-- Ist der Wochenplan eine Regelwoche, die jede Woche gleich gilt, bis man sie ändert —
-  oder wird jede Kalenderwoche einzeln geplant?
-- Soll festgehalten werden, ob der Bewohner einen Termin wahrgenommen hat (teilgenommen,
-  abgesagt, ausgefallen)? Das wäre für den HEB-Bogen aussagekräftig.
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- **Regelwoche:** Der Plan gilt jede Woche gleich, bis er „ab Datum …“ geändert wird.
+  Einzelne Termine aus dem Kalender (Arzttermin, Heimfahrt, Ausflug) erscheinen in der
+  jeweiligen Woche zusätzlich, farblich abgesetzt. Blättern nach Kalenderwochen.
+- **Teilnahme:** Bei Therapie-Terminen lässt sich für einen Tag „teilgenommen“, „abgesagt“
+  oder „ausgefallen“ eintragen (ohne Eintrag: offen). Der HEB-Bogen zeigt die Zahlen je
+  Angebot im Zeitraum.
 
 ## HEB-Bogen aus Berichten
-Status: offen
+Status: freigegeben (Bauplan Schritt 13)
 Datum: 06.11.2026
 Was: Für einen Bewohner einen HEB-Bogen (Hilfe- und Entwicklungsbogen) für einen Zeitraum
 „von … bis …“ erstellen. Das Programm nutzt dafür die eingetragenen Berichte dieses
@@ -167,22 +216,25 @@ Umfang (Entscheidungen Tobi, 06.11.2026, Rest Vorschlag aus dem Chat):
   Ob es die Formularfelder des Bezirks-Bogens sauber füllt, ist ungeprüft; zuerst mit der
   Test-PDF erproben.
 - Ausdrücklich nicht: Versand an den Kostenträger, Unterschrift.
-Offene Fragen (nicht bauen, bevor geklärt):
-- Hat der Bogen des Bezirks ausfüllbare Formularfelder, und wie heißen sie? Der Chat trägt
-  die Feldnamen nach, sobald Tobi einen leeren Bogen bereitstellt.
-- Gibt es einen Zwischenschritt (Monats- oder Quartalsreflexion) zwischen Berichten und
-  HEB-Bogen?
-- Weitere Felder außerhalb der Lebensbereiche (Sichtweise des Leistungsberechtigten,
-  ergänzende Ausführungen, Erläuterung zur Beendigung) — Aufbau noch nicht erfasst.
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- Die Feldnamen des echten Bogens sind unbekannt. Gebaut wird gegen die selbst gebaute
+  Test-PDF; die Zuordnung „Programmfeld → PDF-Feld“ in den Einstellungen macht den echten
+  Bogen später ohne Programmänderung nutzbar. Ohne zugeteilte PDF bleibt die Eingabemaske
+  nutzbar (Entwurf speichern, Ausdruck der eigenen Maske).
+- Dritte Quelle neben jedem Feld: die Monatsreflexionen des Zeitraums (siehe
+  „Monatsreflexion“), falls vorhanden.
+- Felder außerhalb der Lebensbereiche: je ein freies Textfeld „Sichtweise des
+  Leistungsberechtigten“ und „Ergänzende Ausführungen“, bei HEB C zusätzlich „Erläuterung zur
+  Beendigung“ — ohne Zeichengrenze, bis der echte Bogen vorliegt.
 
 ## Medikation: Grundverordnung, Pause, Stufenplan
-Status: offen
+Status: freigegeben (Bauplan Schritt 5)
 Datum: 06.11.2026
 Was: Medikation je Bewohner. Die Grundverordnung bleibt immer erhalten; Pausen und
 Änderungen in Etappen (ansetzen, absetzen) liegen als eigene Einträge darüber.
 Warum: Im bisherigen System lassen sich Medikamente nicht pausieren, und eine Anpassung
 über mehrere Tage geht nur, indem das Medikament mehrfach angelegt wird.
-Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+Umfang (Vorschlag aus dem Chat, freigegeben 07.11.2026):
 - **Grundverordnung:** Medikament (aus der Medikamentendatenbank), Dosis je Einnahmezeit
   (morgens, mittags, abends, nachts), Beginn, Anordnung (Arzt und Datum, ausgedacht),
   Hinweis. Bedarfsmedikation getrennt davon.
@@ -197,13 +249,16 @@ Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
   nicht einfach nicht.
 - Ausdrücklich nicht: Dosisvorschläge, Prüfung auf Wechselwirkungen, Stellen und Ausgabe
   abzeichnen, Bestand und Ablaufdaten.
-Offene Fragen (nicht bauen, bevor geklärt):
-- Was gilt am Ende eines Stufenplans: Beim Ansetzen oder Umstellen wird die letzte Stufe
-  zur neuen Grundverordnung? Beim Absetzen auf null bleibt die Grundverordnung als
-  „abgesetzt am …“ im Verlauf stehen?
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- Ende eines Stufenplans beim **Ansetzen oder Umstellen:** Die letzte Stufe wird zur neuen
+  Grundverordnung; die vorige bleibt im Verlauf als „ersetzt am …“.
+- Ende beim **Absetzen auf null:** Die Grundverordnung bleibt im Verlauf als „abgesetzt am …“
+  stehen und erscheint nicht mehr unter „Was gilt heute“.
+- Ausdruck: „Was gilt heute“ als Übersicht je Bewohner (Druckvorschau), mit dem Vermerk
+  „Demo — nicht zum Stellen verwenden“.
 
 ## Medikamentendatenbank
-Status: offen
+Status: freigegeben (Bauplan Schritt 4)
 Datum: 06.11.2026
 Was: Eine vorgefertigte Liste von Medikamenten, aus der beim Verordnen ausgewählt wird,
 statt den Namen frei einzutippen.
@@ -218,18 +273,24 @@ Umfang (Vorschlag aus dem Chat):
 - Fehlt ein Medikament: von Hand anlegen, gekennzeichnet als „selbst angelegt“.
 - Echte Wirkstoff- und Handelsnamen sind hier erlaubt; das sind keine Bewohnerdaten
   (`CLAUDE.md`, Regel 1).
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- Etwa 30 gängige Wirkstoffe (Psychiatrie und Allgemeinmedizin). Stärken und
+  Darreichungsformen **nur mit Quelle**; ist keine Quelle gefunden, bleibt das Feld leer
+  statt geschätzt.
+- Eigener Bereich „Medikamente“ in der Navigation: Liste mit Suche, Eintrag ansehen,
+  anlegen, ändern.
 Offen: Eine vollständige echte Datenbank (z. B. vom BfArM oder einem kommerziellen
 Anbieter) erst klären, wenn das Programm über eine Demo hinausgeht — Nutzungsrechte sind
 nicht geprüft.
 
 ## Startseite als Übersicht (Dashboard)
-Status: offen
+Status: freigegeben (Bauplan Schritt 12)
 Datum: 06.11.2026
 Was: Die Hauptseite zeigt alle Bewohner des Wohnbereichs auf einen Blick und ist immer
 aktuell.
 Warum: Wer den Dienst beginnt, soll sofort sehen, was heute wichtig ist, ohne jede Akte zu
 öffnen.
-Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+Umfang (Vorschlag aus dem Chat, freigegeben 07.11.2026):
 - Kartenraster wie in der Ausgangsliste (`docs/gestaltung.md`): je Bewohner Bild, Name,
   Zimmer und Marken.
 - Marken (nur wenn zutreffend, Farbe nie allein): Allergie eingetragen, Angabe „nicht
@@ -240,17 +301,22 @@ Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
   Datumswechsel um Mitternacht neu auf.
 - Klick auf eine Karte öffnet die Bewohnerakte.
 - Bezieht Daten aus Einträgen, die noch nicht gebaut sind; zeigt nur, was es schon gibt.
-Offene Fragen:
-- Ab wie vielen Tagen vor Beschlussende soll „Beschluss endet bald“ erscheinen?
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- „Beschluss endet bald“ ab **90 Tagen** vor Beschlussende, einstellbar in den Einstellungen.
+- „HEB fällig“: wenn der letzte HEB-Bogen länger als die eingestellte Frist her ist
+  (Vorgabe 12 Monate) oder bei neuen Bewohnern kein HEB A innerhalb von drei Monaten nach
+  Aufnahme vorliegt.
+- Die Startseite ist der erste Bereich in der Navigation und öffnet beim Programmstart.
+- Abwesende (Heimfahrt, Ausgang) werden auf der Karte gekennzeichnet.
 
 ## Therapie-Bereich
-Status: offen
+Status: freigegeben (Bauplan Schritt 6)
 Datum: 06.11.2026
 Was: Ein eigener Bereich in der Navigation, in dem die Therapie ihre Angebote verwaltet,
 einträgt und Bewohnern zuteilt. Zugeteilte Therapien erscheinen in den Wochenplänen.
 Warum: Die Therapie plant ihre Angebote selbst; der Wohnbereich soll das Ergebnis im
 Wochenplan sehen, ohne es abzuschreiben.
-Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+Umfang (Vorschlag aus dem Chat, freigegeben 07.11.2026):
 - Therapieangebote anlegen: Name, Art (Einzel/Gruppe), Therapeut (ausgedacht), Ort,
   Wochentag(e) und Uhrzeit, höchste Teilnehmerzahl, Hinweis. In der Demo ausgedachte,
   allgemeine Angebote.
@@ -285,13 +351,13 @@ Bestehende Ansichten (Bewohner-Übersicht, Akte, Formular) werden angepasst.
 Ausdrücklich nicht: Logo oder Name der Einrichtung im Repository.
 
 ## Wohnbereichskalender
-Status: offen
+Status: freigegeben (Bauplan Schritt 8)
 Datum: 06.11.2026
 Was: Ein Kalender für den ganzen Wohnbereich. Er zeigt Termine, die Bewohner betreffen, und
 dient zum Planen von Heimfahrten und Tagesausflügen.
 Warum: Wunsch Tobi (06.11.2026). Termine einzelner Bewohner und gemeinsame Unternehmungen
 stehen an einer Stelle, statt verstreut.
-Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
+Umfang (Vorschlag aus dem Chat, freigegeben 07.11.2026):
 - Ansichten Monat, Woche, Tag; Filter „alle“ oder ein Bewohner.
 - Terminarten: Termin eines Bewohners (z. B. Arzttermin), Termin des Wohnbereichs,
   **Heimfahrt** (von Datum/Uhrzeit bis Datum/Uhrzeit, auch über mehrere Tage),
@@ -302,6 +368,83 @@ Umfang (Vorschlag aus dem Chat, von Tobi noch zu bestätigen):
 - Ausdruck: Monats- oder Wochenansicht des Kalenders; Teilnehmerliste eines Ausflugs.
 - Ausdrücklich nicht: Abgleich mit Outlook oder anderen Kalendern (kein Internet,
   `CLAUDE.md`, Regel 6).
-Offene Fragen:
-- Muss bei einer Heimfahrt etwas mitgeplant werden (z. B. mitgegebene Medikation,
-  Rückkehrzeit)?
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- Heimfahrt mit geplanter Rückkehr (Datum, Uhrzeit) und Hinweisfeld. Mitgegebene
+  Medikation wird **nicht** berechnet; das Hinweisfeld genügt für die Demo.
+
+## Programmgerüst mit allen Bereichen und Einstellungen
+Status: freigegeben (Bauplan Schritt 1)
+Datum: 07.11.2026
+Was: Die Navigation bekommt alle Bereiche, die Bewohnerakte Reiter für ihre Teile, und es
+gibt ein Einstellungsfenster. Noch nicht gebaute Bereiche zeigen einen freundlichen Hinweis
+„kommt in Version …“ statt leer zu sein.
+Warum: Tobi sieht in der Demo bisher nur das Hauptfenster (07.11.2026). Das Gerüst macht
+sichtbar, wohin das Programm wächst, und gibt jedem späteren Schritt seinen festen Platz.
+Umfang:
+- Seitenleiste: Übersicht, Bewohner, Neuer Bericht …, Übergabe, Kalender, Therapie,
+  Medikamente, Einstellungen.
+- Bewohnerakte mit Reitern: Stammdaten, Berichte, Medikation, Wochenplan, Biografie,
+  Reflexion, HEB.
+- Einstellungsfenster: eigenes Kürzel; Update-Häkchen (dorthin verschoben, unten links
+  bleibt nur die Versionsanzeige); Logo-Bild wählen (Ablage im Datenordner, erscheint im
+  Kopf rechts); Platz für spätere Einstellungen (HEB-Vorlagen, Fristen).
+- Einstellungen in `einstellungen.json` bzw. Datenbank, wie bisher entschieden.
+
+## Gestaltung Stufe 2
+Status: freigegeben (Bauplan Schritt 2)
+Datum: 07.11.2026
+Was: Das Aussehen rückt näher an die Ausgangsliste: reichere Karten, Marken, Logofeld,
+Farbschlüssel.
+Warum: Tobi findet, die Darstellung wirkt noch nicht überarbeitet (07.11.2026).
+Umfang (Vorbild `KhaosDE/Ausgangsliste`: `BewohnerKarte.cs`, `KopfBereich.cs`,
+`KartenRaster.cs`; Werte in `docs/gestaltung.md`):
+- Karte zeichnet sich selbst wie in der Ausgangsliste: Bild/Initialen, Name, Zimmer-Marke,
+  darunter Marken (z. B. Beschluss mit Enddatum, Allergie, „nicht erfasst“), Aufenthaltsdauer
+  seit Aufnahme, weicher Schatten, Hover-Rand.
+- Kopf: Logofeld rechts (Bild aus den Einstellungen, sonst leer).
+- Statusleiste unten mit Farbschlüssel der Marken (Farbe nie allein).
+- Filterknöpfe über dem Raster mit Zählern (z. B. „Alle 10“, „Beschluss 6“, „Allergie 3“).
+- Bereinigungsregeln aus `CLAUDE.md` gelten.
+
+## Ausgang (aus der Ausgangsliste)
+Status: freigegeben (Bauplan Schritt 9)
+Datum: 07.11.2026
+Was: Ausgänge der Bewohner eintragen und sehen, wer gerade unterwegs ist — übernommen aus
+der Ausgangsliste.
+Warum: Ursprüngliche Idee (05.11.2026): Die Ausgangsliste fließt in das Programm ein. Im
+bisherigen System lässt sich der Ausgang nicht regeln.
+Umfang: Funktion „Ausgang“ der Ausgangsliste übernehmen und bereinigen (`AusgangFenster.cs`,
+`AusgangText.cs`, `UnterbringungFenster.cs`, `StatusFenster.cs` als Vorbild): Ausgang
+beginnen und beenden mit Uhrzeit und Ziel, Abwesenheit mit Grund und Frist, Angaben zur
+Unterbringung bzw. Beschränkungen in der Akte. Unterwegs-Marke auf Karte und Startseite.
+Ausdrucksliste wie in der Ausgangsliste. Ausdrücklich nicht: Küchendienst, Zimmertausch,
+Warteliste (später eigene Einträge, falls gewünscht).
+
+## Biografie
+Status: freigegeben (Bauplan Schritt 10)
+Datum: 07.11.2026
+Was: Reiter „Biografie“ in der Bewohnerakte.
+Warum: Ursprüngliche Idee (05.11.2026).
+Umfang (Regeln aus Tobis Arbeitsweise für Biografieeinträge):
+- Abschnitte: Herkunft und Familie, Schule und Beruf, Wohnen, Interessen und Gewohnheiten,
+  wichtige Lebensereignisse, Wünsche — jeweils Fließtext, ohne Aufzählungszeichen.
+- Je Angabe wählbar „vom Bewohner angegeben, nicht überprüft“; im Text erscheint dann die
+  Formulierung „gibt an, dass …“ als Hinweis, nicht automatisch eingesetzt.
+- Liste „fehlende Angaben“: leere Abschnitte werden am Ende aufgezählt statt überbrückt.
+- „Als Fließtext kopieren“: alle Abschnitte als reiner Text ohne Formatierung in die
+  Zwischenablage.
+- Verlauf: Änderungen mit Datum und Kürzel, frühere Fassung bleibt einsehbar.
+
+## Monatsreflexion
+Status: freigegeben (Bauplan Schritt 11)
+Datum: 07.11.2026
+Was: Je Bewohner und Monat eine kurze Reflexion je Lebensbereich, geschrieben mit den
+Berichten des Monats daneben.
+Warum: Ursprüngliche Idee (05.11.2026); Zwischenschritt zwischen Berichten und HEB-Bogen.
+Umfang:
+- Reiter „Reflexion“ in der Akte: Monat wählen, fünf Textfelder (Lebensbereiche aus
+  `docs/heb-wissen.md`), daneben die Berichte des Monats zu diesem Bereich und die
+  Teilnahme an Therapien laut Wochenplan.
+- Stilprüfung wie beim HEB-Bogen (nur Hinweise).
+- Status Entwurf/fertig; der HEB-Bogen zeigt die fertigen Reflexionen seines Zeitraums als
+  dritte Quelle.
