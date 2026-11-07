@@ -260,9 +260,12 @@ public sealed class FilterKnopf : Control
     private bool aktiv;
     private bool maus;
     private int anzahl;
+    private readonly bool mitZahl;
 
-    public FilterKnopf(string text)
+    // mitZahl: false für reine Umschalter (z. B. Monat/Woche/Tag), dann ohne Zähler.
+    public FilterKnopf(string text, bool mitZahl = true)
     {
+        this.mitZahl = mitZahl;
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
                  ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable, true);
         Text = text;
@@ -291,13 +294,14 @@ public sealed class FilterKnopf : Control
     private void Aktualisieren()
     {
         Size = GetPreferredSize(Size.Empty);
-        AccessibleName = $"{Text}: {anzahl}";
+        AccessibleName = mitZahl ? $"{Text}: {anzahl}" : Text;
         Invalidate();
     }
 
     public override Size GetPreferredSize(Size proposedSize)
     {
         Size text = TextRenderer.MeasureText(Text, Stil.Standard, Size.Empty, TextFormatFlags.NoPadding);
+        if (!mitZahl) return new Size(text.Width + Stil.Px(this, 2 * Stil.AbstandMittel), Stil.Px(this, 32));
         Size zahl = TextRenderer.MeasureText(anzahl.ToString(), Stil.Fett, Size.Empty, TextFormatFlags.NoPadding);
         return new Size(text.Width + zahl.Width + Stil.Px(this, Stil.AbstandKlein + 2 * Stil.AbstandMittel), Stil.Px(this, 32));
     }
@@ -328,9 +332,10 @@ public sealed class FilterKnopf : Control
         int x = Stil.Px(this, Stil.AbstandMittel);
         TextRenderer.DrawText(g, Text, Stil.Standard, new Rectangle(x, 0, text.Width, Height), schrift,
             TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
-        TextRenderer.DrawText(g, anzahl.ToString(), Stil.Fett,
-            new Rectangle(x + text.Width + Stil.Px(this, Stil.AbstandKlein), 0, Width, Height), schrift,
-            TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+        if (mitZahl)
+            TextRenderer.DrawText(g, anzahl.ToString(), Stil.Fett,
+                new Rectangle(x + text.Width + Stil.Px(this, Stil.AbstandKlein), 0, Width, Height), schrift,
+                TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
     }
 }
 

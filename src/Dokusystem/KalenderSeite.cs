@@ -42,7 +42,7 @@ public sealed class KalenderSeite : Panel
         Stichtag = DateOnly.FromDateTime(Jetzt());
         foreach (var a in Enum.GetValues<KalenderAnsicht>())
         {
-            var knopf = new FilterKnopf(a switch { KalenderAnsicht.Monat => "Monat", KalenderAnsicht.Woche => "Woche", _ => "Tag" })
+            var knopf = new FilterKnopf(a switch { KalenderAnsicht.Monat => "Monat", KalenderAnsicht.Woche => "Woche", _ => "Tag" }, mitZahl: false)
                 { Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein) };
             knopf.Click += (_, _) => AnsichtWaehlen(a);
             Ansichten[a] = knopf;
