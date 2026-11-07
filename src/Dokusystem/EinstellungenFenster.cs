@@ -18,6 +18,15 @@ public sealed class EinstellungenFenster : Form
     private readonly List<string> benutzerKuerzel = [];
     public CheckBox AutoUpdate { get; } = new();
     public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
+    public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
+    public Dictionary<Bogenart, Label> Vorlagen { get; } = [];
+
+    // Zum Testen ersetzbar: Dateiauswahl für eine PDF-Vorlage (null = abgebrochen).
+    public Func<string?> PdfWaehlen { get; set; } = () =>
+    {
+        using var dialog = new OpenFileDialog { Title = "PDF-Vorlage wählen", Filter = "PDF (*.pdf)|*.pdf" };
+        return dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : null;
+    };
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");
     public Label Fehler { get; } = new();
     public string? NeuesLogo { get; private set; }
@@ -158,13 +167,41 @@ public sealed class EinstellungenFenster : Form
         var frist = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
         frist.Controls.AddRange([BeschlussFrist, new Label { Text = "Tage vorher (Marke auf der Übersicht)", AutoSize = true, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) }]);
         raster.Controls.Add(frist);
+        HebFrist.Value = werte.HebFristMonate;
+        HebFrist.Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandKlein, Stil.AbstandMini);
+        raster.Controls.Add(Beschriftung("HEB fällig"));
+        var hebFrist = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
+        hebFrist.Controls.AddRange([HebFrist, new Label { Text = "Monate nach dem letzten Bogen", AutoSize = true, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) }]);
+        raster.Controls.Add(hebFrist);
 
-        Ganz(Abschnitt("SPÄTER"));
+        Ganz(Abschnitt("HEB-VORLAGEN"));
         Ganz(new Label
         {
-            Text = "Hier kommen die PDF-Vorlagen für den HEB-Bogen dazu (Version 0.18.0).",
-            AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.TextLeise,
+            Text = "Je Bogenart eine PDF mit Formularfeldern zuteilen. Sie wird in den Datenordner kopiert und nie mitgeliefert; " +
+                   "ausgefüllt wird immer eine Kopie. Die Zuteilung gilt sofort.",
+            AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
         });
+        foreach (var art in Enum.GetValues<Bogenart>())
+        {
+            var status = new Label { AutoSize = true, MaximumSize = new Size(380, 0), Margin = new Padding(0, Stil.AbstandKlein, 0, 0) };
+            Vorlagen[art] = status;
+            var zuteilen = Stil.NebenKnopf("Zuteilen …");
+            var entfernen = Stil.NebenKnopf("Entfernen");
+            var zuordnung = Stil.NebenKnopf("Zuordnung …");
+            zuteilen.Click += (_, _) => { if (PdfWaehlen() is string pfad) VorlageZuteilen(art, pfad); };
+            entfernen.Click += (_, _) => { HebPdf.VorlageEntfernen(art); VorlageAnzeigen(art); };
+            zuordnung.Click += (_, _) =>
+            {
+                using var f = new HebZuordnungFenster(art);
+                Dialog.Zeigen(f, this);
+            };
+            foreach (var k in new[] { zuteilen, entfernen, zuordnung }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0); }
+            raster.Controls.Add(Beschriftung(HebRegeln.ArtKurz(art)));
+            var spalte = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0, 0, 0, Stil.AbstandKlein) };
+            spalte.Controls.AddRange([status, Formular.Reihe(zuteilen, entfernen, zuordnung)]);
+            raster.Controls.Add(spalte);
+            VorlageAnzeigen(art);
+        }
 
         Fehler.AutoSize = true;
         Fehler.MaximumSize = new Size(560, 0);
@@ -196,6 +233,36 @@ public sealed class EinstellungenFenster : Form
     }
 
     public bool HatLogo => logoBild is not null;
+
+    public bool VorlageZuteilen(Bogenart art, string pfad)
+    {
+        try
+        {
+            HebPdf.VorlageZuteilen(art, pfad);
+        }
+        catch (Exception e) when (e is Eingabefehler or IOException or UnauthorizedAccessException)
+        {
+            FehlerZeigen(e is Eingabefehler f ? string.Join(" ", f.Fehler) : $"Zuteilen ging nicht: {e.Message}");
+            return false;
+        }
+        Fehler.Visible = false;
+        VorlageAnzeigen(art);
+        return true;
+    }
+
+    private void VorlageAnzeigen(Bogenart art)
+    {
+        string? pfad = HebPdf.Vorlage(art);
+        try
+        {
+            Vorlagen[art].Text = pfad is null ? "keine Vorlage – der Bogen lässt sich trotzdem schreiben und drucken"
+                : $"zugeteilt ({HebPdf.Felder(pfad).Count} Formularfelder)";
+        }
+        catch (Eingabefehler)
+        {
+            Vorlagen[art].Text = "zugeteilt, aber nicht lesbar – bitte neu zuteilen";
+        }
+    }
 
     private void LogoLaden(string? pfad)
     {
@@ -254,7 +321,7 @@ public sealed class EinstellungenFenster : Form
         try
         {
             string kuerzel = benutzerKuerzel[Math.Max(0, Benutzer.SelectedIndex)];
-            Einstellungen.Aendern(w => w with { Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked, BeschlussFristTage = (int)BeschlussFrist.Value });
+            Einstellungen.Aendern(w => w with { Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked, BeschlussFristTage = (int)BeschlussFrist.Value, HebFristMonate = (int)HebFrist.Value });
             if (logoGeaendert && NeuesLogo is not null) Einstellungen.LogoSetzen(NeuesLogo);
             else if (LogoEntfernen) Einstellungen.LogoSetzen(null);
             foreach (var (schluessel, haken) in Module)

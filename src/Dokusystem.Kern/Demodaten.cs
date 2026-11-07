@@ -668,6 +668,50 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- HEB-Bogen -----
+
+    private sealed class HebDatei
+    {
+        public List<HebVorlage> Boegen { get; set; } = [];
+    }
+
+    private sealed class HebVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public string Art { get; set; } = "B";
+        public int? Nummer { get; set; }
+        public int BisVorMonaten { get; set; }
+        public bool Fertig { get; set; }
+        public Dictionary<string, string> Texte { get; set; } = [];
+    }
+
+    public sealed record DemoHeb(long BewohnerId, Bogenart Art, DateOnly Von, DateOnly Bis, int? Nummer, List<HebFassung> Fassungen);
+
+    // Bögen aus daten/demo/heb.json; der Zeitraum beginnt am Ende des vorherigen Bogens.
+    public static List<DemoHeb> HebBoegen(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        var liste = new List<DemoHeb>();
+        foreach (var gruppe in Lesen<HebDatei>("heb.json").Boegen.GroupBy(v => v.Bewohner))
+        {
+            if (bewohner.FirstOrDefault(b => b.Nachname == gruppe.Key) is not Bewohner b) continue;
+            DateOnly? letztesEnde = null;
+            foreach (var v in gruppe.OrderByDescending(v => v.BisVorMonaten))
+            {
+                var bis = heute.AddMonths(-v.BisVorMonaten);
+                var von = letztesEnde ?? (Enum.Parse<Bogenart>(v.Art) == Bogenart.A ? b.Aufnahmedatum : bis.AddMonths(-12));
+                if (von < b.Aufnahmedatum) von = b.Aufnahmedatum;
+                var erstellt = bis.ToDateTime(new TimeOnly(10, 0));
+                var f = new HebFassung { Texte = v.Texte, Hilfebedarf = new Dictionary<int, int?>(), Erstellt = erstellt, Kuerzel = "AB" };
+                var fassungen = new List<HebFassung> { f };
+                if (v.Fertig) fassungen.Add(f with { Fertig = true, Erstellt = erstellt.AddDays(2), Kuerzel = "RS" });
+                liste.Add(new DemoHeb(b.Id!.Value, Enum.Parse<Bogenart>(v.Art), von, bis, v.Nummer, fassungen));
+                letztesEnde = bis;
+            }
+        }
+        return liste;
+    }
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein

@@ -9,9 +9,10 @@ namespace Dokusystem.Kern;
 //   kuerzel     – eigenes Kürzel, z. B. für Berichte (Vorgabe: leer)
 //   logo        – Dateiname des eigenen Bildes für den Kopf im Ordner „logo“ (Vorgabe: keins)
 //   beschluss_frist_tage – Startseite: „Beschluss endet bald“ ab so vielen Tagen vorher (Vorgabe: 90)
+//   heb_frist_monate     – Startseite: „HEB fällig“, wenn der letzte Bogen so alt ist (Vorgabe: 12)
 // Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben.
 // Dieselbe Datei hat schon die Python-Version (bis 0.2.0) benutzt.
-public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90);
+public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90, int HebFristMonate = 12);
 
 public static partial class Einstellungen
 {
@@ -36,6 +37,8 @@ public static partial class Einstellungen
                 werte = werte with { Logo = logo };
             if (knoten["beschluss_frist_tage"] is JsonValue f && f.TryGetValue(out int tage) && FristPruefen(tage) is null)
                 werte = werte with { BeschlussFristTage = tage };
+            if (knoten["heb_frist_monate"] is JsonValue h && h.TryGetValue(out int monate) && HebFristPruefen(monate) is null)
+                werte = werte with { HebFristMonate = monate };
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
@@ -48,6 +51,7 @@ public static partial class Einstellungen
     {
         if (KuerzelPruefen(werte.Kuerzel) is string fehler) throw new Eingabefehler([fehler]);
         if (FristPruefen(werte.BeschlussFristTage) is string fristFehler) throw new Eingabefehler([fristFehler]);
+        if (HebFristPruefen(werte.HebFristMonate) is string hebFehler) throw new Eingabefehler([hebFehler]);
         string ziel = Pfade.ImDatenordner(Datei);
         Directory.CreateDirectory(Path.GetDirectoryName(ziel)!);
         string zwischen = ziel + ".neu";
@@ -57,6 +61,7 @@ public static partial class Einstellungen
             ["kuerzel"] = werte.Kuerzel.Trim(),
             ["logo"] = werte.Logo,
             ["beschluss_frist_tage"] = werte.BeschlussFristTage,
+            ["heb_frist_monate"] = werte.HebFristMonate,
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen
@@ -73,6 +78,9 @@ public static partial class Einstellungen
 
     public static string? FristPruefen(int tage) =>
         tage is >= 1 and <= 365 ? null : "Frist „Beschluss endet bald“: 1 bis 365 Tage.";
+
+    public static string? HebFristPruefen(int monate) =>
+        monate is >= 1 and <= 60 ? null : "Frist „HEB fällig“: 1 bis 60 Monate.";
 
     // Ändert einen Wert und speichert sofort.
     public static EinstellungsWerte Aendern(Func<EinstellungsWerte, EinstellungsWerte> aenderung)

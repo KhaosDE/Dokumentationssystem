@@ -44,8 +44,9 @@ public sealed class UebersichtSeite : Panel
         var jetzt = Jetzt();
         var heute = DateOnly.FromDateTime(jetzt);
         gezeigtAm = heute;
-        int frist = Einstellungen.Laden().BeschlussFristTage;
-        var alle = speicher.Heute(jetzt);
+        var werte = Einstellungen.Laden();
+        int frist = werte.BeschlussFristTage;
+        var alle = speicher.Heute(jetzt, werte.HebFristMonate);
         Karten.Clear();
         int abwesend = 0;
         foreach (var h in alle)
