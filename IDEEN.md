@@ -263,7 +263,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   Beendigung“ — ohne Zeichengrenze, bis der echte Bogen vorliegt.
 
 ## Medikation: Grundverordnung, Pause, Stufenplan
-Status: freigegeben (Bauplan Schritt 7)
+Status: erledigt (07.11.2026; Bauplan Schritt 7, Version 0.10.0)
 Datum: 06.11.2026
 Was: Medikation je Bewohner. Die Grundverordnung bleibt immer erhalten; Pausen und
 Änderungen in Etappen (ansetzen, absetzen) liegen als eigene Einträge darüber.

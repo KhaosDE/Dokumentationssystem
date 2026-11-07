@@ -19,7 +19,6 @@ public static class Bauplan
 
     public static readonly IReadOnlyDictionary<string, Vorhaben> Reiter = new Dictionary<string, Vorhaben>
     {
-        ["Medikation"] = new("0.10.0", "Grundverordnung, Pausen und Stufenpläne – und was heute gilt."),
         ["Wochenplan"] = new("0.12.0", "Der Wochenplan mit Therapien und Terminen, auch zum Ausdrucken."),
         ["Biografie"] = new("0.15.0", "Lebensgeschichte in Abschnitten, mit Verlauf und Liste fehlender Angaben."),
         ["Reflexion"] = new("0.16.0", "Je Monat eine kurze Reflexion je Lebensbereich, mit den Berichten des Monats daneben."),

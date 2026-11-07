@@ -22,3 +22,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 07.11.2026 — Claude Code: Bauplan Schritt 4 „Wohnbereich-ToDo“ (0.7.0).
 - 07.11.2026 — Claude Code: Bauplan Schritt 5 „Nachrichten“ (0.8.0).
 - 07.11.2026 — Claude Code: Bauplan Schritt 6 „Medikamentendatenbank“ (0.9.0).
+- 07.11.2026 — Claude Code: Bauplan Schritt 7 „Medikation: Grundverordnung, Pause, Stufenplan“ (0.10.0).
