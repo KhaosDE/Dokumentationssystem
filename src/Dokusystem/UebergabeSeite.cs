@@ -189,6 +189,7 @@ public sealed class UebergabeKarte : KartenFlaeche
     public Button Erledigt { get; } = Stil.NebenKnopf("Erledigt");
     public Button BerichtLesen { get; } = Stil.NebenKnopf("Bericht lesen …");
     public IReadOnlyList<string> MarkenTexte { get; }
+    private readonly bool hatKnoepfe;
 
     public event Action<Uebergabe>? GelesenGeklickt;
     public event Action<Uebergabe>? VerlaengernGeklickt;
@@ -233,13 +234,16 @@ public sealed class UebergabeKarte : KartenFlaeche
         Gelesen.Click += (_, _) => GelesenGeklickt?.Invoke(u);
         Verlaengern.Click += (_, _) => VerlaengernGeklickt?.Invoke(u);
         Erledigt.Click += (_, _) => ErledigtGeklickt?.Invoke(u);
-        BerichtLesen.Visible = u.Bericht is not null && u.Text.Length > 0;   // Bericht per Klick lesbar, wenn ein kurzer Satz davorsteht
+        bool lesen = u.Bericht is not null && u.Text.Length > 0;   // Bericht per Klick lesbar, wenn ein kurzer Satz davorsteht
+        BerichtLesen.Visible = lesen;
+        hatKnoepfe = offen || lesen;
         BerichtLesen.Click += (_, _) => MessageBox.Show(FindForm(),
             $"{herkunft.Text}\n\n{u.Bericht?.Text}", "Bericht", MessageBoxButtons.OK, MessageBoxIcon.None);
         foreach (var k in new[] { Gelesen, Verlaengern, Erledigt, BerichtLesen })
         {
             k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
-            if (offen || k == BerichtLesen) knoepfe.Controls.Add(k);
+            if (k != BerichtLesen) k.Visible = offen;   // erledigt oder abgelaufen: nur noch lesen
+            knoepfe.Controls.Add(k);
         }
         Controls.Add(marken);
         Controls.Add(knoepfe);
@@ -252,7 +256,7 @@ public sealed class UebergabeKarte : KartenFlaeche
         int innen = Stil.Px(this, Stil.AbstandGross), breite = Math.Max(100, Width - 2 * innen);
         int y = innen;
         marken.MaximumSize = new Size(breite, 0);
-        marken.Location = new Point(innen, y);
+        marken.Bounds = new Rectangle(new Point(innen, y), marken.GetPreferredSize(new Size(breite, 0)));
         y = marken.Bottom + Stil.Px(this, Stil.AbstandMini);
         text.MaximumSize = new Size(breite, 0);
         text.Location = new Point(innen, y);
@@ -263,9 +267,9 @@ public sealed class UebergabeKarte : KartenFlaeche
         GelesenText.MaximumSize = new Size(breite, 0);
         GelesenText.Location = new Point(innen, y);
         y = GelesenText.Bottom;
-        if (knoepfe.Controls.Count > 0)
+        if (hatKnoepfe)
         {
-            knoepfe.Location = new Point(innen, y + Stil.Px(this, Stil.AbstandKlein));
+            knoepfe.Bounds = new Rectangle(new Point(innen, y + Stil.Px(this, Stil.AbstandKlein)), knoepfe.GetPreferredSize(new Size(breite, 0)));
             y = knoepfe.Bottom;
         }
         int hoehe = y + innen;

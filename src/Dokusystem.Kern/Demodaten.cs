@@ -79,7 +79,7 @@ public static class Demodaten
                         _ => tag.AddHours(23).AddMinutes(zufall.Next(0, 4) * 15),
                     };
                     // Immer erzeugen (gleiche Zufallsfolge zu jeder Uhrzeit), nur Vergangenes behalten.
-                    var bericht = Erzeugen(b, zeit, zufall, bausteine, jetzt, wichtig: zufall.Next(10) == 0);
+                    var bericht = Erzeugen(b, zeit, zufall, bausteine, jetzt, wichtig: zufall.Next(30) == 0);   // selten, sonst verliert „Wichtig“ seinen Sinn
                     if (zeit <= jetzt) berichte.Add(new DemoBericht(bericht));
                 }
             }

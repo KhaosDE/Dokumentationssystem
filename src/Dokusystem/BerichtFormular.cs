@@ -11,17 +11,17 @@ public sealed class BerichtFormular : Form
     private readonly List<Bewohner> auswahl;
 
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 300 };
-    public TextBox Datum { get; } = new() { Width = 120 };
+    public TextBox Datum { get; } = new() { Width = 100 };
     public TextBox Uhrzeit { get; } = new() { Width = 80 };
-    public ComboBox Schichtwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 200 };
+    public ComboBox Schichtwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 210 };
     public TextBox Verfasser { get; } = new() { Width = 80 };
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
     {
-        Text = $"{n} {BerichtRegeln.Lebensbereiche[n - 1]}", AutoSize = true, MaximumSize = new Size(420, 0),
-        Margin = new Padding(0, 0, 0, Stil.AbstandMini),
+        Text = BerichtRegeln.BereichText(n), AutoSize = true, Margin = new Padding(0, 0, Stil.AbstandGross, Stil.AbstandMini),
     }).ToArray();
-    public CheckBox Allgemein { get; } = new() { Text = "allgemein (kein bestimmter Lebensbereich)", AutoSize = true };
-    public TextBox Inhalt { get; } = new() { Multiline = true, Height = 120, ScrollBars = ScrollBars.Vertical, AcceptsReturn = true };
+    public CheckBox Allgemein { get; } = new() { Text = "allgemein (kein Lebensbereich)", AutoSize = true, Margin = new Padding(0, 0, Stil.AbstandGross, Stil.AbstandMini) };
+    private readonly ToolTip hilfe = new();
+    public TextBox Inhalt { get; } = new() { Multiline = true, Height = 100, ScrollBars = ScrollBars.Vertical, AcceptsReturn = true };
     public CheckBox Wichtig { get; } = new() { Text = "Wichtig – bleibt in der Akte hervorgehoben", AutoSize = true, Font = Stil.Fett, ForeColor = Stil.Hinweis.Text };
     public CheckBox Uebergabe { get; } = new() { Text = "Übergabe – erscheint in der Übergabe der folgenden Schichten", AutoSize = true, Font = Stil.Fett, ForeColor = Stil.Unterwegs.Text };
     public ComboBox UebergabeDauer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 160 };
@@ -74,22 +74,27 @@ public sealed class BerichtFormular : Form
         Datum.PlaceholderText = "TT.MM.JJJJ";
         Uhrzeit.Text = BerichtRegeln.UhrzeitText(jetzt);
         Uhrzeit.PlaceholderText = "SS:MM";
+        // Datum, Uhrzeit und Schicht in einer Zeile: Das Fenster bleibt auch bei 150 % niedrig genug.
         var wann = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
-        Datum.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
-        wann.Controls.AddRange([Datum, Uhrzeit]);
-        Zeile("Datum, Uhrzeit", wann);
-
-        Schichtwahl.Items.AddRange(["passend zur Uhrzeit", "Frühdienst", "Spätdienst", "Nachtdienst"]);
+        Datum.Margin = Uhrzeit.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
+        Schichtwahl.Margin = new Padding(0);
+        Schichtwahl.Items.AddRange(["Schicht passend zur Uhrzeit", "Frühdienst", "Spätdienst", "Nachtdienst"]);
         Schichtwahl.SelectedIndex = 0;
-        Zeile("Schicht", Schichtwahl);
+        wann.Controls.AddRange([Datum, Uhrzeit, Schichtwahl]);
+        Zeile("Datum, Uhrzeit, Schicht", wann);
         Verfasser.Text = Einstellungen.Laden().Kuerzel;
         Verfasser.MaxLength = Einstellungen.KuerzelLaenge;
         Verfasser.PlaceholderText = "Kürzel";
         Zeile("Verfasser", Verfasser);
 
-        var bereiche = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0) };
-        bereiche.Controls.AddRange(Bereiche);
-        bereiche.Controls.Add(Allgemein);
+        // Zwei Spalten mit den kurzen Namen; der volle Name steht im Hinweis unter der Maus.
+        var bereiche = new TableLayoutPanel { AutoSize = true, ColumnCount = 2, Margin = new Padding(0) };
+        for (int n = 1; n <= 5; n++)
+        {
+            bereiche.Controls.Add(Bereiche[n - 1], (n - 1) % 2, (n - 1) / 2);
+            hilfe.SetToolTip(Bereiche[n - 1], BerichtRegeln.Lebensbereiche[n - 1]);
+        }
+        bereiche.Controls.Add(Allgemein, 1, 2);
         Allgemein.CheckedChanged += (_, _) => { if (Allgemein.Checked) foreach (var c in Bereiche) c.Checked = false; };
         foreach (var c in Bereiche) c.CheckedChanged += (_, _) => { if (c.Checked) Allgemein.Checked = false; };
         Zeile("Lebensbereiche", bereiche);
@@ -145,6 +150,12 @@ public sealed class BerichtFormular : Form
     }
 
     public void BewohnerWaehlen(long id) => BewohnerWahl.SelectedIndex = auswahl.FindIndex(b => b.Id == id);
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) hilfe.Dispose();
+        base.Dispose(disposing);
+    }
 
     public BerichtEingabe Eingabe() => new()
     {

@@ -68,7 +68,7 @@ public sealed class BerichtKarte : KartenFlaeche
         NachtragKnopf.Location = new Point(Width - innen - NachtragKnopf.Width, y - Stil.Px(this, Stil.AbstandMini));
         y = Math.Max(kopf.Bottom, NachtragKnopf.Bottom - Stil.Px(this, Stil.AbstandKlein)) + Stil.Px(this, Stil.AbstandKlein);
         marken.MaximumSize = new Size(breite, 0);
-        marken.Location = new Point(innen, y);
+        marken.Bounds = new Rectangle(new Point(innen, y), marken.GetPreferredSize(new Size(breite, 0)));
         y = marken.Bottom + Stil.Px(this, Stil.AbstandMini);
         text.MaximumSize = new Size(breite, 0);
         text.Location = new Point(innen, y);
