@@ -12,7 +12,7 @@ public sealed class BewohnerKarte : Control
 {
     // Logische Maße bei 100 % Skalierung.
     public const int Breite = 236;     // Mindestbreite; das Raster verteilt den Rest (3 Spalten bei 1180 px)
-    public const int Hoehe = 180;      // mit Schattenrand; zwei Markenzeilen passen
+    public const int Hoehe = 206;      // mit Schattenrand; drei Markenzeilen passen
     public const int RandSeite = 6, RandOben = 4, RandUnten = 10;   // Platz für den Schatten
     private const int BildGroesse = 52, Innen = 14, MarkeHoehe = 22;
 
@@ -23,10 +23,12 @@ public sealed class BewohnerKarte : Control
 
     public event Action<Bewohner>? Gewaehlt;
 
-    public BewohnerKarte(Bewohner bewohner, DateOnly heute)
+    // ungeleseneUebergaben: offene Übergabe-Einträge, die das eigene Kürzel noch nicht gelesen hat;
+    // wichtigeBerichte: als „Wichtig“ gekennzeichnete Berichte der letzten 7 Tage.
+    public BewohnerKarte(Bewohner bewohner, DateOnly heute, int ungeleseneUebergaben = 0, int wichtigeBerichte = 0)
     {
         Bewohner = bewohner;
-        Marken = Kennzeichen.Marken(bewohner);
+        Marken = Kennzeichen.Marken(bewohner, ungeleseneUebergaben, wichtigeBerichte);
         AufenthaltText = Kennzeichen.Aufenthalt(bewohner.Aufnahmedatum, heute);
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
                  ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable, true);
@@ -91,14 +93,14 @@ public sealed class BewohnerKarte : Control
         Stil.MarkeZeichnen(g, $"Zi. {Bewohner.Zimmer}", textX, blockY + nameHoehe + S(Stil.AbstandMini), Stil.Zimmer, Skala);
         y += bild + S(Stil.AbstandMittel);
 
-        // ---- Marken: höchstens zwei Zeilen; zu lange Texte werden gekürzt ----
+        // ---- Marken: höchstens drei Zeilen; zu lange Texte werden gekürzt ----
         int markeX = x, zeile = 0;
         foreach (var marke in Marken)
         {
             int breite = Math.Min(Stil.MarkenBreite(g, marke.Text, Skala), rechts - x);
             if (markeX > x && markeX + breite > rechts)
             {
-                if (++zeile > 1) break;
+                if (++zeile > 2) break;
                 markeX = x;
                 y += S(MarkeHoehe) + S(Stil.AbstandMini);
             }

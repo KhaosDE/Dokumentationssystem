@@ -15,6 +15,10 @@ public sealed class Speicher : IDisposable
 {
     public const string Datei = "dokumentationssystem.db";
     private const string DemoGeladen = "demo_geladen";
+    private const string DemoBerichte = "demo_berichte";
+
+    // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
+    public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
 
     private static readonly string[] Schritte =
     [
@@ -40,6 +44,62 @@ public sealed class Speicher : IDisposable
             beschlussende TEXT,                       -- JJJJ-MM-TT, nur bei beschluss = 'ende'
             bild          TEXT                        -- Dateiname im Ordner „bilder“
         );
+        """,
+        // 2 – Tägliche Dokumentation. Berichte und Nachträge werden nie geändert (Trigger);
+        //     Korrekturen sind neue Nachträge. Gelöscht wird nur mit „Demo-Daten zurücksetzen“.
+        """
+        CREATE TABLE berichte (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            zeitpunkt   TEXT NOT NULL,                -- JJJJ-MM-TTTSS:MM
+            schicht     TEXT NOT NULL CHECK (schicht IN ('frueh', 'spaet', 'nacht')),
+            verfasser   TEXT NOT NULL,
+            bereiche    TEXT NOT NULL DEFAULT '',     -- z. B. '1,4'; leer = allgemein
+            text        TEXT NOT NULL,
+            wichtig     INTEGER NOT NULL DEFAULT 0,
+            erfasst     TEXT NOT NULL                 -- wann eingetragen
+        );
+        CREATE INDEX berichte_bewohner ON berichte(bewohner_id, zeitpunkt);
+        CREATE TABLE nachtraege (
+            id         INTEGER PRIMARY KEY,
+            bericht_id INTEGER NOT NULL REFERENCES berichte(id) ON DELETE CASCADE,
+            erfasst    TEXT NOT NULL,
+            verfasser  TEXT NOT NULL,
+            text       TEXT NOT NULL
+        );
+        CREATE TRIGGER berichte_bleiben BEFORE UPDATE ON berichte
+            BEGIN SELECT RAISE(ABORT, 'Berichte werden nicht überschrieben – Korrekturen sind Nachträge.'); END;
+        CREATE TRIGGER nachtraege_bleiben BEFORE UPDATE ON nachtraege
+            BEGIN SELECT RAISE(ABORT, 'Nachträge werden nicht überschrieben.'); END;
+        -- Übergabe: Einträge bleiben, bis sie ablaufen oder erledigt sind. Verlängern und
+        -- „erledigt“ sind eigene Ereignisse; nichts wird überschrieben.
+        CREATE TABLE uebergaben (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER REFERENCES bewohner(id) ON DELETE CASCADE,   -- NULL = Wohnbereich allgemein
+            bericht_id  INTEGER REFERENCES berichte(id) ON DELETE CASCADE,   -- NULL = Notiz ohne Bericht
+            text        TEXT NOT NULL DEFAULT '',
+            erstellt    TEXT NOT NULL,
+            verfasser   TEXT NOT NULL,
+            gilt_bis    TEXT                                                -- NULL = bis erledigt
+        );
+        CREATE TABLE uebergabe_ereignisse (
+            id           INTEGER PRIMARY KEY,
+            uebergabe_id INTEGER NOT NULL REFERENCES uebergaben(id) ON DELETE CASCADE,
+            art          TEXT NOT NULL CHECK (art IN ('verlaengert', 'erledigt')),
+            zeit         TEXT NOT NULL,
+            kuerzel      TEXT NOT NULL,
+            gilt_bis     TEXT
+        );
+        CREATE TABLE uebergabe_gelesen (
+            uebergabe_id INTEGER NOT NULL REFERENCES uebergaben(id) ON DELETE CASCADE,
+            kuerzel      TEXT NOT NULL,
+            zeit         TEXT NOT NULL,
+            PRIMARY KEY (uebergabe_id, kuerzel)
+        );
+        CREATE TRIGGER uebergaben_bleiben BEFORE UPDATE ON uebergaben
+            BEGIN SELECT RAISE(ABORT, 'Übergaben werden nicht überschrieben – Änderungen sind Ereignisse.'); END;
+        CREATE TRIGGER uebergabe_ereignisse_bleiben BEFORE UPDATE ON uebergabe_ereignisse
+            BEGIN SELECT RAISE(ABORT, 'Ereignisse werden nicht überschrieben.'); END;
         """,
     ];
 
@@ -157,29 +217,302 @@ public sealed class Speicher : IDisposable
 
     // ------------------------------------------------------------------ Demo-Daten
 
-    // Lädt die Demo-Daten, wenn das noch nie geschehen ist. true = gerade geladen.
+    // Lädt Demo-Daten, die noch nie geladen wurden: beim allerersten Start alles, nach einem
+    // Update nur die neuen Bereiche (für die vorhandenen Bewohner). true = etwas geladen.
     public bool DemoBeimErstenStart()
     {
-        if (Meta(DemoGeladen) is not null) return false;
-        DemoZuruecksetzen();
-        return true;
+        if (Meta(DemoGeladen) is null)
+        {
+            DemoZuruecksetzen();
+            return true;
+        }
+        if (Meta(DemoBerichte) is null)
+        {
+            using var transaktion = db.BeginTransaction();
+            DemoBerichteEinfuegen(transaktion);
+            transaktion.Commit();
+            return true;
+        }
+        return false;
     }
 
-    // Alle Bewohner und ihre Bilder weg, Demo-Daten neu laden – alles oder nichts.
+    // Alle Bewohner mit allem, was dazugehört (Bilder, Berichte …), weg und die Demo-Daten aller
+    // Bereiche neu laden – alles oder nichts.
     public void DemoZuruecksetzen()
     {
         var demo = Demodaten.Bewohner();   // erst lesen: Ist etwas kaputt, bleibt alles, wie es war
         var alteBilder = AlleBewohner().Select(b => b.Bild).Where(b => b is not null).ToList();
         using (var transaktion = db.BeginTransaction())
         {
-            Ausfuehren("DELETE FROM bewohner", transaktion);
+            Ausfuehren("DELETE FROM bewohner", transaktion);   // Berichte und Nachträge folgen (CASCADE)
             foreach (var b in demo)
                 Ausfuehren($"INSERT INTO bewohner ({Spalten}) VALUES ({Platzhalter})", transaktion, Werte(b));
             SetzeMeta(DemoGeladen, "1", transaktion);
+            DemoBerichteEinfuegen(transaktion);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
     }
+
+    private void DemoBerichteEinfuegen(SqliteTransaction transaktion)
+    {
+        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        bewohner.Sort(BewohnerRegeln.NachName);
+        Ausfuehren("DELETE FROM uebergaben WHERE bewohner_id IS NULL", transaktion);   // allgemeine Notizen der Demo
+        var demo = Demodaten.Berichte(bewohner, Uhr());
+        foreach (var d in demo.Berichte)
+        {
+            long id = BerichtEinfuegen(d.Bericht, transaktion);
+            if (d.Uebergabe is UebergabeWunsch wunsch)
+                DemoUebergabe(d.Bericht.BewohnerId, id, wunsch, d.Bericht.Erfasst, d.Bericht.Verfasser, d, transaktion);
+        }
+        foreach (var d in demo.Allgemein)
+            DemoUebergabe(null, null, d.Wunsch, d.Erstellt, d.Verfasser, null, transaktion, d.Text);
+        SetzeMeta(DemoBerichte, "1", transaktion);
+    }
+
+    private void DemoUebergabe(long? bewohnerId, long? berichtId, UebergabeWunsch wunsch, DateTime erstellt, string verfasser,
+        Demodaten.DemoBericht? d, SqliteTransaction transaktion, string? text = null)
+    {
+        long id = UebergabeEinfuegen(bewohnerId, berichtId, text ?? wunsch.Text, erstellt, verfasser,
+            UebergabeRegeln.GiltBis(wunsch.Dauer, erstellt, wunsch.Bis), transaktion);
+        if (d?.GelesenVon is string leser)
+            Ausfuehren("INSERT INTO uebergabe_gelesen (uebergabe_id, kuerzel, zeit) VALUES ($u, $k, $z)", transaktion,
+                ("$u", id), ("$k", leser), ("$z", Zeit(erstellt.AddMinutes(30))));
+        if (d?.ErledigtVon is string erlediger)
+            Ausfuehren("INSERT INTO uebergabe_ereignisse (uebergabe_id, art, zeit, kuerzel) VALUES ($u, 'erledigt', $z, $k)", transaktion,
+                ("$u", id), ("$z", Zeit(erstellt.AddHours(20))), ("$k", erlediger));
+    }
+
+    // ------------------------------------------------------------------ Berichte
+
+    // Speichert einen neuen Bericht (samt Nachträgen, falls schon welche dabei sind) und, wenn
+    // gewünscht, seinen Übergabe-Eintrag.
+    public Bericht BerichtSpeichern(Bericht b, UebergabeWunsch? uebergabe = null)
+    {
+        if (Bewohner(b.BewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        if (b.Id is not null) throw new InvalidOperationException("Berichte werden nicht überschrieben – Korrekturen sind Nachträge.");
+        if (uebergabe is not null) UebergabeRegeln.Pruefen(uebergabe, b.Erfasst);
+        using var transaktion = db.BeginTransaction();
+        long id = BerichtEinfuegen(b, transaktion);
+        if (uebergabe is not null)
+            UebergabeEinfuegen(b.BewohnerId, id, uebergabe.Text, b.Erfasst, b.Verfasser,
+                UebergabeRegeln.GiltBis(uebergabe.Dauer, b.Erfasst, uebergabe.Bis), transaktion);
+        transaktion.Commit();
+        return BerichtLesen(id)!;
+    }
+
+    private long BerichtEinfuegen(Bericht b, SqliteTransaction transaktion)
+    {
+        Ausfuehren("INSERT INTO berichte (bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst) " +
+                   "VALUES ($b, $z, $s, $v, $bereiche, $t, $w, $e)", transaktion,
+            ("$b", b.BewohnerId), ("$z", Zeit(b.Zeitpunkt)), ("$s", BerichtRegeln.Kuerzel(b.Schicht)), ("$v", b.Verfasser),
+            ("$bereiche", string.Join(",", b.Bereiche)), ("$t", b.Text), ("$w", b.Wichtig ? 1 : 0), ("$e", Zeit(b.Erfasst)));
+        long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
+        foreach (var n in b.Nachtraege)
+            NachtragEinfuegen(id, n.Verfasser, n.Text, n.Erfasst, transaktion);
+        return id;
+    }
+
+    // Korrektur oder Ergänzung zu einem Bericht. Der ursprüngliche Text bleibt, wie er ist.
+    public Nachtrag NachtragSpeichern(long berichtId, string verfasser, string text, DateTime erfasst)
+    {
+        BerichtRegeln.NachtragPruefen(verfasser, text);
+        if (BerichtLesen(berichtId) is null) throw new Eingabefehler(["Diesen Bericht gibt es nicht mehr."]);
+        using var transaktion = db.BeginTransaction();
+        long id = NachtragEinfuegen(berichtId, verfasser.Trim(), text.Trim(), erfasst, transaktion);
+        transaktion.Commit();
+        return new Nachtrag(id, berichtId, erfasst, verfasser.Trim(), text.Trim());
+    }
+
+    private long NachtragEinfuegen(long berichtId, string verfasser, string text, DateTime erfasst, SqliteTransaction transaktion)
+    {
+        Ausfuehren("INSERT INTO nachtraege (bericht_id, erfasst, verfasser, text) VALUES ($b, $e, $v, $t)", transaktion,
+            ("$b", berichtId), ("$e", Zeit(erfasst)), ("$v", verfasser), ("$t", text));
+        return Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
+    }
+
+    public Bericht? BerichtLesen(long id) => BerichteLesen("WHERE id = $id", ("$id", id)).FirstOrDefault();
+
+    // Berichte eines Bewohners, neueste oben, mit Filter.
+    public List<Bericht> Berichte(long bewohnerId, BerichtFilter? filter = null)
+    {
+        filter ??= new BerichtFilter();
+        return BerichteLesen("WHERE bewohner_id = $b", ("$b", bewohnerId))
+            .Where(b => BerichtRegeln.Passt(b, filter))
+            .OrderByDescending(b => b.Zeitpunkt).ThenByDescending(b => b.Id)
+            .ToList();
+    }
+
+    public int WichtigeBerichteSeit(long bewohnerId, DateTime seit) => Convert.ToInt32(
+        Wert("SELECT COUNT(*) FROM berichte WHERE bewohner_id = $b AND wichtig = 1 AND zeitpunkt >= $s", ("$b", bewohnerId), ("$s", Zeit(seit))),
+        CultureInfo.InvariantCulture);
+
+    // ------------------------------------------------------------------ Übergabe
+
+    private long UebergabeEinfuegen(long? bewohnerId, long? berichtId, string text, DateTime erstellt, string verfasser,
+        DateTime? giltBis, SqliteTransaction transaktion)
+    {
+        Ausfuehren("INSERT INTO uebergaben (bewohner_id, bericht_id, text, erstellt, verfasser, gilt_bis) VALUES ($b, $r, $t, $e, $v, $g)",
+            transaktion, ("$b", bewohnerId), ("$r", berichtId), ("$t", text.Trim()), ("$e", Zeit(erstellt)), ("$v", verfasser),
+            ("$g", giltBis is DateTime g ? Zeit(g) : null));
+        return Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
+    }
+
+    // Eigene kurze Übergabe-Notiz für den ganzen Wohnbereich (ohne Bericht und ohne Bewohner).
+    public Uebergabe WohnbereichNotiz(string text, string verfasser, UebergabeWunsch wunsch, DateTime jetzt)
+    {
+        var fehler = new List<string>();
+        if (string.IsNullOrWhiteSpace(text)) fehler.Add("Text der Notiz fehlt.");
+        if (string.IsNullOrWhiteSpace(verfasser)) fehler.Add("Verfasser (Kürzel) fehlt.");
+        else if (Einstellungen.KuerzelPruefen(verfasser) is string f) fehler.Add(f.Replace("Kürzel", "Verfasser"));
+        if (fehler.Count > 0) throw new Eingabefehler(fehler);
+        UebergabeRegeln.Pruefen(wunsch, jetzt);
+        using var transaktion = db.BeginTransaction();
+        long id = UebergabeEinfuegen(null, null, text, jetzt, verfasser.Trim(), UebergabeRegeln.GiltBis(wunsch.Dauer, jetzt, wunsch.Bis), transaktion);
+        transaktion.Commit();
+        return UebergabeLesen(id)!;
+    }
+
+    public Uebergabe? UebergabeLesen(long id) => UebergabenLesen("WHERE id = $id", ("$id", id)).FirstOrDefault();
+
+    // Alle Übergabe-Einträge; ohne „auchErledigte“ nur die offenen (nicht erledigt, nicht abgelaufen).
+    public List<Uebergabe> Uebergaben(DateTime jetzt, bool auchErledigte = false) =>
+        UebergabenLesen("").Where(u => auchErledigte || UebergabeRegeln.Offen(u, jetzt))
+            .OrderByDescending(u => u.Erstellt).ThenByDescending(u => u.Id).ToList();
+
+    public void UebergabeGelesen(long id, string kuerzel, DateTime zeit)
+    {
+        if (string.IsNullOrWhiteSpace(kuerzel)) throw new Eingabefehler(["Für „gelesen“ bitte in den Einstellungen ein Kürzel eintragen."]);
+        Ausfuehren("INSERT OR IGNORE INTO uebergabe_gelesen (uebergabe_id, kuerzel, zeit) VALUES ($u, $k, $z)", null,
+            ("$u", id), ("$k", kuerzel.Trim()), ("$z", Zeit(zeit)));
+    }
+
+    public void UebergabeVerlaengern(long id, UebergabeWunsch wunsch, string kuerzel, DateTime zeit)
+    {
+        if (string.IsNullOrWhiteSpace(kuerzel)) throw new Eingabefehler(["Kürzel fehlt (Einstellungen)."]);
+        UebergabeRegeln.Pruefen(wunsch, zeit);
+        Ausfuehren("INSERT INTO uebergabe_ereignisse (uebergabe_id, art, zeit, kuerzel, gilt_bis) VALUES ($u, 'verlaengert', $z, $k, $g)", null,
+            ("$u", id), ("$z", Zeit(zeit)), ("$k", kuerzel.Trim()),
+            ("$g", UebergabeRegeln.GiltBis(wunsch.Dauer, zeit, wunsch.Bis) is DateTime g ? Zeit(g) : null));
+    }
+
+    public void UebergabeErledigt(long id, string kuerzel, DateTime zeit)
+    {
+        if (string.IsNullOrWhiteSpace(kuerzel)) throw new Eingabefehler(["Kürzel fehlt (Einstellungen)."]);
+        Ausfuehren("INSERT INTO uebergabe_ereignisse (uebergabe_id, art, zeit, kuerzel) VALUES ($u, 'erledigt', $z, $k)", null,
+            ("$u", id), ("$z", Zeit(zeit)), ("$k", kuerzel.Trim()));
+    }
+
+    // Offene Übergaben eines Bewohners, die dieses Kürzel noch nicht gelesen hat (ohne Kürzel: alle offenen).
+    public int UngeleseneUebergaben(long bewohnerId, string kuerzel, DateTime jetzt) =>
+        UebergabenLesen("WHERE bewohner_id = $b", ("$b", bewohnerId))
+            .Count(u => UebergabeRegeln.Offen(u, jetzt) && !UebergabeRegeln.GelesenVon(u, kuerzel));
+
+    // „Neu seit deiner letzten Schicht“: der letzte Besuch der Übergabe mit diesem Kürzel.
+    public DateTime? LetzterUebergabeBesuch(string kuerzel) =>
+        kuerzel.Length > 0 && Meta($"uebergabe_besuch:{kuerzel.ToUpperInvariant()}") is string s ? AusZeit(s) : null;
+
+    public void UebergabeBesuchMerken(string kuerzel, DateTime zeit)
+    {
+        if (kuerzel.Length > 0) SetzeMeta($"uebergabe_besuch:{kuerzel.ToUpperInvariant()}", Zeit(zeit));
+    }
+
+    private List<Uebergabe> UebergabenLesen(string bedingung, params (string, object?)[] parameter)
+    {
+        var liste = new List<Uebergabe>();
+        using (var befehl = Befehl($"SELECT id, bewohner_id, bericht_id, text, erstellt, verfasser, gilt_bis FROM uebergaben {bedingung}", null, parameter))
+        using (var leser = befehl.ExecuteReader())
+        {
+            while (leser.Read())
+                liste.Add(new Uebergabe
+                {
+                    Id = leser.GetInt64(0),
+                    BewohnerId = leser.IsDBNull(1) ? null : leser.GetInt64(1),
+                    BerichtId = leser.IsDBNull(2) ? null : leser.GetInt64(2),
+                    Text = leser.GetString(3),
+                    Erstellt = AusZeit(leser.GetString(4)),
+                    Verfasser = leser.GetString(5),
+                    GiltBis = leser.IsDBNull(6) ? null : AusZeit(leser.GetString(6)),
+                });
+        }
+        if (liste.Count == 0) return liste;
+        string ids = string.Join(",", liste.Select(u => u.Id));
+        var ereignisse = new List<(long Id, string Art, DateTime Zeit, string Kuerzel, DateTime? GiltBis)>();
+        using (var befehl = Befehl($"SELECT uebergabe_id, art, zeit, kuerzel, gilt_bis FROM uebergabe_ereignisse WHERE uebergabe_id IN ({ids}) ORDER BY zeit, id", null, []))
+        using (var leser = befehl.ExecuteReader())
+            while (leser.Read())
+                ereignisse.Add((leser.GetInt64(0), leser.GetString(1), AusZeit(leser.GetString(2)), leser.GetString(3),
+                                leser.IsDBNull(4) ? null : AusZeit(leser.GetString(4))));
+        var gelesen = new List<(long Id, Kenntnisnahme K)>();
+        using (var befehl = Befehl($"SELECT uebergabe_id, kuerzel, zeit FROM uebergabe_gelesen WHERE uebergabe_id IN ({ids}) ORDER BY zeit", null, []))
+        using (var leser = befehl.ExecuteReader())
+            while (leser.Read())
+                gelesen.Add((leser.GetInt64(0), new Kenntnisnahme(leser.GetString(1), AusZeit(leser.GetString(2)))));
+        var berichtIds = liste.Where(u => u.BerichtId is not null).Select(u => u.BerichtId!.Value).Distinct().ToList();
+        var berichte = berichtIds.Count == 0 ? [] :
+            BerichteLesen($"WHERE id IN ({string.Join(",", berichtIds)})").ToDictionary(b => b.Id!.Value);
+
+        return liste.Select(u =>
+        {
+            var eigene = ereignisse.Where(e => e.Id == u.Id).ToList();
+            var verlaengerungen = eigene.Where(e => e.Art == "verlaengert").ToList();
+            var erledigt = eigene.FirstOrDefault(e => e.Art == "erledigt");
+            return u with
+            {
+                GiltBis = verlaengerungen.Count > 0 ? verlaengerungen[^1].GiltBis : u.GiltBis,
+                Verlaengert = verlaengerungen.Count,
+                Erledigt = erledigt.Art is null ? null : erledigt.Zeit,
+                ErledigtVon = erledigt.Art is null ? null : erledigt.Kuerzel,
+                Gelesen = gelesen.Where(g => g.Id == u.Id).Select(g => g.K).ToList(),
+                Bericht = u.BerichtId is long r && berichte.TryGetValue(r, out var b) ? b : null,
+            };
+        }).ToList();
+    }
+
+    private List<Bericht> BerichteLesen(string bedingung, params (string, object?)[] parameter)
+    {
+        var berichte = new List<Bericht>();
+        using (var befehl = Befehl("SELECT id, bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst, " +
+                                   $"EXISTS (SELECT 1 FROM uebergaben u WHERE u.bericht_id = berichte.id) FROM berichte {bedingung}", null, parameter))
+        using (var leser = befehl.ExecuteReader())
+        {
+            while (leser.Read())
+            {
+                berichte.Add(new Bericht
+                {
+                    Id = leser.GetInt64(0),
+                    BewohnerId = leser.GetInt64(1),
+                    Zeitpunkt = AusZeit(leser.GetString(2)),
+                    Schicht = BerichtRegeln.SchichtAus(leser.GetString(3)),
+                    Verfasser = leser.GetString(4),
+                    Bereiche = leser.GetString(5).Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(s => int.Parse(s, CultureInfo.InvariantCulture)).ToList(),
+                    Text = leser.GetString(6),
+                    Wichtig = leser.GetInt64(7) != 0,
+                    Erfasst = AusZeit(leser.GetString(8)),
+                    Uebergabe = leser.GetInt64(9) != 0,
+                });
+            }
+        }
+        if (berichte.Count == 0) return berichte;
+        var nachtraege = new Dictionary<long, List<Nachtrag>>();
+        string ids = string.Join(",", berichte.Select(b => b.Id!.Value));
+        using (var befehl = Befehl($"SELECT id, bericht_id, erfasst, verfasser, text FROM nachtraege WHERE bericht_id IN ({ids}) ORDER BY erfasst, id", null, []))
+        using (var leser = befehl.ExecuteReader())
+        {
+            while (leser.Read())
+            {
+                var n = new Nachtrag(leser.GetInt64(0), leser.GetInt64(1), AusZeit(leser.GetString(2)), leser.GetString(3), leser.GetString(4));
+                if (!nachtraege.TryGetValue(n.BerichtId, out var liste)) nachtraege[n.BerichtId] = liste = [];
+                liste.Add(n);
+            }
+        }
+        return berichte.Select(b => nachtraege.TryGetValue(b.Id!.Value, out var n) ? b with { Nachtraege = n } : b).ToList();
+    }
+
+    private static string Zeit(DateTime t) => t.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
+    private static DateTime AusZeit(string s) => DateTime.ParseExact(s, ["yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm"], CultureInfo.InvariantCulture);
 
     // ------------------------------------------------------------------ Hilfen
 
@@ -203,9 +536,11 @@ public sealed class Speicher : IDisposable
 
     private static DateOnly AusIso(string text) => DateOnly.ParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    private List<Bewohner> Lesen(string sql, params (string, object?)[] parameter)
+    private List<Bewohner> Lesen(string sql, params (string, object?)[] parameter) => LesenIn(null, sql, parameter);
+
+    private List<Bewohner> LesenIn(SqliteTransaction? transaktion, string sql, params (string, object?)[] parameter)
     {
-        using var befehl = Befehl(sql, null, parameter);
+        using var befehl = Befehl(sql, transaktion, parameter);
         using var leser = befehl.ExecuteReader();
         var liste = new List<Bewohner>();
         while (leser.Read())

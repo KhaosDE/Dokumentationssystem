@@ -38,6 +38,15 @@ Danach fragt Windows für diese Datei nicht mehr.
   grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
 - **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
   als TT.MM.JJJJ (z. B. 03.04.1965).
+- **Berichte** schreibt man in der Akte (Reiter „Berichte“ → „Neuer Bericht …“) oder über
+  **Neuer Bericht …** links. Zwei Kennzeichen: **Wichtig** (bleibt in der Akte hervorgehoben)
+  und **Übergabe** (erscheint im Bereich „Übergabe“, so lange wie gewählt). Korrigiert wird
+  mit **Nachtrag …** – der ursprüngliche Text bleibt stehen.
+- **Übergabe** (links): nur die Übergabe-Einträge, oben „Wohnbereich allgemein“, darunter je
+  Bewohner. Mit eigenem Kürzel (Einstellungen) lassen sie sich als gelesen bestätigen,
+  verlängern oder erledigen. „Übergabeblatt drucken …“ druckt die offenen Einträge.
+- Die Wortliste für den Hinweis „Soll das in die Übergabe?“ lässt sich ergänzen: eine Datei
+  `uebergabe-woerter.txt` in den Datenordner legen, ein Wort pro Zeile.
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
   her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren.
 - **Einstellungen** (links): eigenes Kürzel, Update beim Start, eigenes Bild für den Kopf
@@ -80,6 +89,7 @@ Adresszeile eingeben). Dort liegen:
 - `bilder\` – hinterlegte Bewohnerbilder,
 - `logo\` – das eigene Bild für den Kopf (falls gewählt),
 - `einstellungen.json` – die Einstellungen,
+- `uebergabe-woerter.txt` – nur falls angelegt: eigene Wörter für den Übergabe-Hinweis,
 - `update.log` – was beim Update passiert ist (zum Nachsehen, wenn etwas nicht klappt),
 - `dokusystem.sqlite3` – nur falls vorhanden: die alte Datenbank der Version 0.2.0
   (wird nicht mehr benutzt).

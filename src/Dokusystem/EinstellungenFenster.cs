@@ -97,8 +97,8 @@ public sealed class EinstellungenFenster : Form
         Ganz(Abschnitt("SPÄTER"));
         Ganz(new Label
         {
-            Text = "Hier kommen weitere Einstellungen dazu: Fristen für die Übersicht (Version 0.15.0) " +
-                   "und die PDF-Vorlagen für den HEB-Bogen (Version 0.16.0).",
+            Text = "Hier kommen weitere Einstellungen dazu: Fristen für die Übersicht (Version 0.17.0) " +
+                   "und die PDF-Vorlagen für den HEB-Bogen (Version 0.18.0).",
             AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.TextLeise,
         });
 

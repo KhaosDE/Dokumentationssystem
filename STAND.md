@@ -1,19 +1,19 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.5.0** (Gestaltung Stufe 2, Bauplan Schritt 2).
+Stand: 07.11.2026. Version: **0.6.0** (Tägliche Dokumentation mit Übergabe, Bauplan Schritt 3).
 
 ## Aktuell
 
-Das Programm (C# / .NET 10, Windows Forms) zeigt jetzt alle geplanten Bereiche in der
-Seitenleiste; was noch nicht gebaut ist, sagt „Kommt in Version …“. Die Bewohnerakte hat
-Reiter, und es gibt ein Einstellungsfenster (Kürzel, Update, eigenes Bild im Kopf). Die
-Bewohnerkarten zeigen wie in der Ausgangsliste Marken und die Aufenthaltsdauer; darüber stehen
-Filterknöpfe mit Zählern, unten eine Statusleiste mit Farbschlüssel.
+Das Programm (C# / .NET 10, Windows Forms) zeigt alle geplanten Bereiche in der
+Seitenleiste; was noch nicht gebaut ist, sagt „Kommt in Version …“. Gebaut sind die
+Bewohnerakte und jetzt die **tägliche Dokumentation**: Berichte je Bewohner mit den
+Kennzeichen „Wichtig“ und „Übergabe“, Nachträge statt Überschreiben, Ausdruck, und der
+Bereich **„Übergabe“**, in dem nur die Übergabe-Einträge stehen, bis sie ablaufen oder
+erledigt sind.
 
-**Nächster Schritt:** Bauplan Schritt 3 „Tägliche Dokumentation“ (0.6.0, mit Bereich
-„Übergabe“), danach der Reihe nach bis Schritt 15 (`IDEEN.md`, oben; seit 07.11.2026 mit
-„Wohnbereich-ToDo“ und „Nachrichten“ als Schritte 4 und 5). Für Schritt 11 (Ausgang) das
-Repository `KhaosDE/Ausgangsliste` anhängen.
+**Nächster Schritt:** Bauplan Schritt 4 „Wohnbereich-ToDo“ (0.7.0), danach der Reihe nach bis
+Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
+`KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
 
 ## Fertig
 
@@ -57,6 +57,34 @@ Repository `KhaosDE/Ausgangsliste` anhängen.
   - Statusleiste unten mit Farbschlüssel der Marken.
   - Logofeld im Kopf (seit 0.4.0, Bild aus den Einstellungen).
 
+- 0.6.0 — Tägliche Dokumentation mit Bereich „Übergabe“ (07.11.2026, Bauplan Schritt 3):
+  - Reiter „Berichte“ in der Akte: Liste neueste oben, Filter nach Zeitraum, Lebensbereich,
+    Schicht, „nur wichtige“ und Suche im Text; Marken „Wichtig“, „Übergabe“ und die
+    Lebensbereiche an jedem Bericht. „Drucken …“ mit Druckvorschau (übernommen aus der
+    Ausgangsliste, bereinigt).
+  - Bericht schreiben aus der Akte oder über „Neuer Bericht …“ in der Seitenleiste (mit
+    Bewohnerauswahl): Datum, Uhrzeit, Schicht passend zur Uhrzeit und eigenes Kürzel sind
+    vorbelegt; Lebensbereiche 1–5 oder „allgemein“; die Kennzeichen „Wichtig“ und
+    „Übergabe“ gut sichtbar im Fenster, bei „Übergabe“ die Dauer (nächste Schicht, 3 Tage,
+    1 Woche, bis Datum, bis erledigt) und ein freiwilliger kurzer Übergabe-Satz.
+  - Hinweis vor dem Speichern: Stehen Wörter wie „Arzt“, „Termin“, „Sturz“ im Text und ist
+    „Übergabe“ nicht gesetzt, fragt das Programm einmal „Soll das in die Übergabe?“. Wortliste
+    in `daten/uebergabe-woerter.txt`, ergänzbar über eine gleichnamige Datei im Datenordner.
+  - Nichts wird gelöscht oder überschrieben: Korrekturen sind Nachträge mit eigener Zeit und
+    eigenem Kürzel; die Datenbank verbietet das Ändern von Berichten.
+  - Bereich „Übergabe“: oben „Wohnbereich allgemein“ (eigene Notizen ohne Bericht), darunter
+    nach Bewohner gruppiert. Marken „neu seit deiner letzten Schicht“, „läuft heute ab“ und
+    die Gültigkeit; „Gelesen“ (Kenntnisnahme mit Kürzel, sichtbar wer schon gelesen hat),
+    „Verlängern …“, „Erledigt“; erledigte und abgelaufene Einträge einblendbar;
+    „Übergabeblatt drucken …“ mit den offenen Einträgen.
+  - Karten der Bewohner: Marke „Übergabe N“ (offene, vom eigenen Kürzel ungelesene
+    Einträge) und „Wichtig“ (wichtiger Bericht in den letzten 7 Tagen).
+  - Seitenleiste nach dem neuen Bauplan: zusätzlich „Aufgaben“ (0.7.0), „Nachrichten“
+    (0.8.0) und „Ausgangsliste“ (0.14.0) als Platzhalter; alle Versionsangaben angepasst.
+  - Demo: für jeden Bewohner Berichte der letzten vier Wochen über alle Lebensbereiche,
+    einige wichtige, einige mit Nachtrag; Übergabe-Einträge (offen, mehrtägig, erledigt,
+    abgelaufen) und zwei Notizen für den Wohnbereich – alles relativ zum heutigen Tag.
+
 ## Offene Punkte
 
 - Bewohnerakte: Vorschläge Beschlusswarnung, „offen geführt“, Altersanzeige — Tobi
@@ -65,8 +93,10 @@ Repository `KhaosDE/Ausgangsliste` anhängen.
   beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
 - Dunkle Darstellung ist nicht gebaut (`docs/gestaltung.md` sieht sie vor, freigegeben ist
   bisher nur die helle).
-- Aus der Ausgangsliste noch nicht übernommen (nicht im Umfang von 0.2.0): Datenbank mit
-  Mehrplatz-Schutz, Sicherung, Druckvorschau.
+- Aus der Ausgangsliste noch nicht übernommen: Datenbank mit Mehrplatz-Schutz, Sicherung
+  (die Druckvorschau ist seit 0.6.0 übernommen).
+- „Bericht lesen …“ in der Übergabe zeigt den Bericht in einem einfachen Meldungsfenster;
+  ein eigenes Lesefenster wäre schöner, war aber nicht verlangt.
 - Der Wechsel 0.2.0 → 0.3.0 über das Update ist am Code geprüft und mit dem echten Release
   durchgespielt (Laden, Prüfsumme), aber nicht auf einem echten Windows-Rechner – bitte
   Testliste Punkt 1.
@@ -90,7 +120,7 @@ Repository `KhaosDE/Ausgangsliste` anhängen.
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
-- **Zwei Nummern.** Die Versionsnummer (jetzt 0.3.0) steht von Hand in
+- **Zwei Nummern.** Die Versionsnummer (z. B. 0.6.0) steht von Hand in
   `Directory.Build.props` und in dieser Datei; die Build-Nummer ist die Laufnummer von
   GitHub Actions und wird beim Bauen in die `.exe` geschrieben. Das Update vergleicht nur
   Build-Nummern. Im Fenster steht beides („Version 0.3.0 · Build 7“).
@@ -144,14 +174,36 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - **Oberflächentests nur unter Windows** (Windows Forms läuft nicht unter Linux); sie laufen
   in GitHub Actions vor jedem Zusammenführen und legen Bildschirmfotos ab.
 - **Programmgerüst (07.11.2026):** Das Programm startet im Bereich „Bewohner“, solange die
-  Übersicht nur ein Platzhalter ist (Startseite wird sie mit 0.15.0). „Einstellungen“ öffnet
-  ein Fenster und ist kein eigener Bereich; der Eintrag steht etwas abgesetzt unten in der
-  Liste. „Neuer Bericht …“ ist bis 0.6.0 eine Platzhalter-Seite.
+  Übersicht nur ein Platzhalter ist (Startseite wird sie mit 0.17.0). „Einstellungen“ und
+  „Neuer Bericht …“ öffnen ein Fenster und sind keine eigenen Bereiche; „Einstellungen“ steht
+  etwas abgesetzt unten in der Liste. Die Ausgangsliste steht als Platzhalter in der Liste;
+  mit der Modulverwaltung (0.14.0) lässt sie sich ausblenden.
 - **Eigenes Bild im Kopf:** Kopie im Datenordner (`logo\`), Dateiname in
   `einstellungen.json`; das alte Bild wird beim Ersetzen gelöscht. Es steht rechts oben, der
   Demo-Hinweis direkt links daneben, damit er immer sichtbar bleibt (Regel 4).
 - **Kürzel:** leer oder bis zu 6 Buchstaben/Ziffern, gespeichert in `einstellungen.json`
   (wie das Update-Häkchen). Gebraucht ab 0.6.0 für Berichte.
+- **Tägliche Dokumentation (0.6.0), wo der Eintrag etwas offen ließ:**
+  - Schichten nach Uhrzeit: Früh 6–14 Uhr, Spät 14–22 Uhr, Nacht 22–6 Uhr. Die Schicht lässt
+    sich im Fenster auch von Hand wählen.
+  - „Nächste Schicht“ heißt: gilt bis zum Ende der Schicht nach der, in der geschrieben wurde.
+    „3 Tage“, „1 Woche“ und „bis Datum“ gelten bis zum Ende des jeweiligen Tages.
+  - „Neu seit deiner letzten Schicht“: entstanden nach deinem letzten Besuch im Bereich
+    „Übergabe“ (je Kürzel gemerkt) und von dir noch nicht gelesen. Ohne Kürzel gibt es kein
+    „neu“, und „Gelesen“, „Verlängern“, „Erledigt“ sind gesperrt (Hinweis auf die
+    Einstellungen).
+  - Marke „Übergabe N“ auf der Karte: Ohne eigenes Kürzel zählt sie alle offenen Einträge.
+  - Verlängern und Erledigt werden als eigene Ereignisse mit Kürzel und Zeit gespeichert; der
+    ursprüngliche Eintrag bleibt unverändert (nichts wird überschrieben).
+  - Rückfrage bei Übergabe-Wörtern mit drei Knöpfen: Ja (in die Übergabe, nächste Schicht),
+    Nein (ohne Übergabe speichern), Abbrechen (zurück zum Text). Gesucht wird auch in
+    zusammengesetzten Wörtern („Arzttermin“ enthält „Arzt“), Groß-/Kleinschreibung egal.
+  - Farben: „Übergabe“ Blaugrün, „Wichtig“ Violett, „läuft heute ab“ Gelb (wie „bitte
+    klären“), Gültigkeit und Lebensbereiche Blaugrau; immer mit Wort.
+  - Eine Karte zeigt jetzt bis zu drei Zeilen Marken (vorher zwei), damit „nicht erfasst“
+    auch neben „Übergabe“ und „Wichtig“ sichtbar bleibt (Regel 5).
+  - Demo-Daten: Die ausgedachten Berichte sind bei gleichem Datum zu jeder Uhrzeit gleich
+    (fester Zufallswert je Bewohner); Berichte in der Zukunft werden weggelassen.
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -161,6 +213,31 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.6.0:
+
+1. Unten links „Version 0.6.0 · Build …“. Links stehen jetzt auch „Aufgaben“, „Nachrichten“
+   und „Ausgangsliste“ mit „Kommt in Version …“.
+2. Einstellungen: Kürzel „TS“ eintragen.
+3. Karten: Anton Ahorn zeigt „Übergabe 1“ und „Wichtig“, Berta Birke keine Übergabe-Marke.
+4. Akte Anton Ahorn → Reiter „Berichte“: Berichte der letzten vier Wochen, neueste oben, mit
+   Marken. „nur wichtige“ anhaken → nur noch violett markierte. Lebensbereich, Schicht und
+   Suche ausprobieren.
+5. „Neuer Bericht …“ in der Akte: Datum, Uhrzeit, Schicht und „TS“ sind vorbelegt. Ohne
+   Lebensbereich und Text speichern → Fehlermeldung. Lebensbereich wählen, Text „Termin beim
+   Arzt am Donnerstag“ → beim Speichern kommt „Soll das in die Übergabe?“.
+6. Bei einem Bericht „Nachtrag …“ → Nachtrag steht darunter, der Text darüber bleibt gleich.
+7. „Neuer Bericht …“ in der Seitenleiste: Bewohner wählen, „Übergabe“ anhaken, „3 Tage“ und
+   einen kurzen Satz eingeben → danach öffnet sich die Akte beim Reiter „Berichte“.
+8. Bereich „Übergabe“: oben „Wohnbereich allgemein“, darunter nach Bewohner. Beim ersten
+   Besuch mit „TS“ ist alles „neu seit deiner letzten Schicht“, beim nächsten Besuch nicht
+   mehr. „Gelesen“ → „gelesen: TS (…)“. „Verlängern …“ → neue Dauer. „Erledigt“ → Eintrag
+   verschwindet; „Erledigte und abgelaufene zeigen“ → er steht unter „ERLEDIGT /
+   ABGELAUFEN“.
+9. „Notiz für den Wohnbereich …“ → erscheint oben unter „Wohnbereich allgemein“.
+10. „Übergabeblatt drucken …“ und in der Akte „Drucken …“ → Druckvorschau; „Drucken …“ dort
+    lässt z. B. „Microsoft Print to PDF“ wählen.
+11. „Demo-Daten zurücksetzen …“ → Berichte und Übergabe sind wieder im Demo-Zustand.
 
 Version 0.5.0:
 

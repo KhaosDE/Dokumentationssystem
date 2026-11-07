@@ -5,7 +5,7 @@ namespace Dokusystem.Kern;
 // Was eine Bewohnerkarte zusätzlich zu Bild, Name und Zimmer zeigt (Gestaltung Stufe 2):
 // Marken für das, was Aufmerksamkeit braucht, und die Aufenthaltsdauer.
 // Farbe sparsam: Der Normalfall („keine bekannt“, „kein Beschluss“) bekommt keine Marke.
-public enum MarkenArt { Beschluss, Allergie, NichtErfasst }
+public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig }
 
 public sealed record Marke(MarkenArt Art, string Text);
 
@@ -14,9 +14,13 @@ public enum BewohnerFilter { Alle, Beschluss, Allergie, NichtErfasst }
 
 public static class Kennzeichen
 {
-    public static List<Marke> Marken(Bewohner b)
+    // ungeleseneUebergaben: offene Übergabe-Einträge, die das eigene Kürzel noch nicht gelesen hat;
+    // wichtigeBerichte: als wichtig markierte Berichte der letzten 7 Tage.
+    public static List<Marke> Marken(Bewohner b, int ungeleseneUebergaben = 0, int wichtigeBerichte = 0)
     {
         var marken = new List<Marke>();
+        if (ungeleseneUebergaben > 0) marken.Add(new Marke(MarkenArt.Uebergabe, $"Übergabe {ungeleseneUebergaben}"));
+        if (wichtigeBerichte > 0) marken.Add(new Marke(MarkenArt.Wichtig, "Wichtig"));
         if (b.Beschluss == BeschlussZustand.Ende)
             marken.Add(new Marke(MarkenArt.Beschluss, $"Beschluss bis {Datum.Text(b.Beschlussende)}"));
         if (b.Allergie == AllergieZustand.Eingetragen)

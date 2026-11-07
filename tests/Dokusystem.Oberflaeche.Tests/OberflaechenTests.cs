@@ -13,7 +13,8 @@ public class HauptfensterTests
         Assert.Contains("Demo — ausgedachte Daten", fenster.Text);
         Assert.Equal("Demo — ausgedachte Daten", KopfBereich.DemoHinweis);
         Assert.Equal(KopfBereich.DemoHinweis, fenster.Kopf.AccessibleName);
-        Assert.Equal(["Übersicht", "Bewohner", "Neuer Bericht …", "Übergabe", "Kalender", "Therapie", "Medikamente", "Einstellungen"],
+        Assert.Equal(["Übersicht", "Bewohner", "Neuer Bericht …", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+                      "Medikamente", "Ausgangsliste", "Einstellungen"],
             fenster.Navigation.Select(n => n.Text));
         Assert.Equal("Bewohner", fenster.AktiverBereich);
         Assert.True(fenster.Navigation.Single(n => n.Text == "Bewohner").Aktiv);
@@ -21,12 +22,13 @@ public class HauptfensterTests
     });
 
     [Theory]
-    [InlineData("Übersicht", "0.15.0")]
-    [InlineData("Neuer Bericht …", "0.6.0")]
-    [InlineData("Übergabe", "0.6.0")]
-    [InlineData("Kalender", "0.11.0")]
-    [InlineData("Therapie", "0.9.0")]
-    [InlineData("Medikamente", "0.7.0")]
+    [InlineData("Übersicht", "0.17.0")]
+    [InlineData("Aufgaben", "0.7.0")]
+    [InlineData("Nachrichten", "0.8.0")]
+    [InlineData("Kalender", "0.13.0")]
+    [InlineData("Therapie", "0.11.0")]
+    [InlineData("Medikamente", "0.9.0")]
+    [InlineData("Ausgangsliste", "0.14.0")]
     public void Noch_nicht_gebaute_Bereiche_zeigen_ihre_Version(string bereich, string version) => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
@@ -108,7 +110,9 @@ public class BewohnerOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         var karten = Karten(f);
         Assert.Equal(u.Speicher.AlleBewohner().Count, karten.Count);
-        Assert.Equal("Anton Ahorn, Zimmer 101, Beschluss bis 30.06.2027, Allergie: Haselnüsse. Akte öffnen", karten[0].AccessibleName);
+        // Ohne eigenes Kürzel zählt „Übergabe“ alle offenen Einträge; „Wichtig“: wichtiger Bericht der letzten 7 Tage.
+        Assert.Equal("Anton Ahorn, Zimmer 101, Übergabe 1, Wichtig, Beschluss bis 30.06.2027, Allergie: Haselnüsse. Akte öffnen",
+            karten[0].AccessibleName);
         Assert.Equal("Bewohner", f.Kopf.TitelText);
         Assert.Equal("Neuer Bewohner …", Assert.Single(f.Kopf.Knoepfe).Text);
     });
@@ -121,10 +125,25 @@ public class BewohnerOberflaechenTests
         f.Bewohner.Heute = () => new DateOnly(2026, 11, 7);
         f.Bewohner.UebersichtZeigen();
         var birke = Karten(f).Single(k => k.Bewohner.Nachname == "Birke");
-        Assert.Empty(birke.Marken);   // keine bekannt, kein Beschluss: Normalfall ohne Marke
+        // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu; ihre Übergabe ist erledigt
+        Assert.DoesNotContain(birke.Marken, m => m.Art is MarkenArt.Beschluss or MarkenArt.Allergie or MarkenArt.NichtErfasst or MarkenArt.Uebergabe);
         Assert.Equal("seit 15.02.2016 · 10 Jahre, 8 Monate", birke.AufenthaltText);
         var ginster = Karten(f).Single(k => k.Bewohner.Nachname == "Ginster");
-        Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst"], ginster.Marken.Select(m => m.Text));
+        Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst"],
+            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst).Select(m => m.Text));
+        Assert.Equal("Übergabe 1", ginster.Marken[0].Text);
+    });
+
+    [Fact]
+    public void Uebergabe_Marke_zaehlt_nur_was_das_eigene_Kuerzel_noch_nicht_gelesen_hat() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var f = new Hauptfenster(u.Speicher);
+        Assert.Contains(Karten(f)[0].Marken, m => m.Text == "Übergabe 1");
+        Einstellungen.Aendern(w => w with { Kuerzel = "AB" });   // AB hat Ahorns Übergabe schon gelesen
+        f.Bewohner.UebersichtZeigen();
+        Assert.DoesNotContain(Karten(f)[0].Marken, m => m.Art == MarkenArt.Uebergabe);
+        Assert.Contains(Karten(f)[0].Marken, m => m.Text == "Wichtig");
     });
 
     [Fact]
@@ -205,7 +224,7 @@ public class BewohnerOberflaechenTests
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
         akte.Reiter.Waehlen("Medikation");
-        Assert.Equal("Kommt in Version 0.8.0", akte.ReiterPlatzhalter.Titel.Text);
+        Assert.Equal("Kommt in Version 0.10.0", akte.ReiterPlatzhalter.Titel.Text);
         Assert.Equal("Allergien: Haselnüsse", akte.Allergie.Text);   // Allergiehinweis bleibt oben
         f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);   // neue Akte beginnt bei den Stammdaten
@@ -340,6 +359,35 @@ public class BildschirmfotoTests
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         f.Bewohner.Akte.Reiter.Waehlen("Berichte");
         Hilfe.Foto(f, "8_akte_reiter_berichte");
+        f.Bewohner.Akte.Berichte.NurWichtige.Checked = true;
+        Hilfe.Foto(f, "13_akte_nur_wichtige");
+        f.Bewohner.Akte.Berichte.NurWichtige.Checked = false;
+        using (var formular = new BerichtFormular(u.Speicher, null))
+        {
+            formular.BewohnerWaehlen(u.Demo("Eiche").Id!.Value);
+            formular.Bereiche[0].Checked = formular.Bereiche[3].Checked = true;
+            formular.Inhalt.Text = "Hat den Einkauf für die Wohngruppe mit Liste selbstständig erledigt.";
+            formular.Wichtig.Checked = formular.Uebergabe.Checked = true;
+            formular.UebergabeDauer.SelectedIndex = (int)UebergabeDauer.DreiTage;
+            formular.UebergabeText.Text = "Einkaufsliste für Samstag liegt im Büro";
+            Hilfe.Foto(formular, "14_neuer_bericht");
+        }
+        f.Navigation.Single(n => n.Text == "Übergabe").Ausloesen();
+        Hilfe.Foto(f, "15_uebergabe");
+        f.Uebergabe.ErledigteZeigen.Checked = true;
+        f.Uebergabe.AutoScrollPosition = new Point(0, 100000);
+        Hilfe.Foto(f, "16_uebergabe_erledigt");
+        f.Uebergabe.ErledigteZeigen.Checked = false;
+        using (var bild = new Bitmap(1240, 1754))
+        using (var g = Graphics.FromImage(bild))
+        {
+            g.Clear(Color.White);
+            g.ScaleTransform(1240f / 210f / 3.7795f, 1240f / 210f / 3.7795f);
+            new UebergabeDruck(u.Speicher.Uebergaben(DateTime.Now),
+                u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}"), DateTime.Now).SeiteZeichnen(g, 0);
+            string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
+            if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "17_uebergabeblatt.png"), System.Drawing.Imaging.ImageFormat.Png);
+        }
         f.Navigation.Single(n => n.Text == "Kalender").Ausloesen();
         Hilfe.Foto(f, "9_platzhalter_kalender");
         string logo = Path.Combine(u.Ordner, "eigenes-bild.png");

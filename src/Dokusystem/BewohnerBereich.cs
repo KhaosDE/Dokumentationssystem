@@ -24,7 +24,8 @@ public sealed class BewohnerBereich : Panel
 
     // Der heutige Tag (für die Aufenthaltsdauer); zum Testen ersetzbar.
     internal Func<DateOnly> Heute { get; set; } = () => DateOnly.FromDateTime(DateTime.Today);
-    public AkteAnsicht Akte { get; } = new() { Dock = DockStyle.Fill, Visible = false };
+    internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
+    public AkteAnsicht Akte { get; }
     // Eigenes Feld statt Akte.Visible: Visible meldet „unsichtbar“, solange das Fenster selbst
     // noch nicht angezeigt ist.
     public bool AkteSichtbar { get; private set; }
@@ -37,6 +38,7 @@ public sealed class BewohnerBereich : Panel
     {
         this.speicher = speicher;
         this.kopf = kopf;
+        Akte = new AkteAnsicht(speicher) { Dock = DockStyle.Fill, Visible = false };
         BackColor = Stil.Seite;
         foreach (var filter in Enum.GetValues<BewohnerFilter>())
         {
@@ -75,9 +77,13 @@ public sealed class BewohnerBereich : Panel
         }
         var sichtbar = alle.Where(b => Kennzeichen.Passt(b, AktiverFilter)).ToList();
         DateOnly heute = Heute();
+        DateTime jetzt = Jetzt();
+        string kuerzel = Einstellungen.Laden().Kuerzel;
         Raster.KartenSetzen(sichtbar.Select(b =>
         {
-            var karte = new BewohnerKarte(b, heute);
+            var karte = new BewohnerKarte(b, heute,
+                speicher.UngeleseneUebergaben(b.Id!.Value, kuerzel, jetzt),
+                speicher.WichtigeBerichteSeit(b.Id!.Value, jetzt.AddDays(-7)));
             karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
             return karte;
         }));
@@ -131,13 +137,15 @@ public sealed class AkteAnsicht : Panel
     public HinweisFeld Allergie { get; } = new();
     public Reiterleiste Reiter { get; } = new(Bauplan.AktenReiter);
     public PlatzhalterKarte ReiterPlatzhalter { get; } = new() { Visible = false };
+    public BerichteAnsicht Berichte { get; }
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
     public Label Beschlussende { get; } = new();
     public Bewohner? Bewohner { get; private set; }
 
-    public AkteAnsicht()
+    public AkteAnsicht(Speicher speicher)
     {
+        Berichte = new BerichteAnsicht(speicher) { Visible = false };
         AutoScroll = true;
         BackColor = Stil.Seite;
         DoubleBuffered = true;
@@ -178,14 +186,17 @@ public sealed class AkteAnsicht : Panel
         stammdaten.Controls.Add(tabelle);
 
         Reiter.Gewechselt += _ => ReiterZeigen();
-        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter]);
+        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Berichte]);
     }
 
     private void ReiterZeigen()
     {
         bool stamm = Reiter.Aktiv == "Stammdaten";
+        bool berichte = Reiter.Aktiv == "Berichte";
         abschnitt.Visible = stammdaten.Visible = stamm;
-        ReiterPlatzhalter.Visible = !stamm;
+        Berichte.Visible = berichte;
+        if (berichte && Bewohner is not null) Berichte.Zeigen(Bewohner);
+        ReiterPlatzhalter.Visible = !stamm && !berichte;
         if (!stamm && Bauplan.Reiter.TryGetValue(Reiter.Aktiv, out var vorhaben))
             ReiterPlatzhalter.Setzen(vorhaben.Version, vorhaben.Beschreibung);
         PerformLayout();
@@ -248,6 +259,14 @@ public sealed class AkteAnsicht : Panel
         Reiter.Bounds = new Rectangle(x, y, breite, S(40));
         y += Reiter.Height + S(Stil.AbstandGross);
 
+        if (Berichte.Visible)
+        {
+            Berichte.SetBounds(x, y, breite, Berichte.Height);
+            Berichte.PerformLayout();
+            y += Berichte.Height + rand;
+            AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y);
+            return;
+        }
         if (ReiterPlatzhalter.Visible)
         {
             ReiterPlatzhalter.Bounds = new Rectangle(x, y, breite, ReiterPlatzhalter.Height);

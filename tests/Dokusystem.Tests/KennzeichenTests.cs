@@ -27,6 +27,14 @@ public class KennzeichenTests
     }
 
     [Fact]
+    public void Uebergabe_und_Wichtig_stehen_vorn()
+    {
+        var b = Neuer(e => { e.Allergie = "keine_bekannt"; e.Beschluss = "kein_beschluss"; });
+        Assert.Equal([new Marke(MarkenArt.Uebergabe, "Übergabe 2"), new Marke(MarkenArt.Wichtig, "Wichtig")],
+            Kennzeichen.Marken(b, ungeleseneUebergaben: 2, wichtigeBerichte: 1));
+    }
+
+    [Fact]
     public void Nicht_erfasst_ist_sichtbar_Regel_5()
     {
         var marken = Kennzeichen.Marken(Neuer());

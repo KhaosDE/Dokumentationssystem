@@ -132,7 +132,7 @@ public sealed class SpeicherBewohnerTests : IDisposable
     public void Demo_Datei_ohne_Bilder()
     {
         string ordner = Path.Combine(Repo.Wurzel, "daten", "demo");
-        Assert.Equal(["bewohner.json"], Directory.GetFiles(ordner).Select(Path.GetFileName));
+        Assert.All(Directory.GetFiles(ordner), d => Assert.Equal(".json", Path.GetExtension(d)));   // keine Bilder (Regel 2)
         using var json = JsonDocument.Parse(File.ReadAllText(Path.Combine(ordner, "bewohner.json")));
         Assert.All(json.RootElement.GetProperty("bewohner").EnumerateArray(), e => Assert.False(e.TryGetProperty("bild", out _)));
     }

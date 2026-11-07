@@ -10,9 +10,10 @@ public sealed class Hauptfenster : Form
 {
     private const int LeisteBreite = 232;
 
-    // Reihenfolge der Seitenleiste. „Einstellungen“ öffnet ein Fenster statt einer Seite.
+    // Reihenfolge der Seitenleiste. „Neuer Bericht …“ und „Einstellungen“ öffnen ein Fenster statt einer Seite.
     public static readonly string[] Bereiche =
-        ["Übersicht", "Bewohner", "Neuer Bericht …", "Übergabe", "Kalender", "Therapie", "Medikamente", "Einstellungen"];
+        ["Übersicht", "Bewohner", "Neuer Bericht …", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+         "Medikamente", "Ausgangsliste", "Einstellungen"];
 
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
@@ -23,6 +24,7 @@ public sealed class Hauptfenster : Form
     public KopfBereich Kopf { get; } = new() { Dock = DockStyle.Top };
     public Statusleiste Statusleiste { get; } = new() { Dock = DockStyle.Bottom };
     public BewohnerBereich Bewohner { get; }
+    public UebergabeSeite Uebergabe { get; }
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
     public Button DemoKnopf { get; } = Stil.NebenKnopf("Demo-Daten zurücksetzen …");
@@ -38,12 +40,15 @@ public sealed class Hauptfenster : Form
         BackColor = Stil.Seite;
         Font = Stil.Standard;
         StartPosition = FormStartPosition.CenterScreen;
-        MinimumSize = new Size(860, 600);
-        Size = new Size(1180, 780);
+        MinimumSize = new Size(860, 680);
+        Size = new Size(1180, 800);
         EinstellungenZeigen = f => f.ShowDialog(this) == DialogResult.OK;
 
         Bewohner = new BewohnerBereich(speicher, Kopf) { Dock = DockStyle.Fill };
         seiten["Bewohner"] = Bewohner;
+        Uebergabe = new UebergabeSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Übergabe"] = Uebergabe;
+        Uebergabe.Geaendert += () => { if (AktiverBereich == "Übergabe") Kopf.TexteSetzen(Uebergabe.KopfText, "Übergabe"); };
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);
@@ -96,7 +101,7 @@ public sealed class Hauptfenster : Form
         inhalt.BringToFront();
 
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
-        // Start im Bereich „Bewohner“, solange die Übersicht noch nicht gebaut ist (kommt mit 0.15.0).
+        // Start im Bereich „Bewohner“, solange die Übersicht noch nicht gebaut ist (kommt mit 0.17.0).
         BereichWaehlen("Bewohner");
     }
 
@@ -114,6 +119,11 @@ public sealed class Hauptfenster : Form
             EinstellungenOeffnen();
             return;
         }
+        if (name == "Neuer Bericht …")
+        {
+            NeuerBericht();
+            return;
+        }
         string schluessel = Schluessel(name);
         AktiverBereich = name;
         foreach (var eintrag in Navigation) eintrag.Aktiv = eintrag.Text == name;
@@ -123,8 +133,26 @@ public sealed class Hauptfenster : Form
             Bewohner.UebersichtZeigen();
             return;
         }
+        if (schluessel == "Übergabe")
+        {
+            Uebergabe.Besuch();
+            Kopf.TexteSetzen(Uebergabe.KopfText, "Übergabe");
+            Kopf.KnoepfeSetzen();
+            return;
+        }
         Kopf.TexteSetzen($"Kommt in Version {Bauplan.Bereiche[schluessel].Version}", schluessel);
         Kopf.KnoepfeSetzen();
+    }
+
+    // Neuer Bericht mit Bewohnerauswahl; danach die Akte des Bewohners beim Reiter „Berichte“.
+    public Bericht? NeuerBericht()
+    {
+        using var formular = new BerichtFormular(speicher, null);
+        if (Dialog.Zeigen(formular, this) != DialogResult.OK || formular.Gespeichert is not Bericht bericht) return null;
+        BereichWaehlen("Bewohner");
+        Bewohner.AkteZeigen(bericht.BewohnerId);
+        Bewohner.Akte.Reiter.Waehlen("Berichte");
+        return bericht;
     }
 
     public bool EinstellungenOeffnen()
@@ -145,7 +173,7 @@ public sealed class Hauptfenster : Form
         {
             // Einstellungen etwas abgesetzt: Sie sind kein Arbeitsbereich.
             if (eintrag.Text == "Einstellungen") y += S(Stil.AbstandMittel);
-            eintrag.Bounds = new Rectangle(x, y, breite, S(40));
+            eintrag.Bounds = new Rectangle(x, y, breite, S(36));
             y += eintrag.Height + S(Stil.AbstandMini);
         }
 
