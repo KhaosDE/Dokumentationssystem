@@ -472,8 +472,8 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   Protokoll und Sicherung der Ausgangsliste bleiben draußen (kein Mehrplatzbetrieb im Bauplan).
 - 07.11.2026 (Schritt 11): Marken des Moduls: „abwesend“ bekommt eine eigene graue Farbe (neu
   im Farbschlüssel); Ausgangsbeschränkung und „unterwegs“ neutral; Fristen und „überfällig“ in
-  der Farbe „bitte klären“ – der Farbschlüssel heißt dafür jetzt kurz „bitte klären“ (statt „nicht
-  erfasst – bitte klären“). Auf den Bewohnerkarten nur, was Aufmerksamkeit braucht; Zimmer, Unterbringung und
+  der Farbe „bitte klären“ – der Farbschlüssel heißt dafür jetzt „nicht erfasst, Frist“ (statt
+  „nicht erfasst – bitte klären“, damit alles in die Statusleiste passt). Auf den Bewohnerkarten nur, was Aufmerksamkeit braucht; Zimmer, Unterbringung und
   Küchendienst nur auf der Seite des Moduls.
 - 07.11.2026 (Schritt 11): Keine neuen Abhängigkeiten.
 

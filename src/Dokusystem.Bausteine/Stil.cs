@@ -127,7 +127,7 @@ public static class Stil
     public static readonly (Marke Marke, string Text)[] Farbschluessel =
     [
         (Beschluss, "Beschluss, Allergie"),
-        (Achtung, "bitte klären"),
+        (Achtung, "nicht erfasst, Frist"),
         (Unterwegs, "Übergabe"),
         (Hinweis, "wichtig"),
         (Abwesend, "abwesend"),
