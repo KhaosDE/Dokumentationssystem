@@ -45,6 +45,10 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Übergabe** (links): nur die Übergabe-Einträge, oben „Wohnbereich allgemein“, darunter je
   Bewohner. Mit eigenem Kürzel (Einstellungen) lassen sie sich als gelesen bestätigen,
   verlängern oder erledigen. „Übergabeblatt drucken …“ druckt die offenen Einträge.
+- **Aufgaben** (links, mit Zähler): was die nächste Schicht (oder wer Zeit hat) tun soll.
+  Aufgaben bleiben stehen, bis jemand sie als erledigt markiert; schafft man es nicht,
+  „An die nächste Schicht weitergeben …“ mit kurzer Notiz. Die ersten offenen Aufgaben stehen
+  auch über den Bewohnerkarten. Aus einem Bericht heraus: „Aufgabe daraus …“.
 - Die Wortliste für den Hinweis „Soll das in die Übergabe?“ lässt sich ergänzen: eine Datei
   `uebergabe-woerter.txt` in den Datenordner legen, ein Wort pro Zeile.
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder

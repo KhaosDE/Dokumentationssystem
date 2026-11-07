@@ -23,7 +23,6 @@ public class HauptfensterTests
 
     [Theory]
     [InlineData("Übersicht", "0.17.0")]
-    [InlineData("Aufgaben", "0.7.0")]
     [InlineData("Nachrichten", "0.8.0")]
     [InlineData("Kalender", "0.13.0")]
     [InlineData("Therapie", "0.11.0")]
@@ -387,6 +386,14 @@ public class BildschirmfotoTests
                 u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}"), DateTime.Now).SeiteZeichnen(g, 0);
             string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
             if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "17_uebergabeblatt.png"), System.Drawing.Imaging.ImageFormat.Png);
+        }
+        f.Navigation.Single(n => n.Text == "Aufgaben").Ausloesen();
+        Hilfe.Foto(f, "18_aufgaben");
+        using (var neu = new AufgabeFenster(u.Speicher, u.Demo("Fichte").Id, null))
+        {
+            neu.Inhalt.Text = "Mit Frieda die Anmeldung für den Malkurs abgeben";
+            neu.FaelligDatum.Text = Datum.Text(DateOnly.FromDateTime(DateTime.Today.AddDays(3)));
+            Hilfe.Foto(neu, "19_neue_aufgabe");
         }
         f.Navigation.Single(n => n.Text == "Kalender").Ausloesen();
         Hilfe.Foto(f, "9_platzhalter_kalender");

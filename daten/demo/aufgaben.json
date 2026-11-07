@@ -1,0 +1,52 @@
+{
+  "hinweis": "Ausgedachte Aufgaben für die Demo. Zeiten relativ zum Laden der Demo-Daten (Stunden vor/nach jetzt).",
+  "aufgaben": [
+    {
+      "text": "Arzttermin am Donnerstag telefonisch bestätigen und Fahrdienst bestellen",
+      "bewohner": "Ahorn",
+      "fuer": "naechste_schicht",
+      "erstelltVorStunden": 2,
+      "faelligInStunden": 20,
+      "verfasser": "AB"
+    },
+    {
+      "text": "Aushang mit dem Wochenplan im Flur erneuern",
+      "fuer": "naechste_schicht",
+      "erstelltVorStunden": 30,
+      "faelligInStunden": -4,
+      "verfasser": "GH",
+      "weitergabe": { "vorStunden": 14, "kuerzel": "KL", "notiz": "Drucker war leer, Papier ist bestellt." }
+    },
+    {
+      "text": "Anmeldung zum Schwimmkurs zusammen mit {vorname} ausfüllen",
+      "bewohner": "Clematis",
+      "fuer": "schicht",
+      "schichtInTagen": 1,
+      "schicht": "spaet",
+      "erstelltVorStunden": 5,
+      "verfasser": "EF"
+    },
+    {
+      "text": "Getränkevorrat im Gemeinschaftsraum auffüllen",
+      "fuer": "wer_zeit_hat",
+      "erstelltVorStunden": 26,
+      "verfasser": "CD"
+    },
+    {
+      "text": "Geburtstagskarte für {vorname} vorbereiten",
+      "bewohner": "Holunder",
+      "fuer": "wer_zeit_hat",
+      "erstelltVorStunden": 8,
+      "faelligInStunden": 72,
+      "verfasser": "CD"
+    },
+    {
+      "text": "Neues Fahrradschloss mit {vorname} besorgen",
+      "bewohner": "Eiche",
+      "fuer": "wer_zeit_hat",
+      "erstelltVorStunden": 50,
+      "verfasser": "AB",
+      "erledigt": { "vorStunden": 20, "kuerzel": "EF" }
+    }
+  ]
+}

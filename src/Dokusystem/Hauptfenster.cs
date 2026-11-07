@@ -25,6 +25,7 @@ public sealed class Hauptfenster : Form
     public Statusleiste Statusleiste { get; } = new() { Dock = DockStyle.Bottom };
     public BewohnerBereich Bewohner { get; }
     public UebergabeSeite Uebergabe { get; }
+    public AufgabenSeite Aufgaben { get; }
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
     public Button DemoKnopf { get; } = Stil.NebenKnopf("Demo-Daten zurücksetzen …");
@@ -49,6 +50,10 @@ public sealed class Hauptfenster : Form
         Uebergabe = new UebergabeSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Übergabe"] = Uebergabe;
         Uebergabe.Geaendert += () => { if (AktiverBereich == "Übergabe") Kopf.TexteSetzen(Uebergabe.KopfText, "Übergabe"); };
+        Aufgaben = new AufgabenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Aufgaben"] = Aufgaben;
+        Aufgaben.Geaendert += () => { if (AktiverBereich == "Aufgaben") Kopf.TexteSetzen(Aufgaben.KopfText, "Aufgaben"); };
+        Bewohner.AufgabenAnzeigen += () => BereichWaehlen("Aufgaben");
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);
@@ -100,6 +105,8 @@ public sealed class Hauptfenster : Form
         Controls.Add(leiste);
         inhalt.BringToFront();
 
+        speicher.AufgabenGeaendert += AufgabenZaehlen;
+        AufgabenZaehlen();
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
         // Start im Bereich „Bewohner“, solange die Übersicht noch nicht gebaut ist (kommt mit 0.17.0).
         BereichWaehlen("Bewohner");
@@ -133,6 +140,13 @@ public sealed class Hauptfenster : Form
             Bewohner.UebersichtZeigen();
             return;
         }
+        if (schluessel == "Aufgaben")
+        {
+            Aufgaben.Aktualisieren();
+            Kopf.TexteSetzen(Aufgaben.KopfText, "Aufgaben");
+            Kopf.KnoepfeSetzen(Aufgaben.NeuKnopf);
+            return;
+        }
         if (schluessel == "Übergabe")
         {
             Uebergabe.Besuch();
@@ -142,6 +156,18 @@ public sealed class Hauptfenster : Form
         }
         Kopf.TexteSetzen($"Kommt in Version {Bauplan.Bereiche[schluessel].Version}", schluessel);
         Kopf.KnoepfeSetzen();
+    }
+
+    // Zähler offener Aufgaben in der Seitenleiste (rot, wenn etwas überfällig ist) und die
+    // Kurzliste über den Bewohnerkarten.
+    public void AufgabenZaehlen()
+    {
+        var jetzt = DateTime.Now;
+        var offen = speicher.Aufgaben(jetzt);
+        int ueberfaellig = offen.Count(a => AufgabenRegeln.Ueberfaellig(a, jetzt));
+        Navigation.Single(n => n.Text == "Aufgaben").ZaehlerSetzen(offen.Count, ueberfaellig > 0,
+            $"{offen.Count} offen" + (ueberfaellig > 0 ? $", {ueberfaellig} überfällig" : ""));
+        Bewohner.AufgabenSetzen(offen, jetzt);
     }
 
     // Neuer Bericht mit Bewohnerauswahl; danach die Akte des Bewohners beim Reiter „Berichte“.

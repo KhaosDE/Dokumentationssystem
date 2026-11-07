@@ -9,7 +9,6 @@ public static class Bauplan
     public static readonly IReadOnlyDictionary<string, Vorhaben> Bereiche = new Dictionary<string, Vorhaben>
     {
         ["Übersicht"] = new("0.17.0", "Alle Bewohner auf einen Blick: was heute wichtig ist – Termine, Änderungen in der Medikation, Beschlüsse, die bald enden, fällige HEB-Bögen."),
-        ["Aufgaben"] = new("0.7.0", "Die Aufgabenliste des Wohnbereichs: Aufgaben an die nächste Schicht weitergeben, bis sie erledigt sind."),
         ["Nachrichten"] = new("0.8.0", "Nachrichten an Kolleginnen und Kollegen – an einzelne Personen oder an Teams."),
         ["Kalender"] = new("0.13.0", "Termine des Wohnbereichs: Arzttermine, Heimfahrten, Tagesausflüge – als Monat, Woche oder Tag."),
         ["Therapie"] = new("0.11.0", "Die Therapieangebote mit Teilnehmern und freien Plätzen; zugeteilte Angebote erscheinen im Wochenplan."),

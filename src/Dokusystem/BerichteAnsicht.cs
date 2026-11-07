@@ -13,7 +13,9 @@ public sealed class BerichtKarte : KartenFlaeche
 
     public Bericht Bericht { get; }
     public Button NachtragKnopf { get; } = Stil.NebenKnopf("Nachtrag …");
+    public Button AufgabeKnopf { get; } = Stil.NebenKnopf("Aufgabe daraus …");
     public event Action<Bericht>? NachtragGewuenscht;
+    public event Action<Bericht>? AufgabeGewuenscht;
 
     // name: Bewohnername (nur in der Übergabe, wo Berichte aller Bewohner stehen).
     public BerichtKarte(Bericht bericht, string? name = null)
@@ -47,8 +49,10 @@ public sealed class BerichtKarte : KartenFlaeche
             Controls.Add(label);
         }
         NachtragKnopf.Click += (_, _) => NachtragGewuenscht?.Invoke(Bericht);
+        AufgabeKnopf.Click += (_, _) => AufgabeGewuenscht?.Invoke(Bericht);
         Controls.Add(marken);
         Controls.Add(NachtragKnopf);
+        Controls.Add(AufgabeKnopf);
         AccessibleName = $"Bericht {kopf.Text}, {string.Join(", ", MarkenTexte)}: {bericht.Text}";
     }
 
@@ -63,9 +67,11 @@ public sealed class BerichtKarte : KartenFlaeche
         base.OnLayout(levent);
         int innen = Stil.Px(this, Stil.AbstandGross), breite = Math.Max(100, Width - 2 * innen);
         int y = innen;
-        kopf.MaximumSize = new Size(breite - NachtragKnopf.Width - Stil.Px(this, Stil.AbstandKlein), 0);
+        int knopfBreite = NachtragKnopf.Width + AufgabeKnopf.Width + Stil.Px(this, Stil.AbstandKlein);
+        kopf.MaximumSize = new Size(Math.Max(100, breite - knopfBreite - Stil.Px(this, Stil.AbstandKlein)), 0);
         kopf.Location = new Point(innen, y);
         NachtragKnopf.Location = new Point(Width - innen - NachtragKnopf.Width, y - Stil.Px(this, Stil.AbstandMini));
+        AufgabeKnopf.Location = new Point(NachtragKnopf.Left - Stil.Px(this, Stil.AbstandKlein) - AufgabeKnopf.Width, NachtragKnopf.Top);
         y = Math.Max(kopf.Bottom, NachtragKnopf.Bottom - Stil.Px(this, Stil.AbstandKlein)) + Stil.Px(this, Stil.AbstandKlein);
         marken.MaximumSize = new Size(breite, 0);
         marken.Bounds = new Rectangle(new Point(innen, y), marken.GetPreferredSize(new Size(breite, 0)));
@@ -222,6 +228,7 @@ public sealed class BerichteAnsicht : Panel
     {
         var karte = new BerichtKarte(b);
         karte.NachtragGewuenscht += NachtragSchreiben;
+        karte.AufgabeGewuenscht += AufgabeDaraus;
         return karte;
     }
 
@@ -236,6 +243,13 @@ public sealed class BerichteAnsicht : Panel
     {
         using var formular = new NachtragFormular(speicher, b);
         if (Dialog.Zeigen(formular, FindForm()) == DialogResult.OK) Aktualisieren();
+    }
+
+    // „Aufgabe daraus machen“: übernimmt den Bewohner und merkt sich den Bericht.
+    public void AufgabeDaraus(Bericht b)
+    {
+        using var fenster = new AufgabeFenster(speicher, b.BewohnerId, b.Id);
+        Dialog.Zeigen(fenster, FindForm());
     }
 
     public void Drucken()
