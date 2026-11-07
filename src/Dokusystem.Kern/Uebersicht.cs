@@ -7,7 +7,10 @@ namespace Dokusystem.Kern;
 
 // Was heute für einen Bewohner gilt (zusammengestellt vom Speicher).
 public sealed record HeuteFuer(Bewohner Bewohner, IReadOnlyList<Termin> Termine,
-    IReadOnlyList<(Verordnung Verordnung, string Aenderung)> Medikation, KalenderTermin? Heimfahrt);
+    IReadOnlyList<(Verordnung Verordnung, string Aenderung)> Medikation, KalenderTermin? Heimfahrt)
+{
+    public string? HebFaellig { get; init; }   // z. B. „HEB fällig (letzter 10/2025)“
+}
 
 public static class UebersichtRegeln
 {
@@ -50,6 +53,7 @@ public static class UebersichtRegeln
         if (b.Allergie == AllergieZustand.Eingetragen) marken.Add(new Marke(MarkenArt.Allergie, $"Allergie: {b.Allergien}"));
         if (b.Allergie == AllergieZustand.NichtErfasst) marken.Add(new Marke(MarkenArt.NichtErfasst, "Allergien nicht erfasst"));
         if (b.Beschluss == BeschlussZustand.NichtErfasst) marken.Add(new Marke(MarkenArt.NichtErfasst, "Beschluss nicht erfasst"));
+        if (h.HebFaellig is string heb) marken.Add(new Marke(MarkenArt.NichtErfasst, heb));
         foreach (var (v, aenderung) in h.Medikation)
             marken.Add(new Marke(MarkenArt.Wichtig, $"Medikation: {aenderung}"));
         var termine = h.Termine.OrderBy(t => t.Ganztags ? TimeOnly.MinValue : t.Von).ToList();

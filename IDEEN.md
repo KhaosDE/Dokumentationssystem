@@ -207,7 +207,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   Angebot im Zeitraum.
 
 ## HEB-Bogen aus Berichten
-Status: freigegeben (Bauplan Schritt 15)
+Status: erledigt (07.11.2026)
 Datum: 06.11.2026
 Was: Für einen Bewohner einen HEB-Bogen (Hilfe- und Entwicklungsbogen) für einen Zeitraum
 „von … bis …“ erstellen. Das Programm nutzt dafür die eingetragenen Berichte dieses

@@ -31,3 +31,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 07.11.2026 — Claude Code: Bauplan Schritt 12 „Biografie“ (0.15.0).
 - 07.11.2026 — Claude Code: Bauplan Schritt 13 „Monatsreflexion“ (0.16.0).
 - 07.11.2026 — Claude Code: Bauplan Schritt 14 „Startseite als Übersicht“ (0.17.0).
+- 07.11.2026 — Claude Code: Bauplan Schritt 15 „HEB-Bogen aus Berichten“ (0.18.0) – Bauplan vollständig.

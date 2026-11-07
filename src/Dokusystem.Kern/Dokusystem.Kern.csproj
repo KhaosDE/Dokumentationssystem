@@ -9,6 +9,10 @@
   <ItemGroup>
     <!-- SQLite-Baustein von Microsoft (MIT). -->
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.14" />
+    <!-- PDF-Formulare des HEB-Bogens ausfüllen. Nur 6.2.x: ab 6.5.0 steht PDFsharp unter AGPL-3.0. -->
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
+    <!-- PDFsharp bringt sonst System.Security.Cryptography.Pkcs 8.0.1 mit bekannter Sicherheitslücke mit. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,6 +28,7 @@
     <EmbeddedResource Include="..\..\daten\demo\kalender.json" LogicalName="Dokusystem.Kern.Demo.kalender.json" />
     <EmbeddedResource Include="..\..\daten\demo\biografie.json" LogicalName="Dokusystem.Kern.Demo.biografie.json" />
     <EmbeddedResource Include="..\..\daten\demo\reflexion.json" LogicalName="Dokusystem.Kern.Demo.reflexion.json" />
+    <EmbeddedResource Include="..\..\daten\demo\heb.json" LogicalName="Dokusystem.Kern.Demo.heb.json" />
     <EmbeddedResource Include="..\..\daten\uebergabe-woerter.txt" LogicalName="Dokusystem.Kern.uebergabe-woerter.txt" />
   </ItemGroup>
 </Project>

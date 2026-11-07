@@ -47,6 +47,20 @@ public static partial class Stilpruefung
     [GeneratedRegex(@"\r?\n\s*\r?\n")]
     private static partial Regex Absatz();
 
+    [GeneratedRegex(@"\b(ich|mein|meine|meinen|meinem|meiner|mir|mich)\b", RegexOptions.IgnoreCase)]
+    private static partial Regex IchForm();
+
+    // Mit Feldart: Rahmenziele in der 3. Person, Leitziel und Nahziele in Ich-Form.
+    public static List<StilHinweis> Pruefen(string text, FeldArt art)
+    {
+        var h = Pruefen(text);
+        if (string.IsNullOrWhiteSpace(text)) return h;
+        bool ich = IchForm().IsMatch(text);
+        if (art == FeldArt.Rahmenziel && ich) h.Add(new("Rahmenziel in der 3. Person schreiben (nicht in Ich-Form)", IchForm().Match(text).Value));
+        if (art == FeldArt.IchZiel && !ich) h.Add(new("Leitziel und Nahziele in Ich-Form schreiben", Kurz(text.Trim())));
+        return h;
+    }
+
     public static List<StilHinweis> Pruefen(string text)
     {
         var h = new List<StilHinweis>();

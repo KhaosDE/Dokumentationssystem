@@ -25,6 +25,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoKalender = "demo_kalender";
     private const string DemoBiografie = "demo_biografie";
     private const string DemoReflexion = "demo_reflexion";
+    private const string DemoHeb = "demo_heb";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -391,6 +392,31 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER reflexionen_bleiben BEFORE UPDATE ON reflexionen
             BEGIN SELECT RAISE(ABORT, 'Reflexionen werden nicht überschrieben – Änderungen sind neue Fassungen.'); END;
         """,
+        // 12 – HEB-Bogen: Kopf je Bogen, Fassungen mit Texten und Hilfebedarf als JSON.
+        """
+        CREATE TABLE heb_boegen (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('A', 'B', 'C')),
+            von         TEXT NOT NULL,
+            bis         TEXT NOT NULL,
+            nummer      INTEGER,
+            erstellt    TEXT NOT NULL
+        );
+        CREATE TABLE heb_fassungen (
+            id          INTEGER PRIMARY KEY,
+            bogen_id    INTEGER NOT NULL REFERENCES heb_boegen(id) ON DELETE CASCADE,
+            texte       TEXT NOT NULL,
+            hilfebedarf TEXT NOT NULL,
+            fertig      INTEGER NOT NULL DEFAULT 0 CHECK (fertig IN (0, 1)),
+            erstellt    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TRIGGER heb_boegen_bleiben BEFORE UPDATE ON heb_boegen
+            BEGIN SELECT RAISE(ABORT, 'HEB-Bögen werden nicht überschrieben.'); END;
+        CREATE TRIGGER heb_fassungen_bleiben BEFORE UPDATE ON heb_fassungen
+            BEGIN SELECT RAISE(ABORT, 'HEB-Bögen werden nicht überschrieben – Änderungen sind neue Fassungen.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -528,10 +554,10 @@ public sealed partial class Speicher : IDisposable
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
              therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null,
-             biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null;
+             biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
@@ -544,6 +570,7 @@ public sealed partial class Speicher : IDisposable
         if (kalender) DemoKalenderEinfuegen(transaktion);
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
+        if (heb) DemoHebEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
         transaktion.Commit();
         if (modulNeu) ModuleGeaendert?.Invoke();
@@ -572,6 +599,7 @@ public sealed partial class Speicher : IDisposable
             DemoKalenderEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);
+            DemoHebEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
             transaktion.Commit();
         }

@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.17.0** (Startseite als Übersicht, Bauplan Schritt 14).
+Stand: 07.11.2026. Version: **0.18.0** (HEB-Bogen aus Berichten, Bauplan Schritt 15 – Bauplan vollständig).
 
 ## Aktuell
 
@@ -18,10 +18,13 @@ die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) 
 ersten Modul **Ausgangsliste** (Ausgang, Anwesenheit, Unterbringung, Tagesliste, Küchendienst,
 Digitaler Ausgang), übernommen aus der Ausgangsliste. Dazu kommen die **Biografie** und neu die
 **Monatsreflexion** als Reiter in der Akte. Das Programm öffnet mit der **Übersicht** (was heute
-wichtig ist).
+wichtig ist). Neu ist der **HEB-Bogen** (A, B, C) mit Quellen, Zählern, Stilhinweisen,
+Textbausteinen und dem Ausfüllen einer zugeteilten PDF.
 
-**Nächster Schritt:** Bauplan Schritt 15 „HEB-Bogen aus Berichten“ (0.18.0), der letzte Schritt
-des Bauplans (`IDEEN.md`, oben).
+**Nächster Schritt:** Der Bauplan vom 07.11.2026 ist vollständig umgesetzt. Neue Aufträge kommen
+über `IDEEN.md` (offen ist dort nur „Mehrplatzbetrieb über einen Server (später)“, nicht
+freigegeben). Bitte die Testlisten unten durchgehen, vor allem den HEB-Bogen mit dem echten
+Bogen des Kostenträgers (Zuordnung der Felder).
 
 ## Fertig
 
@@ -264,6 +267,31 @@ des Bauplans (`IDEEN.md`, oben).
   - Demo: Bei Frieda Fichte beginnt heute eine Pause (Metformin), damit „Medikation heute“
     etwas zeigt.
 
+- 0.18.0 — HEB-Bogen aus Berichten (Bauplan Schritt 15, 07.11.2026):
+  - Reiter „HEB“ in der Akte: die Bögen des Bewohners (Art, Zeitraum, Nummer, Entwurf/fertig,
+    Verlauf), oben „HEB fällig …“, wenn es so ist. „Neuer HEB-Bogen …“: Art wählen, Zeitraum
+    vorgeschlagen (A ab Aufnahme, B/C ab dem Ende des letzten Bogens), laufende Nummer,
+    Planungszeitraum aus dem Beschlussende (6/12/24 oder frei).
+  - Bearbeiten: je Lebensbereich die Felder der Bogenart mit Zeichenzähler (Grenze aus
+    `docs/heb-wissen.md`, rot darüber) und Stilhinweisen (dazu: Rahmenziele nicht in Ich-Form,
+    Leitziel und Nahziele in Ich-Form); Hilfebedarf Stufe 1–6, nie vorgeschlagen oder vorbelegt;
+    daneben Berichte des Zeitraums, Wochenplan, fertige Monatsreflexionen. Reiter „Ziele“
+    (Leitziel, zwei Nahziele mit Einschätzung) und „Weiteres“ (Sichtweise, Ergänzendes, bei C
+    Beendigung) mit Merkhilfe. Textbausteine (Verben, feste Formulierungen, Häufigkeit) per Klick.
+  - HEB B: Rahmenziele, Leitziel und Nahziele des letzten Bogens werden zum Fortschreiben
+    vorgelegt.
+  - Speichern als Entwurf, „Als fertig markieren“ (Rückfrage, wenn Felder zu lang sind),
+    Fassungen mit Verlauf. „Drucken …“ der eigenen Maske (auch ohne PDF).
+  - PDF: Einstellungen → „HEB-VORLAGEN“ je Bogenart zuteilen (Kopie im Datenordner `vorlagen`),
+    „Zuordnung …“ Programmfeld → PDF-Feld (`heb-zuordnung.json`, Vorgabe: gleicher Name).
+    „PDF ausfüllen …“ füllt eine Kopie (Ordner `heb`), die Vorlage bleibt unverändert; Felder
+    ohne PDF-Feld werden gemeldet. Getestet mit einer selbst gebauten Test-PDF
+    (`tests/daten/heb-test.pdf`, Bauskript `werkzeuge/heb-test-pdf.py`).
+  - „HEB fällig“ auf der Übersicht und in der Akte: letzter Bogen älter als die Frist
+    (Einstellungen, Vorgabe 12 Monate) oder kein HEB A drei Monate nach der Aufnahme.
+  - Demo `daten/demo/heb.json`: frühere Bögen für alle Bewohner (bei Anton Ahorn und Ida
+    Immergrün fällig), ein Entwurf bei Karl Kiefer.
+
 ## Offene Punkte
 
 - Bewohnerakte: Vorschläge Beschlusswarnung, „offen geführt“, Altersanzeige — Tobi
@@ -274,6 +302,11 @@ des Bauplans (`IDEEN.md`, oben).
   bisher nur die helle).
 - Aus der Ausgangsliste noch nicht übernommen: Datenbank mit Mehrplatz-Schutz, Sicherung,
   Protokoll (die Druckvorschau seit 0.6.0, die Ausgangs-Funktionen seit 0.14.0 als Modul).
+- HEB-Bogen: Ob PDFsharp die Formularfelder des echten Bezirks-Bogens sauber füllt, ist
+  ungeprüft (nur mit der Test-PDF erprobt). Feldnamen des echten Bogens sind unbekannt; die
+  Zuordnung in den Einstellungen macht ihn ohne Programmänderung nutzbar. Ankreuzfelder
+  (Hilfebedarf, Planungszeitraum) des echten Bogens werden noch nicht angekreuzt – übertragen
+  wird ihr Wert nur in Textfelder.
 - Ein Abgleich Modul → eigenständige Ausgangsliste ist noch nicht gelaufen
   (`docs/bruecke-ausgangsliste.md`).
 - „Bericht lesen …“ in der Übergabe zeigt den Bericht in einem einfachen Meldungsfenster;
@@ -552,8 +585,48 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 07.11.2026 (Schritt 14): Termine heute = Wochenplan des Bewohners (Regelwoche, Therapien,
   Kalender); abgesagte und ausgefallene Therapien zählen nicht. Abwesend = Heimfahrt laut
   Kalender oder Abwesenheit im Modul Ausgangsliste; meldet beides, steht die Marke nur einmal da.
+- 07.11.2026 (Schritt 15): Neue Abhängigkeit **PDFsharp 6.2.4 (MIT)** nur zum Ausfüllen der
+  PDF-Formulare, im Kern (plattformunabhängiges Paket). Bewusst nicht die neueren Versionen 6.5.0
+  und 7.0.0-preview-2: Sie stehen unter **AGPL-3.0** und sind nach `CLAUDE.md` ausgeschlossen.
+  PDFsharp 6.2.4 bringt `System.Security.Cryptography.Pkcs` 8.0.1 mit bekannter Sicherheitslücke
+  mit; deshalb ist **System.Security.Cryptography.Pkcs 10.0.13 (MIT)** direkt eingetragen.
+- 07.11.2026 (Schritt 15): PDFsharp braucht eine Schriftquelle, auch zum Lesen der Felder. Unter
+  Windows nimmt es die Systemschriften; für die Tests unter Linux eine dort vorhandene Schrift.
+  Keine Schrift im Repository.
+- 07.11.2026 (Schritt 15): HEB B legt Rahmenziele, Leitziel und Nahziele des letzten fertigen
+  Bogens als erste Fassung vor (Text eines Menschen, nicht erfunden). Die Rahmenziele landen im
+  Feld „Fortschreibung der Rahmenziele“.
+- 07.11.2026 (Schritt 15): Quelle „Wochenplan“ ist die Woche am Ende des Zeitraums (Regelwoche und
+  Therapien) – eine Auswertung über viele Monate wäre langsam und im Bogen nicht gefragt. Bei
+  vielen Berichten stehen die zwölf neuesten neben dem Feld, die übrigen in der Akte.
+- 07.11.2026 (Schritt 15): Vorlagen zuteilen, entfernen und zuordnen gilt in den Einstellungen
+  sofort (nicht erst mit „Speichern“), weil Dateien kopiert werden.
+- 07.11.2026 (Schritt 15): Der Hilfebedarf wird in Textfelder als Zahl übertragen; das Ankreuzen
+  im echten Bogen hängt an dessen Feldern und ist erst mit dem echten Bogen prüfbar.
+- 07.11.2026 (Schritt 15): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
+  (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), Tests mit xUnit (Apache-2.0). Zum
+  Bauen der Test-PDF einmalig `reportlab` (BSD), nicht im Programm.
 
 ## Testliste für Tobi
+
+Version 0.18.0:
+
+1. Unten links „Version 0.18.0 · Build …“. Übersicht: Anton Ahorn und Ida Immergrün tragen
+   „HEB fällig …“.
+2. Akte Anton Ahorn → Reiter „HEB“: oben „HEB fällig …“, darunter HEB B Nr. 3 (fertig).
+3. Angemeldet „Neuer HEB-Bogen …“ → HEB B, Zeitraum ab dem Ende des letzten Bogens, „Laufende
+   Nummer: 4“ → „Anlegen“: Im Reiter „1 Beziehungen“ steht unter „d) Fortschreibung der
+   Rahmenziele“ der Text des Vorberichts; „Ziele“ zeigt Leitziel und Nahziele.
+4. In ein Feld schreiben: Zähler „… / 340“ (rot, wenn zu lang), Hinweise z. B. bei Semikolon
+   oder Datum. In ein Feld klicken → „Textbaustein einfügen ▾“ → Baustein wird eingefügt.
+5. Hilfebedarf: steht auf „noch nicht eingeschätzt“; eine Stufe wählen, „Speichern“.
+6. „Drucken …“ zeigt alle Felder über mehrere Seiten.
+7. Einstellungen → „HEB-VORLAGEN“ → bei HEB B „Zuteilen …“ eine PDF mit Formularfeldern (zum
+   Probieren `tests/daten/heb-test.pdf` aus dem Repository) → „Zuordnung …“ zeigt Programmfeld
+   und PDF-Feld. Im Bogen „PDF ausfüllen …“ → Meldung mit dem Pfad; die Datei im Ordner `heb`
+   des Datenordners öffnen.
+8. Mit dem echten Bogen des Kostenträgers (nur auf dem eigenen Rechner, nie ins Repository):
+   zuteilen, Zuordnung prüfen, ausfüllen – und berichten, was nicht passt.
 
 Version 0.17.0:
 

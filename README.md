@@ -82,6 +82,13 @@ Danach fragt Windows für diese Datei nicht mehr.
   Das Programm zählt die Zeichen und gibt Stilhinweise (z. B. Semikolon, Datum im Text), ändert
   aber nichts selbst. „Speichern“ hält einen Entwurf fest, „Als fertig markieren“ setzt ein
   Mensch.
+- **HEB** (Reiter in der Akte): HEB-Bogen A, B oder C für einen Zeitraum. Je Lebensbereich die
+  Felder des Bogens mit Zeichenzähler und Stilhinweisen, daneben die Berichte des Zeitraums, der
+  Wochenplan und die fertigen Monatsreflexionen. Textbausteine per Klick, der Hilfebedarf wird
+  nie vorgeschlagen. „Speichern“ (Entwurf), „Als fertig markieren“ (ein Mensch), „Drucken …“ und
+  „PDF ausfüllen …“: Unter Einstellungen → „HEB-VORLAGEN“ teilt man je Bogenart eine PDF mit
+  Formularfeldern zu; ausgefüllt wird eine Kopie im Datenordner (Ordner `heb`). Ist ein HEB fällig,
+  steht das in der Akte und auf der Übersicht.
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
   Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Kein Abgleich mit
   anderen Kalendern.
