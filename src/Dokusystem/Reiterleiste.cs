@@ -26,6 +26,17 @@ public sealed class Reiterleiste : Control
     }
 
     public IReadOnlyList<string> Namen => namen;
+
+    // Neue Reihe von Reitern (z. B. wenn ein Modul ein- oder ausgeschaltet wird). Der aktive Reiter
+    // bleibt, wenn es ihn noch gibt; sonst gilt der erste.
+    public void NamenSetzen(IEnumerable<string> neue)
+    {
+        string vorher = Aktiv;
+        namen.Clear();
+        namen.AddRange(neue);
+        aktiv = Math.Max(0, namen.IndexOf(vorher));
+        Invalidate();
+    }
     public string Aktiv => namen[aktiv];
 
     public void Waehlen(string name)

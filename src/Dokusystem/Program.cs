@@ -29,6 +29,7 @@ internal static class Program
         try
         {
             speicher = new Speicher();
+            Modulverwaltung.Anmelden(speicher);
             speicher.DemoBeimErstenStart();
         }
         catch (SpeicherFehler e)

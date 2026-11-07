@@ -379,55 +379,6 @@ public sealed class PlanEintragFenster : Form
     }
 }
 
-// Kleines Fenster mit einem Datum (z. B. „nicht mehr ab“).
-public sealed class DatumFenster : Form
-{
-    private readonly Action<DateOnly> speichern;
-    public TextBox Datumsfeld { get; } = new() { Width = 100 };
-    public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(420, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
-
-    public DatumFenster(string titel, string beschriftung, DateOnly vorschlag, Action<DateOnly> speichern)
-    {
-        this.speichern = speichern;
-        Text = $"{titel} ({KopfBereich.DemoHinweis})";
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = MinimizeBox = false;
-        ShowInTaskbar = false;
-        StartPosition = FormStartPosition.CenterParent;
-        BackColor = Stil.Fensterhintergrund;
-        Font = Stil.Standard;
-        AutoSize = true;
-        AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        var raster = Formular.Raster(out var zeile);
-        Datumsfeld.Text = Datum.Text(vorschlag);
-        zeile(beschriftung, Datumsfeld);
-        zeile(null, Fehler);
-        zeile(null, Formular.Knoepfe(this, "Speichern", () => Speichern()));
-        Controls.Add(raster);
-        Stil.DpiSkalierungEinschalten(this);
-    }
-
-    public bool Speichern()
-    {
-        try
-        {
-            DateOnly d;
-            try { d = Datum.Lesen(Datumsfeld.Text, "Datum"); }
-            catch (FormatException x) { throw new Eingabefehler([x.Message]); }
-            speichern(d);
-        }
-        catch (Eingabefehler e)
-        {
-            Fehler.Text = string.Join("\n", e.Fehler);
-            Fehler.Visible = true;
-            return false;
-        }
-        DialogResult = DialogResult.OK;
-        Close();
-        return true;
-    }
-}
-
 // Ausdruck: A4 quer, große Schrift, nur Name und Plan (keine Allergien, Medikation oder andere
 // Angaben aus der Akte). Je Tag eine Spalte mit den Terminen untereinander.
 public sealed class WochenplanDruck(Bewohner bewohner, DateOnly montag, IReadOnlyList<Termin> termine)

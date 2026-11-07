@@ -5,7 +5,8 @@ namespace Dokusystem.Kern;
 // Was eine Bewohnerkarte zusätzlich zu Bild, Name und Zimmer zeigt (Gestaltung Stufe 2):
 // Marken für das, was Aufmerksamkeit braucht, und die Aufenthaltsdauer.
 // Farbe sparsam: Der Normalfall („keine bekannt“, „kein Beschluss“) bekommt keine Marke.
-public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig }
+// Abwesend und Ausgang melden Module (z. B. die Ausgangsliste) über die Modulverwaltung.
+public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig, Abwesend, Ausgang }
 
 public sealed record Marke(MarkenArt Art, string Text);
 

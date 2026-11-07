@@ -112,7 +112,8 @@ public sealed class BewohnerBereich : Panel
         {
             var karte = new BewohnerKarte(b, heute,
                 speicher.UngeleseneUebergaben(b.Id!.Value, kuerzel, jetzt),
-                speicher.WichtigeBerichteSeit(b.Id!.Value, jetzt.AddDays(-7)));
+                speicher.WichtigeBerichteSeit(b.Id!.Value, jetzt.AddDays(-7)),
+                Modulverwaltung.Marken(speicher, b, jetzt));
             karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
             return karte;
         }));
@@ -188,13 +189,17 @@ public sealed class AkteAnsicht : Panel
     public BerichteAnsicht Berichte { get; }
     public MedikationAnsicht Medikation { get; }
     public WochenplanAnsicht Wochenplan { get; }
+    public List<ModulReiter> ModulAnsichten { get; } = [];
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
     public Label Beschlussende { get; } = new();
     public Bewohner? Bewohner { get; private set; }
 
+    private readonly Speicher speicher;
+
     public AkteAnsicht(Speicher speicher)
     {
+        this.speicher = speicher;
         Berichte = new BerichteAnsicht(speicher) { Visible = false };
         Medikation = new MedikationAnsicht(speicher) { Visible = false };
         Wochenplan = new WochenplanAnsicht(speicher) { Visible = false };
@@ -239,6 +244,25 @@ public sealed class AkteAnsicht : Panel
 
         Reiter.Gewechselt += _ => ReiterZeigen();
         Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Berichte, Medikation, Wochenplan]);
+        ModuleAktualisieren();
+    }
+
+    // Reiter der eingeschalteten Module nach „Wochenplan“; ausgeschaltete verschwinden ganz.
+    public void ModuleAktualisieren()
+    {
+        foreach (var r in ModulAnsichten) { Controls.Remove(r); r.Dispose(); }
+        ModulAnsichten.Clear();
+        foreach (var m in Modulverwaltung.Eingeschaltet(speicher))
+            if (m.ReiterBauen(speicher) is ModulReiter r)
+            {
+                r.Visible = false;
+                ModulAnsichten.Add(r);
+                Controls.Add(r);
+            }
+        var namen = Bauplan.AktenReiter.ToList();
+        namen.InsertRange(namen.IndexOf("Wochenplan") + 1, ModulAnsichten.Select(r => r.Titel));
+        Reiter.NamenSetzen(namen);
+        ReiterZeigen();
     }
 
     private void ReiterZeigen()
@@ -247,6 +271,9 @@ public sealed class AkteAnsicht : Panel
         bool berichte = Reiter.Aktiv == "Berichte";
         bool medikation = Reiter.Aktiv == "Medikation";
         bool wochenplan = Reiter.Aktiv == "Wochenplan";
+        var modul = ModulAnsichten.FirstOrDefault(r => r.Titel == Reiter.Aktiv);
+        foreach (var r in ModulAnsichten) r.Visible = r == modul;
+        if (modul is not null && Bewohner is not null) modul.Zeigen(Bewohner);
         abschnitt.Visible = stammdaten.Visible = stamm;
         Berichte.Visible = berichte;
         Medikation.Visible = medikation;
@@ -254,7 +281,7 @@ public sealed class AkteAnsicht : Panel
         if (berichte && Bewohner is not null) Berichte.Zeigen(Bewohner);
         if (medikation && Bewohner is not null) Medikation.Zeigen(Bewohner);
         if (wochenplan && Bewohner is not null) Wochenplan.Zeigen(Bewohner);
-        ReiterPlatzhalter.Visible = !stamm && !berichte && !medikation && !wochenplan;
+        ReiterPlatzhalter.Visible = !stamm && !berichte && !medikation && !wochenplan && modul is null;
         if (!stamm && Bauplan.Reiter.TryGetValue(Reiter.Aktiv, out var vorhaben))
             ReiterPlatzhalter.Setzen(vorhaben.Version, vorhaben.Beschreibung);
         PerformLayout();
@@ -317,7 +344,7 @@ public sealed class AkteAnsicht : Panel
         Reiter.Bounds = new Rectangle(x, y, breite, S(40));
         y += Reiter.Height + S(Stil.AbstandGross);
 
-        foreach (Control ansicht in new Control[] { Berichte, Medikation, Wochenplan })
+        foreach (Control ansicht in new Control[] { Berichte, Medikation, Wochenplan }.Concat(ModulAnsichten))
         {
             if (!ansicht.Visible) continue;
             ansicht.SetBounds(x, y, breite, ansicht.Height);

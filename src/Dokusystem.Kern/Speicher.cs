@@ -434,6 +434,14 @@ public sealed partial class Speicher : IDisposable
         return liste;
     }
 
+    // Für Module, die innerhalb einer eigenen Transaktion lesen (z. B. beim Laden der Demo-Daten).
+    public List<Bewohner> AlleBewohner(SqliteTransaction transaktion)
+    {
+        var liste = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        liste.Sort(BewohnerRegeln.NachName);
+        return liste;
+    }
+
     public Bewohner? Bewohner(long id) =>
         Lesen($"SELECT id, {Spalten} FROM bewohner WHERE id = $id", ("$id", id)).FirstOrDefault();
 
@@ -490,7 +498,10 @@ public sealed partial class Speicher : IDisposable
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
              therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender) return false;
+        var neueModule = ModuleOhneDemo();
+        bool modulNeu = neueModule.Count > 0;
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !modulNeu)
+            return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
@@ -500,7 +511,9 @@ public sealed partial class Speicher : IDisposable
         if (therapie) DemoTherapieEinfuegen(transaktion);
         if (therapie || wochenplan) DemoWochenplanEinfuegen(transaktion);   // Teilnahmen hängen an den Zuteilungen
         if (kalender) DemoKalenderEinfuegen(transaktion);
+        DemoModuleEinfuegen(transaktion, neueModule);
         transaktion.Commit();
+        if (modulNeu) ModuleGeaendert?.Invoke();
         return true;
     }
 
@@ -524,6 +537,7 @@ public sealed partial class Speicher : IDisposable
             DemoTherapieEinfuegen(transaktion);
             DemoWochenplanEinfuegen(transaktion);
             DemoKalenderEinfuegen(transaktion);
+            DemoModuleEinfuegen(transaktion, module);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
@@ -533,6 +547,7 @@ public sealed partial class Speicher : IDisposable
         TherapieGeaendert?.Invoke();
         WochenplanGeaendert?.Invoke();
         KalenderGeaendert?.Invoke();
+        ModuleGeaendert?.Invoke();
     }
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)
@@ -869,8 +884,8 @@ public sealed partial class Speicher : IDisposable
         return befehl.ExecuteScalar();
     }
 
-    // Nur für Tests: direkter Zugriff auf die Verbindung (z. B. um die CHECK-Regeln zu prüfen).
-    internal SqliteConnection Verbindung => db;
+    // Direkter Zugriff auf die Verbindung: für Module (eigene Tabellen) und Tests (CHECK-Regeln prüfen).
+    public SqliteConnection Verbindung => db;
 }
 
 // Die Datenbank lässt sich nicht verwenden. Der Text ist für Menschen gedacht.

@@ -10,6 +10,9 @@ namespace Dokusystem;
 // Abstände 4/8/12/16 – Knopfhöhe 36 – Segoe UI – Radien 4 (Knöpfe, Eingaben) und 8 (Karten).
 public static class Stil
 {
+    // Dauerhaft sichtbarer Hinweis (Regel 4 in CLAUDE.md): im Kopf, in Fenstertiteln und auf Ausdrucken.
+    public const string DemoHinweis = "Demo — ausgedachte Daten";
+
     // ----- Flächen und Text -----
     public static readonly Color Seite = Color.FromArgb(238, 241, 247);              // hinter den Karten
     public static readonly Color Fensterhintergrund = Color.FromArgb(243, 243, 243);
@@ -40,6 +43,7 @@ public static class Stil
     public static readonly Marke Achtung = new(Color.FromArgb(255, 248, 230), Color.FromArgb(122, 74, 0), Color.FromArgb(243, 213, 140));
     public static readonly Marke Offen = new(Color.FromArgb(227, 244, 230), Color.FromArgb(30, 107, 46));
     public static readonly Marke Unterwegs = new(Color.FromArgb(221, 244, 241), Color.FromArgb(14, 102, 94));   // hier: Übergabe
+    public static readonly Marke Abwesend = new(Color.FromArgb(236, 237, 240), Color.FromArgb(70, 76, 90), Color.FromArgb(200, 204, 212));
 
     // ----- Abstandsraster: jeder Abstand ist eines dieser Maße -----
     public const int AbstandMini = 4;     // innerhalb zusammengehöriger Texte
@@ -114,6 +118,8 @@ public static class Stil
         Kern.MarkenArt.Allergie => Beschluss,
         Kern.MarkenArt.Uebergabe => Unterwegs,
         Kern.MarkenArt.Wichtig => Hinweis,
+        Kern.MarkenArt.Abwesend => Abwesend,
+        Kern.MarkenArt.Ausgang => Zimmer,
         _ => Achtung,
     };
 
@@ -121,9 +127,10 @@ public static class Stil
     public static readonly (Marke Marke, string Text)[] Farbschluessel =
     [
         (Beschluss, "Beschluss, Allergie"),
-        (Achtung, "nicht erfasst – bitte klären"),
+        (Achtung, "bitte klären (nicht erfasst, Frist)"),
         (Unterwegs, "Übergabe"),
         (Hinweis, "wichtig"),
+        (Abwesend, "abwesend"),
         (Zimmer, "Zimmer, Lebensbereich"),
     ];
 

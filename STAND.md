@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.13.0** (Wohnbereichskalender, Bauplan Schritt 10).
+Stand: 07.11.2026. Version: **0.14.0** (Modul Ausgangsliste mit Modulverwaltung, Bauplan Schritt 11).
 
 ## Aktuell
 
@@ -13,12 +13,13 @@ erledigt sind. Dazu das **Wohnbereich-ToDo** („Aufgaben“) und **Nachrichten*
 ausgedachten Kolleginnen und Kollegen; oben rechts „Angemeldet als …“ (ohne Passwort, nur für
 die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) und neu die
 **Medikation** je Bewohner (Grundverordnung, Pause, Stufenplan, „Was gilt heute“), der
-**Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze), der **Wochenplan** je Bewohner und neu
-der **Wohnbereichskalender** (Termine, Heimfahrten, Ausflüge).
+**Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze), der **Wochenplan** je Bewohner, der
+**Wohnbereichskalender** (Termine, Heimfahrten, Ausflüge) und neu die **Modulverwaltung** mit dem
+ersten Modul **Ausgangsliste** (Ausgang, Anwesenheit, Unterbringung, Tagesliste, Küchendienst,
+Digitaler Ausgang), übernommen aus der Ausgangsliste.
 
-**Nächster Schritt:** Bauplan Schritt 11 „Modul Ausgangsliste (mit Modulverwaltung)“ (0.14.0), danach der Reihe nach bis
-Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
-`KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
+**Nächster Schritt:** Bauplan Schritt 12 „Biografie“ (0.15.0), danach der Reihe nach bis
+Schritt 15 (`IDEEN.md`, oben).
 
 ## Fertig
 
@@ -197,6 +198,26 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
     laufende und eine geplante Heimfahrt, zwei Ausflüge, ein verschobener und ein abgesagter
     Termin – alles relativ zu heute.
 
+- 0.14.0 — Modul Ausgangsliste mit Modulverwaltung (Bauplan Schritt 11, 07.11.2026):
+  - Modulverwaltung: Schnittstelle `IModul` (Seitenleiste mit Seite, Akte-Reiter, Marken auf den
+    Bewohnerkarten) und `IModulDaten` im Kern (eigene Tabellen, eigene Demo-Daten). Einstellungen
+    → „MODULE“ mit Häkchen je Modul und Untermodul. Ausgeschaltet: kein Eintrag links, kein
+    Reiter, keine Marken; die Daten bleiben.
+  - Neues Projekt `src/Dokusystem.Bausteine` (Stil, Karten, Marken, Dialoge, Druckvorschau,
+    kleine Formulare, Schnittstelle für Module) – Programm und Module nutzen es gemeinsam.
+  - Neues Projekt `src/Dokusystem.Modul.Ausgangsliste` mit `AENDERUNGEN.md`, übernommen aus der
+    Ausgangsliste 0.23.0 (bereinigt): Ausgangszeiten (allein / mit Bewohner, Infos,
+    Personal-Begleitung, „wie offen geführt“), Anwesenheit und Abwesenheit mit Grund und Frist,
+    Unterbringung mit Fristen und Rechtsregel, Tagesliste (A4 quer), Verlauf je Person;
+    Untermodule Küchendienst (Plan, Tausch, Zimmergruppen, Ausdruck) und Digitaler Ausgang
+    (beginnen, beenden, unterwegs, überfällig, Nachtbericht zum Kopieren).
+  - Akte: Reiter „Ausgang“ (Karte und Verlauf). Bewohnerkarten: „abwesend: …“,
+    „Ausgangsbeschränkung …“, „unterwegs seit …“, „überfällig seit …“, Fristen.
+  - Demo `daten/demo/ausgangsliste.json`: Ausgänge, eine Heimfahrt (passt zum Kalender), ein
+    Krankenhausaufenthalt, eine Ausgangsbeschränkung, Forensik, ablaufendes Einverständnis,
+    digitale Ausgänge (einer unterwegs, einer überfällig), Küchendienst mit Zimmergruppe und
+    Tausch – relativ zu heute und zur Uhrzeit.
+
 ## Offene Punkte
 
 - Bewohnerakte: Vorschläge Beschlusswarnung, „offen geführt“, Altersanzeige — Tobi
@@ -205,8 +226,10 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
   beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
 - Dunkle Darstellung ist nicht gebaut (`docs/gestaltung.md` sieht sie vor, freigegeben ist
   bisher nur die helle).
-- Aus der Ausgangsliste noch nicht übernommen: Datenbank mit Mehrplatz-Schutz, Sicherung
-  (die Druckvorschau ist seit 0.6.0 übernommen).
+- Aus der Ausgangsliste noch nicht übernommen: Datenbank mit Mehrplatz-Schutz, Sicherung,
+  Protokoll (die Druckvorschau seit 0.6.0, die Ausgangs-Funktionen seit 0.14.0 als Modul).
+- Ein Abgleich Modul → eigenständige Ausgangsliste ist noch nicht gelaufen
+  (`docs/bruecke-ausgangsliste.md`).
 - „Bericht lesen …“ in der Übergabe zeigt den Bericht in einem einfachen Meldungsfenster;
   ein eigenes Lesefenster wäre schöner, war aber nicht verlangt.
 - Der Wechsel 0.2.0 → 0.3.0 über das Update ist am Code geprüft und mit dem echten Release
@@ -425,7 +448,59 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   den Datenordner kopiert (PNG, JPG, BMP, GIF); Demo-Daten werden genau einmal automatisch
   geladen.
 
+- 07.11.2026 (Schritt 11): Modulverwaltung mit zwei Schnittstellen: `IModulDaten` im Kern
+  (Tabellen, Demo-Daten) und `IModul` in den gemeinsamen Bausteinen (Seite, Akte-Reiter,
+  Marken). Dafür wurden Stil, Karten-Bausteine, Dialoge, Druckvorschau und kleine Formulare in
+  das neue Projekt `src/Dokusystem.Bausteine` verschoben – sonst hinge das Modul vom Programm
+  ab, und das Programm vom Modul.
+- 07.11.2026 (Schritt 11): Das Modulprojekt baut zweimal: die Logik für .NET ohne Fenster
+  (Kern-Tests laufen auch unter Linux) und alles zusammen für Windows.
+- 07.11.2026 (Schritt 11): Ein/aus steht in der Datenbank (Verwaltungsangaben), nicht in der
+  Einstellungsdatei des Arbeitsplatzes: gilt so für den ganzen Wohnbereich, und „Demo-Daten
+  zurücksetzen“ schaltet das Modul wieder ein. Ohne Eintrag gilt „eingeschaltet“.
+- 07.11.2026 (Schritt 11): Unterbringung ohne Doppelpflegen: Der Beschluss kommt aus der Akte;
+  „offen geführt“ (mit Datum der Einverständniserklärung) und „Forensik“ führt das Modul. Wer im
+  Modul „Beschluss“ wählt, trägt das Beschlussende in der Akte ein. Ist der Beschluss in der Akte
+  „nicht erfasst“, gilt die Unterbringung als nicht erfasst und eine Ausgangsbeschränkung als
+  nicht zulässig, bis es geklärt ist (Regel 5).
+- 07.11.2026 (Schritt 11): Küchendienst ohne die Regel für Einzelzimmer – der Kern kennt keine
+  Zimmerart und keine freien Plätze.
+- 07.11.2026 (Schritt 11): Digitaler Ausgang ohne Uhrzeit-Fenster: Beginn und Ende zur aktuellen
+  Uhrzeit, Handzeichen ist das Kürzel des angemeldeten Benutzers. Ohne Anmeldung kommt ein
+  Hinweis statt eines Eintrags.
+- 07.11.2026 (Schritt 11): Verlauf mit Kürzel statt Windows-Anmeldename. Mehrplatz-Schutz,
+  Protokoll und Sicherung der Ausgangsliste bleiben draußen (kein Mehrplatzbetrieb im Bauplan).
+- 07.11.2026 (Schritt 11): Marken des Moduls: „abwesend“ bekommt eine eigene graue Farbe (neu
+  im Farbschlüssel); Ausgangsbeschränkung und „unterwegs“ neutral; Fristen und „überfällig“ in
+  der Farbe „bitte klären“ – der Farbschlüssel heißt dafür jetzt „bitte klären (nicht erfasst,
+  Frist)“. Auf den Bewohnerkarten nur, was Aufmerksamkeit braucht; Zimmer, Unterbringung und
+  Küchendienst nur auf der Seite des Moduls.
+- 07.11.2026 (Schritt 11): Keine neuen Abhängigkeiten.
+
 ## Testliste für Tobi
+
+Version 0.14.0:
+
+1. Unten links „Version 0.14.0 · Build …“. Links „Ausgangsliste“ (vor „Einstellungen“):
+   oben Küchendienst heute und morgen, darunter je Bewohner eine Karte nach Zimmer. Hanna
+   Holunder ist abwesend (Heimfahrt), Emil Eiche hat eine Ausgangsbeschränkung, Karl Kiefer ist
+   im Krankenhaus; Clara Clematis ist unterwegs, Gustav Ginster überfällig.
+2. „Bewohner“: Die Karten zeigen jetzt auch „abwesend: …“, „unterwegs seit …“ und Fristen.
+3. Oben rechts anmelden. Anton Ahorn „Ausgang …“ → „Allein +1“, „Info anfügen …“, „Übernehmen“
+   → Karte geändert; „Verlauf …“ zeigt die Änderung mit Kürzel.
+4. Berta Birke (offen geführt) „Anwesenheit …“: Ausgangsbeschränkung ist gesperrt, mit
+   Hinweis. „Heimfahrt bis …“ wählen, Datum ergänzen, „Abwesenheit“ → grau; wieder aufheben →
+   der alte Ausgang ist wieder da.
+5. Dieter Distel „Unterbringung …“ → „Unterbringungsbeschluss“, Datum → in der Akte steht das
+   Beschlussende.
+6. Anton Ahorn „Geht raus: allein“ → „unterwegs seit …“; „Ist zurück“. „Nachtbericht …“ →
+   „Alle kopieren“ und in einen Bericht einfügen.
+7. „Küchendienst …“: Plan; einen Tag ab morgen wählen → „Tausch …“; „Zimmergruppen …“;
+   Drucken.
+8. „Tagesliste drucken …“ → A4 quer mit „von | bis | Hz.“ und der Marke „Küche“.
+9. Akte Hanna Holunder → Reiter „Ausgang“: Karte und Verlauf.
+10. Einstellungen → „MODULE“: „Ausgangsliste“ aus → weg aus Seitenleiste, Akte und Karten;
+    wieder an → alles wieder da. Küchendienst oder Digitaler Ausgang einzeln abschalten.
 
 Version 0.13.0:
 

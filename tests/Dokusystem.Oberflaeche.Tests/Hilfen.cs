@@ -88,6 +88,7 @@ public sealed class Umgebung : IDisposable
     {
         Environment.SetEnvironmentVariable(Pfade.Umlenkung, Ordner);
         Speicher = new Speicher();
+        Modulverwaltung.Anmelden(Speicher);
         Speicher.DemoBeimErstenStart();
     }
 

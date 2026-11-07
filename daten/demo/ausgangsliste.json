@@ -1,0 +1,27 @@
+{
+  "hinweis": "Ausgedachte Demo-Daten für das Modul Ausgangsliste. Zuordnung über den Nachnamen der Demo-Bewohner. Tage relativ zu heute (negativ = vergangen).",
+  "plaetze": [
+    { "nachname": "Ahorn", "ausgang": "2 Allein / 1 MBW", "ausgangVorTagen": 20, "ausgangVorher": "1 Allein" },
+    { "nachname": "Birke", "ausgang": "wie offen geführt", "einverstaendnisVorTagen": 60 },
+    { "nachname": "Clematis", "ausgang": "1 Allein / (Befindlichkeit abfragen)" },
+    { "nachname": "Distel", "ausgang": "1 MBW" },
+    { "nachname": "Eiche", "ausgang": "Ausgang nur mit Personal und in den geschl. Garten", "status": "beschraenkung", "grund": "Ausgangsbeschränkung bis {+5}", "statusVorTagen": 2 },
+    { "nachname": "Fichte", "ausgang": "2 Allein", "forensik": true },
+    { "nachname": "Ginster", "ausgang": "1 MBW" },
+    { "nachname": "Holunder", "ausgang": "3 Allein", "status": "abwesenheit", "grund": "Heimfahrt bis {+2}", "statusVorTagen": 1 },
+    { "nachname": "Immergrün", "ausgang": "2 Allein", "einverstaendnisVorTagen": 170 },
+    { "nachname": "Kiefer", "ausgang": "1 Allein / 1 MBW", "status": "abwesenheit", "grund": "Im Krankenhaus seit ({-3})", "statusVorTagen": 3 }
+  ],
+  "ausgaenge": [
+    { "nachname": "Ahorn", "art": "allein", "vonVorStunden": 5.0, "bisVorStunden": 3.0, "hdz": "AB" },
+    { "nachname": "Ahorn", "art": "mit Bewohner", "vonVorStunden": 2.0, "bisVorStunden": 1.0, "hdz": "AB", "hdzEnde": "CD" },
+    { "nachname": "Fichte", "art": "allein", "vonVorStunden": 4.0, "bisVorStunden": 2.0, "hdz": "CD" },
+    { "nachname": "Clematis", "art": "allein", "vonVorStunden": 0.75, "hdz": "CD" },
+    { "nachname": "Ginster", "art": "mit Bewohner", "vonVorStunden": 1.9, "hdz": "AB" }
+  ],
+  "kuechendienst": {
+    "gruppen": [ [ "109", "110" ] ],
+    "planAbVorTagen": 5,
+    "tausch": { "inTagen": 2, "zimmer": "103" }
+  }
+}
