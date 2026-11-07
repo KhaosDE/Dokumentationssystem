@@ -26,6 +26,7 @@ public sealed class Hauptfenster : Form
     public BewohnerBereich Bewohner { get; }
     public UebergabeSeite Uebergabe { get; }
     public AufgabenSeite Aufgaben { get; }
+    public NachrichtenSeite Nachrichten { get; }
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
     public Button DemoKnopf { get; } = Stil.NebenKnopf("Demo-Daten zurücksetzen …");
@@ -54,6 +55,15 @@ public sealed class Hauptfenster : Form
         seiten["Aufgaben"] = Aufgaben;
         Aufgaben.Geaendert += () => { if (AktiverBereich == "Aufgaben") Kopf.TexteSetzen(Aufgaben.KopfText, "Aufgaben"); };
         Bewohner.AufgabenAnzeigen += () => BereichWaehlen("Aufgaben");
+        Nachrichten = new NachrichtenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Nachrichten"] = Nachrichten;
+        Nachrichten.Geaendert += () => { if (AktiverBereich == "Nachrichten") Kopf.TexteSetzen(Nachrichten.KopfText, "Nachrichten"); };
+        Bewohner.NachrichtenAnzeigen += bewohnerId =>
+        {
+            Nachrichten.BewohnerZeigen(bewohnerId);
+            BereichWaehlen("Nachrichten", filterBehalten: true);
+        };
+        Kopf.BenutzerKnopf.Click += (_, _) => BenutzerMenueZeigen();
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);
@@ -106,7 +116,9 @@ public sealed class Hauptfenster : Form
         inhalt.BringToFront();
 
         speicher.AufgabenGeaendert += AufgabenZaehlen;
+        speicher.NachrichtenGeaendert += NachrichtenZaehlen;
         AufgabenZaehlen();
+        BenutzerAnzeigen();
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
         // Start im Bereich „Bewohner“, solange die Übersicht noch nicht gebaut ist (kommt mit 0.17.0).
         BereichWaehlen("Bewohner");
@@ -119,7 +131,10 @@ public sealed class Hauptfenster : Form
     public Control Seite(string bereich) => seiten[Schluessel(bereich)];
 
     // Wechselt den Bereich. „Bewohner“ führt immer zur Übersicht der Bewohner.
-    public void BereichWaehlen(string name)
+    // filterBehalten: Nachrichten bleiben auf einen Bewohner eingegrenzt (Aufruf aus der Akte).
+    public void BereichWaehlen(string name) => BereichWaehlen(name, filterBehalten: false);
+
+    public void BereichWaehlen(string name, bool filterBehalten)
     {
         if (name == "Einstellungen")
         {
@@ -138,6 +153,14 @@ public sealed class Hauptfenster : Form
         if (schluessel == "Bewohner")
         {
             Bewohner.UebersichtZeigen();
+            return;
+        }
+        if (schluessel == "Nachrichten")
+        {
+            if (filterBehalten) Nachrichten.Aktualisieren();
+            else Nachrichten.BewohnerZeigen(null);
+            Kopf.TexteSetzen(Nachrichten.KopfText, "Nachrichten");
+            Kopf.KnoepfeSetzen(Nachrichten.NeuKnopf);
             return;
         }
         if (schluessel == "Aufgaben")
@@ -170,6 +193,53 @@ public sealed class Hauptfenster : Form
         Bewohner.AufgabenSetzen(offen, jetzt);
     }
 
+    // Zähler ungelesener Nachrichten des angemeldeten Benutzers (Seitenleiste und Hinweis über den Karten).
+    public void NachrichtenZaehlen()
+    {
+        var ich = speicher.Kollege(Einstellungen.Laden().Kuerzel);
+        int n = ich is null ? 0 : speicher.UngeleseneNachrichten(ich.Kuerzel);
+        Navigation.Single(e => e.Text == "Nachrichten").ZaehlerSetzen(n > 0 ? n : null, false, $"{n} ungelesen");
+        Bewohner.NachrichtenSetzen(n, ich?.Name);
+    }
+
+    // „Angemeldet als …“ oben rechts; ohne Passwort, nur für die Vorführung.
+    public void BenutzerAnzeigen()
+    {
+        string kuerzel = Einstellungen.Laden().Kuerzel;
+        Kopf.BenutzerSetzen(speicher.Kollege(kuerzel)?.Anzeige ?? (kuerzel.Length > 0 ? kuerzel : null));
+        NachrichtenZaehlen();
+    }
+
+    public void BenutzerWaehlen(string kuerzel)
+    {
+        Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
+        BenutzerAnzeigen();
+        AufgabenZaehlen();
+        if (AktiverBereich == "Bewohner")
+        {
+            if (!Bewohner.AkteSichtbar) Bewohner.UebersichtZeigen();
+        }
+        else BereichWaehlen(AktiverBereich, filterBehalten: true);
+    }
+
+    private void BenutzerMenueZeigen()
+    {
+        var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false, ShowCheckMargin = true };
+        string ich = Einstellungen.Laden().Kuerzel;
+        foreach (var k in speicher.Kollegen())
+        {
+            var eintrag = new ToolStripMenuItem($"{k.Anzeige} – {string.Join(", ", k.Teams)}") { Checked = k.Kuerzel == ich };
+            eintrag.Click += (_, _) => BenutzerWaehlen(k.Kuerzel);
+            menue.Items.Add(eintrag);
+        }
+        menue.Items.Add(new ToolStripSeparator());
+        var niemand = new ToolStripMenuItem("Abmelden (niemand)") { Checked = ich.Length == 0 };
+        niemand.Click += (_, _) => BenutzerWaehlen("");
+        menue.Items.Add(niemand);
+        menue.Closed += (_, _) => BeginInvoke(menue.Dispose);
+        menue.Show(Kopf.BenutzerKnopf, new Point(Kopf.BenutzerKnopf.Width, Kopf.BenutzerKnopf.Height), ToolStripDropDownDirection.BelowLeft);
+    }
+
     // Neuer Bericht mit Bewohnerauswahl; danach die Akte des Bewohners beim Reiter „Berichte“.
     public Bericht? NeuerBericht()
     {
@@ -183,9 +253,11 @@ public sealed class Hauptfenster : Form
 
     public bool EinstellungenOeffnen()
     {
-        using var fenster = new EinstellungenFenster();
+        using var fenster = new EinstellungenFenster(speicher.Kollegen());
         if (!EinstellungenZeigen(fenster)) return false;
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
+        BenutzerAnzeigen();
+        AufgabenZaehlen();
         return true;
     }
 

@@ -526,7 +526,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   Arbeitszuweisung ist ein eigenes Werkzeug.
 
 ## Nachrichten
-Status: freigegeben (Bauplan Schritt 5)
+Status: erledigt (07.11.2026; Bauplan Schritt 5, Version 0.8.0)
 Datum: 07.11.2026
 Was: Ein Nachrichtensystem im Programm, in dem sich Kolleginnen und Kollegen gegenseitig
 schreiben — an einzelne Personen oder an Teams.

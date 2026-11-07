@@ -49,11 +49,17 @@ Danach fragt Windows für diese Datei nicht mehr.
   Aufgaben bleiben stehen, bis jemand sie als erledigt markiert; schafft man es nicht,
   „An die nächste Schicht weitergeben …“ mit kurzer Notiz. Die ersten offenen Aufgaben stehen
   auch über den Bewohnerkarten. Aus einem Bericht heraus: „Aufgabe daraus …“.
+- **Angemeldet als …** (oben rechts): wer gerade am Programm sitzt – eine der ausgedachten
+  Kolleginnen und Kollegen, ohne Passwort (nur für die Vorführung). Das Kürzel steht dann bei
+  Berichten, Übergabe und Aufgaben.
+- **Nachrichten** (links, mit Zähler): an Personen oder Teams, mit Antworten im selben
+  Verlauf, optional zu einem Bewohner (in der Akte „Nachrichten …“). Alles bleibt im Programm,
+  kein E-Mail-Versand. Nachrichten werden nicht gelöscht, nur archiviert.
 - Die Wortliste für den Hinweis „Soll das in die Übergabe?“ lässt sich ergänzen: eine Datei
   `uebergabe-woerter.txt` in den Datenordner legen, ein Wort pro Zeile.
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
   her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren.
-- **Einstellungen** (links): eigenes Kürzel, Update beim Start, eigenes Bild für den Kopf
+- **Einstellungen** (links): wer angemeldet ist, Update beim Start, eigenes Bild für den Kopf
   (z. B. ein Logo – die Datei wird nur in den Datenordner kopiert).
 
 ## Updates

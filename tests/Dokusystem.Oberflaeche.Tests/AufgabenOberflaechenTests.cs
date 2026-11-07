@@ -7,7 +7,7 @@ namespace Dokusystem.Oberflaeche.Tests;
 [Collection("Oberflaeche")]
 public class AufgabenOberflaechenTests
 {
-    private static (Umgebung, Hauptfenster) Oeffnen(string kuerzel = "TS", bool bereich = true)
+    private static (Umgebung, Hauptfenster) Oeffnen(string kuerzel = "CD", bool bereich = true)
     {
         var u = new Umgebung();
         if (kuerzel.Length > 0) Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
@@ -76,7 +76,7 @@ public class AufgabenOberflaechenTests
             using (new DialogErsatz(fenster =>
             {
                 var neu = Assert.IsType<AufgabeFenster>(fenster);
-                Assert.Equal("TS", neu.Verfasser.Text);
+                Assert.Equal("CD", neu.Verfasser.Text);
                 Assert.True(neu.NaechsteSchicht.Checked);                 // Vorgabe
                 Assert.StartsWith("nächste Schicht (", neu.NaechsteSchicht.Text);
                 Assert.Equal(0, neu.BewohnerWahl.SelectedIndex);           // kein bestimmter Bewohner
@@ -118,14 +118,14 @@ public class AufgabenOberflaechenTests
                 return weiter.Uebernehmen() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 Karte().Weitergeben.PerformClick();
-            Assert.Contains(Karte().VerlaufTexte, v => v.StartsWith("weitergegeben von TS") && v.EndsWith("Heute keine Zeit wegen Ausflug."));
+            Assert.Contains(Karte().VerlaufTexte, v => v.StartsWith("weitergegeben von CD") && v.EndsWith("Heute keine Zeit wegen Ausflug."));
             Assert.Contains(Karte().MarkenTexte, m => m.StartsWith("für "));   // jetzt für die nächste Schicht statt „wer Zeit hat“
 
             Karte().Erledigt.PerformClick();
             Assert.DoesNotContain(seite.Karten, k => k.Aufgabe.Id == id);
             Assert.Equal(4, Eintrag(f).Anzahl);
             seite.ErledigteZeigen.Checked = true;
-            Assert.EndsWith("· TS", Karte().MarkenTexte[0]);
+            Assert.EndsWith("· CD", Karte().MarkenTexte[0]);
         }
     });
 

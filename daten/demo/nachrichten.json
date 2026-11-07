@@ -1,0 +1,51 @@
+{
+  "hinweis": "Ausgedachte Kolleginnen und Kollegen, Teams und Nachrichten für die Demo. Zeiten relativ zum Laden der Demo-Daten (Stunden vor jetzt). {vorname} = Vorname des Bewohners.",
+  "kollegen": [
+    { "kuerzel": "AB", "vorname": "Anna", "nachname": "Bachstelze", "teams": [ "Wohnbereich A" ] },
+    { "kuerzel": "CD", "vorname": "Carl", "nachname": "Dohle", "teams": [ "Wohnbereich A" ] },
+    { "kuerzel": "EF", "vorname": "Emma", "nachname": "Fink", "teams": [ "Wohnbereich A" ] },
+    { "kuerzel": "KL", "vorname": "Karin", "nachname": "Lerche", "teams": [ "Wohnbereich A" ] },
+    { "kuerzel": "GH", "vorname": "Georg", "nachname": "Habicht", "teams": [ "Wohnbereich B" ] },
+    { "kuerzel": "MN", "vorname": "Max", "nachname": "Nachtigall", "teams": [ "Wohnbereich B" ] },
+    { "kuerzel": "OP", "vorname": "Olga", "nachname": "Pirol", "teams": [ "Therapie" ] },
+    { "kuerzel": "RS", "vorname": "Rudi", "nachname": "Specht", "teams": [ "Leitung" ] }
+  ],
+  "verlaeufe": [
+    {
+      "betreff": "Arzttermin am Donnerstag",
+      "bewohner": "Ahorn",
+      "nachrichten": [
+        { "von": "EF", "an": [ "team:Wohnbereich A" ], "vorStunden": 3, "text": "Wer kann {vorname} am Donnerstag um 10 Uhr zum Arzt begleiten? Der Fahrdienst ist bestellt.", "gelesenVon": [ "CD" ] },
+        { "von": "KL", "vorStunden": 1, "text": "Ich habe Frühdienst und übernehme das gern." }
+      ]
+    },
+    {
+      "betreff": "Schwimmkurs",
+      "bewohner": "Clematis",
+      "nachrichten": [
+        { "von": "OP", "an": [ "AB" ], "vorStunden": 5, "text": "{vorname} hat Interesse am Schwimmkurs gezeigt. Können wir die Anmeldung diese Woche zusammen besprechen?" }
+      ]
+    },
+    {
+      "betreff": "Teamsitzung am Mittwoch",
+      "nachrichten": [
+        { "von": "RS", "an": [ "team:Wohnbereich A", "team:Wohnbereich B" ], "vorStunden": 50, "text": "Die Teamsitzung beginnt diese Woche um 14 Uhr statt um 13 Uhr. Bitte Themen bis Dienstag sammeln.", "gelesenVon": [ "AB", "CD", "EF", "GH" ] },
+        { "von": "CD", "vorStunden": 30, "text": "Danke, ist notiert. Ich bringe die Liste für den Ausflug mit.", "gelesenVon": [ "AB", "RS" ] }
+      ]
+    },
+    {
+      "betreff": "Ersatzschlüssel Fahrradkeller",
+      "nachrichten": [
+        { "von": "AB", "an": [ "GH" ], "vorStunden": 26, "text": "Der Ersatzschlüssel für den Fahrradkeller liegt jetzt im Büro in der oberen Schublade.", "gelesenVon": [ "GH" ] }
+      ]
+    },
+    {
+      "betreff": "Dienst am Samstag tauschen?",
+      "archiviertVon": [ "AB" ],
+      "nachrichten": [
+        { "von": "MN", "an": [ "AB" ], "vorStunden": 140, "text": "Könnten wir am Samstag den Dienst tauschen? Ich hätte dafür nächste Woche Mittwoch frei.", "gelesenVon": [ "AB" ] },
+        { "von": "AB", "vorStunden": 138, "text": "Ja, das passt. Ich trage es in den Plan ein.", "gelesenVon": [ "MN" ] }
+      ]
+    }
+  ]
+}

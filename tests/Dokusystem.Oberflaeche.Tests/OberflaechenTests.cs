@@ -45,7 +45,7 @@ public class HauptfensterTests
     });
 
     [Fact]
-    public void Einstellungen_Kuerzel_Update_und_Logo() => Hilfe.Sta(() =>
+    public void Einstellungen_Benutzer_Update_und_Logo() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         using var fenster = new Hauptfenster(u.Speicher);
@@ -57,10 +57,9 @@ public class HauptfensterTests
             gezeigt = true;
             Assert.True(einstellungen.AutoUpdate.Checked);
             Assert.False(einstellungen.HatLogo);
-            einstellungen.Kuerzel.Text = "A.B";
-            Assert.False(einstellungen.Speichern());
-            Assert.Contains("Buchstaben und Ziffern", einstellungen.Fehler.Text);
-            einstellungen.Kuerzel.Text = "TS";
+            Assert.Equal("– niemand –", einstellungen.Benutzer.Text);
+            Assert.Equal(9, einstellungen.Benutzer.Items.Count);   // niemand + 8 ausgedachte Kollegen
+            einstellungen.Benutzer.SelectedIndex = einstellungen.Benutzer.Items.Cast<string>().ToList().FindIndex(x => x.StartsWith("Emma Fink (EF)"));
             einstellungen.AutoUpdate.Checked = false;
             Assert.True(einstellungen.LogoSetzen(logo));
             return einstellungen.Speichern();
@@ -70,14 +69,15 @@ public class HauptfensterTests
         Assert.True(gezeigt);
         Assert.Equal("Bewohner", fenster.AktiverBereich);   // Einstellungen sind ein Fenster, kein Bereich
         var werte = Einstellungen.Laden();
-        Assert.Equal(("TS", false), (werte.Kuerzel, werte.AutoUpdate));
+        Assert.Equal(("EF", false), (werte.Kuerzel, werte.AutoUpdate));
+        Assert.Equal("Angemeldet als Emma Fink (EF) ▾", fenster.Kopf.BenutzerText);
         Assert.NotNull(Einstellungen.LogoPfad());
         Assert.True(fenster.Kopf.HatLogo);
 
         fenster.EinstellungenZeigen = einstellungen =>
         {
             Assert.True(einstellungen.HatLogo);
-            Assert.Equal("TS", einstellungen.Kuerzel.Text);
+            Assert.StartsWith("Emma Fink (EF)", einstellungen.Benutzer.Text);
             Hilfe.Zeigen(einstellungen);   // PerformClick wirkt nur bei angezeigtem Fenster
             einstellungen.LogoWeg.PerformClick();
             return einstellungen.Speichern();
@@ -187,7 +187,7 @@ public class BewohnerOberflaechenTests
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Berta Birke", f.Kopf.TitelText);
         Assert.Equal("22.11.1958", f.Bewohner.Akte.Geburtsdatum.Text);
-        Assert.Equal(["← Alle Bewohner", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
+        Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
         f.Kopf.Knoepfe[0].PerformClick();
         Assert.False(f.Bewohner.AkteSichtbar);
         Karten(f)[0].Waehlen();
@@ -400,14 +400,27 @@ public class BildschirmfotoTests
         string logo = Path.Combine(u.Ordner, "eigenes-bild.png");
         Hilfe.Testbild(logo, 180, 60);
         Einstellungen.LogoSetzen(logo);
-        Einstellungen.Aendern(w => w with { Kuerzel = "TS" });
         f.Kopf.LogoSetzen(Einstellungen.LogoPfad());
+        f.BenutzerWaehlen("AB");
         f.BereichWaehlen("Bewohner");
         Hilfe.Foto(f, "10_kopf_mit_bild");
+        f.Navigation.Single(n => n.Text == "Nachrichten").Ausloesen();
+        Hilfe.Foto(f, "20_nachrichten");
+        f.Nachrichten.Karten[0].Waehlen();
+        Hilfe.Foto(f, "21_verlauf");
+        using (var neu = new NachrichtFenster(u.Speicher, u.Speicher.Kollege("AB")!, u.Demo("Distel").Id, null))
+        {
+            neu.Ankreuzen("Team Therapie");
+            neu.Ankreuzen("Rudi Specht (RS)");
+            neu.Betreff.Text = "Gartenprojekt";
+            neu.Inhalt.Text = "Dieter möchte beim Gartenprojekt mitmachen. Gibt es noch freie Plätze?";
+            Hilfe.Foto(neu, "22_neue_nachricht");
+        }
+        f.BereichWaehlen("Bewohner");
         f.Bewohner.FilterSetzen(BewohnerFilter.NichtErfasst);
         Hilfe.Foto(f, "12_filter_nicht_erfasst");
         f.Bewohner.FilterSetzen(BewohnerFilter.Alle);
-        using (var einstellungen = new EinstellungenFenster())
+        using (var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen()))
             Hilfe.Foto(einstellungen, "11_einstellungen");
         using (var fortschritt = new Fortschrittsfenster())
         {

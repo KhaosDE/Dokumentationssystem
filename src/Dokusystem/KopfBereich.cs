@@ -24,6 +24,15 @@ public sealed class KopfBereich : Panel
     private readonly List<Button> knoepfe = [];
     private Image? logo;
 
+    // „Angemeldet als …“ unter dem Demo-Hinweis: Klick wechselt den Benutzer (ohne Passwort,
+    // nur für die Vorführung – IDEEN „Nachrichten“).
+    public Button BenutzerKnopf { get; } = new()
+    {
+        FlatStyle = FlatStyle.Flat, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Cursor = Cursors.Hand,
+        BackColor = Stil.Flaeche, ForeColor = Stil.Akzent, Font = Stil.Standard, TextAlign = ContentAlignment.MiddleRight,
+        UseMnemonic = false, TabStop = true,
+    };
+
     public KopfBereich()
     {
         DoubleBuffered = true;
@@ -42,6 +51,33 @@ public sealed class KopfBereich : Panel
         titel.Font = Stil.KopfTitel;
         Height = S(GesamtHoehe);
         AccessibleName = DemoHinweis;
+        BenutzerKnopf.FlatAppearance.BorderSize = 0;
+        BenutzerKnopf.FlatAppearance.MouseOverBackColor = Stil.AkzentHell;
+        BenutzerKnopf.FlatAppearance.MouseDownBackColor = Stil.AkzentHell;
+        BenutzerKnopf.Padding = new Padding(Stil.AbstandMini, 0, Stil.AbstandMini, 0);
+        Controls.Add(BenutzerKnopf);
+        BenutzerSetzen(null);
+    }
+
+    public string BenutzerText => BenutzerKnopf.Text;
+
+    // name == null: niemand angemeldet (Hinweis in der Farbe „bitte klären“).
+    public void BenutzerSetzen(string? name)
+    {
+        BenutzerKnopf.Text = name is null ? "Nicht angemeldet – Benutzer wählen ▾" : $"Angemeldet als {name} ▾";
+        BenutzerKnopf.ForeColor = name is null ? Stil.Achtung.Text : Stil.Akzent;
+        BenutzerKnopf.AccessibleName = (name is null ? "Nicht angemeldet" : $"Angemeldet als {name}") + ". Benutzer wechseln";
+        PerformLayout();
+    }
+
+    // Rechter Rand für Demo-Hinweis und Benutzer: links neben dem Logo, falls eines gewählt ist.
+    private int RechtsNebenLogo()
+    {
+        var f = Flaeche;
+        int rechts = f.Right - S(InnenSeite);
+        if (logo is null) return rechts;
+        var feld = new Rectangle(rechts - S(LogoMaxBreite), f.Top + S(Innen), S(LogoMaxBreite), S(LogoHoehe));
+        return (int)(rechts - Einpassen(logo.Size, feld).Width) - S(Stil.AbstandMittel);
     }
 
     public string KleinText => klein.Text;
@@ -75,6 +111,7 @@ public sealed class KopfBereich : Panel
     {
         logo?.Dispose();
         logo = Bewohnerbild.Laden(pfad);
+        PerformLayout();
         Invalidate();
     }
 
@@ -111,6 +148,10 @@ public sealed class KopfBereich : Panel
         int textOben = oben + Math.Max(0, (S(TitelHoehe) - textHoehe) / 2);
         klein.Location = new Point(links, textOben);
         titel.Location = new Point(links - S(2), textOben + klein.PreferredHeight + S(Stil.AbstandMini));
+
+        // Benutzer unter dem Demo-Hinweis, rechtsbündig mit ihm.
+        var benutzer = BenutzerKnopf.PreferredSize;
+        BenutzerKnopf.Bounds = new Rectangle(RechtsNebenLogo() - benutzer.Width + S(Stil.AbstandMini), oben + S(26), benutzer.Width, benutzer.Height);
 
         int y = oben + S(TitelHoehe) + S(Zeilenabstand);
         int x = rechts;

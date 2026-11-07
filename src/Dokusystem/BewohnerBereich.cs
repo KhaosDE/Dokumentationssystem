@@ -22,6 +22,9 @@ public sealed class BewohnerBereich : Panel
     public Dictionary<BewohnerFilter, FilterKnopf> FilterKnoepfe { get; } = [];
     // Offene Aufgaben über den Karten (Wohnbereich-ToDo), mit Knopf zu allen.
     public AufgabenKurzliste Aufgaben { get; } = new();
+    public NachrichtenHinweis Nachrichten { get; } = new() { Visible = false };
+    public event Action<long?>? NachrichtenAnzeigen;
+    private readonly Button nachrichtenKnopf = Stil.NebenKnopf("Nachrichten …");
     private readonly Panel aufgabenRahmen = new() { Dock = DockStyle.Top, BackColor = Stil.Seite };
     public event Action? AufgabenAnzeigen;
     public BewohnerFilter AktiverFilter { get; private set; } = BewohnerFilter.Alle;
@@ -53,15 +56,25 @@ public sealed class BewohnerBereich : Panel
         }
         aufgabenRahmen.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross, Stil.AbstandKlein);
         aufgabenRahmen.Controls.Add(Aufgaben);
+        aufgabenRahmen.Controls.Add(Nachrichten);
         aufgabenRahmen.Layout += (_, _) =>
         {
             var p = aufgabenRahmen.Padding;
-            Aufgaben.SetBounds(p.Left, p.Top, Math.Max(100, aufgabenRahmen.ClientSize.Width - p.Horizontal), Aufgaben.Height);
+            int breite = Math.Max(100, aufgabenRahmen.ClientSize.Width - p.Horizontal), y = p.Top;
+            if (nachrichtenSichtbar)
+            {
+                Nachrichten.SetBounds(p.Left, y, breite, Nachrichten.Height);
+                Nachrichten.PerformLayout();
+                y = Nachrichten.Bottom + Stil.Px(this, Stil.AbstandKlein);
+            }
+            Aufgaben.SetBounds(p.Left, y, breite, Aufgaben.Height);
             Aufgaben.PerformLayout();
-            int hoehe = Aufgaben.Height + p.Vertical;
+            int hoehe = Aufgaben.Bottom + p.Bottom;
             if (aufgabenRahmen.Height != hoehe) aufgabenRahmen.Height = hoehe;
         };
         Aufgaben.AlleKnopf.Click += (_, _) => AufgabenAnzeigen?.Invoke();
+        Nachrichten.OeffnenKnopf.Click += (_, _) => NachrichtenAnzeigen?.Invoke(null);
+        nachrichtenKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) NachrichtenAnzeigen?.Invoke(id); };
         Controls.Add(Raster);
         Controls.Add(Akte);
         Controls.Add(FilterLeiste);
@@ -123,10 +136,22 @@ public sealed class BewohnerBereich : Panel
         Akte.Visible = true;
         AkteSichtbar = true;
         kopf.TexteSetzen("Bewohnerakte", b.Name);
-        kopf.KnoepfeSetzen(zurueckKnopf, bearbeitenKnopf);
+        kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, bearbeitenKnopf);
     }
 
     public BewohnerFormular FormularErstellen(Bewohner? b) => new(speicher, b);
+
+    // Hinweis auf ungelesene Nachrichten über den Karten (nur wenn es welche gibt).
+    private bool nachrichtenSichtbar;
+    public bool NachrichtenHinweisSichtbar => nachrichtenSichtbar;
+
+    public void NachrichtenSetzen(int ungelesen, string? name)
+    {
+        nachrichtenSichtbar = ungelesen > 0 && name is not null;
+        Nachrichten.Visible = nachrichtenSichtbar;
+        if (nachrichtenSichtbar) Nachrichten.Setzen(ungelesen, name);
+        aufgabenRahmen.PerformLayout();
+    }
 
     public void AufgabenSetzen(IReadOnlyList<Aufgabe> offen, DateTime jetzt)
     {

@@ -2,7 +2,7 @@ using Dokusystem.Kern;
 
 namespace Dokusystem;
 
-// Einstellungen: eigenes Kürzel, Update beim Start, eigenes Bild für den Kopf (Logo).
+// Einstellungen: wer angemeldet ist (Kürzel), Update beim Start, eigenes Bild für den Kopf (Logo).
 // Gespeichert wird erst mit „Speichern“; das Bild landet als Kopie im Datenordner (Regel 7).
 public sealed class EinstellungenFenster : Form
 {
@@ -12,14 +12,17 @@ public sealed class EinstellungenFenster : Form
     private Image? logoBild;
     private bool logoGeaendert;
 
-    public TextBox Kuerzel { get; } = new();
+    // Wer angemeldet ist: eine der ausgedachten Kolleginnen oder Kollegen (gleich wie oben rechts
+    // „Angemeldet als …“). Das Kürzel steht dann bei Berichten, Übergabe und Aufgaben.
+    public ComboBox Benutzer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
+    private readonly List<string> benutzerKuerzel = [];
     public CheckBox AutoUpdate { get; } = new();
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");
     public Label Fehler { get; } = new();
     public string? NeuesLogo { get; private set; }
     public bool LogoEntfernen { get; private set; }
 
-    public EinstellungenFenster()
+    public EinstellungenFenster(IReadOnlyList<Kollege>? kollegen = null)
     {
         var werte = Einstellungen.Laden();
         Text = $"Einstellungen ({KopfBereich.DemoHinweis})";
@@ -56,13 +59,29 @@ public sealed class EinstellungenFenster : Form
         Ganz(new MarkenFeld(KopfBereich.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
 
         Ganz(Abschnitt("ICH"));
-        Kuerzel.Text = werte.Kuerzel;
-        Kuerzel.MaxLength = Einstellungen.KuerzelLaenge;
-        Kuerzel.Width = 120;
-        Kuerzel.PlaceholderText = "z. B. AB";
-        Kuerzel.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
-        raster.Controls.Add(Beschriftung("Eigenes Kürzel"));
-        raster.Controls.Add(Kuerzel);
+        Benutzer.Items.Add("– niemand –");
+        benutzerKuerzel.Add("");
+        foreach (var k in kollegen ?? [])
+        {
+            Benutzer.Items.Add($"{k.Anzeige} – {string.Join(", ", k.Teams)}");
+            benutzerKuerzel.Add(k.Kuerzel);
+        }
+        // Ein früher frei eingetragenes Kürzel bleibt wählbar, bis man jemand anderen wählt.
+        if (werte.Kuerzel.Length > 0 && !benutzerKuerzel.Contains(werte.Kuerzel))
+        {
+            Benutzer.Items.Add($"{werte.Kuerzel} (kein Benutzer der Demo)");
+            benutzerKuerzel.Add(werte.Kuerzel);
+        }
+        Benutzer.SelectedIndex = Math.Max(0, benutzerKuerzel.IndexOf(werte.Kuerzel));
+        Benutzer.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
+        raster.Controls.Add(Beschriftung("Angemeldet als"));
+        raster.Controls.Add(Benutzer);
+        raster.Controls.Add(new Label());
+        raster.Controls.Add(new Label
+        {
+            Text = "Nur für die Vorführung, ohne Passwort. Wechseln geht auch oben rechts im Kopf.",
+            AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+        });
 
         Ganz(Abschnitt("PROGRAMM"));
         AutoUpdate.Text = "Beim Start nach Updates suchen";
@@ -187,14 +206,10 @@ public sealed class EinstellungenFenster : Form
 
     public bool Speichern()
     {
-        if (Einstellungen.KuerzelPruefen(Kuerzel.Text) is string fehler)
-        {
-            FehlerZeigen(fehler);
-            return false;
-        }
         try
         {
-            Einstellungen.Aendern(w => w with { Kuerzel = Kuerzel.Text.Trim(), AutoUpdate = AutoUpdate.Checked });
+            string kuerzel = benutzerKuerzel[Math.Max(0, Benutzer.SelectedIndex)];
+            Einstellungen.Aendern(w => w with { Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked });
             if (logoGeaendert && NeuesLogo is not null) Einstellungen.LogoSetzen(NeuesLogo);
             else if (LogoEntfernen) Einstellungen.LogoSetzen(null);
         }
