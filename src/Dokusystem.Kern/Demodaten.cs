@@ -587,6 +587,55 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Biografie -----
+
+    private sealed class BiografieDatei
+    {
+        public List<BiografieVorlage> Biografien { get; set; } = [];
+    }
+
+    public sealed class BiografieVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public List<AbschnittVorlage> Abschnitte { get; set; } = [];
+        public BiografieAenderungVorlage? Aenderung { get; set; }
+    }
+
+    public sealed class AbschnittVorlage
+    {
+        public int Nr { get; set; }
+        public string Text { get; set; } = "";
+        public bool Angegeben { get; set; }
+    }
+
+    public sealed class BiografieAenderungVorlage
+    {
+        public int Nr { get; set; }
+        public int VorTagen { get; set; }
+        public string Alt { get; set; } = "";
+    }
+
+    // Biografien aus daten/demo/biografie.json; bei einer Änderung zuerst die alte Fassung.
+    public static List<(long BewohnerId, BiografieFassung Fassung)> Biografien(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var liste = new List<(long, BiografieFassung)>();
+        foreach (var v in Lesen<BiografieDatei>("biografie.json").Biografien)
+        {
+            if (bewohner.FirstOrDefault(b => b.Nachname == v.Bewohner) is not Bewohner b) continue;
+            var angelegt = jetzt.Date.AddDays(-60).AddHours(10);
+            foreach (var a in v.Abschnitte)
+            {
+                if (v.Aenderung is BiografieAenderungVorlage ae && ae.Nr == a.Nr)
+                {
+                    liste.Add((b.Id!.Value, new BiografieFassung { Abschnitt = a.Nr, Text = ae.Alt, Erstellt = angelegt, Kuerzel = "AB" }));
+                    liste.Add((b.Id!.Value, new BiografieFassung { Abschnitt = a.Nr, Text = a.Text, Angegeben = a.Angegeben, Erstellt = jetzt.Date.AddDays(-ae.VorTagen).AddHours(15), Kuerzel = "CD" }));
+                }
+                else liste.Add((b.Id!.Value, new BiografieFassung { Abschnitt = a.Nr, Text = a.Text, Angegeben = a.Angegeben, Erstellt = angelegt, Kuerzel = "AB" }));
+            }
+        }
+        return liste;
+    }
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein

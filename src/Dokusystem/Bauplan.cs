@@ -16,7 +16,6 @@ public static class Bauplan
 
     public static readonly IReadOnlyDictionary<string, Vorhaben> Reiter = new Dictionary<string, Vorhaben>
     {
-        ["Biografie"] = new("0.15.0", "Lebensgeschichte in Abschnitten, mit Verlauf und Liste fehlender Angaben."),
         ["Reflexion"] = new("0.16.0", "Je Monat eine kurze Reflexion je Lebensbereich, mit den Berichten des Monats daneben."),
         ["HEB"] = new("0.18.0", "Der HEB-Bogen für einen Zeitraum, zusammengestellt aus Berichten, Wochenplan und Reflexionen."),
     };

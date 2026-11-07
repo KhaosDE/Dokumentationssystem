@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.14.0** (Modul Ausgangsliste mit Modulverwaltung, Bauplan Schritt 11).
+Stand: 07.11.2026. Version: **0.15.0** (Biografie, Bauplan Schritt 12).
 
 ## Aktuell
 
@@ -16,9 +16,10 @@ die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) 
 **Therapie-Bereich** (Angebote, Zuteilungen, freie Plätze), der **Wochenplan** je Bewohner, der
 **Wohnbereichskalender** (Termine, Heimfahrten, Ausflüge) und neu die **Modulverwaltung** mit dem
 ersten Modul **Ausgangsliste** (Ausgang, Anwesenheit, Unterbringung, Tagesliste, Küchendienst,
-Digitaler Ausgang), übernommen aus der Ausgangsliste.
+Digitaler Ausgang), übernommen aus der Ausgangsliste. Neu ist die **Biografie** als Reiter in der
+Akte.
 
-**Nächster Schritt:** Bauplan Schritt 12 „Biografie“ (0.15.0), danach der Reihe nach bis
+**Nächster Schritt:** Bauplan Schritt 13 „Monatsreflexion“ (0.16.0), danach der Reihe nach bis
 Schritt 15 (`IDEEN.md`, oben).
 
 ## Fertig
@@ -217,6 +218,19 @@ Schritt 15 (`IDEEN.md`, oben).
     Krankenhausaufenthalt, eine Ausgangsbeschränkung, Forensik, ablaufendes Einverständnis,
     digitale Ausgänge (einer unterwegs, einer überfällig), Küchendienst mit Zimmergruppe und
     Tausch – relativ zu heute und zur Uhrzeit.
+
+- 0.15.0 — Biografie (Bauplan Schritt 12, 07.11.2026):
+  - Reiter „Biografie“ in der Akte: sechs feste Abschnitte (Herkunft und Familie, Schule und
+    Beruf, Wohnen, Interessen und Gewohnheiten, Wichtige Lebensereignisse, Wünsche) als Karten
+    mit Fließtext; leere Abschnitte deutlich als „Keine Angabe – fehlt noch.“.
+  - „Bearbeiten …“: Fließtext ohne Aufzählungszeichen (sonst Fehlermeldung), Häkchen „vom
+    Bewohner angegeben, nicht überprüft“ mit Hinweis auf „gibt an, dass …“ (nicht automatisch
+    eingesetzt). Jede Änderung ist eine neue Fassung mit Datum und Kürzel; „Verlauf …“ zeigt alle.
+  - Unten „Fehlende Angaben: …“; oben „Als Fließtext kopieren“ (reiner Text, fehlende Angaben am
+    Ende).
+  - Demo `daten/demo/biografie.json`: kurze, wertneutrale, ausgedachte Biografien für sechs
+    Bewohner (einige Abschnitte leer, eine Änderung mit Verlauf, ein Hinweis auf die
+    Formulierung), vier Bewohner ohne Biografie.
 
 ## Offene Punkte
 
@@ -476,8 +490,31 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   „nicht erfasst – bitte klären“, damit alles in die Statusleiste passt). Auf den Bewohnerkarten nur, was Aufmerksamkeit braucht; Zimmer, Unterbringung und
   Küchendienst nur auf der Seite des Moduls.
 - 07.11.2026 (Schritt 11): Keine neuen Abhängigkeiten.
+- 07.11.2026 (Schritt 12): Aufzählungszeichen (Strich, Punkt, Nummer am Zeilenanfang) werden beim
+  Speichern abgewiesen statt entfernt – das Programm schreibt keinen Text um. Ein Gedankenstrich
+  mitten im Satz ist erlaubt.
+- 07.11.2026 (Schritt 12): Der Hinweis auf „gibt an, dass …“ erscheint, wenn „vom Bewohner
+  angegeben“ angekreuzt ist und der Text weder „gibt an“, „gab an“, „berichtet“, „erzählt“ noch
+  „nach eigenen Angaben“ enthält. Er ist nur ein Hinweis; gespeichert wird trotzdem.
+- 07.11.2026 (Schritt 12): Einen Abschnitt leeren ist eine neue (leere) Fassung – er zählt dann
+  wieder als fehlende Angabe, der Verlauf bleibt. Speichern ohne Änderung legt keine Fassung an.
+- 07.11.2026 (Schritt 12): „Als Fließtext kopieren“: Überschrift „Biografie Name“, je Abschnitt
+  Titel und Text, bei Angaben des Bewohners darunter „(vom Bewohner angegeben, nicht
+  überprüft)“, am Ende „Fehlende Angaben: …“ – ohne Formatierung.
 
 ## Testliste für Tobi
+
+Version 0.15.0:
+
+1. Unten links „Version 0.15.0 · Build …“. Akte Anton Ahorn → Reiter „Biografie“: sechs
+   Abschnitte, „Wichtige Lebensereignisse“ als „Keine Angabe – fehlt noch.“, unten „Fehlende
+   Angaben: …“.
+2. „Interessen und Gewohnheiten“ → „Verlauf …“: zwei Fassungen mit Datum und Kürzel.
+3. Angemeldet „Bearbeiten …“ bei einem leeren Abschnitt: Text mit „- “ am Zeilenanfang →
+   Fehlermeldung; als Fließtext → gespeichert, fehlt nicht mehr in „Fehlende Angaben“.
+4. „vom Bewohner angegeben“ ankreuzen ohne „gibt an …“ → Hinweis im Fenster und auf der Karte.
+   Akte Dieter Distel zeigt das schon in der Demo.
+5. „Als Fließtext kopieren“ → in einen Editor einfügen: reiner Text, fehlende Angaben am Ende.
 
 Version 0.14.0:
 

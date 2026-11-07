@@ -479,7 +479,7 @@ Umfang:
   Dokumentationssystem hat sein eigenes Update.
 
 ## Biografie
-Status: freigegeben (Bauplan Schritt 12)
+Status: erledigt (07.11.2026)
 Datum: 07.11.2026
 Was: Reiter „Biografie“ in der Bewohnerakte.
 Warum: Ursprüngliche Idee (05.11.2026).
