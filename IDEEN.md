@@ -446,8 +446,10 @@ Status: freigegeben (Bauplan Schritt 11)
 Datum: 07.11.2026 (ersetzt den Eintrag „Ausgang (aus der Ausgangsliste)“)
 Was: Die Ausgangsliste wird ein **zuschaltbares Modul** des Dokumentationssystems. Dazu
 bekommt das Programm eine Modulverwaltung.
-Warum: Entscheidung Tobi (07.11.2026): Nicht jeder Bereich braucht die Ausgangsliste. Die
-Verbindung zwischen beiden Programmen regelt `docs/bruecke-ausgangsliste.md`.
+Warum: Entscheidung Tobi (07.11.2026): Nicht jeder Bereich braucht die Ausgangsliste. Das
+Dokumentationssystem ist das **Muttersystem**; die Ausgangsliste bleibt als eigenständige
+Version bestehen und bekommt die Funktionen über einen Abgleich. Rollen, Regeln für das Modul
+und Abgleich: `docs/bruecke-ausgangsliste.md` (verbindlich für diesen Schritt).
 Umfang:
 - **Modulverwaltung:** In den Einstellungen ein Abschnitt „Module“ mit Häkchen je Modul. Ein
   ausgeschaltetes Modul hinterlässt keine Spuren: kein Eintrag in der Seitenleiste, kein
@@ -467,6 +469,9 @@ Umfang:
 - Übernehmen und anpassen aus `KhaosDE/Ausgangsliste` (Repository anhängen), Bereinigung
   nach `CLAUDE.md`. Dateien und Klassen im Modul möglichst gleich benennen wie in der
   Ausgangsliste, damit spätere Abgleiche leicht sind.
+- **Eigenes Projekt** `src/Dokusystem.Modul.Ausgangsliste/`, abhängig nur von Schnittstellen
+  des Kerns, mit `AENDERUNGEN.md` — so lässt es sich in die eigenständige Ausgangsliste
+  übernehmen (Abschnitt „Damit der Abgleich leicht bleibt“ der Brückendatei).
 - Nach dem Bau in `docs/bruecke-ausgangsliste.md` eintragen, bis zu welcher Version der
   Ausgangsliste übernommen wurde.
 - Demo: Modul in den Demo-Daten eingeschaltet; Ausgänge und Abwesenheiten relativ zu heute.

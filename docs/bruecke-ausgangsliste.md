@@ -10,31 +10,48 @@ Die Ausgangsliste wird ein **zuschaltbares Modul** des Dokumentationssystems (Ei
 „Modul Ausgangsliste (mit Modulverwaltung)“ in `IDEEN.md`). Bereiche, die sie nicht brauchen,
 schalten sie in den Einstellungen ab.
 
-## Rollen (Festlegung 07.11.2026, Tobi kann sie ändern)
+## Rollen (Entscheidung Tobi, 07.11.2026)
 
-| | Ausgangsliste | Dokumentationssystem |
+**Das Dokumentationssystem ist das Muttersystem.** Die Ausgangsliste bleibt daneben als
+**eigenständige Version** bestehen — für Bereiche, die nur die Ausgangsliste brauchen.
+
+| | Dokumentationssystem | Ausgangsliste (eigenständig) |
 |---|---|---|
-| Zweck | Programm für den Einsatz im Wohnbereich, wird dafür vorbereitet (Netzlaufwerk, Installer, Update-Ordner) | Demo zum Vorführen, nur ausgedachte Daten |
-| Repository | privat | öffentlich |
-| Rolle bei Ausgangs-Funktionen | **Mutterprogramm:** Neue Funktionen rund um Ausgang, Unterbringung, Küchendienst entstehen hier zuerst | **Abbild:** übernimmt sie als Modul über einen Abgleich |
+| Rolle | **Muttersystem:** Neue Funktionen rund um Ausgang, Unterbringung, Küchendienst entstehen hier zuerst, im Modul „Ausgangsliste“ | **Eigenständige Version:** bekommt die Funktionen über einen Abgleich aus dem Muttersystem |
+| Zweck | Demo zum Vorführen, nur ausgedachte Daten | Programm für den Einsatz im Wohnbereich (Netzlaufwerk, Installer, Update-Ordner) |
+| Repository | öffentlich | privat |
+| Bleibt nur hier | alle übrigen Bereiche (Dokumentation, Medikation, HEB …) | eigene Hülle: Hauptfenster, Update über den Ordner `Update`, Installer, Logo, Excel-Arbeitsmappe |
 
-Warum so: Die Ausgangsliste ist in Vorbereitung für den echten Einsatz und wird laufend
-weiterentwickelt (Version 0.23.0 am 07.11.2026). Das Dokumentationssystem ist eine Demo in
-einem öffentlichen Repository. Beides in ein Repository zu legen, würde entweder die Demo-Regeln
-(öffentlich, keine echten Daten) oder den Einsatz der Ausgangsliste behindern. Die Frage stellt
-sich neu, wenn das Dokumentationssystem über eine Demo hinausgeht.
+**Übergang:** Bis das Modul gebaut ist (Bauplan Schritt 11), entwickelt sich die Ausgangsliste
+wie bisher. Schritt 11 übernimmt einmal ihren Stand in das Modul. **Ab dann** entstehen neue
+Ausgangs-Funktionen nur noch im Modul; in der Ausgangsliste werden nur noch Fehler behoben
+und Abgleiche eingespielt.
 
-## Abgleich
+## Damit der Abgleich leicht bleibt (Regeln für das Modul)
 
-1. Erscheint eine neue Version der Ausgangsliste mit Änderungen an Funktionen aus der Tabelle
-   unten, trägt der Chat in `IDEEN.md` einen Eintrag „Abgleich mit Ausgangsliste <Version>“ ein.
-2. Claude Code übernimmt die Änderungen in das Modul, **bereinigt** nach `CLAUDE.md` (kein Logo,
-   kein Name der Einrichtung oder des Wohnbereichs, keine Personennamen — auch nicht in
-   Kommentaren) und trägt unten den neuen Stand ein.
-3. Fehler, die beim Abgleich im Code der Ausgangsliste auffallen, werden im Repository der
-   Ausgangsliste gemeldet (dort `Ideen.md`), nicht nur im Modul behoben.
+- Das Modul liegt in einem **eigenen Projekt** (`src/Dokusystem.Modul.Ausgangsliste/`) und hängt
+  nur von festen Schnittstellen des Kerns ab (Bewohner lesen, Speicher, Stil, Druckvorschau,
+  Einstellungen). So lässt es sich als Ganzes in die eigenständige Ausgangsliste übernehmen.
+- Datei- und Klassennamen wie in der Ausgangsliste.
+- Kein Bezug auf andere Bereiche des Dokumentationssystems im Modul selbst (Marken auf der
+  Startseite usw. meldet das Modul über die Schnittstelle, der Kern zeigt sie an).
+- Eine Liste der Änderungen je Version im Modul (`src/Dokusystem.Modul.Ausgangsliste/AENDERUNGEN.md`),
+  damit der Abgleich weiß, was neu ist.
 
-**Übernommen bis Ausgangsliste-Version:** noch keine (Modul nicht gebaut).
+## Abgleich (Richtung: Dokumentationssystem → Ausgangsliste)
+
+1. **Einmalig (Bauplan Schritt 11):** Stand der Ausgangsliste ins Modul übernehmen, bereinigt
+   nach `CLAUDE.md` (kein Logo, kein Name der Einrichtung oder des Wohnbereichs, keine
+   Personennamen — auch nicht in Kommentaren). Version unten eintragen.
+2. **Danach:** Ändert sich das Modul, trägt der Chat im Repository der Ausgangsliste
+   (`Ideen.md`) einen Eintrag „Abgleich mit Dokumentationssystem <Version>“ ein. Claude Code
+   übernimmt dort die Änderungen in die eigenständige Ausgangsliste und passt sie an deren
+   Hülle an.
+3. Fehler, die in der eigenständigen Ausgangsliste auffallen und das Modul betreffen, werden
+   **im Muttersystem** behoben (Eintrag in `IDEEN.md` hier) und dann abgeglichen.
+
+**Einmalige Übernahme aus Ausgangsliste-Version:** noch keine (Modul nicht gebaut).
+**Zuletzt an die Ausgangsliste abgeglichen:** noch nichts.
 
 ## Zuordnung
 
