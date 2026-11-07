@@ -11,8 +11,8 @@ namespace Dokusystem;
 public sealed class BewohnerKarte : Control
 {
     // Logische Maße bei 100 % Skalierung.
-    public const int Breite = 260;     // Mindestbreite; das Raster verteilt den Rest
-    public const int Hoehe = 196;      // mit Schattenrand
+    public const int Breite = 236;     // Mindestbreite; das Raster verteilt den Rest (3 Spalten bei 1180 px)
+    public const int Hoehe = 180;      // mit Schattenrand; zwei Markenzeilen passen
     public const int RandSeite = 6, RandOben = 4, RandUnten = 10;   // Platz für den Schatten
     private const int BildGroesse = 52, Innen = 14, MarkeHoehe = 22;
 
