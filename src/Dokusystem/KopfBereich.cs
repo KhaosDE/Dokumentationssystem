@@ -5,8 +5,9 @@ namespace Dokusystem;
 // Der Kopf über jedem Bereich (übernommen und angepasst aus der Ausgangsliste): eine weiße,
 // abgerundete Fläche mit feinem Rand und weichem Farbverlauf – Orange von oben links, Blau von
 // rechts unten –, der nach rechts in reines Weiß ausläuft.
-// Links: kleine Zeile und Titel. Rechts oben der dauerhaft sichtbare Hinweis „Demo — ausgedachte
-// Daten“ (Regel 4); ein Bild der Einrichtung gibt es hier nicht (Regel 7). Darunter rechts die Knöpfe.
+// Links: kleine Zeile und Titel. Rechts oben das Logofeld: ein selbst gewähltes Bild aus den
+// Einstellungen (liegt im Datenordner, nie im Repository – Regel 7), sonst leer. Daneben der
+// dauerhaft sichtbare Hinweis „Demo — ausgedachte Daten“ (Regel 4). Darunter rechts die Knöpfe.
 public sealed class KopfBereich : Panel
 {
     public const string DemoHinweis = "Demo — ausgedachte Daten";
@@ -15,11 +16,13 @@ public sealed class KopfBereich : Panel
     private const int Rand = 16, RandOben = 16, RandUnten = 8;   // Abstand zum Fensterrand
     private const int Innen = 16, InnenSeite = 24;
     private const int TitelHoehe = 64, Zeilenabstand = 8;
+    private const int LogoHoehe = 56, LogoMaxBreite = 220;
     public const int GesamtHoehe = RandOben + Innen + TitelHoehe + Zeilenabstand + Stil.KnopfHoehe + Innen + RandUnten;
 
     private readonly Label klein = new();
     private readonly Label titel = new();
     private readonly List<Button> knoepfe = [];
+    private Image? logo;
 
     public KopfBereich()
     {
@@ -66,6 +69,30 @@ public sealed class KopfBereich : Panel
     }
 
     public IReadOnlyList<Button> Knoepfe => knoepfe;
+
+    // Eigenes Bild für das Logofeld (null = leer).
+    public void LogoSetzen(string? pfad)
+    {
+        logo?.Dispose();
+        logo = Bewohnerbild.Laden(pfad);
+        Invalidate();
+    }
+
+    public bool HatLogo => logo is not null;
+
+    // Bild im Seitenverhältnis in ein Feld einpassen (mittig).
+    public static RectangleF Einpassen(Size bild, Rectangle feld)
+    {
+        float faktor = Math.Min((float)feld.Width / Math.Max(1, bild.Width), (float)feld.Height / Math.Max(1, bild.Height));
+        float w = bild.Width * faktor, h = bild.Height * faktor;
+        return new RectangleF(feld.X + (feld.Width - w) / 2, feld.Y + (feld.Height - h) / 2, w, h);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) logo?.Dispose();
+        base.Dispose(disposing);
+    }
 
     protected override void OnDpiChangedAfterParent(EventArgs e)
     {
@@ -129,9 +156,22 @@ public sealed class KopfBereich : Panel
 
         using (var rand = new Pen(Stil.KarteRand, 1f)) g.DrawPath(rand, pfad);
 
-        // Demo-Hinweis oben rechts (Regel 4), als Marke „Achtung“ – mit Wort, nicht nur Farbe.
+        // Logofeld oben rechts, im Seitenverhältnis, rechtsbündig.
+        int rechts = (int)f.Right - S(InnenSeite);
+        if (logo is not null)
+        {
+            var feld = new Rectangle(rechts - S(LogoMaxBreite), (int)f.Top + S(Innen), S(LogoMaxBreite), S(LogoHoehe));
+            var ziel = Einpassen(logo.Size, feld);
+            ziel.X = rechts - ziel.Width;
+            ziel.Y = feld.Y;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.DrawImage(logo, ziel);
+            rechts = (int)ziel.X - S(Stil.AbstandMittel);
+        }
+
+        // Demo-Hinweis (Regel 4), als Marke „Achtung“ – mit Wort, nicht nur Farbe.
         int breite = Stil.MarkenBreite(g, DemoHinweis, Skala);
-        Stil.MarkeZeichnen(g, DemoHinweis, (int)f.Right - S(InnenSeite) - breite, (int)f.Top + S(Innen), Stil.Achtung, Skala);
+        Stil.MarkeZeichnen(g, DemoHinweis, rechts - breite, (int)f.Top + S(Innen), Stil.Achtung, Skala);
     }
 
     // Ein weicher Farbfleck: innen kräftig, außen durchsichtig – wie ein Aquarell-Klecks.

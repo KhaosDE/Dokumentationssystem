@@ -35,6 +35,21 @@ public static class Hilfe
         Application.DoEvents();
     }
 
+    // Ein ausgedachtes Testbild (Farbflächen, keine Person, kein echtes Logo).
+    public static void Testbild(string pfad, int breite, int hoehe)
+    {
+        using var bild = new Bitmap(breite, hoehe);
+        using (var g = Graphics.FromImage(bild))
+        {
+            g.Clear(Color.FromArgb(238, 241, 247));
+            using var blau = new SolidBrush(Color.FromArgb(84, 128, 198));
+            using var orange = new SolidBrush(Color.FromArgb(238, 166, 60));
+            g.FillEllipse(orange, 4, 4, hoehe - 8, hoehe - 8);
+            g.FillRectangle(blau, hoehe, hoehe / 3, breite - hoehe - 6, hoehe / 3);
+        }
+        bild.Save(pfad, System.Drawing.Imaging.ImageFormat.Png);
+    }
+
     // Bildschirmfoto eines Fensters oder Steuerelements, nur wenn DOKUSYSTEM_BILDSCHIRMFOTOS gesetzt ist.
     public static void Foto(Control element, string name)
     {

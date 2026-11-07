@@ -13,21 +13,78 @@ public class HauptfensterTests
         Assert.Contains("Demo — ausgedachte Daten", fenster.Text);
         Assert.Equal("Demo — ausgedachte Daten", KopfBereich.DemoHinweis);
         Assert.Equal(KopfBereich.DemoHinweis, fenster.Kopf.AccessibleName);
-        Assert.Equal("Bewohner", fenster.Navigation[0].Text);
-        Assert.True(fenster.Navigation[0].Aktiv);
+        Assert.Equal(["Übersicht", "Bewohner", "Neuer Bericht …", "Übergabe", "Kalender", "Therapie", "Medikamente", "Einstellungen"],
+            fenster.Navigation.Select(n => n.Text));
+        Assert.Equal("Bewohner", fenster.AktiverBereich);
+        Assert.True(fenster.Navigation.Single(n => n.Text == "Bewohner").Aktiv);
         Assert.Matches(@"^Version \d+\.\d+\.\d+ · ", fenster.VersionText.Text);
     });
 
-    [Fact]
-    public void Update_Haekchen_schreibt_Einstellung() => Hilfe.Sta(() =>
+    [Theory]
+    [InlineData("Übersicht", "0.15.0")]
+    [InlineData("Neuer Bericht …", "0.6.0")]
+    [InlineData("Übergabe", "0.6.0")]
+    [InlineData("Kalender", "0.11.0")]
+    [InlineData("Therapie", "0.9.0")]
+    [InlineData("Medikamente", "0.7.0")]
+    public void Noch_nicht_gebaute_Bereiche_zeigen_ihre_Version(string bereich, string version) => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         using var fenster = new Hauptfenster(u.Speicher);
-        Assert.True(fenster.AutoUpdate.Checked);
-        fenster.AutoUpdate.Checked = false;
-        Assert.False(Einstellungen.Laden().AutoUpdate);
-        fenster.AutoUpdate.Checked = true;
-        Assert.True(Einstellungen.Laden().AutoUpdate);
+        fenster.Navigation.Single(n => n.Text == bereich).Ausloesen();
+        Assert.Equal(bereich, fenster.AktiverBereich);
+        Assert.True(fenster.Navigation.Single(n => n.Text == bereich).Aktiv);
+        Assert.False(fenster.Navigation.Single(n => n.Text == "Bewohner").Aktiv);
+        Assert.Equal($"Kommt in Version {version}", fenster.Kopf.KleinText);
+        Assert.Equal(bereich.Replace(" …", ""), fenster.Kopf.TitelText);
+        Assert.Empty(fenster.Kopf.Knoepfe);
+        var seite = Assert.IsType<PlatzhalterSeite>(fenster.Seite(bereich));
+        Assert.Equal($"Kommt in Version {version}", seite.Karte.Titel.Text);
+        Assert.False(string.IsNullOrWhiteSpace(seite.Karte.Beschreibung.Text));
+    });
+
+    [Fact]
+    public void Einstellungen_Kuerzel_Update_und_Logo() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var fenster = new Hauptfenster(u.Speicher);
+        string logo = Path.Combine(u.Ordner, "eigenes-bild.png");
+        Hilfe.Testbild(logo, 120, 40);
+        bool gezeigt = false;
+        fenster.EinstellungenZeigen = einstellungen =>
+        {
+            gezeigt = true;
+            Assert.True(einstellungen.AutoUpdate.Checked);
+            Assert.False(einstellungen.HatLogo);
+            einstellungen.Kuerzel.Text = "A.B";
+            Assert.False(einstellungen.Speichern());
+            Assert.Contains("Buchstaben und Ziffern", einstellungen.Fehler.Text);
+            einstellungen.Kuerzel.Text = "TS";
+            einstellungen.AutoUpdate.Checked = false;
+            Assert.True(einstellungen.LogoSetzen(logo));
+            return einstellungen.Speichern();
+        };
+        Assert.False(fenster.Kopf.HatLogo);
+        fenster.Navigation.Single(n => n.Text == "Einstellungen").Ausloesen();
+        Assert.True(gezeigt);
+        Assert.Equal("Bewohner", fenster.AktiverBereich);   // Einstellungen sind ein Fenster, kein Bereich
+        var werte = Einstellungen.Laden();
+        Assert.Equal(("TS", false), (werte.Kuerzel, werte.AutoUpdate));
+        Assert.NotNull(Einstellungen.LogoPfad());
+        Assert.True(fenster.Kopf.HatLogo);
+
+        fenster.EinstellungenZeigen = einstellungen =>
+        {
+            Assert.True(einstellungen.HatLogo);
+            Assert.Equal("TS", einstellungen.Kuerzel.Text);
+            Hilfe.Zeigen(einstellungen);   // PerformClick wirkt nur bei angezeigtem Fenster
+            einstellungen.LogoWeg.PerformClick();
+            return einstellungen.Speichern();
+        };
+        Hilfe.Zeigen(fenster);
+        Assert.True(fenster.EinstellungenOeffnen());
+        Assert.Null(Einstellungen.LogoPfad());
+        Assert.False(fenster.Kopf.HatLogo);
     });
 
     [Fact]
@@ -70,7 +127,7 @@ public class BewohnerOberflaechenTests
         f.Kopf.Knoepfe[0].PerformClick();
         Assert.False(f.Bewohner.AkteSichtbar);
         Karten(f)[0].Waehlen();
-        f.Navigation[0].Ausloesen();
+        f.Navigation.Single(n => n.Text == "Bewohner").Ausloesen();
         Assert.False(f.Bewohner.AkteSichtbar);   // Klick auf „Bewohner“ führt zur Übersicht
     });
 
@@ -89,6 +146,23 @@ public class BewohnerOberflaechenTests
         Assert.Equal(3, gesehen.Values.Select(v => v.Item1).Distinct().Count());
         Assert.True(gesehen["Allergien: nicht erfasst – bitte klären"].Item2);   // gestrichelt
         Assert.Equal(Stil.Beschluss, gesehen["Allergien: Haselnüsse"].Item1);     // rot
+    });
+
+    [Fact]
+    public void Akte_hat_Reiter_noch_nicht_gebaute_zeigen_ihre_Version() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var f = new Hauptfenster(u.Speicher);
+        f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
+        var akte = f.Bewohner.Akte;
+        Assert.Equal(["Stammdaten", "Berichte", "Medikation", "Wochenplan", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
+        Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
+        Assert.False(akte.ReiterPlatzhalter.Visible);
+        akte.Reiter.Waehlen("Medikation");
+        Assert.Equal("Kommt in Version 0.8.0", akte.ReiterPlatzhalter.Titel.Text);
+        Assert.Equal("Allergien: Haselnüsse", akte.Allergie.Text);   // Allergiehinweis bleibt oben
+        f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
+        Assert.Equal("Stammdaten", akte.Reiter.Aktiv);   // neue Akte beginnt bei den Stammdaten
     });
 
     [Fact]
@@ -217,6 +291,20 @@ public class BildschirmfotoTests
             formular.Speichern();
             Hilfe.Foto(formular, "6_formular_fehler");
         }
+        f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
+        f.Bewohner.Akte.Reiter.Waehlen("Berichte");
+        Hilfe.Foto(f, "8_akte_reiter_berichte");
+        f.Navigation.Single(n => n.Text == "Kalender").Ausloesen();
+        Hilfe.Foto(f, "9_platzhalter_kalender");
+        string logo = Path.Combine(u.Ordner, "eigenes-bild.png");
+        Hilfe.Testbild(logo, 180, 60);
+        Einstellungen.LogoSetzen(logo);
+        Einstellungen.Aendern(w => w with { Kuerzel = "TS" });
+        f.Kopf.LogoSetzen(Einstellungen.LogoPfad());
+        f.BereichWaehlen("Bewohner");
+        Hilfe.Foto(f, "10_kopf_mit_bild");
+        using (var einstellungen = new EinstellungenFenster())
+            Hilfe.Foto(einstellungen, "11_einstellungen");
         using (var fortschritt = new Fortschrittsfenster())
         {
             fortschritt.Zeige("Neue Version wird geladen (Build 4 → Build 5) …", 0.42);

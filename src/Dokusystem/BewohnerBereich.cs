@@ -79,8 +79,8 @@ public sealed class BewohnerBereich : Panel
     }
 }
 
-// Die Akte eines Bewohners: Kopfkarte (Bild, Name, Zimmer), Allergiehinweis gut sichtbar oben,
-// darunter die Stammdaten.
+// Die Akte eines Bewohners: Kopfkarte (Bild, Name, Zimmer) und Allergiehinweis immer gut sichtbar
+// oben, darunter Reiter für die Teile der Akte. Noch nicht gebaute Reiter zeigen „Kommt in Version …“.
 public sealed class AkteAnsicht : Panel
 {
     private const int MaxBreite = 880;
@@ -95,6 +95,8 @@ public sealed class AkteAnsicht : Panel
     private readonly TableLayoutPanel tabelle = new();
 
     public HinweisFeld Allergie { get; } = new();
+    public Reiterleiste Reiter { get; } = new(Bauplan.AktenReiter);
+    public PlatzhalterKarte ReiterPlatzhalter { get; } = new() { Visible = false };
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
     public Label Beschlussende { get; } = new();
@@ -141,7 +143,19 @@ public sealed class AkteAnsicht : Panel
         }
         stammdaten.Controls.Add(tabelle);
 
-        Controls.AddRange([kopfKarte, Allergie, abschnitt, stammdaten]);
+        Reiter.Gewechselt += _ => ReiterZeigen();
+        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter]);
+    }
+
+    private void ReiterZeigen()
+    {
+        bool stamm = Reiter.Aktiv == "Stammdaten";
+        abschnitt.Visible = stammdaten.Visible = stamm;
+        ReiterPlatzhalter.Visible = !stamm;
+        if (!stamm && Bauplan.Reiter.TryGetValue(Reiter.Aktiv, out var vorhaben))
+            ReiterPlatzhalter.Setzen(vorhaben.Version, vorhaben.Beschreibung);
+        PerformLayout();
+        Invalidate(true);
     }
 
     private int S(int wert) => Stil.Px(this, wert);
@@ -149,6 +163,7 @@ public sealed class AkteAnsicht : Panel
     public void Zeigen(Bewohner b)
     {
         Bewohner = b;
+        Reiter.Waehlen("Stammdaten");
         bild.Setzen(Bilder.Pfad(b.Bild), BewohnerRegeln.Initialen(b), b.Nachname);
         name.Text = b.Name;
         zimmer.Text = $"Zimmer {b.Zimmer}";
@@ -194,7 +209,18 @@ public sealed class AkteAnsicht : Panel
         y += kopfHoehe + S(Stil.AbstandMittel);
 
         Allergie.Bounds = new Rectangle(x, y, breite, S(52));
-        y += Allergie.Height + S(Stil.AbstandGross + Stil.AbstandKlein);
+        y += Allergie.Height + S(Stil.AbstandMittel);
+
+        Reiter.Bounds = new Rectangle(x, y, breite, S(40));
+        y += Reiter.Height + S(Stil.AbstandGross);
+
+        if (ReiterPlatzhalter.Visible)
+        {
+            ReiterPlatzhalter.Bounds = new Rectangle(x, y, breite, ReiterPlatzhalter.Height);
+            y += ReiterPlatzhalter.Height + rand;
+            AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y);
+            return;
+        }
 
         abschnitt.Location = new Point(x + S(Stil.AbstandMini), y);
         y += abschnitt.PreferredHeight + S(Stil.AbstandMini);

@@ -1,19 +1,17 @@
 # STAND — Dokumentationssystem
 
-Stand: 06.11.2026. Version: **0.3.0** (Umstieg auf C# / .NET 10, Gestaltung nach Vorbild der
-Ausgangsliste).
+Stand: 07.11.2026. Version: **0.4.0** (Programmgerüst mit allen Bereichen und Einstellungen,
+Bauplan Schritt 1).
 
 ## Aktuell
 
-Das Programm ist neu in C# / .NET 10 mit Windows Forms geschrieben und kann alles, was die
-Python-Version 0.2.0 konnte. Es sieht aus wie die Ausgangsliste: Kopf mit Farbverlauf,
-Bewohner als Kartenraster, Seitenleiste links. Die Python-Version ist entfernt (sie bleibt in
-der Git-Geschichte).
+Das Programm (C# / .NET 10, Windows Forms) zeigt jetzt alle geplanten Bereiche in der
+Seitenleiste; was noch nicht gebaut ist, sagt „Kommt in Version …“. Die Bewohnerakte hat
+Reiter, und es gibt ein Einstellungsfenster (Kürzel, Update, eigenes Bild im Kopf).
 
-**Nächster Schritt (07.11.2026):** Tobi hat alle gesammelten Ideen freigegeben. Bauplan mit
-13 Schritten (Versionen 0.4.0 bis 0.16.0) oben in `IDEEN.md`; begonnen wird mit Schritt 1
-„Programmgerüst mit allen Bereichen und Einstellungen“. Für die Schritte 2 und 9 das
-Repository `KhaosDE/Ausgangsliste` anhängen.
+**Nächster Schritt:** Bauplan Schritt 2 „Gestaltung Stufe 2“ (0.5.0), danach der Reihe nach
+bis Schritt 13 (`IDEEN.md`, oben). Für die Schritte 2 und 9 das Repository
+`KhaosDE/Ausgangsliste` anhängen.
 
 ## Fertig
 
@@ -38,15 +36,24 @@ Repository `KhaosDE/Ausgangsliste` anhängen.
   - Tests: 50 für Kern und Update (xUnit), dazu Oberflächentests unter Windows, die auch
     Bildschirmfotos als Artefakt „Bildschirmfotos“ ablegen.
 
+- 0.4.0 — Programmgerüst (07.11.2026, Bauplan Schritt 1):
+  - Seitenleiste: Übersicht, Bewohner, Neuer Bericht …, Übergabe, Kalender, Therapie,
+    Medikamente, Einstellungen. Noch nicht gebaute Bereiche zeigen „Kommt in Version …“ mit
+    kurzer Beschreibung (Versionen aus dem Bauplan).
+  - Bewohnerakte mit Reitern: Stammdaten, Berichte, Medikation, Wochenplan, Biografie,
+    Reflexion, HEB. Kopfkarte und Allergiehinweis bleiben über den Reitern immer sichtbar.
+  - Einstellungsfenster: eigenes Kürzel (bis 6 Buchstaben/Ziffern), Update-Häkchen (von unten
+    links hierher verschoben), eigenes Bild für den Kopf, Hinweis auf spätere Einstellungen.
+  - Kopf: Logofeld rechts oben mit dem gewählten Bild; der Demo-Hinweis steht daneben.
+
 ## Offene Punkte
 
 - Bewohnerakte: Vorschläge Beschlusswarnung, „offen geführt“, Altersanzeige — Tobi
   entscheidet.
 - Bewohner löschen oder als ausgezogen markieren gibt es noch nicht (war nicht
   beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
-- Dunkle Darstellung und ein selbst gewähltes Bild im Kopf (Logofeld) sind nicht gebaut:
-  `docs/gestaltung.md` sieht sie vor, freigegeben war „zunächst nur die helle Darstellung“
-  ohne neue Funktionen.
+- Dunkle Darstellung ist nicht gebaut (`docs/gestaltung.md` sieht sie vor, freigegeben ist
+  bisher nur die helle).
 - Aus der Ausgangsliste noch nicht übernommen (nicht im Umfang von 0.2.0): Datenbank mit
   Mehrplatz-Schutz, Sicherung, Druckvorschau.
 - Der Wechsel 0.2.0 → 0.3.0 über das Update ist am Code geprüft und mit dem echten Release
@@ -115,6 +122,15 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   „Startseite als Übersicht“ (offen).
 - **Oberflächentests nur unter Windows** (Windows Forms läuft nicht unter Linux); sie laufen
   in GitHub Actions vor jedem Zusammenführen und legen Bildschirmfotos ab.
+- **Programmgerüst (07.11.2026):** Das Programm startet im Bereich „Bewohner“, solange die
+  Übersicht nur ein Platzhalter ist (Startseite wird sie mit 0.15.0). „Einstellungen“ öffnet
+  ein Fenster und ist kein eigener Bereich; der Eintrag steht etwas abgesetzt unten in der
+  Liste. „Neuer Bericht …“ ist bis 0.6.0 eine Platzhalter-Seite.
+- **Eigenes Bild im Kopf:** Kopie im Datenordner (`logo\`), Dateiname in
+  `einstellungen.json`; das alte Bild wird beim Ersetzen gelöscht. Es steht rechts oben, der
+  Demo-Hinweis direkt links daneben, damit er immer sichtbar bleibt (Regel 4).
+- **Kürzel:** leer oder bis zu 6 Buchstaben/Ziffern, gespeichert in `einstellungen.json`
+  (wie das Update-Häkchen). Gebraucht ab 0.6.0 für Berichte.
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -124,6 +140,21 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.4.0:
+
+1. Nach dem Update steht unten links „Version 0.4.0 · Build …“.
+2. Links stehen: Übersicht, Bewohner, Neuer Bericht …, Übergabe, Kalender, Therapie,
+   Medikamente, Einstellungen. Jeder noch nicht gebaute Bereich zeigt „Kommt in Version …“
+   mit kurzer Beschreibung.
+3. Akte öffnen: Unter Kopfkarte und Allergiehinweis stehen Reiter. „Stammdaten“ zeigt die
+   bekannten Angaben, die anderen „Kommt in Version …“. Eine andere Akte beginnt wieder bei
+   „Stammdaten“.
+4. Einstellungen: Kürzel „A.B“ → Fehlermeldung; Kürzel „TS“ → gespeichert und beim nächsten
+   Öffnen wieder da. Das Update-Häkchen steht jetzt hier (nicht mehr unten links).
+5. Einstellungen → „Bild wählen …“: ein ausgedachtes Bild (kein echtes Logo der Einrichtung
+   im Repository – nur bei dir im Datenordner) → erscheint rechts oben im Kopf, der
+   Demo-Hinweis bleibt daneben sichtbar. „Bild entfernen“ → Logofeld wieder leer.
 
 Version 0.3.0:
 
@@ -145,6 +176,6 @@ Version 0.3.0:
 7. „Bearbeiten …“: ein ausgedachtes Bild (keine echte Person) hinterlegen → erscheint in
    Akte und Karte.
 8. „Demo-Daten zurücksetzen …“ → Rückfrage, danach wieder die 10 Demo-Bewohner.
-9. Häkchen „Beim Start nach Updates suchen“ entfernen, neu starten: In `update.log` steht
-   „in den Einstellungen abgeschaltet“.
+9. Häkchen „Beim Start nach Updates suchen“ (ab 0.4.0 unter Einstellungen) entfernen, neu
+   starten: In `update.log` steht „in den Einstellungen abgeschaltet“.
 10. Windows-Anzeige auf 125 % oder 150 % stellen: Nichts darf abgeschnitten sein.

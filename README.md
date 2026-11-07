@@ -31,13 +31,17 @@ Danach fragt Windows für diese Datei nicht mehr.
 
 ## Bedienung in Kürze
 
-- **Bewohner** (links): alle Bewohner als Karten. Ein Klick öffnet die Akte.
+- Links stehen alle Bereiche. Was noch nicht gebaut ist, zeigt „Kommt in Version …“.
+- **Bewohner**: alle Bewohner als Karten. Ein Klick öffnet die Akte; ihre Teile (Stammdaten,
+  Berichte, Medikation …) liegen auf Reitern.
 - In der Akte steht oben der **Allergiehinweis**: rot = Allergien eingetragen,
   grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
 - **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
   als TT.MM.JJJJ (z. B. 03.04.1965).
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
   her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren.
+- **Einstellungen** (links): eigenes Kürzel, Update beim Start, eigenes Bild für den Kopf
+  (z. B. ein Logo – die Datei wird nur in den Datenordner kopiert).
 
 ## Updates
 
@@ -52,7 +56,8 @@ nur bei den Releases dieses Repositorys, sonst geht es nirgends ins Internet.
 
 **Update abschalten** – eine der beiden Möglichkeiten:
 
-- Im Programm unten links das Häkchen **„Beim Start nach Updates suchen“** entfernen.
+- Im Programm unter **Einstellungen** das Häkchen **„Beim Start nach Updates suchen“**
+  entfernen.
 - Oder die `.exe` mit `--kein-update` starten (Verknüpfung anlegen, Rechtsklick →
   Eigenschaften → bei „Ziel“ hinten ` --kein-update` anhängen).
 
@@ -73,6 +78,7 @@ Adresszeile eingeben). Dort liegen:
 
 - `dokumentationssystem.db` – die Datenbank,
 - `bilder\` – hinterlegte Bewohnerbilder,
+- `logo\` – das eigene Bild für den Kopf (falls gewählt),
 - `einstellungen.json` – die Einstellungen,
 - `update.log` – was beim Update passiert ist (zum Nachsehen, wenn etwas nicht klappt),
 - `dokusystem.sqlite3` – nur falls vorhanden: die alte Datenbank der Version 0.2.0
