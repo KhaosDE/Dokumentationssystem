@@ -44,6 +44,38 @@ public class KernGrundlagenTests
     }
 
     [Fact]
+    public void Kuerzel_speichern_und_pruefen()
+    {
+        using var daten = new Datenordner();
+        Assert.Equal("", Einstellungen.Laden().Kuerzel);
+        Einstellungen.Aendern(w => w with { Kuerzel = " AB1 " });
+        Assert.Equal("AB1", Einstellungen.Laden().Kuerzel);
+        Assert.True(Einstellungen.Laden().AutoUpdate);   // andere Werte bleiben
+        Assert.Throws<Eingabefehler>(() => Einstellungen.Aendern(w => w with { Kuerzel = "A.B" }));
+        Assert.Throws<Eingabefehler>(() => Einstellungen.Aendern(w => w with { Kuerzel = "ABCDEFG" }));
+        Assert.Equal("AB1", Einstellungen.Laden().Kuerzel);
+        Assert.Null(Einstellungen.KuerzelPruefen(""));
+        Assert.Null(Einstellungen.KuerzelPruefen("Tö2"));
+    }
+
+    [Fact]
+    public void Logo_liegt_im_Datenordner_und_wird_ersetzt()
+    {
+        using var daten = new Datenordner();
+        using var hilfe = new Hilfsordner();
+        Assert.Null(Einstellungen.LogoPfad());
+        Einstellungen.LogoSetzen(hilfe.Datei("eins.png", [1, 2, 3]));
+        string erstes = Einstellungen.LogoPfad()!;
+        Assert.Equal(Pfade.ImDatenordner(Einstellungen.LogoOrdner), Path.GetDirectoryName(erstes));
+        Einstellungen.LogoSetzen(hilfe.Datei("zwei.jpg", [4, 5]));
+        Assert.False(File.Exists(erstes));
+        Assert.EndsWith(".jpg", Einstellungen.LogoPfad());
+        Einstellungen.LogoSetzen(null);
+        Assert.Null(Einstellungen.LogoPfad());
+        Assert.Empty(Directory.GetFiles(Pfade.ImDatenordner(Einstellungen.LogoOrdner)));
+    }
+
+    [Fact]
     public void Speicher_legt_Datei_im_Datenordner_an_und_baut_auf()
     {
         using var daten = new Datenordner();

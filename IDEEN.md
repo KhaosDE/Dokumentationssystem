@@ -373,7 +373,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   Medikation wird **nicht** berechnet; das Hinweisfeld genügt für die Demo.
 
 ## Programmgerüst mit allen Bereichen und Einstellungen
-Status: freigegeben (Bauplan Schritt 1)
+Status: erledigt (07.11.2026; Bauplan Schritt 1, Version 0.4.0)
 Datum: 07.11.2026
 Was: Die Navigation bekommt alle Bereiche, die Bewohnerakte Reiter für ihre Teile, und es
 gibt ein Einstellungsfenster. Noch nicht gebaute Bereiche zeigen einen freundlichen Hinweis
