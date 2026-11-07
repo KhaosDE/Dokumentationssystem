@@ -10,7 +10,7 @@ Seitenleiste; was noch nicht gebaut ist, sagt „Kommt in Version …“. Die Be
 Reiter, und es gibt ein Einstellungsfenster (Kürzel, Update, eigenes Bild im Kopf).
 
 **Nächster Schritt:** Bauplan Schritt 2 „Gestaltung Stufe 2“ (0.5.0), danach der Reihe nach
-bis Schritt 13 (`IDEEN.md`, oben). Für die Schritte 2 und 9 das Repository
+bis Schritt 15 (`IDEEN.md`, oben). Für die Schritte 2 und 11 das Repository
 `KhaosDE/Ausgangsliste` anhängen.
 
 ## Fertig

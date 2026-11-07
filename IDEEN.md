@@ -18,23 +18,26 @@ Umfang: <was dazu gehört, was ausdrücklich nicht>
 
 Entscheidung Tobi (07.11.2026): **Alle gesammelten Ideen werden umgesetzt**, damit die Demo
 alle Bereiche zeigt. Gebaut wird in dieser Reihenfolge, jeder Eintrag als eigener Pull
-Request mit eigener Version und Testliste in `STAND.md`:
+Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
+07.11.2026 eingefügt, die übrigen rücken nach):
 
 | Schritt | Eintrag | Version |
 |---|---|---|
 | 1 | Programmgerüst mit allen Bereichen und Einstellungen | 0.4.0 |
 | 2 | Gestaltung Stufe 2 | 0.5.0 |
-| 3 | Tägliche Dokumentation | 0.6.0 |
-| 4 | Medikamentendatenbank | 0.7.0 |
-| 5 | Medikation: Grundverordnung, Pause, Stufenplan | 0.8.0 |
-| 6 | Therapie-Bereich | 0.9.0 |
-| 7 | Wochenplan | 0.10.0 |
-| 8 | Wohnbereichskalender | 0.11.0 |
-| 9 | Ausgang (aus der Ausgangsliste) | 0.12.0 |
-| 10 | Biografie | 0.13.0 |
-| 11 | Monatsreflexion | 0.14.0 |
-| 12 | Startseite als Übersicht (Dashboard) | 0.15.0 |
-| 13 | HEB-Bogen aus Berichten | 0.16.0 |
+| 3 | Tägliche Dokumentation (mit Bereich „Übergabe“) | 0.6.0 |
+| 4 | Wohnbereich-ToDo | 0.7.0 |
+| 5 | Nachrichten | 0.8.0 |
+| 6 | Medikamentendatenbank | 0.9.0 |
+| 7 | Medikation: Grundverordnung, Pause, Stufenplan | 0.10.0 |
+| 8 | Therapie-Bereich | 0.11.0 |
+| 9 | Wochenplan | 0.12.0 |
+| 10 | Wohnbereichskalender | 0.13.0 |
+| 11 | Ausgang (aus der Ausgangsliste) | 0.14.0 |
+| 12 | Biografie | 0.15.0 |
+| 13 | Monatsreflexion | 0.16.0 |
+| 14 | Startseite als Übersicht (Dashboard) | 0.17.0 |
+| 15 | HEB-Bogen aus Berichten | 0.18.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -174,7 +177,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
 - Ausdrücklich nicht: Pflegeplanung, Vitalwerte.
 
 ## Wochenplan
-Status: freigegeben (Bauplan Schritt 7)
+Status: freigegeben (Bauplan Schritt 9)
 Datum: 06.11.2026
 Was: Eine Anzeige, in der man für jeden Bewohner einzeln seinen Wochenplan sieht. Der Plan
 lässt sich jederzeit mit Therapien bearbeiten.
@@ -204,7 +207,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   Angebot im Zeitraum.
 
 ## HEB-Bogen aus Berichten
-Status: freigegeben (Bauplan Schritt 13)
+Status: freigegeben (Bauplan Schritt 15)
 Datum: 06.11.2026
 Was: Für einen Bewohner einen HEB-Bogen (Hilfe- und Entwicklungsbogen) für einen Zeitraum
 „von … bis …“ erstellen. Das Programm nutzt dafür die eingetragenen Berichte dieses
@@ -260,7 +263,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   Beendigung“ — ohne Zeichengrenze, bis der echte Bogen vorliegt.
 
 ## Medikation: Grundverordnung, Pause, Stufenplan
-Status: freigegeben (Bauplan Schritt 5)
+Status: freigegeben (Bauplan Schritt 7)
 Datum: 06.11.2026
 Was: Medikation je Bewohner. Die Grundverordnung bleibt immer erhalten; Pausen und
 Änderungen in Etappen (ansetzen, absetzen) liegen als eigene Einträge darüber.
@@ -290,7 +293,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
   „Demo — nicht zum Stellen verwenden“.
 
 ## Medikamentendatenbank
-Status: freigegeben (Bauplan Schritt 4)
+Status: freigegeben (Bauplan Schritt 6)
 Datum: 06.11.2026
 Was: Eine vorgefertigte Liste von Medikamenten, aus der beim Verordnen ausgewählt wird,
 statt den Namen frei einzutippen.
@@ -316,7 +319,7 @@ Anbieter) erst klären, wenn das Programm über eine Demo hinausgeht — Nutzung
 nicht geprüft.
 
 ## Startseite als Übersicht (Dashboard)
-Status: freigegeben (Bauplan Schritt 12)
+Status: freigegeben (Bauplan Schritt 14)
 Datum: 06.11.2026
 Was: Die Hauptseite zeigt alle Bewohner des Wohnbereichs auf einen Blick und ist immer
 aktuell.
@@ -342,7 +345,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
 - Abwesende (Heimfahrt, Ausgang) werden auf der Karte gekennzeichnet.
 
 ## Therapie-Bereich
-Status: freigegeben (Bauplan Schritt 6)
+Status: freigegeben (Bauplan Schritt 8)
 Datum: 06.11.2026
 Was: Ein eigener Bereich in der Navigation, in dem die Therapie ihre Angebote verwaltet,
 einträgt und Bewohnern zuteilt. Zugeteilte Therapien erscheinen in den Wochenplänen.
@@ -383,7 +386,7 @@ Bestehende Ansichten (Bewohner-Übersicht, Akte, Formular) werden angepasst.
 Ausdrücklich nicht: Logo oder Name der Einrichtung im Repository.
 
 ## Wohnbereichskalender
-Status: freigegeben (Bauplan Schritt 8)
+Status: freigegeben (Bauplan Schritt 10)
 Datum: 06.11.2026
 Was: Ein Kalender für den ganzen Wohnbereich. Er zeigt Termine, die Bewohner betreffen, und
 dient zum Planen von Heimfahrten und Tagesausflügen.
@@ -439,7 +442,7 @@ Umfang (Vorbild `KhaosDE/Ausgangsliste`: `BewohnerKarte.cs`, `KopfBereich.cs`,
 - Bereinigungsregeln aus `CLAUDE.md` gelten.
 
 ## Ausgang (aus der Ausgangsliste)
-Status: freigegeben (Bauplan Schritt 9)
+Status: freigegeben (Bauplan Schritt 11)
 Datum: 07.11.2026
 Was: Ausgänge der Bewohner eintragen und sehen, wer gerade unterwegs ist — übernommen aus
 der Ausgangsliste.
@@ -453,7 +456,7 @@ Ausdrucksliste wie in der Ausgangsliste. Ausdrücklich nicht: Küchendienst, Zim
 Warteliste (später eigene Einträge, falls gewünscht).
 
 ## Biografie
-Status: freigegeben (Bauplan Schritt 10)
+Status: freigegeben (Bauplan Schritt 12)
 Datum: 07.11.2026
 Was: Reiter „Biografie“ in der Bewohnerakte.
 Warum: Ursprüngliche Idee (05.11.2026).
@@ -468,7 +471,7 @@ Umfang (Regeln aus Tobis Arbeitsweise für Biografieeinträge):
 - Verlauf: Änderungen mit Datum und Kürzel, frühere Fassung bleibt einsehbar.
 
 ## Monatsreflexion
-Status: freigegeben (Bauplan Schritt 11)
+Status: freigegeben (Bauplan Schritt 13)
 Datum: 07.11.2026
 Was: Je Bewohner und Monat eine kurze Reflexion je Lebensbereich, geschrieben mit den
 Berichten des Monats daneben.
@@ -480,3 +483,52 @@ Umfang:
 - Stilprüfung wie beim HEB-Bogen (nur Hinweise).
 - Status Entwurf/fertig; der HEB-Bogen zeigt die fertigen Reflexionen seines Zeitraums als
   dritte Quelle.
+
+## Wohnbereich-ToDo
+Status: freigegeben (Bauplan Schritt 4)
+Datum: 07.11.2026
+Was: Eine Aufgabenliste des Wohnbereichs auf dem Hauptbildschirm. Damit gibt man Aufgaben an
+die nächste Schicht weiter.
+Warum: Wunsch Tobi (07.11.2026). Abgrenzung zur Übergabe: **Übergabe = etwas wissen**,
+**ToDo = etwas tun**. Beide bleiben stehen, bis sie erledigt sind.
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- Sichtbar auf dem Hauptbildschirm (Bereich „Übersicht“) als Liste neben bzw. über den
+  Karten; zusätzlich als eigener Eintrag in der Seitenleiste mit Zähler offener Aufgaben.
+- Eine Aufgabe hat: Text, optional Bewohner, **für wen** (nächste Schicht — Vorgabe —,
+  bestimmte Schicht an einem Tag, oder „wer Zeit hat“), optional fällig bis (Datum, Uhrzeit),
+  angelegt von (Kürzel, Zeit).
+- **Bleibt stehen, bis erledigt** (mit Kürzel und Zeit). Überfällige Aufgaben rot mit Wort
+  „überfällig“ (Farbe nie allein). Erledigte unter „Erledigt“ einsehbar, nichts wird gelöscht.
+- Aufgabe weitergeben: „an die nächste Schicht weiterreichen“ mit kurzer Notiz, falls sie
+  nicht geschafft wurde; die Weitergabe ist am Eintrag sichtbar.
+- Aus einem Bericht heraus: „Aufgabe daraus machen“ übernimmt den Bewohner.
+- Ausdruck der offenen Aufgaben.
+- Demo: einige ausgedachte Aufgaben, relativ zum heutigen Tag, eine davon überfällig.
+- Ausdrücklich nicht: wiederkehrende Aufgaben (Dienstpläne, Reinigungsdienste) — die
+  Arbeitszuweisung ist ein eigenes Werkzeug.
+
+## Nachrichten
+Status: freigegeben (Bauplan Schritt 5)
+Datum: 07.11.2026
+Was: Ein Nachrichtensystem im Programm, in dem sich Kolleginnen und Kollegen gegenseitig
+schreiben — an einzelne Personen oder an Teams.
+Warum: Wunsch Tobi (07.11.2026).
+Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
+- **Benutzer und Teams in der Demo:** ausgedachte Kolleginnen und Kollegen mit Kürzel und
+  Team (z. B. „Wohnbereich A“, „Wohnbereich B“, „Therapie“, „Leitung“). Oben rechts
+  „Angemeldet als …“ mit **Benutzer wechseln ohne Passwort** — nur für die Vorführung, damit
+  man beide Seiten einer Nachricht zeigen kann. Das bisherige „eigene Kürzel“ aus den
+  Einstellungen geht in diese Auswahl über.
+- Bereich „Nachrichten“ in der Seitenleiste mit Zähler ungelesener Nachrichten: Posteingang,
+  Gesendet, Archiv. Neue Nachricht an eine oder mehrere Personen und/oder ein Team; Betreff,
+  Text, optional Bezug zu einem Bewohner (dann aus der Akte heraus aufrufbar).
+- Antworten im selben Verlauf; Team-Nachrichten sieht jedes Teammitglied.
+- Ungelesene Nachrichten auch auf dem Hauptbildschirm als kleiner Hinweis.
+- Nachrichten werden nicht gelöscht, nur archiviert.
+- Alles bleibt in der Datenbank des Programms: **kein E-Mail-Versand, kein Internet**
+  (`CLAUDE.md`, Regel 6). Auf einem einzelnen Rechner ist das eine Vorführung; echtes
+  Schreiben zwischen Kollegen braucht den Mehrplatzbetrieb (Eintrag oben).
+- Ausdrücklich nicht in der Demo: Anhänge, Lesebestätigung für den Absender.
+Hinweis für einen späteren Echtbetrieb: Ein Nachrichtensystem mit Lese- oder
+Zeitstempeln kann Verhalten und Leistung von Mitarbeitenden sichtbar machen. Vor einem
+Einsatz die Mitarbeitervertretung beteiligen; das gilt auch für „gelesen“ in der Übergabe.
