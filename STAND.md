@@ -10,9 +10,10 @@ Reiter, und es gibt ein Einstellungsfenster (Kürzel, Update, eigenes Bild im Ko
 Bewohnerkarten zeigen wie in der Ausgangsliste Marken und die Aufenthaltsdauer; darüber stehen
 Filterknöpfe mit Zählern, unten eine Statusleiste mit Farbschlüssel.
 
-**Nächster Schritt:** Bauplan Schritt 3 „Tägliche Dokumentation“ (0.6.0), danach der Reihe
-nach bis Schritt 13 (`IDEEN.md`, oben). Für Schritt 9 das Repository `KhaosDE/Ausgangsliste`
-anhängen.
+**Nächster Schritt:** Bauplan Schritt 3 „Tägliche Dokumentation“ (0.6.0, mit Bereich
+„Übergabe“), danach der Reihe nach bis Schritt 15 (`IDEEN.md`, oben; seit 07.11.2026 mit
+„Wohnbereich-ToDo“ und „Nachrichten“ als Schritte 4 und 5). Für Schritt 11 (Ausgang) das
+Repository `KhaosDE/Ausgangsliste` anhängen.
 
 ## Fertig
 
