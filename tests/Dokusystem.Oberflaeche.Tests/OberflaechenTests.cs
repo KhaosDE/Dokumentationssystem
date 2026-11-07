@@ -220,8 +220,8 @@ public class BewohnerOberflaechenTests
         Assert.Equal(["Stammdaten", "Berichte", "Medikation", "Wochenplan", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
-        akte.Reiter.Waehlen("Medikation");
-        Assert.Equal("Kommt in Version 0.10.0", akte.ReiterPlatzhalter.Titel.Text);
+        akte.Reiter.Waehlen("Wochenplan");
+        Assert.Equal("Kommt in Version 0.12.0", akte.ReiterPlatzhalter.Titel.Text);
         Assert.Equal("Allergien: Haselnüsse", akte.Allergie.Text);   // Allergiehinweis bleibt oben
         f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);   // neue Akte beginnt bei den Stammdaten
@@ -402,6 +402,35 @@ public class BildschirmfotoTests
         f.BenutzerWaehlen("AB");
         f.BereichWaehlen("Bewohner");
         Hilfe.Foto(f, "10_kopf_mit_bild");
+        f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
+        f.Bewohner.Akte.Reiter.Waehlen("Medikation");
+        Hilfe.Foto(f, "25_medikation_stufenplan");
+        f.Bewohner.AkteZeigen(u.Demo("Clematis").Id!.Value);
+        f.Bewohner.Akte.Reiter.Waehlen("Medikation");
+        Hilfe.Foto(f, "26_medikation_pause");
+        using (var neu = new VerordnungFenster(u.Speicher, u.Demo("Fichte")))
+        {
+            neu.MedikamentWahl.SelectedIndex = 0;
+            neu.Mengen[0].Text = "1";
+            neu.Arzt.Text = "Dr. Ulme (ausgedacht)";
+            Hilfe.Foto(neu, "27_neue_verordnung");
+        }
+        using (var plan = new AenderungFenster(u.Speicher, u.Speicher.Verordnungen(u.Demo("Ahorn").Id!.Value)[0], AenderungArt.Stufenplan))
+        {
+            plan.StufeSetzen(0, Datum.Text(DateOnly.FromDateTime(DateTime.Today)), "0", "0", "½", "0");
+            plan.StufeSetzen(1, Datum.Text(DateOnly.FromDateTime(DateTime.Today.AddDays(7))), "0", "0", "0", "0");
+            Hilfe.Foto(plan, "28_stufenplan");
+        }
+        using (var bild = new Bitmap(1240, 1754))
+        using (var g = Graphics.FromImage(bild))
+        {
+            g.Clear(Color.White);
+            g.ScaleTransform(1240f / 210f / 3.7795f, 1240f / 210f / 3.7795f);
+            var heute = DateOnly.FromDateTime(DateTime.Today);
+            new MedikationDruck(u.Demo("Fichte"), heute, u.Speicher.Verordnungen(u.Demo("Fichte").Id!.Value).Select(v => MedikationRegeln.Stand(v, heute)).ToList()).SeiteZeichnen(g);
+            string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
+            if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "29_medikation_druck.png"), System.Drawing.Imaging.ImageFormat.Png);
+        }
         f.Navigation.Single(n => n.Text == "Medikamente").Ausloesen();
         Hilfe.Foto(f, "23_medikamente");
         using (var aendern = new MedikamentFenster(u.Speicher, u.Speicher.Medikamente()[0]))

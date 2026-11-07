@@ -19,6 +19,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoAufgaben = "demo_aufgaben";
     private const string DemoNachrichten = "demo_nachrichten";
     private const string DemoMedikamente = "demo_medikamente";
+    private const string DemoMedikation = "demo_medikation";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -199,6 +200,58 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER medikament_fassungen_bleiben BEFORE UPDATE ON medikament_fassungen
             BEGIN SELECT RAISE(ABORT, 'Fassungen werden nicht überschrieben.'); END;
         """,
+        // 6 – Medikation: Grundverordnung je Medikament und Bewohner; Pausen, Stufenpläne und
+        //     Absetzen als eigene Einträge darüber. Nichts wird überschrieben.
+        """
+        CREATE TABLE verordnungen (
+            id                INTEGER PRIMARY KEY,
+            bewohner_id       INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            medikament_id     INTEGER NOT NULL REFERENCES medikamente(id) ON DELETE CASCADE,
+            staerke           TEXT NOT NULL DEFAULT '',
+            einheit           TEXT NOT NULL DEFAULT 'Stück',
+            morgens           TEXT NOT NULL,
+            mittags           TEXT NOT NULL,
+            abends            TEXT NOT NULL,
+            nachts            TEXT NOT NULL,
+            bedarf            INTEGER NOT NULL DEFAULT 0 CHECK (bedarf IN (0, 1)),
+            bedarf_anlass     TEXT NOT NULL DEFAULT '',
+            bedarf_hoechstens TEXT NOT NULL DEFAULT '',
+            beginn            TEXT NOT NULL,
+            arzt              TEXT NOT NULL,
+            angeordnet_am     TEXT NOT NULL,
+            hinweis           TEXT NOT NULL DEFAULT '',
+            erstellt          TEXT NOT NULL,
+            kuerzel           TEXT NOT NULL
+        );
+        CREATE TABLE verordnung_aenderungen (
+            id            INTEGER PRIMARY KEY,
+            verordnung_id INTEGER NOT NULL REFERENCES verordnungen(id) ON DELETE CASCADE,
+            art           TEXT NOT NULL CHECK (art IN ('pause', 'pause_ende', 'stufenplan', 'absetzen')),
+            von           TEXT NOT NULL,
+            bis           TEXT,                                   -- Pause: NULL = bis auf Weiteres
+            arzt          TEXT NOT NULL,
+            angeordnet_am TEXT NOT NULL,
+            hinweis       TEXT NOT NULL DEFAULT '',
+            erstellt      TEXT NOT NULL,
+            kuerzel       TEXT NOT NULL
+        );
+        CREATE TABLE stufen (
+            aenderung_id INTEGER NOT NULL REFERENCES verordnung_aenderungen(id) ON DELETE CASCADE,
+            nr           INTEGER NOT NULL,
+            ab           TEXT NOT NULL,
+            morgens      TEXT NOT NULL,
+            mittags      TEXT NOT NULL,
+            abends       TEXT NOT NULL,
+            nachts       TEXT NOT NULL,
+            PRIMARY KEY (aenderung_id, nr)
+        );
+        CREATE TRIGGER verordnungen_bleiben BEFORE UPDATE ON verordnungen
+            BEGIN SELECT RAISE(ABORT, 'Verordnungen werden nicht überschrieben – Änderungen sind eigene Einträge.'); END;
+        CREATE TRIGGER verordnung_aenderungen_bleiben BEFORE UPDATE ON verordnung_aenderungen
+            BEGIN SELECT RAISE(ABORT, 'Änderungen werden nicht überschrieben.'); END;
+        CREATE TRIGGER stufen_bleiben BEFORE UPDATE ON stufen
+            BEGIN SELECT RAISE(ABORT, 'Stufen werden nicht überschrieben.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -326,13 +379,14 @@ public sealed partial class Speicher : IDisposable
         }
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
-             medikamente = Meta(DemoMedikamente) is null;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente) return false;
+             medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null;
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation) return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
         if (nachrichten) DemoNachrichtenEinfuegen(transaktion);
         if (medikamente) DemoMedikamenteEinfuegen(transaktion);
+        if (medikamente || medikation) DemoMedikationEinfuegen(transaktion);   // hängt am Medikamenten-Bestand
         transaktion.Commit();
         return true;
     }
@@ -353,11 +407,13 @@ public sealed partial class Speicher : IDisposable
             DemoAufgabenEinfuegen(transaktion);
             DemoNachrichtenEinfuegen(transaktion);
             DemoMedikamenteEinfuegen(transaktion);
+            DemoMedikationEinfuegen(transaktion);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
         AufgabenGeaendert?.Invoke();
         NachrichtenGeaendert?.Invoke();
+        MedikationGeaendert?.Invoke();
     }
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)

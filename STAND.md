@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.9.0** (Medikamentendatenbank, Bauplan Schritt 6).
+Stand: 07.11.2026. Version: **0.10.0** (Medikation, Bauplan Schritt 7).
 
 ## Aktuell
 
@@ -11,9 +11,10 @@ Kennzeichen „Wichtig“ und „Übergabe“, Nachträge statt Überschreiben, 
 Bereich **„Übergabe“**, in dem nur die Übergabe-Einträge stehen, bis sie ablaufen oder
 erledigt sind. Dazu das **Wohnbereich-ToDo** („Aufgaben“) und **Nachrichten** zwischen
 ausgedachten Kolleginnen und Kollegen; oben rechts „Angemeldet als …“ (ohne Passwort, nur für
-die Vorführung). Neu ist die **Medikamentendatenbank** (Demo-Bestand mit Quellen).
+die Vorführung). Dazu die **Medikamentendatenbank** (Demo-Bestand mit Quellen) und neu die
+**Medikation** je Bewohner (Grundverordnung, Pause, Stufenplan, „Was gilt heute“).
 
-**Nächster Schritt:** Bauplan Schritt 7 „Medikation: Grundverordnung, Pause, Stufenplan“ (0.10.0), danach der Reihe nach bis
+**Nächster Schritt:** Bauplan Schritt 8 „Therapie-Bereich“ (0.11.0), danach der Reihe nach bis
 Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
 `KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
 
@@ -131,6 +132,23 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
     geändert hat.
   - Demo-Bestand `daten/demo/medikamente.json`: 36 gängige Wirkstoffe (Psychiatrie und
     Allgemeinmedizin), alle „ungeprüft“, jede Angabe mit Quelle.
+
+- 0.10.0 — Medikation (07.11.2026, Bauplan Schritt 7):
+  - Reiter „Medikation“ in der Akte: „Was gilt am …“ (heute oder ein anderer Tag), getrennt nach
+    „Regelmäßig“ und „Bei Bedarf“; dauerhaft „Demo — nicht zum Stellen verwenden“.
+  - „Neue Verordnung …“: Medikament aus der Datenbank, Stärke (aus der Datenbank vorgeschlagen),
+    Menge morgens, mittags, abends, nachts (auch ½ oder 0,5), oder Bedarfsmedikation mit
+    Anlass und Höchstmenge; Beginn; Anordnung (Arzt und Datum, ausgedacht).
+  - Je Verordnung: „Pause …“ (von – bis oder bis auf Weiteres), „Pause beenden …“,
+    „Stufenplan …“ (bis zu 6 Stufen „ab Datum: Menge“), „Absetzen …“, „Verlauf …“ – jede
+    Änderung ein eigener Eintrag mit Anordnung; die Grundverordnung wird nie überschrieben.
+  - Anzeige: „pausiert bis …“ (sichtbar, ausgegraut), „Stufe 2 von 3“ mit „nächste Stufe ab …“,
+    „neue Grundverordnung seit …“; Abgesetztes einblendbar.
+  - Ausdruck „Was gilt am …“ je Bewohner (Druckvorschau) mit dem Vermerk „Demo — nicht zum
+    Stellen verwenden“.
+  - Demo: Verordnungen für alle Bewohner relativ zu heute – eine Pause, ein Stufenplan zum
+    Ansetzen, einer zum Ausschleichen, ein abgeschlossener, ein abgesetztes Medikament, zwei
+    Bedarfsmedikationen; Ärzte erkennbar ausgedacht („Dr. Ulme (ausgedacht)“).
 
 ## Offene Punkte
 
@@ -306,6 +324,20 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
     schon“). Ohne Anmeldung (Kürzel) kein Speichern.
   - „Demo-Daten zurücksetzen“ lädt den Demo-Bestand neu; selbst angelegte Einträge und
     Änderungen sind danach weg.
+- **Medikation (0.10.0), wo der Eintrag etwas offen ließ:**
+  - Eine Dosisänderung ohne Etappen ist ein Stufenplan mit einer Stufe; seine letzte Stufe wird
+    zur neuen Grundverordnung, die vorige steht im Verlauf („ersetzt“). Endet ein Stufenplan
+    auf 0, ist das Medikament ab dieser Stufe abgesetzt.
+  - Laufen mehrere Stufenpläne, gilt der zuletzt angelegte, der schon begonnen hat.
+  - Eine Pause „bis auf Weiteres“ endet mit „Pause beenden …“ (eigener Eintrag). Während einer
+    Pause steht die Verordnung sichtbar da („pausiert bis …“), die Mengen ausgegraut.
+  - Bedarfsmedikation hat eine Einzeldosis (Feld „morgens“), Anlass und Höchstmenge als Text;
+    keinen Stufenplan.
+  - Prüfungen: Mengen nur als Zahl (1, 0,5, ½, 1 ½); nichts vor dem Beginn der Verordnung,
+    nichts nach dem Absetzen; Stufen in zeitlicher Reihenfolge; Anordnung (Arzt, Datum) und
+    Anmeldung (Kürzel) sind Pflicht.
+  - Ausdrücklich nicht gebaut (laut Eintrag): Dosisvorschläge, Wechselwirkungen, Stellen und
+    Ausgabe, Bestand.
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -315,6 +347,21 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.10.0:
+
+1. Unten links „Version 0.10.0 · Build …“.
+2. Akte Clara Clematis → Reiter „Medikation“: Mirtazapin mit „pausiert bis …“, Mengen
+   ausgegraut. Oben einen Tag nach der Pause eintragen → „Grundverordnung“.
+3. Akte Berta Birke: Sertralin „Stufe 2 von 3“, daneben „nächste Stufe ab …“.
+4. Akte Emil Eiche: Olanzapin wird ausgeschlichen (nächste Stufe 0–0–0–0). Akte Hanna Holunder:
+   leer; „Abgesetzte zeigen“ → Escitalopram „abgesetzt am …“.
+5. Angemeldet „Neue Verordnung …“ bei Anton Ahorn: ohne Arzt → Fehlermeldung; mit Arzt →
+   neue Karte „Grundverordnung“. Dann „Pause …“ bis übermorgen → „pausiert bis …“.
+6. „Stufenplan …“ mit zwei Stufen (z. B. ½ ab heute, 0 in einer Woche) → „Stufe 1 von 2“;
+   „Verlauf …“ zeigt Grundverordnung, Pause und Stufenplan mit Anordnung und Kürzel.
+7. „Drucken …“ → Druckvorschau „Was gilt am …“ mit dem roten Vermerk „Demo — nicht zum
+   Stellen verwenden“.
 
 Version 0.9.0:
 

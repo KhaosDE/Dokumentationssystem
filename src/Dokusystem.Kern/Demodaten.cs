@@ -286,6 +286,74 @@ public static class Demodaten
             Kuerzel = DemoKuerzel,
         }).ToList();
 
+    // ----- Medikation -----
+
+    public sealed record DemoVerordnung(Verordnung Verordnung);
+
+    // Ausgedachte Verordnungen relativ zu heute: Grundverordnungen, eine Pause, ein Stufenplan zum
+    // Ansetzen, einer zum Absetzen, ein abgeschlossener (neue Grundverordnung), ein abgesetztes
+    // Medikament und Bedarfsmedikation. Ärztinnen und Ärzte sind ausgedacht.
+    // Fehlt ein Wirkstoff in der Medikamentendatenbank, entfällt die Verordnung.
+    public static List<DemoVerordnung> Medikation(IReadOnlyList<Bewohner> bewohner, IReadOnlyList<Medikament> medikamente, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        var liste = new List<DemoVerordnung>();
+        var arzt1 = "Dr. Ulme (ausgedacht)";
+        var arzt2 = "Dr. Linde (ausgedacht)";
+        Medikament? M(string wirkstoff) => medikamente.FirstOrDefault(m => m.Wirkstoff.StartsWith(wirkstoff, StringComparison.CurrentCultureIgnoreCase));
+        string Staerke(Medikament m, string gewuenscht) =>
+            m.Aktuell.Staerken.Contains(gewuenscht) ? gewuenscht : m.Aktuell.Staerken.FirstOrDefault() ?? "";
+        Bewohner? B(string nachname) => bewohner.FirstOrDefault(b => b.Nachname == nachname);
+        VerordnungsAenderung A(AenderungArt art, DateOnly von, DateOnly? bis = null, IReadOnlyList<Stufe>? stufen = null, string hinweis = "") => new()
+        {
+            Art = art, Von = von, Bis = bis, Stufen = stufen ?? [], Anordnung = new Anordnung(arzt2, von < heute ? von : heute),
+            Hinweis = hinweis, Erstellt = jetzt.AddDays(-1), Kuerzel = "AB",
+        };
+        void V(string nachname, string wirkstoff, string staerke, Dosis dosis, int beginnVorTagen, params VerordnungsAenderung[] aenderungen)
+        {
+            if (B(nachname) is not Bewohner b || M(wirkstoff) is not Medikament m) return;
+            var beginn = heute.AddDays(-beginnVorTagen);
+            liste.Add(new DemoVerordnung(new Verordnung
+            {
+                BewohnerId = b.Id!.Value, MedikamentId = m.Id, Medikament = m.Anzeige, Staerke = Staerke(m, staerke),
+                Einheit = "Stück", Dosis = dosis, Beginn = beginn, Anordnung = new Anordnung(arzt1, beginn),
+                Erstellt = beginn.ToDateTime(new TimeOnly(10, 0)), Kuerzel = "CD", Aenderungen = aenderungen,
+            }));
+        }
+        void Bedarf(string nachname, string wirkstoff, string staerke, string einzeldosis, string anlass, string hoechstens, int beginnVorTagen)
+        {
+            if (B(nachname) is not Bewohner b || M(wirkstoff) is not Medikament m) return;
+            var beginn = heute.AddDays(-beginnVorTagen);
+            liste.Add(new DemoVerordnung(new Verordnung
+            {
+                BewohnerId = b.Id!.Value, MedikamentId = m.Id, Medikament = m.Anzeige, Staerke = Staerke(m, staerke),
+                Einheit = "Stück", Dosis = new Dosis(einzeldosis, "0", "0", "0"), Bedarf = true, BedarfAnlass = anlass,
+                BedarfHoechstens = hoechstens, Beginn = beginn, Anordnung = new Anordnung(arzt1, beginn),
+                Erstellt = beginn.ToDateTime(new TimeOnly(10, 0)), Kuerzel = "CD",
+            }));
+        }
+        Dosis D(string m, string mi, string a, string n) => new(m, mi, a, n);
+
+        V("Ahorn", "Quetiapin", "25 mg", D("0", "0", "1", "0"), 400);
+        V("Ahorn", "Pantoprazol", "40 mg", D("1", "0", "0", "0"), 200);
+        V("Birke", "Sertralin", "50 mg", D("1", "0", "0", "0"), 12,
+            A(AenderungArt.Stufenplan, heute.AddDays(-10), stufen: [new(heute.AddDays(-10), D("½", "0", "0", "0")), new(heute.AddDays(-3), D("1", "0", "0", "0")), new(heute.AddDays(4), D("1½", "0", "0", "0"))], hinweis: "langsam ansetzen"));
+        V("Clematis", "Mirtazapin", "15 mg", D("0", "0", "0", "1"), 90,
+            A(AenderungArt.Pause, heute.AddDays(-2), heute.AddDays(3), hinweis: "wegen Blutabnahme"));
+        Bedarf("Distel", "Lorazepam", "1,0 mg", "1", "bei starker Unruhe", "2 in 24 Stunden", 60);
+        V("Eiche", "Olanzapin", "10 mg", D("0", "0", "1", "0"), 300,
+            A(AenderungArt.Stufenplan, heute.AddDays(-7), stufen: [new(heute.AddDays(-7), D("0", "0", "½", "0")), new(heute.AddDays(7), D("0", "0", "0", "0"))], hinweis: "ausschleichen"));
+        V("Fichte", "Ramipril", "5 mg", D("1", "0", "0", "0"), 500);
+        V("Fichte", "Metformin", "500 mg", D("1", "0", "1", "0"), 500);
+        V("Ginster", "Levothyroxin", "50 Mikrogramm", D("1", "0", "0", "0"), 700);
+        V("Holunder", "Escitalopram", "10 mg", D("1", "0", "0", "0"), 150,
+            A(AenderungArt.Absetzen, heute.AddDays(-5), hinweis: "auf ärztliche Anordnung beendet"));
+        Bedarf("Immergrün", "Paracetamol", "500 mg", "1", "bei Kopfschmerzen", "4 in 24 Stunden", 30);
+        V("Kiefer", "Risperidon", "2 mg", D("1", "0", "1", "0"), 120,
+            A(AenderungArt.Stufenplan, heute.AddDays(-40), stufen: [new(heute.AddDays(-40), D("1", "0", "½", "0")), new(heute.AddDays(-30), D("1", "0", "0", "0"))], hinweis: "Umstellung"));
+        return liste;
+    }
+
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
     {
         int bereich = zufall.Next(0, 6);   // 0 = allgemein

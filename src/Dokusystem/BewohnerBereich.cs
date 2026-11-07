@@ -186,6 +186,7 @@ public sealed class AkteAnsicht : Panel
     public Reiterleiste Reiter { get; } = new(Bauplan.AktenReiter);
     public PlatzhalterKarte ReiterPlatzhalter { get; } = new() { Visible = false };
     public BerichteAnsicht Berichte { get; }
+    public MedikationAnsicht Medikation { get; }
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
     public Label Beschlussende { get; } = new();
@@ -194,6 +195,7 @@ public sealed class AkteAnsicht : Panel
     public AkteAnsicht(Speicher speicher)
     {
         Berichte = new BerichteAnsicht(speicher) { Visible = false };
+        Medikation = new MedikationAnsicht(speicher) { Visible = false };
         AutoScroll = true;
         BackColor = Stil.Seite;
         DoubleBuffered = true;
@@ -234,17 +236,20 @@ public sealed class AkteAnsicht : Panel
         stammdaten.Controls.Add(tabelle);
 
         Reiter.Gewechselt += _ => ReiterZeigen();
-        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Berichte]);
+        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Berichte, Medikation]);
     }
 
     private void ReiterZeigen()
     {
         bool stamm = Reiter.Aktiv == "Stammdaten";
         bool berichte = Reiter.Aktiv == "Berichte";
+        bool medikation = Reiter.Aktiv == "Medikation";
         abschnitt.Visible = stammdaten.Visible = stamm;
         Berichte.Visible = berichte;
+        Medikation.Visible = medikation;
         if (berichte && Bewohner is not null) Berichte.Zeigen(Bewohner);
-        ReiterPlatzhalter.Visible = !stamm && !berichte;
+        if (medikation && Bewohner is not null) Medikation.Zeigen(Bewohner);
+        ReiterPlatzhalter.Visible = !stamm && !berichte && !medikation;
         if (!stamm && Bauplan.Reiter.TryGetValue(Reiter.Aktiv, out var vorhaben))
             ReiterPlatzhalter.Setzen(vorhaben.Version, vorhaben.Beschreibung);
         PerformLayout();
@@ -307,11 +312,12 @@ public sealed class AkteAnsicht : Panel
         Reiter.Bounds = new Rectangle(x, y, breite, S(40));
         y += Reiter.Height + S(Stil.AbstandGross);
 
-        if (Berichte.Visible)
+        foreach (Control ansicht in new Control[] { Berichte, Medikation })
         {
-            Berichte.SetBounds(x, y, breite, Berichte.Height);
-            Berichte.PerformLayout();
-            y += Berichte.Height + rand;
+            if (!ansicht.Visible) continue;
+            ansicht.SetBounds(x, y, breite, ansicht.Height);
+            ansicht.PerformLayout();
+            y += ansicht.Height + rand;
             AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y);
             return;
         }
