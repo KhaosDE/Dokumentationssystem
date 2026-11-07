@@ -21,6 +21,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoMedikamente = "demo_medikamente";
     private const string DemoMedikation = "demo_medikation";
     private const string DemoTherapie = "demo_therapie";
+    private const string DemoWochenplan = "demo_wochenplan";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -295,6 +296,44 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER zuteilung_ende_bleibt BEFORE UPDATE ON zuteilung_ende
             BEGIN SELECT RAISE(ABORT, 'Einträge werden nicht überschrieben.'); END;
         """,
+        // 8 – Wochenplan: freie Einträge der Regelwoche (ändern = neuer Eintrag „ab Datum“, der
+        //     alte endet), „endet ab“ als eigener Eintrag, Teilnahme an Therapien je Tag.
+        """
+        CREATE TABLE plan_eintraege (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            tag         INTEGER NOT NULL CHECK (tag BETWEEN 0 AND 6),   -- 0 = Sonntag (wie .NET)
+            von         TEXT NOT NULL,
+            bis         TEXT NOT NULL,
+            titel       TEXT NOT NULL,
+            ort         TEXT NOT NULL DEFAULT '',
+            hinweis     TEXT NOT NULL DEFAULT '',
+            ab          TEXT NOT NULL,
+            ersetzt     INTEGER REFERENCES plan_eintraege(id) ON DELETE CASCADE,
+            erstellt    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TABLE plan_ende (
+            eintrag_id INTEGER PRIMARY KEY REFERENCES plan_eintraege(id) ON DELETE CASCADE,
+            ab         TEXT NOT NULL,
+            erstellt   TEXT NOT NULL,
+            kuerzel    TEXT NOT NULL
+        );
+        CREATE TABLE teilnahmen (
+            id           INTEGER PRIMARY KEY,
+            zuteilung_id INTEGER NOT NULL REFERENCES zuteilungen(id) ON DELETE CASCADE,
+            tag          TEXT NOT NULL,
+            status       TEXT NOT NULL CHECK (status IN ('offen', 'teilgenommen', 'abgesagt', 'ausgefallen')),
+            erstellt     TEXT NOT NULL,
+            kuerzel      TEXT NOT NULL
+        );
+        CREATE TRIGGER plan_eintraege_bleiben BEFORE UPDATE ON plan_eintraege
+            BEGIN SELECT RAISE(ABORT, 'Einträge werden nicht überschrieben – Änderungen gelten ab Datum.'); END;
+        CREATE TRIGGER plan_ende_bleibt BEFORE UPDATE ON plan_ende
+            BEGIN SELECT RAISE(ABORT, 'Einträge werden nicht überschrieben.'); END;
+        CREATE TRIGGER teilnahmen_bleiben BEFORE UPDATE ON teilnahmen
+            BEGIN SELECT RAISE(ABORT, 'Teilnahmen werden nicht überschrieben – ein neuer Eintrag gilt.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -423,8 +462,8 @@ public sealed partial class Speicher : IDisposable
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
-             therapie = Meta(DemoTherapie) is null;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie) return false;
+             therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null;
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan) return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
@@ -432,6 +471,7 @@ public sealed partial class Speicher : IDisposable
         if (medikamente) DemoMedikamenteEinfuegen(transaktion);
         if (medikamente || medikation) DemoMedikationEinfuegen(transaktion);   // hängt am Medikamenten-Bestand
         if (therapie) DemoTherapieEinfuegen(transaktion);
+        if (therapie || wochenplan) DemoWochenplanEinfuegen(transaktion);   // Teilnahmen hängen an den Zuteilungen
         transaktion.Commit();
         return true;
     }
@@ -454,6 +494,7 @@ public sealed partial class Speicher : IDisposable
             DemoMedikamenteEinfuegen(transaktion);
             DemoMedikationEinfuegen(transaktion);
             DemoTherapieEinfuegen(transaktion);
+            DemoWochenplanEinfuegen(transaktion);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
@@ -461,6 +502,7 @@ public sealed partial class Speicher : IDisposable
         NachrichtenGeaendert?.Invoke();
         MedikationGeaendert?.Invoke();
         TherapieGeaendert?.Invoke();
+        WochenplanGeaendert?.Invoke();
     }
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)

@@ -219,8 +219,8 @@ public class BewohnerOberflaechenTests
         Assert.Equal(["Stammdaten", "Berichte", "Medikation", "Wochenplan", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
-        akte.Reiter.Waehlen("Wochenplan");
-        Assert.Equal("Kommt in Version 0.12.0", akte.ReiterPlatzhalter.Titel.Text);
+        akte.Reiter.Waehlen("Biografie");
+        Assert.Equal("Kommt in Version 0.15.0", akte.ReiterPlatzhalter.Titel.Text);
         Assert.Equal("Allergien: Haselnüsse", akte.Allergie.Text);   // Allergiehinweis bleibt oben
         f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);   // neue Akte beginnt bei den Stammdaten
@@ -429,6 +429,24 @@ public class BildschirmfotoTests
             new MedikationDruck(u.Demo("Fichte"), heute, u.Speicher.Verordnungen(u.Demo("Fichte").Id!.Value).Select(v => MedikationRegeln.Stand(v, heute)).ToList()).SeiteZeichnen(g);
             string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
             if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "29_medikation_druck.png"), System.Drawing.Imaging.ImageFormat.Png);
+        }
+        f.BereichWaehlen("Bewohner");
+        f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
+        f.Bewohner.Akte.Reiter.Waehlen("Wochenplan");
+        Hilfe.Foto(f, "32_wochenplan");
+        f.Bewohner.Akte.AutoScrollPosition = new Point(0, 100000);
+        Hilfe.Foto(f, "33_wochenplan_unten");
+        using (var eintrag = new PlanEintragFenster(u.Speicher, u.Demo("Ahorn"), null, WochenplanRegeln.Montag(DateOnly.FromDateTime(DateTime.Today))))
+            Hilfe.Foto(eintrag, "34_wochenplan_eintrag");
+        using (var bild = new Bitmap(1754, 1240))
+        using (var g = Graphics.FromImage(bild))
+        {
+            g.Clear(Color.White);
+            g.ScaleTransform(1754f / 297f / 3.7795f, 1754f / 297f / 3.7795f);
+            var montag = WochenplanRegeln.Montag(DateOnly.FromDateTime(DateTime.Today));
+            new WochenplanDruck(u.Demo("Ahorn"), montag, u.Speicher.Woche(u.Demo("Ahorn").Id!.Value, montag)).SeiteZeichnen(g);
+            string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
+            if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "35_wochenplan_druck.png"), System.Drawing.Imaging.ImageFormat.Png);
         }
         f.Navigation.Single(n => n.Text == "Therapie").Ausloesen();
         Hilfe.Foto(f, "30_therapie");

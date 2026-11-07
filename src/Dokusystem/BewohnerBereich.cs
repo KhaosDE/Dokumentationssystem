@@ -187,6 +187,7 @@ public sealed class AkteAnsicht : Panel
     public PlatzhalterKarte ReiterPlatzhalter { get; } = new() { Visible = false };
     public BerichteAnsicht Berichte { get; }
     public MedikationAnsicht Medikation { get; }
+    public WochenplanAnsicht Wochenplan { get; }
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
     public Label Beschlussende { get; } = new();
@@ -196,6 +197,7 @@ public sealed class AkteAnsicht : Panel
     {
         Berichte = new BerichteAnsicht(speicher) { Visible = false };
         Medikation = new MedikationAnsicht(speicher) { Visible = false };
+        Wochenplan = new WochenplanAnsicht(speicher) { Visible = false };
         AutoScroll = true;
         BackColor = Stil.Seite;
         DoubleBuffered = true;
@@ -236,7 +238,7 @@ public sealed class AkteAnsicht : Panel
         stammdaten.Controls.Add(tabelle);
 
         Reiter.Gewechselt += _ => ReiterZeigen();
-        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Berichte, Medikation]);
+        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Berichte, Medikation, Wochenplan]);
     }
 
     private void ReiterZeigen()
@@ -244,12 +246,15 @@ public sealed class AkteAnsicht : Panel
         bool stamm = Reiter.Aktiv == "Stammdaten";
         bool berichte = Reiter.Aktiv == "Berichte";
         bool medikation = Reiter.Aktiv == "Medikation";
+        bool wochenplan = Reiter.Aktiv == "Wochenplan";
         abschnitt.Visible = stammdaten.Visible = stamm;
         Berichte.Visible = berichte;
         Medikation.Visible = medikation;
+        Wochenplan.Visible = wochenplan;
         if (berichte && Bewohner is not null) Berichte.Zeigen(Bewohner);
         if (medikation && Bewohner is not null) Medikation.Zeigen(Bewohner);
-        ReiterPlatzhalter.Visible = !stamm && !berichte && !medikation;
+        if (wochenplan && Bewohner is not null) Wochenplan.Zeigen(Bewohner);
+        ReiterPlatzhalter.Visible = !stamm && !berichte && !medikation && !wochenplan;
         if (!stamm && Bauplan.Reiter.TryGetValue(Reiter.Aktiv, out var vorhaben))
             ReiterPlatzhalter.Setzen(vorhaben.Version, vorhaben.Beschreibung);
         PerformLayout();
@@ -312,7 +317,7 @@ public sealed class AkteAnsicht : Panel
         Reiter.Bounds = new Rectangle(x, y, breite, S(40));
         y += Reiter.Height + S(Stil.AbstandGross);
 
-        foreach (Control ansicht in new Control[] { Berichte, Medikation })
+        foreach (Control ansicht in new Control[] { Berichte, Medikation, Wochenplan })
         {
             if (!ansicht.Visible) continue;
             ansicht.SetBounds(x, y, breite, ansicht.Height);
