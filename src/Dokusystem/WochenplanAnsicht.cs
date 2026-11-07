@@ -243,8 +243,9 @@ public sealed class WochenRaster : Control
             var marke = t.Quelle switch { TerminQuelle.Therapie => Stil.Unterwegs, TerminQuelle.Kalender => Stil.Hinweis, _ => Stil.Zimmer };
             bool weg = t.Teilnahme is Teilnahme.Abgesagt or Teilnahme.Ausgefallen;
             Stil.FlaecheZeichnen(g, feld, Stil.RadiusKnopf * Stil.Skala(this), marke.Flaeche, marke.Rand ?? Stil.Mischen(marke.Flaeche, marke.Text, 0.25));
-            string text = t.Titel + (t.Ganztags ? "" : $"\n{t.ZeitText}") + (t.Ort.Length > 0 ? $"\n{t.Ort}" : "");
-            if (t.Quelle == TerminQuelle.Therapie && t.Teilnahme != Teilnahme.Offen) text = $"{WochenplanRegeln.TeilnahmeText(t.Teilnahme).ToUpper(de)}\n" + text;
+            // Titel, Uhrzeit, dann die Teilnahme (falls eingetragen) oder der Ort – passt auch in ein Stunden-Kästchen.
+            string dritte = t.Quelle == TerminQuelle.Therapie && t.Teilnahme != Teilnahme.Offen ? WochenplanRegeln.TeilnahmeText(t.Teilnahme) : t.Ort;
+            string text = t.Titel + (t.Ganztags ? "" : $"\n{t.ZeitText}") + (dritte.Length > 0 ? $"\n{dritte}" : "");
             TextRenderer.DrawText(g, text, Stil.Klein, Rectangle.Inflate(feld, -S(4), -S(2)), weg ? Stil.TextLeise : marke.Text,
                 TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
             kaestchen.Add((feld, t));
@@ -415,8 +416,8 @@ public sealed class WochenplanDruck(Bewohner bewohner, DateOnly montag, IReadOnl
         var de = CultureInfo.GetCultureInfo("de-DE");
         using var titel = new Font("Segoe UI Semibold", 20F);
         using var tagSchrift = new Font("Segoe UI Semibold", 13F);
-        using var zeitSchrift = new Font("Segoe UI Semibold", 11F);
-        using var textSchrift = new Font("Segoe UI", 12F);
+        using var zeitSchrift = new Font("Segoe UI Semibold", 10.5F);
+        using var textSchrift = new Font("Segoe UI", 11F);
         using var klein = new Font("Segoe UI", 8F);
         using var linie = new Pen(Color.Gray, 0.3f);
         g.DrawString($"Wochenplan – {bewohner.Name}", titel, Brushes.Black, links, oben);
