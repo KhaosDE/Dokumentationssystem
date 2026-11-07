@@ -33,7 +33,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 8 | Therapie-Bereich | 0.11.0 |
 | 9 | Wochenplan | 0.12.0 |
 | 10 | Wohnbereichskalender | 0.13.0 |
-| 11 | Ausgang (aus der Ausgangsliste) | 0.14.0 |
+| 11 | Modul Ausgangsliste (mit Modulverwaltung) | 0.14.0 |
 | 12 | Biografie | 0.15.0 |
 | 13 | Monatsreflexion | 0.16.0 |
 | 14 | Startseite als Übersicht (Dashboard) | 0.17.0 |
@@ -441,19 +441,37 @@ Umfang (Vorbild `KhaosDE/Ausgangsliste`: `BewohnerKarte.cs`, `KopfBereich.cs`,
 - Filterknöpfe über dem Raster mit Zählern (z. B. „Alle 10“, „Beschluss 6“, „Allergie 3“).
 - Bereinigungsregeln aus `CLAUDE.md` gelten.
 
-## Ausgang (aus der Ausgangsliste)
+## Modul Ausgangsliste (mit Modulverwaltung)
 Status: freigegeben (Bauplan Schritt 11)
-Datum: 07.11.2026
-Was: Ausgänge der Bewohner eintragen und sehen, wer gerade unterwegs ist — übernommen aus
-der Ausgangsliste.
-Warum: Ursprüngliche Idee (05.11.2026): Die Ausgangsliste fließt in das Programm ein. Im
-bisherigen System lässt sich der Ausgang nicht regeln.
-Umfang: Funktion „Ausgang“ der Ausgangsliste übernehmen und bereinigen (`AusgangFenster.cs`,
-`AusgangText.cs`, `UnterbringungFenster.cs`, `StatusFenster.cs` als Vorbild): Ausgang
-beginnen und beenden mit Uhrzeit und Ziel, Abwesenheit mit Grund und Frist, Angaben zur
-Unterbringung bzw. Beschränkungen in der Akte. Unterwegs-Marke auf Karte und Startseite.
-Ausdrucksliste wie in der Ausgangsliste. Ausdrücklich nicht: Küchendienst, Zimmertausch,
-Warteliste (später eigene Einträge, falls gewünscht).
+Datum: 07.11.2026 (ersetzt den Eintrag „Ausgang (aus der Ausgangsliste)“)
+Was: Die Ausgangsliste wird ein **zuschaltbares Modul** des Dokumentationssystems. Dazu
+bekommt das Programm eine Modulverwaltung.
+Warum: Entscheidung Tobi (07.11.2026): Nicht jeder Bereich braucht die Ausgangsliste. Die
+Verbindung zwischen beiden Programmen regelt `docs/bruecke-ausgangsliste.md`.
+Umfang:
+- **Modulverwaltung:** In den Einstellungen ein Abschnitt „Module“ mit Häkchen je Modul. Ein
+  ausgeschaltetes Modul hinterlässt keine Spuren: kein Eintrag in der Seitenleiste, kein
+  Reiter in der Akte, keine Marken auf den Karten, nichts auf der Startseite. Seine Daten
+  bleiben in der Datenbank und sind nach dem Wiedereinschalten wieder da. Gebaut als
+  allgemeine Schnittstelle (ein Modul meldet Seitenleisten-Eintrag, Akte-Reiter, Marken,
+  Demo-Daten, Einstellungen an), damit später weitere Bereiche zuschaltbar werden können.
+- **Modul „Ausgangsliste“** übernimmt die Funktionen der Ausgangsliste nach der
+  Zuordnungstabelle in `docs/bruecke-ausgangsliste.md`: Ausgangszeiten (allein / mit
+  Bewohner), Anwesenheit und Abwesenheit mit Grund und Frist, Unterbringung mit Fristen und
+  der Rechtsregel „Ausgangsbeschränkung nur mit Beschluss oder Forensik“, druckbare
+  Tagesliste, Verlauf je Person; als Untermodule (eigene Häkchen) Küchendienst und Digitaler
+  Ausgang mit Nachtbericht.
+- **Eine Bewohnerliste, kein Doppelpflegen:** Bewohner, Zimmer, Aufnahme, Entlassung und
+  Zimmerwechsel gehören zum Kern (Bewohnerakte). Das Modul liest und ergänzt sie, legt keine
+  eigene Bewohnerliste an.
+- Übernehmen und anpassen aus `KhaosDE/Ausgangsliste` (Repository anhängen), Bereinigung
+  nach `CLAUDE.md`. Dateien und Klassen im Modul möglichst gleich benennen wie in der
+  Ausgangsliste, damit spätere Abgleiche leicht sind.
+- Nach dem Bau in `docs/bruecke-ausgangsliste.md` eintragen, bis zu welcher Version der
+  Ausgangsliste übernommen wurde.
+- Demo: Modul in den Demo-Daten eingeschaltet; Ausgänge und Abwesenheiten relativ zu heute.
+- Ausdrücklich nicht: Update über den Ordner `Update` und Installer der Ausgangsliste — das
+  Dokumentationssystem hat sein eigenes Update.
 
 ## Biografie
 Status: freigegeben (Bauplan Schritt 12)

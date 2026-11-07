@@ -17,3 +17,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 07.11.2026 — Übergabe als eigener Bereich nur mit Übergabe-Einträgen; Einträge bleiben bis Ablauf oder „erledigt“ stehen (mehrtägig), Wohnbereich-allgemein-Notizen (Chat „Programme/Apps“).
 - 07.11.2026 — Neue Einträge „Wohnbereich-ToDo“ und „Nachrichten“ freigegeben, als Bauplan Schritte 4 und 5 eingefügt; übrige Schritte rücken nach (bis 0.18.0) (Chat „Programme/Apps“).
 - 07.11.2026 — Claude Code: Bauplan Schritt 2 „Gestaltung Stufe 2“ (0.5.0).
+- 07.11.2026 — Brücke zur Ausgangsliste: Eintrag „Ausgang“ ersetzt durch „Modul Ausgangsliste (mit Modulverwaltung)“, docs/bruecke-ausgangsliste.md mit Rollen, Abgleich und Zuordnung (Chat „Programme/Apps“).
