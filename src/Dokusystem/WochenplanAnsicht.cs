@@ -274,7 +274,8 @@ public sealed class WochenRaster : Control
             Stil.FlaecheZeichnen(g, feld, Stil.RadiusKnopf * Stil.Skala(this), marke.Flaeche, marke.Rand ?? Stil.Mischen(marke.Flaeche, marke.Text, 0.25));
             // Titel, Uhrzeit, dann die Teilnahme (falls eingetragen) oder der Ort – passt auch in ein Stunden-Kästchen.
             string dritte = t.Quelle == TerminQuelle.Therapie && t.Teilnahme != Teilnahme.Offen ? WochenplanRegeln.TeilnahmeText(t.Teilnahme) : t.Ort;
-            string text = t.Titel + (t.Ganztags ? "" : $"\n{t.ZeitText}") + (dritte.Length > 0 ? $"\n{dritte}" : "");
+            // „\r\n“: Mit TextBoxControl gilt nur dieser Zeilenumbruch.
+            string text = t.Titel + (t.Ganztags ? "" : $"\r\n{t.ZeitText}") + (dritte.Length > 0 ? $"\r\n{dritte}" : "");
             // TextBoxControl: keine halb abgeschnittene letzte Zeile.
             TextRenderer.DrawText(g, text, Stil.Klein, Rectangle.Inflate(feld, -S(4), -S(2)), weg ? Stil.TextLeise : marke.Text,
                 TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding | TextFormatFlags.TextBoxControl);
