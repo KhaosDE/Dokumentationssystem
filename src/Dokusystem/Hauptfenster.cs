@@ -32,6 +32,10 @@ public sealed class Hauptfenster : Form
     public MedikamenteSeite Medikamente { get; }
     public TherapieSeite Therapie { get; }
     public KalenderSeite Kalender { get; }
+    public UebersichtSeite Uebersicht { get; }
+
+    // Damit öffnet das Programm (Program.cs). Tests beginnen bei „Bewohner“ (Konstruktor).
+    public const string Startbereich = "Übersicht";
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
     public Button DemoKnopf { get; } = Stil.NebenKnopf("Demo-Daten zurücksetzen …");
@@ -79,6 +83,14 @@ public sealed class Hauptfenster : Form
         Kalender = new KalenderSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Kalender"] = Kalender;
         Kalender.Geaendert += () => { if (AktiverBereich == "Kalender") Kopf.TexteSetzen(Kalender.KopfText, "Kalender"); };
+        Uebersicht = new UebersichtSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Übersicht"] = Uebersicht;
+        Uebersicht.Geaendert += () => { if (AktiverBereich == "Übersicht") Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht"); };
+        Uebersicht.AkteGewuenscht += id =>
+        {
+            BereichWaehlen("Bewohner");
+            Bewohner.AkteZeigen(id);
+        };
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);
@@ -134,10 +146,15 @@ public sealed class Hauptfenster : Form
 
         speicher.AufgabenGeaendert += AufgabenZaehlen;
         speicher.NachrichtenGeaendert += NachrichtenZaehlen;
+        // Startseite immer aktuell: nach Änderungen neu aufbauen, wenn sie gerade zu sehen ist.
+        speicher.MedikationGeaendert += UebersichtNeu;
+        speicher.TherapieGeaendert += UebersichtNeu;
+        speicher.WochenplanGeaendert += UebersichtNeu;
+        speicher.KalenderGeaendert += UebersichtNeu;
         AufgabenZaehlen();
         BenutzerAnzeigen();
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
-        // Start im Bereich „Bewohner“, solange die Übersicht noch nicht gebaut ist (kommt mit 0.17.0).
+        // Erst „Bewohner“ (baut die Karten); das Programm wechselt danach zur Übersicht (Startbereich).
         BereichWaehlen("Bewohner");
     }
 
@@ -185,6 +202,13 @@ public sealed class Hauptfenster : Form
             else Nachrichten.BewohnerZeigen(null);
             Kopf.TexteSetzen(Nachrichten.KopfText, "Nachrichten");
             Kopf.KnoepfeSetzen(Nachrichten.NeuKnopf);
+            return;
+        }
+        if (schluessel == "Übersicht")
+        {
+            Uebersicht.Aktualisieren();
+            Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht");
+            Kopf.KnoepfeSetzen();
             return;
         }
         if (schluessel == "Kalender")
@@ -344,11 +368,23 @@ public sealed class Hauptfenster : Form
         if (AktiverBereich.Length == 0) return;
         if (!seiten.ContainsKey(Schluessel(AktiverBereich))) BereichWaehlen("Bewohner");
         else if (AktiverBereich == "Bewohner" && !Bewohner.AkteSichtbar) Bewohner.UebersichtZeigen();   // Marken der Module
-        else if (modulSeiten.ContainsKey(AktiverBereich)) BereichWaehlen(AktiverBereich);
+        else if (modulSeiten.ContainsKey(AktiverBereich) || AktiverBereich == "Übersicht") BereichWaehlen(AktiverBereich);
+    }
+
+    private void UebersichtNeu()
+    {
+        if (AktiverBereich == "Übersicht" && !IsDisposed) Uebersicht.Aktualisieren();
     }
 
     protected override void Dispose(bool disposing)
     {
+        if (disposing)
+        {
+            speicher.MedikationGeaendert -= UebersichtNeu;
+            speicher.TherapieGeaendert -= UebersichtNeu;
+            speicher.WochenplanGeaendert -= UebersichtNeu;
+            speicher.KalenderGeaendert -= UebersichtNeu;
+        }
         if (disposing) speicher.ModuleGeaendert -= ModuleAnzeigen;
         base.Dispose(disposing);
     }

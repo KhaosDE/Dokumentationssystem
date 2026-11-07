@@ -344,7 +344,8 @@ public static class Demodaten
         V("Eiche", "Olanzapin", "10 mg", D("0", "0", "1", "0"), 300,
             A(AenderungArt.Stufenplan, heute.AddDays(-7), stufen: [new(heute.AddDays(-7), D("0", "0", "½", "0")), new(heute.AddDays(7), D("0", "0", "0", "0"))], hinweis: "ausschleichen"));
         V("Fichte", "Ramipril", "5 mg", D("1", "0", "0", "0"), 500);
-        V("Fichte", "Metformin", "500 mg", D("1", "0", "1", "0"), 500);
+        V("Fichte", "Metformin", "500 mg", D("1", "0", "1", "0"), 500,
+            A(AenderungArt.Pause, heute, heute.AddDays(1), hinweis: "vor der Blutabnahme"));   // Änderung heute (Startseite)
         V("Ginster", "Levothyroxin", "50 Mikrogramm", D("1", "0", "0", "0"), 700);
         V("Holunder", "Escitalopram", "10 mg", D("1", "0", "0", "0"), 150,
             A(AenderungArt.Absetzen, heute.AddDays(-5), hinweis: "auf ärztliche Anordnung beendet"));

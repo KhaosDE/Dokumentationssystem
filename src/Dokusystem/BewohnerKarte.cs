@@ -28,9 +28,15 @@ public sealed class BewohnerKarte : Control
     // modulMarken: Marken eingeschalteter Module (z. B. „abwesend: Heimfahrt bis …“), hinten.
     public BewohnerKarte(Bewohner bewohner, DateOnly heute, int ungeleseneUebergaben = 0, int wichtigeBerichte = 0,
         IEnumerable<Marke>? modulMarken = null)
+        : this(bewohner, heute, [.. Kennzeichen.Marken(bewohner, ungeleseneUebergaben, wichtigeBerichte), .. modulMarken ?? []])
+    {
+    }
+
+    // Mit fertig zusammengestellten Marken (Startseite).
+    public BewohnerKarte(Bewohner bewohner, DateOnly heute, IReadOnlyList<Marke> alleMarken)
     {
         Bewohner = bewohner;
-        Marken = [.. Kennzeichen.Marken(bewohner, ungeleseneUebergaben, wichtigeBerichte), .. modulMarken ?? []];
+        Marken = alleMarken;
         AufenthaltText = Kennzeichen.Aufenthalt(bewohner.Aufnahmedatum, heute);
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
                  ControlStyles.UserPaint | ControlStyles.ResizeRedraw | ControlStyles.Selectable, true);

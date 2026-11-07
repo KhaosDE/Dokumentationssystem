@@ -6,7 +6,8 @@ namespace Dokusystem.Kern;
 // Marken für das, was Aufmerksamkeit braucht, und die Aufenthaltsdauer.
 // Farbe sparsam: Der Normalfall („keine bekannt“, „kein Beschluss“) bekommt keine Marke.
 // Abwesend und Ausgang melden Module (z. B. die Ausgangsliste) über die Modulverwaltung.
-public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig, Abwesend, Ausgang }
+// Termin: Termine des Tages auf der Startseite.
+public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig, Abwesend, Ausgang, Termin }
 
 public sealed record Marke(MarkenArt Art, string Text);
 

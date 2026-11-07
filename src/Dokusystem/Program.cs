@@ -39,7 +39,10 @@ internal static class Program
         }
         using (speicher)
         using (var fenster = new Hauptfenster(speicher))
+        {
+            fenster.BereichWaehlen(Hauptfenster.Startbereich);
             Application.Run(fenster);
+        }
         return 0;
     }
 }

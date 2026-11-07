@@ -38,6 +38,11 @@ Danach fragt Windows für diese Datei nicht mehr.
   grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
 - **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
   als TT.MM.JJJJ (z. B. 03.04.1965).
+- **Übersicht** (links oben, öffnet beim Start): oben „Heute“ mit Abwesenden, den Terminen des
+  Tages und den Änderungen in der Medikation; darunter alle Bewohner als Karten mit den Marken
+  des Tages (z. B. „Beschluss endet in … Tagen“, „Medikation: Pause beginnt“, „heute 10:00 …“,
+  „abwesend: …“). Klick auf eine Karte öffnet die Akte. Die Frist für „Beschluss endet bald“
+  steht in den Einstellungen.
 - **Berichte** schreibt man in der Akte (Reiter „Berichte“ → „Neuer Bericht …“) oder über
   **Neuer Bericht …** links. Zwei Kennzeichen: **Wichtig** (bleibt in der Akte hervorgehoben)
   und **Übergabe** (erscheint im Bereich „Übergabe“, so lange wie gewählt). Korrigiert wird
@@ -92,7 +97,7 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
   her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren.
 - **Einstellungen** (links): wer angemeldet ist, Update beim Start, Module ein- und
-  ausschalten, eigenes Bild für den Kopf (z. B. ein Logo – die Datei wird nur in den
+  ausschalten, Frist „Beschluss endet bald“, eigenes Bild für den Kopf (z. B. ein Logo – die Datei wird nur in den
   Datenordner kopiert).
 
 ## Updates

@@ -319,7 +319,7 @@ Anbieter) erst klären, wenn das Programm über eine Demo hinausgeht — Nutzung
 nicht geprüft.
 
 ## Startseite als Übersicht (Dashboard)
-Status: freigegeben (Bauplan Schritt 14)
+Status: erledigt (07.11.2026)
 Datum: 06.11.2026
 Was: Die Hauptseite zeigt alle Bewohner des Wohnbereichs auf einen Blick und ist immer
 aktuell.
