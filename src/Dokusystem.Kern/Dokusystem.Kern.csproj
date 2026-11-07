@@ -18,6 +18,7 @@
     <EmbeddedResource Include="..\..\daten\demo\berichte.json" LogicalName="Dokusystem.Kern.Demo.berichte.json" />
     <EmbeddedResource Include="..\..\daten\demo\aufgaben.json" LogicalName="Dokusystem.Kern.Demo.aufgaben.json" />
     <EmbeddedResource Include="..\..\daten\demo\nachrichten.json" LogicalName="Dokusystem.Kern.Demo.nachrichten.json" />
+    <EmbeddedResource Include="..\..\daten\demo\medikamente.json" LogicalName="Dokusystem.Kern.Demo.medikamente.json" />
     <EmbeddedResource Include="..\..\daten\uebergabe-woerter.txt" LogicalName="Dokusystem.Kern.uebergabe-woerter.txt" />
   </ItemGroup>
 </Project>
