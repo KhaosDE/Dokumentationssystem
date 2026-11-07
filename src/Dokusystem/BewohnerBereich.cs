@@ -20,6 +20,10 @@ public sealed class BewohnerBereich : Panel
         Padding = new Padding(Stil.AbstandGross, Stil.AbstandMini, Stil.AbstandGross, 0),
     };
     public Dictionary<BewohnerFilter, FilterKnopf> FilterKnoepfe { get; } = [];
+    // Offene Aufgaben über den Karten (Wohnbereich-ToDo), mit Knopf zu allen.
+    public AufgabenKurzliste Aufgaben { get; } = new();
+    private readonly Panel aufgabenRahmen = new() { Dock = DockStyle.Top, BackColor = Stil.Seite };
+    public event Action? AufgabenAnzeigen;
     public BewohnerFilter AktiverFilter { get; private set; } = BewohnerFilter.Alle;
 
     // Der heutige Tag (für die Aufenthaltsdauer); zum Testen ersetzbar.
@@ -47,9 +51,21 @@ public sealed class BewohnerBereich : Panel
             FilterKnoepfe[filter] = knopf;
             FilterLeiste.Controls.Add(knopf);
         }
+        aufgabenRahmen.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross, Stil.AbstandKlein);
+        aufgabenRahmen.Controls.Add(Aufgaben);
+        aufgabenRahmen.Layout += (_, _) =>
+        {
+            var p = aufgabenRahmen.Padding;
+            Aufgaben.SetBounds(p.Left, p.Top, Math.Max(100, aufgabenRahmen.ClientSize.Width - p.Horizontal), Aufgaben.Height);
+            Aufgaben.PerformLayout();
+            int hoehe = Aufgaben.Height + p.Vertical;
+            if (aufgabenRahmen.Height != hoehe) aufgabenRahmen.Height = hoehe;
+        };
+        Aufgaben.AlleKnopf.Click += (_, _) => AufgabenAnzeigen?.Invoke();
         Controls.Add(Raster);
         Controls.Add(Akte);
         Controls.Add(FilterLeiste);
+        Controls.Add(aufgabenRahmen);
         Raster.BringToFront();
         Akte.BringToFront();
         neuKnopf.Click += (_, _) => Formular(null);
@@ -88,7 +104,7 @@ public sealed class BewohnerBereich : Panel
             return karte;
         }));
         Akte.Visible = false;
-        Raster.Visible = FilterLeiste.Visible = true;
+        Raster.Visible = FilterLeiste.Visible = aufgabenRahmen.Visible = true;
         AkteSichtbar = false;
         string anzahl = alle.Count == 1 ? "1 Bewohner" : $"{alle.Count} Bewohner";
         kopf.TexteSetzen(AktiverFilter == BewohnerFilter.Alle ? anzahl : $"{sichtbar.Count} von {anzahl}", "Bewohner");
@@ -103,7 +119,7 @@ public sealed class BewohnerBereich : Panel
             return;
         }
         Akte.Zeigen(b);
-        Raster.Visible = FilterLeiste.Visible = false;
+        Raster.Visible = FilterLeiste.Visible = aufgabenRahmen.Visible = false;
         Akte.Visible = true;
         AkteSichtbar = true;
         kopf.TexteSetzen("Bewohnerakte", b.Name);
@@ -111,6 +127,13 @@ public sealed class BewohnerBereich : Panel
     }
 
     public BewohnerFormular FormularErstellen(Bewohner? b) => new(speicher, b);
+
+    public void AufgabenSetzen(IReadOnlyList<Aufgabe> offen, DateTime jetzt)
+    {
+        var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
+        Aufgaben.Setzen(offen, namen, jetzt);
+        aufgabenRahmen.PerformLayout();
+    }
 
     private void Formular(Bewohner? b)
     {

@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.6.0** (Tägliche Dokumentation mit Übergabe, Bauplan Schritt 3).
+Stand: 07.11.2026. Version: **0.7.0** (Wohnbereich-ToDo, Bauplan Schritt 4).
 
 ## Aktuell
 
@@ -9,9 +9,10 @@ Seitenleiste; was noch nicht gebaut ist, sagt „Kommt in Version …“. Gebaut
 Bewohnerakte und jetzt die **tägliche Dokumentation**: Berichte je Bewohner mit den
 Kennzeichen „Wichtig“ und „Übergabe“, Nachträge statt Überschreiben, Ausdruck, und der
 Bereich **„Übergabe“**, in dem nur die Übergabe-Einträge stehen, bis sie ablaufen oder
-erledigt sind.
+erledigt sind. Neu ist das **Wohnbereich-ToDo** („Aufgaben“): Aufgaben an die nächste Schicht,
+die stehen bleiben, bis sie erledigt sind.
 
-**Nächster Schritt:** Bauplan Schritt 4 „Wohnbereich-ToDo“ (0.7.0), danach der Reihe nach bis
+**Nächster Schritt:** Bauplan Schritt 5 „Nachrichten“ (0.8.0), danach der Reihe nach bis
 Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Repository
 `KhaosDE/Ausgangsliste` anhängen; Grundlage ist `docs/bruecke-ausgangsliste.md`.
 
@@ -84,6 +85,23 @@ Schritt 15 (`IDEEN.md`, oben). Für Schritt 11 (Modul Ausgangsliste) das Reposit
   - Demo: für jeden Bewohner Berichte der letzten vier Wochen über alle Lebensbereiche,
     einige wichtige, einige mit Nachtrag; Übergabe-Einträge (offen, mehrtägig, erledigt,
     abgelaufen) und zwei Notizen für den Wohnbereich – alles relativ zum heutigen Tag.
+
+- 0.7.0 — Wohnbereich-ToDo (07.11.2026, Bauplan Schritt 4):
+  - Bereich „Aufgaben“: offene Aufgaben, überfällige oben (rot, mit dem Wort „überfällig“ und
+    rotem Balken), dann was jetzt dran ist, dann nach Fälligkeit. Marken „für Spätdienst
+    Sa 07.11.“ bzw. „wer Zeit hat“, „fällig bis …“, „jetzt dran“. Erledigte einblendbar.
+  - „Neue Aufgabe …“: Text, Bewohner (oder keiner), für wen (nächste Schicht – Vorgabe –,
+    bestimmte Schicht an einem Tag, wer Zeit hat), fällig bis (Datum, Uhrzeit freiwillig),
+    angelegt von (Kürzel vorbelegt).
+  - „Erledigt“ (mit Kürzel und Zeit) und „An die nächste Schicht weitergeben …“ mit kurzer
+    Notiz; die Weitergabe steht sichtbar an der Aufgabe. Nichts wird gelöscht oder
+    überschrieben.
+  - Aus einem Bericht: „Aufgabe daraus …“ übernimmt den Bewohner.
+  - Zähler offener Aufgaben in der Seitenleiste (rot, wenn etwas überfällig ist) und eine
+    Kurzliste der ersten drei offenen Aufgaben über den Bewohnerkarten mit Knopf zu allen.
+  - Ausdruck der offenen Aufgaben (Druckvorschau).
+  - Demo: sechs ausgedachte Aufgaben relativ zu heute, eine überfällig und schon einmal
+    weitergegeben, eine erledigt. „Wichtig“ steht in den Demo-Berichten seltener.
 
 ## Offene Punkte
 
@@ -204,6 +222,21 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
     auch neben „Übergabe“ und „Wichtig“ sichtbar bleibt (Regel 5).
   - Demo-Daten: Die ausgedachten Berichte sind bei gleichem Datum zu jeder Uhrzeit gleich
     (fester Zufallswert je Bewohner); Berichte in der Zukunft werden weggelassen.
+- **Wohnbereich-ToDo (0.7.0), wo der Eintrag etwas offen ließ:**
+  - „Hauptbildschirm“: Die Übersicht ist bis 0.17.0 noch ein Platzhalter. Darum steht die
+    Kurzliste der Aufgaben vorerst über den Bewohnerkarten (dort startet das Programm); die
+    Startseite übernimmt sie später.
+  - „Nächste Schicht“ heißt die Schicht nach der, in der die Aufgabe angelegt oder zuletzt
+    weitergegeben wurde. Nach dem Weitergeben gilt eine Aufgabe immer für die nächste
+    Schicht, auch wenn sie vorher „wer Zeit hat“ oder für eine bestimmte Schicht war.
+  - „Jetzt dran“: Die Schicht der Aufgabe hat begonnen (auch wenn sie aus einer früheren
+    Schicht liegen geblieben ist).
+  - „Fällig bis“ ohne Uhrzeit gilt bis zum Ende des Tages. Die Notiz beim Weitergeben ist
+    freiwillig (höchstens 200 Zeichen).
+  - „Erledigt“ und „Weitergeben“ brauchen das eigene Kürzel aus den Einstellungen (wie in der
+    Übergabe); ohne Kürzel sind die Knöpfe gesperrt, mit Hinweis.
+  - Erledigte Aufgaben lassen sich nicht wieder öffnen; dafür legt man eine neue an (nichts
+    wird überschrieben).
 - 05.11.2026, weiter gültig: Update-Einstellung als Häkchen unten links, gespeichert in
   `einstellungen.json`; `update.log` behält die letzten 300 Zeilen; der Workflow läuft auch
   bei Pull Requests (ohne Release); Name als Vorname und Nachname; Beschlussende mit drei
@@ -213,6 +246,24 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   geladen.
 
 ## Testliste für Tobi
+
+Version 0.7.0:
+
+1. Unten links „Version 0.7.0 · Build …“. Links bei „Aufgaben“ ein roter Zähler „5“ (eine
+   Demo-Aufgabe ist überfällig).
+2. Über den Bewohnerkarten: „AUFGABEN · 5 OFFEN · 1 ÜBERFÄLLIG“ mit drei Zeilen, oben die
+   überfällige. „Alle 5 Aufgaben …“ führt zum Bereich „Aufgaben“.
+3. Bereich „Aufgaben“: oben „Aushang mit dem Wochenplan …“ mit „überfällig seit …“, rotem
+   Balken und der Weitergabe „Drucker war leer …“.
+4. Einstellungen: Kürzel „TS“. „Neue Aufgabe …“: ohne Text speichern → Fehlermeldung.
+   „bestimmte Schicht“ wählen, Tag in zwei Tagen, Frühdienst → Aufgabe erscheint mit „für
+   Frühdienst …“, der Zähler steigt.
+5. Bei „Getränkevorrat …“ „An die nächste Schicht weitergeben …“ mit Notiz → die Notiz steht
+   an der Aufgabe. „Erledigt“ → sie verschwindet; „Erledigte zeigen“ → sie steht unter
+   „ERLEDIGT“ mit „TS“.
+6. Akte → Reiter „Berichte“ → „Aufgabe daraus …“: Der Bewohner ist schon gewählt.
+7. „Offene Aufgaben drucken …“ → Druckvorschau.
+8. „Demo-Daten zurücksetzen …“ → wieder 5 offene Aufgaben.
 
 Version 0.6.0:
 

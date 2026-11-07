@@ -11,11 +11,12 @@ namespace Dokusystem.Kern;
 //
 // Die Python-Version (bis 0.2.0) hatte eine eigene Datei (dokusystem.sqlite3). Sie wird nicht
 // gelöscht und nicht gelesen; die C#-Version beginnt mit den Demo-Daten.
-public sealed class Speicher : IDisposable
+public sealed partial class Speicher : IDisposable
 {
     public const string Datei = "dokumentationssystem.db";
     private const string DemoGeladen = "demo_geladen";
     private const string DemoBerichte = "demo_berichte";
+    private const string DemoAufgaben = "demo_aufgaben";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -99,6 +100,34 @@ public sealed class Speicher : IDisposable
         CREATE TRIGGER uebergaben_bleiben BEFORE UPDATE ON uebergaben
             BEGIN SELECT RAISE(ABORT, 'Übergaben werden nicht überschrieben – Änderungen sind Ereignisse.'); END;
         CREATE TRIGGER uebergabe_ereignisse_bleiben BEFORE UPDATE ON uebergabe_ereignisse
+            BEGIN SELECT RAISE(ABORT, 'Ereignisse werden nicht überschrieben.'); END;
+        """,
+        // 3 – Wohnbereich-ToDo: Aufgaben bleiben, bis sie erledigt sind. Weitergeben und
+        //     „erledigt“ sind eigene Ereignisse; nichts wird überschrieben.
+        """
+        CREATE TABLE aufgaben (
+            id           INTEGER PRIMARY KEY,
+            bewohner_id  INTEGER REFERENCES bewohner(id) ON DELETE CASCADE,   -- NULL = kein einzelner Bewohner
+            bericht_id   INTEGER REFERENCES berichte(id) ON DELETE CASCADE,
+            text         TEXT NOT NULL,
+            fuer         TEXT NOT NULL CHECK (fuer IN ('naechste_schicht', 'schicht', 'wer_zeit_hat')),
+            schicht_tag  TEXT,
+            schicht      TEXT CHECK (schicht IS NULL OR schicht IN ('frueh', 'spaet', 'nacht')),
+            faellig_bis  TEXT,
+            erstellt     TEXT NOT NULL,
+            verfasser    TEXT NOT NULL
+        );
+        CREATE TABLE aufgabe_ereignisse (
+            id         INTEGER PRIMARY KEY,
+            aufgabe_id INTEGER NOT NULL REFERENCES aufgaben(id) ON DELETE CASCADE,
+            art        TEXT NOT NULL CHECK (art IN ('weitergegeben', 'erledigt')),
+            zeit       TEXT NOT NULL,
+            kuerzel    TEXT NOT NULL,
+            notiz      TEXT NOT NULL DEFAULT ''
+        );
+        CREATE TRIGGER aufgaben_bleiben BEFORE UPDATE ON aufgaben
+            BEGIN SELECT RAISE(ABORT, 'Aufgaben werden nicht überschrieben – Änderungen sind Ereignisse.'); END;
+        CREATE TRIGGER aufgabe_ereignisse_bleiben BEFORE UPDATE ON aufgabe_ereignisse
             BEGIN SELECT RAISE(ABORT, 'Ereignisse werden nicht überschrieben.'); END;
         """,
     ];
@@ -226,14 +255,14 @@ public sealed class Speicher : IDisposable
             DemoZuruecksetzen();
             return true;
         }
-        if (Meta(DemoBerichte) is null)
-        {
-            using var transaktion = db.BeginTransaction();
-            DemoBerichteEinfuegen(transaktion);
-            transaktion.Commit();
-            return true;
-        }
-        return false;
+        // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
+        bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null;
+        if (!berichte && !aufgaben) return false;
+        using var transaktion = db.BeginTransaction();
+        if (berichte) DemoBerichteEinfuegen(transaktion);
+        if (aufgaben) DemoAufgabenEinfuegen(transaktion);
+        transaktion.Commit();
+        return true;
     }
 
     // Alle Bewohner mit allem, was dazugehört (Bilder, Berichte …), weg und die Demo-Daten aller
@@ -249,9 +278,11 @@ public sealed class Speicher : IDisposable
                 Ausfuehren($"INSERT INTO bewohner ({Spalten}) VALUES ({Platzhalter})", transaktion, Werte(b));
             SetzeMeta(DemoGeladen, "1", transaktion);
             DemoBerichteEinfuegen(transaktion);
+            DemoAufgabenEinfuegen(transaktion);
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
+        AufgabenGeaendert?.Invoke();
     }
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)

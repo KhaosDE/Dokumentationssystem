@@ -87,7 +87,7 @@ public static class Demodaten
             // nächste Schicht, dazu einige länger laufende, erledigte und abgelaufene Einträge.
             if (i % 2 == 0)
             {
-                var bericht = Erzeugen(b, jetzt.AddMinutes(-(40 + i * 25)), zufall, bausteine, jetzt, wichtig: i % 4 == 0);
+                var bericht = Erzeugen(b, jetzt.AddMinutes(-(40 + i * 25)), zufall, bausteine, jetzt, wichtig: i == 0);
                 var wunsch = i switch
                 {
                     2 => new UebergabeWunsch(UebergabeDauer.DreiTage),
@@ -103,7 +103,7 @@ public static class Demodaten
             }
             if (i == 3)
             {
-                var bericht = Erzeugen(b, jetzt.AddDays(-5).Date.AddHours(9), zufall, bausteine, jetzt, wichtig: true);
+                var bericht = Erzeugen(b, jetzt.AddDays(-5).Date.AddHours(9), zufall, bausteine, jetzt, wichtig: false);
                 berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.NaechsteSchicht)));   // längst abgelaufen
             }
             if (i == 5)
@@ -119,6 +119,67 @@ public static class Demodaten
             new(notizen[1].Replace("{tag}", wochentag), new UebergabeWunsch(UebergabeDauer.BisErledigt), jetzt.AddDays(-2).Date.AddHours(15), bausteine.Kuerzel[2]),
         };
         return new DemoTagebuch(berichte, allgemein);
+    }
+
+    // ----- Aufgaben (Wohnbereich-ToDo) -----
+
+    private sealed class AufgabenDatei
+    {
+        public List<AufgabeVorlage> Aufgaben { get; set; } = [];
+    }
+
+    public sealed class AufgabeVorlage
+    {
+        public string Text { get; set; } = "";
+        public string? Bewohner { get; set; }          // Nachname aus bewohner.json
+        public string Fuer { get; set; } = "naechste_schicht";
+        public int SchichtInTagen { get; set; }
+        public string Schicht { get; set; } = "frueh";
+        public double ErstelltVorStunden { get; set; }
+        public double? FaelligInStunden { get; set; }
+        public string Verfasser { get; set; } = "";
+        public EreignisVorlage? Weitergabe { get; set; }
+        public EreignisVorlage? Erledigt { get; set; }
+    }
+
+    public sealed class EreignisVorlage
+    {
+        public double VorStunden { get; set; }
+        public string Kuerzel { get; set; } = "";
+        public string Notiz { get; set; } = "";
+    }
+
+    public sealed record DemoAufgabe(Aufgabe Aufgabe);
+
+    // Aufgaben aus daten/demo/aufgaben.json, Zeiten relativ zu „jetzt“. Fehlt der genannte
+    // Bewohner (z. B. umbenannt), entfällt die Aufgabe.
+    public static List<DemoAufgabe> Aufgaben(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var liste = new List<DemoAufgabe>();
+        DateTime Minute(DateTime t) => new(t.Year, t.Month, t.Day, t.Hour, t.Minute, 0);
+        DateTime Stunde(DateTime t) => new(t.Year, t.Month, t.Day, t.Hour, 0, 0);
+        foreach (var v in Lesen<AufgabenDatei>("aufgaben.json").Aufgaben)
+        {
+            Bewohner? b = null;
+            if (v.Bewohner is string name && (b = bewohner.FirstOrDefault(x => x.Nachname == name)) is null) continue;
+            var fuer = AufgabenRegeln.FuerAus(v.Fuer);
+            liste.Add(new DemoAufgabe(new Aufgabe
+            {
+                BewohnerId = b?.Id,
+                Text = v.Text.Replace("{vorname}", b?.Vorname ?? ""),
+                Fuer = fuer,
+                FuerSchicht = fuer == AufgabeFuer.Schicht
+                    ? new SchichtTermin(DateOnly.FromDateTime(jetzt).AddDays(v.SchichtInTagen), BerichtRegeln.SchichtAus(v.Schicht))
+                    : null,
+                FaelligBis = v.FaelligInStunden is double h ? Stunde(jetzt.AddHours(h)) : null,
+                Erstellt = Minute(jetzt.AddHours(-v.ErstelltVorStunden)),
+                Verfasser = v.Verfasser,
+                Weitergaben = v.Weitergabe is EreignisVorlage w ? [new Weitergabe(Minute(jetzt.AddHours(-w.VorStunden)), w.Kuerzel, w.Notiz)] : [],
+                Erledigt = v.Erledigt is EreignisVorlage e ? Minute(jetzt.AddHours(-e.VorStunden)) : null,
+                ErledigtVon = v.Erledigt?.Kuerzel,
+            }));
+        }
+        return liste;
     }
 
     private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)

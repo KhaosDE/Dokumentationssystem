@@ -139,6 +139,19 @@ public sealed class SeitenleistenEintrag : Control
         set { aktiv = value; Invalidate(); }
     }
 
+    // Zähler rechts im Eintrag (z. B. offene Aufgaben); null = keiner. Dringend = rot (es ist
+    // etwas überfällig); der Bildschirmleser bekommt beides als Text.
+    public int? Anzahl { get; private set; }
+    public bool Dringend { get; private set; }
+
+    public void ZaehlerSetzen(int? anzahl, bool dringend = false, string? beschreibung = null)
+    {
+        Anzahl = anzahl;
+        Dringend = dringend;
+        AccessibleName = anzahl is int n ? $"{Text}, {beschreibung ?? n.ToString()}" : Text;
+        Invalidate();
+    }
+
     protected override void OnMouseEnter(EventArgs e) { maus = true; Invalidate(); base.OnMouseEnter(e); }
     protected override void OnMouseLeave(EventArgs e) { maus = false; Invalidate(); base.OnMouseLeave(e); }
     protected override void OnGotFocus(EventArgs e) { Invalidate(); base.OnGotFocus(e); }
@@ -174,6 +187,16 @@ public sealed class SeitenleistenEintrag : Control
         TextRenderer.DrawText(g, Text, aktiv ? Stil.Fett : Stil.Standard,
             new Rectangle(Stil.Px(this, Stil.AbstandGross), 0, Width - Stil.Px(this, Stil.AbstandGross), Height),
             aktiv ? Stil.Akzent : Stil.TextNormal, TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+        if (Anzahl is int anzahl)
+        {
+            var farbe = Dringend ? Stil.Beschluss : Stil.Zimmer;
+            string zahl = anzahl.ToString();
+            int breite = Math.Max(Stil.Px(this, 24), TextRenderer.MeasureText(zahl, Stil.MarkeSchrift).Width + Stil.Px(this, 8));
+            var zaehler = new Rectangle(Width - breite - Stil.Px(this, Stil.AbstandKlein), (Height - Stil.Px(this, 20)) / 2, breite, Stil.Px(this, 20));
+            Stil.FlaecheZeichnen(g, zaehler, 10 * s, farbe.Flaeche, farbe.Flaeche);
+            TextRenderer.DrawText(g, zahl, Stil.MarkeSchrift, zaehler, farbe.Text,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine);
+        }
     }
 }
 

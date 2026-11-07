@@ -503,7 +503,7 @@ Umfang:
   dritte Quelle.
 
 ## Wohnbereich-ToDo
-Status: freigegeben (Bauplan Schritt 4)
+Status: erledigt (07.11.2026; Bauplan Schritt 4, Version 0.7.0)
 Datum: 07.11.2026
 Was: Eine Aufgabenliste des Wohnbereichs auf dem Hauptbildschirm. Damit gibt man Aufgaben an
 die nächste Schicht weiter.

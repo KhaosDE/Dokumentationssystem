@@ -16,6 +16,7 @@
          damit nichts neben dem Programm liegen muss. -->
     <EmbeddedResource Include="..\..\daten\demo\bewohner.json" LogicalName="Dokusystem.Kern.Demo.bewohner.json" />
     <EmbeddedResource Include="..\..\daten\demo\berichte.json" LogicalName="Dokusystem.Kern.Demo.berichte.json" />
+    <EmbeddedResource Include="..\..\daten\demo\aufgaben.json" LogicalName="Dokusystem.Kern.Demo.aufgaben.json" />
     <EmbeddedResource Include="..\..\daten\uebergabe-woerter.txt" LogicalName="Dokusystem.Kern.uebergabe-woerter.txt" />
   </ItemGroup>
 </Project>
