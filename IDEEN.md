@@ -122,19 +122,51 @@ Umfang:
 ## Tägliche Dokumentation
 Status: freigegeben (Bauplan Schritt 3)
 Datum: 05.11.2026
-Was: Tägliche schriftliche Dokumentation je Bewohner. Zweiter Teil des Kerns.
-Warum: Laut Tobi Hauptteil des Programms neben der Bewohnerführung.
+Was: Tägliche schriftliche Dokumentation je Bewohner: der Teil, in dem Berichte über
+Bewohner geschrieben werden. **Wichtigster Bereich des Programms** (Tobi, 07.11.2026).
+Warum: Laut Tobi Hauptteil des Programms neben der Bewohnerführung. In den Berichten gibt es
+immer wichtige und übergaberelevante Inhalte; sie dürfen nicht in der Menge untergehen.
 Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie ändern):
 - Ein Bericht hat: Bewohner, Datum und Uhrzeit, Schicht (Früh, Spät, Nacht), Verfasser
   (Kürzel; eigenes Kürzel in den Einstellungen), **Lebensbereich(e)** 1–5 aus
-  `docs/heb-wissen.md` (Mehrfachauswahl, mindestens einer oder „allgemein“), Text, Häkchen
-  „für die Übergabe wichtig“.
+  `docs/heb-wissen.md` (Mehrfachauswahl, mindestens einer oder „allgemein“), Text.
+- **Zwei getrennte Kennzeichen** je Bericht, beide beim Schreiben gut sichtbar (nicht
+  versteckt in einem Menü), Farbe nie allein:
+  - **„Wichtig“** — bleibt in der Akte dauerhaft hervorgehoben (eigener Filter „nur
+    wichtige“, Marke in der Liste). Für Inhalte, die man über die Schicht hinaus wissen muss.
+  - **„Übergabe“** — erscheint in der Übergabe-Ansicht der folgenden Schicht. Für Inhalte,
+    die die nächste Schicht wissen oder tun muss.
+  - Ein Bericht kann beides haben, eines oder keines.
+- **Hinweis vor dem Speichern:** Kommen im Text Wörter vor, die oft übergaberelevant sind
+  (z. B. „Arzt“, „Termin“, „Krise“, „Sturz“, „verweigert“, „abgängig“), und ist „Übergabe“
+  nicht gesetzt, fragt das Programm einmal nach: „Soll das in die Übergabe?“ — nur ein
+  Hinweis, kein Zwang. Die Wortliste steht in einer Datei und ist erweiterbar.
+- **Kenntnisnahme:** In der Übergabe-Ansicht kann jeder Übergabe-Eintrag mit dem eigenen
+  Kürzel als „gelesen“ bestätigt werden; sichtbar, wer ihn schon gelesen hat.
 - Eingabe aus der Akte (Reiter „Berichte“) und über „Neuer Bericht …“ in der Seitenleiste
   (mit Bewohnerauswahl).
 - Liste je Bewohner, neueste oben; Filter nach Zeitraum, Lebensbereich und Schicht; Suche im
   Text.
-- **Übergabe-Ansicht:** alle Berichte aller Bewohner seit Beginn der vorigen Schicht, die als
-  wichtig markierten oben.
+- **Bereich „Übergabe“** (eigener Bereich in der Seitenleiste, Wunsch Tobi 07.11.2026): Hier
+  steht **nur** die Übergabe, keine übrigen Berichte. So bleibt es auf das Wichtige
+  eingegrenzt.
+  - **Übergabe-Einträge bleiben stehen, bis sie nicht mehr gebraucht werden** — nicht nur
+    eine Schicht lang. Beim Setzen von „Übergabe“ wählt man, wie lange: nächste Schicht
+    (Vorgabe), 3 Tage, 1 Woche, bis Datum … oder „bis erledigt“. So geht nichts unter, was
+    über mehrere Tage weitergegeben werden muss.
+  - Jeder Eintrag lässt sich **verlängern** oder als **erledigt** markieren (mit Kürzel und
+    Zeit). Erledigte und abgelaufene Einträge verschwinden aus der Liste, bleiben aber unter
+    „Erledigt / abgelaufen“ einsehbar. Gelöscht wird nichts.
+  - Anzeige nach Bewohner gruppiert; oben ein Abschnitt „Wohnbereich allgemein“ für
+    Übergaben, die keinen einzelnen Bewohner betreffen (eigene kurze Übergabe-Notiz, ohne
+    Bericht). Marke „läuft heute ab“ und „neu seit deiner letzten Schicht“.
+  - Der Übergabe-Text ist der Bericht selbst; ein kurzer eigener Übergabe-Satz ist möglich
+    (z. B. „Arzttermin Do 10 Uhr, Begleitung nötig“), der Bericht bleibt per Klick lesbar.
+  - Ausdruck als Übergabeblatt (nur die offenen Einträge).
+- **Auf den Karten** (Übersicht und Bewohner): Marke „Übergabe 2“ mit der Zahl der noch
+  ungelesenen Übergabe-Einträge, Marke „Wichtig“ bei wichtigen Berichten der letzten 7 Tage.
+- Bericht schreiben geht schnell: Fenster öffnet mit dem aktuellen Datum, der aktuellen
+  Schicht (aus der Uhrzeit) und dem eigenen Kürzel vorbelegt.
 - **Nichts wird gelöscht oder überschrieben:** Korrekturen sind Nachträge mit eigenem
   Zeitstempel, der ursprüngliche Text bleibt sichtbar.
 - Ausdruck: Berichte eines Bewohners für einen Zeitraum (Druckvorschau).
