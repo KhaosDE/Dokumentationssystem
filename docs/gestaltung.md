@@ -18,7 +18,7 @@ Code, **kein Logo und kein Name der Einrichtung**.
    Semibold, Text 10 pt, Kleingedrucktes/Marken 8,5–9 pt Semibold.
 6. **Kartenraster** als Hauptansicht: weiße Karten auf heller Seite, feiner Rand.
 7. **Kopf** weiß mit weichem Farbverlauf (Orange oben links, Blau rechts), rechts ein
-   Logofeld. Im Dokumentationssystem: Logofeld leer bzw. mit selbst gewähltem Bild aus den
+   Logofeld. In DokuLine: Logofeld leer bzw. mit selbst gewähltem Bild aus den
    Einstellungen (Datei bleibt im Datenordner, nie im Repository).
 8. **Hell als Vorgabe**, Dunkel umschaltbar (wirksam nach Neustart).
 9. Symbole aus „Segoe Fluent Icons“ (Windows-11-Symbolschrift), wo vorhanden.

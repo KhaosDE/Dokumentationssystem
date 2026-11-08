@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Selbst-Update über die Releases dieses Repositorys. Das einzige Projekt mit Netzzugriff.
+       Ohne Oberfläche; das Fortschrittsfenster liefert das Programm (IFortschritt). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>DokuLine.Update</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DokuLine.Kern\DokuLine.Kern.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DokuLine.Tests" />
+  </ItemGroup>
+</Project>

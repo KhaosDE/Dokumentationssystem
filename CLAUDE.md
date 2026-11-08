@@ -1,8 +1,9 @@
-# CLAUDE.md — Regeln für Sitzungen am Dokumentationssystem
+# CLAUDE.md — Regeln für Sitzungen an DokuLine
 
-## Was das Dokumentationssystem ist
+## Was DokuLine ist
 
-Eine **Demo** für ein Dokumentationssystem in einem Wohnbereich eines psychiatrischen
+**DokuLine** („Betreuung auf Augenhöhe“; bis 08.11.2026 „Dokumentationssystem“) ist eine
+**Demo** für ein Dokumentationssystem in einem Wohnbereich eines psychiatrischen
 Wohnheims (ohne Pflege). Sie dient zum **Vorführen** (Kolleginnen, Kollegen, Leitung) und
 zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 
@@ -82,25 +83,28 @@ bis Version 0.2.0, abgelöst durch den Eintrag „Umstieg auf C# / .NET 10“ in
   BSD). Vorgesehen: `Microsoft.Data.Sqlite` (Speicher), ein Testrahmen (z. B. xUnit),
   später `PDFsharp` (MIT) für den HEB-Bogen.
 - **Kern ohne Oberfläche:** Datenmodell, Speichern, Prüfregeln und Demo-Daten in einem
-  eigenen Projekt (`src/Dokusystem.Kern/`), testbar ohne Fenster. Die Oberfläche
-  (`src/Dokusystem/`) ruft nur den Kern auf. Tests in `tests/`.
+  eigenen Projekt (`src/DokuLine.Kern/`), testbar ohne Fenster. Die Oberfläche
+  (`src/DokuLine/`) ruft nur den Kern auf. Tests in `tests/`.
 - **Vorbild und Bausteine: `KhaosDE/Ausgangsliste`** (privat, C#, Windows Forms; in der
   Sitzung als zweites Repository anhängen). Übernehmen und anpassen statt neu erfinden:
   `Stil.cs` (Farben, Schriften, Abstände), Karten- und Kopfbereich, Druckvorschau,
   Datenbank mit Mehrplatz-Schutz, Sicherung. **Beim Übernehmen bereinigen:** kein Logo,
   kein Name der Einrichtung oder des Wohnbereichs, keine Namen von Personen — auch nicht
   in Kommentaren (Regel 1 und 7). Gestaltung: `docs/gestaltung.md`.
-- **Speicher:** SQLite-Datei im Datenordner `%APPDATA%\Dokumentationssystem\`. Hinterlegte
+- **Speicher:** SQLite-Datei im Datenordner `%APPDATA%\DokuLine\` (bis 0.29.1
+  `%APPDATA%\Dokumentationssystem\`; beim ersten Start wird dessen Inhalt kopiert). Hinterlegte
   Bilder und zugeteilte Vorlagen ebenfalls dort, nie im Repository.
 - **Demo-Daten:** lesbare Datei im Repository (`daten/demo/`), beim ersten Start geladen,
   über „Demo-Daten zurücksetzen“ wiederherstellbar.
-- **Programmdatei:** eine einzelne `.exe` (self-contained, single-file, **nicht**
+- **Programmdatei:** eine einzelne `DokuLine.exe` (self-contained, single-file, **nicht**
   komprimiert — gepackte Dateien lösen öfter Virenwarnungen aus, Erfahrung Ausgangsliste).
 - **Selbst-Update** über die Releases dieses Repositorys, Ablauf wie bisher (Vorbild
   `KhaosDE/N3XTBYT3`): GitHub Actions testet bei jedem Push nach `main` unter Windows, baut
   die `.exe` und veröffentlicht sie mit SHA-256-Prüfsumme als Release `build-<Laufnummer>`
   (nicht bei reinen `.md`-Änderungen). Die `.exe` fragt beim Start nach dem neuesten
-  Release, lädt, prüft die Prüfsumme, tauscht sich aus und startet neu. Nur diese Adressen,
+  Release, lädt, prüft die Prüfsumme, tauscht sich aus und startet neu. Übergang bis zur
+  Umbenennung des Repositorys in `DokuLine`: Jedes Release enthält die Datei zusätzlich als
+  `Dokumentationssystem.exe`; der Updater kennt beide Repository-Adressen. Nur diese Adressen,
   kein anderer Netzzugriff. Abschaltbar (`--kein-update` und Einstellung). Schlägt etwas
   fehl, startet die alte Version.
 - Die `.exe` ist nicht signiert; Windows SmartScreen warnt beim ersten Start. Im README in

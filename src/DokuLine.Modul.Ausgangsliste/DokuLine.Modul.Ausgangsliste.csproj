@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Modul „Ausgangsliste“ (zuschaltbar), übernommen aus der Ausgangsliste (docs/bruecke-ausgangsliste.md).
+       Logik/: ohne Fenster, läuft auch in den Kern-Tests unter Linux (net10.0).
+       Oberflaeche/: Seiten und Fenster, nur für Windows (net10.0-windows). -->
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net10.0-windows</TargetFrameworks>
+    <RootNamespace>DokuLine.Modul.Ausgangsliste</RootNamespace>
+    <!-- WFO1000 betrifft nur den Formular-Designer von Visual Studio; die Fenster hier sind von Hand gebaut. -->
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net10.0-windows'">
+    <Compile Remove="Oberflaeche\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DokuLine.Kern\DokuLine.Kern.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
+    <ProjectReference Include="..\DokuLine.Bausteine\DokuLine.Bausteine.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\daten\demo\ausgangsliste.json" LogicalName="DokuLine.Modul.Ausgangsliste.Demo.ausgangsliste.json" />
+  </ItemGroup>
+</Project>
