@@ -193,5 +193,6 @@ public sealed partial class Speicher
         }
         SetzeMeta(DemoTherapie, "1", transaktion);
         SetzeMeta(DemoTherapieAnbieter, "1", transaktion);
+        SetzeMeta(DemoTherapieTag, "1", transaktion);
     }
 }

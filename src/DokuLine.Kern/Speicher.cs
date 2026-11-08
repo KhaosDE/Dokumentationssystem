@@ -23,6 +23,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoMedikation = "demo_medikation";
     private const string DemoTherapie = "demo_therapie";
     private const string DemoTherapieAnbieter = "demo_therapie_anbieter";   // Schritt 22: Demo-Angebote mit Anbieter
+    private const string DemoTherapieTag = "demo_therapie_tag";   // Schritt 26m: Angebote über den ganzen Tag
     private const string DemoKalenderHaus = "demo_kalender_haus";            // Schritt 24: Demo-Termine im Kalender „Haus“
     private const string DemoFahrten = "demo_fahrten";                      // Schritt 24: Fahrzeuge und Fahrten
     private const string DemoStandardaufgaben = "demo_standardaufgaben";    // Schritt 25: Standardaufgaben je Schicht
@@ -862,7 +863,7 @@ public sealed partial class Speicher : IDisposable
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
-             therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null, wochenplan = Meta(DemoWochenplan) is null,
+             therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null || Meta(DemoTherapieTag) is null, wochenplan = Meta(DemoWochenplan) is null,
              kalender = Meta(DemoKalender) is null || Meta(DemoKalenderHaus) is null, fahrten = Meta(DemoFahrten) is null,
              standard = Meta(DemoStandardaufgaben) is null, visiten = Meta(DemoVisiten) is null, aerzte = Meta(DemoAerzte) is null,
              aerztlich = Meta(DemoAerztlich) is null,

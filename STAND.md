@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.14** (Übersicht neu: „Heute wichtig“ und Bewohnerliste, Bauplan Schritt 26l).
+Stand: 08.11.2026. Version: **0.29.15** (Therapie: „Laufende Therapien“ als Anwesenheitstafel, Bauplan Schritt 26m).
 
 ## Aktuell
 
@@ -160,7 +160,14 @@ Doppelklick öffnet die Akte. Die Aktionsleiste hat „Neuer Bericht …“, „
 steht „Heute wichtig“ oben. Die Statusleiste zeigt Demo-Hinweis, Datum, Dienst und Stand. Die Fahrzeuge
 stehen nur noch im Kalender.
 
-**Nächster Schritt:** Bauplan Schritt 26m „Therapie: „Laufende Therapien“ als Anwesenheitstafel“ (0.29.15).
+Neu in 0.29.15: Der Bereich **Therapie** hat zwei Reiter. Der erste, **„Laufende Therapien“**, ist eine
+Anwesenheitstafel: oben eine Tagesleiste von 7 bis 21 Uhr mit allen Angeboten und einem orangefarbenen
+Strich für „jetzt“, darunter je laufender Therapie eine Spalte mit den Teilnehmern (Bereich und Zimmer, Name,
+Bezugspflege, Status als Wort mit Farbe), daneben „Gleich“ und „Noch offen“ (mit „gegangen“ und
+„abgesagt“), unten der Rest des Tages. Bestätigt wird derselbe Eintrag wie im Tagesplan. Die Demo hat
+zehn tägliche Angebote von 07:30 bis 20:45. Der zweite Reiter „Angebote“ ist der bisherige Bereich.
+
+**Nächster Schritt:** Bauplan Schritt 26n „Programmsymbol „Hell wie die Kopfzeile““ (0.29.16).
 
 ## Fertig
 
@@ -857,6 +864,19 @@ stehen nur noch im Kalender.
   - Unter 1100 px Breite der Übersicht steht „Heute wichtig“ über der Liste (höchstens 40 % der Höhe).
   - Statusleiste (alle Bereiche): „DEMO — ausgedachte Daten · So 08.11.2026 · Spätdienst · Stand 14:32“, dann
     der Farbschlüssel.
+- 0.29.15 — Therapie: „Laufende Therapien“ als Anwesenheitstafel (Bauplan Schritt 26m, 08.11.2026):
+  - Therapie mit zwei Reitern: „Laufende Therapien“ (zuerst) und „Angebote“ (wie bisher).
+  - Tagesleiste 7–21 Uhr: je Angebot ein Balken in seiner Länge (laufend blau, vorbei grau), Überschneidungen
+    in eigenen Zeilen, orangefarbener Strich „jetzt“. Klick auf einen Balken: Reiter „Angebote“ beim Angebot.
+  - Je laufender Therapie eine Spalte: Name, „Ort · Therapeut-Kürzel“, „bis 11:30 · 5 von 8“, darunter die
+    Teilnehmer als Kärtchen (Bereich und Zimmer, Name, Bezugspflege) mit Status „gegangen“, „noch offen“,
+    „abgesagt“, „ausgefallen“ als Wort mit Farbe.
+  - Spalte „Gleich“ (Beginn in den nächsten 30 Minuten, mit Teilnehmerzahl) und „Noch offen“ (hat begonnen,
+    nicht bestätigt; „gegangen“ und „abgesagt“ am Kärtchen). Ohne laufende Therapie: „Gerade läuft keine
+    Therapie. Nächste: … um …“. Unten „Rest des Tages“.
+  - Bereichswahl „Alle Bereiche“ oder R1–R3; Vorgabe: der eigene Wohnbereich, für die Therapie alle.
+    Bestätigen darf, wer es im Tagesplan darf. Neu lesen jede Minute und bei Änderungen anderer Rechner.
+  - Demo: zehn tägliche Angebote (Morgenrunde 07:30 bis Abendrunde 20:45) mit 4–7 Teilnehmern aus R1–R3.
 ## Offene Punkte
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
@@ -927,6 +947,17 @@ stehen nur noch im Kalender.
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26m): Die Bereichswahl der Tafel steht in der Ansicht, nicht in der Aktionsleiste
+  (dort bleibt „Neues Angebot …“ für beide Reiter). Im Wohnbereich zeigt die Tafel nur Angebote mit Teilnehmern
+  aus dem Bereich; „5 von 8“ zählt alle Teilnehmer.
+- 08.11.2026 (Schritt 26m): „Noch offen“ behält auch Termine, die schon vorbei sind, bis jemand bestätigt (wie
+  im Tagesplan). „Rest des Tages“ zeigt nur, was noch kommt. Das Therapeut-Kürzel kommt aus der
+  Mitarbeiterliste, sonst aus den Anfangsbuchstaben.
+- 08.11.2026 (Schritt 26m): Für die Demo zehn tägliche Angebote (auch am Wochenende), zugeteilt nur Bewohnern
+  aus Schritt 26h, ohne Überschneidung mit Wochenplan und anderen Therapien; Lücken bleiben mittags und
+  am Nachmittag. Ältere Demo-Datenbanken bekommen Therapien und Wochenplan der Demo einmal neu; dort selbst
+  angelegte Angebote, Zuteilungen und Wochenplan-Einträge der Demo werden dabei ersetzt.
 
 - 08.11.2026 (Schritt 26l): **Fahrzeuge** stehen nur noch im Kalender (dort gab es dieselbe Leiste schon);
   in „Heute wichtig“ ist für sie kein Kasten vorgesehen. **Änderungen der Medikation** stehen als Hinweis in
@@ -1528,6 +1559,18 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.15:
+
+1. „Therapie“ öffnen: Reiter „Laufende Therapien“ ist zuerst offen. Oben die Tagesleiste 7–21 Uhr mit dem
+   orangefarbenen Strich bei der jetzigen Uhrzeit.
+2. Je laufender Therapie eine Spalte mit Kärtchen (Bereich · Zimmer, Name, Bezugspflege, Status). Daneben
+   „Gleich“ und „Noch offen“.
+3. In „Noch offen“ bei einem Kärtchen „gegangen“: es wandert in seine Therapie-Spalte („gegangen“); im
+   Tagesplan steht derselbe Status mit Kürzel.
+4. Bereichswahl R2: nur Bewohner aus R2. Als „EF“ ist R1 vorgewählt, als „OP“ „Alle Bereiche“.
+5. Klick auf einen Balken der Tagesleiste: Reiter „Angebote“ beim Angebot.
+6. Abends nach 20:45: „Gerade läuft keine Therapie. Heute kommt keine mehr.“
 
 Version 0.29.14 (am besten im Vollbild):
 

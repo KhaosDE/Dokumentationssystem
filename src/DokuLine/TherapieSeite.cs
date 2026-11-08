@@ -20,6 +20,11 @@ public sealed class TherapieSeite : Panel
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neues Angebot …");
     public List<AngebotKarte> Karten { get; } = [];
     public event Action? Geaendert;
+    // Schritt 26m: erster Reiter „Laufende Therapien“ (Anwesenheitstafel), zweiter die Angebote wie bisher.
+    public const string LaufendReiter = "Laufende Therapien", AngeboteReiter = "Angebote";
+    public Reiterleiste Reiter { get; } = new([LaufendReiter, AngeboteReiter]);
+    public LaufendeTherapienAnsicht Laufend { get; }
+    public bool LaufendAktiv => Reiter.Aktiv == LaufendReiter;
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
 
@@ -39,6 +44,43 @@ public sealed class TherapieSeite : Panel
         AnbieterFilter.SelectedIndexChanged += (_, _) => { if (!filterFuellen) Aktualisieren(); };
         NeuKnopf.Click += (_, _) => Bearbeiten(null);
         Controls.Add(leiste);
+        Laufend = new LaufendeTherapienAnsicht(speicher) { Jetzt = () => Jetzt() };
+        Laufend.Geaendert += () => { if (LaufendAktiv) Geaendert?.Invoke(); };
+        // Klick auf einen Balken der Tagesleiste: das Angebot im Reiter „Angebote“.
+        Laufend.AngebotGewaehlt += a =>
+        {
+            Reiter.Waehlen(AngeboteReiter);
+            if (Karten.FirstOrDefault(k => k.Angebot.Id == a.Id) is AngebotKarte karte) ScrollControlIntoView(karte);
+        };
+        Reiter.Gewechselt += _ => AnsichtWechseln();
+        Controls.Add(Reiter);
+        Controls.Add(Laufend);
+        SichtbarkeitSetzen();
+    }
+
+    private void SichtbarkeitSetzen()
+    {
+        Laufend.Visible = LaufendAktiv;
+        leiste.Visible = !LaufendAktiv;
+        foreach (var c in inhalt) c.Visible = !LaufendAktiv;
+    }
+
+    // Mehrplatz und Änderungen: die gezeigte Ansicht neu lesen.
+    public void NeuLesen()
+    {
+        if (LaufendAktiv) Laufend.Aktualisieren();
+        else Aktualisieren();
+    }
+
+    // Reiter gewechselt: nur die eine Ansicht zeigen und neu lesen.
+    private void AnsichtWechseln()
+    {
+        AutoScrollPosition = Point.Empty;
+        SichtbarkeitSetzen();
+        if (LaufendAktiv) Laufend.Zeigen();
+        else Aktualisieren();
+        PerformLayout();
+        Geaendert?.Invoke();
     }
 
     public DateOnly Stichtag
@@ -75,6 +117,7 @@ public sealed class TherapieSeite : Panel
     {
         get
         {
+            if (LaufendAktiv) return Laufend.KopfText;
             var tag = Stichtag;
             var alle = Gefiltert().Where(a => a.Fassungen[0].GiltAb <= tag).ToList();
             int teilnahmen = alle.Sum(a => a.TeilnehmerAm(tag).Count), frei = alle.Sum(a => a.FreiAm(tag));
@@ -87,6 +130,7 @@ public sealed class TherapieSeite : Panel
         string heute = Datum.Text(DateOnly.FromDateTime(Jetzt()));
         if (TagFeld.Text != heute) TagFeld.Text = heute;
         else Aktualisieren();
+        if (LaufendAktiv) Laufend.Zeigen();
     }
 
     public void Aktualisieren()
@@ -119,7 +163,7 @@ public sealed class TherapieSeite : Panel
         }
         if (Karten.Count == 0)
             inhalt.Add(new Label { Text = AnbieterFilter.SelectedItem is string f && f != AlleAnbieter ? $"Keine Angebote von {f}." : "Noch keine Angebote.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
-        foreach (var c in inhalt) Controls.Add(c);
+        foreach (var c in inhalt) { c.Visible = !LaufendAktiv; Controls.Add(c); }
         ResumeLayout(false);
         AutoScrollPosition = Point.Empty;
         PerformLayout();
@@ -150,6 +194,14 @@ public sealed class TherapieSeite : Panel
         int rand = Stil.Px(this, Stil.AbstandGross);
         int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int y = rand + AutoScrollPosition.Y;
+        Reiter.SetBounds(rand, y, breite, Reiter.Height);
+        y = Reiter.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        if (LaufendAktiv)
+        {
+            AutoScrollMinSize = Size.Empty;
+            Laufend.SetBounds(rand, y, breite, Math.Max(Stil.Px(this, 300), ClientSize.Height - y - rand));
+            return;
+        }
         leiste.MaximumSize = new Size(breite, 0);
         leiste.Bounds = new Rectangle(new Point(rand, y), leiste.GetPreferredSize(new Size(Math.Max(100, breite), 0)));
         y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
