@@ -51,8 +51,9 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 26 | Visiten | 0.29.0 |
 | 26a | Kürzel automatisch aus der Anmeldung | 0.29.1 |
 | 26a1 | Umbenennung in DokuLine, Teil 1 (Übergang) | 0.29.2 |
-| 26b | Ärzteverzeichnis | 0.29.3 |
-| 26c | Visite: Übersicht aller Bewohner | 0.29.4 |
+| 26a2 | Position „Administrator“ mit Kürzel TST | 0.29.3 |
+| 26b | Ärzteverzeichnis | 0.29.4 |
+| 26c | Visite: Übersicht aller Bewohner | 0.29.5 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
@@ -1100,3 +1101,24 @@ Adressen weiter; Version 0.29.2 kommt mit beiden Namen zurecht.
 Teil 3 (später, eigener Eintrag, erst wenn alle Installationen mindestens 0.29.2 haben):
 alten Dateinamen und alten Adress-Anfang entfernen, `%APPDATA%\Dokumentationssystem\` nicht
 mehr beachten.
+
+## Position „Administrator“ mit Kürzel TST
+Status: freigegeben (Bauplan Schritt 26a2)
+Datum: 08.11.2026
+Was: Neue Position „Administrator“ und ein Mitarbeiter mit dem Kürzel **TST** in dieser
+Position.
+Warum: Wunsch Tobi (08.11.2026): „Lege ein Kürzel TST als Administrator an.“
+Umfang:
+- **Position „Administrator“** an erster Stelle der Positionsliste. Hat **alle** Rechte der
+  Rechte-Tabelle, auch „Rechte verwalten“ und „Mitarbeiter verwalten (alle)“, in allen
+  Bereichen. Diese Häkchen sind für den Administrator **nicht abwählbar** (ausgegraut mit
+  Hinweis „Der Administrator hat immer alle Rechte“), damit sich niemand aus der
+  Rechteverwaltung aussperren kann. „Nur Fachkräfte“ gilt für den Administrator nicht.
+- Es muss immer **mindestens ein aktiver Administrator** bleiben: Den letzten kann man weder
+  ausscheiden lassen noch seine Position entziehen (Hinweis statt Fehler).
+- **Mitarbeiter TST** in `daten/demo/mitarbeiter.json`: Kürzel `TST`, Vorname „Test“,
+  Nachname „Administrator“ (kein echter Name, `CLAUDE.md` Regel 1), Fachkraft ja, alle Bereiche,
+  Position „Administrator“.
+- **Bestehende Datenbanken:** Fehlt TST beim Start, wird er einmalig ergänzt (auch ohne
+  „Demo-Daten zurücksetzen“), Protokolleintrag. Ein vorhandener TST wird nicht verändert.
+- Anmeldung mit `TST` wie bei allen anderen (Demo ohne Passwort).
