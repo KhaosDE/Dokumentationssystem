@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.8** (Fenster „Ärztliche Informationen“, Bauplan Schritt 26f).
+Stand: 08.11.2026. Version: **0.29.9** (Tagesplan als Anzeigetafel, Bauplan Schritt 26g).
 
 ## Aktuell
 
@@ -124,7 +124,14 @@ Haupt-/Nebendiagnose, seit, gestellt von – aus dem Ärzteverzeichnis; nie lös
 Notfall“**. Der Allergiehinweis bleibt oben in der Akte; bearbeitet wird er nur noch dort. Neue Rechte
 „Ärztliche Informationen ansehen/bearbeiten“. Visite und HEB-Bogen zeigen die Diagnosen als Information.
 
-**Nächster Schritt:** Bauplan Schritt 26g „Tagesplan als Anzeigetafel“ (0.29.9).
+Neu in 0.29.9: Der **Tagesplan** ist eine **Anzeigetafel** wie am Flughafen: dunkle Fläche, große helle
+Schrift, oben rechts groß Uhrzeit und Datum. Spalten Zeit · Bewohner · Termin · Ort · Begleitung ·
+**Status als Wort mit Farbe** (JETZT, GLEICH, GEPLANT, GEGANGEN, NOCH OFFEN, ABGESAGT, AUSGEFALLEN,
+ZURÜCK, VORBEI). Oben **„Jetzt und gleich“**, darunter „Später heute“, unten blasser „Erledigt“. Die Tafel
+erneuert sich jede Minute. Bestätigen in der Zeile („bestätigen ▾“). **Vollbild** mit Knopf oder **F11**,
+Esc beendet.
+
+**Nächster Schritt:** Bauplan Schritt 26h „Demo-Daten: 23 Bewohner je Wohnbereich“ (0.29.10).
 
 ## Fertig
 
@@ -737,6 +744,28 @@ Notfall“**. Der Allergiehinweis bleibt oben in der Akte; bearbeitet wird er nu
     zwei Reaktionen und zwei Notfallhinweise. Bestehende Demo-Datenbanken bekommen sie beim ersten Start.
   - Behoben: Die Visite (0.29.5) zeigte „Allergien: Allergien: …“ doppelt, auf dem Bildschirm und in
     der Visitenliste.
+- 0.29.9 — Tagesplan als Anzeigetafel (Bauplan Schritt 26g, 08.11.2026):
+  - Die Seite „Tagesplan“ zeigt oben hell die Schalter („nach Uhrzeit“, „nach Bewohner“, „alle
+    Bereiche“, „Vollbild (F11)“), darunter die Tafel: dunkle Fläche, helle große Schrift, Zeit in fester
+    Zeichenbreite (gelb), oben links „TAGESPLAN · R1“ und „Demo — ausgedachte Daten“, oben rechts groß
+    Uhrzeit und Datum.
+  - Spalten: Zeit · Bewohner (mit Zimmer) · Termin bzw. Therapie · Ort · Begleitung (Therapeut,
+    Begleitung des Ausflugs, Fahrzeug und Fahrer) · Status. Der Status ist immer ein Wort auf farbiger
+    Fläche, daneben klein, wann und von wem bestätigt („09:05 · CD“).
+  - Die Spalten passen sich der Breite an: Ist es zu schmal, fällt zuerst „wann · wer“ weg, dann
+    „Begleitung“, dann „Ort“ (Bewohner und Termin bleiben immer). „nach Bewohner“ hat keine Spalte
+    „Bewohner“, der Name steht in der Überschrift. Beim Darüberfahren zeigt ein Hinweis die ganze Zeile.
+  - Status: JETZT (läuft), GLEICH (beginnt in den nächsten 30 Minuten), GEPLANT, GEGANGEN (bis zum Ende
+    der Therapie), NOCH OFFEN (Therapie hat begonnen, nichts bestätigt), ABGESAGT, AUSGEFALLEN, ZURÜCK
+    (nach „gegangen“, Therapie zu Ende), VORBEI (anderer Termin zu Ende). Ganztägiges läuft den ganzen Tag.
+  - Blöcke: „JETZT UND GLEICH“ (gelb hervorgehoben), „SPÄTER HEUTE“, „ERLEDIGT“ (blasser); darin nach
+    Uhrzeit. „nach Bewohner“: je Bewohner eine Überschrift, Status wie oben.
+  - Erneuert sich jede Minute (Uhr, Status, Reihenfolge), nach jeder Bestätigung und über den
+    Mehrplatz-Abgleich (alle 30 Sekunden).
+  - Therapien: „bestätigen ▾“ in der Zeile mit „gegangen“, „abgesagt“, „ausgefallen“ (derselbe Eintrag wie
+    im Wochenplan; Recht „Teilnahme bestätigen“).
+  - Vollbild: Knopf oder F11 (im Tagesplan) – nur die Tafel über den ganzen Bildschirm, auch mit
+    Demo-Hinweis; Esc oder F11 beendet. Beim Abmelden (F12) wird es geschlossen.
 
 ## Offene Punkte
 
@@ -794,6 +823,21 @@ Notfall“**. Der Allergiehinweis bleibt oben in der Akte; bearbeitet wird er nu
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26g): „NOCH OFFEN“ bleibt oben in „Jetzt und gleich“, auch nach dem Ende der
+  Therapie, bis jemand bestätigt – unten bei „Erledigt“ würde es übersehen.
+- 08.11.2026 (Schritt 26g): Für Termine ohne Bestätigung (Kalender, Wochenplan, Fahrten) gibt es nach dem
+  Ende das Wort „VORBEI“. Die Liste aus dem Chat hat dafür kein Wort; „ZURÜCK“ würde etwas behaupten,
+  das niemand bestätigt hat.
+- 08.11.2026 (Schritt 26g): Bestätigen über einen Knopf „bestätigen ▾“ mit Auswahl statt drei Knöpfen je
+  Zeile: Drei Knöpfe passen nicht in eine Tafelzeile neben sechs Spalten.
+- 08.11.2026 (Schritt 26g): Die Spalte „Begleitung“ zeigt bei Therapien den Therapeuten, bei Ausflügen
+  die Begleitung, bei Fahrten Fahrzeug und Fahrer; der Wochenplan hat dafür kein Feld.
+- 08.11.2026 (Schritt 26g): Schmale Fenster: Spalten fallen weg statt zu schrumpfen (zuerst „wann ·
+  wer“, dann „Begleitung“, dann „Ort“) – drei Buchstaben je Spalte wären auf Abstand nicht lesbar.
+  Mindestbreite je Textspalte 120 Pixel. Der volle Text steht im Hinweis und für Bildschirmleser.
+- 08.11.2026 (Schritt 26g): Die Marke der Herkunft (Therapie, Kalender, Fahrt, Wochenplan) entfällt auf
+  der Tafel; der Titel sagt es („Fahrt: …“, „Haus: …“).
 
 - 08.11.2026 (Schritt 26f): „Bearbeiten nur Fachkräfte und Leitungen“ ist wie bei der Medikation
   vorbelegt: alle Positionen außer Verwaltung, mit Häkchen „nur Fachkräfte“. Leitungen, die Fachkraft
@@ -1334,6 +1378,22 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.9:
+
+1. Als „CD“ links „Tagesplan“: dunkle Tafel, oben rechts groß Uhrzeit und Datum, oben links „TAGESPLAN ·
+   R1“ und „Demo — ausgedachte Daten“. Spalten Zeit · Bewohner · Termin · Ort · Begleitung · Status.
+2. Oben „JETZT UND GLEICH“ (gelb), darunter „SPÄTER HEUTE“, unten blasser „ERLEDIGT“. Jede Zeile hat ein
+   Status-Wort (z. B. GEPLANT, GLEICH, JETZT, NOCH OFFEN).
+3. Bei einer laufenden Therapie „bestätigen ▾“ → „gegangen“ → GEGANGEN, daneben „Uhrzeit · CD“. Danach
+   „abgesagt“ → ABGESAGT, die Zeile rutscht nach „ERLEDIGT“. Im Wochenplan steht dasselbe.
+4. Eine Minute warten: Uhr und Status gehen von selbst weiter (z. B. GLEICH → JETZT).
+5. „nach Bewohner“: je Bewohner eine Überschrift, Status bleibt, keine Spalte „Bewohner“. „alle Bereiche“
+   zeigt auch R2. Fenster schmaler ziehen: „Begleitung“ und „Ort“ verschwinden, beim Darüberfahren
+   steht die ganze Zeile im Hinweis; maximiert erscheint neben dem Status „Uhrzeit · Kürzel“.
+6. „Vollbild (F11)“ oder F11: nur die Tafel über den ganzen Bildschirm; Esc beendet. Im Vollbild
+   bestätigen → beide Tafeln zeigen es. Im Vollbild F12 → Rückfrage, dann Abmelden.
+7. Ohne Anmeldung ist „bestätigen ▾“ grau mit Begründung.
 
 Version 0.29.8:
 

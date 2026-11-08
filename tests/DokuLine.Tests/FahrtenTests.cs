@@ -46,7 +46,7 @@ public sealed class FahrtenTests : IDisposable
         Assert.Equal("abwesend: unterwegs mit Caddy bis 11:05", s.Mitfahrende(jetzt)[B("Eiche")].Text);
         Assert.Equal(MarkenArt.Abwesend, s.Mitfahrende(jetzt)[B("Eiche")].Art);
         Assert.Contains(s.Tagesplan(DateOnly.FromDateTime(jetzt), [s.Bewohner(B("Eiche"))!]),
-            z => z.Termin.Quelle == TerminQuelle.Fahrt && z.Termin.Titel == "Fahrt: Arzttermin (Caddy)");
+            z => z.Termin.Quelle == TerminQuelle.Fahrt && z.Termin.Titel == "Fahrt: Arzttermin (Caddy)" && z.Termin.Begleitung.StartsWith("Caddy · Fahrer ", StringComparison.Ordinal));   // Tafel (26g)
         // Rückkehr überschritten.
         Assert.EndsWith("– Rückkehr überschritten", s.FahrzeugStaende(jetzt.AddHours(2)).Single(x => x.Fahrzeug == "Caddy").Text);
         Assert.True(s.FahrzeugStaende(jetzt.AddHours(2)).Single(x => x.Fahrzeug == "Caddy").Ueberfaellig);

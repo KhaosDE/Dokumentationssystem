@@ -202,6 +202,7 @@ public static class KalenderRegeln
         return new Termin
         {
             Tag = tag, Von = von, Bis = bis, Titel = titel, Ort = f.Art == KalenderArt.Ausflug ? f.Treffpunkt : f.Ort, Hinweis = f.Hinweis,
+            Begleitung = f.Art == KalenderArt.Ausflug ? f.Begleitung : "",
             Quelle = TerminQuelle.Kalender, KalenderId = k.Id, Ganztags = ganztags,
         };
     }

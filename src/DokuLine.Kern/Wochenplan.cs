@@ -40,6 +40,7 @@ public sealed record Termin
     public string Titel { get; init; } = "";
     public string Ort { get; init; } = "";
     public string Hinweis { get; init; } = "";
+    public string Begleitung { get; init; } = "";   // Tagesplan-Tafel (Schritt 26g): Therapeut, Begleitung des Ausflugs, Fahrzeug und Fahrer
     public TerminQuelle Quelle { get; init; }
     public long? PlanEintragId { get; init; }
     public long? ZuteilungId { get; init; }
@@ -147,7 +148,7 @@ public static class WochenplanRegeln
                 foreach (var t in f.Termine.Where(t => t.Tag == tag.DayOfWeek))
                     liste.Add(new Termin
                     {
-                        Tag = tag, Von = t.Von, Bis = t.Bis, Titel = f.Name, Ort = f.Ort, Hinweis = f.Therapeut,
+                        Tag = tag, Von = t.Von, Bis = t.Bis, Titel = f.Name, Ort = f.Ort, Hinweis = f.Therapeut, Begleitung = f.Therapeut,
                         Quelle = TerminQuelle.Therapie, ZuteilungId = z.Id,
                         Teilnahme = teilnahmen.GetValueOrDefault((z.Id, tag), Teilnahme.Offen),
                     });

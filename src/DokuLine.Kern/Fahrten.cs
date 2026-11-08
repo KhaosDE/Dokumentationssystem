@@ -132,6 +132,7 @@ public static class FahrtRegeln
     {
         Tag = DateOnly.FromDateTime(f.Von), Von = TimeOnly.FromDateTime(f.Von), Bis = TimeOnly.FromDateTime(f.Bis),
         Titel = $"Fahrt: {ZweckText(f.Zweck)} ({f.Fahrzeug})", Ort = f.Ziel, Hinweis = $"Fahrer {f.Fahrer}", Quelle = TerminQuelle.Fahrt,
+        Begleitung = $"{f.Fahrzeug} · Fahrer {f.Fahrer}",
     };
 
     public static string Langtext(Fahrt f) =>
