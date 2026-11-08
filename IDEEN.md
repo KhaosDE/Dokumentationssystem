@@ -40,6 +40,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 15 | HEB-Bogen aus Berichten | 0.18.0 |
 | 16 | Bewohnerakte: Ergänzungen | 0.19.0 |
 | 17 | Mehrplatzbetrieb (Demo-Stufe) | 0.20.0 |
+| 18 | Oberfläche: volle Fläche, einklappbares Seitenmenü | 0.21.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -600,3 +601,31 @@ Umfang:
   gemeinsamen Ordner nur ausgedachte Daten.
 - Testen ohne zweites Gerät: zwei Programmfenster auf einem Rechner mit demselben
   Datenbank-Ordner.
+
+## Oberfläche: volle Fläche, einklappbares Seitenmenü
+Status: freigegeben (Bauplan Schritt 18)
+Datum: 08.11.2026
+Was: Drei Änderungen an der Oberfläche nach Tobis Durchsicht von Version 0.20.0.
+Warum: Rückmeldung Tobi (08.11.2026) mit Bildschirmfoto der Bewohnerakte (Reiter
+„Wochenplan“): Die Inhalte nehmen nur etwa die linke Hälfte ein, rechts bleibt die Fläche
+leer. Die Übersichtsseite ist gut und bleibt, wie sie ist.
+Umfang:
+- **Inhalte füllen die ganze restliche Fläche.** Keine feste Höchstbreite mehr; alle
+  Ansichten (Akte mit Kopfkarte, Allergiehinweis, Reitern und deren Inhalt, Wochenplan,
+  Kalender, Listen, Formulare im Fenster) wachsen mit der Fenstergröße in Breite und Höhe.
+  Der Wochenplan verteilt die Tagesspalten auf die volle Breite und die Stunden auf die
+  verfügbare Höhe (bei Platzmangel Bildlauf statt Abschneiden). Mindestgrößen so, dass bei
+  1366 × 768 nichts abgeschnitten wird. Gilt für jeden Bereich, nicht nur die Akte.
+- **Seitenmenü einklappbar:** Knopf oben im Seitenmenü (Symbol aus „Segoe Fluent Icons“)
+  schaltet zwischen voller Breite und einer schmalen Leiste nur mit Symbolen um. Eingeklappt:
+  Tooltip mit dem Namen je Symbol, Zähler (z. B. Aufgaben 5) als kleine Zahl am Symbol, aktiver
+  Bereich weiterhin hervorgehoben. Unten Versions- und Bereichsangabe sowie „Demo-Daten
+  zurücksetzen“ eingeklappt nur als Symbol mit Tooltip. Zustand wird in den Einstellungen
+  gemerkt. Die frei werdende Fläche nutzen die Inhalte sofort (siehe oben).
+- **„Neuer Bericht …“ ist kein eigener Menüpunkt mehr.** Stattdessen: Knopf „Neuer
+  Bericht …“ im Kopf der Bewohnerakte (neben „Status …“; die farbige Hauptaktion bleibt
+  „Bearbeiten …“ bzw. wird „Neuer Bericht …“ — die einfachere Lösung wählen und in
+  `STAND.md` festhalten), im Reiter „Berichte“ und per Rechtsklick auf eine Bewohnerkarte
+  (Übersicht und Bewohner). Ohne vorher gewählten Bewohner gibt es keinen Einstieg mehr.
+- Bildschirmfotos im Testlauf für die geänderten Ansichten erneuern (ausgeklappt und
+  eingeklappt).
