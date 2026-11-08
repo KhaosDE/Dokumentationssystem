@@ -649,15 +649,22 @@ Warum: Vorgaben Tobi (08.11.2026): Man meldet sich beim Start mit seinem Kürzel
 Kürzel wird beim Anlegen eines Mitarbeiters festgelegt. Nicht jeder darf alles.
 Umfang:
 - **Mitarbeiterdatenbank:** Kürzel (eindeutig, Pflicht), Vor- und Nachname (ausgedacht),
-  Position, Bereich(e), **Fachkraft ja/nein**, aktiv/ausgeschieden (ausgeschiedene können
-  sich nicht mehr anmelden, bleiben aber an ihren Einträgen sichtbar). Gelöscht wird nicht.
+  **Fachkraft ja/nein**, aktiv/ausgeschieden (ausgeschiedene können sich nicht mehr anmelden,
+  bleiben aber an ihren Einträgen sichtbar). Gelöscht wird nicht.
+- **Zuordnung zu Bereichen und Positionen** (Vorgabe Tobi, 08.11.2026): Im Mitarbeiter-Formular
+  wählt man per Häkchen **einen oder mehrere Bereiche** und **eine oder mehrere Positionen**.
+  Hat jemand mehrere Positionen, gelten die Rechte aller zusammen. Rechte, die sich auf
+  „eigenen Bereich“ beziehen (z. B. Mitarbeiter verwalten für Bereichsleitungen), gelten für
+  alle zugeordneten Bereiche.
+- **Bereiche und Positionen sind Listen in den Einstellungen** (anlegen, umbenennen,
+  stilllegen; nicht löschen, solange jemand zugeordnet ist). Demo-Bereiche ausgedacht, z. B.
+  „Wohnbereich A“, „Wohnbereich B“, „Therapie“, „Verwaltung“.
 - **Anmeldung beim Start:** Fenster „Anmelden“ mit Kürzel. Demo: **ohne Passwort**; das
   Fenster ist so gebaut, dass ein Passwortfeld später ergänzt werden kann. „Angemeldet als …“
   oben rechts wird zu „Abmelden / Benutzer wechseln“. Das bisherige „Benutzer wählen“ ohne
   Anmeldung entfällt.
-- **Positionen:** Geschäftsführung, Hausleitung, Verwaltung, Bereichsleitung, Mitarbeiter
-  Wohnbereich, Psychologischer Fachdienst, Pädagogischer Fachdienst, Therapie. Liste
-  erweiterbar.
+- **Positionen (Vorbelegung):** Geschäftsführung, Hausleitung, Verwaltung, Bereichsleitung,
+  Mitarbeiter Wohnbereich, Psychologischer Fachdienst, Pädagogischer Fachdienst, Therapie.
 - **Rechte als Tabelle mit Häkchen** (Wunsch Tobi): Zeilen = Funktionen, Spalten =
   Positionen, dazu je Funktion ein Häkchen „nur Fachkräfte“. Bearbeiten dürfen nur
   Positionen mit dem Recht „Rechte verwalten“. Funktionen mindestens: Bewohner anlegen und
@@ -670,7 +677,8 @@ Umfang:
 - **Vorbelegung** (laut Tobi, in der Tabelle änderbar): Geschäftsführung, Hausleitung und
   Verwaltung dürfen alles. Wohnbereiche haben keine Mitarbeiterverwaltung, außer der
   Bereichsleitung (eigener Bereich). Der Psychologische Fachdienst verwaltet die
-  Medikamentendatenbank. „Medikament anlegen“ hat „nur Fachkräfte“. „Therapien bearbeiten“
+  Medikamentendatenbank. „Medikament anlegen“ **und „Medikation bearbeiten“** haben „nur
+  Fachkräfte“ (Tobi, 08.11.2026); beide Häkchen lassen sich in den Einstellungen herausnehmen. „Therapien bearbeiten“
   nur Position Therapie (und die drei Leitungspositionen). Übrige Vorbelegung: die einfachere,
   sinnvolle Lösung, in `STAND.md` festhalten.
 - Fehlt ein Recht, ist der Knopf ausgegraut mit Hinweis „Dafür fehlt die Berechtigung“ —
@@ -711,6 +719,8 @@ Warum: Rückmeldung Tobi (08.11.2026): Ab mehr als drei Medikamenten wird die bi
 Darstellung sehr unübersichtlich. Auf einen Blick muss erkennbar sein, wie das Medikament
 heißt, welcher Arzt es verordnet hat und seit wann.
 Umfang:
+- Der Reiter „Medikation“ in der Akte heißt künftig **„Medikamentenplan“** (Begriff wie im
+  Haus). Alle Änderungen an der Medikation eines Bewohners passieren hier.
 - **Tabelle „Was gilt heute“:** eine Zeile je Medikament; Spalten: Medikament (Name,
   Stärke, Darreichungsform), morgens, mittags, abends, nachts, **verordnet von** (Arzt),
   **seit** (Datum), Status (aktiv / „pausiert bis …“ / „Stufe 2 von 4“), Hinweis. Sortierbar,
@@ -829,8 +839,9 @@ Umfang:
     das Anlegen-Formular öffnet (Name aus der Visite vorbelegt; nur Fachkräfte, siehe oben).
     Danach geht es direkt weiter zur Verordnung.
   - Medikament **vorhanden** → „Medikation ändern: … (neu / Dosis / Pause / absetzen)“ mit
-    Knopf, der das passende Formular der Medikation beim Bewohner öffnet, vorbelegt mit der
-    Visite als Anordnung (Arzt, Datum).
+    Knopf, der den **Medikamentenplan des jeweiligen Bewohners** öffnet (Reiter
+    „Medikamentenplan“) und dort das passende Formular, vorbelegt mit der Visite als
+    Anordnung (Arzt, Datum). Geändert wird nur dort (Vorgabe Tobi, 08.11.2026).
   - Die Aufgabe steht zusätzlich in den Aufgaben der Schicht und in der Übergabe, bis sie
     erledigt ist; „Später“ schließt nur die Einblendung.
   - Die Medikation wird **nicht** automatisch geändert; eine berechtigte Person trägt die
