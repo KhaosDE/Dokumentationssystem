@@ -17,10 +17,10 @@ public class UebersichtOberflaechenTests
         f.BereichWaehlen(Hauptfenster.Startbereich);
         var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
         Assert.Empty(f.Kopf.Knoepfe);
-        Assert.StartsWith("10 Bewohner · Stand ", f.Kopf.KleinText);
-        Assert.StartsWith("10 Bewohner · ", s.HeuteText.Text);
+        Assert.StartsWith("8 Bewohner · Wohnbereich A · Stand ", f.Kopf.KleinText);   // eigener Bereich (Mehrplatz)
+        Assert.StartsWith("8 Bewohner · ", s.HeuteText.Text);
         Assert.Contains("Pause beginnt", s.Medikation.Text);
-        Assert.Equal(10, s.Karten.Count);
+        Assert.Equal(8, s.Karten.Count);
         var holunder = s.Karten.Single(k => k.Bewohner.Nachname == "Holunder");
         Assert.Single(holunder.Marken, m => m.Art == MarkenArt.Abwesend);   // nur einmal, obwohl Kalender und Modul es melden
         Assert.Contains(s.Karten.Single(k => k.Bewohner.Nachname == "Fichte").Marken, m => m.Text == "Medikation: Pause beginnt");

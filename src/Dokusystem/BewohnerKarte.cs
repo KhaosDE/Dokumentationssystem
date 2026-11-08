@@ -26,9 +26,10 @@ public sealed class BewohnerKarte : Control
     // ungeleseneUebergaben: offene Übergabe-Einträge, die das eigene Kürzel noch nicht gelesen hat;
     // wichtigeBerichte: als „Wichtig“ gekennzeichnete Berichte der letzten 7 Tage.
     // modulMarken: Marken eingeschalteter Module (z. B. „abwesend: Heimfahrt bis …“), hinten.
+    // vorne: z. B. die Statusmeldung (Mehrplatzbetrieb); hinten: z. B. ein fremder Wohnbereich.
     public BewohnerKarte(Bewohner bewohner, DateOnly heute, int ungeleseneUebergaben = 0, int wichtigeBerichte = 0,
-        IEnumerable<Marke>? modulMarken = null)
-        : this(bewohner, heute, [.. Kennzeichen.Marken(bewohner, ungeleseneUebergaben, wichtigeBerichte), .. modulMarken ?? []])
+        IEnumerable<Marke>? modulMarken = null, IEnumerable<Marke>? vorne = null, IEnumerable<Marke>? hinten = null)
+        : this(bewohner, heute, [.. vorne ?? [], .. Kennzeichen.Marken(bewohner, ungeleseneUebergaben, wichtigeBerichte), .. modulMarken ?? [], .. hinten ?? []])
     {
     }
 

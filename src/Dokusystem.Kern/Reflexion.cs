@@ -55,6 +55,11 @@ public static class ReflexionRegeln
         };
     }
 
+    // Alle Texte als ein Text (für den Konflikt-Hinweis).
+    public static string AlsText(ReflexionFassung f) =>
+        (f.Fertig ? "fertig" : "Entwurf") + Environment.NewLine + string.Join(Environment.NewLine,
+            f.Texte.Select((t, i) => $"{Environment.NewLine}{i + 1}. {BerichtRegeln.Lebensbereiche[i]}:{Environment.NewLine}{(t.Length > 0 ? t : "(leer)")}"));
+
     // Gleich, wenn Texte und Status gleich sind (dann entsteht keine neue Fassung).
     public static bool Gleich(ReflexionFassung a, ReflexionFassung b) => a.Fertig == b.Fertig && a.Texte.SequenceEqual(b.Texte);
 

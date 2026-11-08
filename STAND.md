@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.19.0** (Bewohnerakte: Ergänzungen, Bauplan Schritt 16).
+Stand: 08.11.2026. Version: **0.20.0** (Mehrplatzbetrieb, Demo-Stufe, Bauplan Schritt 17).
 
 ## Aktuell
 
@@ -21,10 +21,14 @@ Digitaler Ausgang), übernommen aus der Ausgangsliste. Dazu kommen die **Biograf
 wichtig ist). Neu ist der **HEB-Bogen** (A, B, C) mit Quellen, Zählern, Stilhinweisen,
 Textbausteinen und dem Ausfüllen einer zugeteilten PDF.
 
-Neu in der Akte: **„offen geführt“** (ja / nein / nicht erfasst) und das **Alter**.
+In der Akte stehen **„offen geführt“** (ja / nein / nicht erfasst) und das **Alter**.
 
-**Nächster Schritt:** Bauplan Schritt 17 „Mehrplatzbetrieb (Demo-Stufe)“ (0.20.0). Bitte die
-Testlisten unten durchgehen, vor allem den HEB-Bogen mit dem echten Bogen des Kostenträgers.
+Neu ist der **Mehrplatzbetrieb (Demo-Stufe)**: Datenbank lokal oder in einem gemeinsamen Ordner,
+Konfliktschutz mit beiden Fassungen, Bereichskennung je Rechner, Wohnbereich je Bewohner,
+**Statusmeldungen** für alle Bereiche und Abgleich alle 30 Sekunden.
+
+**Nächster Schritt:** Der Bauplan ist abgearbeitet; in `IDEEN.md` ist nichts mehr freigegeben.
+Bitte die Testlisten unten durchgehen – für 0.20.0 mit zwei Programmfenstern.
 
 ## Fertig
 
@@ -305,14 +309,50 @@ Testlisten unten durchgehen, vor allem den HEB-Bogen mit dem echten Bogen des Ko
   - Demo: Angaben für alle Bewohner; Dieter Distel „nicht erfasst“, Ida Immergrün mit
     Widerspruch zur Ausgangsliste.
 
+- 0.20.0 — Mehrplatzbetrieb, Demo-Stufe (Bauplan Schritt 17, 08.11.2026):
+  - Einstellungen → „MEHRPLATZ“: **Bereich** dieses Arbeitsplatzes (ausgedacht, Vorschläge
+    „Wohnbereich A/B“, „Therapie“, „Leitung“) und **Ort der Datenbank**: lokal (Vorgabe) oder ein
+    gemeinsamer Ordner (geprüft: erreichbar und beschreibbar). Der Ort gilt nach dem Neustart;
+    ist der Ordner beim Start nicht erreichbar, arbeitet das Programm lokal und sagt es.
+    Unten links steht „Wohnbereich A · Datenbank lokal“ (bzw. „gemeinsamer Ordner“).
+  - **Konfliktschutz** wie in der Ausgangsliste: Haben zwei Arbeitsplätze denselben Datensatz
+    geändert, kommt „Inzwischen geändert“ mit beiden Fassungen nebeneinander und der Wahl
+    „Meine Fassung speichern“, „Andere übernehmen“ oder „Abbrechen“. Gilt für Stammdaten der
+    Akte, Biografie, Monatsreflexion, HEB-Bogen und Kalendertermine. Frühere Fassungen bleiben
+    im Verlauf.
+  - **Wohnbereich je Bewohner** (Stammdaten, Formular). Die Übersicht zeigt den eigenen Bereich,
+    umschaltbar mit „alle Bereiche“; ein Bereich ohne eigene Bewohner (z. B. Therapie) sieht
+    alle mit Hinweis. Auf den Karten der Seite „Bewohner“ steht ein fremder Wohnbereich hinten.
+  - **Statusmeldung je Bewohner** (Akte → „Status …“): kurzer Text, gilt bis, mit Bereich, Kürzel
+    und Zeit; vorne auf Karten und Übersicht, lang oben in der Akte, in allen Bereichen. Neue
+    Meldung ersetzt die alte, „Aufheben“ ist ein eigener Eintrag; der Verlauf bleibt (Datenbank
+    verbietet Überschreiben). Farbschlüssel: „Übergabe, Status“.
+  - **Abgleich:** Alle 30 Sekunden prüft jedes Fenster, ob ein anderer gespeichert hat (SQLite
+    `data_version`), und liest dann Zähler (Aufgaben, Nachrichten) und die gezeigte Ansicht neu.
+    Beim Wechsel der Ansicht wird ohnehin frisch gelesen. Damit gehen Nachrichten, Übergabe und
+    Aufgaben auch zwischen Rechnern.
+  - Einstellungsfenster: Der Inhalt hat eine Bildlaufleiste, „Speichern“ und „Abbrechen“ stehen
+    immer sichtbar unten (vorher war das Fenster auf kleineren Bildschirmen unten abgeschnitten).
+  - Demo: Ginster und Immergrün wohnen in „Wohnbereich B“; Statusmeldungen aus
+    `daten/demo/status.json` (Ahorn „in der Holzwerkstatt“ von der Therapie, Immergrün „Besuch bei
+    der Familie“ von Wohnbereich B, eine ältere im Verlauf).
+
 ## Offene Punkte
 
 - Bewohner löschen oder als ausgezogen markieren gibt es noch nicht (war nicht
   beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
 - Dunkle Darstellung ist nicht gebaut (`docs/gestaltung.md` sieht sie vor, freigegeben ist
   bisher nur die helle).
-- Aus der Ausgangsliste noch nicht übernommen: Datenbank mit Mehrplatz-Schutz, Sicherung,
-  Protokoll (die Druckvorschau seit 0.6.0, die Ausgangs-Funktionen seit 0.14.0 als Modul).
+- Aus der Ausgangsliste noch nicht übernommen: Sicherung und Protokoll (die Druckvorschau seit
+  0.6.0, die Ausgangs-Funktionen seit 0.14.0 als Modul, der Mehrplatz-Schutz seit 0.20.0).
+- Mehrplatz: Bewohnerbilder, das Bild im Kopf und die HEB-Vorlagen bleiben im Datenordner des
+  jeweiligen Rechners (nicht im gemeinsamen Ordner). Die Einstellungen der Module stehen in der
+  Datenbank und gelten damit für alle Rechner am selben Ordner. Ausgangsliste-Modul: Änderungen
+  am Ausgang prüft es nicht auf Konflikte (es speichert einzelne Werte, die Ereignisse stehen im
+  Verlauf).
+- Mehrplatz ist nur mit zwei Fenstern auf einem Rechner getestet (Tests und Testliste), nicht mit
+  einem echten Netzlaufwerk. SQLite im Netzordner geht bei wenigen Rechnern, ist aber kein
+  Server-Betrieb (siehe Eintrag „Mehrplatzbetrieb über einen Server (später)“).
 - HEB-Bogen: Ob PDFsharp die Formularfelder des echten Bezirks-Bogens sauber füllt, ist
   ungeprüft (nur mit der Test-PDF erprobt). Feldnamen des echten Bogens sind unbekannt; die
   Zuordnung in den Einstellungen macht ihn ohne Programmänderung nutzbar. Ankreuzfelder
@@ -627,7 +667,55 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 16): Alter bei Geburtstag am 29. Februar: in Nicht-Schaltjahren zählt der
   28. Februar.
 
+- 08.11.2026 (Schritt 17): Datenbank-Ort ändern gilt erst nach dem Neustart (die offene Datenbank
+  wird nicht im Betrieb getauscht). Ist der gemeinsame Ordner beim Start nicht erreichbar, startet
+  das Programm mit der lokalen Datenbank und meldet das – statt gar nicht zu starten.
+- 08.11.2026 (Schritt 17): Konfliktschutz ohne neue Spalten: Bei Daten mit Fassungen (Biografie,
+  Reflexion, HEB, Kalender) zählt das Programm die Fassungen beim Öffnen; sind es beim Speichern
+  mehr, hat ein anderer gespeichert. Bei den Stammdaten vergleicht es den Bewohner beim Öffnen mit
+  dem gespeicherten. Geprüft wird in derselben Transaktion wie das Speichern (sie sperrt die
+  Datei). Eingetragenes ohne Überschreiben (Berichte, Nachträge, Übergabe, Aufgaben, Nachrichten,
+  Statusmeldungen) kann nicht in Konflikt geraten: Beides bleibt erhalten.
+- 08.11.2026 (Schritt 17): „Übersicht“ im Eintrag ist die Startseite: Sie zeigt den eigenen
+  Bereich, umschaltbar. Die Seite „Bewohner“ zeigt alle (wie ein Verzeichnis) und kennzeichnet
+  Bewohner anderer Wohnbereiche mit einer Marke. Die Wahl „alle Bereiche“ gilt, bis das Programm
+  schließt.
+- 08.11.2026 (Schritt 17): Statusmeldung auf der Karte kurz („Status: …, bis 11:30“, zu Langes
+  kürzt die Karte), oben in der Akte lang mit Bereich, Kürzel und Uhrzeit. Höchstens 80 Zeichen.
+  Farbe wie „Übergabe“ (beides ist Information für die Kolleginnen und Kollegen), Wort „Status:“
+  davor.
+- 08.11.2026 (Schritt 17): Der 30-Sekunden-Abgleich liest in der Akte nur Kopf und Stammdaten neu;
+  die Reiter (Berichte, Medikation, Reflexion, HEB …) lesen beim Wechsel des Reiters neu, damit
+  eine angefangene Eingabe nicht verschwindet. Offene Bearbeitungsfenster bleiben unberührt; ihr
+  Speichern prüft auf Konflikte.
+- 08.11.2026 (Schritt 17): Demo: zwei Bewohner (Ginster, Immergrün) in „Wohnbereich B“, damit der
+  Umschalter etwas zeigt und die übrigen Demo-Abläufe gleich bleiben. Bereich „Leitung“ und
+  „Therapie“ entsprechen den Teams der Demo-Nachrichten.
+
 ## Testliste für Tobi
+
+Version 0.20.0 (zwei Programmfenster genügen):
+
+1. Unten links „Version 0.20.0 · Build …“ und darüber „Wohnbereich A · Datenbank lokal“.
+2. Übersicht: 8 Bewohner, Kopf „… · Wohnbereich A · …“. Anton Ahorn vorne mit „Status: in der
+   Holzwerkstatt, bis …“. Häkchen „alle Bereiche“ → 10 Bewohner, Gustav Ginster und Ida Immergrün
+   mit „Wohnbereich B“, Ida mit „Status: Besuch bei der Familie …“.
+3. Akte Anton Ahorn: oben „Status: in der Holzwerkstatt · bis … · Therapie, OP um …“; in den
+   Stammdaten „Wohnbereich: Wohnbereich A“. „Status …“ → Verlauf zeigt auch „beim Arzttermin“.
+   Angemeldet eine neue Meldung setzen, dann „Aufheben“.
+4. Einstellungen → „MEHRPLATZ“ → „Gemeinsamen Ordner wählen …“ → einen leeren Ordner (zum
+   Probieren z. B. auf dem Desktop) → „Speichern“ → unten links „neuer Ort nach Neustart“.
+   Programm schließen und **zweimal** starten. Im zweiten Fenster in den Einstellungen den Bereich
+   auf „Wohnbereich B“ stellen.
+5. Fenster 1: bei Berta Birke einen Status setzen. Fenster 2 (Übersicht, „alle Bereiche“): nach
+   spätestens 30 Sekunden steht er auf der Karte. Ebenso eine Nachricht oder Aufgabe: Der Zähler
+   im anderen Fenster stimmt nach spätestens 30 Sekunden.
+6. Konflikt: In beiden Fenstern die Akte Berta Birke → „Bearbeiten …“ öffnen. In Fenster 1 das
+   Zimmer ändern und speichern, in Fenster 2 ein anderes Zimmer speichern → „Inzwischen geändert“
+   mit beiden Fassungen. „Andere übernehmen“ zeigt die Akte mit der Änderung aus Fenster 1.
+   Dasselbe mit der Biografie oder einem Kalendertermin.
+7. Ordner nicht erreichbar machen (umbenennen) und das Programm starten → Meldung, das Programm
+   arbeitet lokal. Zurück auf lokal: Einstellungen → „Lokal (Vorgabe)“.
 
 Version 0.19.0:
 

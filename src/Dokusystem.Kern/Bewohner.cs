@@ -28,6 +28,7 @@ public sealed record Bewohner
     public DateOnly? Beschlussende { get; init; }
     public OffenGefuehrtZustand OffenGefuehrt { get; init; }
     public string? Bild { get; init; }   // Dateiname im Ordner „bilder“ des Datenordners
+    public string Wohnbereich { get; init; } = Bereiche.Vorgabe;   // Mehrplatz: zu welchem Bereich er gehört
 
     public string Name => $"{Vorname} {Nachname}";
 }
@@ -46,6 +47,7 @@ public sealed class BewohnerEingabe
     public string Beschluss { get; set; } = "";
     public string Beschlussende { get; set; } = "";
     public string OffenGefuehrt { get; set; } = "";
+    public string Wohnbereich { get; set; } = "";
 }
 
 // Eingaben passen nicht. Fehler enthält verständliche Sätze in der Reihenfolge des Formulars.
@@ -107,9 +109,13 @@ public static class BewohnerRegeln
     // ----- Prüfregeln -----
 
     // Alle Prüfregeln für einen vollständigen Bewohner. Leere Liste = in Ordnung.
-    public static List<string> Pruefen(Bewohner b) =>
-        Pruefen(b.Vorname, b.Nachname, b.Zimmer, b.Geburtsdatum, b.Aufnahmedatum,
+    public static List<string> Pruefen(Bewohner b)
+    {
+        var fehler = Pruefen(b.Vorname, b.Nachname, b.Zimmer, b.Geburtsdatum, b.Aufnahmedatum,
                 b.Allergie, b.Allergien, b.Beschluss, b.Beschlussende, b.OffenGefuehrt);
+        if (WohnbereichPruefen(b.Wohnbereich) is string w) fehler.Add(w);
+        return fehler;
+    }
 
     private static List<string> Pruefen(string vorname, string nachname, string zimmer,
         DateOnly? geburt, DateOnly? aufnahme, AllergieZustand? allergie, string allergien,
@@ -141,9 +147,12 @@ public static class BewohnerRegeln
         return fehler;
     }
 
+    // Wohnbereich: leer = Vorgabe; sonst eine Bereichskennung (wie in den Einstellungen).
+    private static string? WohnbereichPruefen(string text) => Bereiche.Pruefen(text) is string f ? f.Replace("Bereich", "Wohnbereich") : null;
+
     // Fehler erscheinen in der Reihenfolge des Formulars.
     private static readonly string[] Reihenfolge =
-        ["Vorname", "Nachname", "Zimmernummer", "Geburtsdatum", "Aufnahmedatum", "Das Aufnahmedatum", "Beschluss", "Offen geführt", "Allergien"];
+        ["Vorname", "Nachname", "Zimmernummer", "Wohnbereich", "Geburtsdatum", "Aufnahmedatum", "Das Aufnahmedatum", "Beschluss", "Offen geführt", "Allergien"];
 
     private static int Rang(string satz)
     {
@@ -171,6 +180,8 @@ public static class BewohnerRegeln
         var ende = beschluss == BeschlussZustand.Ende ? DatumLesen(e.Beschlussende, "Beschlussende") : null;
         var offen = OffenGefuehrtAus(e.OffenGefuehrt);
         string allergien = allergie == AllergieZustand.Eingetragen ? (e.Allergien ?? "").Trim() : "";
+        string wohnbereich = Bereiche.Bereinigen(e.Wohnbereich);
+        if (WohnbereichPruefen(wohnbereich) is string w) fehler.Add(w);
 
         foreach (string f in Pruefen(e.Vorname, e.Nachname, e.Zimmer, geburt, aufnahme, allergie, allergien, beschluss, ende, offen))
             if (!fehler.Contains(f) && !unlesbar.Any(feld => f.StartsWith(feld, StringComparison.Ordinal)))
@@ -192,6 +203,7 @@ public static class BewohnerRegeln
             Beschlussende = ende,
             OffenGefuehrt = offen!.Value,
             Bild = bild,
+            Wohnbereich = wohnbereich,
         };
     }
 
@@ -208,7 +220,15 @@ public static class BewohnerRegeln
         Beschluss = Kuerzel(b.Beschluss),
         Beschlussende = Datum.Text(b.Beschlussende),
         OffenGefuehrt = Kuerzel(b.OffenGefuehrt),
+        Wohnbereich = b.Wohnbereich,
     };
+
+    // Alle Angaben als Text (für den Konflikt-Hinweis: beide Fassungen nebeneinander).
+    public static string Beschreibung(Bewohner b) => string.Join(Environment.NewLine,
+        $"Name: {b.Name}", $"Zimmer: {b.Zimmer}", $"Wohnbereich: {b.Wohnbereich}",
+        $"Geburtsdatum: {Datum.Text(b.Geburtsdatum)}", $"Aufnahme: {Datum.Text(b.Aufnahmedatum)}",
+        $"Beschlussende: {BeschlussText(b)}", $"Offen geführt: {OffenGefuehrtText(b)}", AllergieText(b),
+        $"Bild: {(b.Bild is null ? "keins" : "hinterlegt")}");
 
     // ----- Anzeige -----
 

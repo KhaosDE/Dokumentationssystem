@@ -126,6 +126,18 @@ public static class KalenderRegeln
         };
     }
 
+    // Alle Angaben als Text (für den Konflikt-Hinweis).
+    public static string AlsText(KalenderFassung f, IReadOnlyDictionary<long, string> namen)
+    {
+        var zeilen = new List<string> { $"{ArtText(f.Art)}: {f.Titel}{(f.Abgesagt ? " (abgesagt)" : "")}", ZeitText(f) };
+        if (f.Ort.Length > 0) zeilen.Add($"Ort: {f.Ort}");
+        if (f.Bewohner.Count > 0) zeilen.Add("Bewohner: " + string.Join(", ", f.Bewohner.Select(b => namen.GetValueOrDefault(b, "?"))));
+        if (f.Treffpunkt.Length > 0) zeilen.Add($"Treffpunkt: {f.Treffpunkt}");
+        if (f.Begleitung.Length > 0) zeilen.Add($"Begleitung: {f.Begleitung}");
+        if (f.Hinweis.Length > 0) zeilen.Add($"Hinweis: {f.Hinweis}");
+        return string.Join(Environment.NewLine, zeilen);
+    }
+
     public static string ZeitText(KalenderFassung f)
     {
         var b = DateOnly.FromDateTime(f.Beginn);

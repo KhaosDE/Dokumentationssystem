@@ -22,13 +22,16 @@ public sealed partial class Speicher
             .Select(g => new Reflexion(bewohnerId, g.Key, g.ToList())).ToList();
 
     // Neue Fassung; ist nichts geändert (Texte und Status), entsteht keine.
-    public Reflexion ReflexionSpeichern(ReflexionFassung f)
+    public Reflexion ReflexionSpeichern(ReflexionFassung f, int? erwartet = null)
     {
         if (Bewohner(f.BewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
         var bisher = Reflexion(f.BewohnerId, f.Monat);
         if (bisher.Aktuell is ReflexionFassung alt && ReflexionRegeln.Gleich(alt, f)) return bisher;
         if (bisher.Aktuell is null && !f.Fertig && f.Texte.All(t => t.Length == 0)) return bisher;
         using var transaktion = db.BeginTransaction();
+        FassungenPruefen(transaktion, "SELECT COUNT(*) FROM reflexionen WHERE bewohner_id = $b AND monat = $m", erwartet,
+            () => Reflexion(f.BewohnerId, f.Monat).Aktuell is ReflexionFassung a ? FassungText(a.Kuerzel, a.Erstellt, ReflexionRegeln.AlsText(a)) : "",
+            FassungText(f.Kuerzel, f.Erstellt, ReflexionRegeln.AlsText(f)), ("$b", f.BewohnerId), ("$m", MonatSchluessel(ReflexionRegeln.MonatVon(f.Monat))));
         ReflexionEinfuegen(f, transaktion);
         transaktion.Commit();
         return Reflexion(f.BewohnerId, f.Monat);

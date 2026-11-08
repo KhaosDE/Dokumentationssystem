@@ -104,8 +104,21 @@ Danach fragt Windows für diese Datei nicht mehr.
   dann ganz, die Daten bleiben.
 - Die Wortliste für den Hinweis „Soll das in die Übergabe?“ lässt sich ergänzen: eine Datei
   `uebergabe-woerter.txt` in den Datenordner legen, ein Wort pro Zeile.
+- **Statusmeldung** (Akte → „Status …“): kurzer Text mit „gilt bis“, z. B. „beim Arzttermin“.
+  Bereich, Kürzel und Uhrzeit kommen dazu. Sie steht auf der Karte und oben in der Akte – in
+  allen Bereichen –, bis sie abläuft oder eine neue sie ersetzt. Der Verlauf bleibt.
+- **Mehrere Rechner (Demo)**: In den Einstellungen unter „MEHRPLATZ“ bekommt jeder Rechner eine
+  **Bereichskennung** (z. B. „Wohnbereich A“, „Therapie“); die Übersicht zeigt zuerst die
+  Bewohner dieses Bereichs, umschaltbar auf „alle Bereiche“. Mit **„Gemeinsamen Ordner wählen
+  …“** liegt die Datenbank in einem Ordner, den mehrere Rechner erreichen (z. B. ein
+  Netzlaufwerk); das gilt nach dem Neustart. Jeder Rechner liest Änderungen der anderen
+  spätestens nach 30 Sekunden nach. Haben zwei denselben Eintrag geändert, zeigt das Programm
+  beide Fassungen und lässt wählen – es überschreibt nichts still. Zum Ausprobieren ohne
+  zweiten Rechner: das Programm zweimal starten. Auch im gemeinsamen Ordner nur ausgedachte
+  Daten; Anmeldung, Rechte und Verschlüsselung gibt es nicht (das gehört zum Echtbetrieb).
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
-  her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren.
+  her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren – im gemeinsamen Ordner
+  für alle Rechner.
 - **Einstellungen** (links): wer angemeldet ist, Update beim Start, Module ein- und
   ausschalten, Frist „Beschluss endet bald“, eigenes Bild für den Kopf (z. B. ein Logo – die Datei wird nur in den
   Datenordner kopiert).
@@ -143,7 +156,8 @@ Die neue Version beginnt mit den Demo-Daten. Was du in 0.2.0 geändert hast, wir
 Im Datenordner `%APPDATA%\Dokumentationssystem` (im Windows-Explorer oben in die
 Adresszeile eingeben). Dort liegen:
 
-- `dokumentationssystem.db` – die Datenbank,
+- `dokumentationssystem.db` – die Datenbank (oder im gemeinsamen Ordner, falls in den
+  Einstellungen gewählt),
 - `bilder\` – hinterlegte Bewohnerbilder,
 - `logo\` – das eigene Bild für den Kopf (falls gewählt),
 - `einstellungen.json` – die Einstellungen,

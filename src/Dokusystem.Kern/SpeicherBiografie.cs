@@ -22,14 +22,18 @@ public sealed partial class Speicher
         return BiografieRegeln.Abschnitte.Select((titel, i) => new BiografieAbschnitt(i, titel, fassungen.GetValueOrDefault(i) ?? [])).ToList();
     }
 
-    // Neue Fassung eines Abschnitts; ist nichts geändert, entsteht keine.
-    public BiografieAbschnitt BiografieSpeichern(long bewohnerId, BiografieFassung f)
+    // Neue Fassung eines Abschnitts; ist nichts geändert, entsteht keine. erwartet: so viele
+    // Fassungen kannte der Aufrufer – sind es inzwischen mehr, gibt es einen Konflikt.
+    public BiografieAbschnitt BiografieSpeichern(long bewohnerId, BiografieFassung f, int? erwartet = null)
     {
         if (Bewohner(bewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
         var bisher = Biografie(bewohnerId)[f.Abschnitt];
         if (bisher.Aktuell is BiografieFassung alt && alt.Text == f.Text && alt.Angegeben == f.Angegeben) return bisher;
         if (bisher.Aktuell is null && f.Text.Length == 0) return bisher;
         using var transaktion = db.BeginTransaction();
+        FassungenPruefen(transaktion, "SELECT COUNT(*) FROM biografie WHERE bewohner_id = $b AND abschnitt = $a", erwartet,
+            () => Biografie(bewohnerId)[f.Abschnitt].Aktuell is BiografieFassung a ? FassungText(a.Kuerzel, a.Erstellt, a.Text) : "",
+            FassungText(f.Kuerzel, f.Erstellt, f.Text), ("$b", bewohnerId), ("$a", f.Abschnitt));
         BiografieEinfuegen(bewohnerId, f, transaktion);
         transaktion.Commit();
         return Biografie(bewohnerId)[f.Abschnitt];

@@ -737,4 +737,33 @@ public static class Demodaten
             Nachtraege = nachtraege,
         };
     }
+
+    // ----- Statusmeldungen (Mehrplatzbetrieb) -----
+
+    private sealed class StatusDatei
+    {
+        public List<StatusVorlage> Meldungen { get; set; } = [];
+    }
+
+    private sealed class StatusVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public string Text { get; set; } = "";
+        public string Bereich { get; set; } = "";
+        public string Kuerzel { get; set; } = "";
+        public int VorMinuten { get; set; }
+        public double FuerStunden { get; set; }
+    }
+
+    // Je Meldung: Bewohner-Id, Text, Bereich, Kürzel, gesetzt, gilt bis (älteste zuerst).
+    public static List<(long BewohnerId, string Text, string Bereich, string Kuerzel, DateTime Erstellt, DateTime GiltBis)> Statusmeldungen(
+        IReadOnlyList<Bewohner> bewohner, DateTime jetzt) =>
+        Lesen<StatusDatei>("status.json").Meldungen
+            .Where(v => bewohner.Any(b => b.Nachname == v.Bewohner))
+            .Select(v =>
+            {
+                var erstellt = jetzt.AddMinutes(-v.VorMinuten);
+                return (bewohner.First(b => b.Nachname == v.Bewohner).Id!.Value, v.Text, v.Bereich, v.Kuerzel, erstellt, erstellt.AddHours(v.FuerStunden));
+            })
+            .OrderBy(m => m.erstellt).ToList();
 }

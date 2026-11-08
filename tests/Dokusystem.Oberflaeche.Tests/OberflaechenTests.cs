@@ -87,8 +87,9 @@ public class BewohnerOberflaechenTests
         var karten = Karten(f);
         Assert.Equal(u.Speicher.AlleBewohner().Count, karten.Count);
         // Ohne eigenes Kürzel zählt „Übergabe“ alle offenen Einträge; „Wichtig“: wichtiger Bericht der letzten 7 Tage.
-        Assert.Equal("Anton Ahorn, Zimmer 101, Übergabe 1, Wichtig, Beschluss bis 30.06.2027, Allergie: Haselnüsse. Akte öffnen",
-            karten[0].AccessibleName);
+        // Vorne die Statusmeldung aus der Demo (Mehrplatz, gesetzt von der Therapie).
+        Assert.StartsWith("Anton Ahorn, Zimmer 101, Status: in der Holzwerkstatt, bis ", karten[0].AccessibleName);
+        Assert.EndsWith(", Übergabe 1, Wichtig, Beschluss bis 30.06.2027, Allergie: Haselnüsse. Akte öffnen", karten[0].AccessibleName);
         Assert.Equal("Bewohner", f.Kopf.TitelText);
         Assert.Equal("Neuer Bewohner …", Assert.Single(f.Kopf.Knoepfe).Text);
     });
@@ -164,7 +165,7 @@ public class BewohnerOberflaechenTests
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Berta Birke", f.Kopf.TitelText);
         Assert.Equal("22.11.1958", f.Bewohner.Akte.Geburtsdatum.Text);
-        Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
+        Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Status …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
         f.Kopf.Knoepfe[0].PerformClick();
         Assert.False(f.Bewohner.AkteSichtbar);
         Karten(f)[0].Waehlen();

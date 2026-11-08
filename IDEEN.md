@@ -574,7 +574,7 @@ Umfang:
 - Demo-Daten um beide Angaben ergänzen.
 
 ## Mehrplatzbetrieb (Demo-Stufe)
-Status: freigegeben (Bauplan Schritt 17)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Mehrere Rechner arbeiten gleichzeitig mit derselben Datenbank, und zu jedem Bewohner gibt
 es eine **Statusmeldung**, die alle Bereiche sehen. Gezeigt mit ausgedachten Daten.

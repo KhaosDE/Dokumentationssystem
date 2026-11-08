@@ -26,6 +26,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoBiografie = "demo_biografie";
     private const string DemoReflexion = "demo_reflexion";
     private const string DemoHeb = "demo_heb";
+    private const string DemoStatus = "demo_status";
 
     // Die Uhr des Speichers (für Demo-Daten relativ zu „jetzt“); zum Testen ersetzbar.
     public Func<DateTime> Uhr { get; set; } = () => DateTime.Now;
@@ -422,12 +423,30 @@ public sealed partial class Speicher : IDisposable
         ALTER TABLE bewohner ADD COLUMN offen_gefuehrt TEXT NOT NULL DEFAULT 'nicht_erfasst'
             CHECK (offen_gefuehrt IN ('ja', 'nein', 'nicht_erfasst'));
         """,
+        // 14 – Mehrplatz (Demo-Stufe): Wohnbereich je Bewohner (vorhandene: „Wohnbereich A“) und
+        //      Statusmeldungen. Eine neue Meldung ersetzt die alte, „aufheben“ ist eine Meldung mit
+        //      leerem Text; nichts wird überschrieben, der Verlauf bleibt.
+        """
+        ALTER TABLE bewohner ADD COLUMN wohnbereich TEXT NOT NULL DEFAULT 'Wohnbereich A';
+        CREATE TABLE statusmeldungen (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            text        TEXT NOT NULL,                -- leer = aufgehoben
+            bereich     TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            erstellt    TEXT NOT NULL,
+            gilt_bis    TEXT NOT NULL
+        );
+        CREATE INDEX statusmeldungen_bewohner ON statusmeldungen(bewohner_id, erstellt);
+        CREATE TRIGGER statusmeldungen_bleiben BEFORE UPDATE ON statusmeldungen
+            BEGIN SELECT RAISE(ABORT, 'Statusmeldungen werden nicht überschrieben – eine neue ersetzt die alte.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
 
     private const string Spalten =
-        "vorname, nachname, zimmer, geburtsdatum, aufnahmedatum, allergie, allergien, beschluss, beschlussende, bild, offen_gefuehrt";
+        "vorname, nachname, zimmer, geburtsdatum, aufnahmedatum, allergie, allergien, beschluss, beschlussende, bild, offen_gefuehrt, wohnbereich";
 
     private readonly SqliteConnection db;
     public string Pfad { get; }
@@ -470,6 +489,8 @@ public sealed partial class Speicher : IDisposable
         for (int nummer = stand; nummer < AktuellerStand; nummer++)
         {
             using var schritt = db.BeginTransaction();
+            // Mehrplatz: Hat ein anderer Arbeitsplatz den Schritt gerade gemacht, nicht noch einmal.
+            if (Convert.ToInt32(WertIn(schritt, "PRAGMA user_version"), CultureInfo.InvariantCulture) > nummer) continue;
             Ausfuehren(Schritte[nummer], schritt);
             Ausfuehren($"PRAGMA user_version = {nummer + 1}", schritt);
             schritt.Commit();
@@ -508,7 +529,9 @@ public sealed partial class Speicher : IDisposable
 
     // Legt an (ohne Id) oder ändert (mit Id). Gibt den gespeicherten Bewohner zurück.
     // neuesBild wird in den Datenordner kopiert; das bisherige Bild wird danach gelöscht.
-    public Bewohner BewohnerSpeichern(Bewohner b, string? neuesBild = null, bool bildEntfernen = false)
+    // ausgangsfassung: der Bewohner, wie er beim Öffnen des Formulars war. Hat ein anderer
+    // Arbeitsplatz ihn inzwischen geändert, gibt es einen Konflikt statt stillem Überschreiben.
+    public Bewohner BewohnerSpeichern(Bewohner b, string? neuesBild = null, bool bildEntfernen = false, Bewohner? ausgangsfassung = null)
     {
         var fehler = BewohnerRegeln.Pruefen(b);
         if (fehler.Count > 0) throw new Eingabefehler(fehler);
@@ -530,12 +553,17 @@ public sealed partial class Speicher : IDisposable
             }
             else
             {
+                // In der Transaktion lesen: Sie sperrt die Datei, bis gespeichert ist.
+                if (ausgangsfassung is not null &&
+                    LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner WHERE id = $id", ("$id", b.Id)).FirstOrDefault() is Bewohner jetzt &&
+                    jetzt != ausgangsfassung && jetzt != b)
+                    throw new Konflikt(Konflikt.Text, BewohnerRegeln.Beschreibung(jetzt), BewohnerRegeln.Beschreibung(b));
                 string setzen = string.Join(", ", Spalten.Split(", ").Select(s => $"{s} = ${s}"));
                 Ausfuehren($"UPDATE bewohner SET {setzen} WHERE id = $id", transaktion, [.. Werte(b), ("$id", b.Id)]);
             }
             transaktion.Commit();
         }
-        catch (SqliteException)
+        catch (Exception e) when (e is SqliteException or Konflikt)
         {
             if (neuesBild is not null) Bilder.Loeschen(bild);
             throw;
@@ -559,10 +587,11 @@ public sealed partial class Speicher : IDisposable
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
              therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null,
-             biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null;
+             biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
+             status = Meta(DemoStatus) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
@@ -576,6 +605,7 @@ public sealed partial class Speicher : IDisposable
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
         if (heb) DemoHebEinfuegen(transaktion);
+        if (status) DemoStatusEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
         transaktion.Commit();
         if (modulNeu) ModuleGeaendert?.Invoke();
@@ -605,6 +635,7 @@ public sealed partial class Speicher : IDisposable
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);
             DemoHebEinfuegen(transaktion);
+            DemoStatusEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
             transaktion.Commit();
         }
@@ -615,6 +646,7 @@ public sealed partial class Speicher : IDisposable
         TherapieGeaendert?.Invoke();
         WochenplanGeaendert?.Invoke();
         KalenderGeaendert?.Invoke();
+        StatusGeaendert?.Invoke();
         ModuleGeaendert?.Invoke();
     }
 
@@ -895,6 +927,7 @@ public sealed partial class Speicher : IDisposable
         ("$beschlussende", b.Beschlussende is DateOnly e ? Iso(e) : null),
         ("$bild", b.Bild),
         ("$offen_gefuehrt", BewohnerRegeln.Kuerzel(b.OffenGefuehrt)),
+        ("$wohnbereich", b.Wohnbereich),
     ];
 
     private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -925,6 +958,7 @@ public sealed partial class Speicher : IDisposable
                 Beschlussende = leser.IsDBNull(9) ? null : AusIso(leser.GetString(9)),
                 Bild = leser.IsDBNull(10) ? null : leser.GetString(10),
                 OffenGefuehrt = BewohnerRegeln.OffenGefuehrtAus(leser.GetString(11)) ?? OffenGefuehrtZustand.NichtErfasst,
+                Wohnbereich = leser.GetString(12),
             });
         }
         return liste;

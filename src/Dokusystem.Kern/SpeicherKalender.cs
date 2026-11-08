@@ -21,12 +21,17 @@ public sealed partial class Speicher
         return KalenderTermin(id)!;
     }
 
-    public KalenderTermin KalenderAendern(long id, KalenderFassung f)
+    public KalenderTermin KalenderAendern(long id, KalenderFassung f, int? erwartet = null)
     {
         var bisher = KalenderTermin(id) ?? throw new Eingabefehler(["Diesen Termin gibt es nicht mehr."]);
-        if (bisher.Aktuell.Abgesagt) throw new Eingabefehler(["Dieser Termin ist abgesagt."]);
+        if (bisher.Aktuell.Abgesagt && erwartet is null) throw new Eingabefehler(["Dieser Termin ist abgesagt."]);
         BewohnerPruefen(f);
+        var namen = AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
         using var transaktion = db.BeginTransaction();
+        FassungenPruefen(transaktion, "SELECT COUNT(*) FROM kalender_fassungen WHERE termin_id = $t", erwartet,
+            () => KalenderTermin(id)?.Aktuell is KalenderFassung a ? FassungText(a.Kuerzel, a.Erstellt, KalenderRegeln.AlsText(a, namen)) : "",
+            FassungText(f.Kuerzel, f.Erstellt, KalenderRegeln.AlsText(f, namen)), ("$t", id));
+        if (bisher.Aktuell.Abgesagt) throw new Eingabefehler(["Dieser Termin ist abgesagt."]);
         KalenderFassungEinfuegen(id, f, transaktion);
         transaktion.Commit();
         KalenderGeaendert?.Invoke();
