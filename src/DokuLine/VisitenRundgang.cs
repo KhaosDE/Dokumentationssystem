@@ -5,7 +5,7 @@ namespace DokuLine;
 
 // Visite mit allen Bewohnern (Bauplan Schritt 26c): Man geht mit dem Arzt die Bewohner des Bereichs
 // der Reihe nach durch. Links die Liste (Zimmer, Name, Bezugspflege, Häkchen „besprochen“), rechts
-// zum gewählten Bewohner Allergiehinweis, die aktuelle Medikation (wie im Medikamentenplan), die
+// zum gewählten Bewohner Allergiehinweis, Diagnosen (nur mit Recht, Schritt 26f), die aktuelle Medikation (wie im Medikamentenplan), die
 // letzte Visite, offene Aufgaben zur Medikation und darunter die Eingabe. Beim Wechsel steht alles
 // sofort als Entwurf in der Datenbank. Während der Visite gibt es keine Einblendungen; erst „Visite
 // abschließen“ legt Berichte, Übergaben und Aufgaben an und zeigt die Aufgaben gesammelt.
@@ -39,6 +39,8 @@ public sealed class VisitenRundgang : Panel
     public Button AbschliessenKnopf { get; } = Stil.HauptKnopf("Visite abschließen …");
     public Label Name_ { get; } = new() { AutoSize = true, Font = Stil.Ueberschrift, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false };
     public Label Allergie { get; } = new() { AutoSize = true, Font = Stil.Fett, BackColor = Stil.Seite, UseMnemonic = false };
+    private bool diagnosenZeigen;
+    public Label Diagnosen { get; } = new() { AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite, UseMnemonic = false };
     public DataGridView Tabelle { get; } = MedikationAnsicht.RegelTabelleBauen();
     public DataGridView BedarfTabelle { get; } = MedikationAnsicht.BedarfTabelleBauen();
     public Label KeineMedikation { get; } = new() { AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite, Text = "Keine Medikation." };
@@ -85,7 +87,7 @@ public sealed class VisitenRundgang : Panel
         Liste.SelectedIndexChanged += (_, _) => { if (!fuellt && Liste.SelectedIndices.Count == 1 && Liste.SelectedIndices[0] != Aktuell) Waehlen(Liste.SelectedIndices[0]); };
         Tabelle.AccessibleName = "Aktuelle Medikation";
         BedarfTabelle.AccessibleName = "Medikation bei Bedarf";
-        rechts.Controls.AddRange([Name_, Allergie, Fehler, medikationTitel, Tabelle, KeineMedikation, bedarfTitel, BedarfTabelle, LetzteVisite, OffeneAufgaben, eingabeTitel]);
+        rechts.Controls.AddRange([Name_, Allergie, Diagnosen, Fehler, medikationTitel, Tabelle, KeineMedikation, bedarfTitel, BedarfTabelle, LetzteVisite, OffeneAufgaben, eingabeTitel]);
         rechts.Layout += (_, _) => RechtsAnordnen();
         Controls.AddRange([kopfleiste, Liste, rechts]);
         ListeFuellen();
@@ -155,8 +157,11 @@ public sealed class VisitenRundgang : Panel
         if (index < Liste.Items.Count) { Liste.Items[index].Selected = true; Liste.EnsureVisible(index); }
         fuellt = false;
         Name_.Text = $"{b.Name} · Zi. {b.Zimmer}";
-        Allergie.Text = $"Allergien: {BewohnerRegeln.AllergieText(b)}";
+        Allergie.Text = BewohnerRegeln.AllergieText(b);   // beginnt schon mit „Allergien:“
         Allergie.ForeColor = b.Allergie == AllergieZustand.Eingetragen ? Stil.Beschluss.Text : b.Allergie == AllergieZustand.NichtErfasst ? Stil.Achtung.Text : Stil.TextMittel;
+        diagnosenZeigen = Recht.Darf(speicher, Funktionen.AerztlicheAnsehen);   // nur Information, wird nicht ausgewertet
+        Diagnosen.Visible = diagnosenZeigen;
+        Diagnosen.Text = diagnosenZeigen ? $"Diagnosen: {DiagnoseRegeln.Kurz(speicher.Diagnosen(id))}" : "";
         var heute = DateOnly.FromDateTime(Jetzt());
         MedikationAnsicht.TabellenFuellen(Tabelle, BedarfTabelle, speicher.Verordnungen(id).Select(v => MedikationRegeln.Stand(v, heute)), abgesetzteZeigen: false);
         Tabelle.Visible = Tabelle.Rows.Count > 0;
@@ -296,6 +301,7 @@ public sealed class VisitenRundgang : Panel
         }
         Setzen(Name_, Stil.AbstandMini);
         Setzen(Allergie);
+        if (diagnosenZeigen) Setzen(Diagnosen);
         if (Fehler.Text.Length > 0 && Fehler.Visible) Setzen(Fehler);
         Setzen(medikationTitel, Stil.AbstandMini);
         foreach (var (t, sichtbar) in new[] { (Tabelle, Tabelle.Rows.Count > 0), (BedarfTabelle, BedarfTabelle.Rows.Count > 0) })
@@ -424,7 +430,7 @@ public sealed class VisitenlisteDruck(string bereich, DateOnly tag, IReadOnlyLis
             y += 1.5f;
             g.DrawString($"Zi. {b.Zimmer} · {b.Name}", fett, Brushes.Black, links, y);
             y += 6f;
-            g.DrawString($"Allergien: {BewohnerRegeln.AllergieText(b)}", normal, Brushes.Black, links, y);
+            g.DrawString(BewohnerRegeln.AllergieText(b), normal, Brushes.Black, links, y);
             y += 5f;
             foreach (var z in zeilen)
             {

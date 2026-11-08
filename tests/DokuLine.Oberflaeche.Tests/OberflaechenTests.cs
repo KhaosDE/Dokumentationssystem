@@ -166,7 +166,7 @@ public class BewohnerOberflaechenTests
         Assert.DoesNotContain("Berta Birke", f.Kopf.KleinText);
         Assert.Equal("Berta Birke", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal("22.11.1958", f.Bewohner.Akte.Geburtsdatum.Text);
-        Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Status …", "Neuer Bericht …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
+        Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Status …", "Ärztliche Informationen …", "Neuer Bericht …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
         f.Kopf.Knoepfe[0].PerformClick();
         Assert.False(f.Bewohner.AkteSichtbar);
         Karten(f)[0].Waehlen();
@@ -230,8 +230,7 @@ public class BewohnerOberflaechenTests
         Hilfe.Zeigen(f);
         f.Bewohner.FormularZeigen = formular =>
         {
-            Assert.Equal("nicht_erfasst", formular.Allergie.Zustand);
-            Assert.Equal("nicht_erfasst", formular.Beschluss.Zustand);
+            Assert.Equal("nicht_erfasst", formular.Beschluss.Zustand);   // Allergien: im Fenster „Ärztliche Informationen“ (Schritt 26f)
             formular.Vorname.Text = "Paul";
             formular.Nachname.Text = "Pappel";
             Assert.Equal(["105 – Bett Tür", "106 – Bett Tür"], formular.Bett.Items.Cast<string>());   // nur freie Betten (Schritt 26e)
@@ -262,7 +261,6 @@ public class BewohnerOberflaechenTests
         var b = u.Demo("Distel");
         using var formular = new BewohnerFormular(u.Speicher, b);
         Assert.Equal("Dieter", formular.Vorname.Text);
-        Assert.Equal("Wespen- und Bienenstiche", formular.Allergie.Feld.Text);
         string keinBild = Path.Combine(u.Ordner, "kein.png");
         File.WriteAllText(keinBild, "kein Bild");
         Assert.False(formular.BildSetzen(keinBild));
@@ -274,14 +272,13 @@ public class BewohnerOberflaechenTests
         }
         Assert.True(formular.BildSetzen(bild));
         Assert.True(formular.HatBild);
-        formular.Allergie.Setzen("keine_bekannt", "");
         Assert.StartsWith("104 – Einzelzimmer (bisher)", (string)formular.Bett.Items[0]!);
         Assert.True(formular.BereichWaehlen("R2"));   // Zimmerwechsel: dieselbe Auswahl freier Betten
         Assert.True(formular.BettWaehlen("204 – Einzelzimmer"));
         Assert.True(formular.Speichern());
         var gespeichert = u.Speicher.Bewohner(b.Id!.Value)!;
         Assert.Equal(("204", "R2"), (gespeichert.Zimmer, gespeichert.Wohnbereich));
-        Assert.Equal("", gespeichert.Allergien);
+        Assert.Equal((AllergieZustand.Eingetragen, "Wespen- und Bienenstiche"), (gespeichert.Allergie, gespeichert.Allergien));   // Formular lässt Allergien unverändert
         Assert.NotNull(Bilder.Pfad(gespeichert.Bild));
     });
 
@@ -289,11 +286,11 @@ public class BewohnerOberflaechenTests
     public void Dreiwahl_kennt_nie_eingetragen_als_Rueckfall() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        using var formular = new BewohnerFormular(u.Speicher, null);
-        formular.Allergie.Setzen("unbekannt", "");
-        Assert.Equal("nicht_erfasst", formular.Allergie.Zustand);
-        foreach (var knopf in formular.Allergie.Knoepfe) knopf.Checked = false;
-        Assert.Equal("nicht_erfasst", formular.Allergie.Zustand);
+        using var fenster = new AerztlichFenster(u.Speicher, u.Demo("Birke"));
+        fenster.Allergie.Setzen("unbekannt", "");
+        Assert.Equal("nicht_erfasst", fenster.Allergie.Zustand);
+        foreach (var knopf in fenster.Allergie.Knoepfe) knopf.Checked = false;
+        Assert.Equal("nicht_erfasst", fenster.Allergie.Zustand);
     });
 
     [Fact]

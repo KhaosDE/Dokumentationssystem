@@ -27,6 +27,7 @@ public sealed class BewohnerBereich : Panel
     private readonly Button nachrichtenKnopf = Stil.NebenKnopf("Nachrichten …");
     private readonly Button statusKnopf = Stil.NebenKnopf("Status …");
     private readonly Button berichtKnopf = Stil.NebenKnopf("Neuer Bericht …");
+    public Button AerztlichKnopf { get; } = Stil.NebenKnopf("Ärztliche Informationen …");   // Schritt 26f
 
     // „Neuer Bericht …“ für einen Bewohner (Akte oder Rechtsklick auf eine Karte); das Hauptfenster öffnet ihn.
     public event Action<long>? BerichtGewuenscht;
@@ -92,6 +93,7 @@ public sealed class BewohnerBereich : Panel
         Nachrichten.OeffnenKnopf.Click += (_, _) => NachrichtenAnzeigen?.Invoke(null);
         nachrichtenKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) NachrichtenAnzeigen?.Invoke(id); };
         statusKnopf.Click += (_, _) => StatusOeffnen();
+        AerztlichKnopf.Click += (_, _) => AerztlichOeffnen();
         berichtKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) BerichtGewuenscht?.Invoke(id); };
         Controls.Add(Raster);
         Controls.Add(Akte);
@@ -164,6 +166,7 @@ public sealed class BewohnerBereich : Panel
     {
         Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, bearbeitenKnopf);
         Recht.Anwenden(speicher, Funktionen.BerichteSchreiben, berichtKnopf);
+        Recht.Anwenden(speicher, Funktionen.AerztlicheAnsehen, AerztlichKnopf);
     }
 
     // Mehrplatz: die gezeigte Ansicht neu lesen (Karten oder Kopf und Stammdaten der Akte).
@@ -189,7 +192,7 @@ public sealed class BewohnerBereich : Panel
         AkteSichtbar = true;
         kopf.TexteSetzen("Bewohner", "Bewohnerakte");   // Schritt 26d: der Name steht nur einmal, auf der Karte darunter
         AkteKnoepfeSperren();
-        kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, statusKnopf, berichtKnopf, bearbeitenKnopf);
+        kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, statusKnopf, AerztlichKnopf, berichtKnopf, bearbeitenKnopf);
     }
 
     // Statusmeldung setzen oder aufheben (Mehrplatzbetrieb); danach die Akte neu lesen.
@@ -200,6 +203,17 @@ public sealed class BewohnerBereich : Panel
         bool gespeichert = Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK;
         Akte.NeuLaden();
         return gespeichert;
+    }
+
+    // Schritt 26f: Ärztliche Informationen (Recht „ansehen“); danach die Akte neu (Allergiehinweis).
+    public bool AerztlichOeffnen()
+    {
+        if (Recht.Grund(speicher, Funktionen.AerztlicheAnsehen) is not null) return false;
+        if (Akte.Bewohner?.Id is not long id || speicher.Bewohner(id) is not Bewohner b) return false;
+        using var fenster = new AerztlichFenster(speicher, b);
+        Dialog.Zeigen(fenster, FindForm());
+        Akte.NeuLaden();
+        return fenster.Geaendert;
     }
 
     public BewohnerFormular FormularErstellen(Bewohner? b) => new(speicher, b);

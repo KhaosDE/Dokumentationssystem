@@ -40,12 +40,16 @@ public static class Funktionen
     public const string EinstellungenBereich = "einstellungen_bereich";
     public const string DemoZuruecksetzen = "demo_zuruecksetzen";
     public const string Aerzte = "aerzte";   // Schritt 26b
+    public const string AerztlicheAnsehen = "aerztliche_ansehen";        // Schritt 26f
+    public const string AerztlicheBearbeiten = "aerztliche_bearbeiten";  // Schritt 26f
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
         (BewohnerBearbeiten, "Bewohner anlegen und bearbeiten"),
         (BerichteSchreiben, "Berichte schreiben"),
         (Visiten, "Visiten eintragen"),
+        (AerztlicheAnsehen, "Ärztliche Informationen ansehen"),
+        (AerztlicheBearbeiten, "Ärztliche Informationen bearbeiten"),
         (MedikationBearbeiten, "Medikation bearbeiten"),
         (MedikamentAnlegen, "Medikament anlegen"),
         (MedikamenteVerwalten, "Medikamentendatenbank verwalten (prüfen, ändern, sperren)"),
@@ -91,7 +95,7 @@ public static partial class RechteRegeln
         [Administrator, "Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung", "Mitarbeiter Wohnbereich",
          "Psychologischer Fachdienst", "Pädagogischer Fachdienst", "Therapie"];
 
-    public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen];
+    public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten];
 
     private static readonly Dictionary<string, string[]> Vorgabe = new()
     {
@@ -122,9 +126,12 @@ public static partial class RechteRegeln
 
     // Funktionen, die nach der ersten Vorbelegung (0.22.0) dazukamen: werden in bestehenden
     // Datenbanken einmal nachträglich vorbelegt.
-    public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte];
+    public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten];
 
+    // Schritt 26f: Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
+    // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
     public static bool Vorbelegt(string position, string funktion) =>
+        funktion is Funktionen.AerztlicheAnsehen or Funktionen.AerztlicheBearbeiten ? position != "Verwaltung" :
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||
         (Vorgabe.TryGetValue(position, out var f) && f.Contains(funktion));
 

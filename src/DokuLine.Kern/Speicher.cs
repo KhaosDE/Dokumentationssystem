@@ -661,6 +661,40 @@ public sealed partial class Speicher : IDisposable
         );
         ALTER TABLE bewohner ADD COLUMN bett TEXT NOT NULL DEFAULT '';
         """,
+        // 26 – Ärztliche Informationen (Schritt 26f): Diagnosen (nie gelöscht, nur „beendet am“), Art der
+        // Reaktion je Allergie, Hinweise für den Notfall.
+        """
+        CREATE TABLE diagnosen (
+            id              INTEGER PRIMARY KEY,
+            bewohner_id     INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            icd             TEXT NOT NULL DEFAULT '',
+            bezeichnung     TEXT NOT NULL,
+            seit            TEXT,
+            art             TEXT NOT NULL CHECK (art IN ('haupt', 'neben')),
+            arzt            TEXT NOT NULL DEFAULT '',
+            hinweis         TEXT NOT NULL DEFAULT '',
+            erstellt        TEXT NOT NULL,
+            kuerzel         TEXT NOT NULL,
+            beendet         TEXT,
+            beendet_kuerzel TEXT
+        );
+        CREATE TRIGGER diagnosen_bleiben BEFORE UPDATE ON diagnosen
+            WHEN OLD.beendet IS NOT NULL OR NEW.bezeichnung IS NOT OLD.bezeichnung OR NEW.icd IS NOT OLD.icd OR NEW.art IS NOT OLD.art
+                 OR NEW.seit IS NOT OLD.seit OR NEW.arzt IS NOT OLD.arzt OR NEW.hinweis IS NOT OLD.hinweis
+            BEGIN SELECT RAISE(ABORT, 'Diagnosen werden nicht überschrieben – beenden und neu eintragen.'); END;
+        CREATE TABLE allergie_reaktionen (
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            stoff       TEXT NOT NULL,
+            reaktion    TEXT NOT NULL,
+            PRIMARY KEY (bewohner_id, stoff)
+        );
+        CREATE TABLE notfallhinweise (
+            bewohner_id INTEGER PRIMARY KEY REFERENCES bewohner(id) ON DELETE CASCADE,
+            text        TEXT NOT NULL,
+            geaendert   TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -821,11 +855,12 @@ public sealed partial class Speicher : IDisposable
              therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null, wochenplan = Meta(DemoWochenplan) is null,
              kalender = Meta(DemoKalender) is null || Meta(DemoKalenderHaus) is null, fahrten = Meta(DemoFahrten) is null,
              standard = Meta(DemoStandardaufgaben) is null, visiten = Meta(DemoVisiten) is null, aerzte = Meta(DemoAerzte) is null,
+             aerztlich = Meta(DemoAerztlich) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
@@ -840,6 +875,7 @@ public sealed partial class Speicher : IDisposable
         if (kalender) DemoKalenderEinfuegen(transaktion);
         if (fahrten) DemoFahrtenEinfuegen(transaktion);
         if (aerzte) DemoAerzteEinfuegen(transaktion);
+        if (aerztlich) DemoAerztlichEinfuegen(transaktion);
         if (visiten) DemoVisitenEinfuegen(transaktion);
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
@@ -887,6 +923,7 @@ public sealed partial class Speicher : IDisposable
             DemoKalenderEinfuegen(transaktion);
             DemoFahrtenEinfuegen(transaktion);
             DemoAerzteEinfuegen(transaktion);
+            DemoAerztlichEinfuegen(transaktion);
             DemoVisitenEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);

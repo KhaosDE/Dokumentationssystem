@@ -41,6 +41,9 @@ Danach fragt Windows für diese Datei nicht mehr.
   Berichte, Medikation …) liegen auf Reitern.
 - In der Akte steht oben der **Allergiehinweis**: rot = Allergien eingetragen,
   grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
+- **Ärztliche Informationen …** (oben rechts in der Akte): Diagnosen (werden nie gelöscht, nur
+  „beendet“), Allergien mit der Art der Reaktion und Hinweise für den Notfall. Nur hier werden die
+  Allergien geändert. Ansehen und Bearbeiten sind eigene Rechte (bearbeiten: Fachkräfte).
 - **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
   als TT.MM.JJJJ (z. B. 03.04.1965); die Punkte setzt das Programm beim Tippen selbst (`08112026`,
   auch `081126` für 20xx), bei Uhrzeiten den Doppelpunkt (`0930`). **Offen geführt** hat drei Zustände: ja, nein, nicht erfasst.
