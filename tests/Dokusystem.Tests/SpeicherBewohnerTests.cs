@@ -81,6 +81,12 @@ public sealed class SpeicherBewohnerTests : IDisposable
             "VALUES ('a', 'b', '1', '1970-01-01', '2020-01-01')");
         var b = Assert.Single(s.AlleBewohner());
         Assert.Equal((AllergieZustand.NichtErfasst, BeschlussZustand.NichtErfasst), (b.Allergie, b.Beschluss));
+        Assert.Equal(OffenGefuehrtZustand.NichtErfasst, b.OffenGefuehrt);   // auch nach dem Update für vorhandene Bewohner
+        Assert.Throws<SqliteException>(() => SqlAusfuehren(
+            "INSERT INTO bewohner (vorname, nachname, zimmer, geburtsdatum, aufnahmedatum, offen_gefuehrt) " +
+            "VALUES ('a', 'b', '1', '1970-01-01', '2020-01-01', 'vielleicht')"));
+        var offen = s.BewohnerSpeichern(b with { OffenGefuehrt = OffenGefuehrtZustand.Ja });
+        Assert.Equal(OffenGefuehrtZustand.Ja, s.Bewohner(offen.Id!.Value)!.OffenGefuehrt);
     }
 
     [Fact]
@@ -124,6 +130,7 @@ public sealed class SpeicherBewohnerTests : IDisposable
         Assert.True(alle.Count >= 10);
         Assert.Equal(Enum.GetValues<AllergieZustand>().ToHashSet(), alle.Select(b => b.Allergie).ToHashSet());
         Assert.Equal(Enum.GetValues<BeschlussZustand>().ToHashSet(), alle.Select(b => b.Beschluss).ToHashSet());
+        Assert.Equal(Enum.GetValues<OffenGefuehrtZustand>().ToHashSet(), alle.Select(b => b.OffenGefuehrt).ToHashSet());
         Assert.All(alle, b => Assert.Null(b.Bild));   // Regel 2: nur Platzhalter
         Assert.Equal(alle.Count, alle.Select(b => b.Zimmer).Distinct().Count());
     }

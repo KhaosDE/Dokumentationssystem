@@ -7,7 +7,8 @@ public class KennzeichenTests
 {
     private static Bewohner Neuer(Action<BewohnerEingabe>? aendern = null)
     {
-        var e = new BewohnerEingabe { Vorname = "A", Nachname = "B", Zimmer = "1", Geburtsdatum = "01.01.1970", Aufnahmedatum = "01.01.2020" };
+        // „offen geführt: nein“ ist der Normalfall ohne Marke.
+        var e = new BewohnerEingabe { Vorname = "A", Nachname = "B", Zimmer = "1", Geburtsdatum = "01.01.1970", Aufnahmedatum = "01.01.2020", OffenGefuehrt = "nein" };
         aendern?.Invoke(e);
         return BewohnerRegeln.AusEingabe(e);
     }
@@ -37,9 +38,19 @@ public class KennzeichenTests
     [Fact]
     public void Nicht_erfasst_ist_sichtbar_Regel_5()
     {
-        var marken = Kennzeichen.Marken(Neuer());
-        Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst"], marken.Select(m => m.Text));
+        var marken = Kennzeichen.Marken(Neuer(e => e.OffenGefuehrt = ""));
+        Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst", "offen geführt: nicht erfasst"], marken.Select(m => m.Text));
         Assert.All(marken, m => Assert.Equal(MarkenArt.NichtErfasst, m.Art));
+    }
+
+    [Fact]
+    public void Offen_gefuehrt_als_Marke_und_im_Filter()
+    {
+        var offen = Neuer(e => { e.Allergie = "keine_bekannt"; e.Beschluss = "kein_beschluss"; e.OffenGefuehrt = "ja"; });
+        Assert.Equal([new Marke(MarkenArt.Angabe, "offen geführt")], Kennzeichen.Marken(offen));
+        Assert.False(Kennzeichen.Passt(offen, BewohnerFilter.NichtErfasst));
+        var unklar = offen with { OffenGefuehrt = OffenGefuehrtZustand.NichtErfasst };
+        Assert.True(Kennzeichen.Passt(unklar, BewohnerFilter.NichtErfasst));
     }
 
     [Fact]

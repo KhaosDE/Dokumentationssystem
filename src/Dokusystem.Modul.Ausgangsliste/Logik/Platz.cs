@@ -50,6 +50,17 @@ public class Platz
 
     public Unterbringung Unterbringung { get; set; } = Unterbringung.NichtErfasst;
 
+    // „Offen geführt“ laut Bewohnerakte, zum Abgleich mit der Unterbringung des Moduls.
+    public OffenGefuehrtZustand OffenGefuehrtLautAkte { get; init; }
+
+    // Widerspruch zwischen Akte und Modul (nur als Hinweis, nichts wird automatisch geändert).
+    public bool Widerspruch => (OffenGefuehrtLautAkte, Unterbringung) switch
+    {
+        (OffenGefuehrtZustand.Ja, Unterbringung.Beschluss or Unterbringung.Forensik) => true,
+        (OffenGefuehrtZustand.Nein, Unterbringung.OffenGefuehrt) => true,
+        _ => false,
+    };
+
     // Datum zur Unterbringung:
     //   Beschluss     → Ablaufdatum des Beschlusses (aus der Akte)
     //   Offen geführt → Tag der Unterschrift unter die Einverständniserklärung (gilt 6 Monate)
@@ -162,6 +173,7 @@ public class Platz
             Status = angaben.Status,
             StatusGrund = angaben.StatusGrund,
             Unterbringung = unterbringung,
+            OffenGefuehrtLautAkte = b.OffenGefuehrt,
             UnterbringungDatum = unterbringung switch
             {
                 Unterbringung.Beschluss => b.Beschlussende?.ToDateTime(TimeOnly.MinValue),

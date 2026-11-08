@@ -7,7 +7,8 @@ namespace Dokusystem.Kern;
 // Farbe sparsam: Der Normalfall („keine bekannt“, „kein Beschluss“) bekommt keine Marke.
 // Abwesend und Ausgang melden Module (z. B. die Ausgangsliste) über die Modulverwaltung.
 // Termin: Termine des Tages auf der Startseite.
-public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig, Abwesend, Ausgang, Termin }
+// Angabe: neutrale Angabe aus der Akte (z. B. „offen geführt“).
+public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig, Abwesend, Ausgang, Termin, Angabe }
 
 public sealed record Marke(MarkenArt Art, string Text);
 
@@ -31,8 +32,17 @@ public static class Kennzeichen
             marken.Add(new Marke(MarkenArt.NichtErfasst, "Allergien nicht erfasst"));
         if (b.Beschluss == BeschlussZustand.NichtErfasst)
             marken.Add(new Marke(MarkenArt.NichtErfasst, "Beschluss nicht erfasst"));
+        if (OffenGefuehrtMarke(b) is Marke offen) marken.Add(offen);
         return marken;
     }
+
+    // „offen geführt“ als Marke; „nein“ ist hier der Normalfall und bekommt keine (Farbe sparsam).
+    public static Marke? OffenGefuehrtMarke(Bewohner b) => b.OffenGefuehrt switch
+    {
+        OffenGefuehrtZustand.Ja => new Marke(MarkenArt.Angabe, "offen geführt"),
+        OffenGefuehrtZustand.NichtErfasst => new Marke(MarkenArt.NichtErfasst, "offen geführt: nicht erfasst"),
+        _ => null,
+    };
 
     public static string FilterText(BewohnerFilter f) => f switch
     {
@@ -46,7 +56,8 @@ public static class Kennzeichen
     {
         BewohnerFilter.Beschluss => b.Beschluss == BeschlussZustand.Ende,
         BewohnerFilter.Allergie => b.Allergie == AllergieZustand.Eingetragen,
-        BewohnerFilter.NichtErfasst => b.Allergie == AllergieZustand.NichtErfasst || b.Beschluss == BeschlussZustand.NichtErfasst,
+        BewohnerFilter.NichtErfasst => b.Allergie == AllergieZustand.NichtErfasst || b.Beschluss == BeschlussZustand.NichtErfasst ||
+                                       b.OffenGefuehrt == OffenGefuehrtZustand.NichtErfasst,
         _ => true,
     };
 

@@ -560,7 +560,7 @@ Zeitstempeln kann Verhalten und Leistung von Mitarbeitenden sichtbar machen. Vor
 Einsatz die Mitarbeitervertretung beteiligen; das gilt auch für „gelesen“ in der Übergabe.
 
 ## Bewohnerakte: Ergänzungen
-Status: freigegeben (Bauplan Schritt 16)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Die beiden zurückgestellten Vorschläge zur Bewohnerakte.
 Warum: Tobi gibt alles frei (08.11.2026). „Offen geführt“ steht in der Lückenliste zu

@@ -53,6 +53,7 @@ public static class UebersichtRegeln
         if (b.Allergie == AllergieZustand.Eingetragen) marken.Add(new Marke(MarkenArt.Allergie, $"Allergie: {b.Allergien}"));
         if (b.Allergie == AllergieZustand.NichtErfasst) marken.Add(new Marke(MarkenArt.NichtErfasst, "Allergien nicht erfasst"));
         if (b.Beschluss == BeschlussZustand.NichtErfasst) marken.Add(new Marke(MarkenArt.NichtErfasst, "Beschluss nicht erfasst"));
+        if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offen) marken.Add(offen);
         if (h.HebFaellig is string heb) marken.Add(new Marke(MarkenArt.NichtErfasst, heb));
         foreach (var (v, aenderung) in h.Medikation)
             marken.Add(new Marke(MarkenArt.Wichtig, $"Medikation: {aenderung}"));

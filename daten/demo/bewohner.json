@@ -1,65 +1,65 @@
 {
-  "hinweis": "Alle Angaben sind ausgedacht (Demo). Namen: Pflanzen mit gleichem Anfangsbuchstaben. Keine Bilder – das Programm zeigt Initialen. Datumsangaben im Format TT.MM.JJJJ. allergie: eingetragen | keine_bekannt | nicht_erfasst. beschluss: ende | kein_beschluss | nicht_erfasst.",
+  "hinweis": "Alle Angaben sind ausgedacht (Demo). Namen: Pflanzen mit gleichem Anfangsbuchstaben. Keine Bilder – das Programm zeigt Initialen. Datumsangaben im Format TT.MM.JJJJ. allergie: eingetragen | keine_bekannt | nicht_erfasst. beschluss: ende | kein_beschluss | nicht_erfasst. offenGefuehrt: ja | nein | nicht_erfasst.",
   "bewohner": [
     {
       "vorname": "Anton", "nachname": "Ahorn", "zimmer": "101",
       "geburtsdatum": "14.03.1962", "aufnahmedatum": "01.09.2019",
       "allergie": "eingetragen", "allergien": "Haselnüsse",
-      "beschluss": "ende", "beschlussende": "30.06.2027"
+      "beschluss": "ende", "beschlussende": "30.06.2027", "offenGefuehrt": "nein"
     },
     {
       "vorname": "Berta", "nachname": "Birke", "zimmer": "102",
       "geburtsdatum": "22.11.1958", "aufnahmedatum": "15.02.2016",
       "allergie": "keine_bekannt",
-      "beschluss": "kein_beschluss"
+      "beschluss": "kein_beschluss", "offenGefuehrt": "ja"
     },
     {
       "vorname": "Clara", "nachname": "Clematis", "zimmer": "103",
       "geburtsdatum": "05.07.1971", "aufnahmedatum": "03.05.2021",
       "allergie": "nicht_erfasst",
-      "beschluss": "ende", "beschlussende": "15.01.2027"
+      "beschluss": "ende", "beschlussende": "15.01.2027", "offenGefuehrt": "nein"
     },
     {
       "vorname": "Dieter", "nachname": "Distel", "zimmer": "104",
       "geburtsdatum": "30.01.1967", "aufnahmedatum": "12.10.2018",
       "allergie": "eingetragen", "allergien": "Wespen- und Bienenstiche",
-      "beschluss": "nicht_erfasst"
+      "beschluss": "nicht_erfasst", "offenGefuehrt": "nicht_erfasst"
     },
     {
       "vorname": "Emil", "nachname": "Eiche", "zimmer": "105",
       "geburtsdatum": "08.08.1975", "aufnahmedatum": "20.04.2022",
       "allergie": "keine_bekannt",
-      "beschluss": "ende", "beschlussende": "31.03.2028"
+      "beschluss": "ende", "beschlussende": "31.03.2028", "offenGefuehrt": "nein"
     },
     {
       "vorname": "Frieda", "nachname": "Fichte", "zimmer": "106",
       "geburtsdatum": "17.12.1955", "aufnahmedatum": "01.07.2014",
       "allergie": "eingetragen", "allergien": "Erdbeeren",
-      "beschluss": "kein_beschluss"
+      "beschluss": "kein_beschluss", "offenGefuehrt": "nein"
     },
     {
       "vorname": "Gustav", "nachname": "Ginster", "zimmer": "107",
       "geburtsdatum": "02.04.1980", "aufnahmedatum": "09.01.2024",
       "allergie": "nicht_erfasst",
-      "beschluss": "nicht_erfasst"
+      "beschluss": "nicht_erfasst", "offenGefuehrt": "ja"
     },
     {
       "vorname": "Hanna", "nachname": "Holunder", "zimmer": "108",
       "geburtsdatum": "25.06.1969", "aufnahmedatum": "18.08.2020",
       "allergie": "keine_bekannt",
-      "beschluss": "ende", "beschlussende": "30.09.2027"
+      "beschluss": "ende", "beschlussende": "30.09.2027", "offenGefuehrt": "nein"
     },
     {
       "vorname": "Ida", "nachname": "Immergrün", "zimmer": "109",
       "geburtsdatum": "11.10.1985", "aufnahmedatum": "02.03.2025",
       "allergie": "eingetragen", "allergien": "Pflasterkleber",
-      "beschluss": "kein_beschluss"
+      "beschluss": "kein_beschluss", "offenGefuehrt": "nein"
     },
     {
       "vorname": "Karl", "nachname": "Kiefer", "zimmer": "110",
       "geburtsdatum": "19.05.1960", "aufnahmedatum": "14.11.2017",
       "allergie": "nicht_erfasst",
-      "beschluss": "ende", "beschlussende": "28.02.2027"
+      "beschluss": "ende", "beschlussende": "28.02.2027", "offenGefuehrt": "nein"
     }
   ]
 }
