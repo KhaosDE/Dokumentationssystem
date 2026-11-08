@@ -68,7 +68,7 @@ public class AkteErgaenzungenTests
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.Bewohner.UebersichtZeigen();
-        var karten = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().ToList();
+        var karten = f.Bewohner.Zeilen;
         Assert.Contains(karten.Single(k => k.Bewohner.Nachname == "Birke").Marken, m => m.Art == MarkenArt.Angabe && m.Text == "offen geführt");
         Assert.DoesNotContain(karten.Single(k => k.Bewohner.Nachname == "Ahorn").Marken, m => m.Text.StartsWith("offen geführt"));   // „nein“: keine Marke
         f.BereichWaehlen("Übersicht");

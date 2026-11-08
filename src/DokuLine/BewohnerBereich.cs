@@ -2,18 +2,37 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Bewohner“: Übersicht als Kartenraster mit Filterknöpfen, Klick öffnet die Akte.
+// Bereich „Bewohner“ (seit Schritt 26j): links eine Liste der Bewohner des Bereichs (Zimmer/Bett, Name,
+// Bezugspflege, Hinweise; sortierbar, Suche, Bereichswahl, Filterknöpfe), rechts die Berichte des
+// gewählten Bewohners. Pfeiltasten blättern, Doppelklick oder „Akte öffnen“ öffnet die Akte.
 // Der Kopf (KopfBereich) zeigt je Ansicht passende Texte und Knöpfe; pro Ansicht genau eine
 // Hauptaktion in Akzentfarbe.
 public sealed class BewohnerBereich : Panel
 {
     private readonly Speicher speicher;
     private readonly KopfBereich kopf;
-    private readonly Button neuKnopf = Stil.HauptKnopf("Neuer Bewohner …");
+    private readonly Button neuKnopf = Stil.NebenKnopf("Neuer Bewohner …");
+    public Button BerichtNeuKnopf { get; } = Stil.HauptKnopf("Neuer Bericht …");   // für den gewählten Bewohner
+    public Button AkteKnopf { get; } = Stil.NebenKnopf("Akte öffnen");
     private readonly Button zurueckKnopf = Stil.NebenKnopf("← Alle Bewohner");
     private readonly Button bearbeitenKnopf = Stil.HauptKnopf("Bearbeiten …");
 
-    public KartenRaster Raster { get; } = new() { Dock = DockStyle.Fill };
+    // Schritt 26j: Liste links, Berichte rechts.
+    public ListView Liste { get; } = new()
+    {
+        View = View.Details, FullRowSelect = true, MultiSelect = false, HideSelection = false, Dock = DockStyle.Fill,
+        Font = Stil.Standard, BorderStyle = BorderStyle.None, ShowItemToolTips = true, AccessibleName = "Bewohnerliste",
+    };
+    public List<BewohnerZeile> Zeilen { get; private set; } = [];
+    public BerichteAnsicht Berichte { get; }
+    public ComboBox BereichWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 150, Font = Stil.Standard, AccessibleName = "Bereich" };
+    public const string AlleBereiche = "alle Bereiche";
+    public TextBox Suche { get; } = new() { Width = 200, PlaceholderText = "Name oder Zimmer suchen", Font = Stil.Standard, AccessibleName = "Bewohner suchen" };
+    private readonly Panel listenFlaeche = new() { Dock = DockStyle.Fill, BackColor = Stil.Seite };
+    private readonly Panel links = new() { Dock = DockStyle.Left, Width = 640, BackColor = Stil.Flaeche };   // Spalten 600 px + Bildlauf; mit der Trennlinie verschiebbar
+    private int sortSpalte;
+    private bool absteigend;
+    public BewohnerZeile? Gewaehlt => Liste.SelectedItems.Count == 1 ? Liste.SelectedItems[0].Tag as BewohnerZeile : null;
     public FlowLayoutPanel FilterLeiste { get; } = new()
     {
         Dock = DockStyle.Top, AutoSize = true, WrapContents = true, BackColor = Stil.Seite,
@@ -71,6 +90,34 @@ public sealed class BewohnerBereich : Panel
             FilterKnoepfe[filter] = knopf;
             FilterLeiste.Controls.Add(knopf);
         }
+        // Bereichswahl und Suche (Schritt 26j).
+        BereichWahl.Items.Add(UebersichtSeite.EigeneBereiche);
+        BereichWahl.Items.Add(AlleBereiche);
+        foreach (var w in speicher.Wohnbereiche()) BereichWahl.Items.Add(w.Name);
+        BereichWahl.SelectedIndex = 0;
+        BereichWahl.SelectedIndexChanged += (_, _) => UebersichtZeigen();
+        Suche.TextChanged += (_, _) => UebersichtZeigen();
+        foreach (var c in new Control[] { BereichWahl, Suche }) c.Margin = new Padding(Stil.AbstandMittel, Stil.AbstandKlein, 0, 0);
+        FilterLeiste.Controls.AddRange([BereichWahl, Suche]);
+
+        foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 180), ("Bezug", 70), ("Hinweise", 250) }) Liste.Columns.Add(titel, breite);
+        Liste.ColumnClick += (_, e) => Sortieren(e.Column);
+        Liste.SelectedIndexChanged += (_, _) => BerichteZeigen();
+        Liste.DoubleClick += (_, _) => AkteOeffnen();
+        Liste.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.Handled = true; AkteOeffnen(); } };
+        var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
+        menue.Items.Add("Akte öffnen", null, (_, _) => AkteOeffnen());
+        menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
+        Liste.ContextMenuStrip = menue;
+        Berichte = new BerichteAnsicht(speicher) { Dock = DockStyle.Fill, Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0) };
+        Berichte.NeuKnopf.Visible = false;   // „Neuer Bericht …“ steht in der Aktionsleiste
+        links.Controls.Add(Liste);
+        listenFlaeche.Controls.Add(Berichte);
+        listenFlaeche.Controls.Add(new Splitter { Dock = DockStyle.Left, Width = 6, BackColor = Stil.Seite });
+        listenFlaeche.Controls.Add(links);
+        listenFlaeche.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, 0, 0);
+        BerichtNeuKnopf.Click += (_, _) => NeuerBericht();
+        AkteKnopf.Click += (_, _) => AkteOeffnen();
         aufgabenRahmen.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross, Stil.AbstandKlein);
         aufgabenRahmen.Controls.Add(Aufgaben);
         aufgabenRahmen.Controls.Add(Nachrichten);
@@ -95,11 +142,11 @@ public sealed class BewohnerBereich : Panel
         statusKnopf.Click += (_, _) => StatusOeffnen();
         AerztlichKnopf.Click += (_, _) => AerztlichOeffnen();
         berichtKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) BerichtGewuenscht?.Invoke(id); };
-        Controls.Add(Raster);
+        Controls.Add(listenFlaeche);
         Controls.Add(Akte);
         Controls.Add(FilterLeiste);
         Controls.Add(aufgabenRahmen);
-        Raster.BringToFront();
+        listenFlaeche.BringToFront();
         Akte.BringToFront();
         neuKnopf.Click += (_, _) => Formular(null);
         zurueckKnopf.Click += (_, _) => UebersichtZeigen();
@@ -115,50 +162,140 @@ public sealed class BewohnerBereich : Panel
         UebersichtZeigen();
     }
 
-    // Kopf und Inhalt für die Übersicht: Filterknöpfe mit Zählern, darunter die passenden Karten.
+    // Kopf und Inhalt der Liste: Filterknöpfe mit Zählern (im gewählten Bereich), darunter die Bewohner;
+    // die Auswahl bleibt, sonst ist der erste gewählt und rechts stehen seine Berichte.
     public void UebersichtZeigen()
     {
+        long? vorher = Gewaehlt?.Bewohner.Id;
+        var werte = Einstellungen.Laden();
         var alle = speicher.AlleBewohner();
+        var imBereich = BereichFiltern(alle, werte, out string bereichText);
         foreach (var (filter, knopf) in FilterKnoepfe)
         {
-            knopf.Anzahl = alle.Count(b => Kennzeichen.Passt(b, filter));
+            knopf.Anzahl = imBereich.Count(b => Kennzeichen.Passt(b, filter));
             knopf.Aktiv = filter == AktiverFilter;
         }
-        var sichtbar = alle.Where(b => Kennzeichen.Passt(b, AktiverFilter)).ToList();
+        string suche = Suche.Text.Trim();
+        var sichtbar = imBereich.Where(b => Kennzeichen.Passt(b, AktiverFilter) &&
+            (suche.Length == 0 || b.Name.Contains(suche, StringComparison.CurrentCultureIgnoreCase) || b.Zimmer.StartsWith(suche, StringComparison.Ordinal))).ToList();
         DateOnly heute = Heute();
         DateTime jetzt = Jetzt();
-        var werte = Einstellungen.Laden();
         string kuerzel = werte.Kuerzel;
         var status = speicher.GeltendeStatusmeldungen(jetzt);
         var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan (Schritt 23): „in Therapie: … bis …“
         var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten (Schritt 24): „abwesend: unterwegs mit …“
-        string? berichtGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
         var bezuege = speicher.Bezuege();
         var farben = BezugAnzeige.Farben(speicher);
-        Raster.KartenSetzen(sichtbar.Select(b =>
+        var zeilen = sichtbar.Select(b =>
         {
-            // Mehrplatz: Statusmeldung vorne; Bewohner eines anderen Wohnbereichs hinten gekennzeichnet.
-            var karte = new BewohnerKarte(b, heute,
-                speicher.UngeleseneUebergaben(b.Id!.Value, kuerzel, jetzt),
-                speicher.WichtigeBerichteSeit(b.Id!.Value, jetzt.AddDays(-7)),
-                Modulverwaltung.Marken(speicher, b, jetzt),
-                [.. mitfahrende.TryGetValue(b.Id!.Value, out var fahrt) ? [fahrt] : Array.Empty<Marke>(),
-                 .. inTherapie.TryGetValue(b.Id!.Value, out var wo) ? [wo] : Array.Empty<Marke>(),
-                 .. status.TryGetValue(b.Id!.Value, out var s) ? [StatusmeldungRegeln.Marke(s, jetzt)] : Array.Empty<Marke>()],
-                b.Wohnbereich != werte.Bereich ? [new Marke(MarkenArt.Angabe, b.Wohnbereich)] : null);
-            karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
-            karte.BerichtGewuenscht += gewaehlt => BerichtGewuenscht?.Invoke(gewaehlt.Id!.Value);
-            karte.BerichtSperren(berichtGrund);
-            BezugAnzeige.Setzen(karte, bezuege.GetValueOrDefault(b.Id!.Value), farben);
-            return karte;
-        }));
+            long id = b.Id!.Value;
+            // Wie auf den Karten: Statusmeldung vorne; Bewohner eines anderen Wohnbereichs hinten gekennzeichnet.
+            IReadOnlyList<Marke> marken =
+            [
+                .. mitfahrende.TryGetValue(id, out var fahrt) ? [fahrt] : Array.Empty<Marke>(),
+                .. inTherapie.TryGetValue(id, out var wo) ? [wo] : Array.Empty<Marke>(),
+                .. status.TryGetValue(id, out var s) ? [StatusmeldungRegeln.Marke(s, jetzt)] : Array.Empty<Marke>(),
+                .. Kennzeichen.Marken(b, speicher.UngeleseneUebergaben(id, kuerzel, jetzt), speicher.WichtigeBerichteSeit(id, jetzt.AddDays(-7))),
+                .. Modulverwaltung.Marken(speicher, b, jetzt),
+                .. b.Wohnbereich != werte.Bereich ? [new Marke(MarkenArt.Angabe, b.Wohnbereich)] : Array.Empty<Marke>(),
+            ];
+            var bezug = bezuege.GetValueOrDefault(id);
+            var zeile = new BewohnerZeile(b, heute, marken,
+                bezug?.Bezugspflege is { } bp ? (bp.Kuerzel, BezugAnzeige.Farbe(farben, bp.Kuerzel)) : null,
+                bezug?.Einzeltrainer is { } tr ? (BezugRegeln.TrainerText(tr), BezugAnzeige.Farbe(farben, tr.Kuerzel)) : null);
+            zeile.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
+            return zeile;
+        });
+        Zeilen = Sortiert(zeilen);
+        Liste.BeginUpdate();
+        Liste.Items.Clear();
+        foreach (var z in Zeilen) Liste.Items.Add(z.Eintrag);
+        Liste.EndUpdate();
+        int index = Zeilen.FindIndex(z => z.Bewohner.Id == vorher);
+        if (index < 0 && Zeilen.Count > 0) index = 0;
+        if (index >= 0) { Liste.Items[index].Selected = true; Liste.Items[index].Focused = true; Liste.EnsureVisible(index); }
+        BerichteZeigen();
         Akte.Visible = false;
-        Raster.Visible = FilterLeiste.Visible = aufgabenRahmen.Visible = true;
+        listenFlaeche.Visible = FilterLeiste.Visible = aufgabenRahmen.Visible = true;
         AkteSichtbar = false;
-        string anzahl = alle.Count == 1 ? "1 Bewohner" : $"{alle.Count} Bewohner";
-        kopf.TexteSetzen(AktiverFilter == BewohnerFilter.Alle ? anzahl : $"{sichtbar.Count} von {anzahl}", "Bewohner");
+        string anzahl = imBereich.Count == 1 ? "1 Bewohner" : $"{imBereich.Count} Bewohner";
+        kopf.TexteSetzen($"{bereichText} · " + (sichtbar.Count == imBereich.Count ? anzahl : $"{sichtbar.Count} von {anzahl}"), "Bewohner");
         Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, neuKnopf);
-        kopf.KnoepfeSetzen(neuKnopf);
+        kopf.KnoepfeSetzen(BerichtNeuKnopf, AkteKnopf, neuKnopf);
+    }
+
+    // Eigene Bereiche wie in der Übersicht (Wohnbereiche des Angemeldeten, sonst der des Rechners; ohne
+    // eigene Bewohner alle), „alle Bereiche“ oder ein gewählter Wohnbereich.
+    private List<Bewohner> BereichFiltern(List<Bewohner> alle, EinstellungsWerte werte, out string text)
+    {
+        string? wahl = BereichWahl.SelectedItem as string;
+        if (wahl == AlleBereiche) { text = AlleBereiche; return alle; }
+        if (wahl is not null && wahl != UebersichtSeite.EigeneBereiche) { text = wahl; return alle.Where(b => b.Wohnbereich == wahl).ToList(); }
+        var meine = speicher.MitarbeiterLesen(werte.Kuerzel)?.Bereiche.Where(b => alle.Any(x => x.Wohnbereich == b)).ToList()
+            is { Count: > 0 } liste ? liste : [werte.Bereich];
+        var eigene = alle.Where(b => meine.Contains(b.Wohnbereich)).ToList();
+        if (eigene.Count == 0) { text = AlleBereiche; return alle; }
+        text = string.Join(", ", meine);
+        return eigene;
+    }
+
+    // Sortieren per Klick auf den Spaltenkopf; noch einmal klicken dreht die Reihenfolge um.
+    public void Sortieren(int spalte)
+    {
+        absteigend = spalte == sortSpalte && !absteigend;
+        sortSpalte = spalte;
+        UebersichtZeigen();
+    }
+
+    private List<BewohnerZeile> Sortiert(IEnumerable<BewohnerZeile> zeilen)
+    {
+        var sortiert = sortSpalte switch
+        {
+            1 => zeilen.OrderBy(z => z.Bewohner.Nachname, StringComparer.CurrentCulture).ThenBy(z => z.Bewohner.Vorname, StringComparer.CurrentCulture),
+            2 => zeilen.OrderBy(z => z.Bezugspflege?.Kuerzel ?? "\uffff", StringComparer.Ordinal).ThenBy(z => z.Bewohner.Nachname, StringComparer.CurrentCulture),
+            3 => zeilen.OrderByDescending(z => z.Marken.Count).ThenBy(z => z.Bewohner.Nachname, StringComparer.CurrentCulture),
+            _ => zeilen.OrderBy(z => z.Bewohner.Zimmer.PadLeft(8), StringComparer.Ordinal).ThenBy(z => z.Bewohner.Bett == ZimmerRegeln.Tuer ? 1 : 0),
+        };
+        var liste = sortiert.ToList();
+        if (absteigend) liste.Reverse();
+        return liste;
+    }
+
+    public bool Waehlen(long bewohnerId)
+    {
+        int index = Zeilen.FindIndex(z => z.Bewohner.Id == bewohnerId);
+        if (index < 0) return false;
+        Liste.SelectedIndices.Clear();
+        Liste.Items[index].Selected = true;
+        Liste.EnsureVisible(index);
+        return true;
+    }
+
+    // Rechts die Berichte des gewählten Bewohners; ohne Auswahl sind „Neuer Bericht …“ und „Akte öffnen“ grau.
+    private void BerichteZeigen()
+    {
+        var z = Gewaehlt;
+        Berichte.Visible = z is not null;
+        if (z is not null) Berichte.Zeigen(z.Bewohner);
+        string? ohne = z is null ? "Bitte zuerst einen Bewohner wählen." : null;
+        Stil.Sperren(AkteKnopf, ohne);
+        Stil.Sperren(BerichtNeuKnopf, ohne ?? Recht.Grund(speicher, Funktionen.BerichteSchreiben));
+        if (Liste.ContextMenuStrip is { } menue)
+        {
+            menue.Items[1].Enabled = Stil.Sperrgrund(BerichtNeuKnopf) is null;
+            menue.Items[1].Text = Stil.Sperrgrund(BerichtNeuKnopf) is string grund ? $"Neuer Bericht … – {grund}" : "Neuer Bericht …";
+        }
+    }
+
+    public void AkteOeffnen() { if (Gewaehlt is { } z) z.Waehlen(); }
+
+    // „Neuer Bericht …“ für den gewählten Bewohner: bleibt in der Liste, rechts erscheint er.
+    public bool NeuerBericht()
+    {
+        if (Gewaehlt is null || Stil.Sperrgrund(BerichtNeuKnopf) is not null) return false;
+        Berichte.NeuerBericht();
+        UebersichtZeigen();   // Marken (z. B. „Wichtig“, „Übergabe“) neu
+        return true;
     }
 
     // Rechte des Angemeldeten auf die Knöpfe im Kopf der Akte (Schritt 19).
@@ -187,7 +324,7 @@ public sealed class BewohnerBereich : Panel
             return;
         }
         Akte.Zeigen(b);
-        Raster.Visible = FilterLeiste.Visible = aufgabenRahmen.Visible = false;
+        listenFlaeche.Visible = FilterLeiste.Visible = aufgabenRahmen.Visible = false;
         Akte.Visible = true;
         AkteSichtbar = true;
         kopf.TexteSetzen("Bewohner", "Bewohnerakte");   // Schritt 26d: der Name steht nur einmal, auf der Karte darunter

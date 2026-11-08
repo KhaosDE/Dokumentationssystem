@@ -73,3 +73,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 26g „Tagesplan als Anzeigetafel“ (0.29.9).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26h „Demo-Daten: 23 Bewohner je Wohnbereich“ (0.29.10); IDEEN-Vorschlag „Assistenzkraft und Fachkraft“ (wartet auf Bestätigung).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26i „Aktionsleiste unter der Kopfzeile“ (0.29.11).
+- 08.11.2026 — Claude Code: Bauplan Schritt 26j „Bereich „Bewohner“ als Liste mit Berichten“ (0.29.12).

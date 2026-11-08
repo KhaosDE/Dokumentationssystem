@@ -1304,7 +1304,7 @@ Umfang:
 - Bildschirmfotos im Testlauf erneuern.
 
 ## Bereich „Bewohner“ als Liste mit Berichten
-Status: freigegeben (Bauplan Schritt 26j)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Der Bereich „Bewohner“ bekommt eine Liste statt Kacheln. Wählt man einen Bewohner, erscheinen
 daneben seine Berichte.

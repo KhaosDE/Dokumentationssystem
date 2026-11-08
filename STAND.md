@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.11** (Aktionsleiste unter der Kopfzeile, Bauplan Schritt 26i).
+Stand: 08.11.2026. Version: **0.29.12** (Bereich „Bewohner“ als Liste mit Berichten, Bauplan Schritt 26j).
 
 ## Aktuell
 
@@ -142,7 +142,12 @@ Neu in 0.29.11: Die Knöpfe eines Bereichs stehen nicht mehr in der Kopfzeile, s
 rechts „… drucken …“ und „Entwurf fortsetzen“. Die Kopfzeile sieht aus wie bisher, nur um diese Zeile
 niedriger. Ohne Aktion gibt es keine Leiste.
 
-**Nächster Schritt:** Bauplan Schritt 26j „Bereich „Bewohner“ als Liste mit Berichten“ (0.29.12).
+Neu in 0.29.12: Der Bereich **„Bewohner“** ist eine **Liste** statt Karten (Zimmer und Bett, Name,
+Bezugspflege, Hinweise; sortierbar, Suche, Bereichswahl). **Rechts** stehen die **Berichte** des gewählten
+Bewohners mit den gewohnten Filtern; Pfeiltasten blättern. „Neuer Bericht …“ (Aktionsleiste) gilt für den
+gewählten Bewohner; die Akte öffnet ein Doppelklick oder „Akte öffnen“. Die Übersicht bleibt bei Karten.
+
+**Nächster Schritt:** Bauplan Schritt 26k „Visite: „Nächster Bewohner“ unter der Texteingabe“ (0.29.13).
 
 ## Fertig
 
@@ -805,6 +810,18 @@ niedriger. Ohne Aktion gibt es keine Leiste.
     „Entwurf fortsetzen“. Ohne Aktion keine Leiste.
   - Betrifft Bewohner (Übersicht und Akte), Visiten, Aufgaben, Nachrichten, Kalender, Therapie und das Modul
     Ausgangsliste; Bereiche ohne eigene Knöpfe (Übersicht, Tagesplan, Übergabe) haben keine Leiste.
+- 0.29.12 — Bereich „Bewohner“ als Liste mit Berichten (Bauplan Schritt 26j, 08.11.2026):
+  - Links eine Tabelle der Bewohner: Zimmer und Bett („101 · Fenster“), Name, Bezugspflege (Kürzel in ihrer
+    Farbe), Hinweise (dieselben Marken wie auf den Karten, als Text; rot bei Beschluss/Allergie, gelb bei
+    „nicht erfasst“). Beim Darüberfahren die ganze Beschreibung. Klick auf einen Spaltenkopf sortiert,
+    nochmals umgekehrt; Vorgabe nach Zimmer.
+  - Darüber die Filterknöpfe (Alle, Beschluss, Allergie, Nicht erfasst – gezählt im gewählten Bereich), die
+    Bereichswahl (eigene Bereiche, alle Bereiche, R1, R2, R3) und ein Suchfeld (Name oder Zimmer).
+  - Rechts die Berichte des gewählten Bewohners (neueste oben) mit Zeitraum, Lebensbereich, Schicht, Suche,
+    „nur wichtige“, Nachtrag, Drucken. Pfeiltasten blättern, die Berichte wechseln mit.
+  - Aktionsleiste: „Neuer Bericht …“ (Hauptaktion, für den gewählten Bewohner; danach bleibt man in der
+    Liste), „Akte öffnen“, „Neuer Bewohner …“. Die Akte öffnet auch ein Doppelklick oder Enter; „← Alle
+    Bewohner“ führt zurück, die Auswahl bleibt. Rechtsklick: „Akte öffnen“, „Neuer Bericht …“.
 ## Offene Punkte
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
@@ -874,6 +891,15 @@ niedriger. Ohne Aktion gibt es keine Leiste.
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26j): Die Liste zeigt zuerst die eigenen Bereiche (wie die Übersicht); „alle Bereiche“
+  und R1–R3 sind wählbar. Die Filterknöpfe bleiben und zählen im gewählten Bereich.
+- 08.11.2026 (Schritt 26j): Hauptaktion ist „Neuer Bericht …“ (die häufigste Aufgabe in dieser Ansicht);
+  „Neuer Bewohner …“ ist deshalb nicht mehr farbig. Nach dem Speichern bleibt man in der Liste, der neue
+  Bericht steht rechts – in der Akte öffnet „Neuer Bericht …“ wie bisher die Berichte der Akte.
+- 08.11.2026 (Schritt 26j): Die Hinweise sind dieselben Marken wie auf den Karten, als Text in einer Spalte;
+  eine Tabellenzeile kann keine einzelnen farbigen Marken zeigen, deshalb färbt sich die Spalte nach der
+  wichtigsten (rot vor gelb), der Text sagt immer, was gilt.
 
 - 08.11.2026 (Schritt 26i): Filter und Umschalter, die schon in einer eigenen Zeile der Seite stehen (z. B.
   Tagesplan „nach Uhrzeit / nach Bewohner“, Übersicht „Meine Bezugsbewohner“), bleiben dort; sie liegen
@@ -1447,6 +1473,18 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.12:
+
+1. „Bewohner“: links eine Liste der 23 Bewohner von R1 (nach Zimmer), rechts die Berichte des ersten.
+   Pfeil nach unten: der nächste Bewohner, rechts seine Berichte.
+2. Klick auf „Name“: nach Name sortiert, nochmals: umgekehrt. Suchfeld „Tanne“: nur Theo Tanne.
+   Bereichswahl „R3“: 23 andere Bewohner; „alle Bereiche“: 69.
+3. Als „CD“: Bewohner wählen → „Neuer Bericht …“ (Aktionsleiste) → speichern → man bleibt in der Liste,
+   rechts steht der neue Bericht.
+4. Doppelklick auf einen Bewohner (oder „Akte öffnen“, oder Enter): die Akte. „← Alle Bewohner“: zurück,
+   derselbe Bewohner ist gewählt.
+5. Filter „Allergie“: nur Bewohner mit eingetragener Allergie; Hinweis-Spalte rot.
 
 Version 0.29.11:
 

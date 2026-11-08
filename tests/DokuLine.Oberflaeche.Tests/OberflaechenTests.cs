@@ -76,7 +76,7 @@ public class HauptfensterTests
 [Collection("Oberflaeche")]
 public class BewohnerOberflaechenTests
 {
-    private static List<BewohnerKarte> Karten(Hauptfenster f) => f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().ToList();
+    private static List<BewohnerZeile> Karten(Hauptfenster f) => f.Bewohner.Zeilen;   // seit Schritt 26j eine Liste
 
     [Fact]
     public void Uebersicht_zeigt_alle_mit_Name_und_Zimmer() => Hilfe.Sta(() =>
@@ -84,13 +84,13 @@ public class BewohnerOberflaechenTests
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         var karten = Karten(f);
-        Assert.Equal(u.Speicher.AlleBewohner().Count, karten.Count);
+        Assert.Equal(u.Speicher.AlleBewohner().Count(b => b.Wohnbereich == "R1"), karten.Count);   // eigener Bereich (Schritt 26j)
         // Ohne eigenes Kürzel zählt „Übergabe“ alle offenen Einträge; „Wichtig“: wichtiger Bericht der letzten 7 Tage.
         // Vorne die Statusmeldung aus der Demo (Mehrplatz, gesetzt von der Therapie).
-        Assert.StartsWith("Anton Ahorn, Zimmer 101, Status: in der Holzwerkstatt, bis ", karten[0].AccessibleName);
-        Assert.EndsWith(", Übergabe 1, Wichtig, Beschluss bis 30.06.2027, Allergie: Haselnüsse, Bezugspflege AB. Akte öffnen", karten[0].AccessibleName);
+        Assert.StartsWith("Anton Ahorn, Zimmer 101, Status: in der Holzwerkstatt, bis ", karten[0].Beschreibung);
+        Assert.EndsWith(", Übergabe 1, Wichtig, Beschluss bis 30.06.2027, Allergie: Haselnüsse, Bezugspflege AB. Akte öffnen", karten[0].Beschreibung);
         Assert.Equal("Bewohner", f.Kopf.TitelText);
-        Assert.Equal("Neuer Bewohner …", Assert.Single(f.Kopf.Knoepfe).Text);
+        Assert.Equal(["Neuer Bericht …", "Akte öffnen", "Neuer Bewohner …"], f.Kopf.Knoepfe.Select(k => k.Text));
     });
 
     [Fact]
@@ -99,7 +99,7 @@ public class BewohnerOberflaechenTests
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         f.Bewohner.Heute = () => new DateOnly(2026, 11, 7);
-        f.Bewohner.UebersichtZeigen();
+        f.Bewohner.BereichWahl.SelectedItem = BewohnerBereich.AlleBereiche;   // Ginster wohnt in R2
         var birke = Karten(f).Single(k => k.Bewohner.Nachname == "Birke");
         // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu; ihre Übergabe ist erledigt
         Assert.DoesNotContain(birke.Marken, m => m.Art is MarkenArt.Beschluss or MarkenArt.Allergie or MarkenArt.NichtErfasst or MarkenArt.Uebergabe);
@@ -128,21 +128,23 @@ public class BewohnerOberflaechenTests
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         var knoepfe = f.Bewohner.FilterKnoepfe;
-        Assert.Equal([("Alle", 69), ("Beschluss", 51), ("Allergie", 14), ("Nicht erfasst", 14)],   // 23 je Wohnbereich (Schritt 26h)
+        Assert.Equal([("Alle", 23), ("Beschluss", 12), ("Allergie", 8), ("Nicht erfasst", 4)],   // im eigenen Bereich R1 (Schritt 26j)
             knoepfe.Values.Select(k => (k.Text, k.Anzahl)));
         Assert.True(knoepfe[BewohnerFilter.Alle].Aktiv);
         knoepfe[BewohnerFilter.Allergie].Ausloesen();
-        Assert.Equal(14, Karten(f).Count);
+        Assert.Equal(8, Karten(f).Count);
         Assert.All(Karten(f), k => Assert.Equal(AllergieZustand.Eingetragen, k.Bewohner.Allergie));
-        Assert.Equal("14 von 69 Bewohner", f.Kopf.KleinText);
+        Assert.Equal("R1 · 8 von 23 Bewohner", f.Kopf.KleinText);
         Assert.True(knoepfe[BewohnerFilter.Allergie].Aktiv);
         Assert.False(knoepfe[BewohnerFilter.Alle].Aktiv);
         Karten(f)[0].Waehlen();
         Assert.False(f.Bewohner.FilterLeiste.Visible);   // in der Akte keine Filter
         f.Bewohner.UebersichtZeigen();
-        Assert.Equal(14, Karten(f).Count);               // Filter bleibt beim Zurückkehren
+        Assert.Equal(8, Karten(f).Count);                // Filter bleibt beim Zurückkehren
         knoepfe[BewohnerFilter.Alle].Ausloesen();
-        Assert.Equal(69, Karten(f).Count);
+        Assert.Equal(23, Karten(f).Count);
+        f.Bewohner.BereichWahl.SelectedItem = BewohnerBereich.AlleBereiche;
+        Assert.Equal([("Alle", 69), ("Beschluss", 51), ("Allergie", 14), ("Nicht erfasst", 14)], knoepfe.Values.Select(k => (k.Text, k.Anzahl)));
     });
 
     [Fact]
@@ -160,7 +162,7 @@ public class BewohnerOberflaechenTests
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        Karten(f)[1].Waehlen();
+        Karten(f).Single(k => k.Bewohner.Nachname == "Birke").Waehlen();
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Bewohnerakte", f.Kopf.TitelText);   // Schritt 26d
         Assert.DoesNotContain("Berta Birke", f.Kopf.KleinText);
@@ -306,7 +308,7 @@ public class BewohnerOberflaechenTests
         Assert.True(f.DemoZuruecksetzen(nachfragen: false));
         Assert.False(f.Bewohner.AkteSichtbar);
         Assert.Equal("105", u.Demo("Eiche").Zimmer);
-        Assert.Equal(69, Karten(f).Count);
+        Assert.Equal(23, Karten(f).Count);   // eigener Bereich R1
     });
 }
 

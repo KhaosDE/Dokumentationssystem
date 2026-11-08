@@ -37,8 +37,10 @@ Danach fragt Windows für diese Datei nicht mehr.
 ## Bedienung in Kürze
 
 - Links stehen alle Bereiche. Was noch nicht gebaut ist, zeigt „Kommt in Version …“.
-- **Bewohner**: alle Bewohner als Karten. Ein Klick öffnet die Akte; ihre Teile (Stammdaten,
-  Berichte, Medikation …) liegen auf Reitern.
+- **Bewohner**: links eine Liste der Bewohner des eigenen Bereichs (Zimmer und Bett, Name, Bezugspflege,
+  Hinweise; Klick auf einen Spaltenkopf sortiert, Suchfeld, Bereichswahl), rechts die Berichte des
+  gewählten Bewohners. Mit den Pfeiltasten blättern; Doppelklick, Enter oder „Akte öffnen“ öffnet die
+  Akte; ihre Teile (Stammdaten, Berichte, Medikation …) liegen auf Reitern.
 - In der Akte steht oben der **Allergiehinweis**: rot = Allergien eingetragen,
   grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
 - **Ärztliche Informationen …** (Aktionsleiste der Akte, unter der Kopfzeile): Diagnosen (werden nie gelöscht, nur
