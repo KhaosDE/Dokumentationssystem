@@ -109,8 +109,10 @@ public class VisitenRundgangTests
         Assert.Equal("Nächster Bewohner ▶", r.NaechsterKnopf.Text);
         Assert.Equal(VisitenRundgang.ErstEintragenText, Stil.Sperrgrund(r.NaechsterKnopf));
         Assert.True(r.VorherigerKnopf.Enabled);
-        Assert.True(r.NaechsterKnopf.Top >= r.Feld!.Bottom);   // unter der Eingabe
-        Assert.True(r.VorherigerKnopf.Top >= r.Feld.Bottom);
+        // Unter der Eingabe (die Knöpfe liegen in einer eigenen Zeile, deshalb in Bildschirmkoordinaten).
+        int feldUnten = r.Feld!.PointToScreen(new Point(0, r.Feld.Height)).Y;
+        Assert.True(r.NaechsterKnopf.PointToScreen(Point.Empty).Y >= feldUnten);
+        Assert.True(r.VorherigerKnopf.PointToScreen(Point.Empty).Y >= feldUnten);
         int erster = r.Aktuell;
         r.NaechsterKnopf.PerformClick();
         Assert.Equal(erster, r.Aktuell);   // gesperrt: bleibt beim Bewohner
