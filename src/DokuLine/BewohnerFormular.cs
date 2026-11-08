@@ -157,13 +157,15 @@ public sealed class BewohnerFormular : Form
         Stil.DpiSkalierungEinschalten(this);
     }
 
-    private static TextBox Feld(string platzhalter = "") => new()
+    private static TextBox Feld(string platzhalter = "")
     {
-        Dock = DockStyle.Fill,
-        PlaceholderText = platzhalter,
-        Font = Stil.Standard,
-        Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini),
-    };
+        var feld = platzhalter == "TT.MM.JJJJ" ? new DatumFeld() : new TextBox();   // Datum mit Punkten (Schritt 26d)
+        feld.Dock = DockStyle.Fill;
+        feld.PlaceholderText = platzhalter;
+        feld.Font = Stil.Standard;
+        feld.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
+        return feld;
+    }
 
     // ------------------------------------------------------------------ Bild
 

@@ -125,9 +125,9 @@ public sealed class FahrtFenster : Form
     private string? gewarntFuer;
 
     public ComboBox Fahrzeug { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
-    public TextBox Datum { get; } = new() { Width = 100 };
-    public TextBox Von { get; } = new() { Width = 70, PlaceholderText = "09:00" };
-    public TextBox Bis { get; } = new() { Width = 70, PlaceholderText = "11:00" };
+    public TextBox Datum { get; } = new DatumFeld() { Width = 100 };
+    public TextBox Von { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "09:00" };
+    public TextBox Bis { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "11:00" };
     public ComboBox Zweck { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
     public PersonWahl Fahrer { get; }   // Schritt 26a: Auswahl aus den Mitarbeitern, vorbelegt mit der angemeldeten Person
     public CheckedListBox Mitfahrende { get; } = new() { Width = 300, Height = 150, CheckOnClick = true, IntegralHeight = false };

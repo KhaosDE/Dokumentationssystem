@@ -1150,7 +1150,7 @@ Umfang:
 - Tastenkürzel im Tooltip und in der Hilfe/„Über“ nennen.
 
 ## Kleine Verbesserungen: Nachrichten „gelesen“, Datum mit Punkten, Kopf der Akte
-Status: freigegeben (Bauplan Schritt 26d)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Drei kleine Änderungen nach Tobis Durchsicht.
 Warum: Rückmeldung Tobi (08.11.2026).

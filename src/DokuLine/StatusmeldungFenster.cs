@@ -12,8 +12,8 @@ public sealed class StatusmeldungFenster : Form
     private readonly Bewohner bewohner;
 
     public TextBox Inhalt { get; } = new() { Width = 380, MaxLength = StatusmeldungRegeln.Laenge, PlaceholderText = "z. B. beim Arzttermin, zurück gegen 11 Uhr" };
-    public TextBox BisDatum { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
-    public TextBox BisUhrzeit { get; } = new() { Width = 60, PlaceholderText = "SS:MM" };
+    public TextBox BisDatum { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
+    public TextBox BisUhrzeit { get; } = new UhrzeitFeld() { Width = 60, PlaceholderText = "SS:MM" };
     public Label Aktuell { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), UseMnemonic = false };
     public TextBox Verlauf { get; } = new() { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Width = 520, Height = 110, BackColor = Stil.Flaeche };
     public Label Fehler { get; } = new();

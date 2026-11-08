@@ -121,7 +121,8 @@ public static partial class BerichtRegeln
 
     public static TimeOnly UhrzeitLesen(string? text)
     {
-        var treffer = UhrzeitMuster().Match((text ?? "").Trim());
+        text = Eingabeformat.UhrzeitFertig(text);   // 0930 → 09:30 (Schritt 26d)
+        var treffer = UhrzeitMuster().Match(text);
         if ((text ?? "").Trim().Length == 0) throw new FormatException("Uhrzeit fehlt.");
         if (!treffer.Success) throw new FormatException("Uhrzeit: bitte als SS:MM eingeben, z. B. 14:30.");
         int stunde = int.Parse(treffer.Groups[1].Value, CultureInfo.InvariantCulture);

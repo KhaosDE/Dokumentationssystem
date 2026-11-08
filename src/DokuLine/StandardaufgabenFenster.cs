@@ -131,7 +131,7 @@ public sealed class VorlageFenster : Form
     public CheckBox Taeglich { get; } = new() { Text = "täglich", AutoSize = true, Checked = true };
     public CheckBox[] Tage { get; } = Woche.Select(t => new CheckBox
         { Text = System.Globalization.CultureInfo.GetCultureInfo("de-DE").DateTimeFormat.GetAbbreviatedDayName(t), AutoSize = true, Checked = true }).ToArray();
-    public TextBox Uhrzeit { get; } = new() { Width = 70, PlaceholderText = "optional" };
+    public TextBox Uhrzeit { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "optional" };
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
     public Label Fehler { get; } = Fenster.Fehlerfeld();
 

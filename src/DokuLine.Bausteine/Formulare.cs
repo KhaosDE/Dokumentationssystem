@@ -72,7 +72,7 @@ public sealed class TextFenster : Form
 public sealed class DatumFenster : Form
 {
     private readonly Action<DateOnly> speichern;
-    public TextBox Datumsfeld { get; } = new() { Width = 100 };
+    public TextBox Datumsfeld { get; } = new DatumFeld() { Width = 100 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(420, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
 
     public DatumFenster(string titel, string beschriftung, DateOnly vorschlag, Action<DateOnly> speichern)

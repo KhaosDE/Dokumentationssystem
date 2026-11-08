@@ -50,9 +50,9 @@ public sealed class EinstellungenFenster : Form
     public Button FahrzeugeKnopf { get; } = Stil.NebenKnopf("Fahrzeuge …");
     public Button AerzteKnopf { get; } = Stil.NebenKnopf("Ärzteverzeichnis …");   // Schritt 26b
     // Schritt 25: Schichtzeiten des Bereichs (dieses Rechners), für alle Rechner des Bereichs.
-    public TextBox Frueh { get; } = new() { Width = 60 };
-    public TextBox Spaet { get; } = new() { Width = 60 };
-    public TextBox Nacht { get; } = new() { Width = 60 };
+    public TextBox Frueh { get; } = new UhrzeitFeld() { Width = 60 };
+    public TextBox Spaet { get; } = new UhrzeitFeld() { Width = 60 };
+    public TextBox Nacht { get; } = new UhrzeitFeld() { Width = 60 };
     public CheckBox AutoUpdate { get; } = new();
     public CheckBox NachschlageAnsicht { get; } = new() { Text = "Nachschlage-Ansicht anzeigen (Formular „Medikament“)", AutoSize = true };
     public Label WebAnsichtStand { get; } = new() { AutoSize = true, MaximumSize = new Size(380, 0), Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein) };

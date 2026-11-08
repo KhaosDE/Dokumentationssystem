@@ -322,7 +322,7 @@ public sealed class VisiteBeginnenFenster : Form
     private readonly Speicher speicher;
     private readonly string bereich;
 
-    public TextBox DatumFeld { get; } = new() { Width = 100 };
+    public TextBox DatumFeld { get; } = new DatumFeld() { Width = 100 };
     public ArztWahl Arzt { get; }
     public PersonenWahl Teilnehmer { get; }
     public Label Fehler { get; } = Fenster.Fehlerfeld();

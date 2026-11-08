@@ -323,10 +323,10 @@ public sealed class AufgabeFenster : Form
     public RadioButton NaechsteSchicht { get; } = new() { AutoSize = true, Checked = true };
     public RadioButton BestimmteSchicht { get; } = new() { Text = "bestimmte Schicht:", AutoSize = true };
     public RadioButton WerZeitHat { get; } = new() { Text = "wer Zeit hat", AutoSize = true };
-    public TextBox SchichtTag { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
+    public TextBox SchichtTag { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public ComboBox SchichtArt { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 130 };
-    public TextBox FaelligDatum { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
-    public TextBox FaelligUhrzeit { get; } = new() { Width = 70, PlaceholderText = "SS:MM" };
+    public TextBox FaelligDatum { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
+    public TextBox FaelligUhrzeit { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "SS:MM" };
     public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // Schritt 26a: aus der Anmeldung
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Aufgabe? Gespeichert { get; private set; }

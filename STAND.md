@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.5** (Visite: Übersicht aller Bewohner, Bauplan Schritt 26c).
+Stand: 08.11.2026. Version: **0.29.6** (Kleine Verbesserungen: Nachrichten „gelesen“, Datum mit Punkten, Kopf der Akte, Bauplan Schritt 26d).
 
 ## Aktuell
 
@@ -105,7 +105,13 @@ Eingabe. Alles steht sofort als **Entwurf** in der Datenbank; „Unterbrechen“
 fortsetzen“**. Erst **„Visite abschließen …“** legt Berichte und Aufgaben an und zeigt die Aufgaben
 gesammelt. Ausdruck **„Visitenliste“** als Papiervorlage. Das Feld „Art der Visite“ entfällt.
 
-**Nächster Schritt:** Bauplan Schritt 26d „Kleine Verbesserungen: Nachrichten „gelesen“, Datum mit Punkten, Kopf der Akte“ (0.29.6).
+Neu in 0.29.6: Nachrichten im Posteingang haben einen Knopf **„Gelesen“** (auch mehrere markiert auf
+einmal) – sie wandern dann ins **Archiv**, nur für die Person, die sie gelesen hat; im Archiv holt
+**„Wieder als ungelesen“** sie zurück. In **jedem Datumsfeld** setzt das Programm die Punkte selbst
+(`08112026` → `08.11.2026`, `081126` → `08.11.2026`), in Uhrzeitfeldern den Doppelpunkt (`0930` →
+`09:30`). Der **Kopf der Akte** zeigt groß „Bewohnerakte“, der Name steht nur einmal, auf der Karte.
+
+**Nächster Schritt:** Bauplan Schritt 26e „Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme“ (0.29.7).
 
 ## Fertig
 
@@ -663,6 +669,16 @@ gesammelt. Ausdruck **„Visitenliste“** als Papiervorlage. Das Feld „Art de
   - Ausdruck „Visitenliste“ (A4 hoch): je Bewohner ein Block mit Zimmer, Allergien, Medikation und
     Linien für Notizen.
   - Feld „Art der Visite“ entfällt (ältere Visiten zeigen die Art weiter im Kopf). Ein Arzt ist Pflicht.
+- 0.29.6 — Kleine Verbesserungen (Bauplan Schritt 26d, 08.11.2026):
+  - Nachrichten: Knopf „Gelesen“ an jedem Verlauf im Posteingang und Häkchen zum Markieren, oben
+    „Markierte als gelesen (n)“. Gelesen heißt: gelesen und im Archiv – nur für die lesende Person
+    (bei Team-Nachrichten bleibt sie bei den anderen ungelesen). Im Archiv „Wieder als ungelesen“
+    (zurück in den Posteingang, wieder neu). Zähler passen sich an. Nichts wird gelöscht.
+  - Datum und Uhrzeit: gemeinsame Bausteine `DatumFeld` und `UhrzeitFeld` für alle Datums- und
+    Uhrzeitfelder. Beim Tippen setzt das Programm Punkt bzw. Doppelpunkt vor die nächste Ziffer;
+    beim Verlassen und beim Lesen: 8 Ziffern → TT.MM.JJJJ, 6 Ziffern und TT.MM.JJ → 20JJ, 4 (oder 3)
+    Ziffern → SS:MM. Eigene Punkte stören nicht.
+  - Akte: Kopf groß „Bewohnerakte“ (kleine Zeile „Bewohner“), der Name nur auf der Karte darunter.
 
 ## Offene Punkte
 
@@ -719,6 +735,16 @@ gesammelt. Ausdruck **„Visitenliste“** als Papiervorlage. Das Feld „Art de
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26d): Zweistellige Jahre gelten überall als 20xx (laut Auftrag) – auch beim
+  Geburtsdatum; „03.04.65“ wird dort zu 2065 (liegt die Aufnahme davor, meldet das Formular einen
+  Fehler). Wer ein Jahr vor 2000 meint, schreibt es vierstellig.
+- 08.11.2026 (Schritt 26d): Der Punkt kommt erst, wenn die nächste Ziffer getippt wird („08“ → „08.1“),
+  nicht schon nach der zweiten – so stört ein selbst getippter Punkt nie. Beim Lesen versteht der Kern
+  dieselben Kurzformen, damit auch „Enter“ ohne Verlassen des Feldes richtig speichert.
+- 08.11.2026 (Schritt 26d): „Gelesen“ steht an der Liste im Posteingang (ein Verlauf = eine Zeile);
+  geöffnete Verläufe gelten wie bisher als gelesen, bleiben aber im Posteingang, bis jemand „Gelesen“
+  oder „Archivieren“ drückt.
 
 - 08.11.2026 (Schritt 26a3): Entwürfe gibt es für „Neuer Bericht“ (das ist die tägliche Dokumentation)
   und für den HEB-Bogen (der hatte schon Entwürfe). Andere offene Fenster werden beim Abmelden nach der
@@ -1223,6 +1249,16 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.6:
+
+1. Als „AB“: Nachrichten → Posteingang: an jeder Zeile „Gelesen“ → die Zeile verschwindet, der Zähler
+   sinkt. Zwei Häkchen setzen → „Markierte als gelesen (2)“ → beide weg.
+2. Archiv: die Nachrichten stehen dort; „Wieder als ungelesen“ → wieder im Posteingang, fett, „neu“.
+3. Als „CD“: eine Team-Nachricht, die AB gelesen hat, ist bei CD weiter ungelesen.
+4. „Neuer Bericht …“: im Datum `08112026` tippen → `08.11.2026`; `081126` tippen, Feld verlassen →
+   `08.11.2026`. Uhrzeit `0930` → `09:30`. Dasselbe in Kalender, Aufgaben, Medikamentenplan.
+5. Bewohner öffnen: oben groß „Bewohnerakte“, der Name nur auf der Karte darunter.
 
 Version 0.29.5:
 

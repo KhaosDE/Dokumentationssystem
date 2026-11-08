@@ -120,6 +120,30 @@ public sealed class NachrichtenTests : IDisposable
         Assert.Contains(s.Verlaeufe("AB", NachrichtenOrdner.Posteingang), v => v.Id == arzt.Id);
     }
 
+    // Schritt 26d: „Gelesen“ (auch mehrere) → gelesen und im Archiv, nur für mich; „Wieder als ungelesen“.
+    [Fact]
+    public void Gelesen_wandert_ins_Archiv_und_zurueck()
+    {
+        var posteingang = s.Verlaeufe("AB", NachrichtenOrdner.Posteingang);
+        int vorher = s.UngeleseneNachrichten("AB");
+        var ungelesen = posteingang.Where(v => v.Ungelesen > 0).ToList();
+        Assert.True(ungelesen.Count >= 2);
+        s.VerlaeufeGelesen("AB", ungelesen.Select(v => v.Id), Jetzt);
+        Assert.Equal(0, s.UngeleseneNachrichten("AB"));
+        Assert.All(ungelesen, v => Assert.Contains(s.Verlaeufe("AB", NachrichtenOrdner.Archiv), a => a.Id == v.Id));
+        Assert.All(ungelesen, v => Assert.DoesNotContain(s.Verlaeufe("AB", NachrichtenOrdner.Posteingang), p => p.Id == v.Id));
+        // Bei Team-Nachrichten bleibt sie für die anderen ungelesen im Posteingang.
+        var team = ungelesen.FirstOrDefault(v => s.VerlaufLesen("CD", v.Id) is { Ungelesen: > 0 });
+        if (team is not null) Assert.Contains(s.Verlaeufe("CD", NachrichtenOrdner.Posteingang), p => p.Id == team.Id);
+
+        var zurueck = ungelesen[0];
+        s.VerlaufWiederUngelesen("AB", zurueck.Id);
+        Assert.Contains(s.Verlaeufe("AB", NachrichtenOrdner.Posteingang), p => p.Id == zurueck.Id);
+        Assert.Equal(zurueck.Ungelesen, s.VerlaufLesen("AB", zurueck.Id)!.Ungelesen);
+        Assert.True(s.UngeleseneNachrichten("AB") > 0 && s.UngeleseneNachrichten("AB") < vorher + 1);
+        Assert.Throws<Eingabefehler>(() => s.VerlaeufeGelesen("", [zurueck.Id], Jetzt));
+    }
+
     [Fact]
     public void Nachrichten_lassen_sich_nicht_aendern()
     {

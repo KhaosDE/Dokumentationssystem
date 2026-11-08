@@ -62,7 +62,8 @@ public class BerichteOberflaechenTests
         Assert.NotNull(rueckfrage);
         Assert.Contains("Arzt", rueckfrage);
         Assert.True(f.Bewohner.AkteSichtbar);
-        Assert.Equal("Dieter Distel", f.Kopf.TitelText);
+        Assert.Equal("Bewohnerakte", f.Kopf.TitelText);   // Schritt 26d: Name nur auf der Karte
+        Assert.Equal("Dieter Distel", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal("Berichte", f.Bewohner.Akte.Reiter.Aktiv);
         var karte = f.Bewohner.Akte.Berichte.Liste.Karten.Single(k => k.Bericht.Text.StartsWith("Hat den Tisch gedeckt"));
         Assert.True(karte.Bericht.Uebergabe);

@@ -457,10 +457,10 @@ public sealed class KalenderFenster : Form
     public RadioButton BereichWahl { get; } = new() { Text = "Bereich", AutoSize = true, Checked = true };
     public RadioButton HausWahl { get; } = new() { Text = "Haus", AutoSize = true };
     public TextBox Titel { get; } = new() { Width = 320 };
-    public TextBox BeginnDatum { get; } = new() { Width = 100 };
-    public TextBox BeginnUhrzeit { get; } = new() { Width = 60 };
-    public TextBox EndeDatum { get; } = new() { Width = 100, PlaceholderText = "gleicher Tag" };
-    public TextBox EndeUhrzeit { get; } = new() { Width = 60 };
+    public TextBox BeginnDatum { get; } = new DatumFeld() { Width = 100 };
+    public TextBox BeginnUhrzeit { get; } = new UhrzeitFeld() { Width = 60 };
+    public TextBox EndeDatum { get; } = new DatumFeld() { Width = 100, PlaceholderText = "gleicher Tag" };
+    public TextBox EndeUhrzeit { get; } = new UhrzeitFeld() { Width = 60 };
     public CheckBox Ganztags { get; } = new() { Text = "ganztags", AutoSize = true };
     public CheckedListBox BewohnerListe { get; } = new() { Width = 320, Height = 150, CheckOnClick = true, IntegralHeight = false };
     public TextBox Ort { get; } = new() { Width = 320 };

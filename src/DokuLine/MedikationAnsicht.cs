@@ -16,7 +16,7 @@ public sealed class MedikationAnsicht : Panel
     private readonly Label bedarfTitel = Titel("BEI BEDARF");
     private Bewohner? bewohner;
 
-    public TextBox TagFeld { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
+    public TextBox TagFeld { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public Button HeuteKnopf { get; } = Stil.NebenKnopf("Heute");
     public Button NeuKnopf { get; } = Stil.NebenKnopf("Neue Verordnung …");
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Drucken …");
@@ -483,9 +483,9 @@ public sealed class VerordnungFenster : Form
     public TextBox[] Mengen { get; } = Enumerable.Range(0, 4).Select(_ => new TextBox { Width = 50, Text = "0", TextAlign = HorizontalAlignment.Center }).ToArray();
     public TextBox Anlass { get; } = new() { Width = 260, PlaceholderText = "z. B. bei starker Unruhe", Enabled = false };
     public TextBox Hoechstens { get; } = new() { Width = 160, PlaceholderText = "z. B. 2 in 24 Stunden", Enabled = false };
-    public TextBox Beginn { get; } = new() { Width = 100 };
+    public TextBox Beginn { get; } = new DatumFeld() { Width = 100 };
     public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
-    public TextBox AngeordnetAm { get; } = new() { Width = 100 };
+    public TextBox AngeordnetAm { get; } = new DatumFeld() { Width = 100 };
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Verordnung? Gespeichert { get; private set; }
@@ -590,11 +590,11 @@ public sealed class AenderungFenster : Form
     private readonly Verordnung verordnung;
     private readonly AenderungArt art;
 
-    public TextBox Von { get; } = new() { Width = 100 };
-    public TextBox Bis { get; } = new() { Width = 100, PlaceholderText = "leer = bis auf Weiteres" };
+    public TextBox Von { get; } = new DatumFeld() { Width = 100 };
+    public TextBox Bis { get; } = new DatumFeld() { Width = 100, PlaceholderText = "leer = bis auf Weiteres" };
     public TextBox[,] Stufen { get; } = new TextBox[StufenZeilen, 5];
     public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
-    public TextBox AngeordnetAm { get; } = new() { Width = 100 };
+    public TextBox AngeordnetAm { get; } = new DatumFeld() { Width = 100 };
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
 

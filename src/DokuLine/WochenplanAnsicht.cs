@@ -311,11 +311,11 @@ public sealed class PlanEintragFenster : Form
 
     public TextBox Titel { get; } = new() { Width = 300 };
     public ComboBox Wochentag { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 140 };
-    public TextBox Von { get; } = new() { Width = 70, PlaceholderText = "SS:MM" };
-    public TextBox Bis { get; } = new() { Width = 70, PlaceholderText = "SS:MM" };
+    public TextBox Von { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "SS:MM" };
+    public TextBox Bis { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "SS:MM" };
     public TextBox Ort { get; } = new() { Width = 260 };
     public TextBox Hinweis { get; } = new() { Width = 360 };
-    public TextBox Ab { get; } = new() { Width = 100 };
+    public TextBox Ab { get; } = new DatumFeld() { Width = 100 };
     public Label Warnung { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
 

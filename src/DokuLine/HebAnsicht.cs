@@ -142,8 +142,8 @@ public sealed class HebNeuFenster : Form
     private readonly DateOnly heute;
 
     public RadioButton[] Arten { get; } = new RadioButton[3];
-    public TextBox Von { get; } = new() { Width = 100 };
-    public TextBox Bis { get; } = new() { Width = 100 };
+    public TextBox Von { get; } = new DatumFeld() { Width = 100 };
+    public TextBox Bis { get; } = new DatumFeld() { Width = 100 };
     public Label Info { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.TextMittel };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public HebBogen? Angelegt { get; private set; }
