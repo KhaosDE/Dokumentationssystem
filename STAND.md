@@ -861,6 +861,11 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): „In Feld übernehmen“ geht in das zuletzt angeklickte Feld der Maske
   (Anzeige „→ Stärken“). Bei Handelsnamen und Stärken kommt der Text dazu (mit Komma, ohne
   Doppelte), sonst ersetzt er den Inhalt. Der Text wird eine Zeile, höchstens 300 Zeichen.
+- 08.11.2026 (Schritt 21): Das Formular „Medikament“ hat eine Bildlaufleiste; Fehler, „Speichern“
+  und „Abbrechen“ bleiben unten immer sichtbar. Grund: Mit der Nachschlage-Ansicht wäre es auf
+  Bildschirmen mit wenig Höhe (z. B. Laptop mit 150 % Skalierung) höher als der Bildschirm. Die
+  Spalten des Medikamentenplans sind nie schmaler als ihre Überschrift; ist die Akte schmaler,
+  rollt die Tabelle waagerecht.
 - 08.11.2026 (Schritt 21): Neue Abhängigkeit **`Microsoft.Web.WebView2` 1.0.4314.35** (Lizenz im
   Paket: BSD-3-Clause-artig, auf nuget.org am 08.11.2026 nachgesehen). Grund: die einzige Art,
   eine Webseite im Programmfenster zu zeigen, deren Browser Windows selbst mitbringt (Edge

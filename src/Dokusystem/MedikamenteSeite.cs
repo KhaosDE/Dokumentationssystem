@@ -214,6 +214,15 @@ public sealed class MedikamentFenster : Form
     private readonly Medikament? bisher;
     private readonly List<(TextBox Feld, string Name)> felder;
     private TextBox ziel;
+    // Inhalt mit Bildlaufleiste; Fehler, „Speichern“ und „Abbrechen“ bleiben unten immer sichtbar
+    // (mit der Nachschlage-Ansicht ist das Formular sonst auf kleinen Bildschirmen zu hoch).
+    private readonly Panel inhalt = new() { Dock = DockStyle.Fill, AutoScroll = true };
+    private readonly FlowLayoutPanel unten = new()
+    {
+        Dock = DockStyle.Bottom, AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false,
+        Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross, Stil.AbstandGross),
+    };
+    private readonly TableLayoutPanel raster = new() { ColumnCount = 2, AutoSize = true, Padding = new Padding(Stil.AbstandGross) };
 
     public TextBox Wirkstoff { get; } = new() { Width = 360 };
     public TextBox Handelsnamen { get; } = new() { Width = 360, PlaceholderText = "durch Komma getrennt" };
@@ -226,7 +235,7 @@ public sealed class MedikamentFenster : Form
     // Nachschlage-Ansicht (null, wenn in den Einstellungen abgeschaltet) – dann nur dieser Knopf.
     public Nachschlageansicht? Nachschlage { get; }
     public Button BrowserKnopf { get; } = Stil.NebenKnopf("Im Browser öffnen");
-    public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
+    public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(700, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Medikament? Gespeichert { get; private set; }
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
@@ -240,11 +249,8 @@ public sealed class MedikamentFenster : Form
         MaximizeBox = MinimizeBox = false;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.CenterParent;
-        BackColor = Stil.Fensterhintergrund;
+        BackColor = inhalt.BackColor = unten.BackColor = Stil.Fensterhintergrund;
         Font = Stil.Standard;
-        AutoSize = true;
-        AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        var raster = new TableLayoutPanel { ColumnCount = 2, AutoSize = true, Padding = new Padding(Stil.AbstandGross), Dock = DockStyle.Fill };
         void Zeile(string? beschriftung, Control feld)
         {
             if (beschriftung is null) { raster.Controls.Add(feld); raster.SetColumnSpan(feld, 2); return; }
@@ -255,9 +261,7 @@ public sealed class MedikamentFenster : Form
         Zeile(null, new MarkenFeld(MedikamentRegeln.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandMittel) });
         if (Einstellungen.Laden().NachschlageAnsicht)
         {
-            // So hoch, wie der Bildschirm zulässt (die Maske darunter braucht etwa 620 Punkte).
-            var flaeche = Screen.PrimaryScreen?.WorkingArea ?? new Rectangle(0, 0, 1024, 768);
-            Nachschlage = new Nachschlageansicht { Size = new Size(760, Math.Clamp(flaeche.Height - 620, 170, 380)), Margin = new Padding(0, 0, 0, Stil.AbstandMittel) };
+            Nachschlage = new Nachschlageansicht { Size = new Size(760, 340), Margin = new Padding(0, 0, 0, Stil.AbstandMittel) };
             Nachschlage.Suchname = () => Wirkstoff.Text.Trim().Length > 0 ? Wirkstoff.Text : MedikamentRegeln.Liste(Handelsnamen.Text).FirstOrDefault() ?? "";
             Nachschlage.TextUebernehmen += InFeldUebernehmen;
             Nachschlage.QuelleUebernehmen += adresse => Quelle.Text = adresse;
@@ -297,7 +301,6 @@ public sealed class MedikamentFenster : Form
             AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
         });
         Zeile("Kürzel", new Label { Text = Einstellungen.Laden().Kuerzel is { Length: > 0 } k ? k : "– bitte oben rechts anmelden –", AutoSize = true, Font = Stil.Fett, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) });
-        Zeile(null, Fehler);
         if (bisher is not null)
         {
             var e = MedikamentRegeln.AlsEingabe(bisher.Aktuell);
@@ -315,12 +318,27 @@ public sealed class MedikamentFenster : Form
         var abbrechen = Stil.NebenKnopf("Abbrechen");
         abbrechen.DialogResult = DialogResult.Cancel;
         speichern.Margin = new Padding(Stil.AbstandKlein, 0, 0, 0);
-        var knoepfe = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Fill, Margin = new Padding(0, Stil.AbstandGross, 0, 0) };
+        var knoepfe = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) };
         knoepfe.Controls.AddRange([speichern, abbrechen]);
-        Zeile(null, knoepfe);
-        Controls.Add(raster);
+        unten.Controls.AddRange([Fehler, knoepfe]);
+        inhalt.Controls.Add(raster);
+        Controls.Add(inhalt);
+        Controls.Add(unten);
         CancelButton = abbrechen;
         Stil.DpiSkalierungEinschalten(this);
+        // Vorläufige Größe (auch für Tests ohne Anzeige); OnLoad passt sie an den Bildschirm an.
+        ClientSize = new Size(raster.PreferredSize.Width + SystemInformation.VerticalScrollBarWidth, raster.PreferredSize.Height + unten.PreferredSize.Height);
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        var flaeche = Screen.FromControl(this).WorkingArea;
+        int rahmen = Height - ClientSize.Height;
+        int breite = raster.GetPreferredSize(Size.Empty).Width + SystemInformation.VerticalScrollBarWidth;
+        int hoehe = raster.GetPreferredSize(new Size(breite, 0)).Height + unten.GetPreferredSize(new Size(breite, 0)).Height;
+        ClientSize = new Size(Math.Min(breite, flaeche.Width - 40), Math.Min(hoehe, flaeche.Height - rahmen - 40));
+        CenterToParent();
     }
 
     // Öffnet die Arzneimittelsuche des BfArM im normalen Browser (Übergabe, kein eigener Netzzugriff).

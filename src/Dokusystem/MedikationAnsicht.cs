@@ -191,8 +191,9 @@ public sealed class MedikationAnsicht : Panel
 }
 
 // Tabellen des Medikamentenplans: nur lesen, ganze Zeile wählbar, sortierbar über die Spaltenköpfe,
-// Zeilen abwechselnd hinterlegt; jede Zeile trägt ihren Tagesstand. Ohne eigene Bildlaufleiste –
-// die Tabelle ist so hoch wie ihr Inhalt, gerollt wird die Akte.
+// Zeilen abwechselnd hinterlegt; jede Zeile trägt ihren Tagesstand. Ohne senkrechte Bildlaufleiste –
+// die Tabelle ist so hoch wie ihr Inhalt, gerollt wird die Akte. Ist sie schmaler als die
+// Mindestbreiten der Spalten, rollt sie waagerecht.
 public static class PlanTabelle
 {
     public static DataGridView Bauen(params (string Name, string Titel, float Gewicht)[] spalten)
@@ -202,7 +203,7 @@ public static class PlanTabelle
             AllowUserToAddRows = false, AllowUserToDeleteRows = false, AllowUserToResizeRows = false, AllowUserToOrderColumns = false,
             RowHeadersVisible = false, ReadOnly = true, MultiSelect = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect,
             AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
-            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize, ScrollBars = ScrollBars.None,
+            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize, ScrollBars = ScrollBars.Horizontal,
             BackgroundColor = Stil.Flaeche, BorderStyle = BorderStyle.FixedSingle, GridColor = Stil.Trennlinie,
             CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal, EnableHeadersVisualStyles = false,
             ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single, Font = Stil.Standard, StandardTab = true, Cursor = Cursors.Hand,
@@ -221,11 +222,15 @@ public static class PlanTabelle
         foreach (var (name, titel, gewicht) in spalten)
         {
             var spalte = new DataGridViewTextBoxColumn { Name = name, HeaderText = titel, FillWeight = gewicht, SortMode = DataGridViewColumnSortMode.Automatic };
+            // Nie schmaler als die Überschrift (mit Sortierpfeil); „seit“ mindestens ein ganzes Datum.
+            int noetig = TextRenderer.MeasureText(titel, Stil.Fett).Width;
             if (name == "seit")
             {
                 spalte.ValueType = typeof(DateTime);   // sortiert nach Datum, nicht nach Text
                 spalte.DefaultCellStyle.Format = "dd.MM.yyyy";
+                noetig = Math.Max(noetig, TextRenderer.MeasureText("00.00.0000", Stil.Standard).Width);
             }
+            spalte.MinimumWidth = noetig + 26;
             if (name is "morgens" or "mittags" or "abends" or "nachts" or "einzeldosis")
                 spalte.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             t.Columns.Add(spalte);
@@ -266,7 +271,11 @@ public static class PlanTabelle
     // Angezeigter Text einer Zelle (Datum als TT.MM.JJJJ).
     public static string Text(DataGridView t, int zeile, string spalte) => t.Rows[zeile].Cells[spalte].FormattedValue as string ?? "";
 
-    public static int Hoehe(DataGridView t) => t.ColumnHeadersHeight + t.Rows.GetRowsHeight(DataGridViewElementStates.Visible) + 2;
+    public static int Hoehe(DataGridView t)
+    {
+        int waagerecht = t.Columns.GetColumnsWidth(DataGridViewElementStates.Visible) > t.ClientSize.Width - 2 ? SystemInformation.HorizontalScrollBarHeight : 0;
+        return t.ColumnHeadersHeight + t.Rows.GetRowsHeight(DataGridViewElementStates.Visible) + waagerecht + 2;
+    }
 }
 
 // Einzelheiten einer Verordnung (Klick auf eine Zeile): Karte mit Zustand, Dosis, Anordnung und den
