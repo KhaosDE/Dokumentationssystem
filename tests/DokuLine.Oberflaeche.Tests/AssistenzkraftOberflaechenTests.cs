@@ -64,7 +64,7 @@ public class AssistenzkraftOberflaechenTests
             switch (fenster)
             {
                 case VerordnungDetailFenster d:
-                    Assert.True(d.Karte.BedarfKnopf.Visible);
+                    Assert.True(d.Karte.BedarfMoeglich);   // der Dialog ist im Test nicht angezeigt: Visible wäre false
                     Assert.Null(Stil.Sperrgrund(d.Karte.BedarfKnopf));
                     Assert.Contains(d.Karte.MarkenTexte, t => t.StartsWith("heute "));
                     Assert.True(d.BedarfWaehlen());

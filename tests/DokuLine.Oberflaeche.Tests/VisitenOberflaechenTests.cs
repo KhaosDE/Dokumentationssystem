@@ -158,7 +158,7 @@ public class VisitenOberflaechenTests
     public void Ohne_Recht_ist_der_Knopf_gesperrt() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        Einstellungen.Aendern(w => w with { Kuerzel = "KL" });   // keine Fachkraft: Visiten ja, Medikation nein
+        Einstellungen.Aendern(w => w with { Kuerzel = "KL" });   // Assistenzkraft: seit 0.33.0 keine Visiten, Medikation nein
         var jetzt = DateTime.Now;
         u.Speicher.VisiteSpeichern(VisitenRegeln.AusEingabe(new VisiteEingabe
         {
@@ -168,7 +168,7 @@ public class VisitenOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.BereichWaehlen("Visiten");
-        Assert.Null(Stil.Sperrgrund(f.Visiten.NeuKnopf));
+        Assert.Equal(RechteRegeln.NurFachkraftText, Stil.Sperrgrund(f.Visiten.NeuKnopf));
         f.BereichWaehlen("Aufgaben");
         var karte = f.Aufgaben.Karten.Single(k => k.Aufgabe.Text.StartsWith("Medikation ändern: Mirtazapin"));   // Freitext, aber in der Datenbank
         Assert.Equal("Im Medikamentenplan eintragen …", karte.AktionKnopf.Text);
