@@ -7,6 +7,8 @@
     <AssemblyName>DokuLine</AssemblyName>
     <RootNamespace>DokuLine</RootNamespace>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <!-- Programmsymbol (Schritt 26n), erzeugt mit werkzeuge/symbol-erzeugen.py aus den SVG-Vorlagen in Bilder/. -->
+    <ApplicationIcon>Bilder\DokuLine.ico</ApplicationIcon>
     <Product>DokuLine</Product>
     <AssemblyTitle>DokuLine (Demo)</AssemblyTitle>
     <Description>DokuLine – Betreuung auf Augenhöhe. Dokumentation für einen Wohnbereich – Demo mit ausgedachten Daten</Description>

@@ -1398,7 +1398,7 @@ Umfang:
   Uhrzeiten etwas läuft. Je Angebot 3–8 Teilnehmer aus R1–R3.
 
 ## Programmsymbol „Hell wie die Kopfzeile“
-Status: freigegeben (Bauplan Schritt 26n)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: DokuLine bekommt ein eigenes Programmsymbol für die `.exe`, die Taskleiste, die Fenster und
 den Desktop.

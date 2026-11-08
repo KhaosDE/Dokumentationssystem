@@ -179,6 +179,31 @@ public static class Stil
     public static int MarkenBreite(Graphics g, string text, float skala) =>
         TextRenderer.MeasureText(g, text, MarkeSchrift, Size.Empty, TextFormatFlags.NoPadding).Width + (int)Math.Round(16 * skala);
 
+    // ----- Programmsymbol (Schritt 26n) -----
+
+    // Das Symbol der .exe, auch für alle Fenster und Dialoge. Nicht im Logofeld der Kopfzeile: Das bleibt
+    // für das Bild der Einrichtung aus den Einstellungen (CLAUDE.md, Regel 7).
+    private static readonly Lazy<Icon> programmsymbol = new(() =>
+    {
+        using var datei = typeof(Stil).Assembly.GetManifestResourceStream("DokuLine.ico")
+            ?? throw new InvalidOperationException("Programmsymbol fehlt im Programm.");
+        return new Icon(datei);
+    });
+
+    public static Icon Programmsymbol => programmsymbol.Value;
+
+    // Macht das Programmsymbol zum Vorgabesymbol aller Fenster (auch der Dialoge, die kein eigenes setzen).
+    // Windows Forms hat dafür keine öffentliche Einstellung; das Feld wird deshalb über Reflection gesetzt.
+    // Fehlt es in einer künftigen .NET-Version, bleibt das Vorgabesymbol von Windows Forms (false).
+    public static bool SymbolFuerAlleFenster()
+    {
+        var feld = typeof(Form).GetField("s_defaultIcon", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+                   ?? typeof(Form).GetField("defaultIcon", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+        if (feld is null || feld.FieldType != typeof(Icon)) return false;
+        feld.SetValue(null, Programmsymbol);
+        return true;
+    }
+
     // ----- Knöpfe -----
 
     // Die eine Hauptaktion einer Ansicht: Akzentfarbe (docs/gestaltung.md).

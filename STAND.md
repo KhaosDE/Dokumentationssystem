@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.15** (Therapie: „Laufende Therapien“ als Anwesenheitstafel, Bauplan Schritt 26m).
+Stand: 08.11.2026. Version: **0.29.16** (Programmsymbol „Hell wie die Kopfzeile“, Bauplan Schritt 26n).
 
 ## Aktuell
 
@@ -167,7 +167,10 @@ Bezugspflege, Status als Wort mit Farbe), daneben „Gleich“ und „Noch offen
 „abgesagt“), unten der Rest des Tages. Bestätigt wird derselbe Eintrag wie im Tagesplan. Die Demo hat
 zehn tägliche Angebote von 07:30 bis 20:45. Der zweite Reiter „Angebote“ ist der bisherige Bereich.
 
-**Nächster Schritt:** Bauplan Schritt 26n „Programmsymbol „Hell wie die Kopfzeile““ (0.29.16).
+Neu in 0.29.16: DokuLine hat ein eigenes **Programmsymbol** (Entwurf „Hell wie die Kopfzeile“) für die
+`.exe`, die Taskleiste und alle Fenster. Das Logofeld oben rechts bleibt für das Bild der Einrichtung.
+
+**Nächster Schritt:** Bauplan Schritt 27 „Ausgangsliste als übersichtliche Liste“ (0.30.0).
 
 ## Fertig
 
@@ -877,6 +880,13 @@ zehn tägliche Angebote von 07:30 bis 20:45. Der zweite Reiter „Angebote“ is
   - Bereichswahl „Alle Bereiche“ oder R1–R3; Vorgabe: der eigene Wohnbereich, für die Therapie alle.
     Bestätigen darf, wer es im Tagesplan darf. Neu lesen jede Minute und bei Änderungen anderer Rechner.
   - Demo: zehn tägliche Angebote (Morgenrunde 07:30 bis Abendrunde 20:45) mit 4–7 Teilnehmern aus R1–R3.
+- 0.29.16 — Programmsymbol „Hell wie die Kopfzeile“ (Bauplan Schritt 26n, 08.11.2026):
+  - Vorlagen `src/DokuLine/Bilder/programmsymbol.svg` (groß, mit Farbverlauf) und `programmsymbol-klein.svg`
+    (ohne Verlauf), selbst gezeichnet im Chat.
+  - `src/DokuLine/Bilder/DokuLine.ico` mit 16, 20, 24, 32 px (kleine Vorlage) und 40, 48, 64, 256 px (große);
+    erzeugt mit `python werkzeuge/symbol-erzeugen.py` (`--vorschau <ordner>` legt PNGs zum Ansehen ab).
+  - Symbol der `.exe` (`ApplicationIcon`), des Hauptfensters und aller weiteren Fenster und Dialoge (zentral
+    in `Stil.cs`); nicht im Logofeld der Kopfzeile.
 ## Offene Punkte
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
@@ -947,6 +957,20 @@ zehn tägliche Angebote von 07:30 bis 20:45. Der zweite Reiter „Angebote“ is
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26n): Umwandlung SVG → ICO mit einem eigenen Python-Skript **nur mit der
+  Standardbibliothek** (keine weitere Abhängigkeit). Geprüft und verworfen: `Svg.Skia` (MIT) zieht `Svg.Custom`
+  mit MS-PL-Lizenz nach, die nicht auf der Liste MIT/Apache-2.0/BSD steht. Das Skript zeichnet, was die
+  Vorlagen nutzen (Rechtecke mit runden Ecken, Farben, radiale Verläufe), und meldet andere SVG-Teile als
+  Fehler. Ein neues Symbol mit denselben Mitteln braucht nur neue SVG-Dateien; mit anderen Formen (z. B.
+  Pfaden) müsste das Skript erweitert werden.
+- 08.11.2026 (Schritt 26n): Die 256-px-Größe liegt als PNG in der `.ico` (für große Symbole im Explorer), die
+  kleinen als klassisches Symbolbild (32 Bit mit Alpha). Fenster und Taskleiste nutzen die klassischen Bilder;
+  `System.Drawing` wählt ohnehin nur unter ihnen (bis 64 px).
+- 08.11.2026 (Schritt 26n): „Zentral“: Das Programmsymbol ist das Vorgabesymbol aller Fenster. Windows Forms hat
+  dafür keine öffentliche Einstellung; `Stil.SymbolFuerAlleFenster()` setzt das interne Feld über Reflection.
+  Fehlt das Feld in einer künftigen .NET-Version, tragen Hauptfenster und alle Dialoge mit `Fenster.Grundform`
+  das Symbol trotzdem, und ein Oberflächentest meldet den Fehler.
 
 - 08.11.2026 (Schritt 26m): Die Bereichswahl der Tafel steht in der Ansicht, nicht in der Aktionsleiste
   (dort bleibt „Neues Angebot …“ für beide Reiter). Im Wohnbereich zeigt die Tafel nur Angebote mit Teilnehmern
@@ -1559,6 +1583,15 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.16:
+
+1. Die heruntergeladene `DokuLine.exe` im Explorer: weißes Quadrat mit zwei blauen und einem orangefarbenen
+   Balken (in der Ansicht „Große Symbole“ mit zartem Farbverlauf).
+2. Programm starten: dasselbe Symbol in der Taskleiste (bei hellem und dunklem Windows-Design gut zu sehen)
+   und oben links im Fenstertitel; auch in Dialogen wie „Einstellungen“ oder „Anmelden“.
+3. Oben rechts in der Kopfzeile bleibt der Platzhalter „Logo der Einrichtung“ (bzw. das eigene Bild).
+4. Hinweis: Windows merkt sich Symbole; zeigt der Desktop-Link noch das alte, hilft Abmelden und Anmelden.
 
 Version 0.29.15:
 
