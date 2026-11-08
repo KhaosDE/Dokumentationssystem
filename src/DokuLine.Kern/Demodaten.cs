@@ -166,7 +166,9 @@ public static class Demodaten
             }
             // Übergabe: bei jedem zweiten Bewohner ein Bericht aus den letzten Stunden für die
             // nächste Schicht, dazu einige länger laufende, erledigte und abgelaufene Einträge.
-            if (i % 2 == 0)
+            // Die ersten zehn (Ahorn … Kiefer) wie bisher jeder zweite; die weiteren (Schritt 26h) seltener,
+            // sonst wird die Übergabe mit 69 Bewohnern unübersichtlich.
+            if (i < 10 ? i % 2 == 0 : i % 9 == 0)
             {
                 var bericht = Erzeugen(b, jetzt.AddMinutes(-(40 + i * 25)), zufall, bausteine, jetzt, wichtig: i == 0);
                 var wunsch = i switch
@@ -390,6 +392,25 @@ public static class Demodaten
 
     public sealed record DemoVerordnung(Verordnung Verordnung);
 
+    // Schritt 26h: Verordnungen der weiteren Demo-Bewohner stehen lesbar in medikation.json.
+    private sealed class MedikationDatei
+    {
+        public List<VerordnungVorlage> Verordnungen { get; set; } = [];
+    }
+
+    private sealed class VerordnungVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public string Wirkstoff { get; set; } = "";
+        public string Staerke { get; set; } = "";
+        public List<string> Dosis { get; set; } = [];
+        public bool Bedarf { get; set; }
+        public string Einzeldosis { get; set; } = "1";
+        public string Anlass { get; set; } = "";
+        public string Hoechstens { get; set; } = "";
+        public int BeginnVorTagen { get; set; }
+    }
+
     // Ausgedachte Verordnungen relativ zu heute: Grundverordnungen, eine Pause, ein Stufenplan zum
     // Ansetzen, einer zum Absetzen, ein abgeschlossener (neue Grundverordnung), ein abgesetztes
     // Medikament und Bedarfsmedikation. Ärztinnen und Ärzte sind ausgedacht.
@@ -452,6 +473,11 @@ public static class Demodaten
         Bedarf("Immergrün", "Paracetamol", "500 mg", "1", "bei Kopfschmerzen", "4 in 24 Stunden", 30);
         V("Kiefer", "Risperidon", "2 mg", D("1", "0", "1", "0"), 120,
             A(AenderungArt.Stufenplan, heute.AddDays(-40), stufen: [new(heute.AddDays(-40), D("1", "0", "½", "0")), new(heute.AddDays(-30), D("1", "0", "0", "0"))], hinweis: "Umstellung"));
+        foreach (var v in Lesen<MedikationDatei>("medikation.json").Verordnungen)
+        {
+            if (v.Bedarf) Bedarf(v.Bewohner, v.Wirkstoff, v.Staerke, v.Einzeldosis, v.Anlass, v.Hoechstens, v.BeginnVorTagen);
+            else if (v.Dosis.Count == 4) V(v.Bewohner, v.Wirkstoff, v.Staerke, D(v.Dosis[0], v.Dosis[1], v.Dosis[2], v.Dosis[3]), v.BeginnVorTagen);
+        }
         return liste;
     }
 

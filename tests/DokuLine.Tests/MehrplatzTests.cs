@@ -146,8 +146,9 @@ public sealed class MehrplatzTests : IDisposable
     public void Wohnbereich_je_Bewohner()
     {
         var alle = a.AlleBewohner();
-        Assert.Equal(["Ginster", "Immergrün"], alle.Where(x => x.Wohnbereich == "R2").Select(x => x.Nachname));
-        Assert.Equal(alle.Count - 2, alle.Count(x => x.Wohnbereich == Bereiche.Vorgabe));
+        Assert.Equal(["Ginster", "Immergrün"], alle.Where(x => x.Wohnbereich == "R2").Select(x => x.Nachname).Take(2));
+        Assert.All(new[] { "R1", "R2", "R3" }, r => Assert.Equal(23, alle.Count(x => x.Wohnbereich == r)));   // Schritt 26h
+        Assert.Equal(23, alle.Count(x => x.Wohnbereich == Bereiche.Vorgabe));
         var e = BewohnerRegeln.AlsEingabe(alle[0]);
         e.Wohnbereich = "  Wohnbereich   C ";
         Assert.Equal("Wohnbereich C", BewohnerRegeln.AusEingabe(e, alle[0].Id).Wohnbereich);

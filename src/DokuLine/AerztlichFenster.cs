@@ -14,7 +14,7 @@ public sealed class AerztlichFenster : Form
 
     public ListView Diagnosen { get; } = new()
     {
-        View = View.Details, FullRowSelect = true, MultiSelect = false, HideSelection = false, Width = 860, Height = 190, Font = Stil.Standard,
+        View = View.Details, FullRowSelect = true, MultiSelect = false, HideSelection = false, Width = 860, Height = 140, Font = Stil.Standard,
     };
     public Button NeuKnopf { get; } = Stil.NebenKnopf("Neue Diagnose …");
     public Button BeendenKnopf { get; } = Stil.NebenKnopf("Beenden …");
@@ -22,11 +22,11 @@ public sealed class AerztlichFenster : Form
                                             ["eingetragen:", "keine bekannt", "nicht erfasst"], "z. B. Haselnüsse, Latex");
     public DataGridView Reaktionen { get; } = new()
     {
-        AllowUserToAddRows = false, AllowUserToDeleteRows = false, RowHeadersVisible = false, Width = 860, Height = 110, Font = Stil.Standard,
+        AllowUserToAddRows = false, AllowUserToDeleteRows = false, RowHeadersVisible = false, Width = 860, Height = 84, Font = Stil.Standard,
         BackgroundColor = Stil.Flaeche, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
     };
     public Button AllergieKnopf { get; } = Stil.NebenKnopf("Allergien speichern");
-    public TextBox Notfall { get; } = new() { Multiline = true, Width = 860, Height = 70, ScrollBars = ScrollBars.Vertical };
+    public TextBox Notfall { get; } = new() { Multiline = true, Width = 860, Height = 56, ScrollBars = ScrollBars.Vertical };
     public Button NotfallKnopf { get; } = Stil.NebenKnopf("Hinweise speichern");
     public Label NurAnsehen { get; } = new() { AutoSize = true, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Label Meldung { get; } = new() { AutoSize = true, MaximumSize = new Size(860, 0), Padding = new Padding(Stil.AbstandKlein), Visible = false };
@@ -53,6 +53,7 @@ public sealed class AerztlichFenster : Form
         zeile(null, Formular.Reihe(NeuKnopf, BeendenKnopf));
         zeile(null, Abschnitt("ALLERGIEN UND UNVERTRÄGLICHKEITEN"));
         Allergie.Setzen(BewohnerRegeln.Kuerzel(bewohner.Allergie), bewohner.Allergien);
+        Allergie.Feld.Width = 520;   // mehrere Stoffe lesbar (0.29.10)
         zeile(null, Allergie);
         Reaktionen.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Stoff", ReadOnly = true, FillWeight = 35 });
         Reaktionen.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Art der Reaktion (freiwillig)", FillWeight = 65 });

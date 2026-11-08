@@ -319,7 +319,7 @@ public sealed record TafelAufteilung(Rectangle Zeit, Rectangle Bewohner, Rectang
     public static TafelAufteilung Berechnen(Control bezug, int breite, bool nachBewohner)
     {
         int P(int wert) => Stil.Px(bezug, wert);
-        int innen = P(Stil.AbstandGross), luecke = P(Stil.AbstandMittel), zeit = P(135), pille = P(124), detail = P(84), knopf = P(100), mindest = P(120);
+        int innen = P(Stil.AbstandGross), luecke = P(Stil.AbstandMittel), zeit = P(135), pille = P(124), detail = P(84), knopf = P(120), mindest = P(120);
         // Textspalten nach Wichtigkeit, mit Anteil an der freien Breite.
         var spalten = new List<(string Name, int Anteil)> { ("bewohner", 28), ("termin", 34), ("ort", 21), ("begleitung", 17) };
         if (nachBewohner) spalten.RemoveAt(0);

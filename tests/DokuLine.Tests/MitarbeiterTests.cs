@@ -38,7 +38,7 @@ public sealed class MitarbeiterTests : IDisposable
     {
         s.DemoBeimErstenStart();
         var alle = s.AlleMitarbeiter();
-        Assert.Equal(14, alle.Count);   // mit TST (Schritt 26a2)
+        Assert.Equal(28, alle.Count);   // mit TST (Schritt 26a2) und 14 weiteren für die Bezugspflege (26h)
         Assert.Equal(["R1", "R2", "R3", "Therapie", "Leitung", "Verwaltung"], s.Bereichsliste().Select(b => b.Name));
         Assert.All(RechteRegeln.Positionen, p => Assert.Contains(alle, m => m.Positionen.Contains(p)));   // je Position mindestens einer
         Assert.Contains(alle, m => m.Fachkraft);
@@ -46,7 +46,7 @@ public sealed class MitarbeiterTests : IDisposable
         Assert.False(s.MitarbeiterLesen("HI")!.Aktiv);
         Assert.Equal(["R1", "R2"], s.MitarbeiterLesen("PR")!.Bereiche.Order());
         Assert.Equal(["Bereichsleitung", "Mitarbeiter Wohnbereich"], s.MitarbeiterLesen("gh")!.Positionen);
-        Assert.Equal(6, s.Positionsliste().Single(p => p.Name == "Mitarbeiter Wohnbereich").Zugeordnet);   // AB, CD, KL, GH, MN, HI
+        Assert.Equal(20, s.Positionsliste().Single(p => p.Name == "Mitarbeiter Wohnbereich").Zugeordnet);   // AB, CD, KL, GH, MN, HI und 14 aus Schritt 26h
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public sealed class MitarbeiterTests : IDisposable
         Assert.Contains("Bitte mindestens einen Bereich wählen.", fehler);
         Assert.Contains("Eine der Positionen gibt es nicht.", fehler);
         s.MitarbeiterSpeichern(neu, neu: true);
-        Assert.Equal(15, s.AlleMitarbeiter().Count);
+        Assert.Equal(29, s.AlleMitarbeiter().Count);
         Assert.Contains(s.Kollegen(), k => k.Kuerzel == "QX" && k.Teams.Contains("R2"));   // auch für Nachrichten
         s.MitarbeiterSpeichern(neu with { Fachkraft = true, Aktiv = false, Bereiche = ["R1", "R2"] }, neu: false);
         var gelesen = s.MitarbeiterLesen("QX")!;
@@ -147,6 +147,6 @@ public sealed class MitarbeiterTests : IDisposable
         s.DemoZuruecksetzen();
         Assert.True(s.Darf("CD", Funktionen.BerichteSchreiben));
         Assert.DoesNotContain(s.Bereichsliste(), b => b.Name == "R4");
-        Assert.Equal(14, s.AlleMitarbeiter().Count);
+        Assert.Equal(28, s.AlleMitarbeiter().Count);
     }
 }

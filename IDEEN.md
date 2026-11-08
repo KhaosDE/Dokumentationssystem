@@ -1259,7 +1259,7 @@ Umfang (Festlegungen aus dem Chat, Tobi kann sie ändern):
 - Bildschirmfotos im Testlauf erneuern.
 
 ## Demo-Daten: 23 Bewohner je Wohnbereich
-Status: freigegeben (Bauplan Schritt 26h)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Die Demo bekommt so viele Bewohner wie im Haus: **23 je Wohnbereich**, also 69 in R1–R3.
 Warum: Vorgabe Tobi (08.11.2026): Aktuell hat jeder Wohnbereich 23 Bewohner; die Zahl soll zum
@@ -1453,3 +1453,18 @@ Kleine Vorlage (`programmsymbol-klein.svg`, für 16–32 px):
   <rect x="14" y="41" width="36" height="6" rx="3" fill="#EEA63C"/>
 </svg>
 ```
+## Assistenzkraft und Fachkraft
+Status: Vorschlag – wartet auf Bestätigung durch Tobi (direkt in Claude Code genannt, 08.11.2026)
+Datum: 08.11.2026
+Was: Die kleinste Stufe ist die **Assistenzkraft**, darüber die **Fachkraft**. Assistenzkräfte machen
+z. B. keine Visiten und dürfen Bedarfsmedikation nur nach Absprache mit einer Fachkraft ausgeben.
+Warum: Vorgabe Tobi (08.11.2026, direkt in der Claude-Code-Sitzung).
+Vorschlag von Claude Code zur Umsetzung (noch nicht bestätigt):
+- **Qualifikation statt Häkchen:** Jeder Mitarbeiter ist „Assistenzkraft“ oder „Fachkraft“ (bisher nur das
+  Häkchen „Fachkraft“); so steht es im Anmeldefenster, in der Mitarbeiterliste und im Formular.
+- **Visiten nur Fachkräfte:** Recht „Visiten eintragen“ mit Häkchen „nur Fachkräfte“; für Assistenzkräfte ist
+  „Visite beginnen …“ grau mit Grund.
+- **„Bedarf gegeben …“** (neu, gibt es noch nicht) im Medikamentenplan an jeder Bedarfsverordnung: Uhrzeit,
+  Menge, Anlass; zeigt, wie viel heute schon gegeben wurde und was höchstens erlaubt ist. Bei einer
+  Assistenzkraft Pflichtfeld „in Absprache mit“ (Fachkraft aus der Liste); erscheint als Bericht in der Akte.
+

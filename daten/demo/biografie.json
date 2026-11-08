@@ -1,54 +1,17 @@
 {
   "hinweis": "Ausgedachte, kurze und wertneutrale Biografien für die Demo. Keine Diagnosen. Abschnitte: 0 Herkunft und Familie, 1 Schule und Beruf, 2 Wohnen, 3 Interessen und Gewohnheiten, 4 Wichtige Lebensereignisse, 5 Wünsche. 'angegeben': vom Bewohner angegeben, nicht überprüft.",
   "biografien": [
-    {
-      "bewohner": "Ahorn",
-      "abschnitte": [
-        { "nr": 0, "text": "Herr Ahorn ist in einer Kleinstadt aufgewachsen und hat eine ältere Schwester, mit der er regelmäßig telefoniert. Die Eltern sind verstorben." },
-        { "nr": 1, "text": "Er gibt an, dass er nach der Hauptschule eine Lehre als Tischler begonnen und einige Jahre in einer Möbelwerkstatt gearbeitet hat.", "angegeben": true },
-        { "nr": 2, "text": "Vor dem Einzug lebte er allein in einer Mietwohnung. Seit 2019 wohnt er im Wohnbereich." },
-        { "nr": 3, "text": "Er arbeitet gern mit Holz, hört Radio und geht nachmittags gern spazieren. Morgens trinkt er seinen Kaffee am liebsten auf der Terrasse." },
-        { "nr": 5, "text": "Er möchte wieder regelmäßig in einer Werkstatt mitarbeiten und plant mit seiner Schwester einen Besuch in seiner Heimatstadt." }
-      ],
-      "aenderung": { "nr": 3, "vorTagen": 12, "alt": "Er arbeitet gern mit Holz und hört Radio." }
-    },
-    {
-      "bewohner": "Birke",
-      "abschnitte": [
-        { "nr": 0, "text": "Frau Birke stammt aus einer großen Familie und hat drei Brüder. Zu einem Bruder hat sie regelmäßig Kontakt." },
-        { "nr": 2, "text": "Sie lebte viele Jahre in einer Wohngemeinschaft und ist 2016 in den Wohnbereich eingezogen." },
-        { "nr": 3, "text": "Sie kocht gern, besonders Suppen, und strickt Schals für Freunde. Sonntags besucht sie gern einen Gottesdienst." }
-      ]
-    },
-    {
-      "bewohner": "Clematis",
-      "abschnitte": [
-        { "nr": 0, "text": "Frau Clematis berichtet, dass sie bei ihrer Großmutter aufgewachsen ist.", "angegeben": true },
-        { "nr": 3, "text": "Sie schwimmt gern und malt mit Aquarellfarben. Sie mag Musik aus den Achtzigerjahren." },
-        { "nr": 5, "text": "Sie wünscht sich, im nächsten Jahr an einem Schwimmkurs teilzunehmen." }
-      ]
-    },
-    {
-      "bewohner": "Distel",
-      "abschnitte": [
-        { "nr": 1, "text": "Herr Distel hat eine Ausbildung zum Gärtner abgeschlossen und war in einer Baumschule beschäftigt." },
-        { "nr": 3, "text": "Er kümmert sich um die Pflanzen im Gemeinschaftsraum und liest gern Bücher über Vögel.", "angegeben": true }
-      ]
-    },
-    {
-      "bewohner": "Eiche",
-      "abschnitte": [
-        { "nr": 0, "text": "Herr Eiche ist das einzige Kind seiner Eltern. Seine Mutter besucht ihn einmal im Monat." },
-        { "nr": 2, "text": "Er wohnte zuletzt in einer betreuten Wohnform und ist 2022 eingezogen." },
-        { "nr": 3, "text": "Er fährt gern Fahrrad und repariert Fahrräder für andere Bewohner." },
-        { "nr": 4, "text": "Der Umzug in den Wohnbereich war für ihn ein großer Schritt; er hat sich nach einigen Wochen gut eingelebt." }
-      ]
-    },
-    {
-      "bewohner": "Fichte",
-      "abschnitte": [
-        { "nr": 3, "text": "Frau Fichte singt im Chor der Gemeinde und spielt gern Gesellschaftsspiele." }
-      ]
-    }
+    {"bewohner": "Ahorn", "abschnitte": [{"nr": 0, "text": "Herr Ahorn ist in einer Kleinstadt aufgewachsen und hat eine ältere Schwester, mit der er regelmäßig telefoniert. Die Eltern sind verstorben."}, {"nr": 1, "text": "Er gibt an, dass er nach der Hauptschule eine Lehre als Tischler begonnen und einige Jahre in einer Möbelwerkstatt gearbeitet hat.", "angegeben": true}, {"nr": 2, "text": "Vor dem Einzug lebte er allein in einer Mietwohnung. Seit 2019 wohnt er im Wohnbereich."}, {"nr": 3, "text": "Er arbeitet gern mit Holz, hört Radio und geht nachmittags gern spazieren. Morgens trinkt er seinen Kaffee am liebsten auf der Terrasse."}, {"nr": 5, "text": "Er möchte wieder regelmäßig in einer Werkstatt mitarbeiten und plant mit seiner Schwester einen Besuch in seiner Heimatstadt."}], "aenderung": {"nr": 3, "vorTagen": 12, "alt": "Er arbeitet gern mit Holz und hört Radio."}},
+    {"bewohner": "Birke", "abschnitte": [{"nr": 0, "text": "Frau Birke stammt aus einer großen Familie und hat drei Brüder. Zu einem Bruder hat sie regelmäßig Kontakt."}, {"nr": 2, "text": "Sie lebte viele Jahre in einer Wohngemeinschaft und ist 2016 in den Wohnbereich eingezogen."}, {"nr": 3, "text": "Sie kocht gern, besonders Suppen, und strickt Schals für Freunde. Sonntags besucht sie gern einen Gottesdienst."}]},
+    {"bewohner": "Clematis", "abschnitte": [{"nr": 0, "text": "Frau Clematis berichtet, dass sie bei ihrer Großmutter aufgewachsen ist.", "angegeben": true}, {"nr": 3, "text": "Sie schwimmt gern und malt mit Aquarellfarben. Sie mag Musik aus den Achtzigerjahren."}, {"nr": 5, "text": "Sie wünscht sich, im nächsten Jahr an einem Schwimmkurs teilzunehmen."}]},
+    {"bewohner": "Distel", "abschnitte": [{"nr": 1, "text": "Herr Distel hat eine Ausbildung zum Gärtner abgeschlossen und war in einer Baumschule beschäftigt."}, {"nr": 3, "text": "Er kümmert sich um die Pflanzen im Gemeinschaftsraum und liest gern Bücher über Vögel.", "angegeben": true}]},
+    {"bewohner": "Eiche", "abschnitte": [{"nr": 0, "text": "Herr Eiche ist das einzige Kind seiner Eltern. Seine Mutter besucht ihn einmal im Monat."}, {"nr": 2, "text": "Er wohnte zuletzt in einer betreuten Wohnform und ist 2022 eingezogen."}, {"nr": 3, "text": "Er fährt gern Fahrrad und repariert Fahrräder für andere Bewohner."}, {"nr": 4, "text": "Der Umzug in den Wohnbereich war für ihn ein großer Schritt; er hat sich nach einigen Wochen gut eingelebt."}]},
+    {"bewohner": "Fichte", "abschnitte": [{"nr": 3, "text": "Frau Fichte singt im Chor der Gemeinde und spielt gern Gesellschaftsspiele."}]},
+    {"bewohner": "Tagetes", "abschnitte": [{"nr": 0, "text": "Frau Tagetes ist in einem Dorf aufgewachsen und hat zwei jüngere Geschwister."}, {"nr": 1, "text": "Sie hat nach der Schule in einer Gärtnerei gearbeitet.", "angegeben": true}, {"nr": 3, "text": "Sie geht gern spazieren und hört Radio."}]},
+    {"bewohner": "Quendel", "abschnitte": [{"nr": 0, "text": "Herr Quendel ist in einer Großstadt aufgewachsen; der Kontakt zur Familie ist selten."}, {"nr": 1, "text": "Er hat eine Ausbildung im Einzelhandel abgeschlossen.", "angegeben": true}, {"nr": 3, "text": "Er malt gern und spielt Karten."}]},
+    {"bewohner": "Salbei", "abschnitte": [{"nr": 0, "text": "Frau Salbei ist bei den Großeltern aufgewachsen."}, {"nr": 1, "text": "Sie hat einige Jahre in einer Küche gearbeitet.", "angegeben": true}, {"nr": 3, "text": "Sie kocht gern und mag Musik aus den Siebzigern."}]},
+    {"bewohner": "Pfingstrose", "abschnitte": [{"nr": 0, "text": "Frau Pfingstrose ist das jüngste von vier Kindern."}, {"nr": 1, "text": "Sie hat in einer Werkstatt für Fahrräder gearbeitet.", "angegeben": true}, {"nr": 3, "text": "Sie repariert gern kleine Dinge und liest Zeitung."}]},
+    {"bewohner": "Lilie", "abschnitte": [{"nr": 0, "text": "Herr Lilie ist in einer Kleinstadt aufgewachsen und hat eine Tochter."}, {"nr": 1, "text": "Er hat im Büro einer Spedition gearbeitet.", "angegeben": true}, {"nr": 3, "text": "Er strickt und schaut gern Tierfilme."}]},
+    {"bewohner": "Zinnie", "abschnitte": [{"nr": 0, "text": "Frau Zinnie ist am Meer aufgewachsen."}, {"nr": 1, "text": "Sie hat als Lagerhelfer gearbeitet.", "angegeben": true}, {"nr": 3, "text": "Sie angelt gern und sammelt Postkarten."}]}
   ]
 }

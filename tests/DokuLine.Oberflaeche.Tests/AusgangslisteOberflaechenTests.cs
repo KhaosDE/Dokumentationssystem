@@ -30,7 +30,7 @@ public class AusgangslisteOberflaechenTests
         using (f)
         {
             Assert.Equal("Tagesliste drucken …", Assert.Single(f.Kopf.Knoepfe).Text);
-            Assert.Equal(10, s.Karten.Count);
+            Assert.Equal(69, s.Karten.Count);   // alle Bereiche (Schritt 26h: 23 je Wohnbereich)
             Assert.Equal("101", s.Karten[0].Platz.Zimmernummer);
             Assert.StartsWith("Küchendienst heute: ", s.KuechendienstText.Text);
             Assert.Contains(Karte(s, "Holunder").MarkenTexte, t => t.StartsWith("abwesend: Heimfahrt bis"));

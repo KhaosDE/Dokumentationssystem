@@ -139,7 +139,7 @@ public sealed class TherapieTests : IDisposable
     public void Demo_Angebote_relativ_zu_heute()
     {
         var alle = s.Angebote();
-        Assert.Equal(7, alle.Count);
+        Assert.Equal(10, alle.Count);   // seit Schritt 26h auch Gartengruppe (R3), Frühstücksgruppe (R2), Entspannung
         Assert.Contains(alle, a => a.Fassungen.Count == 2);                                   // eine Änderung „ab Datum“
         Assert.Contains(alle.SelectMany(a => a.Zuteilungen), z => z.BeendetAb is not null);   // eine beendete Teilnahme
         Assert.Contains(alle.SelectMany(a => a.Zuteilungen), z => z.Ab > Heute);              // eine beginnt später
@@ -160,7 +160,7 @@ public sealed class TherapieTests : IDisposable
             befehl.ExecuteNonQuery();
         }
         Assert.True(s.DemoBeimErstenStart());
-        Assert.Equal(7, s.Angebote().Count);
+        Assert.Equal(10, s.Angebote().Count);
         Assert.False(s.DemoBeimErstenStart());
     }
 }

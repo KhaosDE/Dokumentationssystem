@@ -15,6 +15,7 @@ public sealed partial class Speicher : IDisposable
 {
     public const string Datei = "dokumentationssystem.db";
     private const string DemoGeladen = "demo_geladen";
+    private const string DemoVoll = "demo_23";   // Schritt 26h: 23 Bewohner je Wohnbereich
     private const string DemoBerichte = "demo_berichte";
     private const string DemoAufgaben = "demo_aufgaben";
     private const string DemoNachrichten = "demo_nachrichten";
@@ -849,6 +850,15 @@ public sealed partial class Speicher : IDisposable
             Startprotokoll.Add($"Demo-Daten auf die Bereiche R1–R3 mit Zimmern und Betten umgestellt; die bisherige Datenbank liegt als „{Path.GetFileName(sicherung)}“ daneben.");
             return true;
         }
+        // Schritt 26h: 23 Bewohner je Wohnbereich. Neue Bewohner betreffen Zimmer, Bezugspflege, Medikation,
+        // Therapien und Berichte zugleich – deshalb auch hier einmal neu laden, vorher mit Sicherung.
+        if (Meta(DemoVoll) is null)
+        {
+            string sicherung = SicherungAnlegen("vor-0.29.10");
+            DemoZuruecksetzen();
+            Startprotokoll.Add($"Demo-Daten auf 23 Bewohner je Wohnbereich erweitert; die bisherige Datenbank liegt als „{Path.GetFileName(sicherung)}“ daneben.");
+            return true;
+        }
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
@@ -910,6 +920,7 @@ public sealed partial class Speicher : IDisposable
             foreach (var b in demo)
                 Ausfuehren($"INSERT INTO bewohner ({Spalten}) VALUES ({Platzhalter})", transaktion, Werte(b));
             SetzeMeta(DemoGeladen, "1", transaktion);
+            SetzeMeta(DemoVoll, "1", transaktion);
             DemoBerichteEinfuegen(transaktion);
             DemoAufgabenEinfuegen(transaktion);
             DemoStandardaufgabenEinfuegen(transaktion);

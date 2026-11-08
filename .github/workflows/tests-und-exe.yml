@@ -28,6 +28,13 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+      - name: Bildschirm 1920 × 1080 (für Bildschirmfotos in voller Größe; scheitert es, bleibt 1024 × 768)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Set-DisplayResolution -Width 1920 -Height 1080 -Force
+          Add-Type -AssemblyName System.Windows.Forms
+          Write-Host "Bildschirm jetzt: $([System.Windows.Forms.Screen]::PrimaryScreen.Bounds)"
       - name: Tests (Kern, Update, Oberfläche)
         env:
           DOKUSYSTEM_BILDSCHIRMFOTOS: ${{ github.workspace }}\bildschirmfotos

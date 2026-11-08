@@ -16,7 +16,7 @@ public class RechteOberflaechenTests
             Hilfe.Zeigen(fenster);
             Assert.StartsWith("Anmelden", fenster.Text);
             Assert.Equal("Beenden", fenster.BeendenKnopf.Text);
-            Assert.Equal(13, fenster.DemoListe.Items.Count);   // nur aktive Mitarbeiter (mit TST)
+            Assert.Equal(27, fenster.DemoListe.Items.Count);   // nur aktive Mitarbeiter (mit TST; 14 mehr seit Schritt 26h)
             fenster.Kuerzel.Text = "ZZ";
             Assert.False(fenster.Anmelden());
             Assert.Contains("nicht bekannt", fenster.Fehler.Text);
@@ -66,10 +66,10 @@ public class RechteOberflaechenTests
 
         // Die Übersicht richtet sich nach den Bereichen des Angemeldeten: PR (A und B) sieht beide.
         f.BenutzerWaehlen("PR");
-        Assert.Equal(10, f.Uebersicht.Karten.Count);
-        Assert.StartsWith("R1, R2 · 10 Bewohner · 9 Betten frei · ", f.Kopf.KleinText);
+        Assert.Equal(46, f.Uebersicht.Karten.Count);
+        Assert.StartsWith("R1, R2 · 46 Bewohner · 4 Betten frei · ", f.Kopf.KleinText);
         f.BenutzerWaehlen("MN");
-        Assert.Equal(2, f.Uebersicht.Karten.Count);   // R2
+        Assert.Equal(23, f.Uebersicht.Karten.Count);   // R2
 
         // OP (Therapie): Akte ansehen ja, bearbeiten nein; Berichte schreiben ja.
         f.BenutzerWaehlen("OP");
@@ -145,7 +145,7 @@ public class RechteOberflaechenTests
         using (var fenster = new MitarbeiterFenster(u.Speicher))
         {
             Hilfe.Zeigen(fenster);
-            Assert.Equal(14, fenster.Liste.Items.Count);
+            Assert.Equal(28, fenster.Liste.Items.Count);
             Assert.Null(Stil.Sperrgrund(fenster.NeuKnopf));
             fenster.Waehlen("GH");
             Assert.Equal("Nur Mitarbeiter des eigenen Bereichs.", Stil.Sperrgrund(fenster.BearbeitenKnopf));

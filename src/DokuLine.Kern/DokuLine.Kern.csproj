@@ -38,6 +38,7 @@
     <EmbeddedResource Include="..\..\daten\demo\standardaufgaben.json" LogicalName="DokuLine.Kern.Demo.standardaufgaben.json" />
     <EmbeddedResource Include="..\..\daten\demo\visiten.json" LogicalName="DokuLine.Kern.Demo.visiten.json" />
     <EmbeddedResource Include="..\..\daten\demo\aerzte.json" LogicalName="DokuLine.Kern.Demo.aerzte.json" />
+    <EmbeddedResource Include="..\..\daten\demo\medikation.json" LogicalName="DokuLine.Kern.Demo.medikation.json" />
     <EmbeddedResource Include="..\..\daten\uebergabe-woerter.txt" LogicalName="DokuLine.Kern.uebergabe-woerter.txt" />
   </ItemGroup>
 </Project>

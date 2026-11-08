@@ -1,18 +1,21 @@
 {
   "hinweis": "Ausgedachte Kalendertermine für die Demo. Tage relativ zum Laden der Demo-Daten; 'naechster': der nächste solche Wochentag nach heute. Orte und Praxen sind ausgedacht.",
   "termine": [
-    { "art": "bewohner", "titel": "Hausarzt: Kontrolle", "bewohner": [ "Ahorn" ], "naechster": "Do", "von": "10:00", "bis": "11:00", "ort": "Praxis am Lindenplatz (ausgedacht)", "hinweis": "Fahrdienst bestellt, Begleitung durch KL" },
-    { "art": "bewohner", "titel": "Zahnarzt", "bewohner": [ "Fichte" ], "inTagen": 2, "von": "14:00", "bis": "15:00", "ort": "Zahnarztpraxis (ausgedacht)",
-      "aenderung": { "inTagen": 3, "von": "09:00", "bis": "10:00", "hinweis": "verschoben auf Wunsch der Praxis" } },
-    { "art": "bewohner", "titel": "Friseur", "bewohner": [ "Birke", "Clematis" ], "inTagen": -3, "von": "10:00", "bis": "11:00", "ort": "Salon in der Stadt" },
-    { "art": "bewohner", "titel": "Blutabnahme", "bewohner": [ "Clematis" ], "inTagen": 1, "von": "08:00", "bis": "08:30", "ort": "Praxis am Lindenplatz (ausgedacht)", "hinweis": "nüchtern" },
-    { "art": "wohnbereich", "titel": "Teamsitzung", "naechster": "Mi", "von": "14:00", "bis": "15:30", "ort": "Gruppenraum" },
-    { "art": "wohnbereich", "titel": "Hausversammlung", "inTagen": 9, "von": "18:00", "bis": "19:00", "ort": "Speisesaal", "haus": true },
-    { "art": "wohnbereich", "titel": "Brandschutzübung", "inTagen": 4, "von": "10:00", "bis": "11:00", "ort": "ganzes Haus", "hinweis": "Sammelplatz Parkplatz", "haus": true },
-    { "art": "heimfahrt", "titel": "Heimfahrt zur Familie", "bewohner": [ "Holunder" ], "inTagen": -1, "von": "16:00", "endeInTagen": 2, "bis": "18:00", "hinweis": "Rückkehr mit dem Bus, Familie ruft vorher an" },
-    { "art": "heimfahrt", "titel": "Heimfahrt zur Schwester", "bewohner": [ "Ginster" ], "inTagen": 12, "von": "15:00", "endeInTagen": 14, "bis": "17:00", "hinweis": "" },
-    { "art": "ausflug", "titel": "Tierpark", "bewohner": [ "Ahorn", "Distel", "Eiche", "Immergrün" ], "inTagen": 8, "von": "09:30", "bis": "16:00", "treffpunkt": "Eingangshalle", "begleitung": "AB, CD", "hinweis": "Lunchpaket mitnehmen" },
-    { "art": "ausflug", "titel": "Eisdiele am See", "bewohner": [ "Birke", "Kiefer" ], "inTagen": -10, "von": "14:00", "bis": "17:00", "treffpunkt": "Parkplatz", "begleitung": "EF" },
-    { "art": "bewohner", "titel": "Termin beim Amt", "bewohner": [ "Kiefer" ], "inTagen": 5, "von": "11:00", "bis": "12:00", "ort": "Bürgerbüro", "abgesagt": true }
+    {"art": "bewohner", "titel": "Hausarzt: Kontrolle", "bewohner": ["Ahorn"], "naechster": "Do", "von": "10:00", "bis": "11:00", "ort": "Praxis am Lindenplatz (ausgedacht)", "hinweis": "Fahrdienst bestellt, Begleitung durch KL"},
+    {"art": "bewohner", "titel": "Zahnarzt", "bewohner": ["Fichte"], "inTagen": 2, "von": "14:00", "bis": "15:00", "ort": "Zahnarztpraxis (ausgedacht)", "aenderung": {"inTagen": 3, "von": "09:00", "bis": "10:00", "hinweis": "verschoben auf Wunsch der Praxis"}},
+    {"art": "bewohner", "titel": "Friseur", "bewohner": ["Birke", "Clematis"], "inTagen": -3, "von": "10:00", "bis": "11:00", "ort": "Salon in der Stadt"},
+    {"art": "bewohner", "titel": "Blutabnahme", "bewohner": ["Clematis"], "inTagen": 1, "von": "08:00", "bis": "08:30", "ort": "Praxis am Lindenplatz (ausgedacht)", "hinweis": "nüchtern"},
+    {"art": "wohnbereich", "titel": "Teamsitzung", "naechster": "Mi", "von": "14:00", "bis": "15:30", "ort": "Gruppenraum"},
+    {"art": "wohnbereich", "titel": "Hausversammlung", "inTagen": 9, "von": "18:00", "bis": "19:00", "ort": "Speisesaal", "haus": true},
+    {"art": "wohnbereich", "titel": "Brandschutzübung", "inTagen": 4, "von": "10:00", "bis": "11:00", "ort": "ganzes Haus", "hinweis": "Sammelplatz Parkplatz", "haus": true},
+    {"art": "heimfahrt", "titel": "Heimfahrt zur Familie", "bewohner": ["Holunder"], "inTagen": -1, "von": "16:00", "endeInTagen": 2, "bis": "18:00", "hinweis": "Rückkehr mit dem Bus, Familie ruft vorher an"},
+    {"art": "heimfahrt", "titel": "Heimfahrt zur Schwester", "bewohner": ["Ginster"], "inTagen": 12, "von": "15:00", "endeInTagen": 14, "bis": "17:00", "hinweis": ""},
+    {"art": "ausflug", "titel": "Tierpark", "bewohner": ["Ahorn", "Distel", "Eiche", "Immergrün"], "inTagen": 8, "von": "09:30", "bis": "16:00", "treffpunkt": "Eingangshalle", "begleitung": "AB, CD", "hinweis": "Lunchpaket mitnehmen"},
+    {"art": "ausflug", "titel": "Eisdiele am See", "bewohner": ["Birke", "Kiefer"], "inTagen": -10, "von": "14:00", "bis": "17:00", "treffpunkt": "Parkplatz", "begleitung": "EF"},
+    {"art": "bewohner", "titel": "Termin beim Amt", "bewohner": ["Kiefer"], "inTagen": 5, "von": "11:00", "bis": "12:00", "ort": "Bürgerbüro", "abgesagt": true},
+    {"art": "bewohner", "titel": "Hausarzt: Blutdruck", "bewohner": ["Salbei"], "inTagen": 4, "von": "09:00", "bis": "10:00", "ort": "Praxis am Lindenplatz (ausgedacht)", "hinweis": "Begleitung durch JF"},
+    {"art": "bewohner", "titel": "Zahnarzt", "bewohner": ["Lilie"], "inTagen": 6, "von": "11:00", "bis": "12:00", "ort": "Zahnarztpraxis (ausgedacht)"},
+    {"art": "bewohner", "titel": "Friseur", "bewohner": ["Zinnie", "Paprika"], "inTagen": -5, "von": "10:00", "bis": "11:00", "ort": "Salon in der Stadt"},
+    {"art": "bewohner", "titel": "Gespräch mit der Betreuerin", "bewohner": ["Quendel"], "inTagen": 3, "von": "15:00", "bis": "16:00", "ort": "Besprechungsraum"}
   ]
 }

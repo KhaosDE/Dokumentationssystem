@@ -36,7 +36,7 @@ public class VisitenOberflaechenTests
         seite.Bis.Text = "gestern";
         Assert.True(seite.FilterFehler.Visible);
         seite.Von.Text = seite.Bis.Text = "";
-        Assert.Equal(3, seite.Karten.Count);
+        Assert.Equal(5, seite.Karten.Count);   // seit Schritt 26h auch je eine Visite in R2 und R3
     });
 
     [Fact]

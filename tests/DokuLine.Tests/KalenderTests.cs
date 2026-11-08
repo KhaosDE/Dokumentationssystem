@@ -112,7 +112,7 @@ public sealed class KalenderTests : IDisposable
     public void Demo_Kalender_relativ_zu_heute()
     {
         var alle = s.Kalender(Heute.AddDays(-30), Heute.AddDays(30));
-        Assert.Equal(11, alle.Count);   // einer ist abgesagt; Brandschutzübung (Haus) seit Schritt 24
+        Assert.Equal(15, alle.Count);   // einer ist abgesagt; Brandschutzübung (Haus) seit Schritt 24; vier Termine aus Schritt 26h
         Assert.Contains(alle, k => k.Aktuell.Art == KalenderArt.Ausflug && k.Aktuell.Bewohner.Count == 4);
         Assert.Contains(alle, k => k.Fassungen.Count == 2 && k.Aktuell.Titel == "Zahnarzt");
         Assert.NotNull(s.HeimfahrtJetzt(B("Holunder"), Jetzt));

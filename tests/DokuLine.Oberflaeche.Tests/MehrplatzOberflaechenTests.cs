@@ -108,16 +108,16 @@ public class MehrplatzOberflaechenTests
         Hilfe.Zeigen(f);
         f.BereichWaehlen("Übersicht");
         var s = f.Uebersicht;
-        Assert.Equal(8, s.Karten.Count);
+        Assert.Equal(23, s.Karten.Count);
         Assert.All(s.Karten, k => Assert.Equal("R1", k.Bewohner.Wohnbereich));
-        Assert.StartsWith("R1 · 8 Bewohner · 2 Betten frei · Stand ", f.Kopf.KleinText);
+        Assert.StartsWith("R1 · 23 Bewohner · 2 Betten frei · Stand ", f.Kopf.KleinText);
         Assert.False(s.BereichHinweis.Visible);
         // Statusmeldung eines anderen Bereichs (Therapie) auf der Karte, vorne.
         Assert.StartsWith("Status: in der Holzwerkstatt, bis ", s.Karten.Single(k => k.Bewohner.Nachname == "Ahorn").Marken[0].Text);
 
         s.AlleBereiche.Checked = true;
-        Assert.Equal(10, s.Karten.Count);
-        Assert.StartsWith("alle Bereiche · 10 Bewohner · 18 Betten frei · ", f.Kopf.KleinText);
+        Assert.Equal(69, s.Karten.Count);
+        Assert.StartsWith("alle Bereiche · 69 Bewohner · 6 Betten frei · ", f.Kopf.KleinText);
         var ginster = s.Karten.Single(k => k.Bewohner.Nachname == "Ginster");
         Assert.Equal("R2", ginster.Marken[^1].Text);
         Assert.StartsWith("Status: Besuch bei der Familie, bis ", s.Karten.Single(k => k.Bewohner.Nachname == "Immergrün").Marken[0].Text);
@@ -127,12 +127,12 @@ public class MehrplatzOberflaechenTests
         s.AlleBereiche.Checked = false;
         Einstellungen.Aendern(w => w with { Bereich = "Therapie" });
         s.Aktualisieren();
-        Assert.Equal(10, s.Karten.Count);
+        Assert.Equal(69, s.Karten.Count);
         Assert.True(s.BereichHinweis.Visible);
         // Auf der Seite „Bewohner“ zeigen Karten fremder Wohnbereiche ihren Bereich.
         f.BereichWaehlen("Bewohner");
         var karten = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().ToList();
-        Assert.Equal(10, karten.Count);
+        Assert.Equal(69, karten.Count);
         Assert.Equal("R1", karten.Single(k => k.Bewohner.Nachname == "Birke").Marken[^1].Text);
     });
 
