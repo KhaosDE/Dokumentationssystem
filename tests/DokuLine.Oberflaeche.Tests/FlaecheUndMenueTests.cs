@@ -60,8 +60,7 @@ public class FlaecheUndMenueTests
             Assert.True(f.Navigation[0].Width < eintragBreit);
             Assert.True(f.Kopf.Width > kopfBreit);                      // die Inhalte nutzen die Fläche sofort
             Assert.Equal(5, f.Navigation.Single(n => n.Text == "Aufgaben").Anzahl);   // Zähler bleibt am Symbol
-            Assert.True(f.DemoSymbol.Visible);
-            Assert.False(f.DemoKnopf.Visible);
+            Assert.True(f.InfoSymbol.Visible);
             Assert.False(f.VersionText.Visible);
             Assert.StartsWith("Version ", f.InfoSymbol.Text);
             Assert.Contains("R1", f.InfoSymbol.Text);
@@ -75,7 +74,7 @@ public class FlaecheUndMenueTests
             Assert.True(f.MenueEingeklappt);                             // gemerkt
             f.MenueUmschalten();
             Assert.False(f.MenueEingeklappt);
-            Assert.True(f.DemoKnopf.Visible);
+            Assert.True(f.VersionText.Visible);
             Assert.False(Einstellungen.Laden().MenueEingeklappt);
         }
     });
@@ -129,10 +128,9 @@ public class FlaecheUndMenueTests
         Assert.False(f.Kopf.HatLogo);
         Assert.False(f.Kopf.PlatzhalterFeld.IsEmpty);                       // ohne Logo: Platzhalter oben rechts
         Assert.True(f.Kopf.PlatzhalterFeld.Right <= f.Kopf.Width);
-        bool geoeffnet = false;
-        f.EinstellungenZeigen = _ => { geoeffnet = true; return false; };
         f.Kopf.PlatzhalterKlicken();
-        Assert.True(geoeffnet);                                             // Klick führt zu den Einstellungen
+        Assert.Equal("Einstellungen", f.AktiverBereich);                    // Klick führt zu den Einstellungen
+        Assert.Equal("Wohnbereich", f.Einstellungsseite.AktiveGruppe);     // … gleich zum Logo
         Hilfe.Foto(f.Kopf, "65_kopf_logo_platzhalter");
         string logo = Path.Combine(u.Ordner, "logo.png");
         Hilfe.Testbild(logo, 120, 40);

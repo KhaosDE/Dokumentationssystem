@@ -14,7 +14,6 @@ public sealed class AufgabenSeite : Panel
 
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neue Aufgabe …");
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Aufgaben der Schicht drucken …");
-    public Button VorlagenKnopf { get; } = Stil.NebenKnopf("Standardaufgaben …");   // Schritt 25
     public CheckBox ErledigteZeigen { get; } = new() { Text = "Erledigte zeigen", AutoSize = true, BackColor = Stil.Seite };
     public Label KuerzelHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini) };
     public List<AufgabeKarte> Karten { get; } = [];
@@ -32,8 +31,8 @@ public sealed class AufgabenSeite : Panel
         this.speicher = speicher;
         AutoScroll = true;
         BackColor = Stil.Seite;
-        VorlagenKnopf.Click += (_, _) => { using var f = new VorlagenFenster(speicher); Dialog.Zeigen(f, FindForm()); Aktualisieren(); };
-        foreach (var c in new Control[] { DruckKnopf, VorlagenKnopf, ErledigteZeigen, KuerzelHinweis })
+        // Standardaufgaben verwalten: Einstellungen → „Aufgaben“ (Schritt 29).
+        foreach (var c in new Control[] { DruckKnopf, ErledigteZeigen, KuerzelHinweis })
         {
             c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
             leiste.Controls.Add(c);

@@ -88,9 +88,11 @@ public class BezugOberflaechenTests
     {
         using var u = new Umgebung();
         Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
-        using (var e = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
+        using (var f = new Hauptfenster(u.Speicher))
         {
-            Hilfe.Zeigen(e);
+            Hilfe.Zeigen(f);
+            f.EinstellungenOeffnen("Persönlich");
+            var e = f.Einstellungsseite;
             Assert.Equal(ColorTranslator.FromHtml(BezugRegeln.Vorgabefarbe("EF")).ToArgb(), e.MeineFarbe.BackColor.ToArgb());
             e.FarbeWaehlen = _ => Color.FromArgb(0x12, 0x34, 0x56);
             e.FarbeKnopf.PerformClick();
@@ -99,7 +101,10 @@ public class BezugOberflaechenTests
             Assert.Equal(BezugRegeln.Vorgabefarbe("EF"), u.Speicher.Farbe("EF"));
         }
         Einstellungen.Aendern(w => w with { Kuerzel = "" });
-        using (var e = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
+        using (var e = new EinstellungenSeite(u.Speicher))
+        {
+            e.Zeigen();
             Assert.Equal(RechteRegeln.NichtAngemeldetText, Stil.Sperrgrund(e.FarbeKnopf));
+        }
     });
 }

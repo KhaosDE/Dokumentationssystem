@@ -12,8 +12,8 @@ public sealed class Hauptfenster : Form
 {
     private const int LeisteBreite = 232, LeisteSchmal = 60;
 
-    // Reihenfolge der Seitenleiste. „Einstellungen“ öffnet ein Fenster statt einer Seite.
-    // Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
+    // Reihenfolge der Seitenleiste. „Einstellungen“ steht fest ganz unten (Schritt 29: eine Seite wie die
+    // übrigen). Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
     // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Akte, Reiter „Berichte“, Rechtsklick auf eine Karte).
     public static readonly string[] Bereiche =
         ["Übersicht", "Tagesplan", "Bewohner", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
@@ -38,6 +38,7 @@ public sealed class Hauptfenster : Form
     public UebersichtSeite Uebersicht { get; }
     public TagesplanSeite Tagesplan { get; }
     public VisitenSeite Visiten { get; }
+    public EinstellungenSeite Einstellungsseite { get; }
 
     // Damit öffnet das Programm (Program.cs). Tests beginnen bei „Bewohner“ (Konstruktor).
     public const string Startbereich = "Übersicht";
@@ -47,7 +48,6 @@ public sealed class Hauptfenster : Form
     // zurücksetzen“ nur als Symbol mit Hinweis.
     public SeitenleistenEintrag MenueKnopf { get; } = new("Menü einklappen") { Symbol = Symbole.Menue, Eingeklappt = true };
     public SeitenleistenEintrag InfoSymbol { get; } = new("Version") { Symbol = Symbole.Info, Eingeklappt = true, Visible = false, Cursor = Cursors.Default };
-    public SeitenleistenEintrag DemoSymbol { get; } = new("Demo-Daten zurücksetzen …") { Symbol = Symbole.Zuruecksetzen, Eingeklappt = true, Visible = false };
     // Schritt 26a3: Abmelden auch unten in der Seitenleiste (eingeklappt als Symbol mit Hinweis), F12 überall.
     public SeitenleistenEintrag AbmeldenEintrag { get; } = new(Abmeldung.KnopfText) { Symbol = Symbole.Abmelden };
     public Sperrflaeche Sperre { get; } = new();
@@ -58,11 +58,8 @@ public sealed class Hauptfenster : Form
     private readonly ToolTip hinweis = new();
     private readonly System.Windows.Forms.Timer abgleich = new() { Interval = 30_000 };
     private long? datenstand;
-    public Button DemoKnopf { get; } = Stil.NebenKnopf("Demo-Daten zurücksetzen …");
     public string AktiverBereich { get; private set; } = "";
 
-    // Zum Testen ersetzbar: zeigt das Einstellungsfenster; true = gespeichert.
-    internal Func<EinstellungenFenster, bool> EinstellungenZeigen { get; set; }
 
     public Hauptfenster(Speicher speicher)
     {
@@ -76,7 +73,6 @@ public sealed class Hauptfenster : Form
         StartPosition = FormStartPosition.CenterScreen;
         MinimumSize = new Size(860, 680);
         Size = new Size(1180, 800);
-        EinstellungenZeigen = f => f.ShowDialog(this) == DialogResult.OK;
 
         Bewohner = new BewohnerBereich(speicher, Kopf) { Dock = DockStyle.Fill };
         seiten["Bewohner"] = Bewohner;
@@ -98,7 +94,7 @@ public sealed class Hauptfenster : Form
         Kopf.AbmeldenKnopf.Click += (_, _) => AbmeldenOderAnmelden();
         Kopf.EntwurfKnopf.Click += (_, _) => EntwurfFortsetzen();
         speicher.EntwuerfeGeaendert += EntwuerfeZaehlen;
-        Kopf.LogoGewuenscht += () => EinstellungenOeffnen();
+        Kopf.LogoGewuenscht += () => EinstellungenOeffnen("Wohnbereich");
         Therapie = new TherapieSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Therapie"] = Therapie;
         Therapie.Geaendert += () => { if (AktiverBereich == "Therapie") Kopf.TexteSetzen(Therapie.KopfText, "Therapie"); };
@@ -113,6 +109,15 @@ public sealed class Hauptfenster : Form
         Visiten.Geaendert += () => { if (AktiverBereich == "Visiten") Kopf.TexteSetzen(Visiten.KopfText, "Visiten"); };
         Visiten.AufgabeGewuenscht += a => VisitenAufgabe(a);
         Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
+        Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Einstellungen"] = Einstellungsseite;
+        Einstellungsseite.Geaendert += () => { if (AktiverBereich == "Einstellungen") Kopf.TexteSetzen(Einstellungsseite.KopfText, "Einstellungen"); };
+        Einstellungsseite.LogoGeaendert += () => Kopf.LogoSetzen(Einstellungen.LogoPfad());
+        Einstellungsseite.BereichGeaendert += () => { ArbeitsplatzAnzeigen(); AufgabenZaehlen(); };
+        Einstellungsseite.SchichtzeitenGeaendert += AufgabenZaehlen;
+        Einstellungsseite.AbmeldenGewuenscht += () => Abmelden();   // Schritt 26a3: Abmelden auch unter „Persönlich“
+        Einstellungsseite.MenueGewuenscht += eingeklappt => MenueSetzen(eingeklappt, merken: true);
+        Einstellungsseite.DemoGewuenscht += () => DemoZuruecksetzen();
         Uebersicht = new UebersichtSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Übersicht"] = Uebersicht;
         Uebersicht.Geaendert += () =>
@@ -177,15 +182,6 @@ public sealed class Hauptfenster : Form
         MenueKnopf.Click += (_, _) => MenueUmschalten();
         AbmeldenEintrag.Click += (_, _) => AbmeldenOderAnmelden();
         Sperre.AnmeldenKnopf.Click += (_, _) => AnmeldenZeigen();
-        DemoSymbol.Click += (_, _) =>
-        {
-            if (Recht.Grund(speicher, Funktionen.DemoZuruecksetzen) is string grund) hinweis.Show(grund, DemoSymbol, DemoSymbol.Width, 0, 3000);
-            else DemoZuruecksetzen();
-        };
-
-        DemoKnopf.AutoSize = false;
-        DemoKnopf.Padding = new Padding(Stil.AbstandMini, 0, Stil.AbstandMini, 0);   // passt so in eine Zeile
-        DemoKnopf.Click += (_, _) => DemoZuruecksetzen();
         VersionText.Text = Programmversion.Text;
         VersionText.Font = Stil.Klein;
         VersionText.ForeColor = Stil.TextLeise;
@@ -197,7 +193,7 @@ public sealed class Hauptfenster : Form
 
         leiste.Controls.AddRange([MenueKnopf, programmName, LeittextAnzeige]);
         foreach (var eintrag in Navigation) leiste.Controls.Add(eintrag);
-        leiste.Controls.AddRange([AbmeldenEintrag, Arbeitsplatz, DemoKnopf, VersionText, InfoSymbol, DemoSymbol]);
+        leiste.Controls.AddRange([AbmeldenEintrag, Arbeitsplatz, VersionText, InfoSymbol]);
         leiste.Layout += (_, _) => LeisteAnordnen();
         ModuleAnzeigen();
         speicher.ModuleGeaendert += ModuleAnzeigen;
@@ -329,11 +325,6 @@ public sealed class Hauptfenster : Form
 
     public void BereichWaehlen(string name, bool filterBehalten)
     {
-        if (name == "Einstellungen")
-        {
-            EinstellungenOeffnen();
-            return;
-        }
         string schluessel = Schluessel(name);
         AktiverBereich = name;
         StatuszeileSetzen(neuGelesen: true);
@@ -395,6 +386,13 @@ public sealed class Hauptfenster : Form
             Kopf.KnoepfeSetzen(Aufgaben.NeuKnopf);
             return;
         }
+        if (schluessel == "Einstellungen")
+        {
+            Einstellungsseite.Zeigen();
+            Kopf.TexteSetzen(Einstellungsseite.KopfText, "Einstellungen");
+            Kopf.KnoepfeSetzen();
+            return;
+        }
         if (schluessel == "Visiten")
         {
             Visiten.Zeigen();
@@ -445,7 +443,6 @@ public sealed class Hauptfenster : Form
         hinweis.SetToolTip(AbmeldenEintrag, AbmeldenEintrag.Text);
         EntwuerfeZaehlen();
         NachrichtenZaehlen();
-        Recht.Anwenden(speicher, Funktionen.DemoZuruecksetzen, DemoKnopf);   // Rechte (Schritt 19)
     }
 
     public void BenutzerWaehlen(string kuerzel)
@@ -620,18 +617,11 @@ public sealed class Hauptfenster : Form
         return erledigt;
     }
 
-    public bool EinstellungenOeffnen()
+    // Einstellungen als Seite (Schritt 29), auf Wunsch gleich bei einer Gruppe (z. B. „Wohnbereich“ für das Logo).
+    public bool EinstellungenOeffnen(string? gruppe = null)
     {
-        using var fenster = new EinstellungenFenster(speicher.Kollegen(), speicher);
-        bool gespeichert = EinstellungenZeigen(fenster);
-        if (fenster.AbmeldenGewuenscht) { Abmelden(); return false; }
-        if (!gespeichert) return false;
-        Kopf.LogoSetzen(Einstellungen.LogoPfad());
-        BenutzerAnzeigen();
-        AufgabenZaehlen();
-        ArbeitsplatzAnzeigen();
-        if (AktiverBereich == "Übersicht") Uebersicht.Aktualisieren();   // Bereich kann sich geändert haben
-        else if (AktiverBereich == "Bewohner" && !Bewohner.AkteSichtbar) Bewohner.UebersichtZeigen();
+        BereichWaehlen("Einstellungen");
+        if (gruppe is not null) Einstellungsseite.GruppeWaehlen(gruppe);
         return true;
     }
 
@@ -718,10 +708,9 @@ public sealed class Hauptfenster : Form
             hinweis.SetToolTip(eintrag, eingeklappt ? eintrag.Text : null);
         }
         AbmeldenEintrag.Eingeklappt = eingeklappt;
-        programmName.Visible = LeittextAnzeige.Visible = Arbeitsplatz.Visible = DemoKnopf.Visible = VersionText.Visible = !eingeklappt;
-        InfoSymbol.Visible = DemoSymbol.Visible = eingeklappt;
+        programmName.Visible = LeittextAnzeige.Visible = Arbeitsplatz.Visible = VersionText.Visible = !eingeklappt;
+        InfoSymbol.Visible = eingeklappt;
         InfoAktualisieren();
-        hinweis.SetToolTip(DemoSymbol, DemoSymbol.Text);
         leiste.Width = S(eingeklappt ? LeisteSchmal : LeisteBreite);   // die Inhalte nutzen die Fläche sofort (Dock)
         leiste.PerformLayout();
         leiste.Invalidate();
@@ -745,28 +734,30 @@ public sealed class Hauptfenster : Form
         programmName.Location = new Point(MenueKnopf.Right + S(Stil.AbstandKlein), y + Math.Max(0, (S(36) - namensblock) / 2));
         LeittextAnzeige.Location = new Point(programmName.Left, programmName.Bottom);
         y = MenueKnopf.Bottom + S(Stil.AbstandGross);
-        foreach (var eintrag in Navigation)
+        foreach (var eintrag in Navigation.Where(e => e.Text != "Einstellungen"))
         {
-            // Einstellungen etwas abgesetzt: Sie sind kein Arbeitsbereich.
-            if (eintrag.Text == "Einstellungen") y += S(Stil.AbstandMittel);
             eintrag.Bounds = new Rectangle(x, y, breite, S(36));
             y += eintrag.Height + S(Stil.AbstandMini);
         }
 
+        // Unten fest: „Einstellungen“ (Schritt 29), darunter Arbeitsplatz und Version bzw. das Info-Symbol.
         int unten = leiste.ClientSize.Height - leiste.Padding.Bottom;
+        var einstellungen = Navigation.Single(e => e.Text == "Einstellungen");
         if (MenueEingeklappt)
         {
             InfoSymbol.Bounds = new Rectangle(x, unten - S(36), breite, S(36));
-            DemoSymbol.Bounds = new Rectangle(x, InfoSymbol.Top - S(Stil.AbstandMini) - S(36), breite, S(36));
-            AbmeldenEintrag.Bounds = new Rectangle(x, DemoSymbol.Top - S(Stil.AbstandMini) - S(36), breite, S(36));
-            return;
+            AbmeldenEintrag.Bounds = new Rectangle(x, InfoSymbol.Top - S(Stil.AbstandMini) - S(36), breite, S(36));
+            unten = AbmeldenEintrag.Top - S(Stil.AbstandMini);
         }
-        VersionText.Location = new Point(x + S(Stil.AbstandMini), unten - VersionText.PreferredHeight);
-        unten = VersionText.Top - S(Stil.AbstandMittel);
-        DemoKnopf.Bounds = new Rectangle(x, unten - S(Stil.KnopfHoehe), breite, S(Stil.KnopfHoehe));
-        Arbeitsplatz.MaximumSize = new Size(breite - S(Stil.AbstandMini), 0);
-        Arbeitsplatz.Location = new Point(x + S(Stil.AbstandMini), DemoKnopf.Top - S(Stil.AbstandKlein) - Arbeitsplatz.PreferredHeight);
-        AbmeldenEintrag.Bounds = new Rectangle(x, Arbeitsplatz.Top - S(Stil.AbstandKlein) - S(36), breite, S(36));
+        else
+        {
+            VersionText.Location = new Point(x + S(Stil.AbstandMini), unten - VersionText.PreferredHeight);
+            Arbeitsplatz.MaximumSize = new Size(breite - S(Stil.AbstandMini), 0);
+            Arbeitsplatz.Location = new Point(x + S(Stil.AbstandMini), VersionText.Top - S(Stil.AbstandKlein) - Arbeitsplatz.PreferredHeight);
+            AbmeldenEintrag.Bounds = new Rectangle(x, Arbeitsplatz.Top - S(Stil.AbstandKlein) - S(36), breite, S(36));
+            unten = AbmeldenEintrag.Top - S(Stil.AbstandMini);
+        }
+        einstellungen.Bounds = new Rectangle(x, Math.Max(y + S(Stil.AbstandMittel), unten - S(36)), breite, S(36));
     }
 
     // Alle Bewohner und Bilder weg, Demo-Daten neu laden – mit Rückfrage.

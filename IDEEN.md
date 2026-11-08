@@ -938,7 +938,7 @@ Umfang (vereinbar mit `CLAUDE.md`, Regel 6 — das Programm selbst geht nicht in
 - Ausdrücklich nicht: direkte Verbindung zu Outlook, Exchange, Google oder einem Mailserver.
 
 ## Einstellungen neu gegliedert
-Status: freigegeben (Bauplan Schritt 29)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Das Einstellungsmenü bekommt den Aufbau der Windows-11-Einstellungen: links Gruppen,
 rechts deren Inhalt, oben Suche. Alle Einstellungen der Schritte davor ziehen dorthin um.

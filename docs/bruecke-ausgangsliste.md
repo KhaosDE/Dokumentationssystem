@@ -72,7 +72,7 @@ DokuLine 0.14.0 am 07.11.2026. Was angepasst wurde:
 | `Druckliste.cs` | Modul Ausgangsliste: Tagesliste |
 | `Kuechendienst.cs`, `KuechendienstFenster.cs`, `KuechendienstDruck.cs`, `TauschFenster.cs`, `ZimmergruppenFenster.cs` | Untermodul Küchendienst |
 | `DigitalerAusgang.cs`, `NachtberichtFenster.cs` | Untermodul Digitaler Ausgang |
-| `EinstellungenFenster.cs` | Einstellungen von DokuLine, Abschnitt „Module“ |
+| `EinstellungenSeite.cs` | Einstellungen von DokuLine, Gruppe „Module“ (seit 0.32.0 eine Seite) |
 | `Neuigkeiten.cs` („Was ist neu?“) | offen — bei Bedarf in den Kern |
 | `Aktualisierung.cs` (Update-Ordner), Installer | **nicht** übernommen; DokuLine hat ein eigenes Update |
 | `Bilder/logo*.png/jpg` | **nie** übernehmen (Regel 7) |

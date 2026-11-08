@@ -276,16 +276,15 @@ public class AusgangslisteOberflaechenTests
         using (u)
         using (f)
         {
-            f.EinstellungenZeigen = fenster =>
-            {
-                Assert.True(fenster.Module["ausgangsliste"].Checked);
-                Assert.True(fenster.Module[Kuechendienst.Schluessel].Checked);
-                fenster.Module["ausgangsliste"].Checked = false;
-                Assert.False(fenster.Module[Kuechendienst.Schluessel].Enabled);
-                return fenster.Speichern();
-            };
-            Assert.True(f.EinstellungenOeffnen());
-            Assert.Equal("Bewohner", f.AktiverBereich);
+            f.BenutzerWaehlen("RS");   // Hausleitung: darf Module ein- und ausschalten
+            Assert.True(f.EinstellungenOeffnen("Module"));
+            var einstellungen = f.Einstellungsseite;
+            Assert.True(einstellungen.Module["ausgangsliste"].Checked);
+            Assert.True(einstellungen.Module[Kuechendienst.Schluessel].Checked);
+            einstellungen.Module["ausgangsliste"].Checked = false;   // gilt sofort
+            Assert.False(einstellungen.Module[Kuechendienst.Schluessel].Enabled);
+            Assert.Equal("Einstellungen", f.AktiverBereich);
+            f.BereichWaehlen("Bewohner");
             Assert.DoesNotContain(f.Navigation, n => n.Text == "Ausgangsliste");
             Assert.DoesNotContain("Ausgang", f.Bewohner.Akte.Reiter.Namen);
             Assert.Empty(f.Bewohner.Akte.ModulAnsichten);
@@ -293,12 +292,8 @@ public class AusgangslisteOberflaechenTests
             Assert.DoesNotContain(f.Bewohner.Zeilen.SelectMany(k => k.Marken),
                 m => m.Art is MarkenArt.Ausgang || m.Art == MarkenArt.Abwesend && !m.Text.StartsWith("abwesend: unterwegs mit ", StringComparison.Ordinal));
 
-            f.EinstellungenZeigen = fenster =>
-            {
-                fenster.Module["ausgangsliste"].Checked = true;
-                return fenster.Speichern();
-            };
-            f.EinstellungenOeffnen();
+            f.EinstellungenOeffnen("Module");
+            einstellungen.Module["ausgangsliste"].Checked = true;
             Assert.Contains(f.Navigation, n => n.Text == "Ausgangsliste");
             Assert.Equal("Ausgangsliste", f.Navigation[^2].Text);   // vor „Einstellungen“
             f.Navigation.Single(n => n.Text == "Ausgangsliste").Ausloesen();

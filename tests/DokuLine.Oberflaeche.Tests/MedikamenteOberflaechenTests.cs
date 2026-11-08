@@ -24,8 +24,9 @@ public class MedikamenteOberflaechenTests
         Einstellungen.Aendern(w => w with { Kuerzel = "PR" });
         using var f = new Hauptfenster(u.Speicher);
         Assert.DoesNotContain(f.Navigation, n => n.Text == "Medikamente");
-        using var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher);
-        Hilfe.Zeigen(einstellungen);
+        Hilfe.Zeigen(f);
+        f.EinstellungenOeffnen("Medikamente");
+        var einstellungen = f.Einstellungsseite;
         using (var ersatz = new DialogErsatz(fenster =>
         {
             var db = Assert.IsType<MedikamenteFenster>(fenster);
@@ -223,12 +224,12 @@ public class MedikamenteOberflaechenTests
             }
 
             // Abschaltbar (Einstellungen → Medikamente): dann nur „Im Browser öffnen“.
-            using (var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
+            using (var einstellungen = new EinstellungenSeite(u.Speicher))
             {
+                einstellungen.Zeigen();
                 Assert.True(einstellungen.NachschlageAnsicht.Checked);
                 Assert.StartsWith("WebView2 ", einstellungen.WebAnsichtStand.Text);
-                einstellungen.NachschlageAnsicht.Checked = false;
-                Assert.True(einstellungen.Speichern());
+                einstellungen.NachschlageAnsicht.Checked = false;   // gilt sofort
             }
             Assert.False(Einstellungen.Laden().NachschlageAnsicht);
             using (var aus = new MedikamentFenster(u.Speicher, null))
