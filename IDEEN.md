@@ -59,6 +59,10 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 26e | Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme | 0.29.7 |
 | 26f | Fenster „Ärztliche Informationen“ | 0.29.8 |
 | 26g | Tagesplan als Anzeigetafel | 0.29.9 |
+| 26h | Demo-Daten: 23 Bewohner je Wohnbereich | 0.29.10 |
+| 26i | Kopfzeile nur „Wo bin ich“, Logo, Abmelden; Aktionen darunter | 0.29.11 |
+| 26j | Bereich „Bewohner“ als Liste mit Berichten | 0.29.12 |
+| 26k | Visite: „Nächster Bewohner“ unter der Texteingabe | 0.29.13 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
@@ -1250,3 +1254,74 @@ Umfang (Festlegungen aus dem Chat, Tobi kann sie ändern):
 - **Vollbild-Ansicht** (Knopf und Taste F11): nur die Tafel, z. B. für einen Bildschirm im
   Dienstzimmer; Esc beendet.
 - Bildschirmfotos im Testlauf erneuern.
+
+## Demo-Daten: 23 Bewohner je Wohnbereich
+Status: freigegeben (Bauplan Schritt 26h)
+Datum: 08.11.2026
+Was: Die Demo bekommt so viele Bewohner wie im Haus: **23 je Wohnbereich**, also 69 in R1–R3.
+Warum: Vorgabe Tobi (08.11.2026): Aktuell hat jeder Wohnbereich 23 Bewohner; die Zahl soll zum
+Testen der Übersichtlichkeit dienen.
+Umfang:
+- 23 ausgedachte Bewohner je Bereich (erkennbar ausgedachte Namen, `CLAUDE.md` Regel 1),
+  verteilt auf Zimmer und Betten; **je Bereich zwei Betten frei**, damit die Aufnahme etwas
+  anzeigt. Zimmer in den Demo-Daten entsprechend erweitern (Einzel- und Doppelzimmer gemischt).
+- Alle Bereiche mit Daten füllen, in sinnvollem Umfang: Berichte (auch „Wichtig“ und
+  „Übergabe“), Medikamentenplan, Wochenplan/Therapien, Kalender, Bezugspflege (bis etwa vier
+  Bewohner je Bezugspflege, dafür genug ausgedachte Mitarbeiter), Ausgangsliste, Biografie,
+  Visiten. Datumsangaben weiter relativ zum heutigen Tag.
+- **Übersichtlichkeit prüfen:** Bildschirmfotos im Testlauf aller Hauptansichten mit 23
+  Bewohnern (bei 1920 × 1080 und 1366 × 768). Wo eine Ansicht dabei unübersichtlich oder
+  langsam wird, das in `STAND.md` unter „Offene Punkte“ notieren (nicht eigenmächtig umbauen).
+- Start und Bildaufbau bleiben flüssig (Richtwert: Übersicht in unter einer Sekunde).
+
+## Kopfzeile nur „Wo bin ich“, Logo, Abmelden; Aktionen darunter
+Status: freigegeben (Bauplan Schritt 26i)
+Datum: 08.11.2026
+Was: Die Kopfzeile wird aufgeräumt. Knöpfe für Aktionen wandern in eine Leiste darunter.
+Warum: Vorgabe Tobi (08.11.2026): In der Kopfzeile soll immer nur stehen, wo man ist, dazu Logo
+und Abmelden. Punkte wie „Neuer Bewohner“ oder „Neue Aufgabe“ gehören unter die Kopfzeile.
+Umfang:
+- **Kopfzeile, in allen Bereichen gleich:** links groß der Ort („Übersicht“, „Bewohnerakte“,
+  „Tagesplan“, „Einstellungen“ …), bei Bedarf klein davor der Bereich („R2 ·“); rechts das
+  Logo (falls zugeteilt), „Angemeldet: TST“ und „Abmelden (F12)“. Sonst nichts.
+- **Aktionsleiste direkt unter der Kopfzeile:** alle Aktionen des jeweiligen Bereichs, z. B.
+  „Neuer Bewohner …“, „Neue Aufgabe …“, „Neuer Bericht …“, „Drucken …“, Filter, Umschalter.
+  Links die Hauptaktion (farbig, eine pro Ansicht), rechts Drucken und Ansichtsschalter.
+  Einheitlich aufgebaut, damit man Knöpfe immer an derselben Stelle findet.
+- Der Hinweis **„Demo — ausgedachte Daten“** bleibt dauerhaft sichtbar (`CLAUDE.md`, Regel 4),
+  aber nicht mehr in der Kopfzeile: im Fenstertitel und als feste Marke links in der
+  Statusleiste unten.
+- Alle Bereiche umstellen, auch Akte, Visite, Kalender, Einstellungen und Modul Ausgangsliste.
+- Bildschirmfotos im Testlauf erneuern.
+
+## Bereich „Bewohner“ als Liste mit Berichten
+Status: freigegeben (Bauplan Schritt 26j)
+Datum: 08.11.2026
+Was: Der Bereich „Bewohner“ bekommt eine Liste statt Kacheln. Wählt man einen Bewohner, erscheinen
+daneben seine Berichte.
+Warum: Rückmeldung Tobi (08.11.2026): Übersicht und Bewohner unterscheiden sich kaum. „Bewohner“
+soll eine Liste haben; wählt man einen Bewohner aus, erscheinen die Berichte.
+Umfang:
+- **Übersicht** bleibt das Kartenraster mit Marken („was ist heute wichtig“).
+- **Bewohner:** links eine **Liste** (Tabelle) aller Bewohner des Bereichs — Zimmer/Bett, Name,
+  Bezugspflege (Farbe mit Kürzel), Marken kurz (Allergie, Beschluss, Übergabe offen); sortierbar,
+  Suchfeld, Filter nach Bereich. Mit 23 Bewohnern ohne Bildlauf lesbar, wo möglich.
+- **Rechts die Berichte** des ausgewählten Bewohners, neueste oben, mit den Filtern aus der
+  täglichen Dokumentation (Zeitraum, Lebensbereich, „nur wichtige“) und „Neuer Bericht …“ in der
+  Aktionsleiste (bezogen auf den ausgewählten Bewohner).
+- Mit Pfeiltasten durch die Liste blättern; die Berichte wechseln mit.
+- **Akte öffnen** per Doppelklick oder Knopf „Akte öffnen“ (Aktionsleiste).
+
+## Visite: „Nächster Bewohner“ unter der Texteingabe
+Status: freigegeben (Bauplan Schritt 26k)
+Datum: 08.11.2026
+Was: In der Visitenansicht stehen „◀ Vorheriger“ und „Nächster Bewohner ▶“ direkt unter der
+Texteingabe. „Nächster Bewohner“ ist ausgegraut, solange für den aktuellen Bewohner kein Bericht
+geschrieben ist.
+Warum: Vorgabe Tobi (08.11.2026): Die Visite bleibt sonst, wie sie ist.
+Umfang:
+- Knöpfe unter dem Feld „Besprochenes“, nicht mehr an anderer Stelle.
+- „Nächster Bewohner ▶“ wird aktiv, sobald im Feld „Besprochenes“ Text steht; Tooltip im
+  ausgegrauten Zustand: „Erst den Bericht zu diesem Bewohner schreiben.“
+- „◀ Vorheriger“ ist immer aktiv. Die Liste links bleibt anklickbar wie bisher.
+- Sonst keine Änderung an der Visite.
