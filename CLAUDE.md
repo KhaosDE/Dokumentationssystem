@@ -32,6 +32,10 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 6. **Keine KI, kein Internet** außer dem Selbst-Update (Entscheidung Tobi, 06.11.2026,
    Datenschutz). Das Programm formuliert keine Texte selbst; es stellt zusammen, zählt,
    prüft und bietet Textbausteine an.
+   Erlaubt ist, an Programme auf dem Rechner zu **übergeben**, ohne selbst eine Verbindung
+   aufzubauen: das E-Mail-Programm öffnen (`mailto:`), `.ics`-Dateien ex- und importieren,
+   eine Adresse im Browser öffnen (Entscheidung Tobi, 08.11.2026). E-Mail-Adressen in
+   Demo-Daten nur mit der Endung `@example.org`.
 7. **Fremde Vorlagen bleiben draußen.** PDF-Bögen des Kostenträgers, Logos und Namen der
    Einrichtung kommen nie ins Repository; das Programm lässt sie in den Einstellungen
    zuteilen und speichert sie im Datenordner.
