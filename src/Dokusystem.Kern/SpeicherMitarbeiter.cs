@@ -203,6 +203,11 @@ public sealed partial class Speicher
 
     public bool Darf(string? kuerzel, string funktion) => Grund(kuerzel, funktion) is null;
 
+    // Therapieangebote nach Anbieter (Schritt 22).
+    public string? AngebotGrund(string? kuerzel, string anbieter) => RechteRegeln.AngebotGrund(MitarbeiterLesen(kuerzel), anbieter, Rechte(), NurFachkraft());
+    public List<string> AngebotAnbieter(string? kuerzel) =>
+        RechteRegeln.Anbieter(MitarbeiterLesen(kuerzel), AlleBewohner().Select(b => b.Wohnbereich).ToHashSet(), Rechte(), NurFachkraft());
+
     // Anmelden: nur aktive Mitarbeiter. Rückgabe: der Mitarbeiter oder ein Eingabefehler.
     public Mitarbeiter Anmelden(string kuerzel)
     {
@@ -217,13 +222,33 @@ public sealed partial class Speicher
     // Positionen und Rechte-Vorbelegung, einmal je Datenbank (auch ohne Demo-Daten).
     private void GrundbestandPruefen()
     {
-        if (Meta(Grundbestand) is not null) return;
-        using var transaktion = db.BeginTransaction();
-        if (WertIn(transaktion, "SELECT wert FROM meta WHERE schluessel = $s", ("$s", Grundbestand)) is null)
+        if (Meta(Grundbestand) is null)
         {
-            GrundbestandEinfuegen(transaktion);
+            using var transaktion = db.BeginTransaction();
+            if (WertIn(transaktion, "SELECT wert FROM meta WHERE schluessel = $s", ("$s", Grundbestand)) is null)
+            {
+                GrundbestandEinfuegen(transaktion);
+                transaktion.Commit();
+            }
+        }
+        // Später dazugekommene Funktionen einmal vorbelegen (bestehende Häkchen bleiben, wie sie sind).
+        foreach (var f in RechteRegeln.Nachtraeglich.Where(f => Meta(NachtraeglichSchluessel(f)) is null))
+        {
+            using var transaktion = db.BeginTransaction();
+            if (WertIn(transaktion, "SELECT wert FROM meta WHERE schluessel = $s", ("$s", NachtraeglichSchluessel(f))) is not null) continue;
+            FunktionVorbelegen(f, transaktion);
             transaktion.Commit();
         }
+    }
+
+    private static string NachtraeglichSchluessel(string funktion) => $"rechte_vorbelegt_{funktion}";
+
+    private void FunktionVorbelegen(string funktion, SqliteTransaction transaktion)
+    {
+        foreach (var p in RechteRegeln.Positionen)
+            if (RechteRegeln.Vorbelegt(p, funktion))
+                Ausfuehren("INSERT OR IGNORE INTO rechte (funktion, position) VALUES ($f, $p)", transaktion, ("$f", funktion), ("$p", p));
+        SetzeMeta(NachtraeglichSchluessel(funktion), "1", transaktion);
     }
 
     private void GrundbestandEinfuegen(SqliteTransaction transaktion)
@@ -239,6 +264,7 @@ public sealed partial class Speicher
         Ausfuehren("INSERT OR IGNORE INTO bereiche (name) SELECT DISTINCT team FROM team_mitglieder", transaktion);
         Ausfuehren("INSERT OR IGNORE INTO bereiche (name) SELECT DISTINCT wohnbereich FROM bewohner", transaktion);
         SetzeMeta(Grundbestand, "1", transaktion);
+        foreach (var f in RechteRegeln.Nachtraeglich) SetzeMeta(NachtraeglichSchluessel(f), "1", transaktion);   // oben schon vorbelegt
     }
 
     // Demo: Mitarbeiter, Bereiche, Positionen und Rechte wie neu (daten/demo/mitarbeiter.json).

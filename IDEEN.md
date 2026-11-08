@@ -769,7 +769,7 @@ Umfang:
   automatischer Abgleich des ganzen Bestands — Nutzungsrechte nicht geklärt.
 
 ## Therapien: Zuordnung und Rechte
-Status: freigegeben (Bauplan Schritt 22)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Jede Therapie gehört zur Therapie oder zu einem Wohnbereich. Bearbeiten dürfen nur die
 Berechtigten.

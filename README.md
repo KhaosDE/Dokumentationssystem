@@ -77,7 +77,9 @@ Danach fragt Windows für diese Datei nicht mehr.
   Klick auf eine Zeile zeigt Einzelheiten und Verlauf; dort Pause, Stufenplan, Absetzen. Die
   Grundverordnung wird nie überschrieben. **Demo — nicht zum Stellen verwenden.**
 - **Therapie** (links): Angebote mit Terminen, Teilnehmern und freien Plätzen; Bewohner
-  zuteilen (mit Warnung bei Überschneidung), Teilnahme beenden, Änderungen „ab Datum“.
+  zuteilen (mit Warnung bei Überschneidung), Teilnahme beenden, Änderungen „ab Datum“. Jedes
+  Angebot gehört der Therapie oder einem Wohnbereich (Filter „Anbieter“); alle sehen alles,
+  ändern und zuteilen darf nur der Anbieter.
 - **Wochenplan** (Reiter in der Akte): die Regelwoche mit zugeteilten Therapien und freien
   Einträgen; Teilnahme an Therapien eintragen; Änderungen gelten „ab Datum“; Ausdruck in
   großer Schrift nur mit Name und Plan.

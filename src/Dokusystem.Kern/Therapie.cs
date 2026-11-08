@@ -26,6 +26,7 @@ public sealed record AngebotFassung
     public IReadOnlyList<Wochentermin> Termine { get; init; } = [];
     public int Hoechstens { get; init; }
     public string Hinweis { get; init; } = "";
+    public string Anbieter { get; init; } = TherapieRegeln.AnbieterTherapie;   // Schritt 22: „Therapie“ oder ein Wohnbereich
     public DateTime Erstellt { get; init; }
     public string Kuerzel { get; init; } = "";
 
@@ -57,6 +58,9 @@ public sealed record Angebot
     public IReadOnlyList<AngebotFassung> Fassungen { get; init; } = [];   // nach „gilt ab“, dann Anlage
     public IReadOnlyList<Zuteilung> Zuteilungen { get; init; } = [];
 
+    // Wem das Angebot gehört (letzte Fassung) – danach richten sich die Rechte.
+    public string Anbieter => Fassungen[^1].Anbieter;
+
     // Die Fassung, die an einem Tag gilt (vor der ersten: die erste).
     public AngebotFassung Am(DateOnly tag) => Fassungen.LastOrDefault(f => f.GiltAb <= tag) ?? Fassungen[0];
     public List<Zuteilung> TeilnehmerAm(DateOnly tag) => Zuteilungen.Where(z => z.GiltAm(tag)).ToList();
@@ -75,12 +79,15 @@ public sealed class AngebotEingabe
     public List<(DayOfWeek? Tag, string Von, string Bis)> Termine { get; set; } = [];
     public string Hoechstens { get; set; } = "";
     public string Hinweis { get; set; } = "";
+    public string Anbieter { get; set; } = TherapieRegeln.AnbieterTherapie;
     public string GiltAb { get; set; } = "";
     public string Kuerzel { get; set; } = "";
 }
 
 public static class TherapieRegeln
 {
+    public const string AnbieterTherapie = "Therapie";
+
     public static readonly DayOfWeek[] Woche =
         [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday];
 
@@ -93,6 +100,8 @@ public static class TherapieRegeln
         if (string.IsNullOrWhiteSpace(e.Name)) fehler.Add("Name des Angebots fehlt.");
         if (string.IsNullOrWhiteSpace(e.Therapeut)) fehler.Add("Therapeutin oder Therapeut fehlt.");
         if (string.IsNullOrWhiteSpace(e.Kuerzel)) fehler.Add("Kürzel fehlt (oben rechts „Angemeldet als …“).");
+        if (string.IsNullOrWhiteSpace(e.Anbieter)) fehler.Add("Anbieter fehlt (Therapie oder ein Wohnbereich).");
+        else if (Bereiche.Pruefen(e.Anbieter) is string anbieterFehler) fehler.Add($"Anbieter: {anbieterFehler}");
         var termine = new List<Wochentermin>();
         foreach (var (tag, von, bis) in e.Termine)
         {
@@ -123,7 +132,7 @@ public static class TherapieRegeln
         {
             GiltAb = giltAb, Name = e.Name.Trim(), Art = e.Art, Therapeut = e.Therapeut.Trim(), Ort = e.Ort.Trim(),
             Termine = termine.OrderBy(t => Array.IndexOf(Woche, t.Tag)).ThenBy(t => t.Von).ToList(),
-            Hoechstens = hoechstens, Hinweis = e.Hinweis.Trim(), Erstellt = jetzt, Kuerzel = e.Kuerzel.Trim(),
+            Hoechstens = hoechstens, Hinweis = e.Hinweis.Trim(), Anbieter = Bereiche.Bereinigen(e.Anbieter), Erstellt = jetzt, Kuerzel = e.Kuerzel.Trim(),
         };
     }
 
@@ -146,7 +155,7 @@ public static class TherapieRegeln
         for (int i = 0; i < a.Fassungen.Count; i++)
         {
             var f = a.Fassungen[i];
-            liste.Add((f.Erstellt, $"{(i == 0 ? "angelegt" : "geändert")}, gilt ab {Datum.Text(f.GiltAb)}: {f.Name} · {ArtText(f.Art)} · {f.Therapeut} · {f.Ort} · {f.TermineText} · höchstens {f.Hoechstens} · von {f.Kuerzel}"));
+            liste.Add((f.Erstellt, $"{(i == 0 ? "angelegt" : "geändert")}, gilt ab {Datum.Text(f.GiltAb)}: {f.Name} · {ArtText(f.Art)} · {f.Therapeut} · {f.Ort} · {f.TermineText} · höchstens {f.Hoechstens} · Anbieter {f.Anbieter} · von {f.Kuerzel}"));
         }
         foreach (var z in a.Zuteilungen)
         {

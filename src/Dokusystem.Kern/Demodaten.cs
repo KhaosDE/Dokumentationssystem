@@ -411,6 +411,8 @@ public static class Demodaten
         public int Hoechstens { get; set; }
         public string Hinweis { get; set; } = "";
         public int SeitTagen { get; set; }
+        public string Anbieter { get; set; } = TherapieRegeln.AnbieterTherapie;   // Schritt 22
+        public string Kuerzel { get; set; } = "OP";                               // wer angelegt und zugeteilt hat
         public List<TerminVorlage> Termine { get; set; } = [];
         public AenderungVorlage? Aenderung { get; set; }
         public List<TeilnehmerVorlage> Teilnehmer { get; set; } = [];
@@ -439,7 +441,7 @@ public static class Demodaten
             {
                 GiltAb = heute.AddDays(-v.SeitTagen), Name = v.Name, Art = v.Art == "einzel" ? AngebotArt.Einzel : AngebotArt.Gruppe,
                 Therapeut = v.Therapeut, Ort = v.Ort, Termine = Termine(v.Termine), Hoechstens = v.Hoechstens, Hinweis = v.Hinweis,
-                Erstellt = heute.AddDays(-v.SeitTagen - 3).ToDateTime(new TimeOnly(9, 0)), Kuerzel = "OP",
+                Anbieter = v.Anbieter, Erstellt = heute.AddDays(-v.SeitTagen - 3).ToDateTime(new TimeOnly(9, 0)), Kuerzel = v.Kuerzel,
             };
             var fassungen = new List<AngebotFassung> { erste };
             if (v.Aenderung is AenderungVorlage a)
@@ -455,10 +457,10 @@ public static class Demodaten
                 var ab = heute.AddDays(-t.AbVorTagen);
                 zuteilungen.Add(new Zuteilung
                 {
-                    BewohnerId = b.Id!.Value, Ab = ab, Kuerzel = "OP",
+                    BewohnerId = b.Id!.Value, Ab = ab, Kuerzel = v.Kuerzel,
                     Erstellt = (t.AbVorTagen > 0 ? ab.AddDays(-2) : heute.AddDays(-1)).ToDateTime(new TimeOnly(10, 0)),
                     BeendetAb = t.BeendetVorTagen is int e ? heute.AddDays(-e) : null,
-                    BeendetVon = t.BeendetVorTagen is null ? null : "OP",
+                    BeendetVon = t.BeendetVorTagen is null ? null : v.Kuerzel,
                     BeendetErstellt = t.BeendetVorTagen is int e2 ? heute.AddDays(-e2 - 1).ToDateTime(new TimeOnly(11, 0)) : null,
                 });
             }

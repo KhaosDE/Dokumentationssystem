@@ -27,6 +27,7 @@ public static class Funktionen
     public const string MedikamentAnlegen = "medikament_anlegen";
     public const string MedikamenteVerwalten = "medikamente_verwalten";
     public const string TherapienBearbeiten = "therapien_bearbeiten";
+    public const string TherapienBereich = "therapien_bereich";   // Schritt 22: Angebote des eigenen Wohnbereichs
     public const string TeilnahmeBestaetigen = "teilnahme_bestaetigen";
     public const string KalenderHaus = "kalender_haus";
     public const string Fahrzeuge = "fahrzeuge";
@@ -48,6 +49,7 @@ public static class Funktionen
         (MedikamentAnlegen, "Medikament anlegen"),
         (MedikamenteVerwalten, "Medikamentendatenbank verwalten (prüfen, ändern, sperren)"),
         (TherapienBearbeiten, "Therapien bearbeiten"),
+        (TherapienBereich, "Therapien des eigenen Bereichs bearbeiten"),
         (TeilnahmeBestaetigen, "Therapie-Teilnahme bestätigen"),
         (KalenderHaus, "Kalender Haus bearbeiten"),
         (Fahrzeuge, "Fahrzeuge eintragen"),
@@ -87,7 +89,7 @@ public static partial class RechteRegeln
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten,
             Funktionen.MedikamentAnlegen, Funktionen.TeilnahmeBestaetigen, Funktionen.KalenderHaus, Funktionen.Fahrzeuge,
             Funktionen.AufgabenVorlagen, Funktionen.Heb, Funktionen.MitarbeiterBereich, Funktionen.EinstellungenBereich,
-            Funktionen.DemoZuruecksetzen,
+            Funktionen.DemoZuruecksetzen, Funktionen.TherapienBereich,
         ],
         ["Mitarbeiter Wohnbereich"] =
         [
@@ -106,6 +108,10 @@ public static partial class RechteRegeln
         ["Therapie"] = [Funktionen.BerichteSchreiben, Funktionen.TherapienBearbeiten, Funktionen.TeilnahmeBestaetigen, Funktionen.Fahrzeuge],
     };
 
+    // Funktionen, die nach der ersten Vorbelegung (0.22.0) dazukamen: werden in bestehenden
+    // Datenbanken einmal nachträglich vorbelegt.
+    public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich];
+
     public static bool Vorbelegt(string position, string funktion) =>
         position is "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||
         (Vorgabe.TryGetValue(position, out var f) && f.Contains(funktion));
@@ -118,6 +124,27 @@ public static partial class RechteRegeln
         if (!position) return FehltText;
         if (nurFachkraft.Contains(funktion) && !m.Fachkraft) return NurFachkraftText;
         return null;
+    }
+
+    // Therapieangebote (Schritt 22): Angebote der Therapie ändert, wer „Therapien bearbeiten“ hat;
+    // Angebote eines Wohnbereichs ändert, wer „Therapien des eigenen Bereichs bearbeiten“ hat und
+    // zu diesem Bereich gehört. Das gilt auch für das Zuteilen von Bewohnern.
+    public static string? AngebotGrund(Mitarbeiter? m, string anbieter, IReadOnlyDictionary<string, HashSet<string>> rechte, IReadOnlySet<string> nurFachkraft)
+    {
+        if (anbieter == TherapieRegeln.AnbieterTherapie) return Grund(m, Funktionen.TherapienBearbeiten, rechte, nurFachkraft);
+        if (Grund(m, Funktionen.TherapienBereich, rechte, nurFachkraft) is string grund) return grund;
+        return m!.Bereiche.Contains(anbieter) ? null : $"Nur für {anbieter}.";
+    }
+
+    // Für welche Anbieter jemand neue Angebote anlegen darf: „Therapie“ und die eigenen Wohnbereiche
+    // (Bereiche, in denen Bewohner wohnen – nicht z. B. „Leitung“).
+    public static List<string> Anbieter(Mitarbeiter? m, IReadOnlyCollection<string> wohnbereiche, IReadOnlyDictionary<string, HashSet<string>> rechte, IReadOnlySet<string> nurFachkraft)
+    {
+        var liste = new List<string>();
+        if (Grund(m, Funktionen.TherapienBearbeiten, rechte, nurFachkraft) is null) liste.Add(TherapieRegeln.AnbieterTherapie);
+        if (Grund(m, Funktionen.TherapienBereich, rechte, nurFachkraft) is null)
+            liste.AddRange(m!.Bereiche.Where(b => b != TherapieRegeln.AnbieterTherapie && wohnbereiche.Contains(b)));
+        return liste;
     }
 
     // Mitarbeiter verwalten: „alle“ oder „eigener Bereich“ – dann nur Mitarbeiter mit mindestens einem

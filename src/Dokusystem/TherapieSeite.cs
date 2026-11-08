@@ -4,14 +4,19 @@ namespace Dokusystem;
 
 // Bereich „Therapie“: Angebote mit Terminen, Teilnehmern und freien Plätzen. Angebote anlegen,
 // „ab Datum“ ändern, Bewohner zuteilen (Warnung bei Überschneidung), Teilnahme beenden, Verlauf.
-// Zugeteilte Therapien erscheinen im Wochenplan des Bewohners (ab 0.12.0).
+// Zugeteilte Therapien erscheinen im Wochenplan des Bewohners (ab 0.12.0). Jedes Angebot gehört
+// der Therapie oder einem Wohnbereich (Schritt 22); alle sehen alles, ändern und zuteilen darf nur
+// der Anbieter. Filter nach Anbieter.
 public sealed class TherapieSeite : Panel
 {
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
     private readonly List<Control> inhalt = [];
 
+    public const string AlleAnbieter = "alle Anbieter";
+
     public TextBox TagFeld { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
+    public ComboBox AnbieterFilter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 180 };
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neues Angebot …");
     public List<AngebotKarte> Karten { get; } = [];
     public event Action? Geaendert;
@@ -27,6 +32,11 @@ public sealed class TherapieSeite : Panel
         TagFeld.Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandKlein, Stil.AbstandKlein);
         leiste.Controls.Add(TagFeld);
         TagFeld.TextChanged += (_, _) => Aktualisieren();
+        leiste.Controls.Add(new Label { Text = "Anbieter", AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite, Margin = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandKlein, 0) });
+        AnbieterFilter.Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandKlein, Stil.AbstandKlein);
+        AnbieterFilter.AccessibleName = "Filter nach Anbieter";
+        leiste.Controls.Add(AnbieterFilter);
+        AnbieterFilter.SelectedIndexChanged += (_, _) => { if (!filterFuellen) Aktualisieren(); };
         NeuKnopf.Click += (_, _) => Bearbeiten(null);
         Controls.Add(leiste);
     }
@@ -40,12 +50,33 @@ public sealed class TherapieSeite : Panel
         }
     }
 
+    private bool filterFuellen;
+
+    // „Therapie“, dann die Wohnbereiche (in der Reihenfolge der Bereiche) und Anbieter, die nur noch
+    // an Angeboten hängen.
+    private void FilterFuellen()
+    {
+        string gewaehlt = AnbieterFilter.SelectedItem as string ?? AlleAnbieter;
+        var wohnbereiche = speicher.AlleBewohner().Select(b => b.Wohnbereich).ToHashSet();
+        var namen = new List<string> { AlleAnbieter, TherapieRegeln.AnbieterTherapie };
+        namen.AddRange(speicher.Bereichsliste().Select(b => b.Name).Where(n => n != TherapieRegeln.AnbieterTherapie && wohnbereiche.Contains(n)));
+        namen.AddRange(speicher.Angebote().Select(a => a.Anbieter).Where(n => !namen.Contains(n)).Distinct());
+        filterFuellen = true;
+        AnbieterFilter.Items.Clear();
+        AnbieterFilter.Items.AddRange([.. namen]);
+        AnbieterFilter.SelectedItem = namen.Contains(gewaehlt) ? gewaehlt : AlleAnbieter;
+        filterFuellen = false;
+    }
+
+    private List<Angebot> Gefiltert() =>
+        AnbieterFilter.SelectedItem is string a && a != AlleAnbieter ? speicher.Angebote().Where(x => x.Anbieter == a).ToList() : speicher.Angebote();
+
     public string KopfText
     {
         get
         {
             var tag = Stichtag;
-            var alle = speicher.Angebote().Where(a => a.Fassungen[0].GiltAb <= tag).ToList();
+            var alle = Gefiltert().Where(a => a.Fassungen[0].GiltAb <= tag).ToList();
             int teilnahmen = alle.Sum(a => a.TeilnehmerAm(tag).Count), frei = alle.Sum(a => a.FreiAm(tag));
             return $"{alle.Count} Angebote · {teilnahmen} Teilnahmen · {frei} freie Plätze";
         }
@@ -62,15 +93,18 @@ public sealed class TherapieSeite : Panel
     {
         var tag = Stichtag;
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
-        string? grund = Recht.Grund(speicher, Funktionen.TherapienBearbeiten);   // Rechte (Schritt 19)
-        Stil.Sperren(NeuKnopf, grund);
+        FilterFuellen();
+        // Rechte (Schritt 19/22): neu anlegen, wer für mindestens einen Anbieter darf.
+        Stil.Sperren(NeuKnopf, speicher.AngebotAnbieter(Recht.Kuerzel).Count > 0 ? null
+            : Recht.Grund(speicher, Funktionen.TherapienBearbeiten) ?? Recht.Grund(speicher, Funktionen.TherapienBereich));
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
         inhalt.Clear();
         Karten.Clear();
-        foreach (var a in speicher.Angebote())
+        foreach (var a in Gefiltert())
         {
             var karte = new AngebotKarte(a, tag, namen);
+            string? grund = speicher.AngebotGrund(Recht.Kuerzel, a.Anbieter);   // ändern und zuteilen nur der Anbieter
             foreach (var k in new[] { karte.ZuteilenKnopf, karte.AendernKnopf, karte.BeendenKnopf }) Stil.Sperren(k, grund);
             karte.ZuteilenKnopf.Click += (_, _) => Zuteilen(a);
             karte.AendernKnopf.Click += (_, _) => Bearbeiten(a);
@@ -83,7 +117,8 @@ public sealed class TherapieSeite : Panel
             Karten.Add(karte);
             inhalt.Add(karte);
         }
-        if (Karten.Count == 0) inhalt.Add(new Label { Text = "Noch keine Angebote.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
+        if (Karten.Count == 0)
+            inhalt.Add(new Label { Text = AnbieterFilter.SelectedItem is string f && f != AlleAnbieter ? $"Keine Angebote von {f}." : "Noch keine Angebote.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
         foreach (var c in inhalt) Controls.Add(c);
         ResumeLayout(false);
         AutoScrollPosition = Point.Empty;
@@ -161,6 +196,7 @@ public sealed class AngebotKarte : KartenFlaeche
         int frei = a.FreiAm(tag);
         var liste = new List<(string, Stil.Marke)>
         {
+            (a.Anbieter, a.Anbieter == TherapieRegeln.AnbieterTherapie ? Stil.Hinweis : Stil.Unterwegs),   // Anbieter (Schritt 22)
             (TherapieRegeln.ArtText(f.Art), Stil.Zimmer),
             (f.TermineText, Stil.Unterwegs),
             (frei == 0 ? "voll" : frei == 1 ? "1 Platz frei" : $"{frei} Plätze frei", frei == 0 ? Stil.Achtung : Stil.Offen),
@@ -238,6 +274,7 @@ public sealed class AngebotFenster : Form
     public TextBox Hoechstens { get; } = new() { Width = 60 };
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public TextBox GiltAb { get; } = new() { Width = 100 };
+    public ComboBox Anbieter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Angebot? Gespeichert { get; private set; }
 
@@ -258,6 +295,12 @@ public sealed class AngebotFenster : Form
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         var raster = Formular.Raster(out var zeile);
         zeile("Name", NameFeld);
+        // Anbieter (Schritt 22): nur, wofür der Angemeldete Angebote anlegen darf; beim Ändern bleibt der bisherige wählbar.
+        var anbieter = speicher.AngebotAnbieter(Einstellungen.Laden().Kuerzel);
+        if (bisher is not null && !anbieter.Contains(bisher.Anbieter)) anbieter.Insert(0, bisher.Anbieter);
+        Anbieter.Items.AddRange([.. anbieter]);
+        if (Anbieter.Items.Count > 0) Anbieter.SelectedItem = bisher?.Anbieter ?? anbieter[0];
+        zeile("Anbieter", Anbieter);
         zeile("Art", Formular.Reihe(Gruppe, Einzel));
         zeile("Therapeut/in", Therapeut);
         zeile("Ort", Ort);
@@ -319,6 +362,7 @@ public sealed class AngebotFenster : Form
                 Termine = Enumerable.Range(0, TerminZeilen)
                     .Select(i => (Tage[i].SelectedIndex > 0 ? (DayOfWeek?)TherapieRegeln.Woche[Tage[i].SelectedIndex - 1] : null, Von[i].Text, Bis[i].Text)).ToList(),
                 Hoechstens = Hoechstens.Text, Hinweis = Hinweis.Text, GiltAb = GiltAb.Text, Kuerzel = Einstellungen.Laden().Kuerzel,
+                Anbieter = Anbieter.SelectedItem as string ?? "",
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.AngebotAnlegen(f) : speicher.AngebotAendern(bisher.Id, f);
         }
