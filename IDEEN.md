@@ -49,6 +49,9 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 24 | Kalender: Bereich und Haus, Fahrzeuge | 0.27.0 |
 | 25 | Aufgaben nach Schichten mit Standardaufgaben | 0.28.0 |
 | 26 | Visiten | 0.29.0 |
+| 26a | Kürzel automatisch aus der Anmeldung | 0.29.1 |
+| 26b | Ärzteverzeichnis | 0.29.2 |
+| 26c | Visite: Übersicht aller Bewohner | 0.29.3 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
@@ -61,6 +64,8 @@ Für alle Schritte gilt:
   damit die Demo an jedem Tag etwas zeigt. „Demo-Daten zurücksetzen“ setzt alle Bereiche zurück.
 - Demo-Texte (Berichte, Biografien) sind erkennbar ausgedacht, kurz und wertneutral nach
   `docs/heb-wissen.md`; keine Diagnosen.
+- **Kürzel nie von Hand** (Tobi, 08.11.2026): Wer etwas einträgt, ist über die Anmeldung
+  bekannt. „Eingetragen von“ setzt das Programm immer selbst (siehe Schritt 26a).
 - Steht in einem Eintrag „Festlegungen für die Demo“, sind das Annahmen. Weicht etwas davon
   ab, in `STAND.md` unter „Entscheidungen“ festhalten.
 - Schritte 16 und 17 am 08.11.2026 ergänzt (Tobi: „Alles freigeben“). Schritt 17 ist die
@@ -969,3 +974,78 @@ Warum: Wunsch Tobi in der Sitzung (08.11.2026).
 Umfang: Gestrichelter Rahmen „Logo der Einrichtung“, solange kein eigenes Bild gewählt ist; Klick
 öffnet die Einstellungen („Bild im Kopf“). Das echte Logo wählt jeder Rechner selbst; es liegt im
 Datenordner und kommt nie ins Repository (`CLAUDE.md`, Regel 7).
+
+## Kürzel automatisch aus der Anmeldung
+Status: freigegeben (Bauplan Schritt 26a)
+Datum: 08.11.2026
+Was: Überall, wo ein Kürzel eingetragen wird, setzt das Programm das Kürzel der angemeldeten
+Person selbst.
+Warum: Vorgabe Tobi (08.11.2026): Man meldet sich mit dem Kürzel an; es soll sich bei den
+meisten Dokumenten selbst setzen.
+Umfang:
+- **Zwei Arten von Kürzel-Feldern** unterscheiden:
+  - **„Eingetragen von“** (wer hat geschrieben, bestätigt, erledigt, gelesen): wird immer
+    automatisch gesetzt und ist **nicht änderbar**. Betrifft u. a. Berichte und Nachträge,
+    Übergabe (setzen, gelesen, erledigt), Aufgaben (angelegt, erledigt, weitergegeben),
+    Teilnahme im Tagesplan, Medikamentenplan (Eintrag, Pause, Stufe), Medikament anlegen und
+    bestätigen, Visiten, Statusmeldungen, Fahrten (losgefahren/zurück), Ausgang, Biografie,
+    Reflexion, HEB-Bogen, Nachrichten.
+  - **Personen-Felder** (wer ist dabei oder zuständig, z. B. Fahrer, Teilnehmer der Visite,
+    Bezugspflege): mit der angemeldeten Person **vorbelegt**, aber änderbar bzw. ergänzbar
+    (Auswahl aus den Mitarbeitern, kein Freitext).
+- Alle bisherigen Formulare durchgehen: Eingabefelder für „Verfasser“/„Kürzel“ entfernen bzw.
+  durch eine schreibgeschützte Anzeige „eingetragen von AB“ ersetzen.
+- Die Einstellung „eigenes Kürzel“ entfällt (falls noch vorhanden); maßgeblich ist allein
+  die Anmeldung.
+- Ohne Anmeldung lässt sich nichts eintragen (nur ansehen), Hinweis „Bitte zuerst anmelden“.
+- Gilt ab jetzt für alle neuen Schritte (Regel oben im Bauplan).
+
+## Ärzteverzeichnis
+Status: freigegeben (Bauplan Schritt 26b)
+Datum: 08.11.2026
+Was: Eine Liste der Ärztinnen und Ärzte, die im Programm überall zur Auswahl steht.
+Warum: Vorgabe Tobi (08.11.2026): In der Visite müssen die im System hinterlegten Ärzte zur
+Auswahl stehen.
+Umfang:
+- Verzeichnis in den Einstellungen (Gruppe „Verwaltung“): Name, Fachrichtung, Praxis/Ort,
+  Telefon, E-Mail (Demo: ausgedacht, nur `@example.org`), aktiv/inaktiv. Nicht löschen, nur
+  inaktiv setzen, solange der Arzt irgendwo eingetragen ist.
+- Recht „Ärzteverzeichnis verwalten“ in der Rechte-Tabelle (Vorbelegung: Leitungen,
+  Verwaltung, Bereichsleitung, Fachkräfte).
+- **Auswahl statt Freitext** überall, wo ein Arzt eingetragen wird: Visite, Medikamentenplan
+  („verordnet von“), Pause/Stufenplan (Anordnung), Facharzttermin, Kalendertermin beim Arzt.
+  Fehlt jemand: „Arzt anlegen …“ direkt aus der Auswahl (mit Recht).
+- Vorhandene Freitext-Einträge in den Demo-Daten auf das Verzeichnis umstellen.
+- Demo: etwa sechs ausgedachte Ärztinnen und Ärzte verschiedener Fachrichtungen.
+
+## Visite: Übersicht aller Bewohner
+Status: freigegeben (Bauplan Schritt 26c)
+Datum: 08.11.2026
+Was: Eine Visitenansicht, in der man mit dem Arzt alle Bewohner der Reihe nach durchgeht —
+mit der aktuellen Medikation jedes Bewohners — und währenddessen den Bericht schreibt.
+Warum: Vorgabe Tobi (08.11.2026): Die Arztvisite braucht eine Komplettübersicht über alle
+Bewohner mit aktueller Medikation, damit man jeden Bewohner mit dem Arzt durchgehen und
+gleichzeitig den Bericht schreiben kann.
+Umfang (ändert den Eintrag „Visiten“):
+- **Feld „Art der Visite“ entfällt.** Arzt wird aus dem Ärzteverzeichnis gewählt (26b).
+- **„Visite beginnen …“:** Datum (heute), Arzt (Auswahl), dabei (angemeldete Person
+  vorbelegt, weitere wählbar).
+- **Visitenansicht**, füllt die ganze Fläche:
+  - **links** die Liste aller Bewohner des Bereichs (Zimmer, Name, Bezugspflege-Farbe,
+    Häkchen „besprochen“), sortierbar nach Zimmer oder Name; oben „noch offen: 7 von 10“.
+  - **rechts** zum gewählten Bewohner: Kopf mit Name, Zimmer, Allergiehinweis; darunter die
+    **Tabelle der aktuellen Medikation** wie im Medikamentenplan (inkl. Bedarf, Pausen,
+    Stufen), die letzte Visite in einer Zeile, offene Aufgaben zur Medikation;
+  - **unten rechts** die Eingabe für diesen Bewohner: Besprochenes, Anordnungen geändert,
+    Facharzttermin nötig (wie im Eintrag „Visiten“).
+  - Knöpfe „◀ Vorheriger“ / „Nächster ▶“; beim Wechsel wird der Eintrag des Bewohners als
+    Entwurf gespeichert, nichts geht verloren (auch nicht bei Absturz).
+- **„Visite abschließen“:** speichert alles, legt Berichte, Übergaben und Aufgaben an und
+  zeigt **dann gesammelt** alle neuen Aufgaben (Medikament anlegen, im Medikamentenplan
+  eintragen, Termin eintragen) mit ihren Knöpfen. Während der Visite erscheinen keine
+  Einblendungen, damit das Gespräch mit dem Arzt nicht unterbrochen wird (Festlegung aus dem
+  Chat, Tobi kann sie ändern); eine kleine Zahl „3 Aufgaben vorgemerkt“ zeigt den Stand.
+- Unterbrochene Visite lässt sich später fortsetzen („Visite fortsetzen“).
+- **Ausdruck „Visitenliste“:** alle Bewohner mit aktueller Medikation, ein Block je Bewohner,
+  Platz für Notizen — als Papiervorlage, falls am Bildschirm nicht gearbeitet werden kann.
+- Die bisherige Eingabe „Neue Visite …“ für einzelne Bewohner bleibt erhalten.
