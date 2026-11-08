@@ -17,7 +17,7 @@ public sealed class Hauptfenster : Form
     // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Akte, Reiter „Berichte“, Rechtsklick auf eine Karte).
     public static readonly string[] Bereiche =
         ["Übersicht", "Bewohner", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
-         "Medikamente", "Einstellungen"];
+         "Einstellungen"];   // die Medikamentendatenbank steht seit Schritt 21 in den Einstellungen
 
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
@@ -32,7 +32,6 @@ public sealed class Hauptfenster : Form
     public UebergabeSeite Uebergabe { get; }
     public AufgabenSeite Aufgaben { get; }
     public NachrichtenSeite Nachrichten { get; }
-    public MedikamenteSeite Medikamente { get; }
     public TherapieSeite Therapie { get; }
     public KalenderSeite Kalender { get; }
     public UebersichtSeite Uebersicht { get; }
@@ -88,9 +87,6 @@ public sealed class Hauptfenster : Form
         };
         Kopf.BenutzerKnopf.Click += (_, _) => BenutzerWechseln();
         Kopf.LogoGewuenscht += () => EinstellungenOeffnen();
-        Medikamente = new MedikamenteSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
-        seiten["Medikamente"] = Medikamente;
-        Medikamente.Geaendert += () => { if (AktiverBereich == "Medikamente") Kopf.TexteSetzen(Medikamente.KopfText, "Medikamente"); };
         Therapie = new TherapieSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Therapie"] = Therapie;
         Therapie.Geaendert += () => { if (AktiverBereich == "Therapie") Kopf.TexteSetzen(Therapie.KopfText, "Therapie"); };
@@ -240,7 +236,6 @@ public sealed class Hauptfenster : Form
             case "Nachrichten": Nachrichten.Aktualisieren(); break;
             case "Kalender": Kalender.Aktualisieren(); break;
             case "Therapie": Therapie.Aktualisieren(); break;
-            case "Medikamente": Medikamente.Aktualisieren(); break;
         }
         return true;
     }
@@ -312,13 +307,6 @@ public sealed class Hauptfenster : Form
             Therapie.Zeigen();
             Kopf.TexteSetzen(Therapie.KopfText, "Therapie");
             Kopf.KnoepfeSetzen(Therapie.NeuKnopf);
-            return;
-        }
-        if (schluessel == "Medikamente")
-        {
-            Medikamente.Aktualisieren();
-            Kopf.TexteSetzen(Medikamente.KopfText, "Medikamente");
-            Kopf.KnoepfeSetzen(Medikamente.NeuKnopf);
             return;
         }
         if (schluessel == "Aufgaben")

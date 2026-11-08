@@ -38,6 +38,14 @@ public sealed partial class Speicher
         return Medikament(id)!;
     }
 
+    // Sperren oder wieder freigeben (Recht „Medikamentendatenbank verwalten“): eine neue Fassung.
+    public Medikament MedikamentSperren(long id, bool gesperrt, string kuerzel)
+    {
+        var bisher = Medikament(id) ?? throw new Eingabefehler(["Dieses Medikament gibt es nicht mehr."]);
+        if (string.IsNullOrWhiteSpace(kuerzel)) throw new Eingabefehler(["Kürzel fehlt (oben rechts anmelden)."]);
+        return MedikamentAendern(id, bisher.Aktuell with { Gesperrt = gesperrt, Geaendert = Uhr(), Kuerzel = kuerzel.Trim() });
+    }
+
     private void Doppelt(MedikamentFassung f, long? selbst)
     {
         if (Medikamente().Any(m => m.Id != selbst &&
@@ -56,12 +64,12 @@ public sealed partial class Speicher
 
     private void FassungEinfuegen(long id, MedikamentFassung f, SqliteTransaction transaktion) =>
         Ausfuehren("""
-            INSERT INTO medikament_fassungen (medikament_id, wirkstoff, handelsnamen, staerken, darreichungsform, quelle, pruefstatus, geaendert, kuerzel)
-            VALUES ($m, $w, $h, $s, $d, $q, $p, $g, $k)
+            INSERT INTO medikament_fassungen (medikament_id, wirkstoff, handelsnamen, staerken, darreichungsform, quelle, pruefstatus, geaendert, kuerzel, geprueft_am, gesperrt, zulassungsnummer)
+            VALUES ($m, $w, $h, $s, $d, $q, $p, $g, $k, $ga, $gs, $z)
             """, transaktion,
             ("$m", id), ("$w", f.Wirkstoff), ("$h", JsonSerializer.Serialize(f.Handelsnamen)), ("$s", JsonSerializer.Serialize(f.Staerken)),
             ("$d", f.Darreichungsform), ("$q", f.Quelle), ("$p", f.Pruefstatus == Pruefstatus.Bestaetigt ? "bestaetigt" : "ungeprueft"),
-            ("$g", Zeit(f.Geaendert)), ("$k", f.Kuerzel));
+            ("$g", Zeit(f.Geaendert)), ("$k", f.Kuerzel), ("$ga", f.GeprueftAm is DateOnly d ? Iso(d) : null), ("$gs", f.Gesperrt ? 1 : 0), ("$z", f.Zulassungsnummer));
 
     private List<Medikament> MedikamenteLesen(SqliteTransaction? transaktion, string bedingung, params (string, object?)[] parameter)
     {
@@ -73,7 +81,7 @@ public sealed partial class Speicher
         var fassungen = new Dictionary<long, List<MedikamentFassung>>();
         string ids = string.Join(",", liste.Select(m => m.Id));
         using (var befehl = Befehl($"""
-            SELECT medikament_id, wirkstoff, handelsnamen, staerken, darreichungsform, quelle, pruefstatus, geaendert, kuerzel
+            SELECT medikament_id, wirkstoff, handelsnamen, staerken, darreichungsform, quelle, pruefstatus, geaendert, kuerzel, geprueft_am, gesperrt, zulassungsnummer
             FROM medikament_fassungen WHERE medikament_id IN ({ids}) ORDER BY id
             """, transaktion, []))
         using (var leser = befehl.ExecuteReader())
@@ -90,6 +98,9 @@ public sealed partial class Speicher
                     Pruefstatus = leser.GetString(6) == "bestaetigt" ? Pruefstatus.Bestaetigt : Pruefstatus.Ungeprueft,
                     Geaendert = AusZeit(leser.GetString(7)),
                     Kuerzel = leser.GetString(8),
+                    GeprueftAm = leser.IsDBNull(9) ? null : AusIso(leser.GetString(9)),
+                    Gesperrt = leser.GetInt64(10) == 1,
+                    Zulassungsnummer = leser.GetString(11),
                 });
             }
         return liste.Where(m => fassungen.ContainsKey(m.Id)).Select(m => m with { Fassungen = fassungen[m.Id] }).ToList();

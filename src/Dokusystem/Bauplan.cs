@@ -11,7 +11,7 @@ public static class Bauplan
     };
 
     // Reiter der Bewohnerakte, in dieser Reihenfolge. Stammdaten gibt es schon.
-    public static readonly string[] AktenReiter = ["Stammdaten", "Berichte", "Medikation", "Wochenplan", "Biografie", "Reflexion", "HEB"];
+    public static readonly string[] AktenReiter = ["Stammdaten", "Berichte", "Medikamentenplan", "Wochenplan", "Biografie", "Reflexion", "HEB"];
 
     public static readonly IReadOnlyDictionary<string, Vorhaben> Reiter = new Dictionary<string, Vorhaben>
     {

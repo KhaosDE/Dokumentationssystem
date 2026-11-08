@@ -66,7 +66,8 @@ public sealed class MedikamenteTests : IDisposable
         Assert.Contains(fehler, f => f.StartsWith("Quelle: bitte als vollständige Internetadresse"));
         var ohneQuelle = Assert.Throws<Eingabefehler>(() =>
             MedikamentRegeln.AusEingabe(new MedikamentEingabe { Wirkstoff = "x", Kuerzel = "AB", Bestaetigt = true }, Jetzt)).Fehler;
-        Assert.Equal(["„Bestätigt“ geht nur mit Quelle."], ohneQuelle);
+        Assert.Contains("„Bestätigt“ geht nur mit Quelle.", ohneQuelle);
+        Assert.Contains(ohneQuelle, f => f.StartsWith("Geprüft am"));   // Prüfdatum ist Pflicht (Schritt 21)
 
         var neu = s.MedikamentAnlegen(Fassung());
         Assert.True(neu.SelbstAngelegt);

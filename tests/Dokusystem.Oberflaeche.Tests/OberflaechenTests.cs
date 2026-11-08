@@ -14,7 +14,7 @@ public class HauptfensterTests
         Assert.Equal("Demo — ausgedachte Daten", KopfBereich.DemoHinweis);
         Assert.Equal(KopfBereich.DemoHinweis, fenster.Kopf.AccessibleName);
         Assert.Equal(["Übersicht", "Bewohner", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
-                      "Medikamente", "Ausgangsliste", "Einstellungen"],
+                      "Ausgangsliste", "Einstellungen"],
             fenster.Navigation.Select(n => n.Text));
         Assert.Equal("Bewohner", fenster.AktiverBereich);
         Assert.True(fenster.Navigation.Single(n => n.Text == "Bewohner").Aktiv);
@@ -196,7 +196,7 @@ public class BewohnerOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         var akte = f.Bewohner.Akte;
-        Assert.Equal(["Stammdaten", "Berichte", "Medikation", "Wochenplan", "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
+        Assert.Equal(["Stammdaten", "Berichte", "Medikamentenplan", "Wochenplan", "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
         Assert.Empty(Bauplan.Reiter);   // alle Reiter sind gebaut
@@ -424,10 +424,10 @@ public class BildschirmfotoTests
         f.BereichWaehlen("Bewohner");
         Hilfe.Foto(f, "10_kopf_mit_bild");
         f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
-        f.Bewohner.Akte.Reiter.Waehlen("Medikation");
+        f.Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
         Hilfe.Foto(f, "25_medikation_stufenplan");
         f.Bewohner.AkteZeigen(u.Demo("Clematis").Id!.Value);
-        f.Bewohner.Akte.Reiter.Waehlen("Medikation");
+        f.Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
         Hilfe.Foto(f, "26_medikation_pause");
         using (var neu = new VerordnungFenster(u.Speicher, u.Demo("Fichte")))
         {
@@ -474,8 +474,6 @@ public class BildschirmfotoTests
         Hilfe.Foto(f, "30_therapie");
         using (var angebot = new AngebotFenster(u.Speicher, u.Speicher.Angebote()[0]))
             Hilfe.Foto(angebot, "31_angebot_aendern");
-        f.Navigation.Single(n => n.Text == "Medikamente").Ausloesen();
-        Hilfe.Foto(f, "23_medikamente");
         using (var aendern = new MedikamentFenster(u.Speicher, u.Speicher.Medikamente()[0]))
             Hilfe.Foto(aendern, "24_medikament_aendern");
         f.Navigation.Single(n => n.Text == "Nachrichten").Ausloesen();

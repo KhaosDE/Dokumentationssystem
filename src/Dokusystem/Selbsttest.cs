@@ -25,6 +25,9 @@ public static class Selbsttest
                 using var formular = fenster.Bewohner.FormularErstellen(speicher.AlleBewohner()[0]);
                 using var bild = new Bitmap(fenster.Width, fenster.Height);
                 fenster.DrawToBitmap(bild, new Rectangle(Point.Empty, fenster.Size));
+                // Nachschlage-Ansicht (Schritt 21): Der WebView2-Lader muss in der .exe stecken.
+                if (!Nachschlageansicht.LaderVorhanden())
+                    throw new InvalidOperationException("WebView2Loader.dll fehlt in der .exe (Nachschlage-Ansicht).");
             }
             return 0;
         }

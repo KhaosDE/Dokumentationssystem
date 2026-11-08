@@ -124,14 +124,32 @@ public sealed class UebersichtSeite : Panel
         int y = rand;
         heuteTitel.Location = new Point(innen, innen);
         // Rechts oben, von rechts nach links: alle Bereiche, Meine Einzeltrainings, Meine Bezugsbewohner.
-        int filterX = breite - innen;
-        foreach (var c in new[] { AlleBereiche, MeineEinzeltrainings, MeineBezugsbewohner })
-        {
-            filterX -= c.PreferredSize.Width;
-            c.Location = new Point(Math.Max(heuteTitel.Right + innen, filterX), heuteTitel.Top + (heuteTitel.Height - c.PreferredSize.Height) / 2);
-            filterX -= Stil.Px(this, Stil.AbstandMittel);
-        }
+        // Reicht die Breite nicht, stehen sie in einer eigenen Zeile unter dem Titel (nichts überdeckt sich).
+        var filter = new[] { MeineBezugsbewohner, MeineEinzeltrainings, AlleBereiche };
+        int abstand = Stil.Px(this, Stil.AbstandMittel);
+        int benoetigt = filter.Sum(c => c.PreferredSize.Width) + (filter.Length - 1) * abstand;
         int unterTitel = heuteTitel.Bottom + Stil.Px(this, Stil.AbstandMini);
+        if (heuteTitel.Right + innen + benoetigt <= breite - innen)
+        {
+            int filterX = breite - innen - benoetigt;
+            foreach (var c in filter)
+            {
+                c.Location = new Point(filterX, heuteTitel.Top + (heuteTitel.Height - c.PreferredSize.Height) / 2);
+                filterX += c.PreferredSize.Width + abstand;
+            }
+        }
+        else
+        {
+            int filterX = innen, unten = unterTitel;
+            foreach (var c in filter)
+            {
+                if (filterX > innen && filterX + c.PreferredSize.Width > breite - innen) { filterX = innen; unterTitel = unten; }
+                c.Location = new Point(filterX, unterTitel);
+                filterX += c.PreferredSize.Width + abstand;
+                unten = Math.Max(unten, c.Top + c.PreferredSize.Height + Stil.Px(this, Stil.AbstandMini));
+            }
+            unterTitel = unten;
+        }
         if (BereichHinweis.Visible)
         {
             BereichHinweis.Location = new Point(innen, unterTitel);

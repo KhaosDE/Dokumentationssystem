@@ -1,0 +1,10 @@
+<Project>
+  <!-- Das WebView2-Paket (Nachschlage-Ansicht, Schritt 21) verweist immer auch auf seine WPF-Bibliothek.
+       Dieses Programm nutzt nur Windows Forms: den WPF-Verweis in allen Projekten entfernen (sonst
+       Versionskonflikt mit WindowsBase und eine unnötige DLL in der .exe). -->
+  <Target Name="WebView2OhneWpf" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+</Project>

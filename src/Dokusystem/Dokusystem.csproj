@@ -24,6 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Nur für die Nachschlage-Ansicht des BfArM im Formular „Medikament“ (Schritt 21, Regel 6).
+         Lizenz: BSD-3-Clause-artig (Microsoft). Die Laufzeit ist in Windows 11 enthalten. -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Build-Nummer in die .exe schreiben (GitHub Actions setzt -p:BuildNummer=<Laufnummer>). -->
     <AssemblyMetadata Include="BuildNummer" Value="$(BuildNummer)" />
     <InternalsVisibleTo Include="Dokusystem.Oberflaeche.Tests" />

@@ -44,7 +44,10 @@ public sealed class EinstellungenFenster : Form
     public Button MitarbeiterKnopf { get; } = Stil.NebenKnopf("Mitarbeiter …");
     public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche und Positionen …");
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
+    public Button MedikamenteKnopf { get; } = Stil.NebenKnopf("Medikamentendatenbank …");
     public CheckBox AutoUpdate { get; } = new();
+    public CheckBox NachschlageAnsicht { get; } = new() { Text = "Nachschlage-Ansicht anzeigen (Formular „Medikament“)", AutoSize = true };
+    public Label WebAnsichtStand { get; } = new() { AutoSize = true, MaximumSize = new Size(380, 0), Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein) };
     public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
 
@@ -159,6 +162,27 @@ public sealed class EinstellungenFenster : Form
                 Text = "Mitarbeiter mit Bereichen und Positionen; welche Position was darf, steht in der Rechte-Tabelle. Ohne Recht nur ansehen.",
                 AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
             });
+
+            // Medikamentendatenbank (Schritt 21): nicht mehr in der Seitenleiste. Ansehen dürfen alle;
+            // anlegen, ändern und sperren nach den Rechten.
+            Ganz(Abschnitt("MEDIKAMENTE"));
+            MedikamenteKnopf.AutoSize = true;
+            MedikamenteKnopf.Click += (_, _) => { using var f = new MedikamenteFenster(speicher); Dialog.Zeigen(f, this); };
+            Ganz(MedikamenteKnopf);
+            Ganz(new Label
+            {
+                Text = "Liste, aus der beim Verordnen gewählt wird. Neue Medikamente prüft, wer sie anlegt (Quelle und Prüfdatum); ungeprüfte sind gekennzeichnet, gesperrte nicht wählbar.",
+                AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+            });
+            NachschlageAnsicht.Checked = werte.NachschlageAnsicht;
+            NachschlageAnsicht.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandMini);
+            Ganz(NachschlageAnsicht);
+            Ganz(new Label
+            {
+                Text = "Eingebettete Suche des BfArM über der Maske „Medikament“ (die einzige Webansicht im Programm). Sie zeigt nur feste Adressen: " +
+                       string.Join(", ", ExterneAdressen.Nachschlagebereiche) + ". Ausgeschaltet bleibt „Im Browser öffnen“ – z. B. für Rechner ohne WebView2.",
+                AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+            });
         }
 
         Ganz(Abschnitt("MEHRPLATZ"));
@@ -199,6 +223,10 @@ public sealed class EinstellungenFenster : Form
         AutoUpdate.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein);
         raster.Controls.Add(Beschriftung("Update"));
         raster.Controls.Add(AutoUpdate);
+        // Beim Start geprüft: Ist Microsoft Edge WebView2 für die Nachschlage-Ansicht da? (Hinweis für die IT)
+        WebAnsichtStand.Text = $"WebView2 {Nachschlageansicht.Laufzeit}";
+        raster.Controls.Add(Beschriftung("Nachschlage-Ansicht"));
+        raster.Controls.Add(WebAnsichtStand);
 
         // Logo: Vorschau, Knöpfe, Hinweis.
         logoVorschau.Size = new Size(LogoBreite, LogoHoehe);
@@ -457,7 +485,7 @@ public sealed class EinstellungenFenster : Form
             }
             Einstellungen.Aendern(w => w with
             {
-                AutoUpdate = AutoUpdate.Checked, BeschlussFristTage = (int)BeschlussFrist.Value, HebFristMonate = (int)HebFrist.Value,
+                AutoUpdate = AutoUpdate.Checked, NachschlageAnsicht = NachschlageAnsicht.Checked, BeschlussFristTage = (int)BeschlussFrist.Value, HebFristMonate = (int)HebFrist.Value,
                 Bereich = Kern.Bereiche.Bereinigen(Bereich.Text), DatenbankOrdner = DatenbankOrdner,
             });
             if (logoGeaendert && NeuesLogo is not null) Einstellungen.LogoSetzen(NeuesLogo);

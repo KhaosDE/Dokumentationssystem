@@ -2,9 +2,10 @@ using Dokusystem.Kern;
 
 namespace Dokusystem;
 
-// Bereich „Medikamente“: die Medikamentendatenbank (Demo-Bestand) mit Suche; Einträge ansehen,
-// anlegen und ändern. Jede Änderung ist eine neue Fassung; der Verlauf bleibt einsehbar.
-// Die Quelle steht als Adresse da (zum Kopieren) – das Programm selbst geht nicht ins Internet.
+// Die Medikamentendatenbank (Demo-Bestand) mit Suche; Einträge ansehen, anlegen, ändern und sperren.
+// Jede Änderung ist eine neue Fassung; der Verlauf bleibt einsehbar. Seit Schritt 21 in den
+// Einstellungen (MedikamenteFenster) statt in der Seitenleiste. Die Quelle steht als Adresse da
+// (zum Kopieren) – das Programm selbst geht nicht ins Internet.
 public sealed class MedikamenteSeite : Panel
 {
     private readonly Speicher speicher;
@@ -27,9 +28,10 @@ public sealed class MedikamenteSeite : Panel
         this.speicher = speicher;
         AutoScroll = true;
         BackColor = Stil.Seite;
-        Suche.Margin = new Padding(0, 0, Stil.AbstandGross, Stil.AbstandKlein);
-        Hinweis.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandKlein);
-        leiste.Controls.AddRange([Suche, Hinweis]);
+        NeuKnopf.Margin = new Padding(0, 0, Stil.AbstandGross, Stil.AbstandKlein);
+        Suche.Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandGross, Stil.AbstandKlein);
+        Hinweis.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein);
+        leiste.Controls.AddRange([NeuKnopf, Suche, Hinweis]);
         Suche.TextChanged += (_, _) => Aktualisieren();
         NeuKnopf.Click += (_, _) => Bearbeiten(null);
         Controls.Add(leiste);
@@ -51,7 +53,9 @@ public sealed class MedikamenteSeite : Panel
         {
             var karte = new MedikamentKarte(m);
             Stil.Sperren(karte.AendernKnopf, verwalten);
+            Stil.Sperren(karte.SperrenKnopf, verwalten);
             karte.AendernKnopf.Click += (_, _) => Bearbeiten(m);
+            karte.SperrenKnopf.Click += (_, _) => Sperren(m, !m.Gesperrt);
             karte.VerlaufKnopf.Click += (_, _) => VerlaufZeigen(m);
             karte.KopierenKnopf.Click += (_, _) => Kopieren(m.Aktuell.Quelle);
             Karten.Add(karte);
@@ -70,6 +74,15 @@ public sealed class MedikamenteSeite : Panel
     {
         using var fenster = new MedikamentFenster(speicher, m);
         if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
+    }
+
+    // Sperren (nicht mehr wählbar beim Verordnen) oder wieder freigeben; bleibt im Verlauf.
+    public bool Sperren(Medikament m, bool gesperrt)
+    {
+        if (Recht.Grund(speicher, Funktionen.MedikamenteVerwalten) is not null) return false;
+        speicher.MedikamentSperren(m.Id, gesperrt, Einstellungen.Laden().Kuerzel);
+        Aktualisieren();
+        return true;
     }
 
     public void VerlaufZeigen(Medikament m)
@@ -105,8 +118,8 @@ public sealed class MedikamenteSeite : Panel
     }
 }
 
-// Ein Medikament: Wirkstoff, Handelsnamen, Marken (Form, Stärken, Prüfstatus, selbst angelegt,
-// Fassungen), Quelle mit „Adresse kopieren“, Knöpfe „Ändern …“ und „Verlauf …“.
+// Ein Medikament: Wirkstoff, Handelsnamen, Marken (gesperrt, Prüfstatus, Form, Stärken, selbst angelegt,
+// Fassungen), Quelle mit „Adresse kopieren“, Knöpfe „Ändern …“, „Sperren“ und „Verlauf …“.
 public sealed class MedikamentKarte : KartenFlaeche
 {
     private readonly FlowLayoutPanel marken = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Flaeche, Margin = new Padding(0) };
@@ -119,11 +132,13 @@ public sealed class MedikamentKarte : KartenFlaeche
     public Button AendernKnopf { get; } = Stil.NebenKnopf("Ändern …");
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
     public Button KopierenKnopf { get; } = Stil.NebenKnopf("Adresse kopieren");
+    public Button SperrenKnopf { get; } = Stil.NebenKnopf("Sperren");
     public IReadOnlyList<string> MarkenTexte { get; }
 
     public MedikamentKarte(Medikament m)
     {
         Medikament = m;
+        SperrenKnopf.Text = m.Gesperrt ? "Wieder freigeben" : "Sperren";
         var f = m.Aktuell;
         var liste = new List<(string, Stil.Marke)>
         {
@@ -132,6 +147,8 @@ public sealed class MedikamentKarte : KartenFlaeche
         if (f.Darreichungsform.Length > 0) liste.Add((f.Darreichungsform, Stil.Zimmer));
         if (f.Staerken.Count > 0) liste.Add((string.Join(" · ", f.Staerken), Stil.Zimmer));
         else liste.Add(("Stärken: keine Angabe", Stil.Zimmer));
+        if (f.Gesperrt) liste.Insert(0, ("gesperrt – nicht wählbar", Stil.Beschluss));
+        if (f.Zulassungsnummer.Length > 0) liste.Add(($"Zul.-Nr. {f.Zulassungsnummer}", Stil.Zimmer));
         if (m.SelbstAngelegt) liste.Add(("selbst angelegt", Stil.Hinweis));
         if (m.Fassungen.Count > 1) liste.Add(($"geändert ({m.Fassungen.Count} Fassungen)", Stil.Hinweis));
         MarkenTexte = liste.Select(x => x.Item1).ToList();
@@ -155,7 +172,7 @@ public sealed class MedikamentKarte : KartenFlaeche
         }
         KopierenKnopf.Visible = f.Quelle.Length > 0;
         VerlaufKnopf.Visible = m.Fassungen.Count > 1;
-        foreach (var k in new[] { AendernKnopf, VerlaufKnopf, KopierenKnopf })
+        foreach (var k in new[] { AendernKnopf, SperrenKnopf, VerlaufKnopf, KopierenKnopf })
         {
             k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
             knoepfe.Controls.Add(k);
@@ -188,17 +205,27 @@ public sealed class MedikamentKarte : KartenFlaeche
 }
 
 // Anlegen oder ändern. Beim Ändern entsteht eine neue Fassung mit Datum und Kürzel.
+// Prüfung (Schritt 21): Wer anlegt, prüft selbst gegen eine offizielle Quelle und bestätigt mit
+// Quelle und Prüfdatum. Oben die Nachschlage-Ansicht des BfArM (abschaltbar, dann nur „Im Browser
+// öffnen“); markierter Text geht mit „In Feld übernehmen“ in das zuletzt gewählte Feld.
 public sealed class MedikamentFenster : Form
 {
     private readonly Speicher speicher;
     private readonly Medikament? bisher;
+    private readonly List<(TextBox Feld, string Name)> felder;
+    private TextBox ziel;
 
     public TextBox Wirkstoff { get; } = new() { Width = 360 };
     public TextBox Handelsnamen { get; } = new() { Width = 360, PlaceholderText = "durch Komma getrennt" };
     public TextBox Staerken { get; } = new() { Width = 360, PlaceholderText = "durch Komma getrennt, z. B. 25 mg, 100 mg" };
     public TextBox Darreichungsform { get; } = new() { Width = 240, PlaceholderText = "z. B. Filmtablette" };
     public TextBox Quelle { get; } = new() { Width = 420, PlaceholderText = "Adresse der Fach- oder Gebrauchsinformation" };
+    public TextBox Zulassungsnummer { get; } = new() { Width = 180, PlaceholderText = "optional" };
     public CheckBox Bestaetigt { get; } = new() { Text = "bestätigt – Angaben mit der Quelle geprüft", AutoSize = true };
+    public TextBox GeprueftAm { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ", Enabled = false };
+    // Nachschlage-Ansicht (null, wenn in den Einstellungen abgeschaltet) – dann nur dieser Knopf.
+    public Nachschlageansicht? Nachschlage { get; }
+    public Button BrowserKnopf { get; } = Stil.NebenKnopf("Im Browser öffnen");
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Medikament? Gespeichert { get; private set; }
 
@@ -226,15 +253,46 @@ public sealed class MedikamentFenster : Form
             raster.Controls.Add(feld);
         }
         Zeile(null, new MarkenFeld(MedikamentRegeln.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandMittel) });
-        Zeile("Wirkstoff", Wirkstoff);
-        Zeile("Handelsnamen", Handelsnamen);
-        Zeile("Stärken", Staerken);
-        Zeile("Darreichungsform", Darreichungsform);
-        Zeile("Quelle", Quelle);
+        if (Einstellungen.Laden().NachschlageAnsicht)
+        {
+            // So hoch, wie der Bildschirm zulässt (die Maske darunter braucht etwa 620 Punkte).
+            var flaeche = Screen.PrimaryScreen?.WorkingArea ?? new Rectangle(0, 0, 1024, 768);
+            Nachschlage = new Nachschlageansicht { Size = new Size(760, Math.Clamp(flaeche.Height - 620, 170, 380)), Margin = new Padding(0, 0, 0, Stil.AbstandMittel) };
+            Nachschlage.Suchname = () => Wirkstoff.Text.Trim().Length > 0 ? Wirkstoff.Text : MedikamentRegeln.Liste(Handelsnamen.Text).FirstOrDefault() ?? "";
+            Nachschlage.TextUebernehmen += InFeldUebernehmen;
+            Nachschlage.QuelleUebernehmen += adresse => Quelle.Text = adresse;
+            Zeile(null, Nachschlage);
+        }
+        else
+        {
+            BrowserKnopf.AutoSize = true;
+            BrowserKnopf.Click += (_, _) => Nachsehen();
+            var reihe = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0, 0, 0, Stil.AbstandMittel) };
+            reihe.Controls.Add(new Label { Text = "Nachschlagen beim BfArM", AutoSize = true, ForeColor = Stil.TextMittel, Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandGross, 0) });
+            reihe.Controls.Add(BrowserKnopf);
+            Zeile(null, reihe);
+        }
+        felder = [(Wirkstoff, "Wirkstoff"), (Handelsnamen, "Handelsnamen"), (Staerken, "Stärken"), (Darreichungsform, "Darreichungsform"),
+                  (Zulassungsnummer, "Zulassungsnummer"), (Quelle, "Quelle")];
+        foreach (var (feld, name) in felder)
+        {
+            Zeile(name, feld);
+            feld.Enter += (_, _) => ZielWaehlen(feld);
+        }
+        ziel = Wirkstoff;
+        ZielWaehlen(Wirkstoff);
         Zeile("Prüfstatus", Bestaetigt);
+        Zeile("Geprüft am", GeprueftAm);
+        Bestaetigt.CheckedChanged += (_, _) =>
+        {
+            GeprueftAm.Enabled = Bestaetigt.Checked;
+            if (Bestaetigt.Checked && GeprueftAm.Text.Trim().Length == 0) GeprueftAm.Text = Datum.Text(DateOnly.FromDateTime(Jetzt()));
+        };
         Zeile(null, new Label
         {
-            Text = "Stärken und Formen nur eintragen, wenn sie in der Quelle stehen – sonst leer lassen. " +
+            Text = "Wer ein Medikament anlegt, prüft es selbst gegen eine offizielle Quelle (Fach- oder Gebrauchsinformation) " +
+                   "und bestätigt es hier mit Quelle und Prüfdatum. Ohne Bestätigung bleibt es „ungeprüft“ und ist beim Verordnen so gekennzeichnet. " +
+                   "Stärken und Formen nur eintragen, wenn sie in der Quelle stehen – sonst leer lassen. " +
                    (bisher is null ? "Neue Einträge sind als „selbst angelegt“ gekennzeichnet." : "Die bisherige Fassung bleibt im Verlauf."),
             AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
         });
@@ -248,6 +306,8 @@ public sealed class MedikamentFenster : Form
             Staerken.Text = e.Staerken;
             Darreichungsform.Text = e.Darreichungsform;
             Quelle.Text = e.Quelle;
+            Zulassungsnummer.Text = e.Zulassungsnummer;
+            GeprueftAm.Text = e.GeprueftAm;
             Bestaetigt.Checked = e.Bestaetigt;
         }
         var speichern = Stil.HauptKnopf("Speichern");
@@ -263,6 +323,33 @@ public sealed class MedikamentFenster : Form
         Stil.DpiSkalierungEinschalten(this);
     }
 
+    // Öffnet die Arzneimittelsuche des BfArM im normalen Browser (Übergabe, kein eigener Netzzugriff).
+    public void Nachsehen()
+    {
+        if (Nachschlage is not null) Nachschlage.ImBrowserOeffnen();
+        else Extern.Oeffnen(Nachschlagen.Start.AbsoluteUri);
+    }
+
+    // Zielfeld für „In Feld übernehmen“: das zuletzt angeklickte Feld der Maske.
+    public void ZielWaehlen(TextBox feld)
+    {
+        ziel = feld;
+        Nachschlage?.ZielSetzen(felder.First(f => f.Feld == feld).Name);
+    }
+
+    // Markierten Text aus der Ansicht übernehmen. Bei Listenfeldern (Handelsnamen, Stärken) kommt er
+    // dazu, sonst ersetzt er den Inhalt.
+    public void InFeldUebernehmen(string text)
+    {
+        bool liste = ziel == Handelsnamen || ziel == Staerken;
+        var vorhanden = MedikamentRegeln.Liste(ziel.Text);
+        if (liste && vorhanden.Count > 0)
+        {
+            if (!vorhanden.Contains(text, StringComparer.CurrentCultureIgnoreCase)) ziel.Text = string.Join(", ", vorhanden.Append(text));
+        }
+        else ziel.Text = text;
+    }
+
     public bool Speichern()
     {
         try
@@ -270,8 +357,8 @@ public sealed class MedikamentFenster : Form
             var fassung = MedikamentRegeln.AusEingabe(new MedikamentEingabe
             {
                 Wirkstoff = Wirkstoff.Text, Handelsnamen = Handelsnamen.Text, Staerken = Staerken.Text,
-                Darreichungsform = Darreichungsform.Text, Quelle = Quelle.Text, Bestaetigt = Bestaetigt.Checked,
-                Kuerzel = Einstellungen.Laden().Kuerzel,
+                Darreichungsform = Darreichungsform.Text, Quelle = Quelle.Text, Zulassungsnummer = Zulassungsnummer.Text, Bestaetigt = Bestaetigt.Checked,
+                GeprueftAm = GeprueftAm.Text, Gesperrt = bisher?.Gesperrt ?? false, Kuerzel = Einstellungen.Laden().Kuerzel,
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.MedikamentAnlegen(fassung) : speicher.MedikamentAendern(bisher.Id, fassung);
         }
@@ -322,5 +409,39 @@ public sealed class MedikamentVerlaufFenster : Form
         Controls.Add(stapel);
         CancelButton = schliessen;
         Stil.DpiSkalierungEinschalten(this);
+    }
+}
+
+// Medikamentendatenbank als eigenes Fenster (Schritt 21): aus den Einstellungen, Abschnitt „Medikamente“.
+public sealed class MedikamenteFenster : Form
+{
+    public MedikamenteSeite Seite { get; }
+
+    public MedikamenteFenster(Speicher speicher)
+    {
+        Font = Stil.Standard;
+        BackColor = Stil.Seite;
+        FormBorderStyle = FormBorderStyle.Sizable;
+        MinimizeBox = false;
+        ShowInTaskbar = false;
+        StartPosition = FormStartPosition.CenterParent;
+        var flaeche = Screen.PrimaryScreen?.WorkingArea ?? new Rectangle(0, 0, 1024, 768);
+        Size = new Size(Math.Min(980, flaeche.Width - 40), Math.Min(760, flaeche.Height - 40));
+        MinimumSize = new Size(560, 400);
+        Seite = new MedikamenteSeite(speicher) { Dock = DockStyle.Fill };
+        var schliessen = Stil.NebenKnopf("Schließen");
+        schliessen.DialogResult = DialogResult.Cancel;
+        schliessen.AutoSize = true;
+        var unten = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Bottom, AutoSize = true, FlowDirection = FlowDirection.RightToLeft, BackColor = Stil.Fensterhintergrund,
+            Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross, Stil.AbstandKlein),
+        };
+        unten.Controls.Add(schliessen);
+        Controls.Add(Seite);
+        Controls.Add(unten);
+        CancelButton = schliessen;
+        Seite.Geaendert += () => Text = $"Medikamentendatenbank – {Seite.KopfText} ({Stil.DemoHinweis})";
+        Seite.Aktualisieren();
     }
 }

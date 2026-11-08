@@ -712,7 +712,7 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 08.11.2026 — Tobi kann sie 
 - Verlauf: Wechsel der Bezugspflege bleiben mit Datum nachvollziehbar.
 
 ## Medikation als Tabelle, Medikamentendatenbank in den Einstellungen
-Status: freigegeben (Bauplan Schritt 21)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Die Medikation in der Akte wird eine übersichtliche Tabelle. Die Medikamentendatenbank
 wandert in die Einstellungen. Neu angelegte Medikamente werden geprüft.

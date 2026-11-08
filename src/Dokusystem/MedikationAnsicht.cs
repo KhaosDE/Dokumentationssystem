@@ -1,17 +1,19 @@
+using System.ComponentModel;
 using System.Drawing.Printing;
 using Dokusystem.Kern;
 
 namespace Dokusystem;
 
-// Reiter „Medikation“ in der Akte: „Was gilt am …“ (heute oder ein gewählter Tag), berechnet aus
-// Grundverordnung, Pausen und Stufenplänen. Pausierte stehen sichtbar als „pausiert bis …“ da.
-// Neue Verordnung, Pause, Stufenplan, Absetzen – jeweils als eigener Eintrag; Verlauf je Verordnung.
+// Reiter „Medikamentenplan“ in der Akte (Schritt 21): „Was gilt am …“ (heute oder ein gewählter Tag) als
+// Tabelle, berechnet aus Grundverordnung, Pausen und Stufenplänen; Bedarfsmedikation als eigene Tabelle
+// darunter. Klick auf eine Zeile öffnet Einzelheiten und Verlauf; dort Pause, Stufenplan, Absetzen.
 // Demo — nicht zum Stellen verwenden.
 public sealed class MedikationAnsicht : Panel
 {
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
-    private readonly List<Control> inhalt = [];
+    private readonly Label regelTitel = Titel("REGELMÄSSIG");
+    private readonly Label bedarfTitel = Titel("BEI BEDARF");
     private Bewohner? bewohner;
 
     public TextBox TagFeld { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
@@ -21,8 +23,14 @@ public sealed class MedikationAnsicht : Panel
     public CheckBox AbgesetzteZeigen { get; } = new() { Text = "Abgesetzte zeigen", AutoSize = true, BackColor = Stil.Seite };
     public MarkenFeld Hinweis { get; } = new(MedikationRegeln.DruckHinweis, Stil.Achtung);
     public Label TagFehler { get; } = new() { AutoSize = true, ForeColor = Stil.Beschluss.Text, BackColor = Stil.Seite, Visible = false };
-    public List<VerordnungKarte> Karten { get; } = [];
-    public List<string> Abschnitte { get; } = [];
+    public DataGridView Tabelle { get; } = PlanTabelle.Bauen(
+        ("medikament", "Medikament", 30), ("morgens", "morgens", 7), ("mittags", "mittags", 7), ("abends", "abends", 7), ("nachts", "nachts", 7),
+        ("arzt", "verordnet von", 13), ("seit", "seit", 9), ("status", "Status", 14), ("hinweis", "Hinweis", 16));
+    public DataGridView BedarfTabelle { get; } = PlanTabelle.Bauen(
+        ("medikament", "Medikament", 30), ("anlass", "Anlass", 18), ("einzeldosis", "Einzeldosis", 9), ("hoechstens", "höchstens", 11),
+        ("arzt", "verordnet von", 13), ("seit", "seit", 9), ("status", "Status", 14), ("hinweis", "Hinweis", 16));
+    public Label RegelLeer { get; } = Leer("Keine regelmäßige Medikation an diesem Tag.");
+    public Label BedarfLeer { get; } = Leer("Keine Bedarfsmedikation.");
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
 
@@ -44,8 +52,24 @@ public sealed class MedikationAnsicht : Panel
         NeuKnopf.Click += (_, _) => NeueVerordnung();
         DruckKnopf.Click += (_, _) => Drucken();
         AbgesetzteZeigen.CheckedChanged += (_, _) => Aktualisieren();
-        Controls.Add(leiste);
+        Tabelle.AccessibleName = "Medikamentenplan, regelmäßig";
+        BedarfTabelle.AccessibleName = "Medikamentenplan, bei Bedarf";
+        foreach (var t in new[] { Tabelle, BedarfTabelle })
+        {
+            t.CellClick += (_, e) => { if (e.RowIndex >= 0) Oeffnen(PlanTabelle.Stand(t.Rows[e.RowIndex])); };
+            t.KeyDown += (_, e) =>
+            {
+                if (e.KeyCode != Keys.Enter || t.CurrentRow is null) return;
+                e.SuppressKeyPress = true;
+                Oeffnen(PlanTabelle.Stand(t.CurrentRow));
+            };
+        }
+        Controls.AddRange([leiste, regelTitel, Tabelle, RegelLeer, bedarfTitel, BedarfTabelle, BedarfLeer]);
     }
+
+    private static Label Titel(string text) => new() { Text = text, AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite };
+
+    private static Label Leer(string text) => new() { Text = text, AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite, Visible = false };
 
     public void Zeigen(Bewohner b)
     {
@@ -64,51 +88,59 @@ public sealed class MedikationAnsicht : Panel
     public List<Tagesstand> Staende(DateOnly tag) =>
         bewohner?.Id is long id ? speicher.Verordnungen(id).Select(v => MedikationRegeln.Stand(v, tag)).ToList() : [];
 
+    // Zeilen der Tabelle „Regelmäßig“ in der gezeigten Reihenfolge (nach Sortierung).
+    public List<Tagesstand> Eintraege => PlanTabelle.Staende(Tabelle);
+    public List<Tagesstand> BedarfEintraege => PlanTabelle.Staende(BedarfTabelle);
+
+    // „aktiv“, „pausiert bis …“, „Stufe 2 von 4 · nächste Stufe ab …“, „abgesetzt am …“, „beginnt am …“.
+    public static string StatusText(Tagesstand s) =>
+        (s.Zustand == Zustand.Gilt ? "aktiv" : s.Text) + (s.Naechstes is string n ? $" · {n}" : "");
+
     public void Aktualisieren()
     {
         if (bewohner is null) return;
-        string? grund = Recht.Grund(speicher, Funktionen.MedikationBearbeiten);   // Rechte (Schritt 19)
-        Stil.Sperren(NeuKnopf, grund);
+        Stil.Sperren(NeuKnopf, Recht.Grund(speicher, Funktionen.MedikationBearbeiten));   // Rechte (Schritt 19)
         var tag = Stichtag();
         TagFehler.Visible = tag is null;
         TagFehler.Text = "Tag bitte als TT.MM.JJJJ eingeben.";
-        SuspendLayout();
-        foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
-        inhalt.Clear();
-        Karten.Clear();
-        Abschnitte.Clear();
-        if (tag is DateOnly t)
+        var staende = tag is DateOnly t ? Staende(t) : [];
+        bool Gezeigt(Tagesstand s) => s.Sichtbar || s.Zustand == Zustand.NochNicht || (AbgesetzteZeigen.Checked && s.Zustand == Zustand.Abgesetzt);
+        PlanTabelle.Fuellen(Tabelle, staende.Where(s => Gezeigt(s) && !s.Verordnung.Bedarf), s =>
         {
-            var staende = Staende(t);
-            void Abschnitt(string text, IEnumerable<Tagesstand> liste, string leer)
-            {
-                Abschnitte.Add(text);
-                inhalt.Add(new Label { Text = text, AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
-                int n = 0;
-                foreach (var s in liste)
-                {
-                    var karte = new VerordnungKarte(s);
-                    foreach (var k in new[] { karte.PauseKnopf, karte.PauseEndeKnopf, karte.StufenplanKnopf, karte.AbsetzenKnopf }) Stil.Sperren(k, grund);
-                    karte.PauseKnopf.Click += (_, _) => Aendern(s.Verordnung, AenderungArt.Pause);
-                    karte.PauseEndeKnopf.Click += (_, _) => Aendern(s.Verordnung, AenderungArt.PauseEnde);
-                    karte.StufenplanKnopf.Click += (_, _) => Aendern(s.Verordnung, AenderungArt.Stufenplan);
-                    karte.AbsetzenKnopf.Click += (_, _) => Aendern(s.Verordnung, AenderungArt.Absetzen);
-                    karte.VerlaufKnopf.Click += (_, _) => VerlaufZeigen(s.Verordnung);
-                    Karten.Add(karte);
-                    inhalt.Add(karte);
-                    n++;
-                }
-                if (n == 0) inhalt.Add(new Label { Text = leer, AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
-            }
-            Abschnitt("REGELMÄSSIG", staende.Where(s => s.Sichtbar && !s.Verordnung.Bedarf), "Keine regelmäßige Medikation an diesem Tag.");
-            Abschnitt("BEI BEDARF", staende.Where(s => s.Sichtbar && s.Verordnung.Bedarf), "Keine Bedarfsmedikation.");
-            var spaeter = staende.Where(s => s.Zustand == Zustand.NochNicht).ToList();
-            if (spaeter.Count > 0) Abschnitt("BEGINNT SPÄTER", spaeter, "");
-            if (AbgesetzteZeigen.Checked) Abschnitt("ABGESETZT", staende.Where(s => s.Zustand == Zustand.Abgesetzt), "Nichts abgesetzt.");
-        }
-        foreach (var c in inhalt) Controls.Add(c);
-        ResumeLayout(false);
+            var v = s.Verordnung;
+            var d = s.Dosis.Werte.Select(w => Menge(w, v.Einheit)).ToArray();
+            return [MedikamentText(v), d[0], d[1], d[2], d[3], v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), StatusText(s), v.Hinweis];
+        });
+        PlanTabelle.Fuellen(BedarfTabelle, staende.Where(s => Gezeigt(s) && s.Verordnung.Bedarf), s =>
+        {
+            var v = s.Verordnung;
+            return [MedikamentText(v), v.BedarfAnlass, Menge(v.Dosis.Morgens, v.Einheit), v.BedarfHoechstens.Length > 0 ? v.BedarfHoechstens : "keine Angabe",
+                    v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), StatusText(s), v.Hinweis];
+        });
+        Tabelle.Visible = Tabelle.Rows.Count > 0;
+        RegelLeer.Visible = tag is not null && Tabelle.Rows.Count == 0;
+        BedarfTabelle.Visible = BedarfTabelle.Rows.Count > 0;
+        BedarfLeer.Visible = tag is not null && BedarfTabelle.Rows.Count == 0;
         PerformLayout();
+    }
+
+    private static string MedikamentText(Verordnung v) => v.Medikament + (v.Staerke.Length > 0 ? $" · {v.Staerke}" : " · Stärke: keine Angabe");
+
+    // Menge je Einnahme; die Einheit nur, wenn es nicht „Stück“ sind (z. B. „20 Tropfen“).
+    private static string Menge(string wert, string einheit) =>
+        einheit.Length == 0 || einheit == "Stück" || wert == "0" ? wert : $"{wert} {einheit}";
+
+    // Klick auf eine Zeile: Einzelheiten und Verlauf. Wählt man dort eine Änderung, öffnet sie sich danach.
+    public void Oeffnen(Tagesstand s)
+    {
+        string? grund = Recht.Grund(speicher, Funktionen.MedikationBearbeiten);
+        AenderungArt? wunsch;
+        using (var fenster = new VerordnungDetailFenster(s, grund))
+        {
+            if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK) return;
+            wunsch = fenster.Wunsch;
+        }
+        if (wunsch is AenderungArt art) Aendern(s.Verordnung, art);
     }
 
     public void NeueVerordnung()
@@ -124,17 +156,11 @@ public sealed class MedikationAnsicht : Panel
         if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
     }
 
-    public void VerlaufZeigen(Verordnung v)
-    {
-        using var fenster = new TextFenster($"Verlauf: {v.Medikament}", string.Join(Environment.NewLine + Environment.NewLine, MedikationRegeln.Verlauf(v)));
-        Dialog.Zeigen(fenster, FindForm());
-    }
-
     public void Drucken()
     {
         if (bewohner is null || Stichtag() is not DateOnly tag) return;
         var druck = new MedikationDruck(bewohner, tag, Staende(tag));
-        Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, $"Medikation {bewohner.Name}");
+        Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, $"Medikamentenplan {bewohner.Name}");
     }
 
     protected override void OnLayout(LayoutEventArgs levent)
@@ -143,22 +169,152 @@ public sealed class MedikationAnsicht : Panel
         leiste.MaximumSize = new Size(Width, 0);
         leiste.Bounds = new Rectangle(Point.Empty, leiste.GetPreferredSize(new Size(Math.Max(100, Width), 0)));   // AutoSize greift hier zu spät
         int y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
-        foreach (var c in inhalt)
+        foreach (var (titel, tabelle, leer) in new[] { (regelTitel, Tabelle, RegelLeer), (bedarfTitel, BedarfTabelle, BedarfLeer) })
         {
-            if (c is VerordnungKarte karte)
+            titel.Location = new Point(Stil.Px(this, Stil.AbstandMini), y + Stil.Px(this, Stil.AbstandKlein));
+            y = titel.Bottom + Stil.Px(this, Stil.AbstandKlein);
+            if (tabelle.Visible)
             {
-                karte.SetBounds(0, y, Width, karte.Height);
-                karte.PerformLayout();
-                y += karte.Height + Stil.Px(this, Stil.AbstandKlein);
+                tabelle.Width = Width;
+                tabelle.Height = PlanTabelle.Hoehe(tabelle);
+                tabelle.Location = new Point(0, y);
+                y = tabelle.Bottom + Stil.Px(this, Stil.AbstandKlein);
             }
-            else
+            if (leer.Visible)
             {
-                y += Stil.Px(this, Stil.AbstandKlein);
-                c.Location = new Point(Stil.Px(this, Stil.AbstandMini), y);
-                y = c.Bottom + Stil.Px(this, Stil.AbstandMini);
+                leer.Location = new Point(Stil.Px(this, Stil.AbstandMini), y);
+                y = leer.Bottom + Stil.Px(this, Stil.AbstandKlein);
             }
         }
         if (Height != y) Height = y;
+    }
+}
+
+// Tabellen des Medikamentenplans: nur lesen, ganze Zeile wählbar, sortierbar über die Spaltenköpfe,
+// Zeilen abwechselnd hinterlegt; jede Zeile trägt ihren Tagesstand. Ohne eigene Bildlaufleiste –
+// die Tabelle ist so hoch wie ihr Inhalt, gerollt wird die Akte.
+public static class PlanTabelle
+{
+    public static DataGridView Bauen(params (string Name, string Titel, float Gewicht)[] spalten)
+    {
+        var t = new DataGridView
+        {
+            AllowUserToAddRows = false, AllowUserToDeleteRows = false, AllowUserToResizeRows = false, AllowUserToOrderColumns = false,
+            RowHeadersVisible = false, ReadOnly = true, MultiSelect = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill, AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
+            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize, ScrollBars = ScrollBars.None,
+            BackgroundColor = Stil.Flaeche, BorderStyle = BorderStyle.FixedSingle, GridColor = Stil.Trennlinie,
+            CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal, EnableHeadersVisualStyles = false,
+            ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single, Font = Stil.Standard, StandardTab = true, Cursor = Cursors.Hand,
+        };
+        t.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+        {
+            BackColor = Stil.Fensterhintergrund, ForeColor = Stil.TextMittel, Font = Stil.Fett, WrapMode = DataGridViewTriState.True,
+            SelectionBackColor = Stil.Fensterhintergrund, SelectionForeColor = Stil.TextMittel, Padding = new Padding(4, 6, 4, 6),
+        };
+        t.DefaultCellStyle = new DataGridViewCellStyle
+        {
+            BackColor = Stil.Flaeche, ForeColor = Stil.TextNormal, SelectionBackColor = Stil.AkzentHell, SelectionForeColor = Stil.TextNormal,
+            WrapMode = DataGridViewTriState.True, Padding = new Padding(4, 6, 4, 6),
+        };
+        t.AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle { BackColor = Stil.Seite };
+        foreach (var (name, titel, gewicht) in spalten)
+        {
+            var spalte = new DataGridViewTextBoxColumn { Name = name, HeaderText = titel, FillWeight = gewicht, SortMode = DataGridViewColumnSortMode.Automatic };
+            if (name == "seit")
+            {
+                spalte.ValueType = typeof(DateTime);   // sortiert nach Datum, nicht nach Text
+                spalte.DefaultCellStyle.Format = "dd.MM.yyyy";
+            }
+            if (name is "morgens" or "mittags" or "abends" or "nachts" or "einzeldosis")
+                spalte.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            t.Columns.Add(spalte);
+        }
+        return t;
+    }
+
+    // Neu füllen; eine gewählte Sortierung bleibt erhalten.
+    public static void Fuellen(DataGridView t, IEnumerable<Tagesstand> staende, Func<Tagesstand, object[]> werte)
+    {
+        var sortiert = t.SortedColumn;
+        var richtung = t.SortOrder == SortOrder.Descending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+        t.Rows.Clear();
+        foreach (var s in staende)
+        {
+            var zeile = t.Rows[t.Rows.Add(werte(s))];
+            zeile.Tag = s;
+            if (s.Zustand is Zustand.Pausiert or Zustand.Abgesetzt or Zustand.NochNicht) zeile.DefaultCellStyle.ForeColor = Stil.TextLeise;
+            var marke = s.Zustand switch
+            {
+                Zustand.Pausiert => Stil.Achtung,
+                Zustand.Stufenplan => Stil.Unterwegs,
+                Zustand.Gilt => Stil.Offen,
+                _ => Stil.Zimmer,
+            };
+            var status = zeile.Cells["status"].Style;
+            status.BackColor = status.SelectionBackColor = marke.Flaeche;
+            status.ForeColor = status.SelectionForeColor = marke.Text;
+        }
+        if (sortiert is not null) t.Sort(sortiert, richtung);
+        t.ClearSelection();
+    }
+
+    public static Tagesstand Stand(DataGridViewRow zeile) => (Tagesstand)zeile.Tag!;
+
+    public static List<Tagesstand> Staende(DataGridView t) => t.Rows.Cast<DataGridViewRow>().Select(Stand).ToList();
+
+    // Angezeigter Text einer Zelle (Datum als TT.MM.JJJJ).
+    public static string Text(DataGridView t, int zeile, string spalte) => t.Rows[zeile].Cells[spalte].FormattedValue as string ?? "";
+
+    public static int Hoehe(DataGridView t) => t.ColumnHeadersHeight + t.Rows.GetRowsHeight(DataGridViewElementStates.Visible) + 2;
+}
+
+// Einzelheiten einer Verordnung (Klick auf eine Zeile): Karte mit Zustand, Dosis, Anordnung und den
+// Knöpfen für Änderungen, darunter der Verlauf. Ein Knopf schließt das Fenster mit dem Wunsch;
+// die Änderung öffnet die Ansicht danach (keine Fenster in Fenstern).
+public sealed class VerordnungDetailFenster : Form
+{
+    private readonly string? sperrgrund;
+
+    public VerordnungKarte Karte { get; }
+    public TextBox Verlauf { get; } = new() { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Width = 620, Height = 220, BackColor = Stil.Flaeche };
+    public AenderungArt? Wunsch { get; private set; }
+
+    public VerordnungDetailFenster(Tagesstand s, string? sperrgrund)
+    {
+        this.sperrgrund = sperrgrund;
+        Fenster.Grundform(this, s.Verordnung.Medikament);
+        Karte = new VerordnungKarte(s) { Width = 620, Margin = new Padding(0, 0, 0, Stil.AbstandMittel) };
+        Karte.VerlaufKnopf.Visible = false;   // der Verlauf steht darunter
+        foreach (var (knopf, art) in Karte.Aenderungen)
+        {
+            Stil.Sperren(knopf, sperrgrund);   // Rechte (Schritt 19): sichtbar, aber gesperrt
+            knopf.Click += (_, _) => Waehlen(art);
+        }
+        Karte.PerformLayout();
+        Verlauf.Text = string.Join(Environment.NewLine + Environment.NewLine, MedikationRegeln.Verlauf(s.Verordnung));
+        var raster = Formular.Raster(out var zeile);
+        zeile(null, new MarkenFeld(MedikationRegeln.DruckHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandMittel) });
+        zeile(null, Karte);
+        zeile(null, new Label { Text = "VERLAUF", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
+        zeile(null, Verlauf);
+        var schliessen = Stil.NebenKnopf("Schließen");
+        schliessen.DialogResult = DialogResult.Cancel;
+        schliessen.Margin = new Padding(0, Stil.AbstandGross, 0, 0);
+        zeile(null, schliessen);
+        Controls.Add(raster);
+        CancelButton = schliessen;
+        Stil.DpiSkalierungEinschalten(this);
+    }
+
+    // Änderung wählen (wie der Knopf); geht nicht, wenn sie hier nicht passt oder das Recht fehlt.
+    public bool Waehlen(AenderungArt art)
+    {
+        if (sperrgrund is not null || !Karte.Moeglich.Contains(art)) return false;
+        Wunsch = art;
+        DialogResult = DialogResult.OK;
+        Close();
+        return true;
     }
 }
 
@@ -180,6 +336,10 @@ public sealed class VerordnungKarte : KartenFlaeche
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
     public IReadOnlyList<string> MarkenTexte { get; }
     public string DosisText => dosis.Text;
+    // Welche Änderungen hier passen (z. B. kein „Pause …“ bei Pausiertem) und ihre Knöpfe.
+    public IReadOnlySet<AenderungArt> Moeglich { get; }
+    public IReadOnlyList<(Button Knopf, AenderungArt Art)> Aenderungen =>
+        [(PauseKnopf, AenderungArt.Pause), (PauseEndeKnopf, AenderungArt.PauseEnde), (StufenplanKnopf, AenderungArt.Stufenplan), (AbsetzenKnopf, AenderungArt.Absetzen)];
 
     public VerordnungKarte(Tagesstand s)
     {
@@ -220,10 +380,13 @@ public sealed class VerordnungKarte : KartenFlaeche
             Controls.Add(l);
         }
         bool aktiv = s.Zustand is not Zustand.Abgesetzt;
-        PauseKnopf.Visible = aktiv && s.Zustand != Zustand.Pausiert;
-        PauseEndeKnopf.Visible = s.Zustand == Zustand.Pausiert;
-        StufenplanKnopf.Visible = aktiv && !v.Bedarf;
-        AbsetzenKnopf.Visible = aktiv;
+        var moeglich = new HashSet<AenderungArt>();
+        if (aktiv && s.Zustand != Zustand.Pausiert) moeglich.Add(AenderungArt.Pause);
+        if (s.Zustand == Zustand.Pausiert) moeglich.Add(AenderungArt.PauseEnde);
+        if (aktiv && !v.Bedarf) moeglich.Add(AenderungArt.Stufenplan);
+        if (aktiv) moeglich.Add(AenderungArt.Absetzen);
+        Moeglich = moeglich;
+        foreach (var (knopf, art) in Aenderungen) knopf.Visible = moeglich.Contains(art);
         foreach (var k in new[] { PauseKnopf, PauseEndeKnopf, StufenplanKnopf, AbsetzenKnopf, VerlaufKnopf })
         {
             k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini);
@@ -281,7 +444,7 @@ public sealed class VerordnungFenster : Form
     {
         this.speicher = speicher;
         this.bewohner = bewohner;
-        medikamente = speicher.Medikamente();
+        medikamente = speicher.Medikamente().Where(m => !m.Gesperrt).ToList();   // gesperrte nicht wählbar (Schritt 21)
         Text = $"Neue Verordnung – {bewohner.Name} ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
@@ -293,7 +456,7 @@ public sealed class VerordnungFenster : Form
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(MedikationRegeln.DruckHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandMittel) });
-        MedikamentWahl.Items.AddRange(medikamente.Select(m => (object)m.Anzeige).ToArray());
+        MedikamentWahl.Items.AddRange(medikamente.Select(m => (object)m.Auswahltext).ToArray());   // „… – ungeprüft“
         MedikamentWahl.SelectedIndexChanged += (_, _) =>
         {
             Staerke.Items.Clear();
@@ -477,12 +640,12 @@ public sealed class AenderungFenster : Form
     }
 }
 
-// Ausdruck „Was gilt am …“ je Bewohner (A4 hoch), mit dem Vermerk „Demo — nicht zum Stellen verwenden“.
+// Ausdruck des Medikamentenplans „Was gilt am …“ je Bewohner (A4 hoch), mit dem Vermerk „Demo — nicht zum Stellen verwenden“.
 public sealed class MedikationDruck(Bewohner bewohner, DateOnly tag, IReadOnlyList<Tagesstand> staende)
 {
     public PrintDocument DokumentBauen()
     {
-        var dokument = new PrintDocument { DocumentName = $"Medikation {bewohner.Name}" };
+        var dokument = new PrintDocument { DocumentName = $"Medikamentenplan {bewohner.Name}" };
         dokument.PrintPage += (_, e) => { SeiteZeichnen(e.Graphics!); e.HasMorePages = false; };
         return dokument;
     }
@@ -498,7 +661,7 @@ public sealed class MedikationDruck(Bewohner bewohner, DateOnly tag, IReadOnlyLi
         using var klein = new Font("Segoe UI", 8F);
         using var linie = new Pen(Color.Gray, 0.2f);
         using var rot = new SolidBrush(Color.FromArgb(163, 34, 26));
-        g.DrawString($"Medikation – {bewohner.Name}, Zi. {bewohner.Zimmer}", titel, Brushes.Black, links, y);
+        g.DrawString($"Medikamentenplan – {bewohner.Name}, Zi. {bewohner.Zimmer}", titel, Brushes.Black, links, y);
         y += 8f;
         g.DrawString($"Was gilt am {tag.ToString("dddd, dd.MM.yyyy", System.Globalization.CultureInfo.GetCultureInfo("de-DE"))}", normal, Brushes.Black, links, y);
         y += 6f;

@@ -1,6 +1,7 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.23.0** (Bezugspflege und Einzeltrainer, Bauplan Schritt 20).
+Stand: 08.11.2026. Version: **0.24.0** (Medikamentenplan als Tabelle, Medikamentendatenbank in den
+Einstellungen, Bauplan Schritt 21).
 
 ## Aktuell
 
@@ -38,8 +39,14 @@ Neu in 0.23.0: **Bezugspflege** und **Einzeltrainer** je Bewohner – farbig auf
 Akte (Farbe der Person, Kürzel immer dabei), Filter „Meine Bezugsbewohner“ und „Meine
 Einzeltrainings“, eigene Farbe in den Einstellungen.
 
-**Nächster Schritt:** Bauplan Schritt 21 „Medikation als Tabelle, Medikamentendatenbank in den
-Einstellungen“ (0.24.0).
+Neu in 0.24.0: Der Reiter heißt **„Medikamentenplan“** und ist eine **Tabelle** (Medikament,
+morgens–nachts, verordnet von, seit, Status, Hinweis; Bedarf darunter), sortierbar; ein Klick auf
+eine Zeile zeigt Einzelheiten und Verlauf. Die **Medikamentendatenbank** steht in den
+**Einstellungen** (Abschnitt „Medikamente“): neue Medikamente prüft, wer sie anlegt (Quelle und
+Prüfdatum), Einträge lassen sich sperren, neues Feld **Zulassungsnummer**. Über der Maske die
+**Nachschlage-Ansicht des BfArM** (WebView2, abschaltbar).
+
+**Nächster Schritt:** Bauplan Schritt 22 „Therapien: Zuordnung und Rechte“ (0.25.0).
 
 ## Fertig
 
@@ -404,8 +411,39 @@ Einstellungen“ (0.24.0).
   - Demo `daten/demo/bezug.json`: Bezugspflege für alle, Anna Bachstelze mit fünf (Hinweis),
     ein früherer Wechsel bei Anton Ahorn, drei Einzeltrainings (DBT, Suchtgruppe).
 
+- 0.24.0 — Medikamentenplan als Tabelle, Medikamentendatenbank in den Einstellungen (Bauplan
+  Schritt 21, 08.11.2026):
+  - Reiter „Medikation“ heißt „Medikamentenplan“. Tabelle „Regelmäßig“: Medikament (Name, Form,
+    Stärke), morgens, mittags, abends, nachts, verordnet von, seit, Status („aktiv“, „pausiert bis
+    …“, „Stufe 2 von 3 · nächste Stufe ab …“, „beginnt am …“, „abgesetzt am …“), Hinweis.
+    Darunter „Bei Bedarf“ (Anlass, Einzeldosis, höchstens). Sortierbar über die Spaltenköpfe
+    („seit“ nach Datum), Zeilen abwechselnd hinterlegt, Status farbig.
+  - Klick (oder Eingabetaste) auf eine Zeile: Einzelheiten mit Pause, Pause beenden, Stufenplan,
+    Absetzen und dem Verlauf. Die Logik aus 0.10.0 ist unverändert. Ausdruck „Medikamentenplan“.
+  - Medikamentendatenbank nicht mehr in der Seitenleiste, sondern Einstellungen → „Medikamente“
+    → „Medikamentendatenbank …“ (eigenes Fenster). Ansehen dürfen alle; anlegen, ändern, sperren
+    nach den Rechten.
+  - Prüfung neuer Medikamente: „bestätigt“ nur mit Quelle und Prüfdatum (Vorgabe heute, nicht in
+    der Zukunft); Kürzel und Zeit setzt das Programm. Karte: „geprüft am … von …“. Beim Verordnen
+    sind ungeprüfte gekennzeichnet („… – ungeprüft“), gesperrte nicht wählbar.
+  - „Sperren“ / „Wieder freigeben“ (Recht „Medikamentendatenbank verwalten“) – als neue Fassung im
+    Verlauf. Neues Feld „Zulassungsnummer“ (optional, auch in der Suche).
+  - Nachschlage-Ansicht über der Maske: „Nachschlagen“ öffnet die Arzneimittelsuche des BfArM;
+    der Name liegt in der Zwischenablage. Text markieren, Feld anklicken, „In Feld übernehmen“;
+    „Adresse als Quelle übernehmen“; „Im Browser öffnen“. Nur Adressen des BfArM; anderes öffnet
+    im normalen Browser. Abschaltbar (Einstellungen → Medikamente). Fehlt WebView2: Hinweis, das
+    Formular bleibt nutzbar. Einstellungen → Programm zeigt, ob WebView2 da ist.
+  - README: Abschnitt „Für die IT“ (Windows Server, WebView2, Netzadressen).
+  - Behoben: In der Übersicht überdeckten sich bei wenig Platz „Meine Bezugsbewohner“ und „Meine
+    Einzeltrainings“ (0.23.0); die Filter rücken jetzt in eine eigene Zeile.
+
 ## Offene Punkte
 
+- Nachschlage-Ansicht (0.24.0): Mit der echten Seite des BfArM (anonyme Anmeldung, Weiterleitungen)
+  nur so weit geprüft, dass die Adressen stimmen (08.11.2026); in den automatischen Tests wird das
+  Laden ersetzt. Bitte in der Testliste von Hand prüfen. Ob die BfArM-Suche auf weitere Adressen
+  (außerhalb von bfarm.de und pharmnet-bund.de) springt, ist offen – solche Links öffnen dann im
+  normalen Browser.
 - Bewohner löschen oder als ausgezogen markieren gibt es noch nicht (war nicht
   beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
 - Dunkle Darstellung ist nicht gebaut (`docs/gestaltung.md` sieht sie vor, freigegeben ist
@@ -795,8 +833,77 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 19): Bereich des Rechners (0.20.0) und Bereiche der Mitarbeiter sind dieselbe
   Liste; die Statusmeldung trägt weiter den Bereich des Rechners. Die Einstellungen der Module und
   Fristen bekommen ihre Rechte mit Schritt 29 (neue Einstellungen).
+- 08.11.2026 (Schritt 21): Der Medikamentenplan ist eine Windows-Tabelle (DataGridView) ohne eigene
+  Bildlaufleiste – so hoch wie ihr Inhalt, gerollt wird die Akte. Status „aktiv“ statt
+  „Grundverordnung“ (Wortlaut des Auftrags); „beginnt später“ und „abgesetzt“ stehen in derselben
+  Tabelle mit ihrem Status statt in eigenen Abschnitten. Die Einheit steht nur bei den Mengen,
+  wenn es nicht „Stück“ sind (z. B. „20 Tropfen“).
+- 08.11.2026 (Schritt 21): Klick auf eine Zeile öffnet die Einzelheiten; wählt man dort „Pause …“
+  usw., schließt das Fenster und die Änderung öffnet danach (keine Fenster in Fenstern).
+- 08.11.2026 (Schritt 21): Die Medikamentendatenbank ist ein eigenes Fenster aus den
+  Einstellungen, Abschnitt „MEDIKAMENTE“; die Neugliederung der Einstellungen kommt mit Schritt 29.
+  „Sperren“ fragt nicht nach (umkehrbar, steht im Verlauf). Beim Ändern bleibt „gesperrt“ erhalten.
+- 08.11.2026 (Schritt 21): Prüfdatum: beim Ankreuzen von „bestätigt“ mit heute vorbelegt, nicht in
+  der Zukunft. Die Einträge des Demo-Bestands bleiben „ungeprüft“ (wie bisher, „bis Tobi sie
+  bestätigt“) – damit ist das Kennzeichen beim Verordnen gleich zu sehen.
+- 08.11.2026 (Schritt 21): Zulassungsnummer ohne feste Form (bis 30 Zeichen: Ziffern, Buchstaben,
+  Punkt, Bindestrich, Schrägstrich, Leerzeichen) – der Auftrag nennt „ENR“, im BfArM gibt es
+  daneben die Zulassungsnummer mit Punkten; beide passen hinein.
+- 08.11.2026 (Schritt 21): Nachschlage-Ansicht: Verbunden wird erst auf „Nachschlagen“, nicht beim
+  Öffnen des Formulars. Die BfArM-Suche nimmt keinen Suchbegriff in der Adresse an; deshalb legt
+  das Programm den Namen (nur Buchstaben, Ziffern, Leerzeichen, Bindestrich, höchstens 60 Zeichen)
+  in die Zwischenablage, eingefügt wird mit Strg+V. Zulässig sind nur https-Adressen unter
+  bfarm.de und pharmnet-bund.de (die Suche leitet über auth.bfarm.de zu portal.bfarm.de weiter).
+  Fremde Links, neue Fenster und Downloads gehen an den normalen Browser. Die „feste Liste in den
+  Einstellungen“ wird dort nur angezeigt, nicht geändert (Regel 6). Daten der Ansicht (Cookies,
+  Zwischenspeicher) im Datenordner `webansicht\`; Passwort- und Formularspeicher und die
+  Entwicklerwerkzeuge sind aus.
+- 08.11.2026 (Schritt 21): „In Feld übernehmen“ geht in das zuletzt angeklickte Feld der Maske
+  (Anzeige „→ Stärken“). Bei Handelsnamen und Stärken kommt der Text dazu (mit Komma, ohne
+  Doppelte), sonst ersetzt er den Inhalt. Der Text wird eine Zeile, höchstens 300 Zeichen.
+- 08.11.2026 (Schritt 21): Neue Abhängigkeit **`Microsoft.Web.WebView2` 1.0.4314.35** (Lizenz im
+  Paket: BSD-3-Clause-artig, auf nuget.org am 08.11.2026 nachgesehen). Grund: die einzige Art,
+  eine Webseite im Programmfenster zu zeigen, deren Browser Windows selbst mitbringt (Edge
+  WebView2, in Windows 11 enthalten) – sonst müsste ein ganzer Browser in die `.exe`. Der
+  WPF-Teil des Pakets wird beim Bauen entfernt (`Directory.Build.targets`). Die kleine
+  `WebView2Loader.dll` steckt in der `.exe` und wird beim Start entpackt (wie SQLite,
+  nicht komprimiert); der Selbsttest der `.exe` prüft, dass sie dabei ist. Ein Test prüft, dass
+  die Bibliothek nur in `Nachschlageansicht.cs` benutzt wird.
+- 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
+  (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
+  artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 21): „Beim Start prüft das Programm, ob WebView2 vorhanden ist“: Das Ergebnis
+  steht in den Einstellungen unter „PROGRAMM → Nachschlage-Ansicht“ („WebView2 vorhanden (Version
+  …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.24.0:
+
+1. Akte Anton Ahorn → Reiter „Medikamentenplan“: Tabelle mit Quetiapin und Pantoprazol, Spalten
+   „verordnet von“ und „seit“, Status „aktiv“. Auf „Medikament“ klicken → sortiert; „seit“ →
+   nach Datum. Zeilen abwechselnd hell/grau.
+2. Berta Birke: Status „Stufe 2 von 3 · nächste Stufe ab …“. Clara Clematis: „pausiert bis …“
+   (gelb). Dieter Distel: Tabelle „Bei Bedarf“ mit Anlass und „höchstens“.
+3. Eine Zeile anklicken → Fenster mit Einzelheiten und Verlauf; „Pause …“ → Pause eintragen →
+   Tabelle zeigt „pausiert bis …“. Als „KL“ (keine Fachkraft): Knöpfe grau, Grund beim Klick.
+4. „Neue Verordnung …“: In der Auswahl steht hinter jedem Medikament „– ungeprüft“.
+5. Links ist „Medikamente“ verschwunden. Einstellungen → „Medikamente“ → „Medikamentendatenbank
+   …“ öffnet die Liste. Als „PR“: „Neues Medikament …“ → oben die Nachschlage-Ansicht.
+6. Wirkstoff „Quetiapin“ eintragen → „Nachschlagen“: Die Suche des BfArM lädt (Internet nötig),
+   unten steht „„Quetiapin“ liegt in der Zwischenablage“ → im Suchfeld Strg+V. In der Ansicht
+   „25 mg“ markieren, in der Maske „Stärken“ anklicken, „In Feld übernehmen“ → steht im Feld.
+   „Adresse als Quelle übernehmen“ → Quelle gefüllt. Einen Link zu einer fremden Seite anklicken →
+   öffnet im normalen Browser, nicht in der Ansicht.
+7. „bestätigt“ ankreuzen → „Geprüft am“ ist heute; Speichern → Karte „geprüft am … von PR“. Bei
+   „Neue Verordnung …“ steht dieses Medikament ohne „– ungeprüft“.
+8. Karte → „Sperren“ → „gesperrt – nicht wählbar“; bei „Neue Verordnung …“ fehlt es. „Wieder
+   freigeben“. „Verlauf …“ zeigt beides.
+9. Einstellungen → Programm: „Nachschlage-Ansicht: WebView2 vorhanden (Version …)“. Einstellungen
+   → Medikamente → Häkchen „Nachschlage-Ansicht anzeigen“ weg → Speichern → im Formular nur noch
+   „Im Browser öffnen“.
+10. Übersicht im kleineren Fenster: „Meine Bezugsbewohner“, „Meine Einzeltrainings“ und „alle
+    Bereiche“ überdecken sich nicht mehr.
 
 Version 0.23.0:
 

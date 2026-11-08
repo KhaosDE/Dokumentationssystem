@@ -227,10 +227,42 @@ public class NetzNurImUpdateTests
     [InlineData("Dokusystem.Modul.Ausgangsliste")]
     public void Programm_selbst_geht_nie_ins_Netz(string projekt)
     {
-        var verboten = new Regex(@"\b(HttpClient|WebClient|WebRequest|Socket|TcpClient|System\.Net\.Http|https?://)");
+        var verboten = new Regex(@"\b(HttpClient|WebClient|WebRequest|Socket|TcpClient|System\.Net\.Http)");
+        var adresse = new Regex("https?://[^\\s\"')]+");
         var funde = Quelltexte(projekt)
-            .SelectMany(d => verboten.Matches(File.ReadAllText(d)).Select(m => $"{Path.GetFileName(d)}: {m.Value}"))
+            .SelectMany(d => verboten.Matches(File.ReadAllText(d)).Select(m => $"{Path.GetFileName(d)}: {m.Value}")
+                // Adressen nur zum Übergeben an den Browser, und nur in ExterneAdressen.cs (Regel 6).
+                .Concat(Path.GetFileName(d) == "ExterneAdressen.cs" ? [] : adresse.Matches(File.ReadAllText(d)).Select(m => $"{Path.GetFileName(d)}: {m.Value}")))
             .ToList();
         Assert.Empty(funde);
+    }
+
+    // Einzige eingebettete Webansicht: das Nachschlagen im Formular „Medikament“ (Regel 6, Schritt 21).
+    [Fact]
+    public void Webansicht_nur_zum_Nachschlagen()
+    {
+        // Verwendung der Bibliothek (nicht das Wort in Kommentaren oder Texten).
+        var webansicht = new Regex(@"Microsoft\.Web\.WebView2|\bCoreWebView2\w*|\bnew\s+WebView2\b");
+        var funde = new[] { "Dokusystem.Kern", "Dokusystem", "Dokusystem.Bausteine", "Dokusystem.Modul.Ausgangsliste", "Dokusystem.Update" }
+            .SelectMany(Quelltexte)
+            .Where(d => webansicht.IsMatch(File.ReadAllText(d)))
+            .Select(Path.GetFileName)
+            .ToList();
+        Assert.Equal(["Nachschlageansicht.cs"], funde);
+        string ansicht = File.ReadAllText(Path.Combine(Repo.Wurzel, "src", "Dokusystem", "Nachschlageansicht.cs"));
+        Assert.Contains("Nachschlagen.Zulaessig", ansicht);   // jede Navigation wird geprüft
+        var projekte = Directory.EnumerateFiles(Path.Combine(Repo.Wurzel, "src"), "*.csproj", SearchOption.AllDirectories)
+            .Where(d => File.ReadAllText(d).Contains("Microsoft.Web.WebView2"))
+            .Select(Path.GetFileName);
+        Assert.Equal(["Dokusystem.csproj"], projekte);
+    }
+
+    [Fact]
+    public void Browser_Adressen_nur_aus_der_Liste()
+    {
+        string datei = Path.Combine(Repo.Wurzel, "src", "Dokusystem.Kern", "ExterneAdressen.cs");
+        var gefunden = Regex.Matches(File.ReadAllText(datei), "https?://[^\\s\"')]+").Select(m => m.Value).ToList();
+        Assert.Equal(ExterneAdressen.Alle.Order(), gefunden.Order());
+        Assert.All(ExterneAdressen.Alle, a => Assert.StartsWith("https://", a));
     }
 }
