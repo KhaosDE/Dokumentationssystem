@@ -83,6 +83,11 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Nachrichten** (links, mit Zähler): an Personen oder Teams, mit Antworten im selben
   Verlauf, optional zu einem Bewohner (in der Akte „Nachrichten …“). Alles bleibt im Programm,
   kein E-Mail-Versand. Nachrichten werden nicht gelöscht, nur archiviert.
+- **Ärzteverzeichnis** (Einstellungen → „VERWALTUNG“ → „Ärzteverzeichnis …“): ausgedachte
+  Ärztinnen und Ärzte mit Fachrichtung, Praxis, Telefon und E-Mail. Überall, wo ein Arzt
+  eingetragen wird (Verordnung, Pause/Stufenplan/Absetzen, Visite, Facharzttermin, Termin), wählt
+  man aus dieser Liste; fehlt jemand: „Arzt anlegen …“ gleich daneben. Gelöscht wird nicht, nur
+  inaktiv gesetzt.
 - **Medikamentendatenbank** (Einstellungen → „Medikamente“): Demo-Bestand gängiger Medikamente
   mit Quelle (Fachinformation), **nicht zum Verordnen verwenden**. Suchen, ansehen, eigene
   Einträge anlegen, ändern (mit Verlauf), sperren. Wer ein Medikament anlegt, prüft es selbst

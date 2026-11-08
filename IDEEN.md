@@ -1008,7 +1008,7 @@ Umfang:
 - Gilt ab jetzt für alle neuen Schritte (Regel oben im Bauplan).
 
 ## Ärzteverzeichnis
-Status: freigegeben (Bauplan Schritt 26b)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Eine Liste der Ärztinnen und Ärzte, die im Programm überall zur Auswahl steht.
 Warum: Vorgabe Tobi (08.11.2026): In der Visite müssen die im System hinterlegten Ärzte zur

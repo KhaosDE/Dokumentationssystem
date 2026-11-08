@@ -250,7 +250,7 @@ public sealed class VisiteFenster : Form
 
     public TextBox DatumFeld { get; } = new() { Width = 100 };
     public ComboBox Art { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 200 };
-    public TextBox Arzt { get; } = new() { Width = 300, PlaceholderText = "ausgedacht, z. B. Dr. Ulme" };
+    public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
     public PersonenWahl Teilnehmer { get; }   // Schritt 26a: Auswahl, vorbelegt mit der angemeldeten Person
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 280 };
     public Button HinzufuegenKnopf { get; } = Stil.NebenKnopf("Hinzufügen");
@@ -264,6 +264,7 @@ public sealed class VisiteFenster : Form
     {
         this.speicher = speicher;
         bewohner = speicher.AlleBewohner();
+        Arzt = new ArztWahl(speicher);
         medikamente = speicher.Medikamente().Where(m => !m.Gesperrt).ToList();
         Text = $"Neue Visite ({Stil.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -567,6 +568,7 @@ public sealed class FacharztTerminFenster : Form
 
     public TextBox DatumFeld { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public TextBox Uhrzeit { get; } = new() { Width = 70, PlaceholderText = "10:00" };
+    public ArztWahl Arzt { get; }   // Schritt 26b: aus dem Verzeichnis, füllt den Ort
     public TextBox Ort { get; } = new() { Width = 320, PlaceholderText = "z. B. Praxis Dr. Esche (ausgedacht)" };
     public CheckBox MitFahrt { get; } = new() { Text = "Fahrt mit Fahrzeug eintragen", AutoSize = true };
     public ComboBox Fahrzeug { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200, Enabled = false };
@@ -589,11 +591,14 @@ public sealed class FacharztTerminFenster : Form
         Fahrzeug.Items.AddRange([.. speicher.AktiveFahrzeuge()]);
         if (Fahrzeug.Items.Count > 0) Fahrzeug.SelectedIndex = 0;
         Fahrer = new PersonWahl(speicher) { Enabled = false };
+        Arzt = new ArztWahl(speicher);
+        Arzt.Gewechselt += a => { if (a is not null && a.Praxis.Length > 0) Ort.Text = a.Praxis; };
         MitFahrt.CheckedChanged += (_, _) => Fahrzeug.Enabled = Los.Enabled = Zurueck.Enabled = Fahrer.Enabled = MitFahrt.Checked;
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, new Label { Text = aufgabe.Text, AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Fett, UseMnemonic = false, Margin = new Padding(0, 0, 0, Stil.AbstandMittel) });
         zeile("Datum, Uhrzeit", Formular.Reihe(DatumFeld, Uhrzeit));
+        zeile("Arzt (freiwillig)", Arzt);
         zeile("Ort", Ort);
         zeile("", MitFahrt);
         zeile("Fahrzeug", Fahrzeug);
@@ -641,7 +646,7 @@ public sealed class FacharztTerminFenster : Form
                     return false;
                 }
             }
-            Gespeichert = speicher.FacharztTerminEintragen(aufgabe, datum, Uhrzeit.Text, Ort.Text, kuerzel, jetzt, fahrt);
+            Gespeichert = speicher.FacharztTerminEintragen(aufgabe, datum, Uhrzeit.Text, Ort.Text, kuerzel, jetzt, fahrt, Arzt.GewaehlterArzt);
         }
         catch (Eingabefehler e)
         {

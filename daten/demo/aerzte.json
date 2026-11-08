@@ -1,0 +1,12 @@
+{
+  "hinweis": "Ausgedachte Ärztinnen und Ärzte für die Demo (Schritt 26b). E-Mail-Adressen nur mit der reservierten Endung @example.org (CLAUDE.md, Regel 6), Telefonnummern erkennbar ausgedacht.",
+  "aerzte": [
+    { "name": "Dr. Ulme (ausgedacht)", "fachrichtung": "Allgemeinmedizin (Hausarzt)", "praxis": "Praxis am Lindenplatz (ausgedacht)", "telefon": "0000 100 100", "email": "praxis.ulme@example.org" },
+    { "name": "Dr. Linde (ausgedacht)", "fachrichtung": "Psychiatrie", "praxis": "Psychiatrische Praxis am Park (ausgedacht)", "telefon": "0000 200 200", "email": "linde@example.org" },
+    { "name": "Dr. Esche (ausgedacht)", "fachrichtung": "Kardiologie", "praxis": "Kardiologische Praxis (ausgedacht)", "telefon": "0000 300 300", "email": "esche@example.org" },
+    { "name": "Dr. Buche (ausgedacht)", "fachrichtung": "Neurologie", "praxis": "Neurologie im Ärztehaus (ausgedacht)", "telefon": "0000 400 400", "email": "buche@example.org" },
+    { "name": "Dr. Lärche (ausgedacht)", "fachrichtung": "Zahnmedizin", "praxis": "Zahnarztpraxis am Markt (ausgedacht)", "telefon": "0000 500 500", "email": "" },
+    { "name": "Dr. Pappel (ausgedacht)", "fachrichtung": "Augenheilkunde", "praxis": "Augenpraxis (ausgedacht)", "telefon": "0000 600 600", "email": "pappel@example.org" },
+    { "name": "Dr. Weide (ausgedacht)", "fachrichtung": "Dermatologie", "praxis": "Hautarztpraxis (ausgedacht)", "telefon": "0000 700 700", "email": "weide@example.org", "aktiv": false }
+  ]
+}
