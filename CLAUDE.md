@@ -67,7 +67,7 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 | `SITZUNGEN.md` | wird **angehängt** | ein Einzeiler pro Sitzung: Datum — was erledigt wurde |
 | `IDEEN.md` | wird überarbeitet | Aufträge aus den Chats, jeder mit Status |
 
-Vault-Ordner (Obsidian, nur Dokumentation): `Dokumentationssystem/`. Cloud-Sitzungen erreichen
+Vault-Ordner (Obsidian, nur Dokumentation): `DokuLine/` (bis 08.11.2026 `Dokumentationssystem/`). Cloud-Sitzungen erreichen
 ihn nicht; Claude Code schreibt nur ins Repository.
 
 ## Technik
