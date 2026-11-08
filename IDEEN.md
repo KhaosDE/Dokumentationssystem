@@ -38,6 +38,8 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 13 | Monatsreflexion | 0.16.0 |
 | 14 | Startseite als Übersicht (Dashboard) | 0.17.0 |
 | 15 | HEB-Bogen aus Berichten | 0.18.0 |
+| 16 | Bewohnerakte: Ergänzungen | 0.19.0 |
+| 17 | Mehrplatzbetrieb (Demo-Stufe) | 0.20.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -49,7 +51,8 @@ Für alle Schritte gilt:
   `docs/heb-wissen.md`; keine Diagnosen.
 - Steht in einem Eintrag „Festlegungen für die Demo“, sind das Annahmen. Weicht etwas davon
   ab, in `STAND.md` unter „Entscheidungen“ festhalten.
-- „Mehrplatzbetrieb über einen Server (später)“ gehört **nicht** dazu.
+- Schritte 16 und 17 am 08.11.2026 ergänzt (Tobi: „Alles freigeben“). Schritt 17 ist die
+  Demo-Stufe des Mehrplatzbetriebs, kein Echtbetrieb.
 
 ## Programmrahmen und Selbst-Update
 Status: erledigt (05.11.2026)
@@ -89,8 +92,8 @@ Umfang:
   und ohne Allergie, „keine bekannt“, „nicht erfasst“, mit und ohne Beschlussende.
 - Datumsangaben im Format TT.MM.JJJJ; Prüfung, dass das Aufnahmedatum nicht vor dem
   Geburtsdatum liegt.
-- **Noch nicht entschieden, nicht bauen:** Warnung vor Beschlussende, Angabe „offen geführt
-  ja/nein“, Alter aus dem Geburtsdatum berechnet.
+- Warnung vor Beschlussende: gebaut über die Startseite (Marke „Beschluss endet bald“).
+  „offen geführt“ und Alter: siehe Eintrag „Bewohnerakte: Ergänzungen“.
 - Ausdrücklich nicht: Tagesdokumentation, Medikation, Ausgang (eigene Einträge).
 
 ## Umstieg auf C# / .NET 10
@@ -363,15 +366,15 @@ Umfang (Vorschlag aus dem Chat, freigegeben 07.11.2026):
   Mehrplatzbetrieb (Eintrag unten).
 
 ## Mehrplatzbetrieb über einen Server (später)
-Status: offen
+Status: freigegeben nur als Demo-Stufe — siehe Eintrag „Mehrplatzbetrieb (Demo-Stufe)“
 Datum: 06.11.2026
 Was: Das Programm arbeitet über einen Server auf allen Bereichen (Wohnbereiche, Therapie).
 Dann lässt sich zu jedem Bewohner eine Statusmeldung machen, die alle Bereiche sehen.
 Warum: Laut Tobi der Weg, wie das Programm im Betrieb funktionieren würde.
-Umfang: **nicht für die Demo.** Voraussetzungen, bevor es überhaupt geplant wird: Freigabe
-durch Einrichtung und Datenschutz, Beteiligung der Mitarbeitervertretung, Anmeldung und
-Rechte, Server der Einrichtung. Vorhandene Vorarbeit: Die Ausgangsliste (C#) hat bereits
-eine gemeinsame Datenbank für mehrere Arbeitsplätze mit Konfliktschutz.
+Umfang: Der **Echtbetrieb** bleibt außerhalb der Demo. Voraussetzungen dafür: Freigabe durch
+Einrichtung und Datenschutz, Beteiligung der Mitarbeitervertretung, Anmeldung und Rechte,
+Server der Einrichtung. Was davon schon vorführbar ist, steht im Eintrag „Mehrplatzbetrieb
+(Demo-Stufe)“.
 
 ## Gestaltung nach Vorbild der Ausgangsliste
 Status: erledigt (06.11.2026; gebaut zusammen mit „Umstieg auf C# / .NET 10“)
@@ -555,3 +558,45 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
 Hinweis für einen späteren Echtbetrieb: Ein Nachrichtensystem mit Lese- oder
 Zeitstempeln kann Verhalten und Leistung von Mitarbeitenden sichtbar machen. Vor einem
 Einsatz die Mitarbeitervertretung beteiligen; das gilt auch für „gelesen“ in der Übergabe.
+
+## Bewohnerakte: Ergänzungen
+Status: freigegeben (Bauplan Schritt 16)
+Datum: 08.11.2026
+Was: Die beiden zurückgestellten Vorschläge zur Bewohnerakte.
+Warum: Tobi gibt alles frei (08.11.2026). „Offen geführt“ steht in der Lückenliste zu
+DANlife: Diese Angabe liegt dort an pflegebezogenen Stellen und geht verloren.
+Umfang:
+- **„Offen geführt“** in den Stammdaten mit drei Zuständen wie bei den Allergien
+  (`CLAUDE.md`, Regel 5): *ja*, *nein*, *nicht erfasst*. Als Marke auf Karte und Akte, Farbe
+  nie allein. Ist das Modul Ausgangsliste eingeschaltet, mit dessen Angaben zur
+  Unterbringung abgleichen und Widersprüche als Hinweis zeigen (nicht automatisch ändern).
+- **Alter** aus dem Geburtsdatum berechnet, in der Akte neben dem Geburtsdatum („63 Jahre“).
+- Demo-Daten um beide Angaben ergänzen.
+
+## Mehrplatzbetrieb (Demo-Stufe)
+Status: freigegeben (Bauplan Schritt 17)
+Datum: 08.11.2026
+Was: Mehrere Rechner arbeiten gleichzeitig mit derselben Datenbank, und zu jedem Bewohner gibt
+es eine **Statusmeldung**, die alle Bereiche sehen. Gezeigt mit ausgedachten Daten.
+Warum: Tobi gibt alles frei (08.11.2026). So lässt sich vorführen, wie das Programm über
+mehrere Bereiche funktionieren würde, ohne dass ein Server der Einrichtung nötig ist.
+Umfang:
+- **Ort der Datenbank einstellbar** (Einstellungen): lokal (Vorgabe) oder ein gemeinsamer
+  Ordner im Netz. Vorbild: gemeinsame Datenbank mit Konfliktschutz der Ausgangsliste
+  (`Datenbank.cs`; Zuordnung in `docs/bruecke-ausgangsliste.md`).
+- **Konfliktschutz:** Speichern zwei Rechner denselben Datensatz, gewinnt nicht still der
+  Letzte; der zweite bekommt einen Hinweis und sieht beide Fassungen.
+- **Bereiche:** Jede Installation hat in den Einstellungen eine Bereichskennung (ausgedacht,
+  z. B. „Wohnbereich A“, „Therapie“). Bewohner gehören zu einem Wohnbereich; die Übersicht
+  zeigt standardmäßig den eigenen, umschaltbar auf „alle Bereiche“.
+- **Statusmeldung je Bewohner:** kurzer Text mit Bereich, Kürzel und Zeit (z. B. „beim
+  Arzttermin bis 11 Uhr“), sichtbar auf Karte und Akte in allen Bereichen, bis sie abläuft
+  oder ersetzt wird. Verlauf bleibt.
+- Aktualisierung: Jeder Rechner liest Änderungen der anderen spätestens nach 30 Sekunden und
+  beim Wechsel der Ansicht nach.
+- Nachrichten, Übergabe und Aufgaben funktionieren damit auch zwischen Rechnern.
+- Ausdrücklich nicht: Server-Dienst, Anmeldung mit Passwort, Rechteverwaltung, Verschlüsselung
+  — das gehört zum Echtbetrieb. Die Demo-Regeln aus `CLAUDE.md` gelten unverändert, auch im
+  gemeinsamen Ordner nur ausgedachte Daten.
+- Testen ohne zweites Gerät: zwei Programmfenster auf einem Rechner mit demselben
+  Datenbank-Ordner.
