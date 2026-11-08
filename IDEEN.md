@@ -40,6 +40,18 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 15 | HEB-Bogen aus Berichten | 0.18.0 |
 | 16 | Bewohnerakte: Ergänzungen | 0.19.0 |
 | 17 | Mehrplatzbetrieb (Demo-Stufe) | 0.20.0 |
+| 18 | Oberfläche: volle Fläche, einklappbares Seitenmenü | 0.21.0 |
+| 19 | Mitarbeiter, Anmeldung und Rechte | 0.22.0 |
+| 20 | Bezugspflege und Einzeltrainer | 0.23.0 |
+| 21 | Medikation als Tabelle, Medikamentendatenbank in den Einstellungen | 0.24.0 |
+| 22 | Therapien: Zuordnung und Rechte | 0.25.0 |
+| 23 | Tagesplan | 0.26.0 |
+| 24 | Kalender: Bereich und Haus, Fahrzeuge | 0.27.0 |
+| 25 | Aufgaben nach Schichten mit Standardaufgaben | 0.28.0 |
+| 26 | Visiten | 0.29.0 |
+| 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
+| 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
+| 29 | Einstellungen neu gegliedert | 0.32.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -530,8 +542,8 @@ Festlegungen für die Demo (Annahmen aus dem Chat, 07.11.2026 — Tobi kann sie 
 - Aus einem Bericht heraus: „Aufgabe daraus machen“ übernimmt den Bewohner.
 - Ausdruck der offenen Aufgaben.
 - Demo: einige ausgedachte Aufgaben, relativ zum heutigen Tag, eine davon überfällig.
-- Ausdrücklich nicht: wiederkehrende Aufgaben (Dienstpläne, Reinigungsdienste) — die
-  Arbeitszuweisung ist ein eigenes Werkzeug.
+- Wiederkehrende Standardaufgaben: ab Bauplan Schritt 25 („Aufgaben nach Schichten mit Standardaufgaben“). Weiterhin nicht: Dienstpläne und Reinigungsdienste —
+  die Arbeitszuweisung ist ein eigenes Werkzeug.
 
 ## Nachrichten
 Status: erledigt (07.11.2026; Bauplan Schritt 5, Version 0.8.0)
@@ -600,3 +612,326 @@ Umfang:
   gemeinsamen Ordner nur ausgedachte Daten.
 - Testen ohne zweites Gerät: zwei Programmfenster auf einem Rechner mit demselben
   Datenbank-Ordner.
+
+## Oberfläche: volle Fläche, einklappbares Seitenmenü
+Status: freigegeben (Bauplan Schritt 18)
+Datum: 08.11.2026
+Was: Drei Änderungen an der Oberfläche nach Tobis Durchsicht von Version 0.20.0.
+Warum: Rückmeldung Tobi (08.11.2026) mit Bildschirmfoto der Bewohnerakte (Reiter
+„Wochenplan“): Die Inhalte nehmen nur etwa die linke Hälfte ein, rechts bleibt die Fläche
+leer. Die Übersichtsseite ist gut und bleibt, wie sie ist.
+Umfang:
+- **Inhalte füllen die ganze restliche Fläche.** Keine feste Höchstbreite mehr; alle
+  Ansichten (Akte mit Kopfkarte, Allergiehinweis, Reitern und deren Inhalt, Wochenplan,
+  Kalender, Listen, Formulare im Fenster) wachsen mit der Fenstergröße in Breite und Höhe.
+  Der Wochenplan verteilt die Tagesspalten auf die volle Breite und die Stunden auf die
+  verfügbare Höhe (bei Platzmangel Bildlauf statt Abschneiden). Mindestgrößen so, dass bei
+  1366 × 768 nichts abgeschnitten wird. Gilt für jeden Bereich, nicht nur die Akte.
+- **Seitenmenü einklappbar:** Knopf oben im Seitenmenü (Symbol aus „Segoe Fluent Icons“)
+  schaltet zwischen voller Breite und einer schmalen Leiste nur mit Symbolen um. Eingeklappt:
+  Tooltip mit dem Namen je Symbol, Zähler (z. B. Aufgaben 5) als kleine Zahl am Symbol, aktiver
+  Bereich weiterhin hervorgehoben. Unten Versions- und Bereichsangabe sowie „Demo-Daten
+  zurücksetzen“ eingeklappt nur als Symbol mit Tooltip. Zustand wird in den Einstellungen
+  gemerkt. Die frei werdende Fläche nutzen die Inhalte sofort (siehe oben).
+- **„Neuer Bericht …“ ist kein eigener Menüpunkt mehr.** Stattdessen: Knopf „Neuer
+  Bericht …“ im Kopf der Bewohnerakte (neben „Status …“; die farbige Hauptaktion bleibt
+  „Bearbeiten …“ bzw. wird „Neuer Bericht …“ — die einfachere Lösung wählen und in
+  `STAND.md` festhalten), im Reiter „Berichte“ und per Rechtsklick auf eine Bewohnerkarte
+  (Übersicht und Bewohner). Ohne vorher gewählten Bewohner gibt es keinen Einstieg mehr.
+- Bildschirmfotos im Testlauf für die geänderten Ansichten erneuern (ausgeklappt und
+  eingeklappt).
+
+## Mitarbeiter, Anmeldung und Rechte
+Status: freigegeben (Bauplan Schritt 19)
+Datum: 08.11.2026
+Was: Eine Mitarbeiterdatenbank, Anmeldung beim Programmstart mit dem Namenskürzel und eine
+Rechteverwaltung nach Positionen.
+Warum: Vorgaben Tobi (08.11.2026): Man meldet sich beim Start mit seinem Kürzel an; das
+Kürzel wird beim Anlegen eines Mitarbeiters festgelegt. Nicht jeder darf alles.
+Umfang:
+- **Mitarbeiterdatenbank:** Kürzel (eindeutig, Pflicht), Vor- und Nachname (ausgedacht),
+  **Fachkraft ja/nein**, aktiv/ausgeschieden (ausgeschiedene können sich nicht mehr anmelden,
+  bleiben aber an ihren Einträgen sichtbar). Gelöscht wird nicht.
+- **Zuordnung zu Bereichen und Positionen** (Vorgabe Tobi, 08.11.2026): Im Mitarbeiter-Formular
+  wählt man per Häkchen **einen oder mehrere Bereiche** und **eine oder mehrere Positionen**.
+  Hat jemand mehrere Positionen, gelten die Rechte aller zusammen. Rechte, die sich auf
+  „eigenen Bereich“ beziehen (z. B. Mitarbeiter verwalten für Bereichsleitungen), gelten für
+  alle zugeordneten Bereiche.
+- **Bereiche und Positionen sind Listen in den Einstellungen** (anlegen, umbenennen,
+  stilllegen; nicht löschen, solange jemand zugeordnet ist). Demo-Bereiche ausgedacht, z. B.
+  „Wohnbereich A“, „Wohnbereich B“, „Therapie“, „Verwaltung“.
+- **Anmeldung beim Start:** Fenster „Anmelden“ mit Kürzel. Demo: **ohne Passwort**; das
+  Fenster ist so gebaut, dass ein Passwortfeld später ergänzt werden kann. „Angemeldet als …“
+  oben rechts wird zu „Abmelden / Benutzer wechseln“. Das bisherige „Benutzer wählen“ ohne
+  Anmeldung entfällt.
+- **Positionen (Vorbelegung):** Geschäftsführung, Hausleitung, Verwaltung, Bereichsleitung,
+  Mitarbeiter Wohnbereich, Psychologischer Fachdienst, Pädagogischer Fachdienst, Therapie.
+- **Rechte als Tabelle mit Häkchen** (Wunsch Tobi): Zeilen = Funktionen, Spalten =
+  Positionen, dazu je Funktion ein Häkchen „nur Fachkräfte“. Bearbeiten dürfen nur
+  Positionen mit dem Recht „Rechte verwalten“. Funktionen mindestens: Bewohner anlegen und
+  bearbeiten; Berichte schreiben; Visiten eintragen; Medikation bearbeiten; Medikament
+  anlegen; Medikamentendatenbank verwalten (prüfen, ändern, sperren); Therapien bearbeiten;
+  Therapie-Teilnahme bestätigen; Kalender Haus bearbeiten; Fahrzeuge eintragen;
+  Aufgaben-Vorlagen verwalten; HEB-Bogen erstellen; Mitarbeiter verwalten (eigener Bereich);
+  Mitarbeiter verwalten (alle); Rechte verwalten; Module ein- und ausschalten; Einstellungen
+  des Bereichs; Demo-Daten zurücksetzen.
+- **Vorbelegung** (laut Tobi, in der Tabelle änderbar): Geschäftsführung, Hausleitung und
+  Verwaltung dürfen alles. Wohnbereiche haben keine Mitarbeiterverwaltung, außer der
+  Bereichsleitung (eigener Bereich). Der Psychologische Fachdienst verwaltet die
+  Medikamentendatenbank. „Medikament anlegen“ **und „Medikation bearbeiten“** haben „nur
+  Fachkräfte“ (Tobi, 08.11.2026); beide Häkchen lassen sich in den Einstellungen herausnehmen. „Therapien bearbeiten“
+  nur Position Therapie (und die drei Leitungspositionen). Übrige Vorbelegung: die einfachere,
+  sinnvolle Lösung, in `STAND.md` festhalten.
+- Fehlt ein Recht, ist der Knopf ausgegraut mit Hinweis „Dafür fehlt die Berechtigung“ —
+  nicht versteckt, damit die Demo zeigt, was es gibt.
+- Demo: je Position mindestens ein ausgedachter Mitarbeiter, darunter Fachkräfte und
+  Nicht-Fachkräfte; die bisherigen ausgedachten Kolleginnen und Kollegen werden übernommen.
+- Ausdrücklich nicht: Passwort, Verschlüsselung, Sperre nach Fehlversuchen (Echtbetrieb).
+Hinweis für einen späteren Echtbetrieb: Anmeldung mit Kürzel macht jede Handlung einer
+Person zuordenbar; vor einem Einsatz Datenschutz und Mitarbeitervertretung beteiligen.
+
+## Bezugspflege und Einzeltrainer
+Status: freigegeben (Bauplan Schritt 20)
+Datum: 08.11.2026
+Was: Jedem Bewohner werden eine Bezugspflege und optional ein Einzeltrainer zugeteilt; beides
+wird farblich gekennzeichnet.
+Warum: Im Unternehmen wird mit dem Bezugspflegesystem gearbeitet: eine Bezugspflege für
+mehrere Bewohner (meist bis zu vier, Anzahl nicht festgelegt). Dazu kommt ein Einzeltrainer
+im Rahmen der DBT oder der Suchtgruppe (Tobi, 08.11.2026).
+Festlegungen für die Demo (Annahmen aus dem Chat, 08.11.2026 — Tobi kann sie ändern):
+- In der Akte (Stammdaten): Bezugspflege (Auswahl aus den Mitarbeitern), Einzeltrainer mit
+  Art „DBT“ oder „Suchtgruppe“ (Liste erweiterbar). Keine feste Höchstzahl; ab fünf
+  Bewohnern je Bezugspflege nur ein Hinweis.
+- **Eigene Farbe je Mitarbeiter:** In den Einstellungen wählt jeder Angemeldete seine Farbe
+  frei (Farbauswahl). Die Farbe gehört zum Mitarbeiter, nicht zum Rechner.
+- **Darstellung auf Karten und in der Akte:** Bezugspflege als **kräftiger Farbstreifen** am
+  linken Kartenrand mit Kürzel; Einzeltrainer **untergeordnet** als dünner Rahmen bzw. kleiner
+  Farbpunkt mit Kürzel und Art (z. B. „DBT · AB“). Die Bezugspflege hat Vorrang und ist immer
+  auffälliger. Farbe nie allein: Kürzel steht immer dabei; Farbschlüssel in der Statusleiste.
+- Filter auf der Übersicht: „Meine Bezugsbewohner“ und „Meine Einzeltrainings“.
+- Verlauf: Wechsel der Bezugspflege bleiben mit Datum nachvollziehbar.
+
+## Medikation als Tabelle, Medikamentendatenbank in den Einstellungen
+Status: freigegeben (Bauplan Schritt 21)
+Datum: 08.11.2026
+Was: Die Medikation in der Akte wird eine übersichtliche Tabelle. Die Medikamentendatenbank
+wandert in die Einstellungen. Neu angelegte Medikamente werden geprüft.
+Warum: Rückmeldung Tobi (08.11.2026): Ab mehr als drei Medikamenten wird die bisherige
+Darstellung sehr unübersichtlich. Auf einen Blick muss erkennbar sein, wie das Medikament
+heißt, welcher Arzt es verordnet hat und seit wann.
+Umfang:
+- Der Reiter „Medikation“ in der Akte heißt künftig **„Medikamentenplan“** (Begriff wie im
+  Haus). Alle Änderungen an der Medikation eines Bewohners passieren hier.
+- **Tabelle „Was gilt heute“:** eine Zeile je Medikament; Spalten: Medikament (Name,
+  Stärke, Darreichungsform), morgens, mittags, abends, nachts, **verordnet von** (Arzt),
+  **seit** (Datum), Status (aktiv / „pausiert bis …“ / „Stufe 2 von 4“), Hinweis. Sortierbar,
+  Zeilen gut lesbar, abwechselnd hinterlegt. Bedarfsmedikation als eigene Tabelle darunter.
+- Klick auf eine Zeile öffnet Einzelheiten und Verlauf (Pausen, Stufen, frühere Fassungen)
+  — die Logik aus „Medikation: Grundverordnung, Pause, Stufenplan“ bleibt unverändert.
+- Ausdruck der Tabelle (wie bisher mit „Demo — nicht zum Stellen verwenden“).
+- **Medikamentendatenbank** nicht mehr in der Seitenleiste, sondern in den Einstellungen
+  (Abschnitt „Medikamente“). Rechte nach „Mitarbeiter, Anmeldung und Rechte“.
+- **Prüfung neuer Medikamente** (Vorgabe Tobi, 08.11.2026: kein Vier-Augen-Prinzip, das
+  dauert zu lange): Die **Fachkraft, die das Medikament anlegt, prüft es selbst** gegen eine
+  offizielle Quelle und bestätigt es im selben Formular. Beim Bestätigen sind **Quelle**
+  (Pflicht, z. B. Adresse der Fachinformation) und Prüfdatum anzugeben; Kürzel und Zeit setzt
+  das Programm. Ohne Bestätigung bleibt der Eintrag „ungeprüft“ und ist in der Auswahl so
+  gekennzeichnet. Knopf „In offizieller Datenbank nachsehen“ öffnet die Suche des BfArM im
+  **Browser** (das Programm selbst geht nicht ins Internet, `CLAUDE.md`, Regel 6). Wer
+  „Medikamentendatenbank verwalten“ darf, kann Einträge später korrigieren oder sperren;
+  jede Änderung bleibt im Verlauf.
+- Ein **automatischer** Abgleich mit offiziellen Datenbanken ist ausdrücklich nicht dabei: Er
+  bräuchte Internet und Nutzungsrechte, die nicht geklärt sind.
+
+## Therapien: Zuordnung und Rechte
+Status: freigegeben (Bauplan Schritt 22)
+Datum: 08.11.2026
+Was: Jede Therapie gehört zur Therapie oder zu einem Wohnbereich. Bearbeiten dürfen nur die
+Berechtigten.
+Warum: Vorgabe Tobi (08.11.2026): Nur die Therapie darf ihre Therapien bearbeiten.
+Umfang:
+- Feld **„Anbieter“** je Therapieangebot: „Therapie“ oder ein Wohnbereich. Filter danach.
+- Angebote mit Anbieter „Therapie“ ändert nur, wer „Therapien bearbeiten“ hat (Vorbelegung:
+  Position Therapie und Leitungen). Angebote eines Wohnbereichs ändert dessen Bereich
+  (Bereichsleitung und Mitarbeiter des Bereichs mit dem Recht).
+- Zuteilung von Bewohnern bleibt beim Anbieter; der Wohnbereich sieht alles, ändert aber nur
+  eigene Angebote.
+- Demo-Daten mit beiden Anbietern.
+
+## Tagesplan
+Status: freigegeben (Bauplan Schritt 23)
+Datum: 08.11.2026
+Was: Neuer Punkt unter „Übersicht“: wer heute welche Therapien hat, mit Bestätigung, dass der
+Bewohner hingegangen ist.
+Warum: Wunsch Tobi (08.11.2026): Wer ins System schaut, soll genau wissen, wo ein Bewohner
+gerade sein müsste.
+Umfang:
+- Seitenleiste: „Tagesplan“ direkt unter „Übersicht“.
+- Ansicht des heutigen Tages: Zeitleiste oder Tabelle mit allen Terminen aller Bewohner des
+  Bereichs (Therapien laut Wochenplan, Kalendertermine, Fahrten), sortiert nach Uhrzeit;
+  umschaltbar „nach Bewohner“.
+- Je Termin Knöpfe **„gegangen“**, „abgesagt“, „ausgefallen“ (gleiche Teilnahme wie im
+  Wochenplan, ein Datensatz, nicht doppelt). Gespeichert mit Kürzel und Uhrzeit.
+- **„Wo müsste er sein?“:** Bei „gegangen“ zeigt der Bewohner auf Karte und Akte bis zum
+  Ende des Termins „in Therapie: Holzwerkstatt bis 11:30“. Danach automatisch wieder im Haus,
+  sofern nichts anderes eingetragen ist.
+- Aktualisierung für alle Rechner über den Mehrplatzbetrieb (wie Statusmeldungen).
+- Nicht bestätigte Termine nach Beginn: Marke „noch offen“.
+
+## Kalender: Bereich und Haus, Fahrzeuge
+Status: freigegeben (Bauplan Schritt 24)
+Datum: 08.11.2026
+Was: Zwei Kalender (Bereich und Haus) und eine Fahrzeugverwaltung für die beiden Firmenwagen.
+Warum: Vorgabe Tobi (08.11.2026): Es gibt einen Kalender für den Bereich und einen für das
+Haus. Mit einem VW Bus und einem Caddy werden Bewohner zum Arzt gefahren, Ausflüge gemacht
+oder Sporttherapien wie Schwimmen begleitet. Man muss sehen, welches Fahrzeug vor Ort ist oder
+weg, mit Uhrzeit.
+Umfang:
+- **Kalender „Bereich“ und „Haus“:** Beim Anlegen wählbar; Anzeige beider übereinander mit
+  Umschalter (nur Bereich / nur Haus / beide), farblich und mit Beschriftung unterschieden.
+  Haus-Termine bearbeitet, wer „Kalender Haus bearbeiten“ hat.
+- **Fahrzeuge:** Liste in den Einstellungen (Demo: „VW Bus“, „Caddy“, erweiterbar).
+  **Fahrt eintragen:** Fahrzeug, von–bis (geplant), Zweck (Arzttermin, Ausflug,
+  Sporttherapie, Sonstiges), Fahrer (Kürzel), mitfahrende Bewohner, Ziel.
+- **Anzeige „vor Ort / unterwegs“:** In der Übersicht (und im Kalender) je Fahrzeug: „vor
+  Ort“ oder „unterwegs seit 09:40, zurück geplant 11:30 (Fahrer AB)“. Knöpfe „losgefahren“
+  und „zurück“ mit Uhrzeit. Überschrittene Rückkehrzeit als Hinweis.
+- **Doppelbuchung** desselben Fahrzeugs: Warnung beim Speichern.
+- Mitfahrende Bewohner erscheinen in ihrem Tagesplan bzw. als abwesend.
+
+## Aufgaben nach Schichten mit Standardaufgaben
+Status: freigegeben (Bauplan Schritt 25)
+Datum: 08.11.2026
+Was: Die Aufgaben werden nach Schichten geordnet; es gibt wiederkehrende Standardaufgaben.
+Warum: Vorgabe Tobi (08.11.2026): Im Nachtdienst zum Beispiel gibt es immer Standardaufgaben,
+die regelmäßig wiederholt werden. Ersetzt die frühere Festlegung „keine wiederkehrenden
+Aufgaben“ im Eintrag „Wohnbereich-ToDo“.
+Umfang:
+- **Schichtzeiten** des Bereichs in den Einstellungen (Früh, Spät, Nacht mit Uhrzeiten).
+- Aufgabenansicht gruppiert nach Schicht; oben die aktuelle Schicht.
+- **Standardaufgaben (Vorlagen):** Text, Schicht, Wochentage (täglich oder ausgewählte),
+  optional Uhrzeit und Bewohner. Daraus entstehen zu Beginn jeder Schicht automatisch die
+  Aufgaben dieser Schicht. Verwalten darf, wer „Aufgaben-Vorlagen verwalten“ hat.
+- Abhaken mit Kürzel und Uhrzeit; nicht erledigte Standardaufgaben bleiben als „aus der
+  Nachtschicht offen“ sichtbar, bis sie jemand erledigt oder begründet schließt.
+- Einzelne Aufgaben wie bisher (an nächste Schicht weitergeben usw.).
+- Demo: einige ausgedachte Standardaufgaben je Schicht, besonders für den Nachtdienst.
+- Ausdruck: Aufgabenliste der Schicht.
+
+## Visiten
+Status: freigegeben (Bauplan Schritt 26)
+Datum: 08.11.2026
+Was: Neuer Punkt in der Seitenleiste unter der Berichtsübersicht („Übergabe“) für Visiten: was
+besprochen wurde, ob sich Anordnungen geändert haben, und vereinbarte Facharzttermine.
+Warum: Vorgabe Tobi (08.11.2026): Es ist wichtig, was in der Visite besprochen wurde und ob
+sich Anordnungen geändert haben. Facharzttermine, die dort besprochen wurden, sollen als
+Aufgabe auftauchen; ist ein Termin vereinbart, soll er in den Kalender.
+Umfang:
+- Visite anlegen: Datum, Art (z. B. Hausarzt, Psychiater, Facharzt), Arzt (ausgedacht),
+  Teilnehmer (Kürzel), je Bewohner: Besprochenes (Text), **Anordnungen geändert ja/nein**
+  mit Art (neu verordnet, Dosis geändert, pausiert, abgesetzt) und Medikament (Auswahl aus
+  der Datenbank oder Freitext, falls noch nicht vorhanden), Facharzttermin nötig
+  (Fachrichtung, Dringlichkeit).
+- Ansicht: Liste aller Visiten, Filter nach Bewohner und Zeitraum; in der Akte ein Abschnitt
+  „Visiten“ (im Reiter „Berichte“ oder eigener Reiter — die einfachere Lösung).
+- **Anordnung geändert** (Vorgabe Tobi, 08.11.2026): **Sobald der Visiten-Bericht
+  gespeichert ist**, blendet das Programm sofort eine Aufgabe ein, je Änderung eine:
+  - Medikament **noch nicht in der Datenbank** → „Neues Medikament anlegen: …“ mit Knopf, der
+    das Anlegen-Formular öffnet (Name aus der Visite vorbelegt; nur Fachkräfte, siehe oben).
+    Danach geht es direkt weiter zur Verordnung.
+  - Medikament **vorhanden** → „Medikation ändern: … (neu / Dosis / Pause / absetzen)“ mit
+    Knopf, der den **Medikamentenplan des jeweiligen Bewohners** öffnet (Reiter
+    „Medikamentenplan“) und dort das passende Formular, vorbelegt mit der Visite als
+    Anordnung (Arzt, Datum). Geändert wird nur dort (Vorgabe Tobi, 08.11.2026).
+  - Die Aufgabe steht zusätzlich in den Aufgaben der Schicht und in der Übergabe, bis sie
+    erledigt ist; „Später“ schließt nur die Einblendung.
+  - Die Medikation wird **nicht** automatisch geändert; eine berechtigte Person trägt die
+    Änderung über die Aufgabe ein, die Verknüpfung zur Visite bleibt sichtbar.
+- **Facharzttermin nötig:** erzeugt automatisch eine Aufgabe „Termin bei … vereinbaren“.
+  Beim Erledigen fragt das Programm nach Datum, Uhrzeit, Ort; dann entsteht der Termin im
+  Kalender (Bereich) beim Bewohner, und auf Wunsch eine Fahrt mit Fahrzeug.
+- Visiten-Einträge sind Quelle für Monatsreflexion und HEB-Bogen (Lebensbereich 5).
+- Demo-Daten: einige Visiten mit allen drei Fällen.
+
+## Ausgangsliste als übersichtliche Liste
+Status: freigegeben (Bauplan Schritt 27)
+Datum: 08.11.2026
+Was: Die Bildschirmdarstellung des Moduls Ausgangsliste wird neu gedacht, angelehnt an die
+ausdruckbare Tagesliste.
+Warum: Rückmeldung Tobi (08.11.2026): Die Darstellung ist sehr unübersichtlich; man soll sich
+ungefähr an die ausdruckbare Liste halten, sie aber für den Bildschirm umdenken.
+Umfang:
+- Eine **Tabelle**, eine Zeile je Bewohner, Spalten wie auf der Tagesliste (Vorbild
+  `Druckliste.cs` der Ausgangsliste): Zimmer, Name, Unterbringung bzw. Beschränkung (kurz),
+  Ausgänge heute (von–bis, Hz.), Stand jetzt (im Haus / unterwegs seit … / abwesend).
+- Für den Bildschirm umgedacht: **Wer gerade unterwegs ist, steht oben** und ist
+  hervorgehoben; Überfällige deutlich markiert (Farbe nie allein). Knöpfe „raus“ / „zurück“
+  direkt in der Zeile, ohne zusätzliches Fenster für den Normalfall. Filter „nur unterwegs“,
+  „nur mit Beschränkung“.
+- Alles füllt die Fläche (Schritt 18).
+- Da das Dokumentationssystem Muttersystem ist: Änderungen in
+  `src/Dokusystem.Modul.Ausgangsliste/AENDERUNGEN.md` eintragen (Abgleich mit der
+  eigenständigen Ausgangsliste, `docs/bruecke-ausgangsliste.md`).
+
+## E-Mail und Kalender über externe Programme
+Status: freigegeben (Bauplan Schritt 28)
+Datum: 08.11.2026
+Was: E-Mails an Betreuer und Kalendertermine lassen sich mit einem externen E-Mail- bzw.
+Kalenderprogramm verbinden.
+Warum: Wunsch Tobi (08.11.2026): E-Mails an Betreuer sollen über ein externes E-Mail-Programm
+gehen; der Kalender soll Termine von außen aufgreifen können.
+Umfang (vereinbar mit `CLAUDE.md`, Regel 6 — das Programm selbst geht nicht ins Internet):
+- **Betreuer** in der Akte: Name, Stelle, E-Mail, Telefon (Demo: ausgedacht, E-Mail-Adressen
+  nur mit der reservierten Endung `@example.org`, damit nichts an echte Adressen gehen kann).
+- **„E-Mail an Betreuer …“** öffnet das auf dem Rechner eingestellte E-Mail-Programm (z. B.
+  Outlook) mit Empfänger und Betreff (`mailto:`). Text und Versand macht der Mensch im
+  E-Mail-Programm. Vor dem Öffnen ein Hinweis: „Keine Gesundheitsdaten unverschlüsselt per
+  E-Mail senden.“
+- **Kalender-Austausch über Dateien** im Standardformat `.ics`: Termin(e) exportieren (lassen
+  sich in Outlook usw. öffnen) und `.ics`-Dateien importieren (z. B. eine Termineinladung
+  aus dem E-Mail-Programm speichern und ins Programm ziehen). Beim Import Vorschau und
+  Zuordnung zu Bewohner und Kalender (Bereich/Haus).
+- Ausdrücklich nicht: direkte Verbindung zu Outlook, Exchange, Google oder einem Mailserver.
+
+## Einstellungen neu gegliedert
+Status: freigegeben (Bauplan Schritt 29)
+Datum: 08.11.2026
+Was: Das Einstellungsmenü bekommt den Aufbau der Windows-11-Einstellungen: links Gruppen,
+rechts deren Inhalt, oben Suche. Alle Einstellungen der Schritte davor ziehen dorthin um.
+Warum: Frage Tobi „Was ist die beste Gestaltung für ein Einstellungsmenü?“, Vorschlag aus dem
+Chat freigegeben (08.11.2026). Grundlage: Microsoft „Guidelines for app settings“; abweichend
+davon mehrere Seiten statt einer, weil das Programm viele Einstellungen hat.
+Umfang:
+- **Einstieg:** „Einstellungen“ ganz unten in der Seitenleiste, fest dort. Öffnet als ganze
+  Seite im Inhaltsbereich (kein kleines Fenster), füllt die Fläche (Schritt 18).
+- **Links die Gruppen**, in dieser Reihenfolge, je mit Symbol aus „Segoe Fluent Icons“:
+
+  | Gruppe | Inhalt | Wer (Vorbelegung, Rechte-Tabelle) |
+  |---|---|---|
+  | Persönlich | eigene Farbe, Seitenmenü eingeklappt, Abmelden | jeder |
+  | Wohnbereich | Bereichskennung, Schichtzeiten, Fristen (Beschluss endet bald, HEB fällig), Logo | Bereichsleitung |
+  | Module | Ausgangsliste mit Untermodulen Küchendienst und Digitaler Ausgang, an/aus | Leitungen |
+  | Aufgaben | Standardaufgaben je Schicht | „Aufgaben-Vorlagen verwalten“ |
+  | Fahrzeuge | Fahrzeugliste | mit Recht |
+  | Vorlagen | HEB-PDFs A/B/C mit Feldzuordnung | mit Recht |
+  | Medikamente | Medikamentendatenbank | Fachkräfte (anlegen), Psychologischer Fachdienst (verwalten) |
+  | Verwaltung | Mitarbeiter, Bereiche und Positionen, Rechte-Tabelle | Leitungen, Verwaltung, Bereichsleitung (eigener Bereich) |
+  | System | Ort der Datenbank, Sicherung, Update, Demo-Daten zurücksetzen | Leitungen |
+  | Über | Version, Build, Lizenzen der Bausteine, Demo-Hinweis | jeder |
+
+- **Suchfeld** oben: findet Einstellungen über Namen und Erklärung und springt hin.
+- **Jede Einstellung als Karte:** Name, ein Satz Erklärung, rechts das Bedienelement.
+  Seltene Unterpunkte aufklappbar, höchstens eine Ebene. Kurze Gruppenüberschriften (ein Wort).
+- **Bedienelemente:** an/aus als Schalter (selbst gezeichnet im Stil der Ausgangsliste) oder
+  Häkchen — die einfachere Lösung, einheitlich im ganzen Menü; bis 5 Möglichkeiten
+  Auswahlknöpfe, mehr als 5 Klappliste; Aktionen als Knopf.
+- **Änderungen wirken sofort**, ohne „Speichern“. Ausnahme: ganze Datensätze (Mitarbeiter,
+  Medikament, Fahrzeug, Standardaufgabe, HEB-Feldzuordnung) haben „Speichern“ und
+  „Abbrechen“.
+- **Ohne Recht ausgegraut, nicht versteckt**, mit einem Satz „Dafür fehlt die Berechtigung“.
+- **Folgenreiches nur in „System“:** „Demo-Daten zurücksetzen“ und Wechsel des Datenbank-Orts
+  fragen immer vorher nach; Hinweis in Gefahrenfarbe mit Wort, Farbe nie allein.
+- Was bisher an anderen Stellen eingestellt wurde (Update-Häkchen, Logo, Kürzel, Module,
+  Medikamentendatenbank, Datenbank-Ort, Fahrzeuge, Schichtzeiten …), zieht hierher um; es
+  bleibt keine zweite Stelle.
+- Bildschirmfotos im Testlauf für jede Gruppe.

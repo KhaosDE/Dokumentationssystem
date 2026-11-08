@@ -35,3 +35,8 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — „Alles freigeben“ (Tobi): Bauplan um Schritt 16 „Bewohnerakte: Ergänzungen“ und Schritt 17 „Mehrplatzbetrieb (Demo-Stufe)“ erweitert; Echtbetrieb bleibt außerhalb (Chat „Programme/Apps“).
 - 08.11.2026 — Claude Code: Bauplan Schritt 16 „Bewohnerakte: Ergänzungen“ (0.19.0).
 - 08.11.2026 — Claude Code: Bauplan Schritt 17 „Mehrplatzbetrieb (Demo-Stufe)“ (0.20.0) – Bauplan vollständig.
+- 08.11.2026 — Rückmeldung Tobi zu 0.20.0: Bauplan Schritt 18 „Oberfläche: volle Fläche, einklappbares Seitenmenü“ freigegeben, „Neuer Bericht“ raus aus dem Menü (Chat „Programme/Apps“).
+- 08.11.2026 — Rückmeldung Tobi: Bauplan Schritte 19–28 freigegeben (Mitarbeiter/Anmeldung/Rechte, Bezugspflege, Medikation als Tabelle, Therapie-Rechte, Tagesplan, Kalender Haus + Fahrzeuge, Schicht-Aufgaben, Visiten, Ausgangsliste als Liste, E-Mail/Kalender extern); CLAUDE.md Regel 6 um Übergabe an lokale Programme ergänzt (Chat „Programme/Apps“).
+- 08.11.2026 — Medikamente: Fachkraft bestätigt selbst mit Quelle (kein Vier-Augen-Prinzip); Visite: Aufgabe „Medikament anlegen / Medikation ändern“ wird nach dem Speichern sofort eingeblendet (Chat „Programme/Apps“).
+- 08.11.2026 — Medikation bearbeiten: nur Fachkräfte (abwählbar); Medikation ändern nur im Medikamentenplan des Bewohners (Reiter umbenannt); Mitarbeiter mehreren Bereichen und Positionen zuordenbar (Chat „Programme/Apps“).
+- 08.11.2026 — Bauplan Schritt 29 „Einstellungen neu gegliedert“ freigegeben (Aufbau wie Windows-11-Einstellungen, zehn Gruppen) (Chat „Programme/Apps“).
