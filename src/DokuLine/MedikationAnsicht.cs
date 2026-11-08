@@ -146,13 +146,29 @@ public sealed class MedikationAnsicht : Panel
     public void Oeffnen(Tagesstand s)
     {
         string? grund = Recht.Grund(speicher, Funktionen.MedikationBearbeiten);
+        // 0.33.0: „Bedarf gegeben …“ an Bedarfsverordnungen (eigenes Recht; Assistenzkräfte mit Absprache).
+        string? bedarfGrund = Recht.Grund(speicher, Funktionen.BedarfGeben);
+        string? heute = s.Verordnung.Bedarf ? BedarfRegeln.HeuteKurz(speicher.Bedarfsgaben(s.Verordnung.Id), DateOnly.FromDateTime(DateTime.Now)) : null;
         AenderungArt? wunsch;
-        using (var fenster = new VerordnungDetailFenster(s, grund))
+        bool bedarf;
+        using (var fenster = new VerordnungDetailFenster(s, grund, bedarfGrund, heute))
         {
             if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK) return;
             wunsch = fenster.Wunsch;
+            bedarf = fenster.BedarfGewuenscht;
         }
-        if (wunsch is AenderungArt art) Aendern(s.Verordnung, art);
+        if (bedarf) BedarfGeben(s.Verordnung);
+        else if (wunsch is AenderungArt art) Aendern(s.Verordnung, art);
+    }
+
+    // „Bedarf gegeben …“: Fenster; danach steht die Gabe als Bericht in der Akte. true = eingetragen.
+    public bool BedarfGeben(Verordnung v)
+    {
+        if (bewohner is null || !v.Bedarf) return false;
+        using var fenster = new BedarfFenster(speicher, v, bewohner);
+        if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK) return false;
+        Aktualisieren();
+        return true;
     }
 
     public void NeueVerordnung()
@@ -331,12 +347,17 @@ public sealed class VerordnungDetailFenster : Form
     public VerordnungKarte Karte { get; }
     public TextBox Verlauf { get; } = new() { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Width = 620, Height = 220, BackColor = Stil.Flaeche };
     public AenderungArt? Wunsch { get; private set; }
+    public bool BedarfGewuenscht { get; private set; }
+    private readonly string? bedarfGrund;
 
-    public VerordnungDetailFenster(Tagesstand s, string? sperrgrund)
+    public VerordnungDetailFenster(Tagesstand s, string? sperrgrund, string? bedarfGrund = null, string? bedarfHeute = null)
     {
         this.sperrgrund = sperrgrund;
+        this.bedarfGrund = bedarfGrund;
         Fenster.Grundform(this, s.Verordnung.Medikament);
-        Karte = new VerordnungKarte(s) { Width = 620, Margin = new Padding(0, 0, 0, Stil.AbstandMittel) };
+        Karte = new VerordnungKarte(s, bedarfHeute) { Width = 620, Margin = new Padding(0, 0, 0, Stil.AbstandMittel) };
+        Stil.Sperren(Karte.BedarfKnopf, bedarfGrund);   // eigenes Recht, nicht „Medikation bearbeiten“
+        Karte.BedarfKnopf.Click += (_, _) => BedarfWaehlen();
         Karte.VerlaufKnopf.Visible = false;   // der Verlauf steht darunter
         foreach (var (knopf, art) in Karte.Aenderungen)
         {
@@ -357,6 +378,16 @@ public sealed class VerordnungDetailFenster : Form
         Controls.Add(raster);
         CancelButton = schliessen;
         Stil.DpiSkalierungEinschalten(this);
+    }
+
+    // „Bedarf gegeben …“ (wie der Knopf); nur an einer Bedarfsverordnung, die heute gilt, und mit Recht.
+    public bool BedarfWaehlen()
+    {
+        if (bedarfGrund is not null || !Karte.BedarfMoeglich) return false;
+        BedarfGewuenscht = true;
+        DialogResult = DialogResult.OK;
+        Close();
+        return true;
     }
 
     // Änderung wählen (wie der Knopf); geht nicht, wenn sie hier nicht passt oder das Recht fehlt.
@@ -386,6 +417,8 @@ public sealed class VerordnungKarte : KartenFlaeche
     public Button StufenplanKnopf { get; } = Stil.NebenKnopf("Stufenplan …");
     public Button AbsetzenKnopf { get; } = Stil.NebenKnopf("Absetzen …");
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
+    public Button BedarfKnopf { get; } = Stil.NebenKnopf("Bedarf gegeben …");   // 0.33.0
+    public bool BedarfMoeglich { get; }
     public IReadOnlyList<string> MarkenTexte { get; }
     public string DosisText => dosis.Text;
     // Welche Änderungen hier passen (z. B. kein „Pause …“ bei Pausiertem) und ihre Knöpfe.
@@ -393,7 +426,7 @@ public sealed class VerordnungKarte : KartenFlaeche
     public IReadOnlyList<(Button Knopf, AenderungArt Art)> Aenderungen =>
         [(PauseKnopf, AenderungArt.Pause), (PauseEndeKnopf, AenderungArt.PauseEnde), (StufenplanKnopf, AenderungArt.Stufenplan), (AbsetzenKnopf, AenderungArt.Absetzen)];
 
-    public VerordnungKarte(Tagesstand s)
+    public VerordnungKarte(Tagesstand s, string? bedarfHeute = null)
     {
         Stand = s;
         var v = s.Verordnung;
@@ -409,6 +442,7 @@ public sealed class VerordnungKarte : KartenFlaeche
         liste.Add((s.Text, markeZustand));
         if (s.Naechstes is string n) liste.Add((n, Stil.Unterwegs));
         if (v.Aenderungen.Count > 0) liste.Add(($"{v.Aenderungen.Count} Änderung{(v.Aenderungen.Count == 1 ? "" : "en")}", Stil.Zimmer));
+        if (bedarfHeute is not null) liste.Add((bedarfHeute, Stil.Zimmer));
         MarkenTexte = liste.Select(x => x.Item1).ToList();
         foreach (var (t, m) in liste) marken.Controls.Add(new MarkenFeld(t, m) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
 
@@ -439,7 +473,9 @@ public sealed class VerordnungKarte : KartenFlaeche
         if (aktiv) moeglich.Add(AenderungArt.Absetzen);
         Moeglich = moeglich;
         foreach (var (knopf, art) in Aenderungen) knopf.Visible = moeglich.Contains(art);
-        foreach (var k in new[] { PauseKnopf, PauseEndeKnopf, StufenplanKnopf, AbsetzenKnopf, VerlaufKnopf })
+        BedarfMoeglich = v.Bedarf && s.Zustand == Zustand.Gilt;
+        BedarfKnopf.Visible = BedarfMoeglich;
+        foreach (var k in new[] { BedarfKnopf, PauseKnopf, PauseEndeKnopf, StufenplanKnopf, AbsetzenKnopf, VerlaufKnopf })
         {
             k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini);
             knoepfe.Controls.Add(k);

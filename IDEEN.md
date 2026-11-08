@@ -1454,12 +1454,12 @@ Kleine Vorlage (`programmsymbol-klein.svg`, für 16–32 px):
 </svg>
 ```
 ## Assistenzkraft und Fachkraft
-Status: Vorschlag – wartet auf Bestätigung durch Tobi (direkt in Claude Code genannt, 08.11.2026)
+Status: erledigt (08.11.2026) – freigegeben von Tobi direkt in Claude Code („ja, bau Assistenzkraft und Fachkraft“), 08.11.2026
 Datum: 08.11.2026
 Was: Die kleinste Stufe ist die **Assistenzkraft**, darüber die **Fachkraft**. Assistenzkräfte machen
 z. B. keine Visiten und dürfen Bedarfsmedikation nur nach Absprache mit einer Fachkraft ausgeben.
 Warum: Vorgabe Tobi (08.11.2026, direkt in der Claude-Code-Sitzung).
-Vorschlag von Claude Code zur Umsetzung (noch nicht bestätigt):
+Umsetzung (Vorschlag von Claude Code, von Tobi bestätigt):
 - **Qualifikation statt Häkchen:** Jeder Mitarbeiter ist „Assistenzkraft“ oder „Fachkraft“ (bisher nur das
   Häkchen „Fachkraft“); so steht es im Anmeldefenster, in der Mitarbeiterliste und im Formular.
 - **Visiten nur Fachkräfte:** Recht „Visiten eintragen“ mit Häkchen „nur Fachkräfte“; für Assistenzkräfte ist

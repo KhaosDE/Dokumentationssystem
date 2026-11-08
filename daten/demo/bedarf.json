@@ -1,0 +1,12 @@
+{
+  "hinweis": "Ausgedachte Bedarfsgaben für die Demo (0.33.0). vorStunden: so viele Stunden vor dem Laden der Demo-Daten. kuerzel: wer gegeben hat; absprache: Fachkraft, mit der eine Assistenzkraft die Gabe abgesprochen hat. Je Gabe entsteht ein Bericht in der Akte.",
+  "gaben": [
+    {"bewohner": "Tagetes", "vorStunden": 3, "menge": "1", "anlass": "bei starker Unruhe", "kuerzel": "KL", "absprache": "AB"},
+    {"bewohner": "Tagetes", "vorStunden": 30, "menge": "1", "anlass": "bei starker Unruhe", "kuerzel": "AB"},
+    {"bewohner": "Pflaume", "vorStunden": 50, "menge": "1", "anlass": "bei starker Unruhe", "kuerzel": "TE", "absprache": "LA"},
+    {"bewohner": "Nussbaum", "vorStunden": 5, "menge": "1", "anlass": "bei starker Unruhe", "kuerzel": "GH"},
+    {"bewohner": "Lavendel", "vorStunden": 20, "menge": "1", "anlass": "bei starker Unruhe", "kuerzel": "SW", "absprache": "JF"},
+    {"bewohner": "Lilie", "vorStunden": 8, "menge": "1", "anlass": "bei starker Unruhe", "kuerzel": "MS", "absprache": "DE"},
+    {"bewohner": "Magnolie", "vorStunden": 70, "menge": "1", "anlass": "bei starker Unruhe", "kuerzel": "VK"}
+  ]
+}

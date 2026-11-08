@@ -254,9 +254,18 @@ public sealed partial class Speicher
             FunktionVorbelegen(f, transaktion);
             transaktion.Commit();
         }
+        // „Nur Fachkräfte“ für später dazugekommene Fälle (0.33.0: Visiten) einmal setzen; danach gilt die Rechte-Tabelle.
+        foreach (var f in RechteRegeln.NurFachkraftNachtraeglich.Where(f => Meta(FachkraftSchluessel(f)) is null))
+        {
+            using var transaktion = db.BeginTransaction();
+            Ausfuehren("INSERT OR IGNORE INTO rechte_fachkraft (funktion) VALUES ($f)", transaktion, ("$f", f));
+            SetzeMeta(FachkraftSchluessel(f), "1", transaktion);
+            transaktion.Commit();
+        }
     }
 
     private static string NachtraeglichSchluessel(string funktion) => $"rechte_vorbelegt_{funktion}";
+    private static string FachkraftSchluessel(string funktion) => $"nur_fachkraft_vorbelegt_{funktion}";
 
     // Schritt 26a2, einmal je Datenbank: Position „Administrator“ (an erster Stelle, alle Häkchen) und –
     // in einer schon benutzten Datenbank ohne TST – den Mitarbeiter TST in allen Bereichen. Ein
@@ -310,6 +319,7 @@ public sealed partial class Speicher
         Ausfuehren("INSERT OR IGNORE INTO bereiche (name) SELECT DISTINCT wohnbereich FROM bewohner", transaktion);
         SetzeMeta(Grundbestand, "1", transaktion);
         foreach (var f in RechteRegeln.Nachtraeglich) SetzeMeta(NachtraeglichSchluessel(f), "1", transaktion);   // oben schon vorbelegt
+        foreach (var f in RechteRegeln.NurFachkraftNachtraeglich) SetzeMeta(FachkraftSchluessel(f), "1", transaktion);
     }
 
     // Demo: Mitarbeiter, Bereiche, Positionen und Rechte wie neu (daten/demo/mitarbeiter.json).

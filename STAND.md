@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.32.0** (Einstellungen neu gegliedert, Bauplan Schritt 29).
+Stand: 08.11.2026. Version: **0.33.0** (Assistenzkraft und Fachkraft, „Bedarf gegeben …“).
 
 ## Aktuell
 
@@ -184,6 +184,12 @@ Neu in 0.32.0: **Einstellungen als ganze Seite** wie in Windows 11 – links zeh
 und eine Suche, rechts je Einstellung eine Karte; Änderungen gelten sofort, ohne Recht ist eine Karte
 grau und nennt den Grund. „Einstellungen“ steht fest unten in der Seitenleiste; „Demo-Daten
 zurücksetzen“ und „Standardaufgaben …“ gibt es nur noch dort (keine zweite Stelle).
+
+Neu in 0.33.0: Jeder Mitarbeiter ist **Assistenzkraft** oder **Fachkraft** (Anmeldung, Mitarbeiterliste,
+Formular). **Visiten** machen nur Fachkräfte. Neu im Medikamentenplan: **„Bedarf gegeben …“** an jeder
+Bedarfsverordnung – Uhrzeit, Menge, Anlass; man sieht, was heute schon gegeben wurde und was höchstens
+erlaubt ist. Eine Assistenzkraft muss die Fachkraft angeben, mit der die Gabe abgesprochen ist. Jede Gabe
+steht als Bericht in der Akte.
 
 **Nächster Schritt:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -953,6 +959,21 @@ zurücksetzen“ und „Standardaufgaben …“ gibt es nur noch dort (keine zwe
     „Achtung:“.
   - Umgezogen (keine zweite Stelle mehr): „Demo-Daten zurücksetzen“ aus der Seitenleiste,
     „Standardaufgaben …“ von der Seite „Aufgaben“.
+- 0.33.0 — Assistenzkraft und Fachkraft (Eintrag in `IDEEN.md`, bestätigt von Tobi direkt, 08.11.2026):
+  - Qualifikation „Assistenzkraft“ oder „Fachkraft“: im Anmeldefenster, in der Mitarbeiterliste (Spalte
+    „Qualifikation“) und im Formular (Auswahl statt Häkchen; neue Mitarbeiter: Assistenzkraft).
+  - Visiten: in der Rechte-Tabelle „nur Fachkräfte“ (auch in bestehenden Datenbanken einmal gesetzt). Für
+    Assistenzkräfte ist „Visite beginnen …“ grau: „Nur für Fachkräfte.“
+  - Neues Recht „Bedarfsmedikation geben“ (Bereichsleitung, Mitarbeiter Wohnbereich; die Leitungen wie immer).
+  - „Bedarf gegeben …“ an jeder Bedarfsverordnung, die heute gilt (Medikamentenplan → Zeile → Knopf): Uhrzeit
+    (heute, nicht in der Zukunft), Menge (Einzeldosis vorbelegt), Anlass (aus der Verordnung), „In Absprache
+    mit“ (aktive Fachkräfte, eigener Bereich zuerst). Oben „Heute 1× gegeben: 09:15 (1 Stück, AB)“ und
+    „Höchstens: 2 in 24 Stunden“. Ist die Höchstmenge in den 24 Stunden davor erreicht: Warnung, eingetragen
+    wird erst mit „Trotzdem eintragen“.
+  - Jede Gabe ist ein Bericht in der Akte (Lebensbereich 5, Verfasser = wer gegeben hat): „Bedarfsmedikation
+    gegeben um 14:30: Lorazepam … 1 Stück. Anlass: … In Absprache mit Anna Bachstelze (AB).“
+  - Datenbank-Schritt 28: Tabelle `bedarfsgaben` (wird nie überschrieben). Demo: sieben Gaben in R1–R3, vier
+    davon von Assistenzkräften mit Absprache.
 
 ## Offene Punkte
 
@@ -1024,6 +1045,19 @@ zurücksetzen“ und „Standardaufgaben …“ gibt es nur noch dort (keine zwe
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (0.33.0): Die Qualifikation bleibt in der Datenbank das bisherige Feld „Fachkraft“ (ja/nein) und
+  heißt in der Oberfläche „Assistenzkraft“ oder „Fachkraft“ – keine Umstellung der Daten nötig.
+- 08.11.2026 (0.33.0): „Visiten nur Fachkräfte“ ist das Häkchen „nur Fachkräfte“ der Rechte-Tabelle, nicht fest
+  im Programm; wer Rechte verwaltet, kann es ändern. Bestehende Datenbanken bekommen es einmal gesetzt.
+- 08.11.2026 (0.33.0): Bedarf geben ist ein eigenes Recht (nicht „Medikation bearbeiten“, das nur Fachkräfte
+  haben): Assistenzkräfte dürfen geben, brauchen aber die Absprache. Fachkräfte können eine Absprache eintragen,
+  müssen es nicht.
+- 08.11.2026 (0.33.0): Die Höchstmenge liest das Programm aus der Zahl vorne in „höchstens“ (z. B. „2 in 24
+  Stunden“) und zählt die Gaben der 24 Stunden davor. Bei erreichter Menge warnt es, sperrt aber nicht – die
+  Entscheidung bleibt beim Menschen (z. B. nach ärztlicher Rücksprache). Ohne Zahl: keine Warnung.
+- 08.11.2026 (0.33.0): Eine Gabe gilt für heute (nur Uhrzeit), höchstens 5 Minuten in der Zukunft. Nachträge
+  für frühere Tage gibt es nicht; dafür gibt es den Bericht.
 
 - 08.11.2026 (Schritt 26n): Umwandlung SVG → ICO mit einem eigenen Python-Skript **nur mit der
   Standardbibliothek** (keine weitere Abhängigkeit). Geprüft und verworfen: `Svg.Skia` (MIT) zieht `Svg.Custom`
@@ -1684,6 +1718,18 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.0:
+
+1. Anmelden: in der Liste steht bei jeder Person „Assistenzkraft“ oder „Fachkraft“ (z. B. KL Assistenzkraft,
+   AB Fachkraft). Einstellungen → Verwaltung → Mitarbeiter: Spalte „Qualifikation“; im Formular die Auswahl.
+2. Als „KL“: Visiten → „Visite beginnen …“ grau, beim Darüberfahren „Nur für Fachkräfte.“ Als „AB“ geht es.
+3. Als „KL“: Akte von Thea Tagetes (oder einem anderen Bewohner mit Bedarf) → Medikamentenplan → Zeile der
+   Bedarfsmedikation → „Bedarf gegeben …“. Oben steht, was heute schon gegeben wurde und „Höchstens …“.
+4. Ohne „In Absprache mit“ → Fehler „Als Assistenzkraft bitte die Fachkraft wählen …“. Mit „AB“ → eingetragen;
+   in der Akte unter „Berichte“ steht „Bedarfsmedikation gegeben um … In Absprache mit Anna Bachstelze (AB).“
+5. Als „AB“ noch einmal: kein Pflichtfeld; ist die Höchstmenge erreicht, kommt eine Warnung, erst „Trotzdem
+   eintragen“ trägt ein.
 
 Version 0.32.0:
 

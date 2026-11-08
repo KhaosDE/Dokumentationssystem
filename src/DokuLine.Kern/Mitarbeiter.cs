@@ -11,6 +11,7 @@ public sealed record Mitarbeiter(string Kuerzel, string Vorname, string Nachname
 {
     public string Name => $"{Vorname} {Nachname}";
     public string Anzeige => $"{Name} ({Kuerzel})";
+    public string Qualifikation => RechteRegeln.Qualifikation(Fachkraft);   // „Assistenzkraft“ oder „Fachkraft“
     public string? Farbe { get; init; }   // #RRGGBB (Schritt 20); null = Vorgabe aus dem Kürzel
 }
 
@@ -26,6 +27,7 @@ public static class Funktionen
     public const string MedikationBearbeiten = "medikation_bearbeiten";
     public const string MedikamentAnlegen = "medikament_anlegen";
     public const string MedikamenteVerwalten = "medikamente_verwalten";
+    public const string BedarfGeben = "bedarf_geben";   // „Bedarf gegeben …“ (Assistenzkraft nur mit Absprache)
     public const string TherapienBearbeiten = "therapien_bearbeiten";
     public const string TherapienBereich = "therapien_bereich";   // Schritt 22: Angebote des eigenen Wohnbereichs
     public const string TeilnahmeBestaetigen = "teilnahme_bestaetigen";
@@ -53,6 +55,7 @@ public static class Funktionen
         (MedikationBearbeiten, "Medikation bearbeiten"),
         (MedikamentAnlegen, "Medikament anlegen"),
         (MedikamenteVerwalten, "Medikamentendatenbank verwalten (prüfen, ändern, sperren)"),
+        (BedarfGeben, "Bedarfsmedikation geben"),
         (TherapienBearbeiten, "Therapien bearbeiten"),
         (TherapienBereich, "Therapien des eigenen Bereichs bearbeiten"),
         (TeilnahmeBestaetigen, "Therapie-Teilnahme bestätigen"),
@@ -78,6 +81,10 @@ public static partial class RechteRegeln
     public const string NichtAngemeldetText = "Bitte zuerst anmelden.";
     public const string NurFachkraftText = "Nur für Fachkräfte.";
 
+    // Die zwei Stufen (Tobi, 08.11.2026): die kleinste ist die Assistenzkraft, darüber die Fachkraft.
+    public const string Assistenzkraft = "Assistenzkraft", Fachkraft = "Fachkraft";
+    public static string Qualifikation(bool fachkraft) => fachkraft ? Fachkraft : Assistenzkraft;
+
     // Schritt 26a2: Der Administrator hat immer alle Rechte, in allen Bereichen, auch ohne „Fachkraft“.
     // Es bleibt immer mindestens ein aktiver Administrator, damit sich niemand aussperren kann.
     public const string Administrator = "Administrator";
@@ -95,7 +102,11 @@ public static partial class RechteRegeln
         [Administrator, "Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung", "Mitarbeiter Wohnbereich",
          "Psychologischer Fachdienst", "Pädagogischer Fachdienst", "Therapie"];
 
-    public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten];
+    // Visiten seit 0.33.0: Assistenzkräfte machen keine Visiten.
+    public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten];
+
+    // „Nur Fachkräfte“, das nach der ersten Vorbelegung dazukam: in bestehenden Datenbanken einmal setzen.
+    public static readonly string[] NurFachkraftNachtraeglich = [Funktionen.Visiten];
 
     private static readonly Dictionary<string, string[]> Vorgabe = new()
     {
@@ -103,13 +114,14 @@ public static partial class RechteRegeln
         [
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten,
             Funktionen.MedikamentAnlegen, Funktionen.TeilnahmeBestaetigen, Funktionen.KalenderHaus, Funktionen.Fahrzeuge,
-            Funktionen.AufgabenVorlagen, Funktionen.Heb, Funktionen.MitarbeiterBereich, Funktionen.EinstellungenBereich,
+            Funktionen.BedarfGeben, Funktionen.AufgabenVorlagen, Funktionen.Heb, Funktionen.MitarbeiterBereich, Funktionen.EinstellungenBereich,
             Funktionen.DemoZuruecksetzen, Funktionen.TherapienBereich, Funktionen.Aerzte,
         ],
         ["Mitarbeiter Wohnbereich"] =
         [
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten,
             Funktionen.MedikamentAnlegen, Funktionen.TeilnahmeBestaetigen, Funktionen.Fahrzeuge, Funktionen.Heb,
+            Funktionen.BedarfGeben,
         ],
         ["Psychologischer Fachdienst"] =
         [
@@ -126,7 +138,8 @@ public static partial class RechteRegeln
 
     // Funktionen, die nach der ersten Vorbelegung (0.22.0) dazukamen: werden in bestehenden
     // Datenbanken einmal nachträglich vorbelegt.
-    public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten];
+    public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten,
+        Funktionen.BedarfGeben];
 
     // Schritt 26f: Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.

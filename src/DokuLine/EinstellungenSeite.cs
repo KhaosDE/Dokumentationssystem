@@ -257,7 +257,7 @@ public sealed class EinstellungenSeite : Panel
         ListenKnopf.Click += (_, _) => { using var f = new ListenFenster(speicher); Dialog.Zeigen(f, FindForm()); };
         RechteKnopf.Click += (_, _) => { using var f = new RechteFenster(speicher); Dialog.Zeigen(f, FindForm()); };
         AerzteKnopf.Click += (_, _) => { using var f = new AerzteFenster(speicher); Dialog.Zeigen(f, FindForm()); };
-        Karte("Verwaltung", "Mitarbeiter", "Mitarbeiter mit Bereichen, Positionen und „Fachkraft“. Die Bereichsleitung verwaltet ihren Bereich.", MitarbeiterKnopf);
+        Karte("Verwaltung", "Mitarbeiter", "Mitarbeiter mit Bereichen, Positionen und Qualifikation (Assistenzkraft oder Fachkraft). Die Bereichsleitung verwaltet ihren Bereich.", MitarbeiterKnopf);
         Karte("Verwaltung", "Bereiche und Positionen", "Listen zum Zuordnen; stilllegen statt löschen, solange jemand zugeordnet ist.", ListenKnopf);
         Karte("Verwaltung", "Rechte", "Tabelle: welche Position was darf, je Funktion „nur Fachkräfte“. Ohne Recht nur ansehen.", RechteKnopf);
         Karte("Verwaltung", "Ärzteverzeichnis", "Ausgedachte Ärztinnen und Ärzte (Name, Fachrichtung, Praxis, Telefon, E-Mail), aus denen bei Verordnung, Visite und Termin gewählt wird. Nie löschen, nur inaktiv. Ohne Recht nur ansehen.", AerzteKnopf);
