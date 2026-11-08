@@ -493,7 +493,7 @@ Warnung bei Doppelbuchung, Mitfahrende im Tagesplan und während der Fahrt abwes
     Uhrzeit und Kürzel setzt das Programm, eigene Einträge, nie überschrieben).
   - Mitfahrende: im Wochen- und Tagesplan („Fahrt: Arzttermin (Caddy)“), während der Fahrt auf
     Karten und in der Akte „abwesend: unterwegs mit Caddy bis 11:05“.
-  - Demo `daten/demo/fahrten.json`: Caddy gerade mit Anton Ahorn zum Arzt unterwegs, eine
+  - Demo `daten/demo/fahrten.json`: Caddy gerade mit Emil Eiche zum Arzt unterwegs, eine
     Sporttherapie-Fahrt gestern, der Tierpark-Ausflug mit dem VW Bus in acht Tagen; im Kalender
     „Haus“ Hausversammlung und Brandschutzübung.
 
@@ -987,7 +987,7 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 Version 0.27.0:
 
 1. Übersicht → „FAHRZEUGE“: Caddy „unterwegs seit …, zurück geplant … (Fahrer KL)“, VW Bus „vor
-   Ort“. Anton Ahorn hat auf seiner Karte „abwesend: unterwegs mit Caddy bis …“. Nach einiger Zeit
+   Ort“. Emil Eiche hat auf seiner Karte „abwesend: unterwegs mit Caddy bis …“. Nach einiger Zeit
    wird der Caddy rot („Rückkehr überschritten“).
 2. Beim Caddy „zurück“ → „vor Ort“, Anton Ahorn ist nicht mehr abwesend.
 3. „Neue Fahrt …“: VW Bus, heute, 23:00–23:30, Sporttherapie, Berta Birke, Ziel „Hallenbad“ →

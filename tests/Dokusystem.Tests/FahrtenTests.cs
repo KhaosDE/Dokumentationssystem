@@ -42,10 +42,10 @@ public sealed class FahrtenTests : IDisposable
         Assert.True(caddy.Unterwegs);
         Assert.Equal("unterwegs seit 09:35, zurück geplant 11:05 (Fahrer KL)", caddy.Text);
         Assert.StartsWith("vor Ort", staende.Single(x => x.Fahrzeug == "VW Bus").Text);
-        // Ahorn fährt mit: abwesend, und die Fahrt steht in seinem Wochen- bzw. Tagesplan.
-        Assert.Equal("abwesend: unterwegs mit Caddy bis 11:05", s.Mitfahrende(jetzt)[B("Ahorn")].Text);
-        Assert.Equal(MarkenArt.Abwesend, s.Mitfahrende(jetzt)[B("Ahorn")].Art);
-        Assert.Contains(s.Tagesplan(DateOnly.FromDateTime(jetzt), [s.Bewohner(B("Ahorn"))!]),
+        // Eiche fährt mit: abwesend, und die Fahrt steht in seinem Wochen- bzw. Tagesplan.
+        Assert.Equal("abwesend: unterwegs mit Caddy bis 11:05", s.Mitfahrende(jetzt)[B("Eiche")].Text);
+        Assert.Equal(MarkenArt.Abwesend, s.Mitfahrende(jetzt)[B("Eiche")].Art);
+        Assert.Contains(s.Tagesplan(DateOnly.FromDateTime(jetzt), [s.Bewohner(B("Eiche"))!]),
             z => z.Termin.Quelle == TerminQuelle.Fahrt && z.Termin.Titel == "Fahrt: Arzttermin (Caddy)");
         // Rückkehr überschritten.
         Assert.EndsWith("– Rückkehr überschritten", s.FahrzeugStaende(jetzt.AddHours(2)).Single(x => x.Fahrzeug == "Caddy").Text);

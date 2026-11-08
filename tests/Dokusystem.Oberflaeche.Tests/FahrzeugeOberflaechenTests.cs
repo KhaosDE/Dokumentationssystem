@@ -24,13 +24,13 @@ public class FahrzeugeOberflaechenTests
         Assert.StartsWith("unterwegs seit ", Zeile("Caddy").StandFeld.Text);
         Assert.True(Zeile("Caddy").ZurueckKnopf.Visible);
         Assert.StartsWith("vor Ort", Zeile("VW Bus").StandFeld.Text);
-        long ahorn = u.Demo("Ahorn").Id!.Value;
-        Assert.Contains(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == ahorn).Marken, m => m.Art == MarkenArt.Abwesend && m.Text.StartsWith("abwesend: unterwegs mit Caddy"));
+        long eiche = u.Demo("Eiche").Id!.Value;   // fährt in der Demo gerade mit
+        Assert.Contains(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == eiche).Marken, m => m.Art == MarkenArt.Abwesend && m.Text.StartsWith("abwesend: unterwegs mit Caddy"));
         Hilfe.Foto(f, "77_uebersicht_fahrzeuge");
 
         Zeile("Caddy").ZurueckKnopf.PerformClick();
         Assert.StartsWith("vor Ort", Zeile("Caddy").StandFeld.Text);
-        Assert.DoesNotContain(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == ahorn).Marken, m => m.Text.StartsWith("abwesend: unterwegs"));
+        Assert.DoesNotContain(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == eiche).Marken, m => m.Text.StartsWith("abwesend: unterwegs"));
 
         // Neue Fahrt, dann eine zweite zur selben Zeit: Warnung, erst „Trotzdem speichern“ speichert.
         using (new DialogErsatz(fenster =>
@@ -112,7 +112,8 @@ public class FahrzeugeOberflaechenTests
             neu.HausWahl.Checked = true;
             neu.Titel.Text = "Sommerfest";
             neu.BeginnUhrzeit.Text = "15:00";
-            Assert.True(neu.Speichern());
+            neu.EndeUhrzeit.Text = "18:00";
+            if (!neu.Speichern()) Assert.Fail(neu.Fehler.Text);
             Assert.True(neu.Gespeichert!.Aktuell.Haus);
         }
         k.Aktualisieren();
