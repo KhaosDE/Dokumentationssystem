@@ -17,7 +17,8 @@ public sealed partial class Speicher
     public Verordnung VerordnungSpeichern(Verordnung v)
     {
         if (Bewohner(v.BewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
-        if (Medikament(v.MedikamentId) is null) throw new Eingabefehler(["Dieses Medikament gibt es nicht mehr."]);
+        if (Medikament(v.MedikamentId) is not Medikament m) throw new Eingabefehler(["Dieses Medikament gibt es nicht mehr."]);
+        if (m.Gesperrt) throw new Eingabefehler([$"„{m.Anzeige}“ ist in der Medikamentendatenbank gesperrt."]);
         if (v.Id != 0) throw new InvalidOperationException("Verordnungen werden nicht überschrieben – Änderungen sind eigene Einträge.");
         using var transaktion = db.BeginTransaction();
         long id = VerordnungEinfuegen(v, transaktion);

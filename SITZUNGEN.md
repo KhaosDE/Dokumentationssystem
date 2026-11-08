@@ -46,3 +46,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Platzhalter für das Einrichtungslogo im Kopf (Wunsch Tobi in der Sitzung, mit 0.22.0).
 - 08.11.2026 — Nachschlage-Ansicht nur BfArM (Gelbe Liste raus), abschaltbar; README-Abschnitt „Für die IT“ zu Windows Server und WebView2 beauftragt (Chat „Programme/Apps“).
 - 08.11.2026 — Claude Code: Bauplan Schritt 20 „Bezugspflege und Einzeltrainer“ (0.23.0).
+- 08.11.2026 — Claude Code: Bauplan Schritt 21 „Medikation als Tabelle, Medikamentendatenbank in den Einstellungen“ mit Nachschlage-Ansicht des BfArM (0.24.0).

@@ -502,6 +502,12 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER einzeltrainer_bleibt BEFORE UPDATE ON einzeltrainer
             BEGIN SELECT RAISE(ABORT, 'Einzeltrainer werden nicht überschrieben – ein Wechsel ist ein neuer Eintrag.'); END;
         """,
+        // 17 – Medikamentendatenbank: Prüfdatum der Bestätigung, „gesperrt“ und Zulassungsnummer je Fassung.
+        """
+        ALTER TABLE medikament_fassungen ADD COLUMN geprueft_am TEXT;
+        ALTER TABLE medikament_fassungen ADD COLUMN zulassungsnummer TEXT NOT NULL DEFAULT '';
+        ALTER TABLE medikament_fassungen ADD COLUMN gesperrt INTEGER NOT NULL DEFAULT 0 CHECK (gesperrt IN (0, 1));
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;

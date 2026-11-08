@@ -65,13 +65,17 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Nachrichten** (links, mit Zähler): an Personen oder Teams, mit Antworten im selben
   Verlauf, optional zu einem Bewohner (in der Akte „Nachrichten …“). Alles bleibt im Programm,
   kein E-Mail-Versand. Nachrichten werden nicht gelöscht, nur archiviert.
-- **Medikamente** (links): Demo-Bestand gängiger Medikamente mit Quelle (Fachinformation),
-  **nicht zum Verordnen verwenden**. Suchen, ansehen, eigene Einträge anlegen, ändern (mit
-  Verlauf). Die Quelle lässt sich kopieren und im Browser öffnen; das Programm selbst geht
-  nicht ins Internet.
-- **Medikation** (Reiter in der Akte): „Was gilt am …“ aus Grundverordnung, Pausen und
-  Stufenplänen. Die Grundverordnung wird nie überschrieben; Pause, Stufenplan und Absetzen sind
-  eigene Einträge mit Anordnung. **Demo — nicht zum Stellen verwenden.**
+- **Medikamentendatenbank** (Einstellungen → „Medikamente“): Demo-Bestand gängiger Medikamente
+  mit Quelle (Fachinformation), **nicht zum Verordnen verwenden**. Suchen, ansehen, eigene
+  Einträge anlegen, ändern (mit Verlauf), sperren. Wer ein Medikament anlegt, prüft es selbst
+  gegen eine offizielle Quelle und bestätigt es mit Quelle und Prüfdatum; ungeprüfte sind beim
+  Verordnen gekennzeichnet. Über der Maske eine kleine **Nachschlage-Ansicht des BfArM**: Text
+  markieren, Feld anklicken, „In Feld übernehmen“. Sie zeigt nur Seiten des BfArM und lässt sich in
+  den Einstellungen abschalten (dann „Im Browser öffnen“).
+- **Medikamentenplan** (Reiter in der Akte): „Was gilt am …“ als Tabelle – Medikament,
+  morgens bis nachts, verordnet von, seit, Status; Bedarfsmedikation darunter; sortierbar. Ein
+  Klick auf eine Zeile zeigt Einzelheiten und Verlauf; dort Pause, Stufenplan, Absetzen. Die
+  Grundverordnung wird nie überschrieben. **Demo — nicht zum Stellen verwenden.**
 - **Therapie** (links): Angebote mit Terminen, Teilnehmern und freien Plätzen; Bewohner
   zuteilen (mit Warnung bei Überschneidung), Teilnahme beenden, Änderungen „ab Datum“.
 - **Wochenplan** (Reiter in der Akte): die Regelwoche mit zugeteilten Therapien und freien
@@ -131,8 +135,8 @@ Danach fragt Windows für diese Datei nicht mehr.
   Recht bleiben Knöpfe grau und sagen beim Darüberfahren, warum.
 - **Logo der Einrichtung:** Oben rechts im Kopf steht ein Platzhalter. Ein Klick darauf öffnet die
   Einstellungen; unter „Bild im Kopf“ lässt sich das eigene Logo wählen (es bleibt auf dem Rechner).
-- **Einstellungen** (links): Update beim Start, Module ein- und
-  ausschalten, Frist „Beschluss endet bald“, eigenes Bild für den Kopf (z. B. ein Logo – die Datei wird nur in den
+- **Einstellungen** (links): Update beim Start, Medikamentendatenbank und Nachschlage-Ansicht,
+  Module ein- und ausschalten, Frist „Beschluss endet bald“, eigenes Bild für den Kopf (z. B. ein Logo – die Datei wird nur in den
   Datenordner kopiert).
 
 ## Updates
@@ -175,8 +179,37 @@ Adresszeile eingeben). Dort liegen:
 - `einstellungen.json` – die Einstellungen,
 - `uebergabe-woerter.txt` – nur falls angelegt: eigene Wörter für den Übergabe-Hinweis,
 - `update.log` – was beim Update passiert ist (zum Nachsehen, wenn etwas nicht klappt),
+- `webansicht\` – Zwischenspeicher der Nachschlage-Ansicht des BfArM (darf gelöscht werden),
 - `dokusystem.sqlite3` – nur falls vorhanden: die alte Datenbank der Version 0.2.0
   (wird nicht mehr benutzt).
+
+## Für die IT
+
+Das Programm ist eine einzelne `.exe` (.NET 10, mit allem Nötigen) und braucht keine
+Installation. Es läuft unter Windows 10 und 11.
+
+**Windows Server** (laut Microsofts Liste der unterstützten Systeme für .NET 10, Stand
+08.11.2026): Windows Server 2016, 2019, 2022 und 2025, jeweils mit Desktopdarstellung (das
+Programm hat Fenster, „Server Core“ reicht nicht). Windows Server 2012 und 2012 R2 nur mit
+Microsofts Zusatz-Updates (ESU) – nicht empfohlen. Jede angemeldete Person hat ihren eigenen
+Datenordner (`%APPDATA%\Dokumentationssystem`).
+
+**Nachschlage-Ansicht (WebView2):** Im Formular „Medikament“ zeigt das Programm die
+Arzneimittelsuche des BfArM in einem kleinen Fenster. Dafür braucht es die kostenlose
+„Microsoft Edge WebView2 Runtime“. In Windows 11 ist sie enthalten, auf Servern oft nicht – dann
+einmal von der IT installieren lassen. Für Windows Server 2012 und 2012 R2 gibt es sie nicht mehr;
+dort die Ansicht abschalten (Einstellungen → Medikamente → „Nachschlage-Ansicht anzeigen“).
+Ob WebView2 da ist, steht in den Einstellungen unter „Programm“. Fehlt sie, erscheint im
+Formular nur ein Hinweis; alles andere funktioniert.
+
+**Netz:** Das Programm verbindet sich nur mit
+- `api.github.com` und `github.com` (Selbst-Update; der Download leitet GitHub auf seine eigenen
+  Download-Server weiter; abschaltbar: Einstellungen oder `--kein-update`),
+- `bfarm.de` mit Unteradressen (z. B. `auth.bfarm.de`, `portal.bfarm.de`) und `pharmnet-bund.de`
+  – nur in der Nachschlage-Ansicht und erst, wenn jemand „Nachschlagen“ drückt. Gesucht wird nur
+  mit dem Namen eines Medikaments, nie mit Angaben zu Bewohnern.
+
+Alles andere (E-Mail, Links) übergibt das Programm an die Programme auf dem Rechner.
 
 ## Für Entwickler
 

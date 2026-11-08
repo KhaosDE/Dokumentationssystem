@@ -385,7 +385,7 @@ public sealed class AkteAnsicht : Panel
     {
         bool stamm = Reiter.Aktiv == "Stammdaten";
         bool berichte = Reiter.Aktiv == "Berichte";
-        bool medikation = Reiter.Aktiv == "Medikation";
+        bool medikation = Reiter.Aktiv == "Medikamentenplan";
         bool wochenplan = Reiter.Aktiv == "Wochenplan";
         bool biografie = Reiter.Aktiv == "Biografie";
         bool reflexion = Reiter.Aktiv == "Reflexion";

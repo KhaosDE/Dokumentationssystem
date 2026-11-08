@@ -82,23 +82,38 @@ public class RechteOberflaechenTests
         }
         Hilfe.Foto(f, "64_akte_gesperrt");
 
-        // KL: Mitarbeiter Wohnbereich ohne Fachkraft – Medikation nur ansehen.
+        // KL: Mitarbeiter Wohnbereich ohne Fachkraft – Medikamentenplan nur ansehen.
         f.BenutzerWaehlen("KL");
         Assert.Null(Stil.Sperrgrund(Knopf("Bearbeiten …")));   // die Akte aktualisiert sich beim Wechsel
-        akte.Reiter.Waehlen("Medikation");
+        akte.Reiter.Waehlen("Medikamentenplan");
         Assert.Equal(RechteRegeln.NurFachkraftText, Stil.Sperrgrund(akte.Medikation.NeuKnopf));
-        Assert.All(akte.Medikation.Karten, k => Assert.Equal(RechteRegeln.NurFachkraftText, Stil.Sperrgrund(k.PauseKnopf)));
+        string? pauseGesperrt = null;
+        bool gewaehlt = true;
+        using (new DialogErsatz(fenster =>
+        {
+            var d = Assert.IsType<VerordnungDetailFenster>(fenster);
+            pauseGesperrt = Stil.Sperrgrund(d.Karte.PauseKnopf);
+            gewaehlt = d.Waehlen(AenderungArt.Pause);
+            return DialogResult.Cancel;
+        }))
+            akte.Medikation.Oeffnen(akte.Medikation.Eintraege[0]);
+        Assert.Equal(RechteRegeln.NurFachkraftText, pauseGesperrt);
+        Assert.False(gewaehlt);
 
-        // CD: Fachkraft – Medikation ja; Therapien nein; Medikamentendatenbank anlegen ja, verwalten nein.
+        // CD: Fachkraft – Medikamentenplan ja; Therapien nein; Medikamentendatenbank anlegen ja, verwalten nein.
         f.BenutzerWaehlen("CD");
-        akte.Reiter.Waehlen("Medikation");
+        akte.Reiter.Waehlen("Medikamentenplan");
         Assert.Null(Stil.Sperrgrund(akte.Medikation.NeuKnopf));
         f.BereichWaehlen("Therapie");
         Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(f.Therapie.NeuKnopf));
         Assert.All(f.Therapie.Karten, k => Assert.NotNull(Stil.Sperrgrund(k.ZuteilenKnopf)));
-        f.BereichWaehlen("Medikamente");
-        Assert.Null(Stil.Sperrgrund(f.Medikamente.NeuKnopf));
-        Assert.All(f.Medikamente.Karten, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k.AendernKnopf)));
+        using (var db = new MedikamenteFenster(u.Speicher))
+        {
+            Assert.Null(Stil.Sperrgrund(db.Seite.NeuKnopf));
+            Assert.All(db.Seite.Karten, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k.AendernKnopf)));
+            Assert.All(db.Seite.Karten, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k.SperrenKnopf)));
+            Assert.False(db.Seite.Sperren(db.Seite.Karten[0].Medikament, true));
+        }
         Assert.NotNull(Stil.Sperrgrund(f.DemoKnopf));
 
         // Rechte ändern wirkt sofort (Rechte-Tabelle, angemeldet als Geschäftsführung).
