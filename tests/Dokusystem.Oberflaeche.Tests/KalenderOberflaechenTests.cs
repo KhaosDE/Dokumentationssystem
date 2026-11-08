@@ -41,7 +41,7 @@ public class KalenderOberflaechenTests
             k.TagWaehlen(Naechster(DayOfWeek.Thursday));
             k.AnsichtWaehlen(KalenderAnsicht.Tag);
             var arzt = k.Karten.Single(c => c.Termin.Aktuell.Titel == "Hausarzt: Kontrolle");
-            Assert.Equal(["Termin", KalenderRegeln.ZeitText(arzt.Termin.Aktuell)], arzt.MarkenTexte);
+            Assert.Equal(["Kalender Bereich", "Termin", KalenderRegeln.ZeitText(arzt.Termin.Aktuell)], arzt.MarkenTexte);
             Assert.Contains("Bewohner: Anton Ahorn", arzt.AngabenText);
             Assert.False(arzt.ListeKnopf.Visible);
 
@@ -80,7 +80,7 @@ public class KalenderOberflaechenTests
             k.TagWaehlen(tag);
             k.AnsichtWaehlen(KalenderAnsicht.Tag);
             KalenderKarte Karte() => k.Karten.Single(c => c.Termin.Aktuell.Titel == "Museum");
-            Assert.Equal("Tagesausflug", Karte().MarkenTexte[0]);
+            Assert.Equal("Tagesausflug", Karte().MarkenTexte[1]);
             Assert.Contains("Teilnehmer: Anton Ahorn, Berta Birke", Karte().AngabenText);
             Assert.Contains("Treffpunkt: Eingangshalle", Karte().AngabenText);
             Assert.True(Karte().ListeKnopf.Visible);

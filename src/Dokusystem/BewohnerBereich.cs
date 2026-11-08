@@ -129,6 +129,7 @@ public sealed class BewohnerBereich : Panel
         string kuerzel = werte.Kuerzel;
         var status = speicher.GeltendeStatusmeldungen(jetzt);
         var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan (Schritt 23): „in Therapie: … bis …“
+        var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten (Schritt 24): „abwesend: unterwegs mit …“
         string? berichtGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
         var bezuege = speicher.Bezuege();
         var farben = BezugAnzeige.Farben(speicher);
@@ -139,7 +140,8 @@ public sealed class BewohnerBereich : Panel
                 speicher.UngeleseneUebergaben(b.Id!.Value, kuerzel, jetzt),
                 speicher.WichtigeBerichteSeit(b.Id!.Value, jetzt.AddDays(-7)),
                 Modulverwaltung.Marken(speicher, b, jetzt),
-                [.. inTherapie.TryGetValue(b.Id!.Value, out var wo) ? [wo] : Array.Empty<Marke>(),
+                [.. mitfahrende.TryGetValue(b.Id!.Value, out var fahrt) ? [fahrt] : Array.Empty<Marke>(),
+                 .. inTherapie.TryGetValue(b.Id!.Value, out var wo) ? [wo] : Array.Empty<Marke>(),
                  .. status.TryGetValue(b.Id!.Value, out var s) ? [StatusmeldungRegeln.Marke(s, jetzt)] : Array.Empty<Marke>()],
                 b.Wohnbereich != werte.Bereich ? [new Marke(MarkenArt.Angabe, b.Wohnbereich)] : null);
             karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
@@ -274,7 +276,7 @@ public sealed class AkteAnsicht : Panel
     public IEnumerable<string> KopfMarken => kopfMarken.Controls.OfType<MarkenFeld>().Select(m => m.Text);
     public Bewohner? Bewohner { get; private set; }
     public string? StatusText { get; private set; }   // die geltende Statusmeldung, wie sie im Kopf steht
-    public string? WoText { get; private set; }       // „in Therapie: … bis …“ (Tagesplan), sonst null
+    public string? WoText { get; private set; }       // „in Therapie: … bis …“ (Tagesplan) oder „abwesend: unterwegs mit …“ (Fahrt)
 
     private readonly Speicher speicher;
 
@@ -487,10 +489,10 @@ public sealed class AkteAnsicht : Panel
             kopfMarken.Controls.SetChildIndex(feld, 0);   // vorne, vor dem Zimmer
         }
         // Wo müsste er sein? (Tagesplan, Schritt 23): nach „gegangen“ bis zum Ende der Therapie.
-        WoText = speicher.InTherapie(jetzt).GetValueOrDefault(b.Id!.Value)?.Text;
+        WoText = (speicher.Mitfahrende(jetzt).GetValueOrDefault(b.Id!.Value) ?? speicher.InTherapie(jetzt).GetValueOrDefault(b.Id!.Value))?.Text;
         if (WoText is not null)
         {
-            var feld = new MarkenFeld(WoText, Stil.MarkeFuer(MarkenArt.Status)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) };
+            var feld = new MarkenFeld(WoText, Stil.MarkeFuer(WoText.StartsWith("abwesend") ? MarkenArt.Abwesend : MarkenArt.Status)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) };
             kopfMarken.Controls.Add(feld);
             kopfMarken.Controls.SetChildIndex(feld, 0);
         }

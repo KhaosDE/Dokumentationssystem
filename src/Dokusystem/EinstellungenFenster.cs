@@ -45,6 +45,7 @@ public sealed class EinstellungenFenster : Form
     public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche und Positionen …");
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     public Button MedikamenteKnopf { get; } = Stil.NebenKnopf("Medikamentendatenbank …");
+    public Button FahrzeugeKnopf { get; } = Stil.NebenKnopf("Fahrzeuge …");
     public CheckBox AutoUpdate { get; } = new();
     public CheckBox NachschlageAnsicht { get; } = new() { Text = "Nachschlage-Ansicht anzeigen (Formular „Medikament“)", AutoSize = true };
     public Label WebAnsichtStand { get; } = new() { AutoSize = true, MaximumSize = new Size(380, 0), Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein) };
@@ -154,9 +155,10 @@ public sealed class EinstellungenFenster : Form
             MitarbeiterKnopf.Click += (_, _) => { using var f = new MitarbeiterFenster(speicher); Dialog.Zeigen(f, this); };
             ListenKnopf.Click += (_, _) => { using var f = new ListenFenster(speicher); Dialog.Zeigen(f, this); };
             RechteKnopf.Click += (_, _) => { using var f = new RechteFenster(speicher); Dialog.Zeigen(f, this); };
+            FahrzeugeKnopf.Click += (_, _) => { using var f = new FahrzeugeFenster(speicher); Dialog.Zeigen(f, this); };   // Schritt 24
             Stil.Sperren(MitarbeiterKnopf, Recht.Darf(speicher, Funktionen.MitarbeiterAlle) ? null : Recht.Grund(speicher, Funktionen.MitarbeiterBereich));
-            foreach (var k in new[] { MitarbeiterKnopf, ListenKnopf, RechteKnopf }) k.AutoSize = true;
-            Ganz(Formular.Reihe(MitarbeiterKnopf, ListenKnopf, RechteKnopf));
+            foreach (var k in new[] { MitarbeiterKnopf, ListenKnopf, RechteKnopf, FahrzeugeKnopf }) k.AutoSize = true;
+            Ganz(Formular.Reihe(MitarbeiterKnopf, ListenKnopf, RechteKnopf, FahrzeugeKnopf));
             Ganz(new Label
             {
                 Text = "Mitarbeiter mit Bereichen und Positionen; welche Position was darf, steht in der Rechte-Tabelle. Ohne Recht nur ansehen.",

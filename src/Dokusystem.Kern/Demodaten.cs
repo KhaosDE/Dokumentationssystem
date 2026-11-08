@@ -469,6 +469,65 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Fahrzeuge und Fahrten (Schritt 24) -----
+
+    private sealed class FahrtenDatei
+    {
+        public List<string> Fahrzeuge { get; set; } = [];
+        public List<FahrtVorlage> Fahrten { get; set; } = [];
+    }
+
+    public sealed class FahrtVorlage
+    {
+        public string Fahrzeug { get; set; } = "";
+        public int? LosVorMinuten { get; set; }   // gerade unterwegs: losgefahren vor … Minuten
+        public int DauerMinuten { get; set; } = 60;
+        public int? InTagen { get; set; }
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+        public string Zweck { get; set; } = "sonstiges";
+        public string Fahrer { get; set; } = "";
+        public List<string> Bewohner { get; set; } = [];
+        public string Ziel { get; set; } = "";
+        public bool Erledigt { get; set; }        // losgefahren und zurück wie geplant
+    }
+
+    public sealed record DemoFahrten(List<string> Fahrzeuge, List<(Fahrt Fahrt, DateTime? Los, DateTime? Zurueck)> Fahrten);
+
+    // Fahrzeuge und Fahrten aus daten/demo/fahrten.json; Zeiten relativ zu jetzt.
+    public static DemoFahrten Fahrten(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var datei = Lesen<FahrtenDatei>("fahrten.json");
+        var heute = DateOnly.FromDateTime(jetzt);
+        var liste = new List<(Fahrt, DateTime?, DateTime?)>();
+        jetzt = new DateTime(jetzt.Year, jetzt.Month, jetzt.Day, jetzt.Hour, jetzt.Minute, 0);
+        foreach (var v in datei.Fahrten)
+        {
+            DateTime von, bis;
+            DateTime? los = null, zurueck = null;
+            if (v.LosVorMinuten is int vor)
+            {
+                von = jetzt.AddMinutes(-vor);
+                bis = von.AddMinutes(v.DauerMinuten);
+                los = von;
+            }
+            else
+            {
+                var tag = heute.AddDays(v.InTagen ?? 0);
+                von = tag.ToDateTime(TimeOnly.ParseExact(v.Von, "HH:mm", System.Globalization.CultureInfo.InvariantCulture));
+                bis = tag.ToDateTime(TimeOnly.ParseExact(v.Bis, "HH:mm", System.Globalization.CultureInfo.InvariantCulture));
+                if (v.Erledigt) { los = von.AddMinutes(5); zurueck = bis.AddMinutes(-10); }
+            }
+            var ids = v.Bewohner.Select(n => bewohner.FirstOrDefault(b => b.Nachname == n)?.Id).OfType<long>().ToList();
+            liste.Add((new Fahrt
+            {
+                Fahrzeug = v.Fahrzeug, Von = von, Bis = bis, Zweck = FahrtRegeln.ZweckAus(v.Zweck), Fahrer = v.Fahrer, Bewohner = ids, Ziel = v.Ziel,
+                Erstellt = von.AddDays(-2), Kuerzel = v.Fahrer,
+            }, los, zurueck));
+        }
+        return new DemoFahrten(datei.Fahrzeuge, liste);
+    }
+
     // ----- Wochenplan -----
 
     private sealed class WochenplanDatei
@@ -558,6 +617,7 @@ public static class Demodaten
         public string Treffpunkt { get; set; } = "";
         public string Begleitung { get; set; } = "";
         public bool Abgesagt { get; set; }
+        public bool Haus { get; set; }   // Schritt 24: Kalender „Haus“
         public KalenderAenderungVorlage? Aenderung { get; set; }
     }
 
@@ -591,7 +651,7 @@ public static class Demodaten
             {
                 Art = KalenderRegeln.ArtAus(v.Art), Titel = v.Titel, Beginn = tag.ToDateTime(Zeit(v.Von)), Ende = ende.ToDateTime(Zeit(v.Bis)),
                 Ort = v.Ort, Hinweis = v.Hinweis, Bewohner = ids.Select(i => i!.Value).ToList(), Treffpunkt = v.Treffpunkt, Begleitung = v.Begleitung,
-                Erstellt = (tag < heute ? tag : heute).AddDays(-7).ToDateTime(new TimeOnly(9, 0)), Kuerzel = "AB",
+                Haus = v.Haus, Erstellt = (tag < heute ? tag : heute).AddDays(-7).ToDateTime(new TimeOnly(9, 0)), Kuerzel = v.Haus ? "RS" : "AB",
             };
             var fassungen = new List<KalenderFassung> { erste };
             if (v.Aenderung is KalenderAenderungVorlage a)

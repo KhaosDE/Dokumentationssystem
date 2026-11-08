@@ -105,8 +105,12 @@ Danach fragt Windows für diese Datei nicht mehr.
   Formularfeldern zu; ausgefüllt wird eine Kopie im Datenordner (Ordner `heb`). Ist ein HEB fällig,
   steht das in der Akte und auf der Übersicht.
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
-  Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Kein Abgleich mit
-  anderen Kalendern.
+  Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Zwei Kalender:
+  „Bereich“ und „Haus“ (Umschalter oben; Haus-Termine grau). Kein Abgleich mit anderen Kalendern.
+- **Fahrzeuge** (Übersicht und Kalender): je Firmenwagen „vor Ort“ oder „unterwegs seit …,
+  zurück geplant …“ mit „losgefahren“ und „zurück“; „Neue Fahrt …“ mit Warnung bei Doppelbuchung.
+  Mitfahrende stehen im Tagesplan und sind während der Fahrt abwesend. Die Fahrzeugliste steht in
+  den Einstellungen.
 - **Ausgangsliste** (links, Modul): je Bewohner Ausgangszeiten (allein / mit Bewohner),
   Anwesenheit und Abwesenheit mit Grund und Frist, Unterbringung mit Fristen (eine
   Ausgangsbeschränkung geht nur mit Beschluss oder Forensik), Verlauf je Person und die

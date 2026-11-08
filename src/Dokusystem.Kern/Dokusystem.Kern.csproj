@@ -32,6 +32,7 @@
     <EmbeddedResource Include="..\..\daten\demo\status.json" LogicalName="Dokusystem.Kern.Demo.status.json" />
     <EmbeddedResource Include="..\..\daten\demo\mitarbeiter.json" LogicalName="Dokusystem.Kern.Demo.mitarbeiter.json" />
     <EmbeddedResource Include="..\..\daten\demo\bezug.json" LogicalName="Dokusystem.Kern.Demo.bezug.json" />
+    <EmbeddedResource Include="..\..\daten\demo\fahrten.json" LogicalName="Dokusystem.Kern.Demo.fahrten.json" />
     <EmbeddedResource Include="..\..\daten\uebergabe-woerter.txt" LogicalName="Dokusystem.Kern.uebergabe-woerter.txt" />
   </ItemGroup>
 </Project>

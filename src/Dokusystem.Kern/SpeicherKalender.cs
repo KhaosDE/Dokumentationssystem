@@ -58,12 +58,12 @@ public sealed partial class Speicher
 
     private void KalenderFassungEinfuegen(long id, KalenderFassung f, SqliteTransaction transaktion) =>
         Ausfuehren("""
-            INSERT INTO kalender_fassungen (termin_id, art, titel, beginn, ende, ganztags, ort, hinweis, bewohner, treffpunkt, begleitung, abgesagt, erstellt, kuerzel)
-            VALUES ($t, $a, $ti, $b, $e, $g, $o, $h, $bw, $tr, $be, $ab, $er, $k)
+            INSERT INTO kalender_fassungen (termin_id, art, titel, beginn, ende, ganztags, ort, hinweis, bewohner, treffpunkt, begleitung, abgesagt, erstellt, kuerzel, haus)
+            VALUES ($t, $a, $ti, $b, $e, $g, $o, $h, $bw, $tr, $be, $ab, $er, $k, $hs)
             """, transaktion,
             ("$t", id), ("$a", KalenderRegeln.ArtKuerzel(f.Art)), ("$ti", f.Titel), ("$b", Zeit(f.Beginn)), ("$e", Zeit(f.Ende)),
             ("$g", f.Ganztags ? 1 : 0), ("$o", f.Ort), ("$h", f.Hinweis), ("$bw", JsonSerializer.Serialize(f.Bewohner)),
-            ("$tr", f.Treffpunkt), ("$be", f.Begleitung), ("$ab", f.Abgesagt ? 1 : 0), ("$er", Zeit(f.Erstellt)), ("$k", f.Kuerzel));
+            ("$tr", f.Treffpunkt), ("$be", f.Begleitung), ("$ab", f.Abgesagt ? 1 : 0), ("$er", Zeit(f.Erstellt)), ("$k", f.Kuerzel), ("$hs", f.Haus ? 1 : 0));
 
     public KalenderTermin? KalenderTermin(long id) => KalenderLesen(null).FirstOrDefault(k => k.Id == id);
 
@@ -83,7 +83,7 @@ public sealed partial class Speicher
     {
         var fassungen = new Dictionary<long, List<KalenderFassung>>();
         using (var befehl = Befehl("""
-            SELECT termin_id, art, titel, beginn, ende, ganztags, ort, hinweis, bewohner, treffpunkt, begleitung, abgesagt, erstellt, kuerzel
+            SELECT termin_id, art, titel, beginn, ende, ganztags, ort, hinweis, bewohner, treffpunkt, begleitung, abgesagt, erstellt, kuerzel, haus
             FROM kalender_fassungen ORDER BY id
             """, transaktion, []))
         using (var leser = befehl.ExecuteReader())
@@ -96,6 +96,7 @@ public sealed partial class Speicher
                     Ende = AusZeit(leser.GetString(4)), Ganztags = leser.GetInt64(5) == 1, Ort = leser.GetString(6), Hinweis = leser.GetString(7),
                     Bewohner = JsonSerializer.Deserialize<List<long>>(leser.GetString(8)) ?? [], Treffpunkt = leser.GetString(9),
                     Begleitung = leser.GetString(10), Abgesagt = leser.GetInt64(11) == 1, Erstellt = AusZeit(leser.GetString(12)), Kuerzel = leser.GetString(13),
+                    Haus = leser.GetInt64(14) == 1,
                 });
             }
         return fassungen.Select(x => new KalenderTermin { Id = x.Key, Fassungen = x.Value }).ToList();
@@ -113,5 +114,6 @@ public sealed partial class Speicher
             foreach (var f in d) KalenderFassungEinfuegen(id, f, transaktion);
         }
         SetzeMeta(DemoKalender, "1", transaktion);
+        SetzeMeta(DemoKalenderHaus, "1", transaktion);
     }
 }

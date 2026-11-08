@@ -174,7 +174,7 @@ public sealed class TagesplanKarte : KartenFlaeche
         var t = z.Termin;
         var liste = new List<(string, Stil.Marke)>
         {
-            (t.Quelle switch { TerminQuelle.Therapie => "Therapie", TerminQuelle.Kalender => "Kalender", _ => "Wochenplan" },
+            (t.Quelle switch { TerminQuelle.Therapie => "Therapie", TerminQuelle.Kalender => "Kalender", TerminQuelle.Fahrt => "Fahrt", _ => "Wochenplan" },
              t.Quelle == TerminQuelle.Therapie ? Stil.Hinweis : Stil.Zimmer),
         };
         if (TagesplanRegeln.Marke(z, jetzt) is string status)
