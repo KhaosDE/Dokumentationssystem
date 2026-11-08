@@ -918,7 +918,7 @@ Umfang:
   eigenständigen Ausgangsliste, `docs/bruecke-ausgangsliste.md`).
 
 ## E-Mail und Kalender über externe Programme
-Status: freigegeben (Bauplan Schritt 28)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: E-Mails an Betreuer und Kalendertermine lassen sich mit einem externen E-Mail- bzw.
 Kalenderprogramm verbinden.

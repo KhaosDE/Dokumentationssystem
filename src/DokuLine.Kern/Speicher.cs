@@ -29,6 +29,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoStandardaufgaben = "demo_standardaufgaben";    // Schritt 25: Standardaufgaben je Schicht
     private const string DemoVisiten = "demo_visiten";                      // Schritt 26: Visiten mit allen drei Fällen
     private const string DemoAerzte = "demo_aerzte";                        // Schritt 26b: Ärzteverzeichnis
+    private const string DemoBetreuer = "demo_betreuer";                    // Schritt 28: Betreuer (E-Mail nur @example.org)
     private const string DemoWochenplan = "demo_wochenplan";
     private const string DemoKalender = "demo_kalender";
     private const string DemoBiografie = "demo_biografie";
@@ -697,6 +698,21 @@ public sealed partial class Speicher : IDisposable
             kuerzel     TEXT NOT NULL
         );
         """,
+        // 27 – Betreuer je Bewohner (Schritt 28): jede Änderung eine neue Fassung, die neueste gilt.
+        """
+        CREATE TABLE betreuer (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            name        TEXT NOT NULL,
+            stelle      TEXT NOT NULL DEFAULT '',
+            email       TEXT NOT NULL DEFAULT '',
+            telefon     TEXT NOT NULL DEFAULT '',
+            geaendert   TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TRIGGER betreuer_bleiben BEFORE UPDATE ON betreuer
+            BEGIN SELECT RAISE(ABORT, 'Betreuer-Fassungen werden nicht überschrieben.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -866,12 +882,12 @@ public sealed partial class Speicher : IDisposable
              therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null || Meta(DemoTherapieTag) is null, wochenplan = Meta(DemoWochenplan) is null,
              kalender = Meta(DemoKalender) is null || Meta(DemoKalenderHaus) is null, fahrten = Meta(DemoFahrten) is null,
              standard = Meta(DemoStandardaufgaben) is null, visiten = Meta(DemoVisiten) is null, aerzte = Meta(DemoAerzte) is null,
-             aerztlich = Meta(DemoAerztlich) is null,
+             aerztlich = Meta(DemoAerztlich) is null, betreuer = Meta(DemoBetreuer) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
@@ -888,6 +904,7 @@ public sealed partial class Speicher : IDisposable
         if (aerzte) DemoAerzteEinfuegen(transaktion);
         if (aerztlich) DemoAerztlichEinfuegen(transaktion);
         if (visiten) DemoVisitenEinfuegen(transaktion);
+        if (betreuer) DemoBetreuerEinfuegen(transaktion);
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
         if (heb) DemoHebEinfuegen(transaktion);
@@ -937,6 +954,7 @@ public sealed partial class Speicher : IDisposable
             DemoAerzteEinfuegen(transaktion);
             DemoAerztlichEinfuegen(transaktion);
             DemoVisitenEinfuegen(transaktion);
+            DemoBetreuerEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);
             DemoHebEinfuegen(transaktion);

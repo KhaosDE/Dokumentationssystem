@@ -427,8 +427,14 @@ public sealed class AkteAnsicht : Panel
     private readonly FarbPunkt bezugPunkt = new(), trainerPunkt = new();
     public Button BezugKnopf { get; } = Stil.NebenKnopf("Bezug ändern …");
     public Button BezugVerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
-    private readonly FlowLayoutPanel bezugKnoepfe = new() { AutoSize = true, WrapContents = false, BackColor = Stil.Flaeche, Margin = new Padding(0) };
+    private readonly FlowLayoutPanel bezugKnoepfe = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Flaeche, Margin = new Padding(0) };
     public event Action<long>? BezugGewuenscht;
+    // Betreuer (Schritt 28): Name, Stelle, Telefon, E-Mail; „E-Mail an Betreuer …“ öffnet das E-Mail-Programm.
+    public Label BetreuerText { get; } = new();
+    public Button BetreuerKnopf { get; } = Stil.NebenKnopf("Betreuer …");
+    public Button EmailKnopf { get; } = Stil.NebenKnopf("E-Mail an Betreuer …");
+    // Zum Testen ersetzbar: Hinweis vor dem Öffnen des E-Mail-Programms; true = weiter.
+    internal Func<string, bool> EmailBestaetigen { get; set; }
 
     // Marken im Kopf der Akte: Statusmeldung (lang, mit Bereich, Kürzel und Zeit), Zimmer, „offen geführt“,
     // Hinweise der Module (z. B. Widersprüche).
@@ -476,7 +482,7 @@ public sealed class AkteAnsicht : Panel
                  {
                      ("Geburtsdatum", Geburtsdatum), ("Aufnahmedatum", Aufnahmedatum), ("Beschlussende", Beschlussende),
                      ("Offen geführt", OffenGefuehrt), ("Wohnbereich", Wohnbereich),
-                     ("Bezugspflege", Bezugspflege), ("Einzeltrainer", Einzeltrainer),
+                     ("Bezugspflege", Bezugspflege), ("Einzeltrainer", Einzeltrainer), ("Betreuer", BetreuerText),
                  })
         {
             tabelle.Controls.Add(new Label
@@ -513,8 +519,11 @@ public sealed class AkteAnsicht : Panel
             tabelle.Controls.Add(zelle);
         }
         stammdaten.Controls.Add(tabelle);
-        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0); }
-        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf]);
+        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini); }
+        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf]);
+        BetreuerKnopf.Click += (_, _) => BetreuerBearbeiten();
+        EmailKnopf.Click += (_, _) => EmailSchreiben();
+        EmailBestaetigen = text => MessageBox.Show(FindForm(), text, "E-Mail an Betreuer", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
         stammdaten.Controls.Add(bezugKnoepfe);
         BezugKnopf.Click += (_, _) => { if (Bewohner?.Id is long id) BezugGewuenscht?.Invoke(id); };
         BezugVerlaufKnopf.Click += (_, _) => BezugVerlaufZeigen();
@@ -614,6 +623,38 @@ public sealed class AkteAnsicht : Panel
         Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BezugKnopf);
     }
 
+    // Betreuer: „nicht erfasst“ in Achtung-Farbe (leer heißt nicht „keiner“, Regel 5).
+    private void BetreuerZeigen(Bewohner b)
+    {
+        var betreuer = speicher.Betreuer(b.Id!.Value);
+        BetreuerText.Text = BetreuerRegeln.Text(betreuer);
+        BetreuerText.ForeColor = betreuer is null ? Stil.Achtung.Text : Stil.TextNormal;
+        BetreuerText.Font = betreuer is null ? Stil.FettKursiv : Stil.Fett;
+        BetreuerText.MaximumSize = new Size(S(560), 0);
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BetreuerKnopf);
+        Stil.Sperren(EmailKnopf, betreuer is null ? "Kein Betreuer eingetragen."
+            : !BetreuerRegeln.EmailGueltig(betreuer.Email) ? "Für den Betreuer ist keine E-Mail-Adresse eingetragen." : null);
+    }
+
+    public void BetreuerBearbeiten()
+    {
+        if (Bewohner is null || Recht.Grund(speicher, Funktionen.BewohnerBearbeiten) is not null) return;
+        using var fenster = new BetreuerFenster(speicher, Bewohner);
+        if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) BetreuerZeigen(Bewohner);
+        PerformLayout();
+    }
+
+    // Erst der Hinweis, dann das E-Mail-Programm mit Empfänger und Betreff (mailto:). Das Programm
+    // selbst sendet nichts; Text und Versand macht der Mensch im E-Mail-Programm.
+    public bool EmailSchreiben()
+    {
+        if (Bewohner?.Id is not long id || speicher.Betreuer(id) is not Betreuer b || !BetreuerRegeln.EmailGueltig(b.Email)) return false;
+        if (!EmailBestaetigen($"{BetreuerRegeln.EmailHinweis}\n\nDas E-Mail-Programm öffnet sich mit Empfänger und Betreff. Text und Versand machen Sie dort."))
+            return false;
+        Extern.Oeffnen(BetreuerRegeln.Mailto(b, BetreuerRegeln.Betreff(Bewohner)));
+        return true;
+    }
+
     public void BezugVerlaufZeigen()
     {
         if (Bewohner?.Id is not long id) return;
@@ -679,6 +720,7 @@ public sealed class AkteAnsicht : Panel
         OffenGefuehrt.Font = offenUnklar ? Stil.FettKursiv : Stil.Fett;
         Wohnbereich.Text = b.Wohnbereich;
         BezugZeigen(b);
+        BetreuerZeigen(b);
         AutoScrollPosition = Point.Empty;
         PerformLayout();
         Invalidate(true);
@@ -734,10 +776,11 @@ public sealed class AkteAnsicht : Panel
         y += abschnitt.PreferredHeight + S(Stil.AbstandMini);
 
         var groesse = tabelle.GetPreferredSize(Size.Empty);
-        var knoepfe = bezugKnoepfe.GetPreferredSize(Size.Empty);
+        var knoepfe = bezugKnoepfe.GetPreferredSize(new Size(Math.Max(100, breite - 2 * innen), 0));
         stammdaten.Bounds = new Rectangle(x, y, breite, groesse.Height + S(Stil.AbstandKlein) + knoepfe.Height + 2 * innen);
         tabelle.Location = new Point(innen, innen);
         tabelle.Size = groesse;
+        bezugKnoepfe.MaximumSize = new Size(Math.Max(100, breite - 2 * innen), 0);
         bezugKnoepfe.Bounds = new Rectangle(new Point(innen, tabelle.Bottom + S(Stil.AbstandKlein)), knoepfe);
         y += stammdaten.Height + rand;
         AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y);

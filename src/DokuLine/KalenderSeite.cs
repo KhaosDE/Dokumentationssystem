@@ -29,6 +29,9 @@ public sealed class KalenderSeite : Panel
     public KalenderWahl Wahl => (KalenderWahl)Math.Max(0, Kalenderwahl.SelectedIndex);
     public FahrzeugLeiste Fahrzeuge { get; }
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Drucken …");
+    // Schritt 28: Austausch über .ics-Dateien (z. B. mit Outlook); keine Verbindung zu einem Server.
+    public Button ExportKnopf { get; } = Stil.NebenKnopf("Als .ics speichern …");
+    public Button ImportKnopf { get; } = Stil.NebenKnopf(".ics übernehmen …");
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neuer Termin …");
     public MonatsRaster Monat { get; } = new();
     public WochenRaster Woche { get; } = new();
@@ -57,7 +60,7 @@ public sealed class KalenderSeite : Panel
         Kalenderwahl.SelectedIndexChanged += (_, _) => Aktualisieren();
         Fahrzeuge = new FahrzeugLeiste(speicher) { BackColor = Stil.Seite };
         Fahrzeuge.Geaendert += () => Geaendert?.Invoke();
-        foreach (var c in new Control[] { ZurueckKnopf, ZeitraumText, VorKnopf, HeuteKnopf, Filter, Kalenderwahl, DruckKnopf })
+        foreach (var c in new Control[] { ZurueckKnopf, ZeitraumText, VorKnopf, HeuteKnopf, Filter, Kalenderwahl, DruckKnopf, ExportKnopf, ImportKnopf })
         {
             c.Margin = new Padding(c == ZurueckKnopf ? Stil.AbstandMittel : 0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
             leiste.Controls.Add(c);
@@ -73,6 +76,15 @@ public sealed class KalenderSeite : Panel
         HeuteKnopf.Click += (_, _) => TagWaehlen(DateOnly.FromDateTime(Jetzt()));
         Filter.SelectedIndexChanged += (_, _) => Aktualisieren();
         DruckKnopf.Click += (_, _) => Drucken();
+        ExportKnopf.Click += (_, _) => Exportieren();
+        ImportKnopf.Click += (_, _) => Importieren();
+        // .ics-Datei auf die Seite ziehen (z. B. eine aus dem E-Mail-Programm gespeicherte Einladung).
+        foreach (Control ziel in new Control[] { this, Monat, Woche })
+        {
+            ziel.AllowDrop = true;
+            ziel.DragEnter += (_, e) => e.Effect = IcsDatei(e.Data) is not null ? DragDropEffects.Copy : DragDropEffects.None;
+            ziel.DragDrop += (_, e) => { if (IcsDatei(e.Data) is string pfad) Importieren(pfad); };
+        }
         NeuKnopf.Click += (_, _) => Bearbeiten(null);
         Monat.TagGeklickt += t => { Stichtag = t; AnsichtWaehlen(KalenderAnsicht.Tag); };
         Woche.TerminGeklickt += (t, _) => { if (t.KalenderId is long id) DetailZeigen(id); };
@@ -216,6 +228,49 @@ public sealed class KalenderSeite : Panel
     {
         using var fenster = new TextFenster($"Verlauf: {k.Aktuell.Titel}", string.Join(Environment.NewLine, KalenderRegeln.Verlauf(k, Namen())));
         Dialog.Zeigen(fenster, FindForm());
+    }
+
+    private static string? IcsDatei(IDataObject? daten) =>
+        daten?.GetData(DataFormats.FileDrop) is string[] dateien && dateien.Length > 0 && dateien[0].EndsWith(".ics", StringComparison.OrdinalIgnoreCase) ? dateien[0] : null;
+
+    // Die gezeigten Termine (Zeitraum, Bewohner, Bereich/Haus) als .ics-Datei.
+    public string? Exportieren()
+    {
+        var termine = Termine();
+        if (termine.Count == 0)
+        {
+            MessageBox.Show(FindForm(), "In diesem Zeitraum stehen keine Termine.", "Als .ics speichern", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return null;
+        }
+        string vorschlag = $"Kalender {ZeitraumText.Text}.ics".Replace(',', ' ').Replace(':', ' ');
+        if (KalenderAustausch.SpeichernUnter(FindForm(), vorschlag) is not string pfad) return null;
+        KalenderAustausch.Schreiben(pfad, Ics.Schreiben(termine, Namen(), Jetzt()));
+        return pfad;
+    }
+
+    // .ics-Datei wählen (oder hereingezogen), lesen, Vorschau mit Zuordnung, übernehmen.
+    public int Importieren(string? pfad = null)
+    {
+        pfad ??= KalenderAustausch.Oeffnen(FindForm());
+        if (pfad is null) return 0;
+        List<IcsTermin> gelesen;
+        try { gelesen = Ics.Lesen(File.ReadAllText(pfad)); }
+        catch (IOException x)
+        {
+            MessageBox.Show(FindForm(), $"Die Datei ließ sich nicht lesen: {x.Message}", ".ics übernehmen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return 0;
+        }
+        if (gelesen.Count == 0)
+        {
+            MessageBox.Show(FindForm(), "In der Datei steht kein Termin (VEVENT).", ".ics übernehmen", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return 0;
+        }
+        using var fenster = new IcsImportFenster(speicher, gelesen, Path.GetFileName(pfad));
+        if (BewohnerFilter is long id) { fenster.Arten[(int)KalenderArt.Bewohner].Checked = true; fenster.BewohnerAnkreuzen(id); }
+        if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK) return 0;
+        if (fenster.Angelegt.Count > 0) TagWaehlen(DateOnly.FromDateTime(fenster.Angelegt[0].Aktuell.Beginn));
+        Geaendert?.Invoke();
+        return fenster.Angelegt.Count;
     }
 
     public void Drucken()
