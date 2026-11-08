@@ -42,6 +42,11 @@ public static partial class AusgangsMarken
             marken.Add(new Marke(MarkenArt.Ausgang, Verlauf.Unterbringung(p.Unterbringung)));
         if (p.Unterbringung != Unterbringung.NichtErfasst && p.FristBrauchtHinweis(jetzt))
             marken.Add(new Marke(MarkenArt.NichtErfasst, p.FristText(jetzt)));
+        if (p.Widerspruch)
+            marken.Add(new Marke(MarkenArt.NichtErfasst, alle
+                ? $"Widerspruch: Akte „{(p.OffenGefuehrtLautAkte == OffenGefuehrtZustand.Ja ? "offen geführt" : "nicht offen geführt")}“, " +
+                  $"Ausgangsliste „{Verlauf.Unterbringung(p.Unterbringung)}“ – bitte klären"
+                : "Unterbringung widersprüchlich – bitte klären"));
         if (alle && p.Unterbringung == Unterbringung.NichtErfasst)
             marken.Add(new Marke(MarkenArt.NichtErfasst, "Unterbringung nicht erfasst"));
         if (kueche) marken.Add(new Marke(MarkenArt.Ausgang, "Küchendienst heute"));

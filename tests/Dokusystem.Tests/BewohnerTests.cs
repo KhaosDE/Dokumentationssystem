@@ -101,6 +101,33 @@ public class BewohnerTests
         Assert.Equal("nicht erfasst", BewohnerRegeln.BeschlussText(b));
         Assert.Equal(AllergieZustand.NichtErfasst, default(AllergieZustand));
         Assert.Equal(BeschlussZustand.NichtErfasst, default(BeschlussZustand));
+        Assert.Equal(OffenGefuehrtZustand.NichtErfasst, b.OffenGefuehrt);
+        Assert.Equal(OffenGefuehrtZustand.NichtErfasst, default(OffenGefuehrtZustand));
+        Assert.Equal("nicht erfasst", BewohnerRegeln.OffenGefuehrtText(b));
+    }
+
+    [Fact]
+    public void Offen_gefuehrt_drei_Zustaende()
+    {
+        Assert.Equal(OffenGefuehrtZustand.Ja, BewohnerRegeln.AusEingabe(Eingabe(e => e.OffenGefuehrt = "ja")).OffenGefuehrt);
+        Assert.Equal("nein", BewohnerRegeln.OffenGefuehrtText(BewohnerRegeln.AusEingabe(Eingabe(e => e.OffenGefuehrt = "nein"))));
+        Assert.Equal(["Offen geführt: unbekannte Angabe."], FehlerVon(Eingabe(e => e.OffenGefuehrt = "vielleicht")));
+        Assert.Equal("ja", BewohnerRegeln.Kuerzel(OffenGefuehrtZustand.Ja));
+        Assert.Null(BewohnerRegeln.OffenGefuehrtAus("offen"));
+    }
+
+    [Theory]
+    [InlineData("14.03.1962", "07.11.2026", 64)]
+    [InlineData("08.11.1963", "07.11.2026", 62)]
+    [InlineData("07.11.1963", "07.11.2026", 63)]
+    [InlineData("29.02.2000", "28.02.2026", 26)]
+    [InlineData("29.02.2000", "27.02.2026", 25)]
+    [InlineData("29.02.2000", "29.02.2028", 28)]
+    public void Alter_aus_dem_Geburtsdatum(string geburt, string heute, int alter)
+    {
+        Assert.Equal(alter, BewohnerRegeln.Alter(Datum.Lesen(geburt, "g"), Datum.Lesen(heute, "h")));
+        Assert.Equal($"{alter} Jahre", BewohnerRegeln.AlterText(Datum.Lesen(geburt, "g"), Datum.Lesen(heute, "h")));
+        Assert.Equal("1 Jahr", BewohnerRegeln.AlterText(new DateOnly(2025, 1, 1), new DateOnly(2026, 6, 1)));
     }
 
     [Fact]
@@ -138,6 +165,7 @@ public class BewohnerTests
         var b = BewohnerRegeln.AusEingabe(Eingabe(e =>
         {
             e.Allergie = "eingetragen"; e.Allergien = "Erdbeeren"; e.Beschluss = "ende"; e.Beschlussende = "1.2.2027";
+            e.OffenGefuehrt = "nein";
         }));
         Assert.Equal(b, BewohnerRegeln.AusEingabe(BewohnerRegeln.AlsEingabe(b)));
         Assert.Equal("01.02.2027", BewohnerRegeln.AlsEingabe(b).Beschlussende);

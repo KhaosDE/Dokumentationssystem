@@ -37,7 +37,10 @@ Danach fragt Windows für diese Datei nicht mehr.
 - In der Akte steht oben der **Allergiehinweis**: rot = Allergien eingetragen,
   grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
 - **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
-  als TT.MM.JJJJ (z. B. 03.04.1965).
+  als TT.MM.JJJJ (z. B. 03.04.1965). **Offen geführt** hat drei Zustände: ja, nein, nicht erfasst.
+- In den Stammdaten steht das **Alter** neben dem Geburtsdatum. Oben in der Akte stehen Marken:
+  „offen geführt“, „offen geführt: nicht erfasst“ und Hinweise der Module – etwa, wenn die
+  Ausgangsliste etwas anderes zur Unterbringung sagt als die Akte („bitte klären“).
 - **Übersicht** (links oben, öffnet beim Start): oben „Heute“ mit Abwesenden, den Terminen des
   Tages und den Änderungen in der Medikation; darunter alle Bewohner als Karten mit den Marken
   des Tages (z. B. „Beschluss endet in … Tagen“, „Medikation: Pause beginnt“, „heute 10:00 …“,

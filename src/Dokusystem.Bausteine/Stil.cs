@@ -121,6 +121,7 @@ public static class Stil
         Kern.MarkenArt.Abwesend => Abwesend,
         Kern.MarkenArt.Ausgang => Zimmer,
         Kern.MarkenArt.Termin => Zimmer,
+        Kern.MarkenArt.Angabe => Zimmer,
         _ => Achtung,
     };
 

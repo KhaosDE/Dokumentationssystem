@@ -19,6 +19,7 @@ public sealed class BewohnerFormular : Form
     public TextBox Aufnahmedatum { get; } = Feld("TT.MM.JJJJ");
     public Dreiwahl Beschluss { get; } = new(["ende", "kein_beschluss", "nicht_erfasst"],
                                              ["endet am", "kein Beschluss", "nicht erfasst"], "TT.MM.JJJJ");
+    public Dreiwahl OffenGefuehrt { get; } = new(["ja", "nein", "nicht_erfasst"], ["ja", "nein", "nicht erfasst"], null);
     public Dreiwahl Allergie { get; } = new(["eingetragen", "keine_bekannt", "nicht_erfasst"],
                                             ["eingetragen:", "keine bekannt", "nicht erfasst"], "z. B. Haselnüsse");
     public Label Fehler { get; } = new();
@@ -82,6 +83,8 @@ public sealed class BewohnerFormular : Form
         Allergie.Dock = DockStyle.Fill;
         Beschluss.Margin = Allergie.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein);
         Zeile("Beschluss", Beschluss);
+        OffenGefuehrt.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
+        Zeile("Offen geführt", OffenGefuehrt);
         Zeile("Allergien", Allergie);
 
         // Bild: Vorschau, Knöpfe und Hinweis (Regel 2).
@@ -132,6 +135,7 @@ public sealed class BewohnerFormular : Form
             Geburtsdatum.Text = werte.Geburtsdatum;
             Aufnahmedatum.Text = werte.Aufnahmedatum;
             Beschluss.Setzen(werte.Beschluss, werte.Beschlussende);
+            OffenGefuehrt.Setzen(werte.OffenGefuehrt, "");
             Allergie.Setzen(werte.Allergie, werte.Allergien);
         }
         Vorname.TextChanged += (_, _) => BildZeigen();
@@ -195,6 +199,7 @@ public sealed class BewohnerFormular : Form
         Aufnahmedatum = Aufnahmedatum.Text,
         Beschluss = Beschluss.Zustand,
         Beschlussende = Beschluss.Feld.Text,
+        OffenGefuehrt = OffenGefuehrt.Zustand,
         Allergie = Allergie.Zustand,
         Allergien = Allergie.Feld.Text,
     };

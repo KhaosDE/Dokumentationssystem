@@ -3,6 +3,12 @@
 Für den Abgleich mit der eigenständigen Ausgangsliste (`docs/bruecke-ausgangsliste.md`): je
 Version des Dokumentationssystems, was sich im Modul geändert hat. Neueste oben.
 
+## 0.19.0 (08.11.2026)
+
+- `Platz.OffenGefuehrtLautAkte` und `Platz.Widerspruch`: „offen geführt“ aus der Bewohnerakte wird
+  mit der Unterbringung des Moduls verglichen. Widersprüche erscheinen als Marke („bitte
+  klären“); geändert wird nichts automatisch.
+
 ## 0.14.0 (07.11.2026) — einmalige Übernahme
 
 Übernommen aus der Ausgangsliste, Version 0.23.0 (Stand c57dd0e), bereinigt nach `CLAUDE.md`.

@@ -178,7 +178,8 @@ public sealed class AkteAnsicht : Panel
     private readonly KartenFlaeche kopfKarte = new();
     private readonly BildFeld bild = new();
     private readonly Label name = new();
-    private readonly MarkenFeld zimmer = new("Zimmer", Stil.Zimmer);
+    private readonly MarkenFeld zimmer = new("Zimmer", Stil.Zimmer) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) };
+    private readonly FlowLayoutPanel kopfMarken = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Flaeche, Margin = new Padding(0) };
     private readonly Label abschnitt = new();
     private readonly KartenFlaeche stammdaten = new();
     private readonly TableLayoutPanel tabelle = new();
@@ -196,6 +197,11 @@ public sealed class AkteAnsicht : Panel
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
     public Label Beschlussende { get; } = new();
+    public Label OffenGefuehrt { get; } = new();
+    public Label Alter { get; } = new();
+
+    // Marken im Kopf der Akte: Zimmer, „offen geführt“, Hinweise der Module (z. B. Widersprüche).
+    public IEnumerable<string> KopfMarken => kopfMarken.Controls.OfType<MarkenFeld>().Select(m => m.Text);
     public Bewohner? Bewohner { get; private set; }
 
     private readonly Speicher speicher;
@@ -218,7 +224,8 @@ public sealed class AkteAnsicht : Panel
         name.ForeColor = Stil.TextNormal;
         name.BackColor = Stil.Flaeche;
         name.UseMnemonic = false;
-        kopfKarte.Controls.AddRange([bild, name, zimmer]);
+        kopfMarken.Controls.Add(zimmer);
+        kopfKarte.Controls.AddRange([bild, name, kopfMarken]);
 
         abschnitt.Text = "STAMMDATEN";
         abschnitt.AutoSize = true;
@@ -232,7 +239,11 @@ public sealed class AkteAnsicht : Panel
         tabelle.BackColor = Stil.Flaeche;
         tabelle.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         tabelle.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        foreach (var (beschriftung, wert) in new[] { ("Geburtsdatum", Geburtsdatum), ("Aufnahmedatum", Aufnahmedatum), ("Beschlussende", Beschlussende) })
+        foreach (var (beschriftung, wert) in new[]
+                 {
+                     ("Geburtsdatum", Geburtsdatum), ("Aufnahmedatum", Aufnahmedatum), ("Beschlussende", Beschlussende),
+                     ("Offen geführt", OffenGefuehrt),
+                 })
         {
             tabelle.Controls.Add(new Label
             {
@@ -244,7 +255,19 @@ public sealed class AkteAnsicht : Panel
             wert.ForeColor = Stil.TextNormal;
             wert.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
             wert.UseMnemonic = false;
-            tabelle.Controls.Add(wert);
+            if (wert != Geburtsdatum)
+            {
+                tabelle.Controls.Add(wert);
+                continue;
+            }
+            // Das Alter steht neben dem Geburtsdatum.
+            Alter.AutoSize = true;
+            Alter.Font = Stil.Standard;
+            Alter.ForeColor = Stil.TextMittel;
+            Alter.Margin = new Padding(Stil.AbstandKlein, Stil.AbstandMini, 0, Stil.AbstandMini);
+            var zelle = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0), BackColor = Stil.Flaeche };
+            zelle.Controls.AddRange([wert, Alter]);
+            tabelle.Controls.Add(zelle);
         }
         stammdaten.Controls.Add(tabelle);
 
@@ -312,6 +335,16 @@ public sealed class AkteAnsicht : Panel
         bild.Setzen(Bilder.Pfad(b.Bild), BewohnerRegeln.Initialen(b), b.Nachname);
         name.Text = b.Name;
         zimmer.Text = $"Zimmer {b.Zimmer}";
+        foreach (var alt in kopfMarken.Controls.OfType<MarkenFeld>().Where(m => m != zimmer).ToList())
+        {
+            kopfMarken.Controls.Remove(alt);
+            alt.Dispose();
+        }
+        var marken = new List<Marke>();
+        if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offenMarke) marken.Add(offenMarke);
+        marken.AddRange(Modulverwaltung.Marken(speicher, b, DateTime.Now));
+        foreach (var m in marken)
+            kopfMarken.Controls.Add(new MarkenFeld(m.Text, Stil.MarkeFuer(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
         AccessibleName = $"Akte von {b.Name}";
 
         // Allergiehinweis: drei klar verschiedene Darstellungen (Regel 5), immer mit Wort.
@@ -329,6 +362,11 @@ public sealed class AkteAnsicht : Panel
         bool offen = b.Beschluss == BeschlussZustand.NichtErfasst;
         Beschlussende.ForeColor = offen ? Stil.Achtung.Text : Stil.TextNormal;
         Beschlussende.Font = offen ? Stil.FettKursiv : Stil.Fett;
+        Alter.Text = $"({BewohnerRegeln.AlterText(b.Geburtsdatum, DateOnly.FromDateTime(DateTime.Now))})";
+        OffenGefuehrt.Text = BewohnerRegeln.OffenGefuehrtText(b);
+        bool offenUnklar = b.OffenGefuehrt == OffenGefuehrtZustand.NichtErfasst;
+        OffenGefuehrt.ForeColor = offenUnklar ? Stil.Achtung.Text : Stil.TextNormal;
+        OffenGefuehrt.Font = offenUnklar ? Stil.FettKursiv : Stil.Fett;
         AutoScrollPosition = Point.Empty;
         PerformLayout();
         Invalidate(true);
@@ -347,10 +385,12 @@ public sealed class AkteAnsicht : Panel
         kopfKarte.Bounds = new Rectangle(x, y, breite, kopfHoehe);
         bild.Bounds = new Rectangle(innen, innen, bildSeite, bildSeite);
         int textX = innen + bildSeite + S(Stil.AbstandGross);
-        int blockHoehe = name.PreferredHeight + S(Stil.AbstandKlein) + zimmer.Height;
-        int textY = (kopfHoehe - blockHoehe) / 2;
+        var markenGroesse = kopfMarken.GetPreferredSize(new Size(Math.Max(100, breite - textX - innen), 0));
+        int blockHoehe = name.PreferredHeight + S(Stil.AbstandKlein) + markenGroesse.Height;
+        int textY = Math.Max(innen, (kopfHoehe - blockHoehe) / 2);
         name.Location = new Point(textX, textY);
-        zimmer.Location = new Point(textX, textY + name.PreferredHeight + S(Stil.AbstandKlein));
+        kopfMarken.MaximumSize = new Size(Math.Max(100, breite - textX - innen), 0);
+        kopfMarken.Bounds = new Rectangle(new Point(textX, textY + name.PreferredHeight + S(Stil.AbstandKlein)), markenGroesse);
         y += kopfHoehe + S(Stil.AbstandMittel);
 
         Allergie.Bounds = new Rectangle(x, y, breite, S(52));

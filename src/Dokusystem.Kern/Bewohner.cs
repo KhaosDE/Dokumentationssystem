@@ -9,6 +9,9 @@ public enum AllergieZustand { NichtErfasst = 0, Eingetragen, KeineBekannt }
 // Beschlussende genauso: Datum eingetragen / kein Beschluss / nicht erfasst.
 public enum BeschlussZustand { NichtErfasst = 0, Ende, KeinBeschluss }
 
+// „Offen geführt“ ebenso: ja / nein / nicht erfasst.
+public enum OffenGefuehrtZustand { NichtErfasst = 0, Ja, Nein }
+
 // Ein Bewohner, wie er gespeichert wird. „record“ heißt: Werte statt Verweise; eine
 // geänderte Kopie entsteht mit „with { … }“.
 public sealed record Bewohner
@@ -23,6 +26,7 @@ public sealed record Bewohner
     public string Allergien { get; init; } = "";
     public BeschlussZustand Beschluss { get; init; }
     public DateOnly? Beschlussende { get; init; }
+    public OffenGefuehrtZustand OffenGefuehrt { get; init; }
     public string? Bild { get; init; }   // Dateiname im Ordner „bilder“ des Datenordners
 
     public string Name => $"{Vorname} {Nachname}";
@@ -41,6 +45,7 @@ public sealed class BewohnerEingabe
     public string Allergien { get; set; } = "";
     public string Beschluss { get; set; } = "";
     public string Beschlussende { get; set; } = "";
+    public string OffenGefuehrt { get; set; } = "";
 }
 
 // Eingaben passen nicht. Fehler enthält verständliche Sätze in der Reihenfolge des Formulars.
@@ -58,6 +63,21 @@ public static class BewohnerRegeln
         AllergieZustand.Eingetragen => "eingetragen",
         AllergieZustand.KeineBekannt => "keine_bekannt",
         _ => "nicht_erfasst",
+    };
+
+    public static string Kuerzel(OffenGefuehrtZustand z) => z switch
+    {
+        OffenGefuehrtZustand.Ja => "ja",
+        OffenGefuehrtZustand.Nein => "nein",
+        _ => "nicht_erfasst",
+    };
+
+    public static OffenGefuehrtZustand? OffenGefuehrtAus(string? kuerzel) => (kuerzel ?? "").Trim() switch
+    {
+        "ja" => OffenGefuehrtZustand.Ja,
+        "nein" => OffenGefuehrtZustand.Nein,
+        "nicht_erfasst" or "" => OffenGefuehrtZustand.NichtErfasst,
+        _ => null,
     };
 
     public static string Kuerzel(BeschlussZustand z) => z switch
@@ -89,11 +109,11 @@ public static class BewohnerRegeln
     // Alle Prüfregeln für einen vollständigen Bewohner. Leere Liste = in Ordnung.
     public static List<string> Pruefen(Bewohner b) =>
         Pruefen(b.Vorname, b.Nachname, b.Zimmer, b.Geburtsdatum, b.Aufnahmedatum,
-                b.Allergie, b.Allergien, b.Beschluss, b.Beschlussende);
+                b.Allergie, b.Allergien, b.Beschluss, b.Beschlussende, b.OffenGefuehrt);
 
     private static List<string> Pruefen(string vorname, string nachname, string zimmer,
         DateOnly? geburt, DateOnly? aufnahme, AllergieZustand? allergie, string allergien,
-        BeschlussZustand? beschluss, DateOnly? ende)
+        BeschlussZustand? beschluss, DateOnly? ende, OffenGefuehrtZustand? offen)
     {
         var fehler = new List<string>();
         if (string.IsNullOrWhiteSpace(vorname)) fehler.Add("Vorname fehlt.");
@@ -115,12 +135,15 @@ public static class BewohnerRegeln
             fehler.Add("Beschlussende fehlt.");
         else if (beschluss != BeschlussZustand.Ende && ende is not null)
             fehler.Add("Beschlussende nur, wenn es einen Beschluss gibt.");
+
+        if (offen is null || !Enum.IsDefined(offen.Value))
+            fehler.Add("Offen geführt: unbekannte Angabe.");
         return fehler;
     }
 
     // Fehler erscheinen in der Reihenfolge des Formulars.
     private static readonly string[] Reihenfolge =
-        ["Vorname", "Nachname", "Zimmernummer", "Geburtsdatum", "Aufnahmedatum", "Das Aufnahmedatum", "Beschluss", "Allergien"];
+        ["Vorname", "Nachname", "Zimmernummer", "Geburtsdatum", "Aufnahmedatum", "Das Aufnahmedatum", "Beschluss", "Offen geführt", "Allergien"];
 
     private static int Rang(string satz)
     {
@@ -146,9 +169,10 @@ public static class BewohnerRegeln
         var allergie = AllergieAus(e.Allergie);
         var beschluss = BeschlussAus(e.Beschluss);
         var ende = beschluss == BeschlussZustand.Ende ? DatumLesen(e.Beschlussende, "Beschlussende") : null;
+        var offen = OffenGefuehrtAus(e.OffenGefuehrt);
         string allergien = allergie == AllergieZustand.Eingetragen ? (e.Allergien ?? "").Trim() : "";
 
-        foreach (string f in Pruefen(e.Vorname, e.Nachname, e.Zimmer, geburt, aufnahme, allergie, allergien, beschluss, ende))
+        foreach (string f in Pruefen(e.Vorname, e.Nachname, e.Zimmer, geburt, aufnahme, allergie, allergien, beschluss, ende, offen))
             if (!fehler.Contains(f) && !unlesbar.Any(feld => f.StartsWith(feld, StringComparison.Ordinal)))
                 fehler.Add(f);
         if (fehler.Count > 0)
@@ -166,6 +190,7 @@ public static class BewohnerRegeln
             Allergien = allergien,
             Beschluss = beschluss!.Value,
             Beschlussende = ende,
+            OffenGefuehrt = offen!.Value,
             Bild = bild,
         };
     }
@@ -182,6 +207,7 @@ public static class BewohnerRegeln
         Allergien = b.Allergien,
         Beschluss = Kuerzel(b.Beschluss),
         Beschlussende = Datum.Text(b.Beschlussende),
+        OffenGefuehrt = Kuerzel(b.OffenGefuehrt),
     };
 
     // ----- Anzeige -----
@@ -199,6 +225,26 @@ public static class BewohnerRegeln
         BeschlussZustand.KeinBeschluss => "kein Beschluss",
         _ => "nicht erfasst",
     };
+
+    public static string OffenGefuehrtText(Bewohner b) => b.OffenGefuehrt switch
+    {
+        OffenGefuehrtZustand.Ja => "ja",
+        OffenGefuehrtZustand.Nein => "nein",
+        _ => "nicht erfasst",
+    };
+
+    // Alter in vollen Jahren (Geburtstag am 29. Februar: in Nicht-Schaltjahren am 28. Februar).
+    public static int Alter(DateOnly geburt, DateOnly heute)
+    {
+        int jahre = heute.Year - geburt.Year;
+        var geburtstag = geburt.Month == 2 && geburt.Day == 29 && !DateTime.IsLeapYear(heute.Year)
+            ? new DateOnly(heute.Year, 2, 28)
+            : new DateOnly(heute.Year, geburt.Month, geburt.Day);
+        return heute < geburtstag ? jahre - 1 : jahre;
+    }
+
+    public static string AlterText(DateOnly geburt, DateOnly heute) =>
+        Alter(geburt, heute) is int a && a == 1 ? "1 Jahr" : $"{Alter(geburt, heute)} Jahre";
 
     public static string Initialen(string vorname, string nachname)
     {

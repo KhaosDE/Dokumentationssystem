@@ -248,6 +248,22 @@ public sealed class AusgangslisteTests : IDisposable
     }
 
     [Fact]
+    public void Widerspruch_zwischen_Akte_und_Modul_ist_nur_ein_Hinweis()
+    {
+        // Immergrün: Akte „nicht offen geführt“, Modul „offen geführt“.
+        Assert.True(P("Immergrün").Widerspruch);
+        Assert.Contains(AusgangsMarken.Fuer(P("Immergrün"), Jetzt, null), m => m.Text == "Unterbringung widersprüchlich – bitte klären");
+        Assert.Contains(AusgangsMarken.Fuer(P("Immergrün"), Jetzt, null, alle: true), m => m.Text.StartsWith("Widerspruch: Akte „nicht offen geführt“, Ausgangsliste „offen geführt“"));
+        Assert.False(P("Birke").Widerspruch);   // beide „offen geführt“
+        Assert.False(P("Ahorn").Widerspruch);   // Beschluss, „nein“
+        Assert.False(P("Distel").Widerspruch);  // nicht erfasst
+        Assert.Equal(OffenGefuehrtZustand.Nein, s.Bewohner(B("Immergrün"))!.OffenGefuehrt);   // nichts automatisch geändert
+        var ahorn = s.Bewohner(B("Ahorn"))!;
+        s.BewohnerSpeichern(ahorn with { OffenGefuehrt = OffenGefuehrtZustand.Ja });
+        Assert.True(P("Ahorn").Widerspruch);   // Akte „ja“, aber Beschluss
+    }
+
+    [Fact]
     public void Platzhalter_in_den_Demo_Texten()
     {
         Assert.Equal("bis 12.11.2026 und seit (04.11.2026)", AusgangslisteDaten.Einsetzen("bis {+5} und seit ({-3})", new DateOnly(2026, 11, 7)));

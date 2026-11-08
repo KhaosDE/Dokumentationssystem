@@ -417,12 +417,17 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER heb_fassungen_bleiben BEFORE UPDATE ON heb_fassungen
             BEGIN SELECT RAISE(ABORT, 'HEB-Bögen werden nicht überschrieben – Änderungen sind neue Fassungen.'); END;
         """,
+        // 13 – „Offen geführt“ in der Bewohnerakte (drei Zustände). Vorhandene Bewohner: nicht erfasst.
+        """
+        ALTER TABLE bewohner ADD COLUMN offen_gefuehrt TEXT NOT NULL DEFAULT 'nicht_erfasst'
+            CHECK (offen_gefuehrt IN ('ja', 'nein', 'nicht_erfasst'));
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
 
     private const string Spalten =
-        "vorname, nachname, zimmer, geburtsdatum, aufnahmedatum, allergie, allergien, beschluss, beschlussende, bild";
+        "vorname, nachname, zimmer, geburtsdatum, aufnahmedatum, allergie, allergien, beschluss, beschlussende, bild, offen_gefuehrt";
 
     private readonly SqliteConnection db;
     public string Pfad { get; }
@@ -889,6 +894,7 @@ public sealed partial class Speicher : IDisposable
         ("$beschluss", BewohnerRegeln.Kuerzel(b.Beschluss)),
         ("$beschlussende", b.Beschlussende is DateOnly e ? Iso(e) : null),
         ("$bild", b.Bild),
+        ("$offen_gefuehrt", BewohnerRegeln.Kuerzel(b.OffenGefuehrt)),
     ];
 
     private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -918,6 +924,7 @@ public sealed partial class Speicher : IDisposable
                 Beschluss = BewohnerRegeln.BeschlussAus(leser.GetString(8)) ?? BeschlussZustand.NichtErfasst,
                 Beschlussende = leser.IsDBNull(9) ? null : AusIso(leser.GetString(9)),
                 Bild = leser.IsDBNull(10) ? null : leser.GetString(10),
+                OffenGefuehrt = BewohnerRegeln.OffenGefuehrtAus(leser.GetString(11)) ?? OffenGefuehrtZustand.NichtErfasst,
             });
         }
         return liste;

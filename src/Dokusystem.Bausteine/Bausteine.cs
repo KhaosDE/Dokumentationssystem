@@ -208,27 +208,30 @@ public sealed class Dreiwahl : TableLayoutPanel
     public RadioButton[] Knoepfe { get; }
     public TextBox Feld { get; } = new();
 
-    public Dreiwahl(string[] kuerzel, string[] beschriftungen, string platzhalter)
+    // platzhalter = null: ohne Textfeld, die drei Knöpfe nebeneinander (z. B. „offen geführt“).
+    public Dreiwahl(string[] kuerzel, string[] beschriftungen, string? platzhalter)
     {
         this.kuerzel = kuerzel;
-        ColumnCount = 2;
-        RowCount = 3;
+        bool mitFeld = platzhalter is not null;
+        ColumnCount = mitFeld ? 2 : 3;
+        RowCount = mitFeld ? 3 : 1;
         AutoSize = true;
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         Margin = new Padding(0);
         ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        ColumnStyles.Add(new ColumnStyle(mitFeld ? SizeType.Percent : SizeType.AutoSize, mitFeld ? 100 : 0));
+        if (!mitFeld) ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         Knoepfe = beschriftungen.Select(t => new RadioButton
         {
             Text = t, AutoSize = true, Font = Stil.Standard, ForeColor = Stil.TextNormal,
             Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandKlein, Stil.AbstandMini),
         }).ToArray();
-        for (int i = 0; i < 3; i++) Controls.Add(Knoepfe[i], 0, i);
-        Feld.PlaceholderText = platzhalter;
+        for (int i = 0; i < 3; i++) Controls.Add(Knoepfe[i], mitFeld ? 0 : i, mitFeld ? i : 0);
+        Feld.PlaceholderText = platzhalter ?? "";
         Feld.Font = Stil.Standard;
         Feld.Dock = DockStyle.Fill;
         Feld.Margin = new Padding(0, 0, 0, Stil.AbstandMini);
-        Controls.Add(Feld, 1, 0);
+        if (mitFeld) Controls.Add(Feld, 1, 0);
         foreach (var knopf in Knoepfe) knopf.CheckedChanged += (_, _) => Feld.Enabled = Knoepfe[0].Checked;
         Setzen(kuerzel[2], "");
     }

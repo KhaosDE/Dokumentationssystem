@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 07.11.2026. Version: **0.18.0** (HEB-Bogen aus Berichten, Bauplan Schritt 15 – Bauplan vollständig).
+Stand: 08.11.2026. Version: **0.19.0** (Bewohnerakte: Ergänzungen, Bauplan Schritt 16).
 
 ## Aktuell
 
@@ -21,10 +21,10 @@ Digitaler Ausgang), übernommen aus der Ausgangsliste. Dazu kommen die **Biograf
 wichtig ist). Neu ist der **HEB-Bogen** (A, B, C) mit Quellen, Zählern, Stilhinweisen,
 Textbausteinen und dem Ausfüllen einer zugeteilten PDF.
 
-**Nächster Schritt:** Der Bauplan vom 07.11.2026 ist vollständig umgesetzt. Neue Aufträge kommen
-über `IDEEN.md` (offen ist dort nur „Mehrplatzbetrieb über einen Server (später)“, nicht
-freigegeben). Bitte die Testlisten unten durchgehen, vor allem den HEB-Bogen mit dem echten
-Bogen des Kostenträgers (Zuordnung der Felder).
+Neu in der Akte: **„offen geführt“** (ja / nein / nicht erfasst) und das **Alter**.
+
+**Nächster Schritt:** Bauplan Schritt 17 „Mehrplatzbetrieb (Demo-Stufe)“ (0.20.0). Bitte die
+Testlisten unten durchgehen, vor allem den HEB-Bogen mit dem echten Bogen des Kostenträgers.
 
 ## Fertig
 
@@ -292,10 +292,21 @@ Bogen des Kostenträgers (Zuordnung der Felder).
   - Demo `daten/demo/heb.json`: frühere Bögen für alle Bewohner (bei Anton Ahorn und Ida
     Immergrün fällig), ein Entwurf bei Karl Kiefer.
 
+- 0.19.0 — Bewohnerakte: Ergänzungen (Bauplan Schritt 16, 08.11.2026):
+  - „Offen geführt“ in den Stammdaten mit drei Zuständen (ja, nein, nicht erfasst; Regel 5), im
+    Formular, in der Akte und als Marke auf Karten, Übersicht und Akte („offen geführt“,
+    „offen geführt: nicht erfasst“). Filter „Nicht erfasst“ zählt es mit. Vorhandene Bewohner
+    stehen nach dem Update auf „nicht erfasst“.
+  - Ist das Modul Ausgangsliste eingeschaltet: Abgleich mit dessen Unterbringung, Widerspruch als
+    Marke „Unterbringung widersprüchlich – bitte klären“ (auf der Seite des Moduls ausführlich).
+    Nichts wird automatisch geändert.
+  - Alter aus dem Geburtsdatum neben dem Geburtsdatum („(63 Jahre)“).
+  - Oben in der Akte stehen jetzt Marken: Zimmer, „offen geführt“ und Hinweise der Module.
+  - Demo: Angaben für alle Bewohner; Dieter Distel „nicht erfasst“, Ida Immergrün mit
+    Widerspruch zur Ausgangsliste.
+
 ## Offene Punkte
 
-- Bewohnerakte: Vorschläge Beschlusswarnung, „offen geführt“, Altersanzeige — Tobi
-  entscheidet.
 - Bewohner löschen oder als ausgezogen markieren gibt es noch nicht (war nicht
   beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
 - Dunkle Darstellung ist nicht gebaut (`docs/gestaltung.md` sieht sie vor, freigegeben ist
@@ -607,7 +618,28 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), Tests mit xUnit (Apache-2.0). Zum
   Bauen der Test-PDF einmalig `reportlab` (BSD), nicht im Programm.
 
+- 08.11.2026 (Schritt 16): Marke nur für „offen geführt: ja“ und „nicht erfasst“; „nein“ ist im
+  Wohnbereich der Normalfall und bekommt keine Marke (Farbe sparsam).
+- 08.11.2026 (Schritt 16): Der Abgleich mit der Ausgangsliste liegt im Modul (es kennt die Akte, die
+  Akte kennt das Modul nicht). Widerspruch: Akte „ja“ und Modul „Beschluss“ oder „Forensik“, oder
+  Akte „nein“ und Modul „offen geführt“. Ist eine Seite „nicht erfasst“, gibt es keinen
+  Widerspruch, sondern die „nicht erfasst“-Marke.
+- 08.11.2026 (Schritt 16): Alter bei Geburtstag am 29. Februar: in Nicht-Schaltjahren zählt der
+  28. Februar.
+
 ## Testliste für Tobi
+
+Version 0.19.0:
+
+1. Unten links „Version 0.19.0 · Build …“. Akte Berta Birke: in den Stammdaten „Offen geführt:
+   ja“, neben dem Geburtsdatum das Alter; oben die Marke „offen geführt“.
+2. Akte Dieter Distel: „Offen geführt: nicht erfasst“ (kursiv, gelb), oben „offen geführt:
+   nicht erfasst“. Filter „Nicht erfasst“ in der Bewohnerübersicht zeigt ihn.
+3. Akte Ida Immergrün: Marke „Unterbringung widersprüchlich – bitte klären“ (Akte „nein“,
+   Ausgangsliste „offen geführt“). Auf der Seite „Ausgangsliste“ steht der Widerspruch
+   ausführlich. Modul in den Einstellungen ausschalten → der Hinweis verschwindet.
+4. „Bearbeiten …“: „Offen geführt“ mit ja / nein / nicht erfasst; neuer Bewohner beginnt bei
+   „nicht erfasst“.
 
 Version 0.18.0:
 
