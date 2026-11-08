@@ -34,7 +34,11 @@ public sealed class VisitenRundgang : Panel
     public Label OffenText { get; } = new() { AutoSize = true, Font = Stil.Fett, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini) };
     public Label VorgemerktText { get; } = new() { AutoSize = true, ForeColor = Stil.Hinweis.Text, BackColor = Stil.Hinweis.Flaeche, Padding = new Padding(Stil.AbstandMini) };
     public Button VorherigerKnopf { get; } = Stil.NebenKnopf("◀ Vorheriger");
-    public Button NaechsterKnopf { get; } = Stil.NebenKnopf("Nächster ▶");
+    public Button NaechsterKnopf { get; } = Stil.NebenKnopf("Nächster Bewohner ▶");
+    // Schritt 26k: „◀ Vorheriger“ und „Nächster Bewohner ▶“ direkt unter der Eingabe; „Nächster“ erst, wenn
+    // zu diesem Bewohner etwas eingetragen ist.
+    public const string ErstEintragenText = "Erst den Bericht zu diesem Bewohner schreiben.";
+    private readonly FlowLayoutPanel weiter = new() { AutoSize = true, WrapContents = false, BackColor = Stil.Seite, Margin = new Padding(0) };
     public Button UnterbrechenKnopf { get; } = Stil.NebenKnopf("Unterbrechen");
     public Button AbschliessenKnopf { get; } = Stil.HauptKnopf("Visite abschließen …");
     public Label Name_ { get; } = new() { AutoSize = true, Font = Stil.Ueberschrift, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false };
@@ -67,7 +71,7 @@ public sealed class VisitenRundgang : Panel
         Sortierung.SelectedIndex = 0;
         Sortierung.AccessibleName = "Sortierung";
         Sortierung.SelectedIndexChanged += (_, _) => Sortieren();
-        foreach (var c in new Control[] { titel, OffenText, VorgemerktText, Sortierung, VorherigerKnopf, NaechsterKnopf, UnterbrechenKnopf, AbschliessenKnopf })
+        foreach (var c in new Control[] { titel, OffenText, VorgemerktText, Sortierung, UnterbrechenKnopf, AbschliessenKnopf })
         {
             c.Margin = new Padding(0, 0, Stil.AbstandMittel, Stil.AbstandKlein);
             if (c is Button b) b.AutoSize = true;
@@ -76,6 +80,8 @@ public sealed class VisitenRundgang : Panel
         titel.Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandGross, Stil.AbstandKlein);
         VorherigerKnopf.Click += (_, _) => Vorheriger();
         NaechsterKnopf.Click += (_, _) => Naechster();
+        foreach (var k in new[] { VorherigerKnopf, NaechsterKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0); }
+        weiter.Controls.AddRange([VorherigerKnopf, NaechsterKnopf]);
         UnterbrechenKnopf.Click += (_, _) => Unterbrechen();
         AbschliessenKnopf.Click += (_, _) => Abschliessen();
         merkenUhr.Tick += (_, _) => { merkenUhr.Stop(); Merken(); };
@@ -87,7 +93,7 @@ public sealed class VisitenRundgang : Panel
         Liste.SelectedIndexChanged += (_, _) => { if (!fuellt && Liste.SelectedIndices.Count == 1 && Liste.SelectedIndices[0] != Aktuell) Waehlen(Liste.SelectedIndices[0]); };
         Tabelle.AccessibleName = "Aktuelle Medikation";
         BedarfTabelle.AccessibleName = "Medikation bei Bedarf";
-        rechts.Controls.AddRange([Name_, Allergie, Diagnosen, Fehler, medikationTitel, Tabelle, KeineMedikation, bedarfTitel, BedarfTabelle, LetzteVisite, OffeneAufgaben, eingabeTitel]);
+        rechts.Controls.AddRange([Name_, Allergie, Diagnosen, Fehler, medikationTitel, Tabelle, KeineMedikation, bedarfTitel, BedarfTabelle, LetzteVisite, OffeneAufgaben, eingabeTitel, weiter]);
         rechts.Layout += (_, _) => RechtsAnordnen();
         Controls.AddRange([kopfleiste, Liste, rechts]);
         ListeFuellen();
@@ -139,8 +145,8 @@ public sealed class VisitenRundgang : Panel
         OffenText.Text = offen == 0 ? $"alle {Bewohner.Count} besprochen" : $"noch offen: {offen} von {Bewohner.Count}";
         int n = VisitenEntwurfRegeln.Vorgemerkt(Entwurf);
         VorgemerktText.Text = n == 1 ? "1 Aufgabe vorgemerkt" : $"{n} Aufgaben vorgemerkt";
-        VorherigerKnopf.Enabled = Aktuell > 0;
-        NaechsterKnopf.Enabled = Aktuell < Bewohner.Count - 1;
+        NaechsterKnopf.Enabled = Aktuell < Bewohner.Count - 1;   // „◀ Vorheriger“ ist immer aktiv
+        NaechsterSperren();
         Geaendert?.Invoke();
     }
 
@@ -177,7 +183,7 @@ public sealed class VisitenRundgang : Panel
         Feld = new VisiteEintragFeld(b, speicher.Medikamente().Where(m => !m.Gesperrt).ToList());
         Feld.EntfernenKnopf.Visible = false;
         Feld.Leave += (_, _) => Merken();   // verlässt man die Eingabe, steht sie schon im Entwurf
-        Feld.Besprochen.TextChanged += (_, _) => NachTippen();
+        Feld.Besprochen.TextChanged += (_, _) => { NachTippen(); NaechsterSperren(); };
         Feld.Fachrichtung.TextChanged += (_, _) => NachTippen();
         fuellt = true;
         FeldSetzen(Feld, Entwurf.Eintrag(id));
@@ -201,6 +207,10 @@ public sealed class VisitenRundgang : Panel
         f.Fachrichtung.Text = e.Facharzt;
         f.Dringend.Checked = e.Dringend;
     }
+
+    // „Nächster Bewohner ▶“ grau mit Hinweis, solange „Besprochenes“ leer ist (Schritt 26k).
+    private void NaechsterSperren() =>
+        Stil.Sperren(NaechsterKnopf, Feld is { } f && f.Besprochen.Text.Trim().Length > 0 ? null : ErstEintragenText);
 
     private void NachTippen()
     {
@@ -236,7 +246,11 @@ public sealed class VisitenRundgang : Panel
         catch (Eingabefehler e) { FehlerZeigen(string.Join(" ", e.Fehler)); }
     }
 
-    public void Naechster() => Waehlen(Aktuell + 1);
+    public void Naechster()
+    {
+        if (Stil.Sperrgrund(NaechsterKnopf) is not null) return;   // erst eintragen (die Liste links bleibt frei wählbar)
+        Waehlen(Aktuell + 1);
+    }
 
     public void Vorheriger() => Waehlen(Aktuell - 1);
 
@@ -318,6 +332,7 @@ public sealed class VisitenRundgang : Panel
         y += Stil.Px(this, Stil.AbstandKlein);
         Setzen(eingabeTitel, Stil.AbstandMini);
         if (Feld is not null) Setzen(Feld);
+        Setzen(weiter);
         rechts.AutoScrollMinSize = new Size(0, y - rechts.AutoScrollPosition.Y + rand);
     }
 }

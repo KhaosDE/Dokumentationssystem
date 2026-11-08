@@ -1322,7 +1322,7 @@ Umfang:
 - **Akte öffnen** per Doppelklick oder Knopf „Akte öffnen“ (Aktionsleiste).
 
 ## Visite: „Nächster Bewohner“ unter der Texteingabe
-Status: freigegeben (Bauplan Schritt 26k)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: In der Visitenansicht stehen „◀ Vorheriger“ und „Nächster Bewohner ▶“ direkt unter der
 Texteingabe. „Nächster Bewohner“ ist ausgegraut, solange für den aktuellen Bewohner kein Bericht
