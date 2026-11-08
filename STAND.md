@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.16** (Programmsymbol „Hell wie die Kopfzeile“, Bauplan Schritt 26n).
+Stand: 08.11.2026. Version: **0.30.0** (Ausgangsliste als übersichtliche Liste, Bauplan Schritt 27).
 
 ## Aktuell
 
@@ -170,7 +170,12 @@ zehn tägliche Angebote von 07:30 bis 20:45. Der zweite Reiter „Angebote“ is
 Neu in 0.29.16: DokuLine hat ein eigenes **Programmsymbol** (Entwurf „Hell wie die Kopfzeile“) für die
 `.exe`, die Taskleiste und alle Fenster. Das Logofeld oben rechts bleibt für das Bild der Einrichtung.
 
-**Nächster Schritt:** Bauplan Schritt 27 „Ausgangsliste als übersichtliche Liste“ (0.30.0).
+Neu in 0.30.0: Die **Ausgangsliste** ist eine **Liste** wie die Tagesliste (eine Zeile je Bewohner:
+Zimmer, Name, Ausgang, Unterbringung, heute von–bis mit Hz., Stand jetzt). Wer unterwegs ist, steht
+oben und ist hinterlegt, Überfällige rot mit „überfällig seit …“; „raus“/„zurück“ direkt in der
+Zeile, Filter „nur unterwegs“ und „nur mit Beschränkung“.
+
+**Nächster Schritt:** Bauplan Schritt 28 „E-Mail und Kalender über externe Programme“ (0.31.0).
 
 ## Fertig
 
@@ -805,7 +810,6 @@ Neu in 0.29.16: DokuLine hat ein eigenes **Programmsymbol** (Entwurf „Hell wie
     im Wochenplan; Recht „Teilnahme bestätigen“).
   - Vollbild: Knopf oder F11 (im Tagesplan) – nur die Tafel über den ganzen Bildschirm, auch mit
     Demo-Hinweis; Esc oder F11 beendet. Beim Abmelden (F12) wird es geschlossen.
-
 - 0.29.10 — Demo-Daten: 23 Bewohner je Wohnbereich (Bauplan Schritt 26h, 08.11.2026):
   - 59 weitere ausgedachte Bewohner (Pflanzennamen mit gleichem Anfangsbuchstaben, alle von L bis Z), also
     23 je Wohnbereich. Zimmer erweitert auf 15 je Bereich (Einzel- und Doppelzimmer gemischt); frei sind je
@@ -887,6 +891,23 @@ Neu in 0.29.16: DokuLine hat ein eigenes **Programmsymbol** (Entwurf „Hell wie
     erzeugt mit `python werkzeuge/symbol-erzeugen.py` (`--vorschau <ordner>` legt PNGs zum Ansehen ab).
   - Symbol der `.exe` (`ApplicationIcon`), des Hauptfensters und aller weiteren Fenster und Dialoge (zentral
     in `Stil.cs`); nicht im Logofeld der Kopfzeile.
+- 0.30.0 — Ausgangsliste als übersichtliche Liste (Bauplan Schritt 27, 08.11.2026):
+  - Seite „Ausgangsliste“: Spaltenköpfe „Zi., Bewohner, Ausgang, Unterbringung, Heute (von–bis,
+    Hz.), Stand jetzt“, darunter eine Zeile je Bewohner. Zu lange Texte enden mit „…“; der volle Text
+    steht im Hinweis beim Darüberfahren.
+  - Abschnitt „UNTERWEGS (n)“ oben: hellblau hinterlegt mit blauem Balken links; Überfällige rot
+    hinterlegt, roter Balken, „überfällig seit 16:05“ und ganz oben. Darunter „IM HAUS ODER
+    ABWESEND (n)“ nach Zimmer.
+  - „Stand jetzt“: „im Haus“, „unterwegs seit 14:05 (allein), zurück bis 16:05“, „überfällig seit …“,
+    „abwesend: …“ oder „Ausgangsbeschränkung …“. Was zu klären ist (Fristen, Widerspruch, nicht
+    erfasst) und Infos stehen klein unter der Zeile.
+  - Rechts in der Zeile „raus allein“, „raus mit Bewohner“ bzw. „zurück“ (Digitaler Ausgang) und „…“
+    mit „Ausgang ändern …“, „Anwesenheit …“, „Unterbringung …“, „Verlauf …“ (auch per Rechtsklick).
+    In schmalen Fenstern stehen die Knöpfe unter der Zeile.
+  - Filter „nur unterwegs“ (mit Digitalem Ausgang) und „nur mit Beschränkung“.
+  - Der Reiter „Ausgang“ in der Akte bleibt eine Karte. Änderungen im Modul:
+    `src/DokuLine.Modul.Ausgangsliste/AENDERUNGEN.md`.
+
 ## Offene Punkte
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
@@ -1490,6 +1511,11 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 27): Die Liste ist aus einzelnen Zeilen gebaut (keine Tabelle mit Zellen), weil
+  „raus“/„zurück“ als echte Knöpfe in der Zeile stehen sollen. Spalten sind feste Anteile der Breite,
+  alle Zeilen haben dieselbe Breite für den Knopfbereich, damit die Spalten fluchten. Die seltenen
+  Aktionen (Ausgang ändern, Anwesenheit, Unterbringung, Verlauf) liegen hinter „…“, damit die Zeile
+  ruhig bleibt. Hervorhebung: Farbe immer mit Wort und Balken (nie Farbe allein).
 - 08.11.2026 (Schritt 26c): Der Entwurf gilt je Wohnbereich (eine laufende Visite pro Bereich), nicht je
   Person – so kann eine Kollegin die Visite am anderen Rechner fortsetzen. Die Visitenansicht zeigt die
   Bewohner des eigenen Bereichs (Einstellung „Bereich“ dieses Rechners).
@@ -1583,6 +1609,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.30.0:
+
+1. „Ausgangsliste“: oben Spaltenköpfe, darunter „UNTERWEGS“ – Clara Clematis (hellblau, „unterwegs
+   seit …, zurück bis …“) und Gustav Ginster (rot, „überfällig seit …“, ganz oben). Darunter alle
+   anderen nach Zimmer, „Stand jetzt“ z. B. „im Haus“ oder „abwesend: Heimfahrt …“.
+2. Anton Ahorn „raus allein“ → rutscht nach oben zu „UNTERWEGS“; „zurück“ → wieder unten, in „Heute“
+   steht „hh:mm–hh:mm Hz. …“.
+3. „…“ (oder Rechtsklick auf die Zeile) → „Ausgang ändern …“, „Anwesenheit …“, „Unterbringung …“,
+   „Verlauf …“ öffnen wie bisher.
+4. Filter „nur unterwegs“ und „nur mit Beschränkung“ an und aus.
+5. Fenster schmal ziehen → die Knöpfe rutschen unter die Zeile; lange Texte enden mit „…“, beim
+   Darüberfahren steht der volle Text.
 
 Version 0.29.16:
 

@@ -898,7 +898,7 @@ Umfang:
 - Demo-Daten: einige Visiten mit allen drei Fällen.
 
 ## Ausgangsliste als übersichtliche Liste
-Status: freigegeben (Bauplan Schritt 27)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Die Bildschirmdarstellung des Moduls Ausgangsliste wird neu gedacht, angelehnt an die
 ausdruckbare Tagesliste.
