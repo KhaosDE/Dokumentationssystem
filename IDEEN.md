@@ -65,6 +65,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 26k | Visite: „Nächster Bewohner“ unter der Texteingabe | 0.29.13 |
 | 26l | Übersicht neu: „Heute wichtig“ und Bewohnerliste | 0.29.14 |
 | 26m | Therapie: Ansicht „Laufende Therapien“ als Anwesenheitstafel | 0.29.15 |
+| 26n | Programmsymbol „Hell wie die Kopfzeile“ | 0.29.16 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
@@ -1395,3 +1396,60 @@ Umfang:
 - Aktualisiert sich jede Minute und bei Änderungen von anderen Rechnern (Mehrplatz).
 - Demo-Daten: Therapieangebote über den ganzen Tag, sodass beim Vorführen zu den meisten
   Uhrzeiten etwas läuft. Je Angebot 3–8 Teilnehmer aus R1–R3.
+
+## Programmsymbol „Hell wie die Kopfzeile“
+Status: freigegeben (Bauplan Schritt 26n)
+Datum: 08.11.2026
+Was: DokuLine bekommt ein eigenes Programmsymbol für die `.exe`, die Taskleiste, die Fenster und
+den Desktop.
+Warum: Entscheidung Tobi (08.11.2026) aus vier Entwürfen: Entwurf 4 „Hell wie die Kopfzeile“,
+„erstmal“ — ein späterer Wechsel muss leicht bleiben.
+Umfang:
+- **Vorlage** (selbst gezeichnet im Chat, keine fremde Vorlage, keine Lizenzfrage): die zwei
+  SVG-Dateien unten. Ablage im Repository als `src/DokuLine/Bilder/programmsymbol.svg` (groß)
+  und `src/DokuLine/Bilder/programmsymbol-klein.svg` (klein, ohne Farbverlauf).
+- **Symboldatei** `src/DokuLine/Bilder/DokuLine.ico` mit den Größen 16, 20, 24, 32, 40, 48, 64
+  und 256 px: 16–32 px aus der kleinen Vorlage, ab 40 px aus der großen. Umwandlung mit einem
+  kleinen Skript im Repository (`werkzeuge/symbol-erzeugen.*`), damit ein Wechsel des Symbols
+  nur die SVG-Dateien betrifft. Werkzeug dafür nur mit freier Lizenz, Begründung in `STAND.md`;
+  die fertige `.ico` liegt im Repository, der Windows-Build braucht das Werkzeug nicht.
+- Einbinden: `ApplicationIcon` im Projekt `DokuLine` (Symbol der `.exe`), dasselbe Symbol für
+  das Hauptfenster und alle weiteren Fenster und Dialoge (zentral, z. B. in `Stil.cs`).
+- **Nicht** in das Logofeld der Kopfzeile: Das bleibt für das Bild der Einrichtung aus den
+  Einstellungen (`CLAUDE.md`, Regel 7).
+- Prüfen: Symbol der `.exe` im Explorer, in der Taskleiste (hell und dunkel) und im
+  Fenstertitel; Bildschirmfoto im Testlauf.
+
+Große Vorlage (`programmsymbol.svg`):
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="dlOrange" cx="0" cy="0" r="1">
+      <stop offset="0" stop-color="#EEA63C" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#EEA63C" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dlBlau" cx="1" cy="1" r="1">
+      <stop offset="0" stop-color="#5480C6" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#5480C6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#FFFFFF" stroke="#C9D3E3" stroke-width="2"/>
+  <rect x="3" y="3" width="58" height="58" rx="13" fill="url(#dlOrange)"/>
+  <rect x="3" y="3" width="58" height="58" rx="13" fill="url(#dlBlau)"/>
+  <rect x="14" y="17" width="36" height="6" rx="3" fill="#2D549C"/>
+  <rect x="14" y="29" width="26" height="6" rx="3" fill="#2D549C"/>
+  <rect x="14" y="41" width="36" height="6" rx="3" fill="#EEA63C"/>
+</svg>
+```
+
+Kleine Vorlage (`programmsymbol-klein.svg`, für 16–32 px):
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 64 64">
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#FFFFFF" stroke="#C9D3E3" stroke-width="2"/>
+  <rect x="14" y="17" width="36" height="6" rx="3" fill="#2D549C"/>
+  <rect x="14" y="29" width="26" height="6" rx="3" fill="#2D549C"/>
+  <rect x="14" y="41" width="36" height="6" rx="3" fill="#EEA63C"/>
+</svg>
+```
