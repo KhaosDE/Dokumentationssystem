@@ -11,17 +11,18 @@ public class FlaecheUndMenueTests
     public void Akte_und_Wochenplan_fuellen_die_Breite() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        using var f = new Hauptfenster(u.Speicher) { Size = new Size(1366, 768) };
+        // Der Bildschirm des Testrechners ist klein: Mehr Platz entsteht hier durch das Einklappen des Menüs.
+        using var f = new Hauptfenster(u.Speicher) { Size = new Size(900, 700) };
         Hilfe.Zeigen(f);
         var akte = f.Bewohner.Akte;
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         int Rand() => Stil.Px(akte, Stil.AbstandGross);
         Assert.Equal(akte.ClientSize.Width - 2 * Rand(), akte.Reiter.Width);
         int vorher = akte.Reiter.Width;
-        f.Size = new Size(1800, 900);
+        f.MenueUmschalten();
         f.PerformLayout();
         Assert.True(akte.Reiter.Width > vorher);
-        Assert.Equal(akte.ClientSize.Width - 2 * Rand(), akte.Reiter.Width);   // keine feste Höchstbreite mehr
+        Assert.Equal(akte.ClientSize.Width - 2 * Rand(), akte.Reiter.Width);   // wächst mit, keine feste Höchstbreite
 
         akte.Reiter.Waehlen("Wochenplan");
         Assert.Equal(akte.Reiter.Width, akte.Wochenplan.Width);
@@ -35,7 +36,8 @@ public class FlaecheUndMenueTests
 
         // Auch die Seiten: Aufgaben füllen die Breite.
         f.BereichWaehlen("Aufgaben");
-        Assert.True(f.Aufgaben.Controls.OfType<Control>().Where(c => c.Visible).Max(c => c.Width) > Stil.Px(f, 880));
+        int aufgabenRand = Stil.Px(f.Aufgaben, Stil.AbstandGross);
+        Assert.Contains(f.Aufgaben.Controls.OfType<AufgabeKarte>(), k => k.Width == f.Aufgaben.ClientSize.Width - 2 * aufgabenRand);
     });
 
     [Fact]
@@ -69,6 +71,7 @@ public class FlaecheUndMenueTests
         }
         using (var f = new Hauptfenster(u.Speicher))
         {
+            Hilfe.Zeigen(f);
             Assert.True(f.MenueEingeklappt);                             // gemerkt
             f.MenueUmschalten();
             Assert.False(f.MenueEingeklappt);
