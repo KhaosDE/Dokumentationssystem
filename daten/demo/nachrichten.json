@@ -5,7 +5,7 @@
       "betreff": "Arzttermin am Donnerstag",
       "bewohner": "Ahorn",
       "nachrichten": [
-        { "von": "EF", "an": [ "team:Wohnbereich A" ], "vorStunden": 3, "text": "Wer kann {vorname} am Donnerstag um 10 Uhr zum Arzt begleiten? Der Fahrdienst ist bestellt.", "gelesenVon": [ "CD" ] },
+        { "von": "EF", "an": [ "team:R1" ], "vorStunden": 3, "text": "Wer kann {vorname} am Donnerstag um 10 Uhr zum Arzt begleiten? Der Fahrdienst ist bestellt.", "gelesenVon": [ "CD" ] },
         { "von": "KL", "vorStunden": 1, "text": "Ich habe Frühdienst und übernehme das gern." }
       ]
     },
@@ -19,7 +19,7 @@
     {
       "betreff": "Teamsitzung am Mittwoch",
       "nachrichten": [
-        { "von": "RS", "an": [ "team:Wohnbereich A", "team:Wohnbereich B" ], "vorStunden": 50, "text": "Die Teamsitzung beginnt diese Woche um 14 Uhr statt um 13 Uhr. Bitte Themen bis Dienstag sammeln.", "gelesenVon": [ "AB", "CD", "EF", "GH" ] },
+        { "von": "RS", "an": [ "team:R1", "team:R2" ], "vorStunden": 50, "text": "Die Teamsitzung beginnt diese Woche um 14 Uhr statt um 13 Uhr. Bitte Themen bis Dienstag sammeln.", "gelesenVon": [ "AB", "CD", "EF", "GH" ] },
         { "von": "CD", "vorStunden": 30, "text": "Danke, ist notiert. Ich bringe die Liste für den Ausflug mit.", "gelesenVon": [ "AB", "RS" ] }
       ]
     },

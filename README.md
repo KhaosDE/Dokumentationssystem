@@ -44,6 +44,9 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
   als TT.MM.JJJJ (z. B. 03.04.1965); die Punkte setzt das Programm beim Tippen selbst (`08112026`,
   auch `081126` für 20xx), bei Uhrzeiten den Doppelpunkt (`0930`). **Offen geführt** hat drei Zustände: ja, nein, nicht erfasst.
+  Bei der **Aufnahme** wählt man erst den Wohnbereich (R1 offen, R2/R3 beschützend), dann eines der
+  **freien Betten** („105 – Bett Tür“, „104 – Einzelzimmer“); „offen geführt“ ist dann „nein“. Zimmer
+  und Betten: Einstellungen → „WOHNBEREICHE“ → „Zimmer und Betten …“.
 - In den Stammdaten steht das **Alter** neben dem Geburtsdatum. Oben in der Akte stehen Marken:
   „offen geführt“, „offen geführt: nicht erfasst“ und Hinweise der Module – etwa, wenn die
   Ausgangsliste etwas anderes zur Unterbringung sagt als die Akte („bitte klären“).
@@ -149,7 +152,7 @@ Danach fragt Windows für diese Datei nicht mehr.
   Bereich, Kürzel und Uhrzeit kommen dazu. Sie steht auf der Karte und oben in der Akte – in
   allen Bereichen –, bis sie abläuft oder eine neue sie ersetzt. Der Verlauf bleibt.
 - **Mehrere Rechner (Demo)**: In den Einstellungen unter „MEHRPLATZ“ bekommt jeder Rechner eine
-  **Bereichskennung** (z. B. „Wohnbereich A“, „Therapie“); die Übersicht zeigt zuerst die
+  **Bereichskennung** (z. B. „R1“, „Therapie“); die Übersicht zeigt zuerst die
   Bewohner dieses Bereichs, umschaltbar auf „alle Bereiche“. Mit **„Gemeinsamen Ordner wählen
   …“** liegt die Datenbank in einem Ordner, den mehrere Rechner erreichen (z. B. ein
   Netzlaufwerk); das gilt nach dem Neustart. Jeder Rechner liest Änderungen der anderen

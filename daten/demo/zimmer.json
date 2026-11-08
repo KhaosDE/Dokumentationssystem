@@ -1,0 +1,28 @@
+{
+  "hinweis": "Ausgedachte Wohnbereiche und Zimmer für die Demo (Bauplan Schritt 26e). R1 offen, R2 und R3 beschützend – allgemeine Kürzel, kein Name einer Einrichtung. betten: 1 = Einzelzimmer, 2 = Doppelzimmer mit „Bett Fenster“ und „Bett Tür“. Welcher Bewohner wo liegt, steht in bewohner.json.",
+  "bereiche": [
+    { "name": "R1", "beschuetzt": false },
+    { "name": "R2", "beschuetzt": true },
+    { "name": "R3", "beschuetzt": true }
+  ],
+  "zimmer": [
+    { "nummer": "101", "bereich": "R1", "betten": 2 },
+    { "nummer": "102", "bereich": "R1", "betten": 1 },
+    { "nummer": "103", "bereich": "R1", "betten": 2 },
+    { "nummer": "104", "bereich": "R1", "betten": 1 },
+    { "nummer": "105", "bereich": "R1", "betten": 2 },
+    { "nummer": "106", "bereich": "R1", "betten": 2 },
+    { "nummer": "201", "bereich": "R2", "betten": 2 },
+    { "nummer": "202", "bereich": "R2", "betten": 1 },
+    { "nummer": "203", "bereich": "R2", "betten": 2 },
+    { "nummer": "204", "bereich": "R2", "betten": 1 },
+    { "nummer": "205", "bereich": "R2", "betten": 2 },
+    { "nummer": "206", "bereich": "R2", "betten": 1 },
+    { "nummer": "301", "bereich": "R3", "betten": 1 },
+    { "nummer": "302", "bereich": "R3", "betten": 2 },
+    { "nummer": "303", "bereich": "R3", "betten": 1 },
+    { "nummer": "304", "bereich": "R3", "betten": 2 },
+    { "nummer": "305", "bereich": "R3", "betten": 1 },
+    { "nummer": "306", "bereich": "R3", "betten": 2 }
+  ]
+}

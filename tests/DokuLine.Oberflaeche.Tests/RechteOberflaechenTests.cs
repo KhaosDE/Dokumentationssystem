@@ -67,9 +67,9 @@ public class RechteOberflaechenTests
         // Die Übersicht richtet sich nach den Bereichen des Angemeldeten: PR (A und B) sieht beide.
         f.BenutzerWaehlen("PR");
         Assert.Equal(10, f.Uebersicht.Karten.Count);
-        Assert.StartsWith("10 Bewohner · Wohnbereich A, Wohnbereich B · ", f.Kopf.KleinText);
+        Assert.StartsWith("R1, R2 · 10 Bewohner · 9 Betten frei · ", f.Kopf.KleinText);
         f.BenutzerWaehlen("MN");
-        Assert.Equal(2, f.Uebersicht.Karten.Count);   // Wohnbereich B
+        Assert.Equal(2, f.Uebersicht.Karten.Count);   // R2
 
         // OP (Therapie): Akte ansehen ja, bearbeiten nein; Berichte schreiben ja.
         f.BenutzerWaehlen("OP");
@@ -141,7 +141,7 @@ public class RechteOberflaechenTests
     public void Mitarbeiter_im_eigenen_Bereich_verwalten() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });   // Bereichsleitung Wohnbereich A
+        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });   // Bereichsleitung R1
         using (var fenster = new MitarbeiterFenster(u.Speicher))
         {
             Hilfe.Zeigen(fenster);
@@ -149,24 +149,24 @@ public class RechteOberflaechenTests
             Assert.Null(Stil.Sperrgrund(fenster.NeuKnopf));
             fenster.Waehlen("GH");
             Assert.Equal("Nur Mitarbeiter des eigenen Bereichs.", Stil.Sperrgrund(fenster.BearbeitenKnopf));
-            fenster.Waehlen("PR");   // Wohnbereich A und B
+            fenster.Waehlen("PR");   // R1 und B
             Assert.Null(Stil.Sperrgrund(fenster.BearbeitenKnopf));
             Hilfe.Foto(fenster, "62_mitarbeiter");
             using var neu = fenster.FormularErstellen(null);
-            Assert.False(neu.Bereiche["Wohnbereich B"].Enabled);   // nur eigene Bereiche
-            Assert.True(neu.Bereiche["Wohnbereich A"].Enabled);
+            Assert.False(neu.Bereiche["R2"].Enabled);   // nur eigene Bereiche
+            Assert.True(neu.Bereiche["R1"].Enabled);
             neu.Kuerzel.Text = "qx";
             neu.Vorname.Text = "Quirin";
             neu.Nachname.Text = "Kranich";
             Assert.False(neu.Speichern());
             Assert.Contains("mindestens einen Bereich", neu.Fehler.Text);
-            neu.Bereiche["Wohnbereich A"].Checked = true;
+            neu.Bereiche["R1"].Checked = true;
             neu.Positionen["Mitarbeiter Wohnbereich"].Checked = true;
             Hilfe.Foto(neu, "63_mitarbeiter_formular");
             Assert.True(neu.Speichern());
             Assert.Equal("QX", neu.Gespeichert!.Kuerzel);
         }
-        Assert.Equal(["Wohnbereich A"], u.Speicher.MitarbeiterLesen("QX")!.Bereiche);
+        Assert.Equal(["R1"], u.Speicher.MitarbeiterLesen("QX")!.Bereiche);
 
         // CD (ohne Mitarbeiterverwaltung): in den Einstellungen gesperrt; Bereiche und Positionen nur ansehen.
         Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
@@ -179,9 +179,9 @@ public class RechteOberflaechenTests
         Einstellungen.Aendern(w => w with { Kuerzel = "WZ" });
         using (var listen = new ListenFenster(u.Speicher))
         {
-            listen.Name_.Text = "Wohnbereich C";
+            listen.Name_.Text = "R4";
             Assert.True(listen.Ausfuehren(() => u.Speicher.ListeneintragAnlegen(Liste.Bereiche, listen.Name_.Text)));
-            Assert.Contains("Wohnbereich C", listen.Listen[Liste.Bereiche].Items.Cast<string>().Last());
+            Assert.Contains("R4", listen.Listen[Liste.Bereiche].Items.Cast<string>().Last());
         }
     });
 }

@@ -36,10 +36,10 @@ public sealed class StandardaufgabenTests : IDisposable
         Assert.Contains("Reihenfolge", Assert.Single(Assert.Throws<Eingabefehler>(() => Schichtzeiten.AusEingabe("14:00", "06:00", "22:00")).Fehler));
         Assert.Throws<Eingabefehler>(() => Schichtzeiten.AusEingabe("x", "14:00", "22:00"));
 
-        Assert.Equal(Schichtzeiten.Vorgabe, s.Schichtzeiten("Wohnbereich A"));
-        s.SchichtzeitenSetzen("Wohnbereich A", z);
-        Assert.Equal(z, s.Schichtzeiten("Wohnbereich A"));
-        Assert.Equal(Schichtzeiten.Vorgabe, s.Schichtzeiten("Wohnbereich B"));   // je Bereich
+        Assert.Equal(Schichtzeiten.Vorgabe, s.Schichtzeiten("R1"));
+        s.SchichtzeitenSetzen("R1", z);
+        Assert.Equal(z, s.Schichtzeiten("R1"));
+        Assert.Equal(Schichtzeiten.Vorgabe, s.Schichtzeiten("R2"));   // je Bereich
         Assert.Equal("Früh 06:30 · Spät 14:30 · Nacht 21:45", z.Text);
     }
 

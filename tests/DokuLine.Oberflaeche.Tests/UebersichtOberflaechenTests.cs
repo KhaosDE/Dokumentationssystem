@@ -17,7 +17,7 @@ public class UebersichtOberflaechenTests
         f.BereichWaehlen(Hauptfenster.Startbereich);
         var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
         Assert.Empty(f.Kopf.Knoepfe);
-        Assert.StartsWith("8 Bewohner · Wohnbereich A · Stand ", f.Kopf.KleinText);   // eigener Bereich (Mehrplatz)
+        Assert.StartsWith("R1 · 8 Bewohner · 2 Betten frei · Stand ", f.Kopf.KleinText);   // eigener Bereich (Mehrplatz, Schritt 26e)
         Assert.StartsWith("8 Bewohner · ", s.HeuteText.Text);
         Assert.Contains("Pause beginnt", s.Medikation.Text);
         Assert.Equal(8, s.Karten.Count);

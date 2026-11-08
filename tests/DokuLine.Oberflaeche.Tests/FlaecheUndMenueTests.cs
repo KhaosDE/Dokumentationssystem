@@ -64,7 +64,7 @@ public class FlaecheUndMenueTests
             Assert.False(f.DemoKnopf.Visible);
             Assert.False(f.VersionText.Visible);
             Assert.StartsWith("Version ", f.InfoSymbol.Text);
-            Assert.Contains("Wohnbereich A", f.InfoSymbol.Text);
+            Assert.Contains("R1", f.InfoSymbol.Text);
             Hilfe.Foto(f, "57_menue_eingeklappt");
             f.Navigation.Single(n => n.Text == "Kalender").Ausloesen();
             Assert.Equal("Kalender", f.AktiverBereich);                  // Bedienung geht eingeklappt wie sonst

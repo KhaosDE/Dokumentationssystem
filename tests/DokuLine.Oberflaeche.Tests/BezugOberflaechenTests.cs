@@ -78,9 +78,9 @@ public class BezugOberflaechenTests
         s.MeineBezugsbewohner.Checked = false;
         f.BenutzerWaehlen("PR");
         s.MeineEinzeltrainings.Checked = true;
-        Assert.Equal(["Birke", "Ginster"], s.Karten.Select(k => k.Bewohner.Nachname));   // auch aus Wohnbereich B
+        Assert.Equal(["Birke", "Ginster"], s.Karten.Select(k => k.Bewohner.Nachname));   // auch aus R2
         s.MeineEinzeltrainings.Checked = false;
-        Assert.Equal(10, s.Karten.Count);   // PR: Wohnbereich A und B
+        Assert.Equal(10, s.Karten.Count);   // PR: R1 und B
     });
 
     [Fact]

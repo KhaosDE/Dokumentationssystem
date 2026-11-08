@@ -26,6 +26,35 @@ public static class Demodaten
     public static List<Bewohner> Bewohner() =>
         Lesen<BewohnerDatei>("bewohner.json").Bewohner.Select(e => BewohnerRegeln.AusEingabe(e)).ToList();
 
+    // ----- Wohnbereiche, Zimmer und Betten (Schritt 26e) -----
+
+    private sealed class ZimmerDatei
+    {
+        public List<BereichDaten> Bereiche { get; set; } = [];
+        public List<ZimmerDaten> Zimmer { get; set; } = [];
+    }
+
+    public sealed class BereichDaten
+    {
+        public string Name { get; set; } = "";
+        public bool Beschuetzt { get; set; }
+    }
+
+    public sealed class ZimmerDaten
+    {
+        public string Nummer { get; set; } = "";
+        public string Bereich { get; set; } = "";
+        public int Betten { get; set; } = 1;
+    }
+
+    public sealed record DemoZimmer(List<(string Name, bool Beschuetzt)> Bereiche, List<Kern.Zimmer> Zimmer);
+
+    public static DemoZimmer Zimmer()
+    {
+        var datei = Lesen<ZimmerDatei>("zimmer.json");
+        return new DemoZimmer([.. datei.Bereiche.Select(b => (b.Name, b.Beschuetzt))], [.. datei.Zimmer.Select(z => new Kern.Zimmer(z.Nummer, z.Bereich, z.Betten))]);
+    }
+
     // ----- Berichte -----
 
     public sealed class BerichtTexte

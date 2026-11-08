@@ -72,7 +72,7 @@ public sealed class AusgangslisteTests : IDisposable
         Assert.Equal(Unterbringung.OffenGefuehrt, P("Birke").Unterbringung);
         Assert.Equal(Unterbringung.NichtErfasst, P("Distel").Unterbringung);
         Assert.Equal(Unterbringung.Forensik, P("Fichte").Unterbringung);
-        Assert.Equal(["101", "102", "103"], db.Laden().Take(3).Select(p => p.Zimmernummer));
+        Assert.Equal(["101", "101", "102"], db.Laden().Take(3).Select(p => p.Zimmernummer));   // 101 ist ein Doppelzimmer (Schritt 26e)
         Assert.Equal("Heimfahrt bis 09.11.2026", P("Holunder").StatusGrund);
         Assert.Equal("noch 2 Tage", KartenText.Frist(P("Holunder").StatusGrund, Jetzt, out _));
         Assert.Equal("seit 3 Tagen", KartenText.Frist(P("Kiefer").StatusGrund, Jetzt, out _));
@@ -178,12 +178,13 @@ public sealed class AusgangslisteTests : IDisposable
         var heute = Jetzt.Date;
         Assert.Equal(heute.AddDays(-5), plan[0].Datum);
         Assert.Equal(new DateTime(2026, 12, 31), plan[^1].Datum);   // bis Ende des Folgemonats
-        // Holunder (108) und Kiefer (110) sind abwesend: 108 fehlt, die Gruppe 109/110 ist nur 109.
+        // Holunder und Kiefer sind abwesend, teilen aber Doppelzimmer mit Anwesenden (101, 103; Schritt 26e):
+        // alle Zimmer sind dabei, die Gruppe 201/202 ist ein Eintrag.
         var zimmer = plan.Select(t => t.Zimmer).Distinct().ToList();
-        Assert.DoesNotContain("108", zimmer);
-        Assert.Contains("109", zimmer);
-        Assert.DoesNotContain("110", zimmer);
-        Assert.Equal(8, zimmer.Count);
+        Assert.Contains("201/202", zimmer);
+        Assert.DoesNotContain("201", zimmer);
+        Assert.Contains("101", zimmer);
+        Assert.Equal(7, zimmer.Count);
         // Reihum ohne Lücke.
         for (int i = 1; i < 20; i++) Assert.NotEqual(plan[i - 1].Zimmer, plan[i].Zimmer);
 
@@ -212,10 +213,10 @@ public sealed class AusgangslisteTests : IDisposable
     {
         Kuechendienst.ReihenfolgeSpeichern(db, ["105", "101", "unbekannt"]);
         var reihe = Kuechendienst.Reihenfolge(db, db.Laden());
-        Assert.Equal(["105", "101", "102", "103", "104", "106", "107", "108", "109", "110"], reihe);
+        Assert.Equal(["105", "101", "102", "103", "104", "106", "201", "202"], reihe);
         var fest = Kuechendienst.FesteReihenfolge(reihe, Kuechendienst.Gruppen(db));
-        Assert.Equal(9, fest.Count);
-        Assert.Equal(["109", "110"], fest[^1]);
+        Assert.Equal(7, fest.Count);
+        Assert.Equal(["201", "202"], fest[^1]);
     }
 
     [Fact]

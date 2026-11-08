@@ -3,6 +3,8 @@ using DokuLine.Kern;
 namespace DokuLine;
 
 // Formular: Bewohner anlegen oder bearbeiten. Prüfen und Speichern macht der Kern.
+// Schritt 26e: erst der Wohnbereich, dann eine Liste nur der freien Betten („102 – Bett Fenster“).
+// „Offen geführt“ steht nicht in der Aufnahme – neue Bewohner sind „nein“ (geschlossen aufgenommen).
 public sealed class BewohnerFormular : Form
 {
     private const int BildGroesse = 96;
@@ -14,9 +16,12 @@ public sealed class BewohnerFormular : Form
 
     public TextBox Vorname { get; } = Feld();
     public TextBox Nachname { get; } = Feld();
-    public TextBox Zimmer { get; } = Feld();
-    // Mehrplatz: zu welchem Wohnbereich der Bewohner gehört (Vorschläge aus den vorhandenen, eigene möglich).
-    public ComboBox Wohnbereich { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Dock = DockStyle.Fill, Font = Stil.Standard, MaxLength = Kern.Bereiche.Laenge };
+    // Wohnbereich (R1 offen, R2/R3 beschützend) und ein freies Bett darin (Zimmerwechsel: dieselbe Auswahl).
+    public ComboBox Wohnbereich { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = Stil.Standard };
+    public ComboBox Bett { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = Stil.Standard };
+    public Label KeinBett { get; } = new() { Text = ZimmerRegeln.KeinBettFrei, AutoSize = true, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini), Visible = false };
+    private List<Bettplatz> bettplaetze = [];
+    private List<Wohnbereich> wohnbereiche = [];
     public TextBox Geburtsdatum { get; } = Feld("TT.MM.JJJJ");
     public TextBox Aufnahmedatum { get; } = Feld("TT.MM.JJJJ");
     public Dreiwahl Beschluss { get; } = new(["ende", "kein_beschluss", "nicht_erfasst"],
@@ -79,8 +84,9 @@ public sealed class BewohnerFormular : Form
         Zeile(null, demo);
         Zeile("Vorname", Vorname);
         Zeile("Nachname", Nachname);
-        Zeile("Zimmer", Zimmer);
         Zeile("Wohnbereich", Wohnbereich);
+        Zeile("Zimmer und Bett", Bett);
+        Zeile(null, KeinBett);
         Zeile("Geburtsdatum", Geburtsdatum);
         Zeile("Aufnahmedatum", Aufnahmedatum);
         Beschluss.Dock = DockStyle.Fill;
@@ -88,7 +94,7 @@ public sealed class BewohnerFormular : Form
         Beschluss.Margin = Allergie.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein);
         Zeile("Beschluss", Beschluss);
         OffenGefuehrt.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
-        Zeile("Offen geführt", OffenGefuehrt);
+        if (bewohner is not null) Zeile("Offen geführt", OffenGefuehrt);   // in der Aufnahme nicht (immer „nein“)
         Zeile("Allergien", Allergie);
 
         // Bild: Vorschau, Knöpfe und Hinweis (Regel 2).
@@ -130,21 +136,21 @@ public sealed class BewohnerFormular : Form
         Controls.Add(raster);
         CancelButton = abbrechen;
 
-        // Vorschläge: alle Wohnbereiche der vorhandenen Bewohner und „Wohnbereich A/B“; neu: der eigene Bereich,
-        // wenn er ein Wohnbereich ist.
-        var vorhanden = speicher.AlleBewohner().Select(x => x.Wohnbereich)
-            .Concat(Kern.Bereiche.Vorschlaege.Where(v => v.StartsWith("Wohnbereich", StringComparison.Ordinal)))
-            .Distinct().Order(StringComparer.CurrentCulture).ToList();
-        Wohnbereich.Items.AddRange([.. vorhanden]);
-        string eigener = Einstellungen.Laden().Bereich;
-        Wohnbereich.Text = vorhanden.Contains(eigener) ? eigener : Kern.Bereiche.Vorgabe;
+        // Wohnbereiche mit Art; neu: der Bereich dieses Rechners, wenn er ein Wohnbereich ist.
+        wohnbereiche = speicher.Wohnbereiche();
+        if (bewohner is not null && !wohnbereiche.Any(w => w.Name == bewohner.Wohnbereich))
+            wohnbereiche.Add(new Kern.Wohnbereich(bewohner.Wohnbereich, false));   // ältere Angabe bleibt wählbar
+        Wohnbereich.Items.AddRange([.. wohnbereiche.Select(w => (object)w.Anzeige)]);
+        Wohnbereich.SelectedIndexChanged += (_, _) => BettenFuellen();
+        string eigener = bewohner?.Wohnbereich ?? Einstellungen.Laden().Bereich;
+        int start = wohnbereiche.FindIndex(w => w.Name == eigener);
+        Wohnbereich.SelectedIndex = wohnbereiche.Count == 0 ? -1 : Math.Max(0, start);
+        if (wohnbereiche.Count == 0) BettenFuellen();
         if (bewohner is not null)
         {
             var werte = BewohnerRegeln.AlsEingabe(bewohner);
-            Wohnbereich.Text = werte.Wohnbereich;
             Vorname.Text = werte.Vorname;
             Nachname.Text = werte.Nachname;
-            Zimmer.Text = werte.Zimmer;
             Geburtsdatum.Text = werte.Geburtsdatum;
             Aufnahmedatum.Text = werte.Aufnahmedatum;
             Beschluss.Setzen(werte.Beschluss, werte.Beschlussende);
@@ -155,6 +161,40 @@ public sealed class BewohnerFormular : Form
         Nachname.TextChanged += (_, _) => BildZeigen();
         BildZeigen();
         Stil.DpiSkalierungEinschalten(this);
+    }
+
+    // Freie Betten des gewählten Bereichs; beim Bearbeiten zuerst das bisherige Bett (Zimmerwechsel: anderes wählen).
+    private void BettenFuellen()
+    {
+        string bereich = Wohnbereich.SelectedIndex >= 0 ? wohnbereiche[Wohnbereich.SelectedIndex].Name : "";
+        bettplaetze = bereich.Length == 0 ? [] : speicher.FreieBetten(bereich, bewohner?.Id);
+        if (bewohner is not null && bewohner.Wohnbereich == bereich)
+        {
+            var bisher = new Bettplatz(bewohner.Zimmer, bewohner.Bett, bewohner.Wohnbereich);
+            bettplaetze.RemoveAll(p => p.Zimmer == bisher.Zimmer && p.Bett == bisher.Bett);
+            bettplaetze.Insert(0, bisher);
+        }
+        Bett.Items.Clear();
+        Bett.Items.AddRange([.. bettplaetze.Select(p => (object)(bewohner is not null && p.Zimmer == bewohner.Zimmer && p.Bett == bewohner.Bett
+            ? $"{p.Anzeige} (bisher)" : p.Anzeige))]);
+        Bett.SelectedIndex = bettplaetze.Count > 0 ? 0 : -1;
+        Bett.Enabled = bettplaetze.Count > 0;
+        KeinBett.Visible = bettplaetze.Count == 0;
+    }
+
+    // Ein Bett wählen über die Anzeige, z. B. „105 – Bett Tür“ (auch für Tests).
+    public bool BettWaehlen(string anzeige)
+    {
+        int i = bettplaetze.FindIndex(p => p.Anzeige == anzeige);
+        if (i >= 0) Bett.SelectedIndex = i;
+        return i >= 0;
+    }
+
+    public bool BereichWaehlen(string name)
+    {
+        int i = wohnbereiche.FindIndex(w => w.Name == name);
+        if (i >= 0) Wohnbereich.SelectedIndex = i;
+        return i >= 0;
     }
 
     private static TextBox Feld(string platzhalter = "")
@@ -209,13 +249,14 @@ public sealed class BewohnerFormular : Form
     {
         Vorname = Vorname.Text,
         Nachname = Nachname.Text,
-        Zimmer = Zimmer.Text,
+        Zimmer = Bett.SelectedIndex >= 0 ? bettplaetze[Bett.SelectedIndex].Zimmer : "",
+        Bett = Bett.SelectedIndex >= 0 ? bettplaetze[Bett.SelectedIndex].Bett : "",
         Geburtsdatum = Geburtsdatum.Text,
         Aufnahmedatum = Aufnahmedatum.Text,
         Beschluss = Beschluss.Zustand,
         Beschlussende = Beschluss.Feld.Text,
-        OffenGefuehrt = OffenGefuehrt.Zustand,
-        Wohnbereich = Wohnbereich.Text,
+        OffenGefuehrt = bewohner is null ? "nein" : OffenGefuehrt.Zustand,   // Aufnahme: geschlossen (Schritt 26e)
+        Wohnbereich = Wohnbereich.SelectedIndex >= 0 ? wohnbereiche[Wohnbereich.SelectedIndex].Name : "",
         Allergie = Allergie.Zustand,
         Allergien = Allergie.Feld.Text,
     };

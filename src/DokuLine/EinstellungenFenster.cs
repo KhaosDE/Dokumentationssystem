@@ -49,6 +49,7 @@ public sealed class EinstellungenFenster : Form
     public Button MedikamenteKnopf { get; } = Stil.NebenKnopf("Medikamentendatenbank …");
     public Button FahrzeugeKnopf { get; } = Stil.NebenKnopf("Fahrzeuge …");
     public Button AerzteKnopf { get; } = Stil.NebenKnopf("Ärzteverzeichnis …");   // Schritt 26b
+    public Button ZimmerKnopf { get; } = Stil.NebenKnopf("Zimmer und Betten …");    // Schritt 26e
     // Schritt 25: Schichtzeiten des Bereichs (dieses Rechners), für alle Rechner des Bereichs.
     public TextBox Frueh { get; } = new UhrzeitFeld() { Width = 60 };
     public TextBox Spaet { get; } = new UhrzeitFeld() { Width = 60 };
@@ -197,6 +198,20 @@ public sealed class EinstellungenFenster : Form
             {
                 Text = "Eingebettete Suche des BfArM über der Maske „Medikament“ (die einzige Webansicht im Programm). Sie zeigt nur feste Adressen: " +
                        string.Join(", ", ExterneAdressen.Nachschlagebereiche) + ". Ausgeschaltet bleibt „Im Browser öffnen“ – z. B. für Rechner ohne WebView2.",
+                AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+            });
+        }
+
+        if (speicher is not null)
+        {
+            // Schritt 26e: Wohnbereiche R1–R3 (offen/beschützend), Zimmer und Betten.
+            Ganz(Abschnitt("WOHNBEREICHE"));
+            ZimmerKnopf.AutoSize = true;
+            ZimmerKnopf.Click += (_, _) => { using var f = new ZimmerFenster(speicher); Dialog.Zeigen(f, this); };
+            Ganz(Formular.Reihe(ZimmerKnopf));
+            Ganz(new Label
+            {
+                Text = "Wohnbereiche: " + string.Join(", ", speicher.Wohnbereiche().Select(w => w.Anzeige)) + ". Die Aufnahme zeigt nur freie Betten.",
                 AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
             });
         }

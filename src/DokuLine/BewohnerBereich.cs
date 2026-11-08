@@ -469,7 +469,7 @@ public sealed class AkteAnsicht : Panel
     {
         bild.Setzen(Bilder.Pfad(b.Bild), BewohnerRegeln.Initialen(b), b.Nachname);
         name.Text = b.Name;
-        zimmer.Text = $"Zimmer {b.Zimmer}";
+        zimmer.Text = $"Zimmer {b.Zimmer}" + (b.Bett.Length > 0 && b.Bett != ZimmerRegeln.Einzel ? $" · {ZimmerRegeln.BettText(b.Bett)}" : "");   // Schritt 26e
         foreach (var alt in kopfMarken.Controls.OfType<MarkenFeld>().Where(m => m != zimmer).ToList())
         {
             kopfMarken.Controls.Remove(alt);

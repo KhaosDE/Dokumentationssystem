@@ -225,7 +225,7 @@ public sealed class Hauptfenster : Form
         catch (SpeicherFehler) { return null; }   // Netz kurz weg: beim nächsten Mal wieder versuchen
     }
 
-    // „Wohnbereich A · Datenbank lokal“ unten in der Seitenleiste; der volle Pfad als Hinweis.
+    // „R1 · Datenbank lokal“ unten in der Seitenleiste; der volle Pfad als Hinweis.
     public void ArbeitsplatzAnzeigen(bool erreichbar = true)
     {
         var werte = Einstellungen.Laden();

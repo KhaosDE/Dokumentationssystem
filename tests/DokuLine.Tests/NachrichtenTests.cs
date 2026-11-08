@@ -32,7 +32,7 @@ public sealed class NachrichtenTests : IDisposable
     {
         Assert.Equal(14, s.Kollegen().Count);                      // Mitarbeiter aus mitarbeiter.json, mit einem Ausgeschiedenen und TST
         Assert.Equal(13, s.Kollegen(nurAktive: true).Count);
-        Assert.Equal(["Leitung", "Therapie", "Verwaltung", "Wohnbereich A", "Wohnbereich B"], s.Teams());
+        Assert.Equal(["Leitung", "R1", "R2", "R3", "Therapie", "Verwaltung"], s.Teams());
         Assert.Equal("Anna Bachstelze (AB)", s.Kollege("ab")!.Anzeige);
         // AB: zwei ungelesene im Team-Verlauf „Arzttermin“, eine direkte von OP.
         Assert.Equal(3, s.UngeleseneNachrichten("AB"));
@@ -48,7 +48,7 @@ public sealed class NachrichtenTests : IDisposable
     [Fact]
     public void Nur_Beteiligte_sehen_einen_Verlauf()
     {
-        // OP (Therapie) ist am „Arzttermin“ nicht beteiligt, GH (Wohnbereich B) auch nicht.
+        // OP (Therapie) ist am „Arzttermin“ nicht beteiligt, GH (R2) auch nicht.
         Assert.DoesNotContain(s.Verlaeufe("OP", NachrichtenOrdner.Posteingang), v => v.Betreff == "Arzttermin am Donnerstag");
         Assert.DoesNotContain(s.Verlaeufe("GH", NachrichtenOrdner.Posteingang), v => v.Betreff == "Arzttermin am Donnerstag");
         Assert.Contains(s.Verlaeufe("GH", NachrichtenOrdner.Posteingang), v => v.Betreff == "Teamsitzung am Mittwoch");
@@ -67,7 +67,7 @@ public sealed class NachrichtenTests : IDisposable
         Assert.Contains(Assert.Throws<Eingabefehler>(() => Senden("AB", [Empfaenger.Team("Küche")])).Fehler, f => f.Contains("Küche"));
 
         int vorher = s.UngeleseneNachrichten("GH");
-        var n = Senden("AB", [Empfaenger.Team("Wohnbereich B"), Empfaenger.Person("OP")], "Grillfest", "Wer hilft beim Aufbau?");
+        var n = Senden("AB", [Empfaenger.Team("R2"), Empfaenger.Person("OP")], "Grillfest", "Wer hilft beim Aufbau?");
         Assert.Equal(vorher + 1, s.UngeleseneNachrichten("GH"));   // über das Team
         Assert.Contains(s.Verlaeufe("MN", NachrichtenOrdner.Posteingang), v => v.Id == n.Id && v.Ungelesen == 1);
         Assert.Contains(s.Verlaeufe("OP", NachrichtenOrdner.Posteingang), v => v.Id == n.Id);

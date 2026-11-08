@@ -46,7 +46,7 @@ public sealed class AdministratorTests : IDisposable
         s.MitarbeiterSpeichern(new Mitarbeiter("ZZ", "Zweite", "Administratorin", false, true, ["Leitung"], ["Administrator"]), neu: true);
         Assert.True(s.Darf("ZZ", Funktionen.MedikationBearbeiten));
         Assert.True(s.Darf("ZZ", Funktionen.MitarbeiterAlle));
-        Assert.Null(s.AngebotGrund("ZZ", "Wohnbereich B"));   // Therapien jedes Bereichs, ohne dort zu sein
+        Assert.Null(s.AngebotGrund("ZZ", "R2"));   // Therapien jedes Bereichs, ohne dort zu sein
     }
 
     [Fact]

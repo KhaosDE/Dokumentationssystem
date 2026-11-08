@@ -20,7 +20,7 @@
     { "nachname": "Ginster", "art": "mit Bewohner", "vonVorStunden": 1.9, "hdz": "AB" }
   ],
   "kuechendienst": {
-    "gruppen": [ [ "109", "110" ] ],
+    "gruppen": [ [ "201", "202" ] ],
     "planAbVorTagen": 5,
     "tausch": { "inTagen": 2, "zimmer": "103" }
   }

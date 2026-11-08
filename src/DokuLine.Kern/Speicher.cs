@@ -637,7 +637,7 @@ public sealed partial class Speicher : IDisposable
         );
         CREATE UNIQUE INDEX aerzte_name ON aerzte (name COLLATE NOCASE);
         """,
-        // 23 – Visite mit allen Bewohnern (Schritt 26c): je Bereich ein Entwurf, bis „Visite abschließen“.
+        // 24 – Visite mit allen Bewohnern (Schritt 26c): je Bereich ein Entwurf, bis „Visite abschließen“.
         """
         CREATE TABLE visite_entwuerfe (
             bereich    TEXT PRIMARY KEY,
@@ -649,12 +649,24 @@ public sealed partial class Speicher : IDisposable
             eintraege  TEXT NOT NULL DEFAULT '[]'
         );
         """,
+        // 25 – Wohnbereiche R1–R3, Zimmer und Betten (Schritt 26e): Bereiche „offen“/„beschuetzt“ (leer = kein
+        // Wohnbereich, z. B. Therapie), Zimmer mit 1 Bett (Einzelzimmer) oder 2 (Fenster, Tür), Bett am Bewohner.
+        """
+        ALTER TABLE bereiche ADD COLUMN art TEXT CHECK (art IS NULL OR art IN ('offen', 'beschuetzt'));
+        CREATE TABLE zimmer (
+            nummer  TEXT PRIMARY KEY,
+            bereich TEXT NOT NULL,
+            betten  INTEGER NOT NULL CHECK (betten IN (1, 2)),
+            aktiv   INTEGER NOT NULL DEFAULT 1
+        );
+        ALTER TABLE bewohner ADD COLUMN bett TEXT NOT NULL DEFAULT '';
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
 
     private const string Spalten =
-        "vorname, nachname, zimmer, geburtsdatum, aufnahmedatum, allergie, allergien, beschluss, beschlussende, bild, offen_gefuehrt, wohnbereich";
+        "vorname, nachname, zimmer, geburtsdatum, aufnahmedatum, allergie, allergien, beschluss, beschlussende, bild, offen_gefuehrt, wohnbereich, bett";
 
     private readonly SqliteConnection db;
     public string Pfad { get; }
@@ -744,6 +756,7 @@ public sealed partial class Speicher : IDisposable
     {
         var fehler = BewohnerRegeln.Pruefen(b);
         if (fehler.Count > 0) throw new Eingabefehler(fehler);
+        b = BettPruefen(b);   // Schritt 26e: Bett muss es geben und frei sein
         Bewohner? vorher = b.Id is long id ? Bewohner(id) : null;
         if (b.Id is not null && vorher is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
 
@@ -792,6 +805,16 @@ public sealed partial class Speicher : IDisposable
             DemoZuruecksetzen();
             return true;
         }
+        // Schritt 26e: Wohnbereiche R1–R3 mit Zimmern und Betten ersetzen „Wohnbereich A/B“ – das betrifft
+        // fast alle Demo-Daten. Eine ältere Demo-Datenbank wird deshalb einmal neu geladen; vorher sichert
+        // das Programm sie als Kopie neben der Datenbank.
+        if (Meta(DemoZimmer) is null)
+        {
+            string sicherung = SicherungAnlegen("vor-0.29.7");
+            DemoZuruecksetzen();
+            Startprotokoll.Add($"Demo-Daten auf die Bereiche R1–R3 mit Zimmern und Betten umgestellt; die bisherige Datenbank liegt als „{Path.GetFileName(sicherung)}“ daneben.");
+            return true;
+        }
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
@@ -829,6 +852,16 @@ public sealed partial class Speicher : IDisposable
         return true;
     }
 
+    // Eine Kopie der Datenbank neben ihr (VACUUM INTO: auch während sie offen ist, in sich stimmig).
+    public string SicherungAnlegen(string zusatz)
+    {
+        string ordner = Path.GetDirectoryName(Pfad)!, name = Path.GetFileNameWithoutExtension(Pfad);
+        string ziel = Path.Combine(ordner, $"{name}-{zusatz}.db");
+        for (int i = 2; File.Exists(ziel); i++) ziel = Path.Combine(ordner, $"{name}-{zusatz}-{i}.db");
+        Ausfuehren("VACUUM INTO $ziel", null, ("$ziel", ziel));
+        return ziel;
+    }
+
     // Alle Bewohner mit allem, was dazugehört (Bilder, Berichte …), weg und die Demo-Daten aller
     // Bereiche neu laden – alles oder nichts.
     public void DemoZuruecksetzen()
@@ -845,6 +878,7 @@ public sealed partial class Speicher : IDisposable
             DemoAufgabenEinfuegen(transaktion);
             DemoStandardaufgabenEinfuegen(transaktion);
             DemoMitarbeiterEinfuegen(transaktion);
+            DemoZimmerEinfuegen(transaktion);   // nach den Bereichen
             DemoNachrichtenEinfuegen(transaktion);
             DemoMedikamenteEinfuegen(transaktion);
             DemoMedikationEinfuegen(transaktion);
@@ -1153,6 +1187,7 @@ public sealed partial class Speicher : IDisposable
         ("$bild", b.Bild),
         ("$offen_gefuehrt", BewohnerRegeln.Kuerzel(b.OffenGefuehrt)),
         ("$wohnbereich", b.Wohnbereich),
+        ("$bett", b.Bett),
     ];
 
     private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
@@ -1184,6 +1219,7 @@ public sealed partial class Speicher : IDisposable
                 Bild = leser.IsDBNull(10) ? null : leser.GetString(10),
                 OffenGefuehrt = BewohnerRegeln.OffenGefuehrtAus(leser.GetString(11)) ?? OffenGefuehrtZustand.NichtErfasst,
                 Wohnbereich = leser.GetString(12),
+                Bett = leser.GetString(13),
             });
         }
         return liste;

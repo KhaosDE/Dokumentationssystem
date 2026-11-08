@@ -234,7 +234,8 @@ public class BewohnerOberflaechenTests
             Assert.Equal("nicht_erfasst", formular.Beschluss.Zustand);
             formular.Vorname.Text = "Paul";
             formular.Nachname.Text = "Pappel";
-            formular.Zimmer.Text = "111";
+            Assert.Equal(["105 – Bett Tür", "106 – Bett Tür"], formular.Bett.Items.Cast<string>());   // nur freie Betten (Schritt 26e)
+            Assert.True(formular.BettWaehlen("106 – Bett Tür"));
             formular.Geburtsdatum.Text = "01.01.1990";
             formular.Aufnahmedatum.Text = "01.01.1989";
             Assert.False(formular.Speichern());
@@ -248,6 +249,7 @@ public class BewohnerOberflaechenTests
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Bewohnerakte", f.Kopf.TitelText);
         Assert.Equal("Paul Pappel", f.Bewohner.Akte.Bewohner!.Name);
+        Assert.Equal(("106", ZimmerRegeln.Tuer, OffenGefuehrtZustand.Nein), (f.Bewohner.Akte.Bewohner.Zimmer, f.Bewohner.Akte.Bewohner.Bett, f.Bewohner.Akte.Bewohner.OffenGefuehrt));
         Assert.Equal("Allergien: nicht erfasst – bitte klären", f.Bewohner.Akte.Allergie.Text);
         f.Bewohner.UebersichtZeigen();
         Assert.Contains(Karten(f), k => k.Bewohner.Name == "Paul Pappel");
@@ -273,10 +275,12 @@ public class BewohnerOberflaechenTests
         Assert.True(formular.BildSetzen(bild));
         Assert.True(formular.HatBild);
         formular.Allergie.Setzen("keine_bekannt", "");
-        formular.Zimmer.Text = "204";
+        Assert.StartsWith("104 – Einzelzimmer (bisher)", (string)formular.Bett.Items[0]!);
+        Assert.True(formular.BereichWaehlen("R2"));   // Zimmerwechsel: dieselbe Auswahl freier Betten
+        Assert.True(formular.BettWaehlen("204 – Einzelzimmer"));
         Assert.True(formular.Speichern());
         var gespeichert = u.Speicher.Bewohner(b.Id!.Value)!;
-        Assert.Equal("204", gespeichert.Zimmer);
+        Assert.Equal(("204", "R2"), (gespeichert.Zimmer, gespeichert.Wohnbereich));
         Assert.Equal("", gespeichert.Allergien);
         Assert.NotNull(Bilder.Pfad(gespeichert.Bild));
     });
@@ -299,6 +303,7 @@ public class BewohnerOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         var eiche = BewohnerRegeln.AlsEingabe(u.Demo("Eiche"));
         eiche.Zimmer = "999";
+        eiche.Bett = "";
         u.Speicher.BewohnerSpeichern(BewohnerRegeln.AusEingabe(eiche, u.Demo("Eiche").Id));
         f.Bewohner.AkteZeigen(u.Demo("Eiche").Id!.Value);
         Assert.True(f.DemoZuruecksetzen(nachfragen: false));
@@ -330,7 +335,6 @@ public class BildschirmfotoTests
         {
             formular.Vorname.Text = "Paul";
             formular.Nachname.Text = "Pappel";
-            formular.Zimmer.Text = "111";
             formular.Geburtsdatum.Text = "01.01.1990";
             formular.Aufnahmedatum.Text = "01.01.1989";
             formular.Speichern();

@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.6** (Kleine Verbesserungen: Nachrichten „gelesen“, Datum mit Punkten, Kopf der Akte, Bauplan Schritt 26d).
+Stand: 08.11.2026. Version: **0.29.7** (Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme, Bauplan Schritt 26e).
 
 ## Aktuell
 
@@ -111,7 +111,14 @@ einmal) – sie wandern dann ins **Archiv**, nur für die Person, die sie gelese
 (`08112026` → `08.11.2026`, `081126` → `08.11.2026`), in Uhrzeitfeldern den Doppelpunkt (`0930` →
 `09:30`). Der **Kopf der Akte** zeigt groß „Bewohnerakte“, der Name steht nur einmal, auf der Karte.
 
-**Nächster Schritt:** Bauplan Schritt 26e „Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme“ (0.29.7).
+Neu in 0.29.7: Die Demo hat die Wohnbereiche **R1 (offen), R2 und R3 (beschützend)** statt „Wohnbereich
+A/B“, je sechs **Zimmer** mit **Betten** (Einzelzimmer oder „Bett Fenster“/„Bett Tür“; Einstellungen →
+„WOHNBEREICHE“ → „Zimmer und Betten …“). Die **Aufnahme** fragt erst den Bereich, dann zeigt sie nur
+**freie Betten**; „offen geführt“ steht dort nicht mehr (neue Bewohner: „nein“). Die Übersicht filtert
+nach Bereich und zeigt „R2 · 2 Bewohner · 7 Betten frei“. Ältere Demo-Datenbanken werden einmal neu
+geladen; die bisherige liegt als Kopie daneben.
+
+**Nächster Schritt:** Bauplan Schritt 26f „Fenster „Ärztliche Informationen““ (0.29.8).
 
 ## Fertig
 
@@ -679,6 +686,28 @@ einmal) – sie wandern dann ins **Archiv**, nur für die Person, die sie gelese
     beim Verlassen und beim Lesen: 8 Ziffern → TT.MM.JJJJ, 6 Ziffern und TT.MM.JJ → 20JJ, 4 (oder 3)
     Ziffern → SS:MM. Eigene Punkte stören nicht.
   - Akte: Kopf groß „Bewohnerakte“ (kleine Zeile „Bewohner“), der Name nur auf der Karte darunter.
+- 0.29.7 — Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme (Bauplan Schritt 26e, 08.11.2026):
+  - Bereiche R1 (offen), R2, R3 (beschützend) in Demo-Daten und Einstellungen; Merkmal „offen /
+    beschützend“ je Bereich (Bereiche ohne Merkmal wie Therapie oder Leitung sind keine Wohnbereiche).
+    Bewohner, Mitarbeiter, Therapien, Statusmeldungen, Nachrichten und Bereichskennung: R1/R2 statt
+    „Wohnbereich A/B“ (die Kennung des Rechners wird einmal umbenannt).
+  - Zimmer und Betten (neue Tabelle `zimmer`, Bett am Bewohner): je Bereich sechs Zimmer (R1: 101–106,
+    R2: 201–206, R3: 301–306), gemischt Einzel- und Doppelzimmer („Bett Fenster“, „Bett Tür“). Demo:
+    alle Bewohner haben ein Bett; R1 hat 2, R2 7, R3 9 freie Betten. Einstellungen → „WOHNBEREICHE“ →
+    „Zimmer und Betten …“: Bereiche mit Art (umschaltbar), Zimmer mit Belegung, anlegen, ändern,
+    stilllegen (belegte nicht; ein belegtes Bett fällt nie weg). Recht „Einstellungen des Bereichs“.
+  - Aufnahme („Neuer Bewohner …“): Wohnbereich wählen, dann nur freie Betten („105 – Bett Tür“, „104 –
+    Einzelzimmer“); kein freies Bett: „In diesem Bereich ist kein Bett frei.“ „Offen geführt“ steht nicht
+    im Aufnahmeformular – neue Bewohner sind „nein“; ändern in der Akte („Bearbeiten …“).
+  - Zimmerwechsel: „Bearbeiten …“ zeigt das bisherige Bett und dieselbe Auswahl freier Betten (auch
+    anderer Bereiche); das alte Bett wird frei. Belegte Betten lehnt das Programm ab.
+  - Akte: Marke „Zimmer 101 · Bett Fenster“. Übersicht: Auswahl „eigene Bereiche / R1 / R2 / R3“, Kopf
+    „R2 · 2 Bewohner · 7 Betten frei · Stand …“.
+  - Modul Ausgangsliste: nimmt die Zimmer der Bewohner (keine zweite Liste); die Küchendienst-Gruppe der
+    Demo ist jetzt 201/202.
+  - Ältere Demo-Datenbanken (noch „Wohnbereich A/B“) werden beim ersten Start einmal neu geladen; vorher
+    sichert das Programm sie als `dokumentationssystem-vor-0.29.7.db` neben der Datenbank (`update.log`
+    vermerkt es).
 
 ## Offene Punkte
 
@@ -690,7 +719,8 @@ einmal) – sie wandern dann ins **Archiv**, nur für die Person, die sie gelese
   Laden ersetzt. Bitte in der Testliste von Hand prüfen. Ob die BfArM-Suche auf weitere Adressen
   (außerhalb von bfarm.de und pharmnet-bund.de) springt, ist offen – solche Links öffnen dann im
   normalen Browser.
-- Bewohner löschen oder als ausgezogen markieren gibt es noch nicht (war nicht
+- Bewohner löschen, entlassen oder als ausgezogen markieren gibt es noch nicht (damit würde auch das Bett
+  frei, Schritt 26e; war nicht
   beauftragt). Zum Aufräumen in der Demo: „Demo-Daten zurücksetzen“.
 - Dunkle Darstellung ist nicht gebaut (`docs/gestaltung.md` sieht sie vor, freigegeben ist
   bisher nur die helle).
@@ -735,6 +765,19 @@ einmal) – sie wandern dann ins **Archiv**, nur für die Person, die sie gelese
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26e): Bestehende Demo-Datenbanken werden einmal ganz neu geladen statt Feld für Feld
+  umgestellt: Die Bereichsnamen stehen auch in Einträgen, die nie geändert werden (Statusmeldungen,
+  Fassungen der Therapien), und die Zimmer der alten Demo (101–110) passen nicht zu R1–R3. Damit nichts
+  verloren geht, liegt die alte Datenbank als Kopie daneben (`…-vor-0.29.7.db`); die Kopie aus
+  `%APPDATA%\Dokumentationssystem` (0.29.2) bleibt ebenfalls.
+- 08.11.2026 (Schritt 26e): Betten sind keine eigene Tabelle: Ein Zimmer hat 1 oder 2 Betten, welcher
+  Bewohner wo liegt, steht am Bewohner (Zimmer und Bett). Frei = nicht belegt. Eine „Entlassung“ gibt es
+  noch nicht (siehe Offene Punkte); der Zimmerwechsel läuft über „Bearbeiten …“.
+- 08.11.2026 (Schritt 26e): „Neue Bewohner: nein“ bei „offen geführt“ widerspricht Regel 5 nicht: Es ist
+  keine leere Angabe, sondern bekannt (aufgenommen wird nur geschlossen, Vorgabe Tobi).
+- 08.11.2026 (Schritt 26e): Der Bereichsfilter der Übersicht ist eine Auswahl neben „alle Bereiche“;
+  „eigene Bereiche“ verhält sich wie bisher.
 
 - 08.11.2026 (Schritt 26d): Zweistellige Jahre gelten überall als 20xx (laut Auftrag) – auch beim
   Geburtsdatum; „03.04.65“ wird dort zu 2065 (liegt die Aufnahme davor, meldet das Formular einen
@@ -1249,6 +1292,21 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.7:
+
+1. Nach dem Update: Die Demo hat R1, R2, R3; im Datenordner liegt `dokumentationssystem-vor-0.29.7.db`
+   (die alte Datenbank). `update.log` nennt die Umstellung.
+2. Übersicht: oben „R1 · 8 Bewohner · 2 Betten frei“. Auswahl „R2“ → zwei Bewohner, „7 Betten frei“;
+   „R3“ → niemand, „9 Betten frei“.
+3. Einstellungen → „WOHNBEREICHE“ → „Zimmer und Betten …“: 18 Zimmer, z. B. 101 „Bett Fenster: Anton
+   Ahorn · Bett Tür: Hanna Holunder“. Als „EF“: neues Zimmer 307 (R3, Doppelzimmer); Zimmer 101
+   stilllegen → Hinweis „belegt“. R3 auf „offen“ umschalten und zurück.
+4. „Neuer Bewohner …“: Wohnbereich R1 → nur „105 – Bett Tür“ und „106 – Bett Tür“; R2 → mehrere freie
+   Betten. Kein Feld „offen geführt“. Speichern → in der Akte „offen geführt: nein“, Marke „Zimmer 106 ·
+   Bett Tür“.
+5. Akte Dieter Distel → „Bearbeiten …“: „104 – Einzelzimmer (bisher)“; R2 wählen → „204 – Einzelzimmer“
+   → Speichern → Distel steht in R2, 104 ist wieder frei.
 
 Version 0.29.6:
 

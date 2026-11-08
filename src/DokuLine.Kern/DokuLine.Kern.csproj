@@ -19,6 +19,7 @@
     <!-- Die lesbare Demo-Datei aus dem Repository wird in die .exe eingebaut,
          damit nichts neben dem Programm liegen muss. -->
     <EmbeddedResource Include="..\..\daten\demo\bewohner.json" LogicalName="DokuLine.Kern.Demo.bewohner.json" />
+    <EmbeddedResource Include="..\..\daten\demo\zimmer.json" LogicalName="DokuLine.Kern.Demo.zimmer.json" />
     <EmbeddedResource Include="..\..\daten\demo\berichte.json" LogicalName="DokuLine.Kern.Demo.berichte.json" />
     <EmbeddedResource Include="..\..\daten\demo\aufgaben.json" LogicalName="DokuLine.Kern.Demo.aufgaben.json" />
     <EmbeddedResource Include="..\..\daten\demo\nachrichten.json" LogicalName="DokuLine.Kern.Demo.nachrichten.json" />

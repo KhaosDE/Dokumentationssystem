@@ -47,6 +47,8 @@ internal static class Program
             Modulverwaltung.Anmelden(speicher);
             speicher.DemoBeimErstenStart();
             foreach (string zeile in speicher.Startprotokoll) Aktualisierung.Protokoll(zeile);   // z. B. TST ergänzt (Schritt 26a2)
+            string bereich = Einstellungen.Laden().Bereich;
+            if (Kern.Bereiche.Umbenannt(bereich) != bereich) Einstellungen.Aendern(w => w with { Bereich = Kern.Bereiche.Umbenannt(bereich) });   // Schritt 26e
         }
         catch (SpeicherFehler e)
         {

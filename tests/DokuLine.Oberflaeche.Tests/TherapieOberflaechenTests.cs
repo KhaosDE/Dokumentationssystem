@@ -131,7 +131,7 @@ public class TherapieOberflaechenTests
         using (f)
         {
             AngebotKarte Karte(string name) => t.Karten.Single(k => k.Angebot.Fassungen[^1].Name == name);
-            Assert.Equal("Wohnbereich A", Karte("Kochgruppe").MarkenTexte[0]);
+            Assert.Equal("R1", Karte("Kochgruppe").MarkenTexte[0]);
             Assert.Null(Stil.Sperrgrund(Karte("Holzwerkstatt").ZuteilenKnopf));
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(Karte("Kochgruppe").ZuteilenKnopf));
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(Karte("Kochgruppe").AendernKnopf));
@@ -140,8 +140,8 @@ public class TherapieOberflaechenTests
                 Assert.Equal([TherapieRegeln.AnbieterTherapie], neu.Anbieter.Items.Cast<string>());
 
             // Filter
-            Assert.Equal([TherapieSeite.AlleAnbieter, "Therapie", "Wohnbereich A", "Wohnbereich B"], t.AnbieterFilter.Items.Cast<string>().Take(4));
-            t.AnbieterFilter.SelectedItem = "Wohnbereich A";
+            Assert.Equal([TherapieSeite.AlleAnbieter, "Therapie", "R1", "R2"], t.AnbieterFilter.Items.Cast<string>().Take(4));
+            t.AnbieterFilter.SelectedItem = "R1";
             Assert.Equal("Kochgruppe", Assert.Single(t.Karten).Angebot.Fassungen[^1].Name);
             Assert.StartsWith("1 Angebote · ", f.Kopf.KleinText);
             t.AnbieterFilter.SelectedItem = "Therapie";
@@ -149,16 +149,16 @@ public class TherapieOberflaechenTests
             t.AnbieterFilter.SelectedItem = TherapieSeite.AlleAnbieter;
             Assert.Equal(7, t.Karten.Count);
 
-            // Bereichsleitung Wohnbereich A: nur die eigenen Angebote; neue nur für Wohnbereich A.
+            // Bereichsleitung R1: nur die eigenen Angebote; neue nur für R1.
             f.BenutzerWaehlen("EF");
             Assert.Null(Stil.Sperrgrund(Karte("Kochgruppe").ZuteilenKnopf));
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(Karte("Holzwerkstatt").ZuteilenKnopf));
-            Assert.Equal("Nur für Wohnbereich B.", Stil.Sperrgrund(Karte("Kreativwerkstatt").AendernKnopf));
+            Assert.Equal("Nur für R2.", Stil.Sperrgrund(Karte("Kreativwerkstatt").AendernKnopf));
             Assert.Null(Stil.Sperrgrund(t.NeuKnopf));
             using (new DialogErsatz(fenster =>
             {
                 var neu = Assert.IsType<AngebotFenster>(fenster);
-                Assert.Equal(["Wohnbereich A"], neu.Anbieter.Items.Cast<string>());
+                Assert.Equal(["R1"], neu.Anbieter.Items.Cast<string>());
                 neu.NameFeld.Text = "Gartengruppe A";
                 neu.Therapeut.Text = "Emma Fink";
                 neu.TerminSetzen(0, DayOfWeek.Friday, "10:00", "11:00");
@@ -167,7 +167,7 @@ public class TherapieOberflaechenTests
                 return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 t.NeuKnopf.PerformClick();
-            Assert.Equal("Wohnbereich A", Karte("Gartengruppe A").Angebot.Anbieter);
+            Assert.Equal("R1", Karte("Gartengruppe A").Angebot.Anbieter);
             Hilfe.Foto(f, "73_therapie_anbieter");
 
             // Mitarbeiter Wohnbereich ohne das Recht: nichts ändern, aber alles sehen.

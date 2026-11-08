@@ -1169,7 +1169,7 @@ Umfang:
   Der Name erscheint nur **einmal**, auf der Karte darunter — nicht zusätzlich im Kopf.
 
 ## Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme
-Status: freigegeben (Bauplan Schritt 26e)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Die Demo bekommt die Bereichsstruktur des Hauses, eine Zimmer- und Bettenverwaltung, und
 die Aufnahme zeigt freie Zimmer und Betten.

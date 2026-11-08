@@ -55,9 +55,10 @@ public class AkteErgaenzungenTests
         Assert.Equal(OffenGefuehrtZustand.NichtErfasst, u.Speicher.Bewohner(u.Demo("Birke").Id!.Value)!.OffenGefuehrt);
         Assert.Equal("nicht erfasst", f.Bewohner.Akte.OffenGefuehrt.Text);
 
-        // Neuer Bewohner: Vorgabe „nicht erfasst“, nie „nein“ (Regel 5).
+        // Neuer Bewohner (Schritt 26e): „offen geführt“ steht nicht in der Aufnahme; aufgenommen wird nur
+        // geschlossen, also „nein“ – kein leeres Feld, sondern eine bekannte Angabe.
         using var neu = f.Bewohner.FormularErstellen(null);
-        Assert.Equal("nicht_erfasst", neu.OffenGefuehrt.Zustand);
+        Assert.Equal("nein", neu.Eingabe().OffenGefuehrt);
     });
 
     [Fact]

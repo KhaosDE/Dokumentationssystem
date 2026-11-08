@@ -132,7 +132,8 @@ public sealed class SpeicherBewohnerTests : IDisposable
         Assert.Equal(Enum.GetValues<BeschlussZustand>().ToHashSet(), alle.Select(b => b.Beschluss).ToHashSet());
         Assert.Equal(Enum.GetValues<OffenGefuehrtZustand>().ToHashSet(), alle.Select(b => b.OffenGefuehrt).ToHashSet());
         Assert.All(alle, b => Assert.Null(b.Bild));   // Regel 2: nur Platzhalter
-        Assert.Equal(alle.Count, alle.Select(b => b.Zimmer).Distinct().Count());
+        Assert.Equal(alle.Count, alle.Select(b => (b.Zimmer, b.Bett)).Distinct().Count());   // je Bett ein Bewohner (Schritt 26e)
+        Assert.All(alle, b => Assert.NotEqual("", b.Bett));
     }
 
     [Fact]
