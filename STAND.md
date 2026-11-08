@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.2** (Umbenennung in DokuLine, Teil 1, Bauplan Schritt 26a1).
+Stand: 08.11.2026. Version: **0.29.3** (Administrator TST und Abmelden mit F12, Bauplan Schritte 26a2 und 26a3).
 
 ## Aktuell
 
@@ -85,7 +85,14 @@ Datenordner `%APPDATA%\DokuLine` (der Inhalt des alten Ordners wird beim ersten 
 alte bleibt). Übergang: Jedes Release enthält die Datei auch als `Dokumentationssystem.exe`, und das
 Update findet das Repository unter altem und neuem Namen.
 
-**Nächster Schritt:** Bauplan Schritte 26a2 „Position Administrator mit Kürzel TST“ und 26a3 „Abmelden sichtbar machen, Tastenkürzel F12“ (zusammen 0.29.3).
+Neu in 0.29.3: Position **„Administrator“** mit allen Rechten (in der Rechte-Tabelle nicht abwählbar)
+und der Mitarbeiter **TST** („Test Administrator“); der letzte aktive Administrator bleibt immer.
+**Abmelden** ist sichtbar: oben rechts „Angemeldet: TST – Test Administrator“ und der Knopf
+**„Abmelden (F12)“**, die Taste **F12** aus jedem Fenster, unten in der Seitenleiste und in den
+Einstellungen. Danach ist nur das Anmeldefenster über einer leeren Fläche zu sehen. Ein angefangener
+Bericht kann als **Entwurf** bleiben („Entwurf fortsetzen“ oben rechts nach dem Anmelden).
+
+**Nächster Schritt:** Bauplan Schritt 26b „Ärzteverzeichnis“ (0.29.4).
 
 ## Fertig
 
@@ -593,6 +600,27 @@ Update findet das Repository unter altem und neuem Namen.
     unangetastet, `update.log` vermerkt die Übernahme. Ein selbst gewählter Datenbank-Ort bleibt.
   - Dokumentation: `CLAUDE.md` (Name, Pfade, Projektnamen), `README.md`, `docs/`, Pfade in `IDEEN.md`.
 
+- 0.29.3 — Administrator TST und Abmelden mit F12 (Bauplan Schritte 26a2 und 26a3, 08.11.2026):
+  - Position „Administrator“ an erster Stelle: hat immer alle Rechte, in allen Bereichen, auch ohne
+    „Fachkraft“. In der Rechte-Tabelle ist die Spalte voll, ausgegraut, mit Hinweis „Der
+    Administrator hat immer alle Rechte“. Die Position lässt sich nicht stilllegen, umbenennen oder
+    löschen; vergeben kann sie nur ein Administrator.
+  - Mindestens ein aktiver Administrator bleibt: Beim letzten sind „aktiv“ und die Position im
+    Mitarbeiterformular gesperrt, mit Hinweis.
+  - Mitarbeiter TST („Test Administrator“, Fachkraft, alle Bereiche) in `daten/demo/mitarbeiter.json`.
+    Bestehende Datenbanken bekommen die Position und – falls es TST noch nicht gibt – TST einmal
+    dazu (Eintrag in `update.log`); ein vorhandener TST bleibt, wie er ist.
+  - Kopf oben rechts: „Angemeldet: TST – Test Administrator“ und der Knopf „Abmelden (F12)“ (ohne
+    Anmeldung „Anmelden …“) statt des Klappmenüs. Dazu „Abmelden (F12)“ unten in der Seitenleiste
+    (eingeklappt als Symbol mit Hinweis) und in den Einstellungen unter „ICH“; „Über“ nennt die Taste.
+  - F12 meldet aus jedem Fenster ab. Sind Fenster offen, fragt das Programm einmal: „Als Entwurf
+    speichern“ (wenn ein Bericht angefangen ist) / „Verwerfen“ / „Abbrechen“; dann schließt es sie.
+  - Nach dem Abmelden liegt eine Fläche mit Name, Leittext und Demo-Hinweis über dem ganzen Fenster,
+    darüber das Anmeldefenster („Anmelden“ – auch mit anderem Kürzel – oder „Programm beenden“).
+  - Entwürfe (neue Tabelle `entwuerfe`): gehören dem Kürzel, je Bewohner einer. Nach dem Anmelden
+    steht oben rechts „Entwurf fortsetzen“; „Neuer Bericht …“ beim selben Bewohner übernimmt ihn
+    („Entwurf vom … übernommen“, „Entwurf verwerfen“). Speichern löscht den Entwurf.
+
 ## Offene Punkte
 
 - **Teil 2: Repository umbenennen — sobald dieses Release erschienen ist** (`KhaosDE/Dokumentationssystem`
@@ -648,6 +676,16 @@ Update findet das Repository unter altem und neuem Namen.
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26a3): Entwürfe gibt es für „Neuer Bericht“ (das ist die tägliche Dokumentation)
+  und für den HEB-Bogen (der hatte schon Entwürfe). Andere offene Fenster werden beim Abmelden nach der
+  einen Rückfrage geschlossen; ihre Eingaben gehen verloren (die Rückfrage sagt das).
+- 08.11.2026 (Schritt 26a3): „Benutzer wechseln“ ist jetzt Abmelden und mit dem anderen Kürzel anmelden;
+  das alte Klappmenü entfällt. Schließt man das Anmeldefenster nach dem Abmelden, endet das Programm –
+  so bleibt nie ein Fenster mit Bewohnerdaten ohne Anmeldung offen.
+- 08.11.2026 (Schritt 26a2): Die Position „Administrator“ vergibt nur ein Administrator (sonst könnte sich
+  z. B. eine Bereichsleitung selbst alle Rechte geben). Fehlen Häkchen in der Tabelle (ältere Daten),
+  gilt trotzdem: Der Administrator darf alles.
 
 - 08.11.2026 (Schritt 26a1): Der Leittext steht unter dem Namen oben in der Seitenleiste (damit auf
   jeder Seite, auch im Kopf der Übersicht); der Kopfbereich der Seiten behält Titel und Zähler.
@@ -1125,6 +1163,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.3:
+
+1. Anmeldefenster: oben „TST – Test Administrator · Administrator · Fachkraft“. Als TST anmelden → oben rechts
+   „Angemeldet: TST – Test Administrator“ und der Knopf „Abmelden (F12)“.
+2. Einstellungen → „VERWALTUNG“ → „Rechte …“: erste Spalte „Administrator“ voll und grau; ein Klick
+   ändert nichts. „Mitarbeiter …“ → TST ändern: „aktiv“ und „Administrator“ gesperrt, mit Hinweis.
+3. Bewohner öffnen → „Neuer Bericht …“ → etwas eintippen, Fenster offen lassen, **F12** → Rückfrage
+   „Als Entwurf speichern“ → nur noch die leere Fläche und das Anmeldefenster.
+4. Als „CD“ anmelden → kein „Entwurf fortsetzen“. Abmelden (Knopf oben rechts), als TST anmelden →
+   oben „Entwurf fortsetzen“ → der Bericht mit dem Text → Speichern → der Knopf ist weg.
+5. Seitenleiste einklappen: unten das Symbol „Abmelden (F12)“ (Hinweis beim Darüberfahren).
+6. Einstellungen → „ICH“ → „Abmelden (F12)“. Anmeldefenster → „Programm beenden“ schließt alles.
 
 Version 0.29.2:
 

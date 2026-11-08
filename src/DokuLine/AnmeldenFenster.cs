@@ -3,8 +3,8 @@ using DokuLine.Kern;
 namespace DokuLine;
 
 // Anmelden mit dem Kürzel (Bauplan Schritt 19). Demo: ohne Passwort – das Fenster ist so gebaut,
-// dass ein Passwortfeld später darunter Platz hat. Beim Start Pflicht; oben rechts im Kopf als
-// „Abmelden / Benutzer wechseln“.
+// dass ein Passwortfeld später darunter Platz hat. Beim Start Pflicht; nach dem Abmelden (F12,
+// Schritt 26a3) liegt es über dem leeren Hauptfenster – anmelden (auch mit anderem Kürzel) oder beenden.
 public sealed class AnmeldenFenster : Form
 {
     private readonly Speicher speicher;
@@ -17,18 +17,19 @@ public sealed class AnmeldenFenster : Form
         Padding = new Padding(Stil.AbstandKlein), Visible = false,
     };
     public Button AnmeldenKnopf { get; } = Stil.HauptKnopf("Anmelden");
-    public Button AbmeldenKnopf { get; } = Stil.NebenKnopf("Abmelden");
+    public Button BeendenKnopf { get; }
     public Mitarbeiter? Angemeldet { get; private set; }
 
-    // wechsel: aus dem laufenden Programm (mit „Abmelden“); sonst beim Start („Beenden“ statt „Abbrechen“).
-    public AnmeldenFenster(Speicher speicher, string vorschlag, bool wechsel)
+    // nachAbmelden: aus dem laufenden Programm nach dem Abmelden; sonst beim Start.
+    public AnmeldenFenster(Speicher speicher, string vorschlag, bool nachAbmelden = false)
     {
         this.speicher = speicher;
-        Text = (wechsel ? "Abmelden / Benutzer wechseln" : "Anmelden") + $" ({Stil.DemoHinweis})";
+        BeendenKnopf = Stil.NebenKnopf(nachAbmelden ? "Programm beenden" : "Beenden");
+        Text = (nachAbmelden ? "Abgemeldet – Anmelden" : "Anmelden") + $" ({Stil.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
-        ShowInTaskbar = !wechsel;
-        StartPosition = wechsel ? FormStartPosition.CenterParent : FormStartPosition.CenterScreen;
+        ShowInTaskbar = !nachAbmelden;
+        StartPosition = nachAbmelden ? FormStartPosition.CenterParent : FormStartPosition.CenterScreen;
         BackColor = Stil.Fensterhintergrund;
         Font = Stil.Standard;
         AutoSize = true;
@@ -40,7 +41,8 @@ public sealed class AnmeldenFenster : Form
         zeile(null, new Label { Text = Programmversion.Leittext, AutoSize = true, ForeColor = Stil.TextMittel, Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, new Label
         {
-            Text = "Mit dem eigenen Kürzel anmelden. In der Demo ohne Passwort – alles, was du tust, steht mit deinem Kürzel im Programm.",
+            Text = "Mit dem eigenen Kürzel anmelden. In der Demo ohne Passwort – alles, was du tust, steht mit deinem Kürzel im Programm. " +
+                   "Abmelden: Taste F12 oder „Abmelden (F12)“ oben rechts.",
             AutoSize = true, MaximumSize = new Size(440, 0), ForeColor = Stil.TextMittel,
         });
         Kuerzel.Text = vorschlag;
@@ -58,17 +60,14 @@ public sealed class AnmeldenFenster : Form
         zeile(null, DemoListe);
 
         AnmeldenKnopf.Click += (_, _) => Anmelden();
-        AbmeldenKnopf.Click += (_, _) => { DialogResult = DialogResult.Abort; Close(); };
-        var abbrechen = Stil.NebenKnopf(wechsel ? "Abbrechen" : "Beenden");
-        abbrechen.DialogResult = DialogResult.Cancel;
-        foreach (var b in new[] { AnmeldenKnopf, AbmeldenKnopf, abbrechen }) { b.AutoSize = true; b.Margin = new Padding(Stil.AbstandKlein, 0, 0, 0); }
-        AbmeldenKnopf.Visible = wechsel && vorschlag.Length > 0;
+        BeendenKnopf.DialogResult = DialogResult.Cancel;
+        foreach (var b in new[] { AnmeldenKnopf, BeendenKnopf }) { b.AutoSize = true; b.Margin = new Padding(Stil.AbstandKlein, 0, 0, 0); }
         var knoepfe = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Fill, Margin = new Padding(0, Stil.AbstandGross, 0, 0) };
-        knoepfe.Controls.AddRange([AnmeldenKnopf, AbmeldenKnopf, abbrechen]);
+        knoepfe.Controls.AddRange([AnmeldenKnopf, BeendenKnopf]);
         zeile(null, knoepfe);
         Controls.Add(raster);
         AcceptButton = AnmeldenKnopf;
-        CancelButton = abbrechen;
+        CancelButton = BeendenKnopf;
         Stil.DpiSkalierungEinschalten(this);
     }
 

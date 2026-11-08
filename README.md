@@ -76,7 +76,7 @@ Danach fragt Windows für diese Datei nicht mehr.
   „Aufgabe daraus …“. **Standardaufgaben** (z. B. Rundgänge im Nachtdienst) entstehen zu Beginn
   jeder Schicht von selbst; nicht erledigte bleiben „aus der Nachtschicht offen“, bis jemand sie
   erledigt oder mit Begründung schließt. Die Schichtzeiten stehen in den Einstellungen.
-- **Angemeldet als …** (oben rechts): wer gerade am Programm sitzt – eine der ausgedachten
+- **Angemeldet: … / Abmelden (F12)** (oben rechts): wer gerade am Programm sitzt – eine der ausgedachten
   Kolleginnen und Kollegen, ohne Passwort (nur für die Vorführung). Das Kürzel setzt das
   Programm überall selbst („eingetragen von …“, nicht änderbar); Fahrer, Teilnehmer und
   Begleitung wählt man aus den Mitarbeitern. Ohne Anmeldung lässt sich nur ansehen.
@@ -154,7 +154,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   Farbe der Person (Einstellungen → „Meine Farbe“), immer mit Kürzel. In der Übersicht filtern
   „Meine Bezugsbewohner“ und „Meine Einzeltrainings“.
 - **Anmelden:** Beim Start mit dem Kürzel (Demo: ohne Passwort; die ausgedachten Mitarbeiter
-  stehen im Anmeldefenster). Oben rechts „Angemeldet als …“ → „Abmelden / Benutzer wechseln“.
+  stehen im Anmeldefenster; TST ist der Administrator mit allen Rechten). **Abmelden:** Taste F12
+  (aus jedem Fenster), der Knopf „Abmelden (F12)“ oben rechts, unten in der Seitenleiste oder in den
+  Einstellungen. Danach ist nichts mehr zu sehen, bis sich jemand anmeldet; ein angefangener Bericht
+  kann als Entwurf bleiben („Entwurf fortsetzen“ oben rechts).
   Was jemand darf, hängt an seiner Position (Einstellungen → „VERWALTUNG“ → „Rechte …“). Ohne
   Recht bleiben Knöpfe grau und sagen beim Darüberfahren, warum.
 - **Logo der Einrichtung:** Oben rechts im Kopf steht ein Platzhalter. Ein Klick darauf öffnet die

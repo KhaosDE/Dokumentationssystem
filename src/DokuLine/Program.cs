@@ -46,6 +46,7 @@ internal static class Program
             (speicher, hinweis) = Speicher.Oeffnen(Einstellungen.Laden());
             Modulverwaltung.Anmelden(speicher);
             speicher.DemoBeimErstenStart();
+            foreach (string zeile in speicher.Startprotokoll) Aktualisierung.Protokoll(zeile);   // z. B. TST ergänzt (Schritt 26a2)
         }
         catch (SpeicherFehler e)
         {
@@ -57,7 +58,7 @@ internal static class Program
         _ = Nachschlageansicht.Laufzeit;
         BerichtRegeln.Zeiten = speicher.Schichtzeiten(Einstellungen.Laden().Bereich);   // Schichtzeiten des Bereichs (Schritt 25)   // WebView2 vorhanden? Steht in den Einstellungen (Schritt 21).
         // Anmelden mit dem Kürzel (Schritt 19), ohne Passwort; „Beenden“ schließt das Programm.
-        using (var anmelden = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel, wechsel: false))
+        using (var anmelden = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel))
         {
             if (anmelden.ShowDialog() != DialogResult.OK || anmelden.Angemeldet is not Mitarbeiter angemeldet)
             {

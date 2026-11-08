@@ -48,6 +48,11 @@ public sealed class Hauptfenster : Form
     public SeitenleistenEintrag MenueKnopf { get; } = new("Menü einklappen") { Symbol = Symbole.Menue, Eingeklappt = true };
     public SeitenleistenEintrag InfoSymbol { get; } = new("Version") { Symbol = Symbole.Info, Eingeklappt = true, Visible = false, Cursor = Cursors.Default };
     public SeitenleistenEintrag DemoSymbol { get; } = new("Demo-Daten zurücksetzen …") { Symbol = Symbole.Zuruecksetzen, Eingeklappt = true, Visible = false };
+    // Schritt 26a3: Abmelden auch unten in der Seitenleiste (eingeklappt als Symbol mit Hinweis), F12 überall.
+    public SeitenleistenEintrag AbmeldenEintrag { get; } = new(Abmeldung.KnopfText) { Symbol = Symbole.Abmelden };
+    public Sperrflaeche Sperre { get; } = new();
+    public bool Gesperrt => Sperre.Visible;
+    internal IMessageFilter F12 { get; }
     public bool MenueEingeklappt { get; private set; }
     public Label Arbeitsplatz { get; } = new();   // Bereich und Ort der Datenbank
     private readonly ToolTip hinweis = new();
@@ -88,7 +93,9 @@ public sealed class Hauptfenster : Form
             Nachrichten.BewohnerZeigen(bewohnerId);
             BereichWaehlen("Nachrichten", filterBehalten: true);
         };
-        Kopf.BenutzerKnopf.Click += (_, _) => BenutzerWechseln();
+        Kopf.AbmeldenKnopf.Click += (_, _) => AbmeldenOderAnmelden();
+        Kopf.EntwurfKnopf.Click += (_, _) => EntwurfFortsetzen();
+        speicher.EntwuerfeGeaendert += EntwuerfeZaehlen;
         Kopf.LogoGewuenscht += () => EinstellungenOeffnen();
         Therapie = new TherapieSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Therapie"] = Therapie;
@@ -145,6 +152,8 @@ public sealed class Hauptfenster : Form
             Navigation.Add(eintrag);
         }
         MenueKnopf.Click += (_, _) => MenueUmschalten();
+        AbmeldenEintrag.Click += (_, _) => AbmeldenOderAnmelden();
+        Sperre.AnmeldenKnopf.Click += (_, _) => AnmeldenZeigen();
         DemoSymbol.Click += (_, _) =>
         {
             if (Recht.Grund(speicher, Funktionen.DemoZuruecksetzen) is string grund) hinweis.Show(grund, DemoSymbol, DemoSymbol.Width, 0, 3000);
@@ -165,7 +174,7 @@ public sealed class Hauptfenster : Form
 
         leiste.Controls.AddRange([MenueKnopf, programmName, LeittextAnzeige]);
         foreach (var eintrag in Navigation) leiste.Controls.Add(eintrag);
-        leiste.Controls.AddRange([Arbeitsplatz, DemoKnopf, VersionText, InfoSymbol, DemoSymbol]);
+        leiste.Controls.AddRange([AbmeldenEintrag, Arbeitsplatz, DemoKnopf, VersionText, InfoSymbol, DemoSymbol]);
         leiste.Layout += (_, _) => LeisteAnordnen();
         ModuleAnzeigen();
         speicher.ModuleGeaendert += ModuleAnzeigen;
@@ -179,6 +188,9 @@ public sealed class Hauptfenster : Form
 
         Controls.Add(inhalt);
         Controls.Add(leiste);
+        Controls.Add(Sperre);
+        F12 = new F12Taste(this);
+        Application.AddMessageFilter(F12);
         inhalt.BringToFront();
 
         speicher.AufgabenGeaendert += AufgabenZaehlen;
@@ -382,11 +394,15 @@ public sealed class Hauptfenster : Form
         Bewohner.NachrichtenSetzen(n, ich?.Name);
     }
 
-    // „Angemeldet als …“ oben rechts; ohne Passwort, nur für die Vorführung.
+    // „Angemeldet: TST – Name“ und „Abmelden (F12)“ oben rechts; ohne Passwort, nur für die Vorführung.
     public void BenutzerAnzeigen()
     {
         string kuerzel = Einstellungen.Laden().Kuerzel;
-        Kopf.BenutzerSetzen(speicher.Kollege(kuerzel)?.Anzeige ?? (kuerzel.Length > 0 ? kuerzel : null));
+        Kopf.BenutzerSetzen(kuerzel.Length > 0 ? kuerzel : null, speicher.MitarbeiterLesen(kuerzel)?.Name);
+        AbmeldenEintrag.Text = kuerzel.Length > 0 ? Abmeldung.KnopfText : "Anmelden …";
+        AbmeldenEintrag.AccessibleName = AbmeldenEintrag.Text;
+        hinweis.SetToolTip(AbmeldenEintrag, AbmeldenEintrag.Text);
+        EntwuerfeZaehlen();
         NachrichtenZaehlen();
         Recht.Anwenden(speicher, Funktionen.DemoZuruecksetzen, DemoKnopf);   // Rechte (Schritt 19)
     }
@@ -411,13 +427,93 @@ public sealed class Hauptfenster : Form
         else if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
     }
 
-    // „Abmelden / Benutzer wechseln“ oben rechts: Anmelden mit Kürzel (Schritt 19).
-    public void BenutzerWechseln()
+    // ----- Abmelden (Schritt 26a3) -----
+
+    private void AbmeldenOderAnmelden()
     {
-        using var fenster = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel, wechsel: true);
-        var ergebnis = Dialog.Zeigen(fenster, this);
-        if (ergebnis == DialogResult.OK && fenster.Angemeldet is Kern.Mitarbeiter m) BenutzerWaehlen(m.Kuerzel);
-        else if (ergebnis == DialogResult.Abort) BenutzerWaehlen("");
+        if (Recht.Angemeldet) Abmelden();
+        else AnmeldenZeigen();
+    }
+
+    // Offene Fenster des Programms (Dialoge), die beim Abmelden geschlossen werden.
+    public List<Form> OffeneFenster() =>
+        [.. Application.OpenForms.Cast<Form>().Where(f => f != this && f is not Hauptfenster && f is not AnmeldenFenster && f is not AbmeldenFrage && f.Visible)];
+
+    // Abmelden: offene Fenster schließen (vorher fragen, angefangene Eingaben als Entwurf), dann liegt die
+    // Sperrfläche über allem und das Anmeldefenster darüber. false = abgebrochen.
+    public bool Abmelden()
+    {
+        if (Gesperrt) return false;
+        var offen = OffeneFenster();
+        if (offen.Count > 0)
+        {
+            var mitEingaben = offen.OfType<IEntwurfFenster>().Where(e => e.HatEingaben).ToList();
+            using var frage = new AbmeldenFrage(offen.Select(f => f.Text.Replace($" ({Stil.DemoHinweis})", "")).ToList(), mitEingaben.Count > 0);
+            var antwort = Dialog.Zeigen(frage, offen[^1]);
+            if (antwort != DialogResult.Yes && antwort != DialogResult.No) return false;
+            if (antwort == DialogResult.Yes) foreach (var e in mitEingaben) e.AlsEntwurfSpeichern();
+            Abmeldung.SchliesstFenster = true;
+            try
+            {
+                foreach (var f in Enumerable.Reverse(offen))
+                {
+                    f.DialogResult = DialogResult.Cancel;
+                    f.Close();
+                }
+            }
+            finally { Abmeldung.SchliesstFenster = false; }
+        }
+        BenutzerWaehlen("");
+        Sperren(true);
+        // Waren Dialoge offen, erst deren Schleifen enden lassen, dann das Anmeldefenster zeigen.
+        if (offen.Count > 0 && IsHandleCreated) BeginInvoke(AnmeldenZeigen);
+        else AnmeldenZeigen();
+        return true;
+    }
+
+    // Anmelden (nach dem Abmelden oder ohne Anmeldung). Nach dem Abmelden: „Programm beenden“ schließt.
+    public void AnmeldenZeigen()
+    {
+        if (IsDisposed) return;
+        bool gesperrt = Gesperrt;
+        using var fenster = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel, nachAbmelden: gesperrt);
+        if (Dialog.Zeigen(fenster, this) == DialogResult.OK && fenster.Angemeldet is Kern.Mitarbeiter m)
+        {
+            BenutzerWaehlen(m.Kuerzel);
+            if (gesperrt)
+            {
+                Sperren(false);
+                BereichWaehlen(Startbereich);
+            }
+        }
+        else if (gesperrt) Close();
+    }
+
+    private void Sperren(bool an)
+    {
+        // Alles andere ausblenden (nicht nur überdecken): So ist sicher nichts mehr zu sehen.
+        foreach (Control c in Controls)
+            if (c != Sperre) c.Visible = !an;
+        if (an)
+        {
+            Sperre.SetBounds(0, 0, ClientSize.Width, ClientSize.Height);
+            Sperre.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            Sperre.Visible = true;
+            Sperre.BringToFront();
+        }
+        else Sperre.Visible = false;
+    }
+
+    private void EntwuerfeZaehlen()
+    {
+        if (!IsDisposed) Kopf.EntwuerfeSetzen(speicher.Entwuerfe(Recht.Kuerzel).Count);
+    }
+
+    // Den ältesten eigenen Entwurf fortsetzen (öffnet „Neuer Bericht“ mit dem Entwurf).
+    public Bericht? EntwurfFortsetzen()
+    {
+        var entwurf = speicher.Entwuerfe(Recht.Kuerzel).FirstOrDefault(e => e.Art == EntwurfRegeln.Bericht);
+        return entwurf is null ? null : NeuerBericht(entwurf.BewohnerId);
     }
 
     // Neuer Bericht für einen Bewohner (aus Akte oder Karte); danach seine Akte beim Reiter „Berichte“.
@@ -479,7 +575,9 @@ public sealed class Hauptfenster : Form
     public bool EinstellungenOeffnen()
     {
         using var fenster = new EinstellungenFenster(speicher.Kollegen(), speicher);
-        if (!EinstellungenZeigen(fenster)) return false;
+        bool gespeichert = EinstellungenZeigen(fenster);
+        if (fenster.AbmeldenGewuenscht) { Abmelden(); return false; }
+        if (!gespeichert) return false;
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
         BenutzerAnzeigen();
         AufgabenZaehlen();
@@ -549,6 +647,8 @@ public sealed class Hauptfenster : Form
             speicher.BezugGeaendert -= StatusNeu;
             abgleich.Dispose();
             hinweis.Dispose();
+            Application.RemoveMessageFilter(F12);
+            speicher.EntwuerfeGeaendert -= EntwuerfeZaehlen;
         }
         if (disposing) speicher.ModuleGeaendert -= ModuleAnzeigen;
         base.Dispose(disposing);
@@ -569,6 +669,7 @@ public sealed class Hauptfenster : Form
             eintrag.Eingeklappt = eingeklappt;
             hinweis.SetToolTip(eintrag, eingeklappt ? eintrag.Text : null);
         }
+        AbmeldenEintrag.Eingeklappt = eingeklappt;
         programmName.Visible = LeittextAnzeige.Visible = Arbeitsplatz.Visible = DemoKnopf.Visible = VersionText.Visible = !eingeklappt;
         InfoSymbol.Visible = DemoSymbol.Visible = eingeklappt;
         InfoAktualisieren();
@@ -609,6 +710,7 @@ public sealed class Hauptfenster : Form
         {
             InfoSymbol.Bounds = new Rectangle(x, unten - S(36), breite, S(36));
             DemoSymbol.Bounds = new Rectangle(x, InfoSymbol.Top - S(Stil.AbstandMini) - S(36), breite, S(36));
+            AbmeldenEintrag.Bounds = new Rectangle(x, DemoSymbol.Top - S(Stil.AbstandMini) - S(36), breite, S(36));
             return;
         }
         VersionText.Location = new Point(x + S(Stil.AbstandMini), unten - VersionText.PreferredHeight);
@@ -616,6 +718,7 @@ public sealed class Hauptfenster : Form
         DemoKnopf.Bounds = new Rectangle(x, unten - S(Stil.KnopfHoehe), breite, S(Stil.KnopfHoehe));
         Arbeitsplatz.MaximumSize = new Size(breite - S(Stil.AbstandMini), 0);
         Arbeitsplatz.Location = new Point(x + S(Stil.AbstandMini), DemoKnopf.Top - S(Stil.AbstandKlein) - Arbeitsplatz.PreferredHeight);
+        AbmeldenEintrag.Bounds = new Rectangle(x, Arbeitsplatz.Top - S(Stil.AbstandKlein) - S(36), breite, S(36));
     }
 
     // Alle Bewohner und Bilder weg, Demo-Daten neu laden – mit Rückfrage.

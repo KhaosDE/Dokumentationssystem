@@ -15,12 +15,12 @@ public class NachrichtenOberflaechenTests
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        Assert.Equal("Nicht angemeldet – Anmelden ▾", f.Kopf.BenutzerText);
+        Assert.Equal("Nicht angemeldet", f.Kopf.BenutzerText);
         Assert.Null(Eintrag(f).Anzahl);
         Assert.False(f.Bewohner.NachrichtenHinweisSichtbar);
 
         f.BenutzerWaehlen("AB");
-        Assert.Equal("Angemeldet als Anna Bachstelze (AB) ▾", f.Kopf.BenutzerText);
+        Assert.Equal("Angemeldet: AB – Anna Bachstelze", f.Kopf.BenutzerText);
         Assert.Equal("AB", Einstellungen.Laden().Kuerzel);   // gilt auch für Berichte, Übergabe, Aufgaben
         Assert.Equal(3, Eintrag(f).Anzahl);
         Assert.True(f.Bewohner.NachrichtenHinweisSichtbar);
@@ -30,12 +30,12 @@ public class NachrichtenOberflaechenTests
         Assert.Equal("Anna Bachstelze · 3 ungelesen", f.Kopf.KleinText);
 
         f.BenutzerWaehlen("OP");
-        Assert.Equal("Angemeldet als Olga Pirol (OP) ▾", f.Kopf.BenutzerText);
+        Assert.Equal("Angemeldet: OP – Olga Pirol", f.Kopf.BenutzerText);
         Assert.Equal("Nachrichten", f.AktiverBereich);
         Assert.Empty(f.Nachrichten.Karten);                                        // OP hat nichts bekommen
         Assert.Equal(1, f.Nachrichten.Ordner[NachrichtenOrdner.Gesendet].Anzahl);   // nur „Schwimmkurs“ geschrieben
         f.BenutzerWaehlen("");
-        Assert.Equal("Nicht angemeldet – Anmelden ▾", f.Kopf.BenutzerText);
+        Assert.Equal("Nicht angemeldet", f.Kopf.BenutzerText);
         Assert.True(f.Nachrichten.Hinweis.Visible);
         Assert.False(f.Nachrichten.NeuKnopf.Enabled);
         Assert.Empty(f.Nachrichten.Karten);
