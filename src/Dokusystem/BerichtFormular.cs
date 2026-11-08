@@ -4,7 +4,7 @@ using Dokusystem.Kern;
 namespace Dokusystem;
 
 // Neuer Bericht: Bewohner (fest aus der Akte oder zur Auswahl), Datum und Uhrzeit, Schicht,
-// Verfasser (Kürzel aus den Einstellungen), Lebensbereiche, Text, „für die Übergabe wichtig“.
+// eingetragen von (Kürzel aus der Anmeldung, nicht änderbar), Lebensbereiche, Text, „für die Übergabe wichtig“.
 public sealed class BerichtFormular : Form
 {
     private readonly Speicher speicher;
@@ -14,7 +14,7 @@ public sealed class BerichtFormular : Form
     public TextBox Datum { get; } = new() { Width = 100 };
     public TextBox Uhrzeit { get; } = new() { Width = 80 };
     public ComboBox Schichtwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 210 };
-    public TextBox Verfasser { get; } = new() { Width = 80 };
+    public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // Schritt 26a: aus der Anmeldung
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
     {
         Text = BerichtRegeln.BereichText(n), AutoSize = true, Margin = new Padding(0, 0, Stil.AbstandGross, Stil.AbstandMini),
@@ -82,10 +82,7 @@ public sealed class BerichtFormular : Form
         Schichtwahl.SelectedIndex = 0;
         wann.Controls.AddRange([Datum, Uhrzeit, Schichtwahl]);
         Zeile("Datum, Uhrzeit, Schicht", wann);
-        Verfasser.Text = Einstellungen.Laden().Kuerzel;
-        Verfasser.MaxLength = Einstellungen.KuerzelLaenge;
-        Verfasser.PlaceholderText = "Kürzel";
-        Zeile("Verfasser", Verfasser);
+        Zeile("Eingetragen von", Verfasser);
 
         // Zwei Spalten mit den kurzen Namen; der volle Name steht im Hinweis unter der Maus.
         var bereiche = new TableLayoutPanel { AutoSize = true, ColumnCount = 2, Margin = new Padding(0) };
@@ -163,7 +160,7 @@ public sealed class BerichtFormular : Form
         Datum = Datum.Text,
         Uhrzeit = Uhrzeit.Text,
         Schicht = Schichtwahl.SelectedIndex switch { 1 => Schicht.Frueh, 2 => Schicht.Spaet, 3 => Schicht.Nacht, _ => null },
-        Verfasser = Verfasser.Text,
+        Verfasser = Recht.Kuerzel,
         Bereiche = Enumerable.Range(1, 5).Where(n => Bereiche[n - 1].Checked).ToHashSet(),
         Allgemein = Allgemein.Checked,
         Text = Inhalt.Text,
@@ -214,7 +211,7 @@ public sealed class NachtragFormular : Form
     private readonly Speicher speicher;
     private readonly Bericht bericht;
 
-    public TextBox Verfasser { get; } = new() { Width = 80 };
+    public Label Verfasser { get; } = Recht.KuerzelAnzeige();
     public TextBox Inhalt { get; } = new() { Multiline = true, Height = 90, Width = 460, ScrollBars = ScrollBars.Vertical };
     public Label Fehler { get; } = new();
 
@@ -240,9 +237,7 @@ public sealed class NachtragFormular : Form
         stapel.Controls.Add(Klein("URSPRÜNGLICHER BERICHT – BLEIBT, WIE ER IST", Stil.Abschnitt, Stil.TextLeise));
         stapel.Controls.Add(Klein($"{BerichtRegeln.ZeitText(bericht.Zeitpunkt)} · {bericht.Verfasser}", Stil.Fett, Stil.TextNormal));
         stapel.Controls.Add(Klein(bericht.Text, Stil.Standard, Stil.TextMittel));
-        stapel.Controls.Add(Klein("Verfasser", Stil.Standard, Stil.TextMittel));
-        Verfasser.Text = Einstellungen.Laden().Kuerzel;
-        Verfasser.MaxLength = Einstellungen.KuerzelLaenge;
+        stapel.Controls.Add(Klein("Eingetragen von", Stil.Standard, Stil.TextMittel));
         stapel.Controls.Add(Verfasser);
         stapel.Controls.Add(Klein("Nachtrag (Korrektur oder Ergänzung)", Stil.Standard, Stil.TextMittel));
         stapel.Controls.Add(Inhalt);
@@ -269,7 +264,7 @@ public sealed class NachtragFormular : Form
     {
         try
         {
-            speicher.NachtragSpeichern(bericht.Id!.Value, Verfasser.Text, Inhalt.Text, Jetzt());
+            speicher.NachtragSpeichern(bericht.Id!.Value, Recht.Kuerzel, Inhalt.Text, Jetzt());
         }
         catch (Eingabefehler e)
         {

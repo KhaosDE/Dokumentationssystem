@@ -251,7 +251,7 @@ public sealed class VisiteFenster : Form
     public TextBox DatumFeld { get; } = new() { Width = 100 };
     public ComboBox Art { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 200 };
     public TextBox Arzt { get; } = new() { Width = 300, PlaceholderText = "ausgedacht, z. B. Dr. Ulme" };
-    public TextBox Teilnehmer { get; } = new() { Width = 300, PlaceholderText = "Kürzel, z. B. AB, CD" };
+    public PersonenWahl Teilnehmer { get; }   // Schritt 26a: Auswahl, vorbelegt mit der angemeldeten Person
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 280 };
     public Button HinzufuegenKnopf { get; } = Stil.NebenKnopf("Hinzufügen");
     public List<VisiteEintragFeld> Eintraege { get; } = [];
@@ -281,7 +281,7 @@ public sealed class VisiteFenster : Form
         }
         DatumFeld.Text = Datum.Text(DateOnly.FromDateTime(Jetzt()));
         Art.Items.AddRange([.. VisitenRegeln.Arten]);
-        Teilnehmer.Text = Recht.Kuerzel;
+        Teilnehmer = new PersonenWahl(speicher) { AccessibleName = "Dabei" };
         BewohnerWahl.Items.AddRange([.. bewohner.Select(b => (object)$"{b.Name}, Zi. {b.Zimmer}")]);
         if (BewohnerWahl.Items.Count > 0) BewohnerWahl.SelectedIndex = 0;
         BewohnerWahl.AccessibleName = "Bewohner hinzufügen";
@@ -291,7 +291,7 @@ public sealed class VisiteFenster : Form
         Zeile("Datum der Visite", DatumFeld);
         Zeile("Art", Art);
         Zeile("Arzt", Arzt);
-        Zeile("Dabei (Kürzel)", Teilnehmer);
+        Zeile("Dabei", Teilnehmer);
         Zeile("Bewohner", Formular.Reihe(BewohnerWahl, HinzufuegenKnopf));
         Zeile(null, eintraege);
         Zeile(null, Fenster.Hinweis(
@@ -299,7 +299,7 @@ public sealed class VisiteFenster : Form
             "Nach dem Speichern zeigt das Programm sofort die Aufgaben – je geänderter Anordnung eine, je Facharzttermin eine. " +
             "Die Medikation ändert das Programm nicht selbst; das trägt eine berechtigte Person über die Aufgabe ein. " +
             "Je Bewohner entsteht ein Bericht (Lebensbereich 5)."));
-        Zeile("Kürzel", new Label { Text = Recht.Kuerzel is { Length: > 0 } k ? k : "– bitte oben rechts anmelden –", AutoSize = true, Font = Stil.Fett, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) });
+        Zeile("Eingetragen von", Recht.KuerzelAnzeige());
 
         var speichern = Stil.HauptKnopf("Speichern");
         speichern.Click += (_, _) => Speichern();
@@ -352,7 +352,7 @@ public sealed class VisiteFenster : Form
         {
             var v = VisitenRegeln.AusEingabe(new VisiteEingabe
             {
-                Datum = DatumFeld.Text, Art = Art.Text, Arzt = Arzt.Text, Teilnehmer = Teilnehmer.Text, Kuerzel = Recht.Kuerzel,
+                Datum = DatumFeld.Text, Art = Art.Text, Arzt = Arzt.Text, Teilnehmer = Teilnehmer.AlsText, Kuerzel = Recht.Kuerzel,
                 Eintraege = Eintraege.Select(e => e.Eingabe()).ToList(),
             }, Jetzt());
             Gespeichert = speicher.VisiteSpeichern(v);
@@ -572,7 +572,7 @@ public sealed class FacharztTerminFenster : Form
     public ComboBox Fahrzeug { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200, Enabled = false };
     public TextBox Los { get; } = new() { Width = 70, PlaceholderText = "09:30", Enabled = false };
     public TextBox Zurueck { get; } = new() { Width = 70, PlaceholderText = "11:30", Enabled = false };
-    public ComboBox Fahrer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 120, Enabled = false };
+    public PersonWahl Fahrer { get; }
     public Label Warnung { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Label Fehler { get; } = Fenster.Fehlerfeld();
     public Button SpeichernKnopf { get; }
@@ -588,8 +588,7 @@ public sealed class FacharztTerminFenster : Form
         Fenster.Grundform(this, "Facharzttermin eintragen");
         Fahrzeug.Items.AddRange([.. speicher.AktiveFahrzeuge()]);
         if (Fahrzeug.Items.Count > 0) Fahrzeug.SelectedIndex = 0;
-        Fahrer.Items.AddRange([.. speicher.AlleMitarbeiter().Where(m => m.Aktiv).Select(m => m.Kuerzel)]);
-        Fahrer.Text = Recht.Kuerzel;
+        Fahrer = new PersonWahl(speicher) { Enabled = false };
         MitFahrt.CheckedChanged += (_, _) => Fahrzeug.Enabled = Los.Enabled = Zurueck.Enabled = Fahrer.Enabled = MitFahrt.Checked;
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
@@ -599,7 +598,7 @@ public sealed class FacharztTerminFenster : Form
         zeile("", MitFahrt);
         zeile("Fahrzeug", Fahrzeug);
         zeile("los – zurück", Formular.Reihe(Los, Zurueck));
-        zeile("Fahrer (Kürzel)", Fahrer);
+        zeile("Fahrer", Fahrer);
         zeile(null, Fenster.Hinweis("Der Termin kommt in den Kalender (Bereich) beim Bewohner. Mit Fahrt steht der Bewohner während der Fahrt " +
                                     "im Tagesplan als abwesend. Danach ist die Aufgabe erledigt."));
         zeile(null, Warnung);
@@ -627,7 +626,7 @@ public sealed class FacharztTerminFenster : Form
                 fahrt = FahrtRegeln.AusEingabe(new FahrtEingabe
                 {
                     Fahrzeug = Fahrzeug.SelectedItem as string ?? "", Datum = DatumFeld.Text, Von = Los.Text, Bis = Zurueck.Text,
-                    Zweck = FahrtZweck.Arzttermin, Fahrer = Fahrer.Text, Bewohner = [eintrag.BewohnerId], Ziel = Ort.Text, Kuerzel = kuerzel,
+                    Zweck = FahrtZweck.Arzttermin, Fahrer = Fahrer.Kuerzel, Bewohner = [eintrag.BewohnerId], Ziel = Ort.Text, Kuerzel = kuerzel,
                 }, speicher.AktiveFahrzeuge(), jetzt);
                 var andere = speicher.FahrtUeberschneidungen(fahrt);
                 string schluessel = $"{fahrt.Fahrzeug}|{fahrt.Von:O}|{fahrt.Bis:O}";

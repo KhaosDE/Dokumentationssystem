@@ -527,7 +527,7 @@ public sealed class VerordnungFenster : Form
         zeile("Beginn", Beginn);
         zeile("Angeordnet von, am", Formular.Reihe(Arzt, AngeordnetAm));
         zeile("Hinweis", Hinweis);
-        zeile("Kürzel", new Label { Text = Einstellungen.Laden().Kuerzel is { Length: > 0 } k ? k : "– bitte oben rechts anmelden –", AutoSize = true, Font = Stil.Fett, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) });
+        zeile("Eingetragen von", Recht.KuerzelAnzeige());
         zeile(null, Fehler);
         zeile(null, Formular.Knoepfe(this, "Speichern", () => Speichern()));
         Controls.Add(raster);

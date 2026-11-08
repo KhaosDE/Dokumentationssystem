@@ -37,7 +37,7 @@ public sealed class UebergabeSeite : Panel
         }
         ErledigteZeigen.Margin = new Padding(Stil.AbstandKlein, Stil.AbstandKlein, Stil.AbstandKlein, 0);
         KuerzelHinweis.Margin = new Padding(0, Stil.AbstandKlein, 0, 0);
-        KuerzelHinweis.Text = "Für „gelesen“ und „erledigt“ bitte unter Einstellungen ein Kürzel eintragen.";
+        KuerzelHinweis.Text = "Für Notizen, „gelesen“ und „erledigt“ bitte zuerst oben rechts anmelden.";
         NotizKnopf.Click += (_, _) => NotizSchreiben();
         DruckKnopf.Click += (_, _) => Drucken();
         ErledigteZeigen.CheckedChanged += (_, _) => Aktualisieren();
@@ -66,6 +66,7 @@ public sealed class UebergabeSeite : Panel
         Offen = offen.Count;
         Neu = offen.Count(u => UebergabeRegeln.Neu(u, kuerzel, vergleich));
         KuerzelHinweis.Visible = kuerzel.Length == 0;
+        Recht.NurAngemeldet(NotizKnopf);   // Schritt 26a: ohne Anmeldung nur ansehen
 
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }

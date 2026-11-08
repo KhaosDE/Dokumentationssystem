@@ -976,7 +976,7 @@ Umfang: Gestrichelter Rahmen „Logo der Einrichtung“, solange kein eigenes Bi
 Datenordner und kommt nie ins Repository (`CLAUDE.md`, Regel 7).
 
 ## Kürzel automatisch aus der Anmeldung
-Status: freigegeben (Bauplan Schritt 26a)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Überall, wo ein Kürzel eingetragen wird, setzt das Programm das Kürzel der angemeldeten
 Person selbst.

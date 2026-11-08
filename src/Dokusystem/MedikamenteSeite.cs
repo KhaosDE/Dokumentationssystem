@@ -300,7 +300,7 @@ public sealed class MedikamentFenster : Form
                    (bisher is null ? "Neue Einträge sind als „selbst angelegt“ gekennzeichnet." : "Die bisherige Fassung bleibt im Verlauf."),
             AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
         });
-        Zeile("Kürzel", new Label { Text = Einstellungen.Laden().Kuerzel is { Length: > 0 } k ? k : "– bitte oben rechts anmelden –", AutoSize = true, Font = Stil.Fett, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) });
+        Zeile("Eingetragen von", Recht.KuerzelAnzeige());
         if (bisher is not null)
         {
             var e = MedikamentRegeln.AlsEingabe(bisher.Aktuell);

@@ -73,7 +73,7 @@ public class KalenderOberflaechenTests
                 neu.BewohnerAnkreuzen(u.Demo("Ahorn").Id!.Value);
                 neu.BewohnerAnkreuzen(u.Demo("Birke").Id!.Value);
                 neu.Treffpunkt.Text = "Eingangshalle";
-                neu.Begleitung.Text = "CD";
+                neu.Begleitung.Setzen(["CD"]);
                 return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 f.Kopf.Knoepfe[0].PerformClick();
