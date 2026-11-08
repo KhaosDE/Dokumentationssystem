@@ -469,6 +469,29 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Ärzteverzeichnis (Schritt 26b) -----
+
+    private sealed class AerzteDatei
+    {
+        public List<ArztDaten> Aerzte { get; set; } = [];
+    }
+
+    public sealed class ArztDaten
+    {
+        public string Name { get; set; } = "";
+        public string Fachrichtung { get; set; } = "";
+        public string Praxis { get; set; } = "";
+        public string Telefon { get; set; } = "";
+        public string Email { get; set; } = "";
+        public bool Aktiv { get; set; } = true;
+    }
+
+    public static List<Arzt> Aerzte() =>
+        Lesen<AerzteDatei>("aerzte.json").Aerzte.Select(a => new Arzt
+        {
+            Name = a.Name, Fachrichtung = a.Fachrichtung, Praxis = a.Praxis, Telefon = a.Telefon, Email = a.Email, Aktiv = a.Aktiv,
+        }).ToList();
+
     // ----- Visiten (Schritt 26) -----
 
     private sealed class VisitenDatei

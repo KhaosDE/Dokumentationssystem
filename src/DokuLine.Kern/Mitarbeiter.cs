@@ -39,6 +39,7 @@ public static class Funktionen
     public const string Module = "module";
     public const string EinstellungenBereich = "einstellungen_bereich";
     public const string DemoZuruecksetzen = "demo_zuruecksetzen";
+    public const string Aerzte = "aerzte";   // Schritt 26b
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -60,6 +61,7 @@ public static class Funktionen
         (RechteVerwalten, "Rechte verwalten"),
         (Module, "Module ein- und ausschalten"),
         (EinstellungenBereich, "Einstellungen des Bereichs"),
+        (Aerzte, "Ärzteverzeichnis verwalten"),
         (DemoZuruecksetzen, "Demo-Daten zurücksetzen"),
     ];
 
@@ -98,7 +100,7 @@ public static partial class RechteRegeln
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten,
             Funktionen.MedikamentAnlegen, Funktionen.TeilnahmeBestaetigen, Funktionen.KalenderHaus, Funktionen.Fahrzeuge,
             Funktionen.AufgabenVorlagen, Funktionen.Heb, Funktionen.MitarbeiterBereich, Funktionen.EinstellungenBereich,
-            Funktionen.DemoZuruecksetzen, Funktionen.TherapienBereich,
+            Funktionen.DemoZuruecksetzen, Funktionen.TherapienBereich, Funktionen.Aerzte,
         ],
         ["Mitarbeiter Wohnbereich"] =
         [
@@ -108,18 +110,19 @@ public static partial class RechteRegeln
         ["Psychologischer Fachdienst"] =
         [
             Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen,
-            Funktionen.MedikamenteVerwalten, Funktionen.TeilnahmeBestaetigen, Funktionen.Heb,
+            Funktionen.MedikamenteVerwalten, Funktionen.TeilnahmeBestaetigen, Funktionen.Heb, Funktionen.Aerzte,
         ],
         ["Pädagogischer Fachdienst"] =
         [
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.TeilnahmeBestaetigen, Funktionen.Heb,
+            Funktionen.Aerzte,
         ],
         ["Therapie"] = [Funktionen.BerichteSchreiben, Funktionen.TherapienBearbeiten, Funktionen.TeilnahmeBestaetigen, Funktionen.Fahrzeuge],
     };
 
     // Funktionen, die nach der ersten Vorbelegung (0.22.0) dazukamen: werden in bestehenden
     // Datenbanken einmal nachträglich vorbelegt.
-    public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich];
+    public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte];
 
     public static bool Vorbelegt(string position, string funktion) =>
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||

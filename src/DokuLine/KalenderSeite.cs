@@ -466,6 +466,7 @@ public sealed class KalenderFenster : Form
     public TextBox Ort { get; } = new() { Width = 320 };
     public TextBox Treffpunkt { get; } = new() { Width = 320 };
     public PersonenWahl Begleitung { get; }   // Schritt 26a: Auswahl aus den Mitarbeitern
+    public ArztWahl Arzt { get; }   // Schritt 26b: Termin beim Arzt (füllt Ort und Hinweis)
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public KalenderTermin? Gespeichert { get; private set; }
@@ -478,6 +479,14 @@ public sealed class KalenderFenster : Form
         this.bisher = bisher;
         bewohner = speicher.AlleBewohner();
         Begleitung = new PersonenWahl(speicher) { AccessibleName = "Begleitung" };
+        Arzt = new ArztWahl(speicher);
+        Arzt.Gewechselt += a =>   // Schritt 26b: Termin beim Arzt – Ort und Kontakt aus dem Verzeichnis
+        {
+            if (a is null) return;
+            if (Ort.Text.Trim().Length == 0) Ort.Text = a.Praxis;
+            string kontakt = ArztRegeln.Kontakt(a);
+            if (!Hinweis.Text.Contains(a.Name, StringComparison.Ordinal)) Hinweis.Text = Hinweis.Text.Trim().Length == 0 ? kontakt : $"{kontakt} · {Hinweis.Text.Trim()}";
+        };
         Text = (bisher is null ? "Neuer Termin" : "Termin ändern") + $" ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
@@ -503,6 +512,7 @@ public sealed class KalenderFenster : Form
         zeile("Ende", Formular.Reihe(EndeDatum, EndeUhrzeit));
         BewohnerListe.Items.AddRange(bewohner.Select(b => (object)$"{b.Nachname}, {b.Vorname} (Zi. {b.Zimmer})").ToArray());
         zeile("Bewohner", BewohnerListe);
+        zeile("Arzt (freiwillig)", Arzt);
         zeile("Ort", Ort);
         zeile("Treffpunkt (Ausflug)", Treffpunkt);
         zeile("Begleitung (Ausflug)", Begleitung);

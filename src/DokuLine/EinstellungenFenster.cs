@@ -48,6 +48,7 @@ public sealed class EinstellungenFenster : Form
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     public Button MedikamenteKnopf { get; } = Stil.NebenKnopf("Medikamentendatenbank …");
     public Button FahrzeugeKnopf { get; } = Stil.NebenKnopf("Fahrzeuge …");
+    public Button AerzteKnopf { get; } = Stil.NebenKnopf("Ärzteverzeichnis …");   // Schritt 26b
     // Schritt 25: Schichtzeiten des Bereichs (dieses Rechners), für alle Rechner des Bereichs.
     public TextBox Frueh { get; } = new() { Width = 60 };
     public TextBox Spaet { get; } = new() { Width = 60 };
@@ -168,8 +169,10 @@ public sealed class EinstellungenFenster : Form
             RechteKnopf.Click += (_, _) => { using var f = new RechteFenster(speicher); Dialog.Zeigen(f, this); };
             FahrzeugeKnopf.Click += (_, _) => { using var f = new FahrzeugeFenster(speicher); Dialog.Zeigen(f, this); };   // Schritt 24
             Stil.Sperren(MitarbeiterKnopf, Recht.Darf(speicher, Funktionen.MitarbeiterAlle) ? null : Recht.Grund(speicher, Funktionen.MitarbeiterBereich));
-            foreach (var k in new[] { MitarbeiterKnopf, ListenKnopf, RechteKnopf, FahrzeugeKnopf }) k.AutoSize = true;
+            AerzteKnopf.Click += (_, _) => { using var f = new AerzteFenster(speicher); Dialog.Zeigen(f, this); };
+            foreach (var k in new[] { MitarbeiterKnopf, ListenKnopf, RechteKnopf, FahrzeugeKnopf, AerzteKnopf }) k.AutoSize = true;
             Ganz(Formular.Reihe(MitarbeiterKnopf, ListenKnopf, RechteKnopf, FahrzeugeKnopf));
+            Ganz(Formular.Reihe(AerzteKnopf));
             Ganz(new Label
             {
                 Text = "Mitarbeiter mit Bereichen und Positionen; welche Position was darf, steht in der Rechte-Tabelle. Ohne Recht nur ansehen.",

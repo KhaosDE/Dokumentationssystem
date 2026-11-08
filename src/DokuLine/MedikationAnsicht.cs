@@ -472,7 +472,7 @@ public sealed class VerordnungFenster : Form
     public TextBox Anlass { get; } = new() { Width = 260, PlaceholderText = "z. B. bei starker Unruhe", Enabled = false };
     public TextBox Hoechstens { get; } = new() { Width = 160, PlaceholderText = "z. B. 2 in 24 Stunden", Enabled = false };
     public TextBox Beginn { get; } = new() { Width = 100 };
-    public TextBox Arzt { get; } = new() { Width = 260, PlaceholderText = "ausgedacht, z. B. Dr. Ulme" };
+    public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
     public TextBox AngeordnetAm { get; } = new() { Width = 100 };
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
@@ -484,6 +484,7 @@ public sealed class VerordnungFenster : Form
     {
         this.speicher = speicher;
         this.bewohner = bewohner;
+        Arzt = new ArztWahl(speicher);
         medikamente = speicher.Medikamente().Where(m => !m.Gesperrt).ToList();   // gesperrte nicht wählbar (Schritt 21)
         Text = $"Neue Verordnung – {bewohner.Name} ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -580,7 +581,7 @@ public sealed class AenderungFenster : Form
     public TextBox Von { get; } = new() { Width = 100 };
     public TextBox Bis { get; } = new() { Width = 100, PlaceholderText = "leer = bis auf Weiteres" };
     public TextBox[,] Stufen { get; } = new TextBox[StufenZeilen, 5];
-    public TextBox Arzt { get; } = new() { Width = 260, PlaceholderText = "ausgedacht, z. B. Dr. Ulme" };
+    public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
     public TextBox AngeordnetAm { get; } = new() { Width = 100 };
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
@@ -592,6 +593,7 @@ public sealed class AenderungFenster : Form
         this.speicher = speicher;
         verordnung = v;
         this.art = art;
+        Arzt = new ArztWahl(speicher);
         string titel = art switch
         {
             AenderungArt.Pause => "Pause",

@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.3** (Administrator TST und Abmelden mit F12, Bauplan Schritte 26a2 und 26a3).
+Stand: 08.11.2026. Version: **0.29.4** (Ärzteverzeichnis, Bauplan Schritt 26b).
 
 ## Aktuell
 
@@ -92,7 +92,12 @@ und der Mitarbeiter **TST** („Test Administrator“); der letzte aktive Admini
 Einstellungen. Danach ist nur das Anmeldefenster über einer leeren Fläche zu sehen. Ein angefangener
 Bericht kann als **Entwurf** bleiben („Entwurf fortsetzen“ oben rechts nach dem Anmelden).
 
-**Nächster Schritt:** Bauplan Schritt 26b „Ärzteverzeichnis“ (0.29.4).
+Neu in 0.29.4: **Ärzteverzeichnis** (Einstellungen → „VERWALTUNG“) mit ausgedachten Ärztinnen und
+Ärzten. Wo ein Arzt eingetragen wird – Verordnung, Pause/Stufenplan/Absetzen, Visite, Facharzttermin,
+Termin –, steht eine **Auswahl** statt eines Textfelds; „Arzt anlegen …“ gleich daneben (Recht
+„Ärzteverzeichnis verwalten“).
+
+**Nächster Schritt:** Bauplan Schritt 26c „Visite: Übersicht aller Bewohner“ (0.29.5).
 
 ## Fertig
 
@@ -599,7 +604,6 @@ Bericht kann als **Entwurf** bleiben („Entwurf fortsetzen“ oben rechts nach 
     wird dessen Inhalt kopiert (erst in einen Zwischenordner, dann umbenannt); der alte Ordner bleibt
     unangetastet, `update.log` vermerkt die Übernahme. Ein selbst gewählter Datenbank-Ort bleibt.
   - Dokumentation: `CLAUDE.md` (Name, Pfade, Projektnamen), `README.md`, `docs/`, Pfade in `IDEEN.md`.
-
 - 0.29.3 — Administrator TST und Abmelden mit F12 (Bauplan Schritte 26a2 und 26a3, 08.11.2026):
   - Position „Administrator“ an erster Stelle: hat immer alle Rechte, in allen Bereichen, auch ohne
     „Fachkraft“. In der Rechte-Tabelle ist die Spalte voll, ausgegraut, mit Hinweis „Der
@@ -620,6 +624,19 @@ Bericht kann als **Entwurf** bleiben („Entwurf fortsetzen“ oben rechts nach 
   - Entwürfe (neue Tabelle `entwuerfe`): gehören dem Kürzel, je Bewohner einer. Nach dem Anmelden
     steht oben rechts „Entwurf fortsetzen“; „Neuer Bericht …“ beim selben Bewohner übernimmt ihn
     („Entwurf vom … übernommen“, „Entwurf verwerfen“). Speichern löscht den Entwurf.
+
+- 0.29.4 — Ärzteverzeichnis (Bauplan Schritt 26b, 08.11.2026):
+  - Einstellungen → „VERWALTUNG“ → „Ärzteverzeichnis …“: Liste (Name, Fachrichtung, Praxis/Ort,
+    Telefon, Status), „Neuer Arzt …“, „Ändern …“, „Inaktiv / wieder aktiv“. Nie löschen.
+  - Neues Recht „Ärzteverzeichnis verwalten“ (Vorbelegung: Geschäftsführung, Hausleitung,
+    Verwaltung, Bereichsleitung, Psychologischer und Pädagogischer Fachdienst); in bestehenden
+    Datenbanken einmal nachträglich vorbelegt.
+  - Auswahl statt Freitext (nur aktive Ärzte) mit „Arzt anlegen …“ daneben: Neue Verordnung,
+    Pause/Pause beenden/Stufenplan/Absetzen, Neue Visite, Facharzttermin (freiwillig; füllt den Ort)
+    und Kalendertermin (freiwillig; füllt Ort und Hinweis mit Name, Praxis, Telefon). Ein älterer
+    Name, der nicht im Verzeichnis steht, bleibt wählbar („nicht im Verzeichnis“).
+  - Demo `daten/demo/aerzte.json`: sieben ausgedachte Ärztinnen und Ärzte (eine inaktiv), Adressen
+    nur `@example.org`; Dr. Ulme und Dr. Linde aus den bisherigen Demo-Daten stehen darin.
 
 ## Offene Punkte
 
@@ -1087,6 +1104,16 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 26b): Gespeichert wird weiter der Name des Arztes (wie bisher als Text), nicht eine
+  Nummer – so bleiben ältere Einträge und Ausdrucke gleich, und ein umbenannter oder inaktiver Arzt
+  ändert keine früheren Einträge. Namen sind im Verzeichnis eindeutig.
+- 08.11.2026 (Schritt 26b): Vorbelegung des Rechts: „Fachkräfte“ lassen sich in der Rechte-Tabelle nicht
+  mit „Leitungen und Verwaltung“ zusammen ausdrücken (das Häkchen „nur Fachkräfte“ würde
+  Geschäftsführung und Verwaltung ohne Fachkraft ausschließen). Deshalb Positionen: die drei
+  Leitungen, Bereichsleitung, Psychologischer und Pädagogischer Fachdienst. Fachkräfte im
+  Wohnbereich bekommen es bei Bedarf in der Tabelle.
+- 08.11.2026 (Schritt 26b): Kalendertermine haben kein eigenes Feld „Arzt“; die Auswahl füllt Ort und
+  Hinweis (Name, Praxis, Telefon). Beim Facharzttermin steht der Arzt ebenso im Hinweis.
 - 08.11.2026 (Schritt 26a): Eine eigene Einstellung „Kürzel“ gab es seit 0.22.0 nicht mehr; maßgeblich
   ist die Anmeldung. Personen-Felder mit mehreren Personen speichern die Kürzel wie bisher als Text
   („AB, CD“), damit ältere Einträge lesbar bleiben.
@@ -1163,6 +1190,16 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.4:
+
+1. Einstellungen → „VERWALTUNG“ → „Ärzteverzeichnis …“: sieben ausgedachte Ärzte, Dr. Weide inaktiv.
+   Als „CD“ nur ansehen (Knöpfe grau); als „EF“ „Neuer Arzt …“ und „Inaktiv / wieder aktiv“.
+2. Akte → Medikamentenplan → „Neue Verordnung …“: „Angeordnet von“ ist eine Liste (nur aktive Ärzte);
+   „Arzt anlegen …“ daneben → neuer Arzt ist gleich gewählt.
+3. „Neue Visite …“: Arzt aus der Liste. Facharzttermin eintragen: Arzt wählen → Ort ist ausgefüllt.
+4. Kalender → „Neuer Termin …“ → „Arzt (freiwillig)“ wählen → Ort und Hinweis (Name, Praxis, Telefon)
+   sind ausgefüllt.
 
 Version 0.29.3:
 

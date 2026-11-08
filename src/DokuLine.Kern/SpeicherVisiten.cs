@@ -153,13 +153,14 @@ public sealed partial class Speicher
 
     // Facharzttermin vereinbart (Aufgabe erledigen): Termin im Kalender (Bereich) beim Bewohner, auf
     // Wunsch eine Fahrt, dann ist die Aufgabe erledigt.
-    public KalenderTermin FacharztTerminEintragen(Aufgabe a, DateOnly datum, string uhrzeit, string ort, string kuerzel, DateTime jetzt, Fahrt? fahrt = null)
+    public KalenderTermin FacharztTerminEintragen(Aufgabe a, DateOnly datum, string uhrzeit, string ort, string kuerzel, DateTime jetzt, Fahrt? fahrt = null, Arzt? arzt = null)
     {
         if (VisitenAufgabe(a) is not { Aktion: VisitenAktion.FacharztTermin } info) throw new Eingabefehler(["Das ist keine Aufgabe für einen Facharzttermin."]);
         var f = KalenderRegeln.AusEingabe(new KalenderEingabe
         {
             Art = KalenderArt.Bewohner, Titel = $"Facharzt: {info.Eintrag.Facharzt}", BeginnDatum = Kern.Datum.Text(datum), BeginnUhrzeit = uhrzeit,
-            Ort = ort, Hinweis = $"vereinbart nach der {VisitenRegeln.Kopf(info.Visite)}", Bewohner = [info.Eintrag.BewohnerId], Kuerzel = kuerzel,
+            Ort = ort, Hinweis = (arzt is null ? "" : $"bei {ArztRegeln.Kontakt(arzt)} · ") + $"vereinbart nach der {VisitenRegeln.Kopf(info.Visite)}",
+            Bewohner = [info.Eintrag.BewohnerId], Kuerzel = kuerzel,
         }, jetzt);
         var termin = KalenderAnlegen(f);
         if (fahrt is not null) FahrtAnlegen(fahrt);

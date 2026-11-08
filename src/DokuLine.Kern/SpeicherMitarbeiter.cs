@@ -291,6 +291,8 @@ public sealed partial class Speicher
         foreach (var p in RechteRegeln.Positionen)
             if (RechteRegeln.Vorbelegt(p, funktion))
                 Ausfuehren("INSERT OR IGNORE INTO rechte (funktion, position) VALUES ($f, $p)", transaktion, ("$f", funktion), ("$p", p));
+        if (RechteRegeln.NurFachkraftVorgabe.Contains(funktion))
+            Ausfuehren("INSERT OR IGNORE INTO rechte_fachkraft (funktion) VALUES ($f)", transaktion, ("$f", funktion));
         SetzeMeta(NachtraeglichSchluessel(funktion), "1", transaktion);
     }
 
