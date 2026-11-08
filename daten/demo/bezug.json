@@ -1,0 +1,21 @@
+{
+  "hinweis": "Ausgedachte Bezugspflege und Einzeltrainer für die Demo. vorTagen = seit wann (relativ zum Laden der Demo-Daten). Einträge je Bewohner in zeitlicher Reihenfolge; der letzte gilt.",
+  "bezugspflege": [
+    { "bewohner": "Ahorn", "kuerzel": "CD", "vorTagen": 400, "von": "EF" },
+    { "bewohner": "Ahorn", "kuerzel": "AB", "vorTagen": 90, "von": "EF" },
+    { "bewohner": "Birke", "kuerzel": "AB", "vorTagen": 300, "von": "EF" },
+    { "bewohner": "Clematis", "kuerzel": "AB", "vorTagen": 200, "von": "EF" },
+    { "bewohner": "Distel", "kuerzel": "AB", "vorTagen": 150, "von": "EF" },
+    { "bewohner": "Eiche", "kuerzel": "AB", "vorTagen": 60, "von": "EF" },
+    { "bewohner": "Fichte", "kuerzel": "CD", "vorTagen": 250, "von": "EF" },
+    { "bewohner": "Holunder", "kuerzel": "CD", "vorTagen": 120, "von": "EF" },
+    { "bewohner": "Kiefer", "kuerzel": "KL", "vorTagen": 30, "von": "EF" },
+    { "bewohner": "Ginster", "kuerzel": "GH", "vorTagen": 180, "von": "GH" },
+    { "bewohner": "Immergrün", "kuerzel": "MN", "vorTagen": 100, "von": "GH" }
+  ],
+  "einzeltrainer": [
+    { "bewohner": "Birke", "kuerzel": "PR", "art": "DBT", "vorTagen": 120, "von": "EF" },
+    { "bewohner": "Eiche", "kuerzel": "BM", "art": "Suchtgruppe", "vorTagen": 45, "von": "EF" },
+    { "bewohner": "Ginster", "kuerzel": "PR", "art": "DBT", "vorTagen": 80, "von": "GH" }
+  ]
+}

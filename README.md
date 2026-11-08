@@ -121,6 +121,10 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
   her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren – im gemeinsamen Ordner
   für alle Rechner.
+- **Bezugspflege und Einzeltrainer:** In der Akte unter „Stammdaten“ („Bezug ändern …“). Auf
+  den Karten zeigt ein farbiger Streifen die Bezugspflege, ein Punkt den Einzeltrainer – in der
+  Farbe der Person (Einstellungen → „Meine Farbe“), immer mit Kürzel. In der Übersicht filtern
+  „Meine Bezugsbewohner“ und „Meine Einzeltrainings“.
 - **Anmelden:** Beim Start mit dem Kürzel (Demo: ohne Passwort; die ausgedachten Mitarbeiter
   stehen im Anmeldefenster). Oben rechts „Angemeldet als …“ → „Abmelden / Benutzer wechseln“.
   Was jemand darf, hängt an seiner Position (Einstellungen → „VERWALTUNG“ → „Rechte …“). Ohne

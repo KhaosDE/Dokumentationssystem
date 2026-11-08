@@ -471,6 +471,37 @@ public sealed partial class Speicher : IDisposable
             funktion TEXT PRIMARY KEY
         );
         """,
+        // 16 – Bezugspflege und Einzeltrainer: Wechsel sind neue Einträge (der neueste gilt, Kürzel
+        //      leer = keine), Arten der Einzeltrainings als Liste, eigene Farbe je Mitarbeiter.
+        """
+        ALTER TABLE kollegen ADD COLUMN farbe TEXT;
+        CREATE TABLE bezugspflege (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            kuerzel     TEXT NOT NULL,
+            ab          TEXT NOT NULL,
+            erstellt    TEXT NOT NULL,
+            von         TEXT NOT NULL
+        );
+        CREATE TABLE einzeltrainer (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            kuerzel     TEXT NOT NULL,
+            art         TEXT NOT NULL,
+            ab          TEXT NOT NULL,
+            erstellt    TEXT NOT NULL,
+            von         TEXT NOT NULL
+        );
+        CREATE TABLE einzeltrainer_arten (
+            name TEXT PRIMARY KEY,
+            nr   INTEGER NOT NULL DEFAULT 0
+        );
+        INSERT INTO einzeltrainer_arten (name, nr) VALUES ('DBT', 1), ('Suchtgruppe', 2);
+        CREATE TRIGGER bezugspflege_bleibt BEFORE UPDATE ON bezugspflege
+            BEGIN SELECT RAISE(ABORT, 'Die Bezugspflege wird nicht überschrieben – ein Wechsel ist ein neuer Eintrag.'); END;
+        CREATE TRIGGER einzeltrainer_bleibt BEFORE UPDATE ON einzeltrainer
+            BEGIN SELECT RAISE(ABORT, 'Einzeltrainer werden nicht überschrieben – ein Wechsel ist ein neuer Eintrag.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -619,10 +650,10 @@ public sealed partial class Speicher : IDisposable
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
              therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
-             status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null;
+             status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
@@ -638,6 +669,7 @@ public sealed partial class Speicher : IDisposable
         if (reflexion) DemoReflexionEinfuegen(transaktion);
         if (heb) DemoHebEinfuegen(transaktion);
         if (status) DemoStatusEinfuegen(transaktion);
+        if (bezug || mitarbeiter) DemoBezugEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
         transaktion.Commit();
         if (modulNeu) ModuleGeaendert?.Invoke();
@@ -669,6 +701,7 @@ public sealed partial class Speicher : IDisposable
             DemoReflexionEinfuegen(transaktion);
             DemoHebEinfuegen(transaktion);
             DemoStatusEinfuegen(transaktion);
+            DemoBezugEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
             transaktion.Commit();
         }
@@ -681,6 +714,7 @@ public sealed partial class Speicher : IDisposable
         KalenderGeaendert?.Invoke();
         StatusGeaendert?.Invoke();
         MitarbeiterGeaendert?.Invoke();
+        BezugGeaendert?.Invoke();
         ModuleGeaendert?.Invoke();
     }
 

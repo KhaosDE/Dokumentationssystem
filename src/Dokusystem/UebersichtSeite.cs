@@ -21,6 +21,9 @@ public sealed class UebersichtSeite : Panel
     public Label Medikation { get; } = new() { AutoSize = true, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
     public KartenRaster Raster { get; } = new();
     public CheckBox AlleBereiche { get; } = new() { Text = "alle Bereiche", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
+    // Schritt 20: nur die eigenen Bezugsbewohner bzw. Einzeltrainings (aus allen Bereichen).
+    public CheckBox MeineBezugsbewohner { get; } = new() { Text = "Meine Bezugsbewohner", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
+    public CheckBox MeineEinzeltrainings { get; } = new() { Text = "Meine Einzeltrainings", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
     public Label BereichHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, Visible = false, UseMnemonic = false };
     public List<BewohnerKarte> Karten { get; } = [];
     public event Action<long>? AkteGewuenscht;
@@ -33,8 +36,9 @@ public sealed class UebersichtSeite : Panel
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        heuteKarte.Controls.AddRange([heuteTitel, AlleBereiche, BereichHinweis, HeuteText, termineTitel, Termine, medikationTitel, Medikation]);
-        AlleBereiche.CheckedChanged += (_, _) => Aktualisieren();
+        heuteKarte.Controls.AddRange([heuteTitel, MeineBezugsbewohner, MeineEinzeltrainings, AlleBereiche, BereichHinweis, HeuteText,
+            termineTitel, Termine, medikationTitel, Medikation]);
+        foreach (var c in new[] { AlleBereiche, MeineBezugsbewohner, MeineEinzeltrainings }) c.CheckedChanged += (_, _) => Aktualisieren();
         Controls.Add(heuteKarte);
         Controls.Add(Raster);
         // Immer aktuell: Datumswechsel um Mitternacht (jede Minute prüfen, nur wenn sichtbar neu bauen).
@@ -60,11 +64,25 @@ public sealed class UebersichtSeite : Panel
         var eigene = jeder.Where(h => meine.Contains(h.Bewohner.Wohnbereich)).ToList();
         bool allesZeigen = AlleBereiche.Checked || eigene.Count == 0;
         var alle = allesZeigen ? jeder : eigene;
+        var bezuege = speicher.Bezuege();
+        bool angemeldet = speicher.MitarbeiterLesen(werte.Kuerzel) is not null;
+        MeineBezugsbewohner.Enabled = MeineEinzeltrainings.Enabled = angemeldet;
+        bool meineBp = angemeldet && MeineBezugsbewohner.Checked, meineEt = angemeldet && MeineEinzeltrainings.Checked;
+        if (meineBp || meineEt)
+        {
+            bool Meins(Zuordnung? z) => z?.Kuerzel.Equals(werte.Kuerzel, StringComparison.OrdinalIgnoreCase) == true;
+            alle = jeder.Where(h => bezuege.GetValueOrDefault(h.Bewohner.Id!.Value) is Bezug b &&
+                                    ((meineBp && Meins(b.Bezugspflege)) || (meineEt && Meins(b.Einzeltrainer)))).ToList();
+            allesZeigen = true;
+        }
         BereichHinweis.Visible = !AlleBereiche.Checked && eigene.Count == 0 && jeder.Count > 0;
         BereichHinweis.Text = $"Für „{string.Join(", ", meine)}“ gibt es keine eigenen Bewohner – gezeigt werden alle Bereiche.";
-        string bereichText = allesZeigen ? "alle Bereiche" : string.Join(", ", meine);
+        string bereichText = meineBp || meineEt
+            ? string.Join(" und ", new[] { meineBp ? "meine Bezugsbewohner" : null, meineEt ? "meine Einzeltrainings" : null }.OfType<string>())
+            : allesZeigen ? "alle Bereiche" : string.Join(", ", meine);
         var status = speicher.GeltendeStatusmeldungen(jetzt);
         string? berichtGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
+        var farben = BezugAnzeige.Farben(speicher);
         Karten.Clear();
         int abwesend = 0;
         foreach (var h in alle)
@@ -82,6 +100,7 @@ public sealed class UebersichtSeite : Panel
             karte.Gewaehlt += b => AkteGewuenscht?.Invoke(b.Id!.Value);
             karte.BerichtGewuenscht += b => BerichtGewuenscht?.Invoke(b.Id!.Value);
             karte.BerichtSperren(berichtGrund);
+            BezugAnzeige.Setzen(karte, bezuege.GetValueOrDefault(h.Bewohner.Id!.Value), farben);
             Karten.Add(karte);
         }
         Raster.KartenSetzen(Karten);
@@ -104,8 +123,14 @@ public sealed class UebersichtSeite : Panel
         int breite = Math.Max(300, ClientSize.Width - 2 * rand);
         int y = rand;
         heuteTitel.Location = new Point(innen, innen);
-        AlleBereiche.Location = new Point(Math.Max(heuteTitel.Right + innen, breite - innen - AlleBereiche.PreferredSize.Width),
-            heuteTitel.Top + (heuteTitel.Height - AlleBereiche.PreferredSize.Height) / 2);
+        // Rechts oben, von rechts nach links: alle Bereiche, Meine Einzeltrainings, Meine Bezugsbewohner.
+        int filterX = breite - innen;
+        foreach (var c in new[] { AlleBereiche, MeineEinzeltrainings, MeineBezugsbewohner })
+        {
+            filterX -= c.PreferredSize.Width;
+            c.Location = new Point(Math.Max(heuteTitel.Right + innen, filterX), heuteTitel.Top + (heuteTitel.Height - c.PreferredSize.Height) / 2);
+            filterX -= Stil.Px(this, Stil.AbstandMittel);
+        }
         int unterTitel = heuteTitel.Bottom + Stil.Px(this, Stil.AbstandMini);
         if (BereichHinweis.Visible)
         {

@@ -46,15 +46,34 @@ public sealed class BewohnerKarte : Control
         Cursor = Cursors.Hand;
         TabStop = true;
         AccessibleRole = AccessibleRole.PushButton;
-        // Für Bildschirmleser: alles, was auf der Karte steht, als Text.
-        string marken = Marken.Count > 0 ? ", " + string.Join(", ", Marken.Select(m => m.Text)) : "";
-        AccessibleName = $"{bewohner.Name}, Zimmer {bewohner.Zimmer}{marken}. Akte öffnen";
         Text = bewohner.Name;
+        BeschriftungSetzen();
         // Rechtsklick (oder Kontextmenü-Taste): Akte öffnen, Neuer Bericht.
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
         menue.Items.Add("Akte öffnen", null, (_, _) => Waehlen());
         menue.Items.Add("Neuer Bericht …", null, (_, _) => BerichtWaehlen());
         ContextMenuStrip = menue;
+    }
+
+    // Bezugspflege (kräftiger Farbstreifen links, Kürzel in der Zimmerzeile) und Einzeltrainer
+    // (kleiner Farbpunkt mit „DBT · AB“), Schritt 20. Farbe nie allein: das Kürzel steht dabei.
+    public (string Kuerzel, Color Farbe)? Bezugspflege { get; private set; }
+    public (string Text, Color Farbe)? Trainer { get; private set; }
+
+    public void BezugSetzen((string Kuerzel, Color Farbe)? bezugspflege, (string Text, Color Farbe)? trainer)
+    {
+        Bezugspflege = bezugspflege;
+        Trainer = trainer;
+        BeschriftungSetzen();
+        Invalidate();
+    }
+
+    // Für Bildschirmleser: alles, was auf der Karte steht, als Text.
+    private void BeschriftungSetzen()
+    {
+        string marken = Marken.Count > 0 ? ", " + string.Join(", ", Marken.Select(m => m.Text)) : "";
+        string bezug = (Bezugspflege is { } b ? $", Bezugspflege {b.Kuerzel}" : "") + (Trainer is { } t ? $", Einzeltrainer {t.Text}" : "");
+        AccessibleName = $"{Bewohner.Name}, Zimmer {Bewohner.Zimmer}{marken}{bezug}. Akte öffnen";
     }
 
     // Rechte (Schritt 19): ohne „Berichte schreiben“ ist der Eintrag grau und nennt den Grund.
@@ -114,6 +133,15 @@ public sealed class BewohnerKarte : Control
         Stil.SchattenZeichnen(g, karte, radius, Skala);
         Color rand = Focused ? Stil.Fokus : maus ? Stil.Mischen(Stil.KarteRand, Stil.Fokus, 0.55) : Stil.KarteRand;
         Stil.FlaecheZeichnen(g, karte, radius, Stil.Flaeche, rand, Focused ? 2f * Skala : 1f);
+        if (Bezugspflege is { } bp)
+        {
+            // Farbstreifen am linken Rand, in die Rundung der Karte geschnitten.
+            using var umriss = Stil.Abgerundet(karte, radius);
+            var vorher = g.Clip;
+            g.SetClip(umriss);
+            using (var pinsel = new SolidBrush(bp.Farbe)) g.FillRectangle(pinsel, karte.Left, karte.Top, S(6), karte.Height);
+            g.Clip = vorher;
+        }
 
         int innen = S(Innen);
         int x = (int)karte.Left + innen, rechts = (int)karte.Right - innen, y = (int)karte.Top + innen;
@@ -127,7 +155,26 @@ public sealed class BewohnerKarte : Control
         TextRenderer.DrawText(g, $"{Bewohner.Nachname}, {Bewohner.Vorname}", Stil.KarteName,
             new Rectangle(textX, blockY, Math.Max(0, rechts - textX), nameHoehe), Stil.TextNormal,
             TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter);
-        Stil.MarkeZeichnen(g, $"Zi. {Bewohner.Zimmer}", textX, blockY + nameHoehe + S(Stil.AbstandMini), Stil.Zimmer, Skala);
+        int zimmerY = blockY + nameHoehe + S(Stil.AbstandMini);
+        Stil.MarkeZeichnen(g, $"Zi. {Bewohner.Zimmer}", textX, zimmerY, Stil.Zimmer, Skala);
+        int bezugX = textX + Stil.MarkenBreite(g, $"Zi. {Bewohner.Zimmer}", Skala) + S(Stil.AbstandMini);
+        if (Bezugspflege is { } bp2)
+        {
+            int breite = TextRenderer.MeasureText(g, bp2.Kuerzel, Stil.MarkeSchrift, Size.Empty, TextFormatFlags.NoPadding).Width + S(12);
+            var feld = new Rectangle(bezugX, zimmerY, breite, S(MarkeHoehe));
+            Stil.FlaecheZeichnen(g, feld, Stil.RadiusKnopf * Skala, bp2.Farbe, bp2.Farbe);
+            TextRenderer.DrawText(g, bp2.Kuerzel, Stil.MarkeSchrift, feld, Schriftfarbe(bp2.Farbe),
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine);
+            bezugX = feld.Right + S(Stil.AbstandKlein);
+        }
+        if (Trainer is { } et && bezugX < rechts - S(20))
+        {
+            int punkt = S(9);
+            using (var pinsel = new SolidBrush(et.Farbe))
+                g.FillEllipse(pinsel, bezugX, zimmerY + (S(MarkeHoehe) - punkt) / 2f, punkt, punkt);
+            TextRenderer.DrawText(g, et.Text, Stil.Klein, new Rectangle(bezugX + punkt + S(4), zimmerY, rechts - bezugX - punkt - S(4), S(MarkeHoehe)),
+                Stil.TextMittel, TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter);
+        }
         y += bild + S(Stil.AbstandMittel);
 
         // ---- Marken: höchstens drei Zeilen; zu lange Texte werden gekürzt ----
@@ -153,6 +200,10 @@ public sealed class BewohnerKarte : Control
         TextRenderer.DrawText(g, AufenthaltText, Stil.Klein, new Rectangle(x, fussY, rechts - x, fussHoehe), Stil.TextLeise,
             TextFormatFlags.NoPadding | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.VerticalCenter);
     }
+
+    // Weiß oder dunkel, je nachdem, was auf der Farbe besser lesbar ist.
+    public static Color Schriftfarbe(Color hinten) =>
+        hinten.R * 0.299 + hinten.G * 0.587 + hinten.B * 0.114 > 160 ? Stil.TextNormal : Color.White;
 
     // Marke mit fester Breite; passt der Text nicht, endet er mit „…“.
     private void MarkeGekuerzt(Graphics g, string text, int x, int y, int breite, Stil.Marke marke)

@@ -11,6 +11,7 @@ public sealed record Mitarbeiter(string Kuerzel, string Vorname, string Nachname
 {
     public string Name => $"{Vorname} {Nachname}";
     public string Anzeige => $"{Name} ({Kuerzel})";
+    public string? Farbe { get; init; }   // #RRGGBB (Schritt 20); null = Vorgabe aus dem Kürzel
 }
 
 // Ein Eintrag der Listen „Bereiche“ und „Positionen“ (stillgelegt = nicht mehr wählbar).

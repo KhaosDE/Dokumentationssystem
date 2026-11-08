@@ -179,6 +179,7 @@ public sealed class Hauptfenster : Form
         speicher.KalenderGeaendert += UebersichtNeu;
         speicher.StatusGeaendert += StatusNeu;
         speicher.MitarbeiterGeaendert += RechteNeu;
+        speicher.BezugGeaendert += StatusNeu;
         AufgabenZaehlen();
         BenutzerAnzeigen();
         ArbeitsplatzAnzeigen();
@@ -479,6 +480,7 @@ public sealed class Hauptfenster : Form
             speicher.KalenderGeaendert -= UebersichtNeu;
             speicher.StatusGeaendert -= StatusNeu;
             speicher.MitarbeiterGeaendert -= RechteNeu;
+            speicher.BezugGeaendert -= StatusNeu;
             abgleich.Dispose();
             hinweis.Dispose();
         }

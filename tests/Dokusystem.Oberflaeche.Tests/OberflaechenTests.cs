@@ -88,7 +88,7 @@ public class BewohnerOberflaechenTests
         // Ohne eigenes Kürzel zählt „Übergabe“ alle offenen Einträge; „Wichtig“: wichtiger Bericht der letzten 7 Tage.
         // Vorne die Statusmeldung aus der Demo (Mehrplatz, gesetzt von der Therapie).
         Assert.StartsWith("Anton Ahorn, Zimmer 101, Status: in der Holzwerkstatt, bis ", karten[0].AccessibleName);
-        Assert.EndsWith(", Übergabe 1, Wichtig, Beschluss bis 30.06.2027, Allergie: Haselnüsse. Akte öffnen", karten[0].AccessibleName);
+        Assert.EndsWith(", Übergabe 1, Wichtig, Beschluss bis 30.06.2027, Allergie: Haselnüsse, Bezugspflege AB. Akte öffnen", karten[0].AccessibleName);
         Assert.Equal("Bewohner", f.Kopf.TitelText);
         Assert.Equal("Neuer Bewohner …", Assert.Single(f.Kopf.Knoepfe).Text);
     });

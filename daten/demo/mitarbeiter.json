@@ -1,19 +1,19 @@
 {
-  "hinweis": "Ausgedachte Mitarbeiterinnen und Mitarbeiter, Bereiche und Positionen für die Demo. Anmelden mit dem Kürzel, ohne Passwort. aktiv: false = ausgeschieden (kann sich nicht mehr anmelden, bleibt an Einträgen sichtbar).",
+  "hinweis": "Ausgedachte Mitarbeiterinnen und Mitarbeiter, Bereiche und Positionen für die Demo. Anmelden mit dem Kürzel, ohne Passwort. farbe = eigene Farbe für Bezugspflege/Einzeltrainer (fehlt = Vorgabe aus dem Kürzel). aktiv: false = ausgeschieden (kann sich nicht mehr anmelden, bleibt an Einträgen sichtbar).",
   "bereiche": [ "Wohnbereich A", "Wohnbereich B", "Therapie", "Leitung", "Verwaltung" ],
   "mitarbeiter": [
-    { "kuerzel": "AB", "vorname": "Anna", "nachname": "Bachstelze", "fachkraft": true, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
-    { "kuerzel": "CD", "vorname": "Carl", "nachname": "Dohle", "fachkraft": true, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
+    { "kuerzel": "AB", "farbe": "#2F6FB7", "vorname": "Anna", "nachname": "Bachstelze", "fachkraft": true, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
+    { "kuerzel": "CD", "farbe": "#2E8B57", "vorname": "Carl", "nachname": "Dohle", "fachkraft": true, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
     { "kuerzel": "EF", "vorname": "Emma", "nachname": "Fink", "fachkraft": true, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Bereichsleitung" ] },
-    { "kuerzel": "KL", "vorname": "Karin", "nachname": "Lerche", "fachkraft": false, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
-    { "kuerzel": "GH", "vorname": "Georg", "nachname": "Habicht", "fachkraft": true, "bereiche": [ "Wohnbereich B" ], "positionen": [ "Bereichsleitung", "Mitarbeiter Wohnbereich" ] },
-    { "kuerzel": "MN", "vorname": "Max", "nachname": "Nachtigall", "fachkraft": false, "bereiche": [ "Wohnbereich B" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
+    { "kuerzel": "KL", "farbe": "#C2410C", "vorname": "Karin", "nachname": "Lerche", "fachkraft": false, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
+    { "kuerzel": "GH", "farbe": "#7C3AED", "vorname": "Georg", "nachname": "Habicht", "fachkraft": true, "bereiche": [ "Wohnbereich B" ], "positionen": [ "Bereichsleitung", "Mitarbeiter Wohnbereich" ] },
+    { "kuerzel": "MN", "farbe": "#0F766E", "vorname": "Max", "nachname": "Nachtigall", "fachkraft": false, "bereiche": [ "Wohnbereich B" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
     { "kuerzel": "OP", "vorname": "Olga", "nachname": "Pirol", "fachkraft": true, "bereiche": [ "Therapie" ], "positionen": [ "Therapie" ] },
     { "kuerzel": "RS", "vorname": "Rudi", "nachname": "Specht", "fachkraft": true, "bereiche": [ "Leitung" ], "positionen": [ "Hausleitung" ] },
     { "kuerzel": "UT", "vorname": "Ute", "nachname": "Taube", "fachkraft": false, "bereiche": [ "Leitung" ], "positionen": [ "Geschäftsführung" ] },
     { "kuerzel": "WZ", "vorname": "Walter", "nachname": "Zeisig", "fachkraft": false, "bereiche": [ "Verwaltung" ], "positionen": [ "Verwaltung" ] },
-    { "kuerzel": "PR", "vorname": "Paula", "nachname": "Rabe", "fachkraft": true, "bereiche": [ "Wohnbereich A", "Wohnbereich B" ], "positionen": [ "Psychologischer Fachdienst" ] },
-    { "kuerzel": "BM", "vorname": "Bruno", "nachname": "Meise", "fachkraft": true, "bereiche": [ "Wohnbereich A", "Wohnbereich B" ], "positionen": [ "Pädagogischer Fachdienst" ] },
+    { "kuerzel": "PR", "farbe": "#BE185D", "vorname": "Paula", "nachname": "Rabe", "fachkraft": true, "bereiche": [ "Wohnbereich A", "Wohnbereich B" ], "positionen": [ "Psychologischer Fachdienst" ] },
+    { "kuerzel": "BM", "farbe": "#A16207", "vorname": "Bruno", "nachname": "Meise", "fachkraft": true, "bereiche": [ "Wohnbereich A", "Wohnbereich B" ], "positionen": [ "Pädagogischer Fachdienst" ] },
     { "kuerzel": "HI", "vorname": "Hugo", "nachname": "Ibis", "fachkraft": false, "aktiv": false, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] }
   ]
 }
