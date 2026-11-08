@@ -21,6 +21,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoMedikamente = "demo_medikamente";
     private const string DemoMedikation = "demo_medikation";
     private const string DemoTherapie = "demo_therapie";
+    private const string DemoTherapieAnbieter = "demo_therapie_anbieter";   // Schritt 22: Demo-Angebote mit Anbieter
     private const string DemoWochenplan = "demo_wochenplan";
     private const string DemoKalender = "demo_kalender";
     private const string DemoBiografie = "demo_biografie";
@@ -508,6 +509,10 @@ public sealed partial class Speicher : IDisposable
         ALTER TABLE medikament_fassungen ADD COLUMN zulassungsnummer TEXT NOT NULL DEFAULT '';
         ALTER TABLE medikament_fassungen ADD COLUMN gesperrt INTEGER NOT NULL DEFAULT 0 CHECK (gesperrt IN (0, 1));
         """,
+        // 18 – Therapieangebote: Anbieter je Fassung („Therapie“ oder ein Wohnbereich).
+        """
+        ALTER TABLE angebot_fassungen ADD COLUMN anbieter TEXT NOT NULL DEFAULT 'Therapie';
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -654,7 +659,7 @@ public sealed partial class Speicher : IDisposable
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
-             therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null,
+             therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
         var neueModule = ModuleOhneDemo();

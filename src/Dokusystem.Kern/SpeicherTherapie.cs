@@ -53,12 +53,12 @@ public sealed partial class Speicher
 
     private void FassungEinfuegen(long angebotId, AngebotFassung f, SqliteTransaction transaktion) =>
         Ausfuehren("""
-            INSERT INTO angebot_fassungen (angebot_id, gilt_ab, name, art, therapeut, ort, termine, hoechstens, hinweis, erstellt, kuerzel)
-            VALUES ($a, $g, $n, $art, $t, $o, $te, $h, $hi, $e, $k)
+            INSERT INTO angebot_fassungen (angebot_id, gilt_ab, name, art, therapeut, ort, termine, hoechstens, hinweis, erstellt, kuerzel, anbieter)
+            VALUES ($a, $g, $n, $art, $t, $o, $te, $h, $hi, $e, $k, $an)
             """, transaktion,
             ("$a", angebotId), ("$g", Iso(f.GiltAb)), ("$n", f.Name), ("$art", f.Art == AngebotArt.Einzel ? "einzel" : "gruppe"),
             ("$t", f.Therapeut), ("$o", f.Ort), ("$te", TermineJson(f.Termine)), ("$h", f.Hoechstens), ("$hi", f.Hinweis),
-            ("$e", Zeit(f.Erstellt)), ("$k", f.Kuerzel));
+            ("$e", Zeit(f.Erstellt)), ("$k", f.Kuerzel), ("$an", f.Anbieter));
 
     // Überschneidungen mit anderen Therapien des Bewohners (Warnung, kein Verbot).
     public List<Ueberschneidung> Ueberschneidungen(long angebotId, long bewohnerId, DateOnly ab, DateOnly? bis)
@@ -135,7 +135,7 @@ public sealed partial class Speicher
         string liste = string.Join(",", ids);
         var fassungen = new Dictionary<long, List<AngebotFassung>>();
         using (var befehl = Befehl($"""
-            SELECT angebot_id, gilt_ab, name, art, therapeut, ort, termine, hoechstens, hinweis, erstellt, kuerzel
+            SELECT angebot_id, gilt_ab, name, art, therapeut, ort, termine, hoechstens, hinweis, erstellt, kuerzel, anbieter
             FROM angebot_fassungen WHERE angebot_id IN ({liste}) ORDER BY gilt_ab, id
             """, transaktion, []))
         using (var leser = befehl.ExecuteReader())
@@ -147,6 +147,7 @@ public sealed partial class Speicher
                     GiltAb = AusIso(leser.GetString(1)), Name = leser.GetString(2), Art = leser.GetString(3) == "einzel" ? AngebotArt.Einzel : AngebotArt.Gruppe,
                     Therapeut = leser.GetString(4), Ort = leser.GetString(5), Termine = TermineAus(leser.GetString(6)), Hoechstens = leser.GetInt32(7),
                     Hinweis = leser.GetString(8), Erstellt = AusZeit(leser.GetString(9)), Kuerzel = leser.GetString(10),
+                    Anbieter = leser.GetString(11),
                 });
             }
         var zuteilungen = new Dictionary<long, List<Zuteilung>>();
@@ -191,5 +192,6 @@ public sealed partial class Speicher
             }
         }
         SetzeMeta(DemoTherapie, "1", transaktion);
+        SetzeMeta(DemoTherapieAnbieter, "1", transaktion);
     }
 }

@@ -3,7 +3,7 @@ using Dokusystem.Kern;
 namespace Dokusystem.Oberflaeche.Tests;
 
 // Therapie-Bereich: Angebote mit Teilnehmern und freien Plätzen, anlegen, ändern ab Datum,
-// zuteilen mit Warnung bei Überschneidung, Teilnahme beenden, Verlauf.
+// zuteilen mit Warnung bei Überschneidung, Teilnahme beenden, Verlauf; Anbieter und Rechte (Schritt 22).
 [Collection("Oberflaeche")]
 public class TherapieOberflaechenTests
 {
@@ -31,7 +31,7 @@ public class TherapieOberflaechenTests
             Assert.StartsWith("7 Angebote · ", f.Kopf.KleinText);
             Assert.Equal(7, t.Karten.Count);
             var holz = t.Karten.Single(k => k.Angebot.Am(DateOnly.FromDateTime(DateTime.Today)).Name == "Holzwerkstatt");
-            Assert.Equal(["Gruppe", "Mo 09:00–11:30, Mi 09:00–11:30", "4 Plätze frei"], holz.MarkenTexte);
+            Assert.Equal(["Therapie", "Gruppe", "Mo 09:00–11:30, Mi 09:00–11:30", "4 Plätze frei"], holz.MarkenTexte);
             Assert.StartsWith("Teilnehmer (2 von 6): Anton Ahorn, Dieter Distel", holz.TeilnehmerText);
             var koch = t.Karten.Single(k => k.Angebot.Am(DateOnly.FromDateTime(DateTime.Today)).Name == "Kochgruppe");
             Assert.Contains("später dazu: Emil Eiche ab ", koch.TeilnehmerText);
@@ -119,6 +119,62 @@ public class TherapieOberflaechenTests
             Assert.Contains($"geändert ab {Tag(7)}", musik.MarkenTexte);
             t.TagFeld.Text = Tag(8);
             Assert.Contains("Di 16:00–17:00", t.Karten.Single(k => k.Angebot.Fassungen[0].Name == "Musikgruppe").MarkenTexte);
+        }
+    });
+    // Schritt 22: Jedes Angebot gehört der Therapie oder einem Wohnbereich; alle sehen alles,
+    // ändern und zuteilen darf nur der Anbieter. Filter nach Anbieter.
+    [Fact]
+    public void Anbieter_Filter_und_Rechte() => Hilfe.Sta(() =>
+    {
+        var (u, f, t) = Oeffnen();   // angemeldet als OP (Therapie)
+        using (u)
+        using (f)
+        {
+            AngebotKarte Karte(string name) => t.Karten.Single(k => k.Angebot.Fassungen[^1].Name == name);
+            Assert.Equal("Wohnbereich A", Karte("Kochgruppe").MarkenTexte[0]);
+            Assert.Null(Stil.Sperrgrund(Karte("Holzwerkstatt").ZuteilenKnopf));
+            Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(Karte("Kochgruppe").ZuteilenKnopf));
+            Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(Karte("Kochgruppe").AendernKnopf));
+            Assert.Null(Stil.Sperrgrund(Karte("Kochgruppe").VerlaufKnopf));   // ansehen dürfen alle
+            using (var neu = new AngebotFenster(u.Speicher, null))
+                Assert.Equal([TherapieRegeln.AnbieterTherapie], neu.Anbieter.Items.Cast<string>());
+
+            // Filter
+            Assert.Equal([TherapieSeite.AlleAnbieter, "Therapie", "Wohnbereich A", "Wohnbereich B"], t.AnbieterFilter.Items.Cast<string>().Take(4));
+            t.AnbieterFilter.SelectedItem = "Wohnbereich A";
+            Assert.Equal("Kochgruppe", Assert.Single(t.Karten).Angebot.Fassungen[^1].Name);
+            Assert.StartsWith("1 Angebote · ", f.Kopf.KleinText);
+            t.AnbieterFilter.SelectedItem = "Therapie";
+            Assert.Equal(5, t.Karten.Count);
+            t.AnbieterFilter.SelectedItem = TherapieSeite.AlleAnbieter;
+            Assert.Equal(7, t.Karten.Count);
+
+            // Bereichsleitung Wohnbereich A: nur die eigenen Angebote; neue nur für Wohnbereich A.
+            f.BenutzerWaehlen("EF");
+            Assert.Null(Stil.Sperrgrund(Karte("Kochgruppe").ZuteilenKnopf));
+            Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(Karte("Holzwerkstatt").ZuteilenKnopf));
+            Assert.Equal("Nur für Wohnbereich B.", Stil.Sperrgrund(Karte("Kreativwerkstatt").AendernKnopf));
+            Assert.Null(Stil.Sperrgrund(t.NeuKnopf));
+            using (new DialogErsatz(fenster =>
+            {
+                var neu = Assert.IsType<AngebotFenster>(fenster);
+                Assert.Equal(["Wohnbereich A"], neu.Anbieter.Items.Cast<string>());
+                neu.NameFeld.Text = "Gartengruppe A";
+                neu.Therapeut.Text = "Emma Fink";
+                neu.TerminSetzen(0, DayOfWeek.Friday, "10:00", "11:00");
+                neu.Hoechstens.Text = "4";
+                Hilfe.Foto(neu, "74_angebot_anbieter");
+                return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
+            }))
+                t.NeuKnopf.PerformClick();
+            Assert.Equal("Wohnbereich A", Karte("Gartengruppe A").Angebot.Anbieter);
+            Hilfe.Foto(f, "73_therapie_anbieter");
+
+            // Mitarbeiter Wohnbereich ohne das Recht: nichts ändern, aber alles sehen.
+            f.BenutzerWaehlen("CD");
+            Assert.All(t.Karten, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k.ZuteilenKnopf)));
+            Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(t.NeuKnopf));
+            Assert.Equal(8, t.Karten.Count);
         }
     });
 }

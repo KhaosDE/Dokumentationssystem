@@ -1,5 +1,5 @@
 {
-  "hinweis": "Ausgedachte, allgemeine Therapieangebote für die Demo. Zeiten relativ zum Laden der Demo-Daten (Tage vor/nach heute).",
+  "hinweis": "Ausgedachte, allgemeine Therapieangebote für die Demo. Zeiten relativ zum Laden der Demo-Daten (Tage vor/nach heute). anbieter: Therapie (Vorgabe) oder ein Wohnbereich; kuerzel: wer angelegt und zugeteilt hat (Vorgabe OP).",
   "angebote": [
     {
       "name": "Holzwerkstatt", "art": "gruppe", "therapeut": "Olga Pirol", "ort": "Werkraum", "hoechstens": 6,
@@ -12,7 +12,8 @@
       ]
     },
     {
-      "name": "Kochgruppe", "art": "gruppe", "therapeut": "Olga Pirol", "ort": "Lehrküche", "hoechstens": 5,
+      "name": "Kochgruppe", "art": "gruppe", "therapeut": "Emma Fink", "ort": "Lehrküche", "hoechstens": 5,
+      "anbieter": "Wohnbereich A", "kuerzel": "EF",
       "hinweis": "Einkauf am Vortag", "seitTagen": 300,
       "termine": [ { "tag": "Di", "von": "10:00", "bis": "12:30" } ],
       "teilnehmer": [
@@ -60,7 +61,8 @@
       "teilnehmer": [ { "bewohner": "Ginster", "abVorTagen": 40 } ]
     },
     {
-      "name": "Kreativwerkstatt", "art": "gruppe", "therapeut": "Ben Amsel", "ort": "Atelier", "hoechstens": 6,
+      "name": "Kreativwerkstatt", "art": "gruppe", "therapeut": "Georg Habicht", "ort": "Atelier", "hoechstens": 6,
+      "anbieter": "Wohnbereich B", "kuerzel": "GH",
       "hinweis": "", "seitTagen": 300,
       "termine": [ { "tag": "Do", "von": "09:30", "bis": "11:30" } ],
       "teilnehmer": [

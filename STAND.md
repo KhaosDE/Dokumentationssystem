@@ -1,7 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.24.0** (Medikamentenplan als Tabelle, Medikamentendatenbank in den
-Einstellungen, Bauplan Schritt 21).
+Stand: 08.11.2026. Version: **0.25.0** (Therapien: Zuordnung und Rechte, Bauplan Schritt 22).
 
 ## Aktuell
 
@@ -46,7 +45,12 @@ eine Zeile zeigt Einzelheiten und Verlauf. Die **Medikamentendatenbank** steht i
 Prüfdatum), Einträge lassen sich sperren, neues Feld **Zulassungsnummer**. Über der Maske die
 **Nachschlage-Ansicht des BfArM** (WebView2, abschaltbar).
 
-**Nächster Schritt:** Bauplan Schritt 22 „Therapien: Zuordnung und Rechte“ (0.25.0).
+Neu in 0.25.0: Jedes **Therapieangebot gehört der Therapie oder einem Wohnbereich** (Feld
+„Anbieter“, Filter danach). Alle sehen alle Angebote; ändern und Bewohner zuteilen darf nur der
+Anbieter (Therapie: „Therapien bearbeiten“, Wohnbereich: neues Recht „Therapien des eigenen
+Bereichs bearbeiten“ und Zugehörigkeit zum Bereich).
+
+**Nächster Schritt:** Bauplan Schritt 23 „Tagesplan“ (0.26.0).
 
 ## Fertig
 
@@ -436,6 +440,18 @@ Prüfdatum), Einträge lassen sich sperren, neues Feld **Zulassungsnummer**. Üb
   - README: Abschnitt „Für die IT“ (Windows Server, WebView2, Netzadressen).
   - Behoben: In der Übersicht überdeckten sich bei wenig Platz „Meine Bezugsbewohner“ und „Meine
     Einzeltrainings“ (0.23.0); die Filter rücken jetzt in eine eigene Zeile.
+
+- 0.25.0 — Therapien: Zuordnung und Rechte (Bauplan Schritt 22, 08.11.2026):
+  - Feld „Anbieter“ je Angebot: „Therapie“ oder ein Wohnbereich; auf der Karte als erste Marke.
+    Im Formular stehen nur die Anbieter zur Wahl, für die man anlegen darf. Eine Änderung des
+    Anbieters ist eine neue Fassung (steht im Verlauf).
+  - Bereich „Therapie“: Filter „Anbieter“ (alle, Therapie, Wohnbereich A, Wohnbereich B …).
+  - Rechte: Angebote der Therapie ändert und teilt zu, wer „Therapien bearbeiten“ hat (Vorbelegung
+    Position Therapie und Leitungen). Angebote eines Wohnbereichs: neues Recht „Therapien des
+    eigenen Bereichs bearbeiten“ (Vorbelegung Bereichsleitung) und der Bereich muss zu einem
+    gehören; sonst „Nur für Wohnbereich …“. Gesperrte Knöpfe bleiben sichtbar und nennen den Grund.
+  - Demo: Kochgruppe gehört Wohnbereich A (Emma Fink), Kreativwerkstatt Wohnbereich B (Georg
+    Habicht), die übrigen der Therapie. Nach dem Update werden die Demo-Angebote einmal neu geladen.
 
 ## Offene Punkte
 
@@ -877,11 +893,39 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 22): Der Anbieter steht in jeder Fassung des Angebots (wie Name und
+  Termine); es zählt die letzte. So bleibt ein Wechsel im Verlauf, und die Datenbank überschreibt
+  weiter nichts.
+- 08.11.2026 (Schritt 22): „Mitarbeiter des Bereichs mit dem Recht“ als eigenes Recht „Therapien des
+  eigenen Bereichs bearbeiten“ (vorbelegt: Bereichsleitung, Leitungen). So bleibt „Therapien
+  bearbeiten“ bei der Therapie, und ein Wohnbereich bekommt das Recht in der Rechte-Tabelle, ohne
+  die Angebote der Therapie ändern zu können. Es gilt nur für Bereiche, zu denen man gehört – auch
+  für Leitungen (die gehören zum Bereich „Leitung“ und ändern Wohnbereichs-Angebote nur, wenn sie
+  dem Wohnbereich zugeordnet sind).
+- 08.11.2026 (Schritt 22): Anbieter zur Wahl sind „Therapie“ und die Wohnbereiche, also Bereiche,
+  in denen Bewohner wohnen (nicht „Leitung“ oder „Verwaltung“). Ein neues Recht wird in bestehenden
+  Datenbanken einmal vorbelegt (Merker in der Datenbank); später entfernte Häkchen bleiben entfernt.
+- 08.11.2026 (Schritt 22): Bestehende Demo-Datenbanken laden die Demo-Angebote nach dem Update einmal
+  neu (wie bei früheren neuen Demo-Bereichen) – eigene Änderungen an Therapien in der Demo gehen dabei
+  verloren.
 - 08.11.2026 (Schritt 21): „Beim Start prüft das Programm, ob WebView2 vorhanden ist“: Das Ergebnis
   steht in den Einstellungen unter „PROGRAMM → Nachschlage-Ansicht“ („WebView2 vorhanden (Version
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.25.0:
+
+1. Bereich „Therapie“: Jede Karte zeigt zuerst den Anbieter („Therapie“, „Wohnbereich A“ bei der
+   Kochgruppe, „Wohnbereich B“ bei der Kreativwerkstatt).
+2. Oben „Anbieter“ → „Wohnbereich A“ → nur die Kochgruppe; „alle Anbieter“ → wieder alle.
+3. Als „OP“ (Therapie): Holzwerkstatt lässt sich ändern und zuteilen; bei der Kochgruppe sind die
+   Knöpfe grau („Dafür fehlt die Berechtigung.“). „Neues Angebot …“ → Anbieter nur „Therapie“.
+4. Als „EF“ (Bereichsleitung A): Kochgruppe ja, Holzwerkstatt nein, Kreativwerkstatt „Nur für
+   Wohnbereich B.“. „Neues Angebot …“ → Anbieter „Wohnbereich A“.
+5. Als „CD“ (Mitarbeiter A): alles sichtbar, nichts änderbar. Als „UT“ in den Einstellungen →
+   „Rechte …“ bei „Therapien des eigenen Bereichs bearbeiten“ ein Häkchen für „Mitarbeiter
+   Wohnbereich“ → als „CD“ ist die Kochgruppe änderbar, die Holzwerkstatt nicht.
 
 Version 0.24.0:
 
