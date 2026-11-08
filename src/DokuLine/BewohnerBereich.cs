@@ -172,7 +172,7 @@ public sealed class BewohnerBereich : Panel
         if (!AkteSichtbar) { UebersichtZeigen(); return; }
         if (Akte.Bewohner?.Id is not long id || speicher.Bewohner(id) is not Bewohner b) { UebersichtZeigen(); return; }
         Akte.NeuLaden();
-        kopf.TexteSetzen("Bewohnerakte", b.Name);
+        kopf.TexteSetzen("Bewohner", "Bewohnerakte");   // Schritt 26d: der Name steht nur einmal, auf der Karte darunter
         AkteKnoepfeSperren();
     }
 
@@ -187,7 +187,7 @@ public sealed class BewohnerBereich : Panel
         Raster.Visible = FilterLeiste.Visible = aufgabenRahmen.Visible = false;
         Akte.Visible = true;
         AkteSichtbar = true;
-        kopf.TexteSetzen("Bewohnerakte", b.Name);
+        kopf.TexteSetzen("Bewohner", "Bewohnerakte");   // Schritt 26d: der Name steht nur einmal, auf der Karte darunter
         AkteKnoepfeSperren();
         kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, statusKnopf, berichtKnopf, bearbeitenKnopf);
     }

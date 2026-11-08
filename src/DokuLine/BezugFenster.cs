@@ -13,7 +13,7 @@ public sealed class BezugFenster : Form
     public ComboBox Bezugspflege { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
     public ComboBox Trainer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
     public ComboBox Art { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 180, MaxLength = 40 };
-    public TextBox Ab { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
+    public TextBox Ab { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public Label Hinweis { get; } = new() { AutoSize = true, MaximumSize = new Size(480, 0), ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(480, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
 

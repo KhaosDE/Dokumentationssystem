@@ -283,7 +283,7 @@ public sealed class DauerFenster : Form
 {
     private readonly Func<string, UebergabeWunsch, Uebergabe>? notizSpeichern;
     public ComboBox Dauer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160 };
-    public TextBox Bis { get; } = new() { Width = 110, PlaceholderText = "TT.MM.JJJJ", Enabled = false };
+    public TextBox Bis { get; } = new DatumFeld() { Width = 110, PlaceholderText = "TT.MM.JJJJ", Enabled = false };
     public TextBox Inhalt { get; } = new() { Multiline = true, Width = 440, Height = 70 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(440, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public UebergabeWunsch? Wunsch { get; private set; }

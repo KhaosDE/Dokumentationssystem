@@ -134,6 +134,44 @@ public sealed partial class Speicher
         NachrichtenGeaendert?.Invoke();
     }
 
+    // Schritt 26d: „Gelesen“ im Posteingang (auch mehrere auf einmal) – gilt als gelesen und wandert ins
+    // Archiv, nur für mich (bei Team-Nachrichten bleibt sie bei den anderen ungelesen). Nichts wird gelöscht.
+    public void VerlaeufeGelesen(string ich, IEnumerable<long> verlaufIds, DateTime zeit)
+    {
+        if (Kollege(ich) is not Kollege person) throw new Eingabefehler([RechteRegeln.NichtAngemeldetText]);
+        var ids = verlaufIds.Distinct().ToList();
+        if (ids.Count == 0) return;
+        var offen = ids.SelectMany(v => NachrichtenLesen("WHERE id = $v OR verlauf_id = $v", ("$v", v)))
+                       .Where(n => NachrichtenRegeln.Ungelesen(n, person)).ToList();
+        using (var transaktion = db.BeginTransaction())
+        {
+            foreach (var n in offen)
+                Ausfuehren("INSERT OR IGNORE INTO nachricht_gelesen (nachricht_id, kuerzel, zeit) VALUES ($n, $k, $z)", transaktion,
+                    ("$n", n.Id), ("$k", person.Kuerzel), ("$z", Zeit(zeit)));
+            foreach (long v in ids)
+                Ausfuehren("INSERT INTO verlauf_archiv (verlauf_id, kuerzel, zeit) VALUES ($v, $k, $z) ON CONFLICT(verlauf_id, kuerzel) DO UPDATE SET zeit = excluded.zeit",
+                    transaktion, ("$v", v), ("$k", person.Kuerzel), ("$z", Zeit(zeit)));
+            transaktion.Commit();
+        }
+        NachrichtenGeaendert?.Invoke();
+    }
+
+    // „Wieder als ungelesen“ aus dem Archiv: zurück in den Posteingang, was an mich ging, ist wieder neu.
+    public void VerlaufWiederUngelesen(string ich, long verlaufId)
+    {
+        if (Kollege(ich) is not Kollege person) return;
+        var anMich = NachrichtenLesen("WHERE id = $v OR verlauf_id = $v", ("$v", verlaufId))
+                     .Where(n => n.Von != person.Kuerzel && NachrichtenRegeln.AnMich(n, person)).Select(n => n.Id).ToList();
+        using (var transaktion = db.BeginTransaction())
+        {
+            Ausfuehren("DELETE FROM verlauf_archiv WHERE verlauf_id = $v AND kuerzel = $k", transaktion, ("$v", verlaufId), ("$k", person.Kuerzel));
+            foreach (long n in anMich)
+                Ausfuehren("DELETE FROM nachricht_gelesen WHERE nachricht_id = $n AND kuerzel = $k", transaktion, ("$n", n), ("$k", person.Kuerzel));
+            transaktion.Commit();
+        }
+        NachrichtenGeaendert?.Invoke();
+    }
+
     // „Zurück in den Posteingang“: nur die Ablage ändert sich, die Nachrichten bleiben.
     public void VerlaufZurueckholen(string ich, long verlaufId)
     {

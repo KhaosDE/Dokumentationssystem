@@ -244,13 +244,14 @@ public sealed class Dreiwahl : TableLayoutPanel
 {
     private readonly string[] kuerzel;
     public RadioButton[] Knoepfe { get; }
-    public TextBox Feld { get; } = new();
+    public TextBox Feld { get; }
 
     // platzhalter = null: ohne Textfeld, die drei Knöpfe nebeneinander (z. B. „offen geführt“).
     public Dreiwahl(string[] kuerzel, string[] beschriftungen, string? platzhalter)
     {
         this.kuerzel = kuerzel;
         bool mitFeld = platzhalter is not null;
+        Feld = platzhalter == "TT.MM.JJJJ" ? new DatumFeld() : new TextBox();   // Schritt 26d
         ColumnCount = mitFeld ? 2 : 3;
         RowCount = mitFeld ? 3 : 1;
         AutoSize = true;

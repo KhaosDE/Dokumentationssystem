@@ -32,8 +32,8 @@ public class BewohnerTests
 
     [Theory]
     [InlineData("1965-04-03")]
-    [InlineData("03.04.65")]
     [InlineData("03/04/1965")]
+    [InlineData("0304")]   // „03.04.65“ gilt seit Schritt 26d als 03.04.2065 (zweistellige Jahre als 20xx)
     [InlineData("irgendwann")]
     public void Falsches_Format(string text)
     {
@@ -82,7 +82,10 @@ public class BewohnerTests
         var b = BewohnerRegeln.AusEingabe(Eingabe(e => { e.Beschluss = "ende"; e.Beschlussende = "30.06.2027"; }));
         Assert.Equal("30.06.2027", BewohnerRegeln.BeschlussText(b));
         Assert.Equal(["Beschlussende fehlt."], FehlerVon(Eingabe(e => { e.Beschluss = "ende"; e.Beschlussende = ""; })));
-        Assert.Single(FehlerVon(Eingabe(e => { e.Beschluss = "ende"; e.Beschlussende = "30.6.27"; })));
+        // Seit Schritt 26d: zweistellige Jahre als 20xx, Ziffern ohne Punkte werden gelesen.
+        Assert.Equal("30.06.2027", BewohnerRegeln.BeschlussText(BewohnerRegeln.AusEingabe(Eingabe(e => { e.Beschluss = "ende"; e.Beschlussende = "30.6.27"; }))));
+        Assert.Equal("30.06.2027", BewohnerRegeln.BeschlussText(BewohnerRegeln.AusEingabe(Eingabe(e => { e.Beschluss = "ende"; e.Beschlussende = "30062027"; }))));
+        Assert.Single(FehlerVon(Eingabe(e => { e.Beschluss = "ende"; e.Beschlussende = "31.06.2027"; })));
         b = BewohnerRegeln.AusEingabe(Eingabe(e => { e.Beschluss = "kein_beschluss"; e.Beschlussende = "30.06.2027"; }));
         Assert.Null(b.Beschlussende);   // Datum ohne Beschluss wird verworfen
         Assert.Equal("kein Beschluss", BewohnerRegeln.BeschlussText(b));

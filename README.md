@@ -42,7 +42,8 @@ Danach fragt Windows für diese Datei nicht mehr.
 - In der Akte steht oben der **Allergiehinweis**: rot = Allergien eingetragen,
   grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
 - **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
-  als TT.MM.JJJJ (z. B. 03.04.1965). **Offen geführt** hat drei Zustände: ja, nein, nicht erfasst.
+  als TT.MM.JJJJ (z. B. 03.04.1965); die Punkte setzt das Programm beim Tippen selbst (`08112026`,
+  auch `081126` für 20xx), bei Uhrzeiten den Doppelpunkt (`0930`). **Offen geführt** hat drei Zustände: ja, nein, nicht erfasst.
 - In den Stammdaten steht das **Alter** neben dem Geburtsdatum. Oben in der Akte stehen Marken:
   „offen geführt“, „offen geführt: nicht erfasst“ und Hinweise der Module – etwa, wenn die
   Ausgangsliste etwas anderes zur Unterbringung sagt als die Akte („bitte klären“).
@@ -86,7 +87,8 @@ Danach fragt Windows für diese Datei nicht mehr.
   Begleitung wählt man aus den Mitarbeitern. Ohne Anmeldung lässt sich nur ansehen.
 - **Nachrichten** (links, mit Zähler): an Personen oder Teams, mit Antworten im selben
   Verlauf, optional zu einem Bewohner (in der Akte „Nachrichten …“). Alles bleibt im Programm,
-  kein E-Mail-Versand. Nachrichten werden nicht gelöscht, nur archiviert.
+  kein E-Mail-Versand. Nachrichten werden nicht gelöscht, nur archiviert: „Gelesen“ (auch mehrere
+  markiert) schiebt sie für mich ins Archiv, „Wieder als ungelesen“ holt sie zurück.
 - **Ärzteverzeichnis** (Einstellungen → „VERWALTUNG“ → „Ärzteverzeichnis …“): ausgedachte
   Ärztinnen und Ärzte mit Fachrichtung, Praxis, Telefon und E-Mail. Überall, wo ein Arzt
   eingetragen wird (Verordnung, Pause/Stufenplan/Absetzen, Visite, Facharzttermin, Termin), wählt

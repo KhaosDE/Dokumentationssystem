@@ -11,8 +11,8 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     private readonly List<Bewohner> auswahl;
 
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 300 };
-    public TextBox Datum { get; } = new() { Width = 100 };
-    public TextBox Uhrzeit { get; } = new() { Width = 80 };
+    public TextBox Datum { get; } = new DatumFeld() { Width = 100 };
+    public TextBox Uhrzeit { get; } = new UhrzeitFeld() { Width = 80 };
     public ComboBox Schichtwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 210 };
     public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // Schritt 26a: aus der Anmeldung
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
@@ -25,7 +25,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     public CheckBox Wichtig { get; } = new() { Text = "Wichtig – bleibt in der Akte hervorgehoben", AutoSize = true, Font = Stil.Fett, ForeColor = Stil.Hinweis.Text };
     public CheckBox Uebergabe { get; } = new() { Text = "Übergabe – erscheint in der Übergabe der folgenden Schichten", AutoSize = true, Font = Stil.Fett, ForeColor = Stil.Unterwegs.Text };
     public ComboBox UebergabeDauer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 160 };
-    public TextBox UebergabeBis { get; } = new() { Width = 110, PlaceholderText = "TT.MM.JJJJ", Enabled = false };
+    public TextBox UebergabeBis { get; } = new DatumFeld() { Width = 110, PlaceholderText = "TT.MM.JJJJ", Enabled = false };
     public TextBox UebergabeText { get; } = new() { Width = 420, PlaceholderText = "Kurzer Übergabe-Satz (freiwillig), z. B. „Arzttermin Do 10 Uhr, Begleitung nötig“" };
     private readonly Panel uebergabeOptionen = new FlowLayoutPanel { AutoSize = true, WrapContents = true, Margin = new Padding(Stil.AbstandGross, 0, 0, Stil.AbstandKlein), Visible = false };
     private bool rueckgefragt;

@@ -231,7 +231,7 @@ public sealed class MedikamentFenster : Form
     public TextBox Quelle { get; } = new() { Width = 420, PlaceholderText = "Adresse der Fach- oder Gebrauchsinformation" };
     public TextBox Zulassungsnummer { get; } = new() { Width = 180, PlaceholderText = "optional" };
     public CheckBox Bestaetigt { get; } = new() { Text = "bestätigt – Angaben mit der Quelle geprüft", AutoSize = true };
-    public TextBox GeprueftAm { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ", Enabled = false };
+    public TextBox GeprueftAm { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ", Enabled = false };
     // Nachschlage-Ansicht (null, wenn in den Einstellungen abgeschaltet) – dann nur dieser Knopf.
     public Nachschlageansicht? Nachschlage { get; }
     public Button BrowserKnopf { get; } = Stil.NebenKnopf("Im Browser öffnen");

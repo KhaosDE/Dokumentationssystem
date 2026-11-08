@@ -16,6 +16,8 @@ public sealed class NachrichtenSeite : Panel
     public long? BewohnerFilter { get; private set; }
     public Button BewohnerFilterKnopf { get; } = Stil.NebenKnopf("");
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neue Nachricht …");
+    // Schritt 26d: mehrere Nachrichten auf einmal als gelesen markieren (wandern ins Archiv).
+    public Button MarkierteGelesenKnopf { get; } = Stil.NebenKnopf("Markierte als gelesen");
     public Label Hinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini) };
     public List<VerlaufKarte> Karten { get; } = [];
     public VerlaufAnsicht? Offen { get; private set; }
@@ -38,7 +40,10 @@ public sealed class NachrichtenSeite : Panel
         BewohnerFilterKnopf.Margin = new Padding(Stil.AbstandMittel, 0, Stil.AbstandKlein, Stil.AbstandKlein);
         BewohnerFilterKnopf.Click += (_, _) => { BewohnerFilter = null; Aktualisieren(); };
         Hinweis.Margin = new Padding(0, Stil.AbstandKlein, 0, 0);
-        leiste.Controls.AddRange([BewohnerFilterKnopf, Hinweis]);
+        MarkierteGelesenKnopf.Margin = new Padding(Stil.AbstandMittel, 0, Stil.AbstandKlein, Stil.AbstandKlein);
+        MarkierteGelesenKnopf.AutoSize = true;
+        MarkierteGelesenKnopf.Click += (_, _) => Gelesen([.. Karten.Where(k => k.Auswahl.Checked).Select(k => k.Verlauf)]);
+        leiste.Controls.AddRange([BewohnerFilterKnopf, MarkierteGelesenKnopf, Hinweis]);
         NeuKnopf.Click += (_, _) => NeueNachricht();
         Controls.Add(leiste);
     }
@@ -103,8 +108,11 @@ public sealed class NachrichtenSeite : Panel
             var verlaeufe = speicher.Verlaeufe(ich.Kuerzel, AktiverOrdner, BewohnerFilter);
             foreach (var v in verlaeufe)
             {
-                var karte = new VerlaufKarte(v, ich, kollegen, v.BewohnerId is long id ? namen.GetValueOrDefault(id) : null);
+                var karte = new VerlaufKarte(v, ich, kollegen, v.BewohnerId is long id ? namen.GetValueOrDefault(id) : null, AktiverOrdner);
                 karte.Gewaehlt += VerlaufOeffnen;
+                karte.GelesenKnopf.Click += (_, _) => Gelesen([karte.Verlauf]);
+                karte.UngelesenKnopf.Click += (_, _) => WiederUngelesen(karte.Verlauf);
+                karte.Auswahl.CheckedChanged += (_, _) => MarkierteZeigen();
                 Karten.Add(karte);
                 inhalt.Add(karte);
             }
@@ -112,10 +120,34 @@ public sealed class NachrichtenSeite : Panel
                 inhalt.Add(new Label { Text = $"Keine Nachrichten unter „{NachrichtenRegeln.OrdnerText(AktiverOrdner)}“.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
         }
         foreach (var c in inhalt) Controls.Add(c);
+        MarkierteZeigen();
         ResumeLayout(false);
         AutoScrollPosition = Point.Empty;
         PerformLayout();
         Geaendert?.Invoke();
+    }
+
+    private void MarkierteZeigen()
+    {
+        int n = Karten.Count(k => k.Auswahl.Checked);
+        MarkierteGelesenKnopf.Text = n == 0 ? "Markierte als gelesen" : $"Markierte als gelesen ({n})";
+        MarkierteGelesenKnopf.Visible = AktiverOrdner == NachrichtenOrdner.Posteingang && Offen is null && Karten.Count > 0;
+        MarkierteGelesenKnopf.Enabled = n > 0;
+    }
+
+    // Schritt 26d: als gelesen markieren – die Nachrichten wandern (nur für mich) ins Archiv.
+    public void Gelesen(IReadOnlyList<Verlauf> verlaeufe)
+    {
+        if (speicher.Kollege(Ich) is not Kollege ich || verlaeufe.Count == 0) return;
+        speicher.VerlaeufeGelesen(ich.Kuerzel, verlaeufe.Select(v => v.Id), Jetzt());
+        Aktualisieren();
+    }
+
+    public void WiederUngelesen(Verlauf v)
+    {
+        if (speicher.Kollege(Ich) is not Kollege ich) return;
+        speicher.VerlaufWiederUngelesen(ich.Kuerzel, v.Id);
+        Aktualisieren();
     }
 
     // Öffnet einen Verlauf; was darin an mich ging, gilt danach als gelesen.
@@ -200,11 +232,22 @@ public sealed class VerlaufKarte : KartenFlaeche
     public IReadOnlyList<string> MarkenTexte { get; }
     public string Vorschau => vorschau.Text;
     public event Action<Verlauf>? Gewaehlt;
+    // Schritt 26d: im Posteingang Häkchen und „Gelesen“, im Archiv „Wieder als ungelesen“.
+    public CheckBox Auswahl { get; } = new() { AutoSize = true, BackColor = Stil.Flaeche, AccessibleName = "Markieren" };
+    public Button GelesenKnopf { get; } = Stil.NebenKnopf("Gelesen");
+    public Button UngelesenKnopf { get; } = Stil.NebenKnopf("Wieder als ungelesen");
+    private readonly bool imPosteingang, imArchiv;
 
-    public VerlaufKarte(Verlauf v, Kollege ich, IReadOnlyDictionary<string, Kollege> kollegen, string? bewohner)
+    public VerlaufKarte(Verlauf v, Kollege ich, IReadOnlyDictionary<string, Kollege> kollegen, string? bewohner, NachrichtenOrdner ordner = NachrichtenOrdner.Posteingang)
     {
         Verlauf = v;
         Cursor = Cursors.Hand;
+        imPosteingang = ordner == NachrichtenOrdner.Posteingang;
+        imArchiv = ordner == NachrichtenOrdner.Archiv;
+        Auswahl.Visible = GelesenKnopf.Visible = imPosteingang;
+        UngelesenKnopf.Visible = imArchiv;
+        GelesenKnopf.AutoSize = UngelesenKnopf.AutoSize = true;
+        Controls.AddRange([Auswahl, GelesenKnopf, UngelesenKnopf]);
         var liste = new List<(string, Stil.Marke)>();
         if (v.Ungelesen > 0) liste.Add((v.Ungelesen == 1 ? "1 neu" : $"{v.Ungelesen} neu", Stil.Unterwegs));
         if (bewohner is not null) liste.Add(($"Bewohner: {bewohner}", Stil.Zimmer));
@@ -250,8 +293,22 @@ public sealed class VerlaufKarte : KartenFlaeche
     {
         base.OnLayout(levent);
         if (Verlauf is null) return;   // Anordnung schon im Konstruktor der Basisklasse
-        int innen = Stil.Px(this, Stil.AbstandGross), breite = Math.Max(100, Width - 2 * innen);
-        int y = innen;
+        int rand = Stil.Px(this, Stil.AbstandGross), innen = rand, breite = Math.Max(100, Width - 2 * rand);
+        int y = rand;
+        // Knopf rechts oben, Häkchen links; der Text rückt ein, damit nichts überlappt.
+        Button? knopf = imPosteingang ? GelesenKnopf : imArchiv ? UngelesenKnopf : null;
+        if (knopf is not null)
+        {
+            knopf.Location = new Point(Width - rand - knopf.Width, rand);
+            breite = Math.Max(100, breite - knopf.Width - Stil.Px(this, Stil.AbstandKlein));
+        }
+        if (imPosteingang)
+        {
+            Auswahl.Location = new Point(rand, rand + Stil.Px(this, 2));
+            int platz = Auswahl.Width + Stil.Px(this, Stil.AbstandKlein);
+            innen = rand + platz;
+            breite = Math.Max(100, breite - platz);
+        }
         if (marken.Controls.Count > 0)
         {
             marken.Bounds = new Rectangle(new Point(innen, y), marken.GetPreferredSize(new Size(breite, 0)));
@@ -264,7 +321,7 @@ public sealed class VerlaufKarte : KartenFlaeche
         zeile.Location = new Point(innen, y);
         y = zeile.Bottom + Stil.Px(this, Stil.AbstandMini);
         vorschau.Bounds = new Rectangle(innen, y, breite, vorschau.PreferredHeight);
-        int hoehe = vorschau.Bottom + innen;
+        int hoehe = Math.Max(vorschau.Bottom, knopf?.Bottom ?? 0) + rand;
         if (Height != hoehe) Height = hoehe;
     }
 }

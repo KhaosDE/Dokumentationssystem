@@ -15,7 +15,7 @@ public static partial class Datum
     // Liest ein Datum. Fehler kommen als verständlicher Satz (FormatException).
     public static DateOnly Lesen(string? text, string feld)
     {
-        text = (text ?? "").Trim();
+        text = Eingabeformat.DatumFertig(text);   // 08112026, 081126, 08.11.26 → 08.11.2026 (Schritt 26d)
         if (text.Length == 0) throw new FormatException($"{feld} fehlt.");
         var treffer = Muster().Match(text);
         if (!treffer.Success)

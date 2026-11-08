@@ -15,7 +15,7 @@ public sealed class TherapieSeite : Panel
 
     public const string AlleAnbieter = "alle Anbieter";
 
-    public TextBox TagFeld { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
+    public TextBox TagFeld { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public ComboBox AnbieterFilter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 180 };
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neues Angebot …");
     public List<AngebotKarte> Karten { get; } = [];
@@ -273,7 +273,7 @@ public sealed class AngebotFenster : Form
     public TextBox[] Bis { get; } = new TextBox[TerminZeilen];
     public TextBox Hoechstens { get; } = new() { Width = 60 };
     public TextBox Hinweis { get; } = new() { Width = 420 };
-    public TextBox GiltAb { get; } = new() { Width = 100 };
+    public TextBox GiltAb { get; } = new DatumFeld() { Width = 100 };
     public ComboBox Anbieter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Angebot? Gespeichert { get; private set; }
@@ -311,8 +311,8 @@ public sealed class AngebotFenster : Form
             Tage[i] = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 130, Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini) };
             Tage[i].Items.AddRange(tagNamen.Cast<object>().ToArray());
             Tage[i].SelectedIndex = 0;
-            Von[i] = new TextBox { Width = 70, PlaceholderText = "von", Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini) };
-            Bis[i] = new TextBox { Width = 70, PlaceholderText = "bis", Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini) };
+            Von[i] = new UhrzeitFeld { Width = 70, PlaceholderText = "von", Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini) };
+            Bis[i] = new UhrzeitFeld { Width = 70, PlaceholderText = "bis", Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini) };
             termine.Controls.AddRange([Tage[i], Von[i], Bis[i]]);
         }
         zeile("Termine (jede Woche)", termine);
@@ -388,8 +388,8 @@ public sealed class ZuteilenFenster : Form
     private string? gewarnt;   // für welche Auswahl schon gewarnt wurde
 
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
-    public TextBox Ab { get; } = new() { Width = 100 };
-    public TextBox Bis { get; } = new() { Width = 100, PlaceholderText = "leer = offen" };
+    public TextBox Ab { get; } = new DatumFeld() { Width = 100 };
+    public TextBox Bis { get; } = new DatumFeld() { Width = 100, PlaceholderText = "leer = offen" };
     public Label Warnung { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
 
@@ -472,7 +472,7 @@ public sealed class BeendenFenster : Form
     private readonly List<Zuteilung> zuteilungen;
 
     public ComboBox Teilnehmer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 340 };
-    public TextBox Ab { get; } = new() { Width = 100 };
+    public TextBox Ab { get; } = new DatumFeld() { Width = 100 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;

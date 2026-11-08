@@ -162,7 +162,9 @@ public class BewohnerOberflaechenTests
         Hilfe.Zeigen(f);
         Karten(f)[1].Waehlen();
         Assert.True(f.Bewohner.AkteSichtbar);
-        Assert.Equal("Berta Birke", f.Kopf.TitelText);
+        Assert.Equal("Bewohnerakte", f.Kopf.TitelText);   // Schritt 26d
+        Assert.DoesNotContain("Berta Birke", f.Kopf.KleinText);
+        Assert.Equal("Berta Birke", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal("22.11.1958", f.Bewohner.Akte.Geburtsdatum.Text);
         Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Status …", "Neuer Bericht …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
         f.Kopf.Knoepfe[0].PerformClick();
@@ -244,7 +246,8 @@ public class BewohnerOberflaechenTests
         };
         f.Kopf.Knoepfe.Single(k => k.Text == "Neuer Bewohner …").PerformClick();
         Assert.True(f.Bewohner.AkteSichtbar);
-        Assert.Equal("Paul Pappel", f.Kopf.TitelText);
+        Assert.Equal("Bewohnerakte", f.Kopf.TitelText);
+        Assert.Equal("Paul Pappel", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal("Allergien: nicht erfasst – bitte klären", f.Bewohner.Akte.Allergie.Text);
         f.Bewohner.UebersichtZeigen();
         Assert.Contains(Karten(f), k => k.Bewohner.Name == "Paul Pappel");
