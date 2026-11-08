@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.10** (Demo-Daten: 23 Bewohner je Wohnbereich, Bauplan Schritt 26h).
+Stand: 08.11.2026. Version: **0.29.11** (Aktionsleiste unter der Kopfzeile, Bauplan Schritt 26i).
 
 ## Aktuell
 
@@ -137,7 +137,12 @@ Bereiche haben Daten für die neuen Bewohner: Berichte, Medikamentenplan, Diagno
 Therapien (neu: Gartengruppe R3, Frühstücksgruppe R2, Entspannung), Termine, Biografien, Visiten in R2 und
 R3, HEB-Bögen. Ältere Demo-Datenbanken werden einmal neu geladen; die bisherige liegt als Kopie daneben.
 
-**Nächster Schritt:** Bauplan Schritt 26i „Kopfzeile nur „Wo bin ich“, Logo, Abmelden; Aktionen darunter“ (0.29.11).
+Neu in 0.29.11: Die Knöpfe eines Bereichs stehen nicht mehr in der Kopfzeile, sondern in einer
+**Aktionsleiste direkt darunter** – überall gleich: links die Hauptaktion (farbig), dann die übrigen,
+rechts „… drucken …“ und „Entwurf fortsetzen“. Die Kopfzeile sieht aus wie bisher, nur um diese Zeile
+niedriger. Ohne Aktion gibt es keine Leiste.
+
+**Nächster Schritt:** Bauplan Schritt 26j „Bereich „Bewohner“ als Liste mit Berichten“ (0.29.12).
 
 ## Fertig
 
@@ -791,12 +796,30 @@ R3, HEB-Bögen. Ältere Demo-Datenbanken werden einmal neu geladen; die bisherig
   - Behoben (0.29.8): Im Fenster „Ärztliche Informationen“ ist das Allergie-Feld breiter, das Fenster
     niedriger (passt auf 768 Pixel Höhe).
   - Behoben (0.29.9): „bestätigen ▾“ auf der Tagesplan-Tafel bricht nicht mehr in zwei Zeilen um.
+- 0.29.11 — Aktionsleiste unter der Kopfzeile (Bauplan Schritt 26i, 08.11.2026):
+  - Die Kopfzeile bleibt im Aussehen gleich (Fläche, Verlauf, Titel, Logofeld, Demo-Hinweis, „Angemeldet:
+    …“, „Abmelden (F12)“) und ist um die Knopfzeile niedriger.
+  - Aktionsleiste darunter, gleiche Seitenränder wie die Kopfzeile, Knöpfe im bestehenden Stil (36 px).
+    Reihenfolge in allen Bereichen: links ein Rücksprung („← Alle Bewohner“), dann die Hauptaktion (farbig,
+    auch gesperrt noch an erster Stelle), dann die übrigen Aktionen; rechts „… drucken …“, ganz außen
+    „Entwurf fortsetzen“. Ohne Aktion keine Leiste.
+  - Betrifft Bewohner (Übersicht und Akte), Visiten, Aufgaben, Nachrichten, Kalender, Therapie und das Modul
+    Ausgangsliste; Bereiche ohne eigene Knöpfe (Übersicht, Tagesplan, Übergabe) haben keine Leiste.
 ## Offene Punkte
 
-- Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten):
+- Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
+  den Bildschirmfotos `109_…` und den Zeiten des Testlaufs von 0.29.10):
   - **Ausgangsliste** zeigt alle 69 Bewohner aller Bereiche; einen Filter nach Wohnbereich hat sie nicht.
+    Ihr Aufbau dauert im Testlauf **6–9 Sekunden** (alle anderen Ansichten unter 0,25 Sekunden); bei
+    1366 × 768 passen zwei Bewohner auf den Bildschirm.
   - **Küchendienst** geht reihum über alle belegten Zimmer aller drei Bereiche (42); je Wohnbereich
     getrennt wäre näher an der Wirklichkeit.
+  - **Übersicht:** Bei 1920 × 1080 sind 12 der 23 Karten ohne Bildlauf zu sehen; „Termine heute“ zählt bei
+    Gruppenterminen alle Namen auf (Spaziergang: 23 Namen). Schritt 26l baut die Übersicht neu.
+  - **Übergabe:** Jeder Eintrag ist eine große Karte; bei 1366 × 768 passen zwei der neun offenen Einträge
+    auf den Bildschirm.
+  - **Tagesplan:** Ein Gruppentermin („Spaziergang mit der Wohngruppe“) steht je Bewohner in einer eigenen
+    Zeile (23 Zeilen).
 - **Teil 2: Repository umbenennen — sobald dieses Release erschienen ist** (`KhaosDE/Dokumentationssystem`
   → `KhaosDE/DokuLine`, kein Claude-Code-Auftrag). Installationen älter als 0.29.2 kennen nur die
   alte Download-Adresse; sie sollten vorher einmal gestartet werden, damit sie 0.29.2 holen.
@@ -851,6 +874,14 @@ R3, HEB-Bögen. Ältere Demo-Datenbanken werden einmal neu geladen; die bisherig
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26i): Filter und Umschalter, die schon in einer eigenen Zeile der Seite stehen (z. B.
+  Tagesplan „nach Uhrzeit / nach Bewohner“, Übersicht „Meine Bezugsbewohner“), bleiben dort; sie liegen
+  ohnehin direkt unter der Aktionsleiste. Umgezogen ist, wie im Auftrag präzisiert, nur die Knopfzeile.
+- 08.11.2026 (Schritt 26i): „← Alle Bewohner“ steht als Rücksprung noch vor der Hauptaktion – wie ein
+  Zurück-Knopf, den man immer ganz links erwartet.
+- 08.11.2026 (Schritt 26i): Was rechts steht, erkennt die Leiste am Wort „drucken“ im Knopf; die Hauptaktion
+  am Merkmal des Knopfs (Stil.HauptKnopf), damit sie auch gesperrt (grau) an ihrem Platz bleibt.
 
 - 08.11.2026 (Schritt 26h): Die neuen Demo-Bewohner heißen alle mit L bis Z, also nach „Kiefer“. So bleiben die
   ersten zehn mit ihren Berichten, Übergaben und Beispielen in Tests und Testliste gleich (die Berichte
@@ -1416,6 +1447,16 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.11:
+
+1. Kopfzeile wie bisher (Titel, Logofeld, Demo-Hinweis, Angemeldet, Abmelden), nur niedriger.
+2. „Aufgaben“: „Neue Aufgabe …“ links in einer Leiste direkt unter der Kopfzeile. „Tagesplan“: keine Leiste.
+3. Bewohner öffnen: in der Leiste „← Alle Bewohner“, „Bearbeiten …“ (farbig), „Nachrichten …“, „Status …“,
+   „Ärztliche Informationen …“, „Neuer Bericht …“.
+4. „Ausgangsliste“: „Tagesliste drucken …“ rechts in der Leiste.
+5. Als TST einen Bericht anfangen, F12, als Entwurf speichern, wieder als TST anmelden: „Entwurf
+   fortsetzen“ rechts außen in der Leiste.
 
 Version 0.29.10:
 

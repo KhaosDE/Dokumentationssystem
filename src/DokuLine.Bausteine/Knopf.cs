@@ -10,6 +10,9 @@ public sealed class Knopf : Button
     private string? sperrgrund;
     private (Color Vorne, Color Hinten, Color Rand, Cursor Zeiger)? frei;
 
+    // Hauptaktion (farbig, Stil.HauptKnopf) – bleibt es auch gesperrt, wenn die Farbe grau ist (Schritt 26i).
+    public bool Hauptaktion { get; set; }
+
     public string? Sperrgrund
     {
         get => sperrgrund;
