@@ -11,6 +11,7 @@ internal static class Program
     {
         // Grundeinstellungen für die Oberfläche (Schriften, Skalierung) – vor dem ersten Fenster.
         ApplicationConfiguration.Initialize();
+        Stil.SymbolFuerAlleFenster();   // Programmsymbol für alle Fenster (Schritt 26n)
 
         if (args.Contains("--selbsttest")) return Selbsttest.Ausfuehren();
 

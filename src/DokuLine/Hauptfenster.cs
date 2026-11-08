@@ -69,6 +69,8 @@ public sealed class Hauptfenster : Form
         this.speicher = speicher;
         Modulverwaltung.Anmelden(speicher);   // schon beim Start geschehen; sicherheitshalber (legt nur fehlende Tabellen an)
         Text = $"{Programmversion.Name} – {KopfBereich.DemoHinweis}";
+        Stil.SymbolFuerAlleFenster();   // schon beim Start geschehen; sicherheitshalber (Schritt 26n)
+        Icon = Stil.Programmsymbol;
         BackColor = Stil.Seite;
         Font = Stil.Standard;
         StartPosition = FormStartPosition.CenterScreen;

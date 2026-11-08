@@ -12,4 +12,9 @@
   <ItemGroup>
     <ProjectReference Include="..\DokuLine.Kern\DokuLine.Kern.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <!-- Programmsymbol für alle Fenster (Schritt 26n); dieselbe Datei wie das Symbol der .exe. -->
+    <EmbeddedResource Include="..\DokuLine\Bilder\DokuLine.ico" LogicalName="DokuLine.ico" />
+  </ItemGroup>
 </Project>

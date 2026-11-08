@@ -10,6 +10,7 @@ static class Fenster
     public static void Grundform(Form f, string titel)
     {
         f.Text = $"{titel} ({Stil.DemoHinweis})";
+        f.Icon = Stil.Programmsymbol;
         f.FormBorderStyle = FormBorderStyle.FixedDialog;
         f.MaximizeBox = f.MinimizeBox = false;
         f.ShowInTaskbar = false;
