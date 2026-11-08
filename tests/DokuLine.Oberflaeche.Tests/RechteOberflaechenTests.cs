@@ -60,16 +60,16 @@ public class RechteOberflaechenTests
 
         // Nicht angemeldet: alles grau, mit Grund.
         f.BereichWaehlen("Übersicht");
-        var karte = f.Uebersicht.Karten[0];
-        Assert.False(karte.ContextMenuStrip!.Items[1].Enabled);
-        Assert.Equal($"Neuer Bericht … – {RechteRegeln.NichtAngemeldetText}", karte.ContextMenuStrip.Items[1].Text);
+        var menue = f.Uebersicht.Liste.ContextMenuStrip!;
+        Assert.False(menue.Items[1].Enabled);
+        Assert.Equal($"Neuer Bericht … – {RechteRegeln.NichtAngemeldetText}", menue.Items[1].Text);
 
         // Die Übersicht richtet sich nach den Bereichen des Angemeldeten: PR (A und B) sieht beide.
         f.BenutzerWaehlen("PR");
-        Assert.Equal(46, f.Uebersicht.Karten.Count);
+        Assert.Equal(46, f.Uebersicht.Zeilen.Count);
         Assert.StartsWith("R1, R2 · 46 Bewohner · 4 Betten frei · ", f.Kopf.KleinText);
         f.BenutzerWaehlen("MN");
-        Assert.Equal(23, f.Uebersicht.Karten.Count);   // R2
+        Assert.Equal(23, f.Uebersicht.Zeilen.Count);   // R2
 
         // OP (Therapie): Akte ansehen ja, bearbeiten nein; Berichte schreiben ja.
         f.BenutzerWaehlen("OP");

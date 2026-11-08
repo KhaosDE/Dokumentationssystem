@@ -1336,7 +1336,7 @@ Umfang:
 - Sonst keine Änderung an der Visite.
 
 ## Übersicht neu: „Heute wichtig“ und Bewohnerliste
-Status: freigegeben (Bauplan Schritt 26l)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Die Übersicht bekommt einen neuen Aufbau: links „Heute wichtig“, rechts alle Bewohner des
 Bereichs als Liste. Das Kartenraster in der Übersicht entfällt.

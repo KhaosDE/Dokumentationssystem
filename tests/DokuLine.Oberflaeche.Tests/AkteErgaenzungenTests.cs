@@ -72,6 +72,6 @@ public class AkteErgaenzungenTests
         Assert.Contains(karten.Single(k => k.Bewohner.Nachname == "Birke").Marken, m => m.Art == MarkenArt.Angabe && m.Text == "offen geführt");
         Assert.DoesNotContain(karten.Single(k => k.Bewohner.Nachname == "Ahorn").Marken, m => m.Text.StartsWith("offen geführt"));   // „nein“: keine Marke
         f.BereichWaehlen("Übersicht");
-        Assert.Contains(f.Uebersicht.Karten.Single(k => k.Bewohner.Nachname == "Distel").Marken, m => m.Text == "offen geführt: nicht erfasst");
+        Assert.Contains(f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Distel").Marken, m => m.Text == "offen geführt: nicht erfasst");
     });
 }

@@ -374,6 +374,14 @@ public sealed class BewohnerBereich : Panel
         aufgabenRahmen.PerformLayout();
     }
 
+    // „Neuer Bewohner …“ aus der Übersicht (Schritt 26l): Formular; der gespeicherte Bewohner oder null.
+    public Bewohner? NeuerBewohner()
+    {
+        if (Recht.Grund(speicher, Funktionen.BewohnerBearbeiten) is not null) return null;
+        using var formular = FormularErstellen(null);
+        return FormularZeigen(formular);
+    }
+
     private void Formular(Bewohner? b)
     {
         using var formular = FormularErstellen(b);

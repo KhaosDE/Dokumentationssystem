@@ -154,8 +154,8 @@ public class HebOberflaechenTests
             }
             f.BereichWaehlen("Übersicht");
             var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
-            Assert.Contains(s.Karten.Single(k => k.Bewohner.Nachname == "Ahorn").Marken, m => m.Text.StartsWith("HEB fällig"));
-            Assert.DoesNotContain(s.Karten.Single(k => k.Bewohner.Nachname == "Birke").Marken, m => m.Text.StartsWith("HEB fällig"));
+            Assert.Contains(s.Zeilen.Single(k => k.Bewohner.Nachname == "Ahorn").Marken, m => m.Text.StartsWith("HEB fällig"));
+            Assert.DoesNotContain(s.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Marken, m => m.Text.StartsWith("HEB fällig"));
         }
     });
 }

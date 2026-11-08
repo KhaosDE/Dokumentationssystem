@@ -113,7 +113,28 @@ public sealed class Hauptfenster : Form
         Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
         Uebersicht = new UebersichtSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Übersicht"] = Uebersicht;
-        Uebersicht.Geaendert += () => { if (AktiverBereich == "Übersicht") Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht"); };
+        Uebersicht.Geaendert += () =>
+        {
+            if (AktiverBereich != "Übersicht") return;
+            Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht");
+            StatuszeileSetzen(neuGelesen: true);
+        };
+        // „Heute wichtig“ (Schritt 26l): ein Klick führt an die Stelle, an die der Eintrag gehört.
+        Uebersicht.StelleGewuenscht += bereich => BereichWaehlen(bereich);
+        Uebersicht.VerlaufGewuenscht += v =>
+        {
+            BereichWaehlen("Nachrichten");
+            Nachrichten.VerlaufOeffnen(v);
+        };
+        Uebersicht.VisitenAufgabeGewuenscht += a => VisitenAufgabe(a);
+        Uebersicht.AufgabeNeuGewuenscht += () => { Aufgaben.NeueAufgabe(); AufgabenZaehlen(); Uebersicht.Aktualisieren(); };
+        Uebersicht.NachrichtNeuGewuenscht += () => { Nachrichten.NeueNachricht(); NachrichtenZaehlen(); Uebersicht.Aktualisieren(); };
+        Uebersicht.BewohnerNeuGewuenscht += () =>
+        {
+            if (Bewohner.NeuerBewohner() is not Kern.Bewohner neu) return;
+            BereichWaehlen("Bewohner");
+            Bewohner.AkteZeigen(neu.Id!.Value);
+        };
         Uebersicht.AkteGewuenscht += id =>
         {
             BereichWaehlen("Bewohner");
@@ -214,7 +235,12 @@ public sealed class Hauptfenster : Form
         datenstand = Datenstand();
         // Alle 30 Sekunden: Änderungen anderer Rechner; der Tagesplan zusätzlich wegen der Uhrzeit
         // („noch offen“ nach Beginn, „in Therapie“ bis zum Ende).
-        abgleich.Tick += (_, _) => { if (!AenderungenVonAnderen() && AktiverBereich == "Tagesplan") Tagesplan.Aktualisieren(); };
+        abgleich.Tick += (_, _) =>
+        {
+            bool neu = AenderungenVonAnderen();
+            if (!neu && AktiverBereich == "Tagesplan") Tagesplan.Aktualisieren();
+            StatuszeileSetzen(neu);
+        };
         abgleich.Start();
     }
 
@@ -281,6 +307,16 @@ public sealed class Hauptfenster : Form
 
     private int S(int wert) => Stil.Px(this, wert);
 
+    // Statusleiste (Schritt 26l): Demo-Hinweis, Datum, Dienst und wann die gezeigten Daten gelesen wurden.
+    private DateTime gelesen = DateTime.Now;
+
+    private void StatuszeileSetzen(bool neuGelesen)
+    {
+        var jetzt = DateTime.Now;
+        if (neuGelesen) gelesen = jetzt;
+        Statusleiste.StatusText = HeuteWichtigRegeln.StatusText(jetzt, gelesen);
+    }
+
     private static string Schluessel(string eintrag) => eintrag.Replace(" …", "");
 
     public Control Seite(string bereich) => seiten[Schluessel(bereich)];
@@ -298,6 +334,7 @@ public sealed class Hauptfenster : Form
         }
         string schluessel = Schluessel(name);
         AktiverBereich = name;
+        StatuszeileSetzen(neuGelesen: true);
         foreach (var eintrag in Navigation) eintrag.Aktiv = eintrag.Text == name;
         foreach (var (key, seite) in seiten) seite.Visible = key == schluessel;
         if (modulSeiten.TryGetValue(schluessel, out var modulSeite))
@@ -324,7 +361,8 @@ public sealed class Hauptfenster : Form
         {
             Uebersicht.Aktualisieren();
             Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht");
-            Kopf.KnoepfeSetzen();
+            Kopf.KnoepfeSetzen(Uebersicht.Knoepfe);
+            Kopf.ZusatzSetzen(Uebersicht.BereichWahl);   // Bereichswahl rechts in der Aktionsleiste
             return;
         }
         if (schluessel == "Tagesplan")

@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Bauplan Schritt 24: Fahrzeuge in Übersicht und Kalender („vor Ort / unterwegs“, „losgefahren“,
+// Bauplan Schritt 24: Fahrzeuge im Kalender (bis Schritt 26l auch in der Übersicht) („vor Ort / unterwegs“, „losgefahren“,
 // „zurück“), Fahrt eintragen mit Warnung bei Doppelbuchung, mitfahrende Bewohner abwesend und im
 // Tagesplan; Kalender „Bereich“ und „Haus“ mit Umschalter und Recht.
 [Collection("Oberflaeche")]
@@ -17,20 +17,22 @@ public class FahrzeugeOberflaechenTests
         Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        f.BereichWaehlen("Übersicht");
-        var leiste = f.Uebersicht.Fahrzeuge;
+        f.BereichWaehlen("Kalender");
+        var leiste = f.Kalender.Fahrzeuge;   // seit Schritt 26l nur noch im Kalender
         FahrzeugZeile Zeile(string name) => leiste.Zeilen.Single(z => z.Stand.Fahrzeug == name);
         Assert.Equal(["VW Bus", "Caddy"], leiste.Zeilen.Select(z => z.Stand.Fahrzeug));
         Assert.StartsWith("unterwegs seit ", Zeile("Caddy").StandFeld.Text);
         Assert.True(Zeile("Caddy").ZurueckKnopf.Visible);
         Assert.StartsWith("vor Ort", Zeile("VW Bus").StandFeld.Text);
         long eiche = u.Demo("Eiche").Id!.Value;   // fährt in der Demo gerade mit
-        Assert.Contains(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == eiche).Marken, m => m.Art == MarkenArt.Abwesend && m.Text.StartsWith("abwesend: unterwegs mit Caddy"));
-        Hilfe.Foto(f, "77_uebersicht_fahrzeuge");
+        BewohnerZeile Eiche() { f.Uebersicht.Aktualisieren(); return f.Uebersicht.Zeilen.Single(k => k.Bewohner.Id == eiche); }
+        Assert.Contains(Eiche().Marken, m => m.Art == MarkenArt.Abwesend && m.Text.StartsWith("abwesend: unterwegs mit Caddy"));
+        Assert.StartsWith("unterwegs mit Caddy bis ", Eiche().Wo);   // Spalte „Wo“ der Übersicht
+        Hilfe.Foto(f, "77_kalender_fahrzeuge");
 
         Zeile("Caddy").ZurueckKnopf.PerformClick();
         Assert.StartsWith("vor Ort", Zeile("Caddy").StandFeld.Text);
-        Assert.DoesNotContain(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == eiche).Marken, m => m.Text.StartsWith("abwesend: unterwegs"));
+        Assert.DoesNotContain(Eiche().Marken, m => m.Text.StartsWith("abwesend: unterwegs"));
 
         // Neue Fahrt, dann eine zweite zur selben Zeit: Warnung, erst „Trotzdem speichern“ speichert.
         using (new DialogErsatz(fenster =>
@@ -62,11 +64,12 @@ public class FahrzeugeOberflaechenTests
         }
 
         // Losgefahren: Birke ist abwesend und die Fahrt steht in ihrem Tagesplan.
-        f.BereichWaehlen("Übersicht");
+        f.BereichWaehlen("Kalender");
         Zeile("VW Bus").LosKnopf.PerformClick();
         Assert.StartsWith("unterwegs seit ", Zeile("VW Bus").StandFeld.Text);
         long birke = u.Demo("Birke").Id!.Value;
-        Assert.Contains(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == birke).Marken, m => m.Text.StartsWith("abwesend: unterwegs mit VW Bus"));
+        f.Uebersicht.Aktualisieren();
+        Assert.Contains(f.Uebersicht.Zeilen.Single(k => k.Bewohner.Id == birke).Marken, m => m.Text.StartsWith("abwesend: unterwegs mit VW Bus"));
         f.BereichWaehlen("Tagesplan");
         f.Tagesplan.AlleBereiche.Checked = true;
         Assert.Contains(f.Tagesplan.Tafel.Zeilen, k => k.Daten.Bewohner.Id == birke && k.Daten.Termin.Quelle == TerminQuelle.Fahrt

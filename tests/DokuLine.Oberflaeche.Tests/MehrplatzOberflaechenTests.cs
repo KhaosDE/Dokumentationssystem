@@ -19,7 +19,7 @@ public class MehrplatzOberflaechenTests
         Hilfe.Zeigen(f2);
         f2.BereichWaehlen("Übersicht");
         Assert.False(f2.AenderungenVonAnderen());   // nichts geändert: nichts neu lesen
-        bool Status() => f2.Uebersicht.Karten.Single(k => k.Bewohner.Nachname == "Birke").Marken.Any(m => m.Text.StartsWith("Status: beim Friseur, bis "));
+        bool Status() => f2.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Marken.Any(m => m.Text.StartsWith("Status: beim Friseur, bis "));
         Assert.False(Status());
 
         f1.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
@@ -108,26 +108,26 @@ public class MehrplatzOberflaechenTests
         Hilfe.Zeigen(f);
         f.BereichWaehlen("Übersicht");
         var s = f.Uebersicht;
-        Assert.Equal(23, s.Karten.Count);
-        Assert.All(s.Karten, k => Assert.Equal("R1", k.Bewohner.Wohnbereich));
+        Assert.Equal(23, s.Zeilen.Count);
+        Assert.All(s.Zeilen, k => Assert.Equal("R1", k.Bewohner.Wohnbereich));
         Assert.StartsWith("R1 · 23 Bewohner · 2 Betten frei · Stand ", f.Kopf.KleinText);
         Assert.False(s.BereichHinweis.Visible);
         // Statusmeldung eines anderen Bereichs (Therapie) auf der Karte, vorne.
-        Assert.StartsWith("Status: in der Holzwerkstatt, bis ", s.Karten.Single(k => k.Bewohner.Nachname == "Ahorn").Marken[0].Text);
+        Assert.StartsWith("Status: in der Holzwerkstatt, bis ", s.Zeilen.Single(k => k.Bewohner.Nachname == "Ahorn").Marken[0].Text);
 
-        s.AlleBereiche.Checked = true;
-        Assert.Equal(69, s.Karten.Count);
+        s.BereichWahl.SelectedItem = UebersichtSeite.AlleBereiche;   // seit Schritt 26l in der Bereichswahl
+        Assert.Equal(69, s.Zeilen.Count);
         Assert.StartsWith("alle Bereiche · 69 Bewohner · 6 Betten frei · ", f.Kopf.KleinText);
-        var ginster = s.Karten.Single(k => k.Bewohner.Nachname == "Ginster");
+        var ginster = s.Zeilen.Single(k => k.Bewohner.Nachname == "Ginster");
         Assert.Equal("R2", ginster.Marken[^1].Text);
-        Assert.StartsWith("Status: Besuch bei der Familie, bis ", s.Karten.Single(k => k.Bewohner.Nachname == "Immergrün").Marken[0].Text);
+        Assert.StartsWith("Status: Besuch bei der Familie, bis ", s.Zeilen.Single(k => k.Bewohner.Nachname == "Immergrün").Marken[0].Text);
         Hilfe.Foto(f, "56_uebersicht_alle_bereiche");
 
         // Ein Bereich ohne eigene Bewohner (z. B. Therapie) sieht alle, mit Hinweis.
-        s.AlleBereiche.Checked = false;
+        s.BereichWahl.SelectedItem = UebersichtSeite.EigeneBereiche;
         Einstellungen.Aendern(w => w with { Bereich = "Therapie" });
         s.Aktualisieren();
-        Assert.Equal(69, s.Karten.Count);
+        Assert.Equal(69, s.Zeilen.Count);
         Assert.True(s.BereichHinweis.Visible);
         // Auf der Seite „Bewohner“ zeigen Karten fremder Wohnbereiche ihren Bereich.
         f.BereichWaehlen("Bewohner");

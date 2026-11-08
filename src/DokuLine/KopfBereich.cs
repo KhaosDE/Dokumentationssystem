@@ -122,6 +122,10 @@ public sealed class KopfBereich : Panel
 
     public IReadOnlyList<Button> Knoepfe => knoepfe;
 
+    // Ein Bedienelement rechts in der Aktionsleiste, z. B. die Bereichswahl der Übersicht (Schritt 26l).
+    // Nach KnoepfeSetzen aufrufen; der nächste KnoepfeSetzen-Aufruf entfernt es wieder.
+    public void ZusatzSetzen(Control? zusatz) => Leiste.ZusatzSetzen(zusatz);
+
     // Eigenes Bild für das Logofeld (null = leer).
     public void LogoSetzen(string? pfad)
     {
@@ -295,6 +299,7 @@ public sealed class AktionsLeiste : Panel
     private const int Rand = 16, RandUnten = 8;   // wie KopfBereich
     private readonly List<Button> knoepfe = [];
     private Button? entwurf;
+    public Control? Zusatz { get; private set; }
 
     public AktionsLeiste()
     {
@@ -316,8 +321,18 @@ public sealed class AktionsLeiste : Panel
     {
         foreach (var alt in knoepfe) Controls.Remove(alt);
         knoepfe.Clear();
+        if (Zusatz is not null) Controls.Remove(Zusatz);
+        Zusatz = null;
         knoepfe.AddRange(neue);
         foreach (var knopf in knoepfe) Controls.Add(knopf);
+        Anordnen();
+    }
+
+    public void ZusatzSetzen(Control? zusatz)
+    {
+        if (Zusatz is not null) Controls.Remove(Zusatz);
+        Zusatz = zusatz;
+        if (zusatz is not null) Controls.Add(zusatz);
         Anordnen();
     }
 
@@ -348,7 +363,7 @@ public sealed class AktionsLeiste : Panel
 
     public void Anordnen()
     {
-        Visible = knoepfe.Count > 0 || entwurfSichtbar;
+        Visible = knoepfe.Count > 0 || entwurfSichtbar || Zusatz is not null;
         Height = S(Stil.KnopfHoehe + RandUnten);
         PerformLayout();
     }
@@ -380,6 +395,11 @@ public sealed class AktionsLeiste : Panel
             r -= b;
             rechts[i].Bounds = new Rectangle(r, 0, b, hoehe);
             r -= S(Stil.AbstandKlein);
+        }
+        if (Zusatz is not null)
+        {
+            r -= S(Stil.AbstandKlein);
+            Zusatz.Location = new Point(Math.Max(x, r - Zusatz.Width), Math.Max(0, (hoehe - Zusatz.Height) / 2));
         }
     }
 }
