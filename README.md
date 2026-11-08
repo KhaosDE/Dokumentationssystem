@@ -1,7 +1,10 @@
-# Dokumentationssystem (Demo)
+# DokuLine (Demo)
 
-Vorführ-Version eines Dokumentationssystems für einen Wohnbereich: Bewohnerakte und
-tägliche Dokumentation in einem Programm.
+**Betreuung auf Augenhöhe**
+
+Vorführ-Version von DokuLine, einem Dokumentationsprogramm für einen Wohnbereich: Bewohnerakte
+und tägliche Dokumentation in einem Programm. Bis Version 0.29.1 hieß das Programm
+„Dokumentationssystem“.
 
 **Alle Daten sind ausgedacht.** Das Programm ist nicht für echte Bewohnerdaten gedacht
 und nicht dafür freigegeben. Oben im Fenster steht deshalb immer „Demo — ausgedachte Daten“.
@@ -11,7 +14,9 @@ Stand der Entwicklung: [`STAND.md`](STAND.md).
 ## Herunterladen und starten (Windows)
 
 1. Die neueste Version laden:
-   <https://github.com/KhaosDE/Dokumentationssystem/releases/latest/download/Dokumentationssystem.exe>
+   <https://github.com/KhaosDE/Dokumentationssystem/releases/latest/download/DokuLine.exe>
+   (Wer schon eine `Dokumentationssystem.exe` hat, braucht nichts zu tun: Sie holt sich das
+   Update selbst und behält ihren Dateinamen.)
 2. Die Datei in einen Ordner legen, in dem du schreiben darfst – zum Beispiel
    „Dokumente“ oder „Downloads“, **nicht** „Programme“. (Das Update tauscht die Datei
    dort aus.)
@@ -188,8 +193,10 @@ Die neue Version beginnt mit den Demo-Daten. Was du in 0.2.0 geändert hast, wir
 
 ## Wo liegen die Daten?
 
-Im Datenordner `%APPDATA%\Dokumentationssystem` (im Windows-Explorer oben in die
-Adresszeile eingeben). Dort liegen:
+Im Datenordner `%APPDATA%\DokuLine` (im Windows-Explorer oben in die
+Adresszeile eingeben). Beim ersten Start nach der Umbenennung (Version 0.29.2) kopiert das
+Programm den Inhalt des bisherigen Ordners `%APPDATA%\Dokumentationssystem` dorthin; der alte
+Ordner bleibt unverändert liegen (in `update.log` steht, dass kopiert wurde). Dort liegen:
 
 - `dokumentationssystem.db` – die Datenbank (oder im gemeinsamen Ordner, falls in den
   Einstellungen gewählt),
@@ -211,7 +218,7 @@ Installation. Es läuft unter Windows 10 und 11.
 08.11.2026): Windows Server 2016, 2019, 2022 und 2025, jeweils mit Desktopdarstellung (das
 Programm hat Fenster, „Server Core“ reicht nicht). Windows Server 2012 und 2012 R2 nur mit
 Microsofts Zusatz-Updates (ESU) – nicht empfohlen. Jede angemeldete Person hat ihren eigenen
-Datenordner (`%APPDATA%\Dokumentationssystem`).
+Datenordner (`%APPDATA%\DokuLine`).
 
 **Nachschlage-Ansicht (WebView2):** Im Formular „Medikament“ zeigt das Programm die
 Arzneimittelsuche des BfArM in einem kleinen Fenster. Dafür braucht es die kostenlose
@@ -236,21 +243,21 @@ C# mit .NET 10 und Windows Forms. Aufbau:
 
 | Ordner | Inhalt |
 |---|---|
-| `src/Dokusystem.Kern` | Datenmodell, Prüfregeln, Speicher (SQLite), Demo-Daten – ohne Fenster |
-| `src/Dokusystem.Update` | Selbst-Update – das einzige Projekt mit Internetzugriff |
-| `src/Dokusystem` | Oberfläche (Windows Forms), ergibt `Dokumentationssystem.exe` |
-| `tests/Dokusystem.Tests` | Tests für Kern und Update (laufen auch unter Linux) |
-| `tests/Dokusystem.Oberflaeche.Tests` | Tests für die Oberfläche (nur Windows) |
+| `src/DokuLine.Kern` | Datenmodell, Prüfregeln, Speicher (SQLite), Demo-Daten – ohne Fenster |
+| `src/DokuLine.Update` | Selbst-Update – das einzige Projekt mit Internetzugriff |
+| `src/DokuLine` | Oberfläche (Windows Forms), ergibt `DokuLine.exe` |
+| `tests/DokuLine.Tests` | Tests für Kern und Update (laufen auch unter Linux) |
+| `tests/DokuLine.Oberflaeche.Tests` | Tests für die Oberfläche (nur Windows) |
 | `daten/demo` | Demo-Daten als lesbare Datei (werden in die `.exe` eingebaut) |
 
 Mit dem .NET 10 SDK im Projektordner:
 
 ```bash
-dotnet test Dokumentationssystem.sln
+dotnet test DokuLine.sln
 ```
 
 ```bash
-dotnet run --project src/Dokusystem
+dotnet run --project src/DokuLine
 ```
 
 Die `.exe` baut GitHub Actions (`.github/workflows/tests-und-exe.yml`) bei jedem Push nach

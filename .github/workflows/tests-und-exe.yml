@@ -31,7 +31,7 @@ jobs:
       - name: Tests (Kern, Update, Oberfläche)
         env:
           DOKUSYSTEM_BILDSCHIRMFOTOS: ${{ github.workspace }}\bildschirmfotos
-        run: dotnet test Dokumentationssystem.sln -c Release --logger "console;verbosity=normal"
+        run: dotnet test DokuLine.sln -c Release --logger "console;verbosity=normal"
       - name: Bildschirmfotos zur Sichtprüfung bereitstellen
         if: always()
         uses: actions/upload-artifact@v4
@@ -54,7 +54,7 @@ jobs:
           dotnet-version: 10.0.x
       - name: .exe bauen (eine Datei, mit .NET, nicht komprimiert)
         run: >
-          dotnet publish src/Dokusystem/Dokusystem.csproj
+          dotnet publish src/DokuLine/DokuLine.csproj
           -c Release -r win-x64 --self-contained true
           -p:PublishSingleFile=true
           -p:IncludeNativeLibrariesForSelfExtract=true
@@ -63,17 +63,17 @@ jobs:
       - name: Selbsttest der .exe
         shell: pwsh
         run: |
-          $p = Start-Process -FilePath "publish\Dokumentationssystem.exe" -ArgumentList "--selbsttest" -Wait -PassThru
+          $p = Start-Process -FilePath "publish\DokuLine.exe" -ArgumentList "--selbsttest" -Wait -PassThru
           if ($p.ExitCode -ne 0) {
             if (Test-Path selbsttest.log) { Get-Content selbsttest.log }
             throw "Selbsttest fehlgeschlagen (Exit-Code $($p.ExitCode))"
           }
-          Write-Host "Selbsttest bestanden. Größe: $([math]::Round((Get-Item publish\Dokumentationssystem.exe).Length / 1MB)) MB"
+          Write-Host "Selbsttest bestanden. Größe: $([math]::Round((Get-Item publish\DokuLine.exe).Length / 1MB)) MB"
       - name: .exe zum Herunterladen bereitstellen
         uses: actions/upload-artifact@v4
         with:
-          name: Dokumentationssystem-Windows
-          path: publish/Dokumentationssystem.exe
+          name: DokuLine-Windows
+          path: publish/DokuLine.exe
           retention-days: 30
       - name: Release veröffentlichen (für das Selbst-Update und den festen Download-Link)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -81,14 +81,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $hash = (Get-FileHash publish\Dokumentationssystem.exe -Algorithm SHA256).Hash.ToLower()
-          "$hash  Dokumentationssystem.exe" | Set-Content -NoNewline -Encoding utf8NoBOM publish\Dokumentationssystem.exe.sha256
+          # Übergang (Bauplan Schritt 26a1): dieselbe Datei zusätzlich als Dokumentationssystem.exe,
+          # damit Installationen bis 0.29.1 sie finden (sie suchen nur diesen Namen).
+          Copy-Item publish\DokuLine.exe publish\Dokumentationssystem.exe
+          foreach ($name in "DokuLine.exe", "Dokumentationssystem.exe") {
+            $hash = (Get-FileHash "publish\$name" -Algorithm SHA256).Hash.ToLower()
+            "$hash  $name" | Set-Content -NoNewline -Encoding utf8NoBOM "publish\$name.sha256"
+          }
           [xml]$props = Get-Content Directory.Build.props
           $version = @($props.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ })[0]
           $tag = "build-${{ github.run_number }}"
-          gh release create $tag publish\Dokumentationssystem.exe publish\Dokumentationssystem.exe.sha256 `
+          gh release create $tag publish\DokuLine.exe publish\DokuLine.exe.sha256 `
+            publish\Dokumentationssystem.exe publish\Dokumentationssystem.exe.sha256 `
             --repo "${{ github.repository }}" --target "${{ github.sha }}" --latest `
-            --title "Dokumentationssystem $version (Build ${{ github.run_number }})" `
+            --title "DokuLine $version (Build ${{ github.run_number }})" `
             --notes "Version $version, automatisch gebaut aus ${{ github.sha }}. Die .exe aktualisiert sich beim Start selbst auf den neuesten Build. Demo – nur ausgedachte Daten."
       - name: Alte Releases aufräumen (die neuesten 10 bleiben)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

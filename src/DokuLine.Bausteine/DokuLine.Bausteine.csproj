@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Gemeinsame Bausteine der Oberfläche: Stil, Karten, Marken, Dialoge, Druckvorschau, kleine
+       Formulare und die Schnittstelle für zuschaltbare Module. Programm und Module nutzen sie gemeinsam. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>DokuLine</RootNamespace>
+    <!-- WFO1000 betrifft nur den Formular-Designer von Visual Studio; die Fenster hier sind von Hand gebaut. -->
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DokuLine.Kern\DokuLine.Kern.csproj" />
+  </ItemGroup>
+</Project>

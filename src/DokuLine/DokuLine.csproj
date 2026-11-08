@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Die Oberfläche (Windows Forms). Ruft nur Kern und Update auf. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>DokuLine</AssemblyName>
+    <RootNamespace>DokuLine</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <Product>DokuLine</Product>
+    <AssemblyTitle>DokuLine (Demo)</AssemblyTitle>
+    <Description>DokuLine – Betreuung auf Augenhöhe. Dokumentation für einen Wohnbereich – Demo mit ausgedachten Daten</Description>
+    <!-- Bewusst NICHT komprimieren: Gepackte .exe-Dateien lösen öfter Virenwarnungen aus. -->
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <!-- WFO1000 betrifft nur den Formular-Designer von Visual Studio; die Fenster hier sind von Hand gebaut. -->
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DokuLine.Kern\DokuLine.Kern.csproj" />
+    <ProjectReference Include="..\DokuLine.Update\DokuLine.Update.csproj" />
+    <ProjectReference Include="..\DokuLine.Bausteine\DokuLine.Bausteine.csproj" />
+    <ProjectReference Include="..\DokuLine.Modul.Ausgangsliste\DokuLine.Modul.Ausgangsliste.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Nur für die Nachschlage-Ansicht des BfArM im Formular „Medikament“ (Schritt 21, Regel 6).
+         Lizenz: BSD-3-Clause-artig (Microsoft). Die Laufzeit ist in Windows 11 enthalten. -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Build-Nummer in die .exe schreiben (GitHub Actions setzt -p:BuildNummer=<Laufnummer>). -->
+    <AssemblyMetadata Include="BuildNummer" Value="$(BuildNummer)" />
+    <InternalsVisibleTo Include="DokuLine.Oberflaeche.Tests" />
+  </ItemGroup>
+</Project>

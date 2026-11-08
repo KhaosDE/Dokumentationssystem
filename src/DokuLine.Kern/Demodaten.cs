@@ -1,0 +1,957 @@
+using System.Text.Json;
+
+namespace DokuLine.Kern;
+
+// Demo-Daten aus daten/demo/*.json (lesbare Dateien im Repository, in die .exe eingebaut).
+// Alle Angaben dort sind ausgedacht. Datumsangaben der Bereiche entstehen relativ zum heutigen
+// Tag, damit die Demo an jedem Tag etwas zeigt (Bauplan in IDEEN.md).
+public static class Demodaten
+{
+    private static readonly JsonSerializerOptions Optionen = new() { PropertyNameCaseInsensitive = true };
+
+    private static T Lesen<T>(string datei)
+    {
+        using var strom = typeof(Demodaten).Assembly.GetManifestResourceStream($"DokuLine.Kern.Demo.{datei}")
+            ?? throw new InvalidOperationException($"Demo-Daten {datei} fehlen im Programm.");
+        return JsonSerializer.Deserialize<T>(strom, Optionen) ?? throw new InvalidOperationException($"Demo-Daten {datei} sind leer.");
+    }
+
+    // ----- Bewohner -----
+
+    private sealed class BewohnerDatei
+    {
+        public List<BewohnerEingabe> Bewohner { get; set; } = [];
+    }
+
+    public static List<Bewohner> Bewohner() =>
+        Lesen<BewohnerDatei>("bewohner.json").Bewohner.Select(e => BewohnerRegeln.AusEingabe(e)).ToList();
+
+    // ----- Berichte -----
+
+    public sealed class BerichtTexte
+    {
+        public List<string> Kuerzel { get; set; } = [];
+        public Dictionary<string, List<string>> Texte { get; set; } = [];
+        public List<string> Nachtraege { get; set; } = [];
+        public UebergabeTexte Uebergabe { get; set; } = new();
+    }
+
+    public sealed class UebergabeTexte
+    {
+        public List<string> Saetze { get; set; } = [];
+        public List<string> Notizen { get; set; } = [];
+    }
+
+    // Ein Demo-Bericht mit seinem Übergabe-Eintrag (falls einer dazugehört).
+    public sealed record DemoBericht(Bericht Bericht, UebergabeWunsch? Uebergabe = null, string? GelesenVon = null, string? ErledigtVon = null);
+    public sealed record DemoNotiz(string Text, UebergabeWunsch Wunsch, DateTime Erstellt, string Verfasser);
+    public sealed record DemoTagebuch(List<DemoBericht> Berichte, List<DemoNotiz> Allgemein);
+
+    public static BerichtTexte BerichtBausteine() => Lesen<BerichtTexte>("berichte.json");
+
+    // Berichte der letzten vier Wochen für die übergebenen Bewohner, über alle Lebensbereiche
+    // verteilt; einige wichtig, einige mit Nachtrag, einige mit Übergabe-Eintrag (offen, gelesen,
+    // erledigt, abgelaufen), dazu Notizen für den ganzen Wohnbereich. Immer gleich für denselben
+    // Zeitpunkt (fester Zufallsstartwert je Bewohner), nichts liegt in der Zukunft.
+    public static DemoTagebuch Berichte(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var bausteine = BerichtBausteine();
+        var berichte = new List<DemoBericht>();
+        string wochentag = jetzt.AddDays(2).ToString("dddd", System.Globalization.CultureInfo.GetCultureInfo("de-DE"));
+        string Satz(int i) => bausteine.Uebergabe.Saetze[i % bausteine.Uebergabe.Saetze.Count].Replace("{tag}", wochentag);
+        for (int i = 0; i < bewohner.Count; i++)
+        {
+            var b = bewohner[i];
+            var zufall = new Random(1000 + i);
+            for (int tageZurueck = 27; tageZurueck >= 0; tageZurueck--)
+            {
+                var tag = jetzt.Date.AddDays(-tageZurueck);
+                if (DateOnly.FromDateTime(tag) < b.Aufnahmedatum) continue;
+                int anzahl = zufall.Next(1, 3);
+                for (int n = 0; n < anzahl; n++)
+                {
+                    // Früh oder Spät, selten Nacht.
+                    int schicht = zufall.Next(10) switch { < 5 => 0, < 9 => 1, _ => 2 };
+                    var zeit = schicht switch
+                    {
+                        0 => tag.AddHours(7).AddMinutes(zufall.Next(0, 13 * 30) / 30 * 30),
+                        1 => tag.AddHours(14).AddMinutes(30 + zufall.Next(0, 14 * 30) / 30 * 30),
+                        _ => tag.AddHours(23).AddMinutes(zufall.Next(0, 4) * 15),
+                    };
+                    // Immer erzeugen (gleiche Zufallsfolge zu jeder Uhrzeit), nur Vergangenes behalten.
+                    var bericht = Erzeugen(b, zeit, zufall, bausteine, jetzt, wichtig: zufall.Next(30) == 0);   // selten, sonst verliert „Wichtig“ seinen Sinn
+                    if (zeit <= jetzt) berichte.Add(new DemoBericht(bericht));
+                }
+            }
+            // Übergabe: bei jedem zweiten Bewohner ein Bericht aus den letzten Stunden für die
+            // nächste Schicht, dazu einige länger laufende, erledigte und abgelaufene Einträge.
+            if (i % 2 == 0)
+            {
+                var bericht = Erzeugen(b, jetzt.AddMinutes(-(40 + i * 25)), zufall, bausteine, jetzt, wichtig: i == 0);
+                var wunsch = i switch
+                {
+                    2 => new UebergabeWunsch(UebergabeDauer.DreiTage),
+                    4 => new UebergabeWunsch(UebergabeDauer.BisErledigt, Text: Satz(0)),
+                    _ => new UebergabeWunsch(UebergabeDauer.NaechsteSchicht),
+                };
+                berichte.Add(new DemoBericht(bericht, wunsch, GelesenVon: i == 0 ? "AB" : null));
+            }
+            if (i == 1)
+            {
+                var bericht = Erzeugen(b, jetzt.AddDays(-2).Date.AddHours(16), zufall, bausteine, jetzt, wichtig: false);
+                berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.BisErledigt, Text: Satz(2)), "AB", ErledigtVon: "CD"));
+            }
+            if (i == 3)
+            {
+                var bericht = Erzeugen(b, jetzt.AddDays(-5).Date.AddHours(9), zufall, bausteine, jetzt, wichtig: false);
+                berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.NaechsteSchicht)));   // längst abgelaufen
+            }
+            if (i == 5)
+            {
+                var bericht = Erzeugen(b, jetzt.AddHours(-20), zufall, bausteine, jetzt, wichtig: true);
+                berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.Woche, Text: Satz(1))));
+            }
+        }
+        var notizen = bausteine.Uebergabe.Notizen;
+        var allgemein = new List<DemoNotiz>
+        {
+            new(notizen[0].Replace("{tag}", wochentag), new UebergabeWunsch(UebergabeDauer.Woche), jetzt.AddDays(-1).Date.AddHours(9), bausteine.Kuerzel[1]),
+            new(notizen[1].Replace("{tag}", wochentag), new UebergabeWunsch(UebergabeDauer.BisErledigt), jetzt.AddDays(-2).Date.AddHours(15), bausteine.Kuerzel[2]),
+        };
+        return new DemoTagebuch(berichte, allgemein);
+    }
+
+    // ----- Aufgaben (Wohnbereich-ToDo) -----
+
+    private sealed class AufgabenDatei
+    {
+        public List<AufgabeVorlage> Aufgaben { get; set; } = [];
+    }
+
+    public sealed class AufgabeVorlage
+    {
+        public string Text { get; set; } = "";
+        public string? Bewohner { get; set; }          // Nachname aus bewohner.json
+        public string Fuer { get; set; } = "naechste_schicht";
+        public int SchichtInTagen { get; set; }
+        public string Schicht { get; set; } = "frueh";
+        public double ErstelltVorStunden { get; set; }
+        public double? FaelligInStunden { get; set; }
+        public string Verfasser { get; set; } = "";
+        public EreignisVorlage? Weitergabe { get; set; }
+        public EreignisVorlage? Erledigt { get; set; }
+    }
+
+    public sealed class EreignisVorlage
+    {
+        public double VorStunden { get; set; }
+        public string Kuerzel { get; set; } = "";
+        public string Notiz { get; set; } = "";
+    }
+
+    public sealed record DemoAufgabe(Aufgabe Aufgabe);
+
+    // Aufgaben aus daten/demo/aufgaben.json, Zeiten relativ zu „jetzt“. Fehlt der genannte
+    // Bewohner (z. B. umbenannt), entfällt die Aufgabe.
+    public static List<DemoAufgabe> Aufgaben(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var liste = new List<DemoAufgabe>();
+        DateTime Minute(DateTime t) => new(t.Year, t.Month, t.Day, t.Hour, t.Minute, 0);
+        DateTime Stunde(DateTime t) => new(t.Year, t.Month, t.Day, t.Hour, 0, 0);
+        foreach (var v in Lesen<AufgabenDatei>("aufgaben.json").Aufgaben)
+        {
+            Bewohner? b = null;
+            if (v.Bewohner is string name && (b = bewohner.FirstOrDefault(x => x.Nachname == name)) is null) continue;
+            var fuer = AufgabenRegeln.FuerAus(v.Fuer);
+            liste.Add(new DemoAufgabe(new Aufgabe
+            {
+                BewohnerId = b?.Id,
+                Text = v.Text.Replace("{vorname}", b?.Vorname ?? ""),
+                Fuer = fuer,
+                FuerSchicht = fuer == AufgabeFuer.Schicht
+                    ? new SchichtTermin(DateOnly.FromDateTime(jetzt).AddDays(v.SchichtInTagen), BerichtRegeln.SchichtAus(v.Schicht))
+                    : null,
+                FaelligBis = v.FaelligInStunden is double h ? Stunde(jetzt.AddHours(h)) : null,
+                Erstellt = Minute(jetzt.AddHours(-v.ErstelltVorStunden)),
+                Verfasser = v.Verfasser,
+                Weitergaben = v.Weitergabe is EreignisVorlage w ? [new Weitergabe(Minute(jetzt.AddHours(-w.VorStunden)), w.Kuerzel, w.Notiz)] : [],
+                Erledigt = v.Erledigt is EreignisVorlage e ? Minute(jetzt.AddHours(-e.VorStunden)) : null,
+                ErledigtVon = v.Erledigt?.Kuerzel,
+            }));
+        }
+        return liste;
+    }
+
+    // ----- Nachrichten -----
+
+    private sealed class NachrichtenDatei
+    {
+        public List<VerlaufVorlage> Verlaeufe { get; set; } = [];
+    }
+
+    // ----- Mitarbeiter (daten/demo/mitarbeiter.json) -----
+
+    private sealed class MitarbeiterDatei
+    {
+        public List<string> Bereiche { get; set; } = [];
+        public List<MitarbeiterVorlage> Mitarbeiter { get; set; } = [];
+    }
+
+    private sealed class MitarbeiterVorlage
+    {
+        public string Kuerzel { get; set; } = "";
+        public string Vorname { get; set; } = "";
+        public string Nachname { get; set; } = "";
+        public bool Fachkraft { get; set; }
+        public bool Aktiv { get; set; } = true;
+        public List<string> Bereiche { get; set; } = [];
+        public List<string> Positionen { get; set; } = [];
+        public string? Farbe { get; set; }
+    }
+
+    public sealed record DemoMitarbeiter(List<string> Bereiche, List<Mitarbeiter> Mitarbeiter);
+
+    public static DemoMitarbeiter Mitarbeiter()
+    {
+        var datei = Lesen<MitarbeiterDatei>("mitarbeiter.json");
+        return new DemoMitarbeiter(datei.Bereiche,
+            datei.Mitarbeiter.Select(m => new Mitarbeiter(m.Kuerzel, m.Vorname, m.Nachname, m.Fachkraft, m.Aktiv, m.Bereiche, m.Positionen) { Farbe = m.Farbe }).ToList());
+    }
+
+    public sealed class VerlaufVorlage
+    {
+        public string Betreff { get; set; } = "";
+        public string? Bewohner { get; set; }
+        public List<string> ArchiviertVon { get; set; } = [];
+        public List<NachrichtVorlage> Nachrichten { get; set; } = [];
+    }
+
+    public sealed class NachrichtVorlage
+    {
+        public string Von { get; set; } = "";
+        public List<string>? An { get; set; }          // „team:Name“ oder Kürzel; fehlt = Antwort an alle
+        public double VorStunden { get; set; }
+        public string Text { get; set; } = "";
+        public List<string> GelesenVon { get; set; } = [];
+    }
+
+    public sealed record DemoNachricht(Nachricht Nachricht);
+    public sealed record DemoVerlauf(List<DemoNachricht> Nachrichten, List<string> ArchiviertVon);
+    public sealed record DemoPost(List<DemoVerlauf> Verlaeufe);
+
+    // Kollegen, Teams und Verläufe aus daten/demo/nachrichten.json, Zeiten relativ zu „jetzt“.
+    // Fehlt der genannte Bewohner (z. B. umbenannt), entfällt der Verlauf.
+    public static DemoPost Nachrichten(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var datei = Lesen<NachrichtenDatei>("nachrichten.json");
+        DateTime Minute(DateTime t) => new(t.Year, t.Month, t.Day, t.Hour, t.Minute, 0);
+        var verlaeufe = new List<DemoVerlauf>();
+        foreach (var v in datei.Verlaeufe)
+        {
+            Bewohner? b = null;
+            if (v.Bewohner is string name && (b = bewohner.FirstOrDefault(x => x.Nachname == name)) is null) continue;
+            var bisher = new List<Nachricht>();
+            foreach (var d in v.Nachrichten)
+            {
+                var an = d.An is null
+                    ? NachrichtenRegeln.AntwortAn(bisher, d.Von)
+                    : d.An.Select(z => z.StartsWith("team:") ? Empfaenger.Team(z[5..]) : Empfaenger.Person(z)).ToList();
+                bisher.Add(new Nachricht
+                {
+                    Von = d.Von,
+                    Betreff = v.Betreff,
+                    Text = d.Text.Replace("{vorname}", b?.Vorname ?? ""),
+                    Gesendet = Minute(jetzt.AddHours(-d.VorStunden)),
+                    BewohnerId = b?.Id,
+                    An = an,
+                    GelesenVon = d.GelesenVon,
+                });
+            }
+            verlaeufe.Add(new DemoVerlauf(bisher.Select(x => new DemoNachricht(x)).ToList(), v.ArchiviertVon));
+        }
+        return new DemoPost(verlaeufe);
+    }
+
+    // ----- Medikamentendatenbank (echte Nachschlagedaten, keine Bewohnerdaten) -----
+
+    private sealed class MedikamenteDatei
+    {
+        public List<MedikamentVorlage> Medikamente { get; set; } = [];
+    }
+
+    public sealed class MedikamentVorlage
+    {
+        public string Wirkstoff { get; set; } = "";
+        public List<string> Handelsnamen { get; set; } = [];
+        public List<string> Staerken { get; set; } = [];
+        public string Darreichungsform { get; set; } = "";
+        public string Quelle { get; set; } = "";
+        public string Pruefstatus { get; set; } = "ungeprueft";
+    }
+
+    // Kürzel der ersten Fassung im Demo-Bestand (kein Mensch, sondern die Datei).
+    public const string DemoKuerzel = "DEMO";
+
+    public static List<MedikamentFassung> Medikamente(DateTime jetzt) =>
+        Lesen<MedikamenteDatei>("medikamente.json").Medikamente.Select(v => new MedikamentFassung
+        {
+            Wirkstoff = v.Wirkstoff,
+            Handelsnamen = v.Handelsnamen,
+            Staerken = v.Staerken,
+            Darreichungsform = v.Darreichungsform,
+            Quelle = v.Quelle,
+            Pruefstatus = v.Pruefstatus == "bestaetigt" ? Pruefstatus.Bestaetigt : Pruefstatus.Ungeprueft,
+            Geaendert = jetzt.Date,
+            Kuerzel = DemoKuerzel,
+        }).ToList();
+
+    // ----- Medikation -----
+
+    public sealed record DemoVerordnung(Verordnung Verordnung);
+
+    // Ausgedachte Verordnungen relativ zu heute: Grundverordnungen, eine Pause, ein Stufenplan zum
+    // Ansetzen, einer zum Absetzen, ein abgeschlossener (neue Grundverordnung), ein abgesetztes
+    // Medikament und Bedarfsmedikation. Ärztinnen und Ärzte sind ausgedacht.
+    // Fehlt ein Wirkstoff in der Medikamentendatenbank, entfällt die Verordnung.
+    public static List<DemoVerordnung> Medikation(IReadOnlyList<Bewohner> bewohner, IReadOnlyList<Medikament> medikamente, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        var liste = new List<DemoVerordnung>();
+        var arzt1 = "Dr. Ulme (ausgedacht)";
+        var arzt2 = "Dr. Linde (ausgedacht)";
+        Medikament? M(string wirkstoff) => medikamente.FirstOrDefault(m => m.Wirkstoff.StartsWith(wirkstoff, StringComparison.CurrentCultureIgnoreCase));
+        string Staerke(Medikament m, string gewuenscht) =>
+            m.Aktuell.Staerken.Contains(gewuenscht) ? gewuenscht : m.Aktuell.Staerken.FirstOrDefault() ?? "";
+        Bewohner? B(string nachname) => bewohner.FirstOrDefault(b => b.Nachname == nachname);
+        VerordnungsAenderung A(AenderungArt art, DateOnly von, DateOnly? bis = null, IReadOnlyList<Stufe>? stufen = null, string hinweis = "") => new()
+        {
+            Art = art, Von = von, Bis = bis, Stufen = stufen ?? [], Anordnung = new Anordnung(arzt2, von < heute ? von : heute),
+            Hinweis = hinweis, Erstellt = jetzt.AddDays(-1), Kuerzel = "AB",
+        };
+        void V(string nachname, string wirkstoff, string staerke, Dosis dosis, int beginnVorTagen, params VerordnungsAenderung[] aenderungen)
+        {
+            if (B(nachname) is not Bewohner b || M(wirkstoff) is not Medikament m) return;
+            var beginn = heute.AddDays(-beginnVorTagen);
+            liste.Add(new DemoVerordnung(new Verordnung
+            {
+                BewohnerId = b.Id!.Value, MedikamentId = m.Id, Medikament = m.Anzeige, Staerke = Staerke(m, staerke),
+                Einheit = "Stück", Dosis = dosis, Beginn = beginn, Anordnung = new Anordnung(arzt1, beginn),
+                Erstellt = beginn.ToDateTime(new TimeOnly(10, 0)), Kuerzel = "CD", Aenderungen = aenderungen,
+            }));
+        }
+        void Bedarf(string nachname, string wirkstoff, string staerke, string einzeldosis, string anlass, string hoechstens, int beginnVorTagen)
+        {
+            if (B(nachname) is not Bewohner b || M(wirkstoff) is not Medikament m) return;
+            var beginn = heute.AddDays(-beginnVorTagen);
+            liste.Add(new DemoVerordnung(new Verordnung
+            {
+                BewohnerId = b.Id!.Value, MedikamentId = m.Id, Medikament = m.Anzeige, Staerke = Staerke(m, staerke),
+                Einheit = "Stück", Dosis = new Dosis(einzeldosis, "0", "0", "0"), Bedarf = true, BedarfAnlass = anlass,
+                BedarfHoechstens = hoechstens, Beginn = beginn, Anordnung = new Anordnung(arzt1, beginn),
+                Erstellt = beginn.ToDateTime(new TimeOnly(10, 0)), Kuerzel = "CD",
+            }));
+        }
+        Dosis D(string m, string mi, string a, string n) => new(m, mi, a, n);
+
+        V("Ahorn", "Quetiapin", "25 mg", D("0", "0", "1", "0"), 400);
+        V("Ahorn", "Pantoprazol", "40 mg", D("1", "0", "0", "0"), 200);
+        V("Birke", "Sertralin", "50 mg", D("1", "0", "0", "0"), 12,
+            A(AenderungArt.Stufenplan, heute.AddDays(-10), stufen: [new(heute.AddDays(-10), D("½", "0", "0", "0")), new(heute.AddDays(-3), D("1", "0", "0", "0")), new(heute.AddDays(4), D("1½", "0", "0", "0"))], hinweis: "langsam ansetzen"));
+        V("Clematis", "Mirtazapin", "15 mg", D("0", "0", "0", "1"), 90,
+            A(AenderungArt.Pause, heute.AddDays(-2), heute.AddDays(3), hinweis: "wegen Blutabnahme"));
+        Bedarf("Distel", "Lorazepam", "1,0 mg", "1", "bei starker Unruhe", "2 in 24 Stunden", 60);
+        V("Eiche", "Olanzapin", "10 mg", D("0", "0", "1", "0"), 300,
+            A(AenderungArt.Stufenplan, heute.AddDays(-7), stufen: [new(heute.AddDays(-7), D("0", "0", "½", "0")), new(heute.AddDays(7), D("0", "0", "0", "0"))], hinweis: "ausschleichen"));
+        V("Fichte", "Ramipril", "5 mg", D("1", "0", "0", "0"), 500);
+        V("Fichte", "Metformin", "500 mg", D("1", "0", "1", "0"), 500,
+            A(AenderungArt.Pause, heute, heute.AddDays(1), hinweis: "vor der Blutabnahme"));   // Änderung heute (Startseite)
+        V("Ginster", "Levothyroxin", "50 Mikrogramm", D("1", "0", "0", "0"), 700);
+        V("Holunder", "Escitalopram", "10 mg", D("1", "0", "0", "0"), 150,
+            A(AenderungArt.Absetzen, heute.AddDays(-5), hinweis: "auf ärztliche Anordnung beendet"));
+        Bedarf("Immergrün", "Paracetamol", "500 mg", "1", "bei Kopfschmerzen", "4 in 24 Stunden", 30);
+        V("Kiefer", "Risperidon", "2 mg", D("1", "0", "1", "0"), 120,
+            A(AenderungArt.Stufenplan, heute.AddDays(-40), stufen: [new(heute.AddDays(-40), D("1", "0", "½", "0")), new(heute.AddDays(-30), D("1", "0", "0", "0"))], hinweis: "Umstellung"));
+        return liste;
+    }
+
+    // ----- Therapie -----
+
+    private sealed class TherapieDatei
+    {
+        public List<AngebotVorlage> Angebote { get; set; } = [];
+    }
+
+    public sealed class TerminVorlage
+    {
+        public string Tag { get; set; } = "Mo";
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+    }
+
+    public sealed class AenderungVorlage
+    {
+        public int GiltAbVorTagen { get; set; }
+        public List<TerminVorlage> Termine { get; set; } = [];
+        public string Hinweis { get; set; } = "";
+    }
+
+    public sealed class TeilnehmerVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public int AbVorTagen { get; set; }
+        public int? BeendetVorTagen { get; set; }
+    }
+
+    public sealed class AngebotVorlage
+    {
+        public string Name { get; set; } = "";
+        public string Art { get; set; } = "gruppe";
+        public string Therapeut { get; set; } = "";
+        public string Ort { get; set; } = "";
+        public int Hoechstens { get; set; }
+        public string Hinweis { get; set; } = "";
+        public int SeitTagen { get; set; }
+        public string Anbieter { get; set; } = TherapieRegeln.AnbieterTherapie;   // Schritt 22
+        public string Kuerzel { get; set; } = "OP";                               // wer angelegt und zugeteilt hat
+        public List<TerminVorlage> Termine { get; set; } = [];
+        public AenderungVorlage? Aenderung { get; set; }
+        public List<TeilnehmerVorlage> Teilnehmer { get; set; } = [];
+    }
+
+    public sealed record DemoAngebot(List<AngebotFassung> Fassungen, List<Zuteilung> Zuteilungen);
+
+    private static readonly Dictionary<string, DayOfWeek> Kurztage = new()
+    {
+        ["Mo"] = DayOfWeek.Monday, ["Di"] = DayOfWeek.Tuesday, ["Mi"] = DayOfWeek.Wednesday, ["Do"] = DayOfWeek.Thursday,
+        ["Fr"] = DayOfWeek.Friday, ["Sa"] = DayOfWeek.Saturday, ["So"] = DayOfWeek.Sunday,
+    };
+
+    // Angebote aus daten/demo/therapie.json; Zuteilungen relativ zu heute. Fehlt ein Bewohner,
+    // entfällt nur seine Zuteilung.
+    public static List<DemoAngebot> Therapie(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        static List<Wochentermin> Termine(IEnumerable<TerminVorlage> t) => t.Select(x => new Wochentermin(Kurztage[x.Tag],
+            TimeOnly.ParseExact(x.Von, "HH:mm", System.Globalization.CultureInfo.InvariantCulture),
+            TimeOnly.ParseExact(x.Bis, "HH:mm", System.Globalization.CultureInfo.InvariantCulture))).ToList();
+        var liste = new List<DemoAngebot>();
+        foreach (var v in Lesen<TherapieDatei>("therapie.json").Angebote)
+        {
+            var erste = new AngebotFassung
+            {
+                GiltAb = heute.AddDays(-v.SeitTagen), Name = v.Name, Art = v.Art == "einzel" ? AngebotArt.Einzel : AngebotArt.Gruppe,
+                Therapeut = v.Therapeut, Ort = v.Ort, Termine = Termine(v.Termine), Hoechstens = v.Hoechstens, Hinweis = v.Hinweis,
+                Anbieter = v.Anbieter, Erstellt = heute.AddDays(-v.SeitTagen - 3).ToDateTime(new TimeOnly(9, 0)), Kuerzel = v.Kuerzel,
+            };
+            var fassungen = new List<AngebotFassung> { erste };
+            if (v.Aenderung is AenderungVorlage a)
+                fassungen.Add(erste with
+                {
+                    GiltAb = heute.AddDays(-a.GiltAbVorTagen), Termine = Termine(a.Termine), Hinweis = a.Hinweis,
+                    Erstellt = heute.AddDays(-a.GiltAbVorTagen - 2).ToDateTime(new TimeOnly(9, 0)),
+                });
+            var zuteilungen = new List<Zuteilung>();
+            foreach (var t in v.Teilnehmer)
+            {
+                if (bewohner.FirstOrDefault(b => b.Nachname == t.Bewohner) is not Bewohner b) continue;
+                var ab = heute.AddDays(-t.AbVorTagen);
+                zuteilungen.Add(new Zuteilung
+                {
+                    BewohnerId = b.Id!.Value, Ab = ab, Kuerzel = v.Kuerzel,
+                    Erstellt = (t.AbVorTagen > 0 ? ab.AddDays(-2) : heute.AddDays(-1)).ToDateTime(new TimeOnly(10, 0)),
+                    BeendetAb = t.BeendetVorTagen is int e ? heute.AddDays(-e) : null,
+                    BeendetVon = t.BeendetVorTagen is null ? null : v.Kuerzel,
+                    BeendetErstellt = t.BeendetVorTagen is int e2 ? heute.AddDays(-e2 - 1).ToDateTime(new TimeOnly(11, 0)) : null,
+                });
+            }
+            liste.Add(new DemoAngebot(fassungen, zuteilungen));
+        }
+        return liste;
+    }
+
+    // ----- Visiten (Schritt 26) -----
+
+    private sealed class VisitenDatei
+    {
+        public List<VisiteDaten> Visiten { get; set; } = [];
+    }
+
+    public sealed class VisiteDaten
+    {
+        public int VorTagen { get; set; }
+        public string Art { get; set; } = "";
+        public string Arzt { get; set; } = "";
+        public string Teilnehmer { get; set; } = "";
+        public List<VisiteEintragDaten> Eintraege { get; set; } = [];
+    }
+
+    public sealed class VisiteEintragDaten
+    {
+        public string Bewohner { get; set; } = "";
+        public string Besprochen { get; set; } = "";
+        public List<AnordnungDaten> Anordnungen { get; set; } = [];
+        public string Facharzt { get; set; } = "";
+        public bool Dringend { get; set; }
+    }
+
+    public sealed class AnordnungDaten
+    {
+        public string Art { get; set; } = "dosis";
+        public string Medikament { get; set; } = "";   // Wirkstoff; fehlt er in der Datenbank, bleibt es Freitext
+    }
+
+    // Visiten aus daten/demo/visiten.json; Medikamente werden über den Wirkstoff gefunden.
+    public static List<Visite> Visiten(IReadOnlyList<Bewohner> bewohner, IReadOnlyList<Medikament> medikamente, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        return Lesen<VisitenDatei>("visiten.json").Visiten.Select(v => new Visite
+        {
+            Datum = heute.AddDays(-v.VorTagen), Art = v.Art, Arzt = v.Arzt, Teilnehmer = v.Teilnehmer, Kuerzel = "EF",
+            Erstellt = heute.AddDays(-v.VorTagen).ToDateTime(new TimeOnly(11, 30)),
+            Eintraege = v.Eintraege.Where(e => bewohner.Any(b => b.Nachname == e.Bewohner)).Select(e => new VisiteEintrag
+            {
+                BewohnerId = bewohner.First(b => b.Nachname == e.Bewohner).Id!.Value, Besprochen = e.Besprochen, Facharzt = e.Facharzt, Dringend = e.Dringend,
+                Anordnungen = e.Anordnungen.Select(a =>
+                {
+                    var m = medikamente.FirstOrDefault(x => x.Wirkstoff.Equals(a.Medikament, StringComparison.CurrentCultureIgnoreCase));
+                    return new VisiteAnordnung(0, VisitenRegeln.ArtAus(a.Art), m?.Id, m?.Wirkstoff ?? a.Medikament);
+                }).ToList(),
+            }).ToList(),
+        }).ToList();
+    }
+
+    // ----- Standardaufgaben (Schritt 25) -----
+
+    private sealed class StandardaufgabenDatei
+    {
+        public List<VorlageDaten> Vorlagen { get; set; } = [];
+    }
+
+    public sealed class VorlageDaten
+    {
+        public string Schicht { get; set; } = "nacht";
+        public string Text { get; set; } = "";
+        public string? Uhrzeit { get; set; }
+        public List<string> Tage { get; set; } = [];
+    }
+
+    // Standardaufgaben aus daten/demo/standardaufgaben.json (angelegt von der Bereichsleitung „EF“).
+    public static List<Kern.AufgabeVorlage> Standardaufgaben(DateTime jetzt)
+    {
+        var alle = new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday };
+        return Lesen<StandardaufgabenDatei>("standardaufgaben.json").Vorlagen.Select(v => new Kern.AufgabeVorlage
+        {
+            Text = v.Text, Schicht = BerichtRegeln.SchichtAus(v.Schicht),
+            Tage = v.Tage.Count == 0 ? alle : v.Tage.Select(t => Kurztage[t]).ToList(),
+            Uhrzeit = v.Uhrzeit is string u ? TimeOnly.ParseExact(u, "HH:mm", System.Globalization.CultureInfo.InvariantCulture) : null,
+            Erstellt = jetzt.AddDays(-30), Kuerzel = "EF",
+        }).ToList();
+    }
+
+    // ----- Fahrzeuge und Fahrten (Schritt 24) -----
+
+    private sealed class FahrtenDatei
+    {
+        public List<string> Fahrzeuge { get; set; } = [];
+        public List<FahrtVorlage> Fahrten { get; set; } = [];
+    }
+
+    public sealed class FahrtVorlage
+    {
+        public string Fahrzeug { get; set; } = "";
+        public int? LosVorMinuten { get; set; }   // gerade unterwegs: losgefahren vor … Minuten
+        public int DauerMinuten { get; set; } = 60;
+        public int? InTagen { get; set; }
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+        public string Zweck { get; set; } = "sonstiges";
+        public string Fahrer { get; set; } = "";
+        public List<string> Bewohner { get; set; } = [];
+        public string Ziel { get; set; } = "";
+        public bool Erledigt { get; set; }        // losgefahren und zurück wie geplant
+    }
+
+    public sealed record DemoFahrten(List<string> Fahrzeuge, List<(Fahrt Fahrt, DateTime? Los, DateTime? Zurueck)> Fahrten);
+
+    // Fahrzeuge und Fahrten aus daten/demo/fahrten.json; Zeiten relativ zu jetzt.
+    public static DemoFahrten Fahrten(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var datei = Lesen<FahrtenDatei>("fahrten.json");
+        var heute = DateOnly.FromDateTime(jetzt);
+        var liste = new List<(Fahrt, DateTime?, DateTime?)>();
+        jetzt = new DateTime(jetzt.Year, jetzt.Month, jetzt.Day, jetzt.Hour, jetzt.Minute, 0);
+        foreach (var v in datei.Fahrten)
+        {
+            DateTime von, bis;
+            DateTime? los = null, zurueck = null;
+            if (v.LosVorMinuten is int vor)
+            {
+                von = jetzt.AddMinutes(-vor);
+                bis = von.AddMinutes(v.DauerMinuten);
+                los = von;
+            }
+            else
+            {
+                var tag = heute.AddDays(v.InTagen ?? 0);
+                von = tag.ToDateTime(TimeOnly.ParseExact(v.Von, "HH:mm", System.Globalization.CultureInfo.InvariantCulture));
+                bis = tag.ToDateTime(TimeOnly.ParseExact(v.Bis, "HH:mm", System.Globalization.CultureInfo.InvariantCulture));
+                if (v.Erledigt) { los = von.AddMinutes(5); zurueck = bis.AddMinutes(-10); }
+            }
+            var ids = v.Bewohner.Select(n => bewohner.FirstOrDefault(b => b.Nachname == n)?.Id).OfType<long>().ToList();
+            liste.Add((new Fahrt
+            {
+                Fahrzeug = v.Fahrzeug, Von = von, Bis = bis, Zweck = FahrtRegeln.ZweckAus(v.Zweck), Fahrer = v.Fahrer, Bewohner = ids, Ziel = v.Ziel,
+                Erstellt = von.AddDays(-2), Kuerzel = v.Fahrer,
+            }, los, zurueck));
+        }
+        return new DemoFahrten(datei.Fahrzeuge, liste);
+    }
+
+    // ----- Wochenplan -----
+
+    private sealed class WochenplanDatei
+    {
+        public List<PlanVorlage> Eintraege { get; set; } = [];
+    }
+
+    public sealed class PlanVorlage
+    {
+        public string Titel { get; set; } = "";
+        public string Tag { get; set; } = "Mo";
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+        public string Ort { get; set; } = "";
+        public System.Text.Json.JsonElement Fuer { get; set; }
+        public int AbVorTagen { get; set; }
+        public int? EntferntVorTagen { get; set; }
+        public PlanAenderungVorlage? Aenderung { get; set; }
+    }
+
+    public sealed class PlanAenderungVorlage
+    {
+        public string Fuer { get; set; } = "";
+        public string Tag { get; set; } = "Mo";
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+        public int AbVorTagen { get; set; }
+        public string Hinweis { get; set; } = "";
+    }
+
+    public sealed record DemoPlan(PlanEintrag Eintrag, PlanEintrag? Ersatz, DateOnly? EntferntAb);
+
+    // Freie Einträge aus daten/demo/wochenplan.json, relativ zu heute.
+    public static List<DemoPlan> Wochenplan(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        static TimeOnly Zeit(string s) => TimeOnly.ParseExact(s, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        var liste = new List<DemoPlan>();
+        foreach (var v in Lesen<WochenplanDatei>("wochenplan.json").Eintraege)
+        {
+            var namen = v.Fuer.ValueKind == System.Text.Json.JsonValueKind.String && v.Fuer.GetString() == "alle"
+                ? bewohner.Select(b => b.Nachname).ToList()
+                : v.Fuer.EnumerateArray().Select(x => x.GetString() ?? "").ToList();
+            foreach (var b in bewohner.Where(b => namen.Contains(b.Nachname)))
+            {
+                var ab = heute.AddDays(-v.AbVorTagen);
+                var eintrag = new PlanEintrag
+                {
+                    BewohnerId = b.Id!.Value, Termin = new Wochentermin(Kurztage[v.Tag], Zeit(v.Von), Zeit(v.Bis)), Titel = v.Titel, Ort = v.Ort,
+                    Ab = ab, Erstellt = ab.AddDays(-1).ToDateTime(new TimeOnly(10, 0)), Kuerzel = "AB",
+                };
+                PlanEintrag? ersatz = null;
+                if (v.Aenderung is PlanAenderungVorlage a && a.Fuer == b.Nachname)
+                {
+                    var neuAb = heute.AddDays(-a.AbVorTagen);
+                    ersatz = eintrag with
+                    {
+                        Termin = new Wochentermin(Kurztage[a.Tag], Zeit(a.Von), Zeit(a.Bis)), Hinweis = a.Hinweis, Ab = neuAb,
+                        Erstellt = neuAb.AddDays(-1).ToDateTime(new TimeOnly(11, 0)), Kuerzel = "CD",
+                    };
+                }
+                liste.Add(new DemoPlan(eintrag, ersatz, v.EntferntVorTagen is int e ? heute.AddDays(-e) : null));
+            }
+        }
+        return liste;
+    }
+
+    // ----- Kalender -----
+
+    private sealed class KalenderDatei
+    {
+        public List<KalenderVorlage> Termine { get; set; } = [];
+    }
+
+    public sealed class KalenderVorlage
+    {
+        public string Art { get; set; } = "bewohner";
+        public string Titel { get; set; } = "";
+        public List<string> Bewohner { get; set; } = [];
+        public int? InTagen { get; set; }
+        public string? Naechster { get; set; }
+        public string Von { get; set; } = "";
+        public int? EndeInTagen { get; set; }
+        public string Bis { get; set; } = "";
+        public string Ort { get; set; } = "";
+        public string Hinweis { get; set; } = "";
+        public string Treffpunkt { get; set; } = "";
+        public string Begleitung { get; set; } = "";
+        public bool Abgesagt { get; set; }
+        public bool Haus { get; set; }   // Schritt 24: Kalender „Haus“
+        public KalenderAenderungVorlage? Aenderung { get; set; }
+    }
+
+    public sealed class KalenderAenderungVorlage
+    {
+        public int InTagen { get; set; }
+        public string Von { get; set; } = "";
+        public string Bis { get; set; } = "";
+        public string Hinweis { get; set; } = "";
+    }
+
+    // Termine aus daten/demo/kalender.json, relativ zu heute; je Termin die Fassungen.
+    // Fehlt ein genannter Bewohner, entfällt der Termin.
+    public static List<List<KalenderFassung>> Kalender(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        static TimeOnly Zeit(string s) => TimeOnly.ParseExact(s, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+        var liste = new List<List<KalenderFassung>>();
+        foreach (var v in Lesen<KalenderDatei>("kalender.json").Termine)
+        {
+            var ids = v.Bewohner.Select(n => bewohner.FirstOrDefault(b => b.Nachname == n)?.Id).ToList();
+            if (ids.Any(i => i is null)) continue;
+            DateOnly tag = heute.AddDays(v.InTagen ?? 0);
+            if (v.Naechster is string w)
+            {
+                int abstand = ((int)Kurztage[w] - (int)heute.DayOfWeek + 7) % 7;
+                tag = heute.AddDays(abstand == 0 ? 7 : abstand);   // der nächste solche Wochentag nach heute
+            }
+            var ende = v.EndeInTagen is int e ? heute.AddDays(e) : tag;
+            var erste = new KalenderFassung
+            {
+                Art = KalenderRegeln.ArtAus(v.Art), Titel = v.Titel, Beginn = tag.ToDateTime(Zeit(v.Von)), Ende = ende.ToDateTime(Zeit(v.Bis)),
+                Ort = v.Ort, Hinweis = v.Hinweis, Bewohner = ids.Select(i => i!.Value).ToList(), Treffpunkt = v.Treffpunkt, Begleitung = v.Begleitung,
+                Haus = v.Haus, Erstellt = (tag < heute ? tag : heute).AddDays(-7).ToDateTime(new TimeOnly(9, 0)), Kuerzel = v.Haus ? "RS" : "AB",
+            };
+            var fassungen = new List<KalenderFassung> { erste };
+            if (v.Aenderung is KalenderAenderungVorlage a)
+            {
+                var neu = heute.AddDays(a.InTagen);
+                fassungen.Add(erste with
+                {
+                    Beginn = neu.ToDateTime(Zeit(a.Von)), Ende = neu.ToDateTime(Zeit(a.Bis)), Hinweis = a.Hinweis,
+                    Erstellt = jetzt.AddHours(-5), Kuerzel = "CD",
+                });
+            }
+            if (v.Abgesagt) fassungen.Add(fassungen[^1] with { Abgesagt = true, Erstellt = jetzt.AddHours(-3), Kuerzel = "CD" });
+            liste.Add(fassungen);
+        }
+        return liste;
+    }
+
+    // ----- Biografie -----
+
+    private sealed class BiografieDatei
+    {
+        public List<BiografieVorlage> Biografien { get; set; } = [];
+    }
+
+    public sealed class BiografieVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public List<AbschnittVorlage> Abschnitte { get; set; } = [];
+        public BiografieAenderungVorlage? Aenderung { get; set; }
+    }
+
+    public sealed class AbschnittVorlage
+    {
+        public int Nr { get; set; }
+        public string Text { get; set; } = "";
+        public bool Angegeben { get; set; }
+    }
+
+    public sealed class BiografieAenderungVorlage
+    {
+        public int Nr { get; set; }
+        public int VorTagen { get; set; }
+        public string Alt { get; set; } = "";
+    }
+
+    // Biografien aus daten/demo/biografie.json; bei einer Änderung zuerst die alte Fassung.
+    public static List<(long BewohnerId, BiografieFassung Fassung)> Biografien(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var liste = new List<(long, BiografieFassung)>();
+        foreach (var v in Lesen<BiografieDatei>("biografie.json").Biografien)
+        {
+            if (bewohner.FirstOrDefault(b => b.Nachname == v.Bewohner) is not Bewohner b) continue;
+            var angelegt = jetzt.Date.AddDays(-60).AddHours(10);
+            foreach (var a in v.Abschnitte)
+            {
+                if (v.Aenderung is BiografieAenderungVorlage ae && ae.Nr == a.Nr)
+                {
+                    liste.Add((b.Id!.Value, new BiografieFassung { Abschnitt = a.Nr, Text = ae.Alt, Erstellt = angelegt, Kuerzel = "AB" }));
+                    liste.Add((b.Id!.Value, new BiografieFassung { Abschnitt = a.Nr, Text = a.Text, Angegeben = a.Angegeben, Erstellt = jetzt.Date.AddDays(-ae.VorTagen).AddHours(15), Kuerzel = "CD" }));
+                }
+                else liste.Add((b.Id!.Value, new BiografieFassung { Abschnitt = a.Nr, Text = a.Text, Angegeben = a.Angegeben, Erstellt = angelegt, Kuerzel = "AB" }));
+            }
+        }
+        return liste;
+    }
+
+    // ----- Monatsreflexion -----
+
+    private sealed class ReflexionDatei
+    {
+        public List<ReflexionVorlage> Reflexionen { get; set; } = [];
+    }
+
+    private sealed class ReflexionVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public bool Fertig { get; set; }
+        public List<string> Texte { get; set; } = [];
+    }
+
+    // Reflexionen für den vergangenen Monat aus daten/demo/reflexion.json. Fertige haben zwei
+    // Fassungen (Entwurf, dann fertig), damit der Verlauf etwas zeigt.
+    public static List<ReflexionFassung> Reflexionen(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var monat = ReflexionRegeln.Vorschlag(DateOnly.FromDateTime(jetzt));
+        var entwurf = jetzt.Date.AddDays(-Math.Min(6, jetzt.Day + 2)).AddHours(14);
+        var liste = new List<ReflexionFassung>();
+        foreach (var v in Lesen<ReflexionDatei>("reflexion.json").Reflexionen)
+        {
+            if (bewohner.FirstOrDefault(b => b.Nachname == v.Bewohner) is not Bewohner b) continue;
+            var f = new ReflexionFassung { BewohnerId = b.Id!.Value, Monat = monat, Texte = v.Texte, Erstellt = entwurf, Kuerzel = "AB" };
+            liste.Add(f);
+            if (v.Fertig) liste.Add(f with { Fertig = true, Erstellt = entwurf.AddDays(1).AddHours(1), Kuerzel = "CD" });
+        }
+        return liste;
+    }
+
+    // ----- HEB-Bogen -----
+
+    private sealed class HebDatei
+    {
+        public List<HebVorlage> Boegen { get; set; } = [];
+    }
+
+    private sealed class HebVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public string Art { get; set; } = "B";
+        public int? Nummer { get; set; }
+        public int BisVorMonaten { get; set; }
+        public bool Fertig { get; set; }
+        public Dictionary<string, string> Texte { get; set; } = [];
+    }
+
+    public sealed record DemoHeb(long BewohnerId, Bogenart Art, DateOnly Von, DateOnly Bis, int? Nummer, List<HebFassung> Fassungen);
+
+    // Bögen aus daten/demo/heb.json; der Zeitraum beginnt am Ende des vorherigen Bogens.
+    public static List<DemoHeb> HebBoegen(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        var liste = new List<DemoHeb>();
+        foreach (var gruppe in Lesen<HebDatei>("heb.json").Boegen.GroupBy(v => v.Bewohner))
+        {
+            if (bewohner.FirstOrDefault(b => b.Nachname == gruppe.Key) is not Bewohner b) continue;
+            DateOnly? letztesEnde = null;
+            foreach (var v in gruppe.OrderByDescending(v => v.BisVorMonaten))
+            {
+                var bis = heute.AddMonths(-v.BisVorMonaten);
+                var von = letztesEnde ?? (Enum.Parse<Bogenart>(v.Art) == Bogenart.A ? b.Aufnahmedatum : bis.AddMonths(-12));
+                if (von < b.Aufnahmedatum) von = b.Aufnahmedatum;
+                var erstellt = bis.ToDateTime(new TimeOnly(10, 0));
+                var f = new HebFassung { Texte = v.Texte, Hilfebedarf = new Dictionary<int, int?>(), Erstellt = erstellt, Kuerzel = "AB" };
+                var fassungen = new List<HebFassung> { f };
+                if (v.Fertig) fassungen.Add(f with { Fertig = true, Erstellt = erstellt.AddDays(2), Kuerzel = "RS" });
+                liste.Add(new DemoHeb(b.Id!.Value, Enum.Parse<Bogenart>(v.Art), von, bis, v.Nummer, fassungen));
+                letztesEnde = bis;
+            }
+        }
+        return liste;
+    }
+
+    private static Bericht Erzeugen(Bewohner b, DateTime zeit, Random zufall, BerichtTexte bausteine, DateTime jetzt, bool wichtig)
+    {
+        int bereich = zufall.Next(0, 6);   // 0 = allgemein
+        var texte = bausteine.Texte[bereich == 0 ? "allgemein" : bereich.ToString()];
+        var nachtraege = new List<Nachtrag>();
+        if (zufall.Next(20) == 0)
+        {
+            var erfasst = zeit.AddHours(zufall.Next(1, 4));
+            if (erfasst <= jetzt)
+                nachtraege.Add(new Nachtrag(0, 0, erfasst, bausteine.Kuerzel[zufall.Next(bausteine.Kuerzel.Count)],
+                    bausteine.Nachtraege[zufall.Next(bausteine.Nachtraege.Count)]));
+        }
+        return new Bericht
+        {
+            BewohnerId = b.Id ?? 0,
+            Zeitpunkt = zeit,
+            Schicht = BerichtRegeln.SchichtZu(zeit),
+            Verfasser = bausteine.Kuerzel[zufall.Next(bausteine.Kuerzel.Count)],
+            Bereiche = bereich == 0 ? [] : [bereich],
+            Text = texte[zufall.Next(texte.Count)],
+            Wichtig = wichtig,
+            Erfasst = zeit.AddMinutes(zufall.Next(5, 40)) is var e && e <= jetzt ? e : jetzt,
+            Nachtraege = nachtraege,
+        };
+    }
+
+    // ----- Statusmeldungen (Mehrplatzbetrieb) -----
+
+    private sealed class StatusDatei
+    {
+        public List<StatusVorlage> Meldungen { get; set; } = [];
+    }
+
+    private sealed class StatusVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public string Text { get; set; } = "";
+        public string Bereich { get; set; } = "";
+        public string Kuerzel { get; set; } = "";
+        public int VorMinuten { get; set; }
+        public double FuerStunden { get; set; }
+    }
+
+    // Je Meldung: Bewohner-Id, Text, Bereich, Kürzel, gesetzt, gilt bis (älteste zuerst).
+    public static List<(long BewohnerId, string Text, string Bereich, string Kuerzel, DateTime Erstellt, DateTime GiltBis)> Statusmeldungen(
+        IReadOnlyList<Bewohner> bewohner, DateTime jetzt) =>
+        Lesen<StatusDatei>("status.json").Meldungen
+            .Where(v => bewohner.Any(b => b.Nachname == v.Bewohner))
+            .Select(v =>
+            {
+                var erstellt = jetzt.AddMinutes(-v.VorMinuten);
+                return (bewohner.First(b => b.Nachname == v.Bewohner).Id!.Value, v.Text, v.Bereich, v.Kuerzel, erstellt, erstellt.AddHours(v.FuerStunden));
+            })
+            .OrderBy(m => m.erstellt).ToList();
+
+    // ----- Bezugspflege und Einzeltrainer (daten/demo/bezug.json) -----
+
+    private sealed class BezugDatei
+    {
+        public List<BezugVorlage> Bezugspflege { get; set; } = [];
+        public List<BezugVorlage> Einzeltrainer { get; set; } = [];
+    }
+
+    private sealed class BezugVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public string Kuerzel { get; set; } = "";
+        public string Art { get; set; } = "";
+        public int VorTagen { get; set; }
+        public string Von { get; set; } = "";
+    }
+
+    public sealed record DemoBezug(long BewohnerId, bool Trainer, string Kuerzel, string Art, DateOnly Ab, string Von);
+
+    public static List<DemoBezug> Bezuege(IReadOnlyList<Bewohner> bewohner, DateOnly heute)
+    {
+        var datei = Lesen<BezugDatei>("bezug.json");
+        IEnumerable<DemoBezug> Liste(List<BezugVorlage> v, bool trainer) => v
+            .Where(x => bewohner.Any(b => b.Nachname == x.Bewohner))
+            .Select(x => new DemoBezug(bewohner.First(b => b.Nachname == x.Bewohner).Id!.Value, trainer, x.Kuerzel, x.Art, heute.AddDays(-x.VorTagen), x.Von));
+        return [.. Liste(datei.Bezugspflege, false), .. Liste(datei.Einzeltrainer, true)];
+    }
+}

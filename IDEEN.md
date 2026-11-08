@@ -496,7 +496,7 @@ Umfang:
 - Übernehmen und anpassen aus `KhaosDE/Ausgangsliste` (Repository anhängen), Bereinigung
   nach `CLAUDE.md`. Dateien und Klassen im Modul möglichst gleich benennen wie in der
   Ausgangsliste, damit spätere Abgleiche leicht sind.
-- **Eigenes Projekt** `src/Dokusystem.Modul.Ausgangsliste/`, abhängig nur von Schnittstellen
+- **Eigenes Projekt** `src/DokuLine.Modul.Ausgangsliste/`, abhängig nur von Schnittstellen
   des Kerns, mit `AENDERUNGEN.md` — so lässt es sich in die eigenständige Ausgangsliste
   übernehmen (Abschnitt „Damit der Abgleich leicht bleibt“ der Brückendatei).
 - Nach dem Bau in `docs/bruecke-ausgangsliste.md` eintragen, bis zu welcher Version der
@@ -907,7 +907,7 @@ Umfang:
   „nur mit Beschränkung“.
 - Alles füllt die Fläche (Schritt 18).
 - Da das Dokumentationssystem Muttersystem ist: Änderungen in
-  `src/Dokusystem.Modul.Ausgangsliste/AENDERUNGEN.md` eintragen (Abgleich mit der
+  `src/DokuLine.Modul.Ausgangsliste/AENDERUNGEN.md` eintragen (Abgleich mit der
   eigenständigen Ausgangsliste, `docs/bruecke-ausgangsliste.md`).
 
 ## E-Mail und Kalender über externe Programme
@@ -1058,7 +1058,7 @@ Umfang (ändert den Eintrag „Visiten“):
 - Die bisherige Eingabe „Neue Visite …“ für einzelne Bewohner bleibt erhalten.
 
 ## Umbenennung in DokuLine, Teil 1 (Übergang)
-Status: freigegeben (Bauplan Schritt 26a1 — **vor allen anderen offenen Schritten bauen**)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Das Programm heißt **DokuLine**, Leittext **„Betreuung auf Augenhöhe“**. Alles wird
 umbenannt: Programm, Programmdatei, Projekte, Datenordner, Dokumentation — und danach das

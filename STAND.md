@@ -1,6 +1,6 @@
-# STAND — Dokumentationssystem
+# STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.1** (Kürzel automatisch aus der Anmeldung, Bauplan Schritt 26a).
+Stand: 08.11.2026. Version: **0.29.2** (Umbenennung in DokuLine, Teil 1, Bauplan Schritt 26a1).
 
 ## Aktuell
 
@@ -79,7 +79,13 @@ Teilnehmer der Visite und Begleitung eines Ausflugs sind eine **Auswahl aus den 
 vorbelegt mit der angemeldeten Person. Ohne Anmeldung sind „Neue Aufgabe“, „Notiz“ und „Neuer
 Termin“ gesperrt („Bitte zuerst anmelden.“).
 
-**Nächster Schritt:** Bauplan Schritt 26b „Ärzteverzeichnis“ (0.29.2).
+Neu in 0.29.2: Das Programm heißt **DokuLine** – „Betreuung auf Augenhöhe“ (Fenstertitel,
+Seitenleiste, Anmeldung, Einstellungen, Fußzeile jedes Ausdrucks). Programmdatei `DokuLine.exe`,
+Datenordner `%APPDATA%\DokuLine` (der Inhalt des alten Ordners wird beim ersten Start kopiert, der
+alte bleibt). Übergang: Jedes Release enthält die Datei auch als `Dokumentationssystem.exe`, und das
+Update findet das Repository unter altem und neuem Namen.
+
+**Nächster Schritt:** Bauplan Schritte 26a2 „Position Administrator mit Kürzel TST“ und 26a3 „Abmelden sichtbar machen, Tastenkürzel F12“ (zusammen 0.29.3).
 
 ## Fertig
 
@@ -87,9 +93,9 @@ Termin“ gesperrt („Bitte zuerst anmelden.“).
 - `CLAUDE.md`, `IDEEN.md`, `STAND.md`, `SITZUNGEN.md`, `README.md`, `docs/`.
 - 0.1.0 und 0.2.0 (Python, 05.11.2026): Programmrahmen mit Selbst-Update, Bewohnerakte.
 - 0.3.0 — Umstieg auf C# / .NET 10 und Gestaltung (06.11.2026):
-  - Aufbau: `src/Dokusystem.Kern` (ohne Fenster, auch unter Linux testbar),
-    `src/Dokusystem.Update` (einziges Projekt mit Internet), `src/Dokusystem` (Windows Forms),
-    Tests in `tests/`. Projektmappe `Dokumentationssystem.sln`.
+  - Aufbau: `src/DokuLine.Kern` (ohne Fenster, auch unter Linux testbar),
+    `src/DokuLine.Update` (einziges Projekt mit Internet), `src/DokuLine` (Windows Forms),
+    Tests in `tests/`. Projektmappe `DokuLine.sln`.
   - Gleicher Funktionsumfang wie 0.2.0: Hauptfenster mit Demo-Hinweis, Navigation, Version
     und Build; Datenordner; Update-Häkchen und `--kein-update`; `update.log`; Bewohnerakte
     mit Übersicht, Akte, Formular, Prüfregeln, drei Zuständen bei Allergien und
@@ -263,9 +269,9 @@ Termin“ gesperrt („Bitte zuerst anmelden.“).
     Bewohnerkarten) und `IModulDaten` im Kern (eigene Tabellen, eigene Demo-Daten). Einstellungen
     → „MODULE“ mit Häkchen je Modul und Untermodul. Ausgeschaltet: kein Eintrag links, kein
     Reiter, keine Marken; die Daten bleiben.
-  - Neues Projekt `src/Dokusystem.Bausteine` (Stil, Karten, Marken, Dialoge, Druckvorschau,
+  - Neues Projekt `src/DokuLine.Bausteine` (Stil, Karten, Marken, Dialoge, Druckvorschau,
     kleine Formulare, Schnittstelle für Module) – Programm und Module nutzen es gemeinsam.
-  - Neues Projekt `src/Dokusystem.Modul.Ausgangsliste` mit `AENDERUNGEN.md`, übernommen aus der
+  - Neues Projekt `src/DokuLine.Modul.Ausgangsliste` mit `AENDERUNGEN.md`, übernommen aus der
     Ausgangsliste 0.23.0 (bereinigt): Ausgangszeiten (allein / mit Bewohner, Infos,
     Personal-Begleitung, „wie offen geführt“), Anwesenheit und Abwesenheit mit Grund und Frist,
     Unterbringung mit Fristen und Rechtsregel, Tagesliste (A4 quer), Verlauf je Person;
@@ -571,9 +577,27 @@ Termin“ gesperrt („Bitte zuerst anmelden.“).
   - Ohne Anmeldung: „Neue Aufgabe …“, „Notiz für den Wohnbereich …“ und „Neuer Termin …“ gesperrt mit
     „Bitte zuerst anmelden.“ (die übrigen Knöpfe waren über die Rechte schon gesperrt); Hinweise
     „bitte zuerst oben rechts anmelden“ statt „unter Einstellungen ein Kürzel eintragen“.
+- 0.29.2 — Umbenennung in DokuLine, Teil 1 (Bauplan Schritt 26a1, 08.11.2026):
+  - Angezeigter Name „DokuLine“, darunter der Leittext „Betreuung auf Augenhöhe“: Fenstertitel,
+    Seitenleiste oben (Name und Leittext), Anmeldefenster, Update-Fenster, Meldungen, Einstellungen →
+    „PROGRAMM“ → „Über“. Jeder Ausdruck trägt unten „DokuLine · Demo — ausgedachte Daten“.
+  - Projekte, Ordner und Namensräume `DokuLine.*` (`src/DokuLine.Kern`, `src/DokuLine`,
+    `src/DokuLine.Modul.Ausgangsliste`, …), Lösung `DokuLine.sln`, Programmdatei `DokuLine.exe`.
+  - Release: `DokuLine.exe` und dieselbe Datei als `Dokumentationssystem.exe`, je mit `.sha256`;
+    Titel „DokuLine …“, Tags weiter `build-<Laufnummer>`.
+  - Update: fragt zuerst `…/repos/KhaosDE/DokuLine/releases/latest`, sonst die alte Adresse;
+    akzeptiert Downloads unter beiden Repository-Namen und beide Dateinamen; tauscht die laufende
+    Datei unter ihrem eigenen Namen aus (eine `Dokumentationssystem.exe` heißt weiter so).
+  - Datenordner `%APPDATA%\DokuLine`: Gibt es ihn nicht, aber `%APPDATA%\Dokumentationssystem`,
+    wird dessen Inhalt kopiert (erst in einen Zwischenordner, dann umbenannt); der alte Ordner bleibt
+    unangetastet, `update.log` vermerkt die Übernahme. Ein selbst gewählter Datenbank-Ort bleibt.
+  - Dokumentation: `CLAUDE.md` (Name, Pfade, Projektnamen), `README.md`, `docs/`, Pfade in `IDEEN.md`.
 
 ## Offene Punkte
 
+- **Teil 2: Repository umbenennen — sobald dieses Release erschienen ist** (`KhaosDE/Dokumentationssystem`
+  → `KhaosDE/DokuLine`, kein Claude-Code-Auftrag). Installationen älter als 0.29.2 kennen nur die
+  alte Download-Adresse; sie sollten vorher einmal gestartet werden, damit sie 0.29.2 holen.
 - Nachschlage-Ansicht (0.24.0): Mit der echten Seite des BfArM (anonyme Anmeldung, Weiterleitungen)
   nur so weit geprüft, dass die Adressen stimmen (08.11.2026); in den automatischen Tests wird das
   Laden ersetzt. Bitte in der Testliste von Hand prüfen. Ob die BfArM-Suche auf weitere Adressen
@@ -625,6 +649,19 @@ Termin“ gesperrt („Bitte zuerst anmelden.“).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 08.11.2026 (Schritt 26a1): Der Leittext steht unter dem Namen oben in der Seitenleiste (damit auf
+  jeder Seite, auch im Kopf der Übersicht); der Kopfbereich der Seiten behält Titel und Zähler.
+  Eingeklappt steht er im Hinweis am Info-Symbol.
+- 08.11.2026 (Schritt 26a1): Die Fußzeile mit Name und Demo-Hinweis setzt die gemeinsame Druckvorschau
+  auf jede Seite (unterer Rand), damit kein Ausdruck sie vergisst.
+- 08.11.2026 (Schritt 26a1): Nicht umbenannt: die Datenbankdatei `dokumentationssystem.db` (im
+  gemeinsamen Ordner liegt sie für alle Rechner; ältere Versionen finden sie so weiter) und die
+  internen Umgebungsvariablen `DOKUSYSTEM_*` (ein Update von 0.29.1 setzt `DOKUSYSTEM_FRISCH_AKTUALISIERT`).
+- 08.11.2026 (Schritt 26a1): Antwortet die neue Update-Adresse nicht (vor der Umbenennung: „nicht
+  gefunden“), fragt das Programm sofort die alte; nach der Umbenennung leitet GitHub die alte Adresse
+  weiter. Kann das Kopieren des alten Datenordners nicht beendet werden, meldet das Programm es und
+  startet nicht – beim nächsten Start wird erneut kopiert, nichts ist halb übernommen.
+
 - **Zwei Nummern.** Die Versionsnummer (z. B. 0.6.0) steht von Hand in
   `Directory.Build.props` und in dieser Datei; die Build-Nummer ist die Laufnummer von
   GitHub Actions und wird beim Bauen in die `.exe` geschrieben. Das Update vergleicht nur
@@ -644,7 +681,7 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   `einstellungen.json` (Update-Häkchen) und `update.log` werden weiter gemeinsam benutzt.
 - **„Demo-Daten zurücksetzen“ löscht nur die Bilder der Bewohner in der Datenbank**, nicht
   mehr den ganzen Ordner `bilder\`. Grund: Bilder der Python-Version bleiben so unberührt.
-- **Update-Projekt getrennt** (`Dokusystem.Update`): einziges Projekt mit Internetzugriff;
+- **Update-Projekt getrennt** (`DokuLine.Update`): einziges Projekt mit Internetzugriff;
   ein Test prüft, dass Kern und Oberfläche keine Netzbausteine und keine Adressen
   enthalten. Der Dateiname der `.exe` darf abweichen (z. B. „Dokumentationssystem (1).exe“
   nach doppeltem Herunterladen) – wie bei der Python-Version.
@@ -821,7 +858,7 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 07.11.2026 (Schritt 11): Modulverwaltung mit zwei Schnittstellen: `IModulDaten` im Kern
   (Tabellen, Demo-Daten) und `IModul` in den gemeinsamen Bausteinen (Seite, Akte-Reiter,
   Marken). Dafür wurden Stil, Karten-Bausteine, Dialoge, Druckvorschau und kleine Formulare in
-  das neue Projekt `src/Dokusystem.Bausteine` verschoben – sonst hinge das Modul vom Programm
+  das neue Projekt `src/DokuLine.Bausteine` verschoben – sonst hinge das Modul vom Programm
   ab, und das Programm vom Modul.
 - 07.11.2026 (Schritt 11): Das Modulprojekt baut zweimal: die Logik für .NET ohne Fenster
   (Kern-Tests laufen auch unter Linux) und alles zusammen für Windows.
@@ -1088,6 +1125,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.2:
+
+1. Die vorhandene `Dokumentationssystem.exe` starten: Sie lädt das Update und startet neu; die Datei
+   heißt weiter `Dokumentationssystem.exe`. Fenstertitel „DokuLine – Demo — ausgedachte Daten“, oben
+   links „DokuLine“ und darunter „Betreuung auf Augenhöhe“.
+2. Alle bisherigen Daten (Bewohner, Berichte, Anmeldung, Logo) sind da. Im Explorer `%APPDATA%`:
+   neuer Ordner `DokuLine` mit denselben Dateien, `Dokumentationssystem` liegt unverändert daneben.
+   In `DokuLine\update.log` steht „Datenordner übernommen: … Dateien …“.
+3. Anmeldefenster: „DokuLine“ und „Betreuung auf Augenhöhe“. Einstellungen → „PROGRAMM“ → „Über“.
+4. Ein Ausdruck (z. B. Übergabeblatt): unten links „DokuLine · Demo — ausgedachte Daten“.
+5. Releases auf GitHub: im neuesten Release `DokuLine.exe` und `Dokumentationssystem.exe`, je mit
+   `.sha256`. Der Link aus dem README lädt `DokuLine.exe`.
 
 Version 0.29.1:
 
