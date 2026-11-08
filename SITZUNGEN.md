@@ -44,3 +44,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Medikament anlegen: eingebettete Nachschlage-Ansicht (BfArM, Gelbe Liste) über der Eingabemaske, Feld Zulassungsnummer; CLAUDE.md Regel 6 um diese einzige Webansicht ergänzt (Chat „Programme/Apps“).
 - 08.11.2026 — Claude Code: Bauplan Schritt 19 „Mitarbeiter, Anmeldung und Rechte“ (0.22.0).
 - 08.11.2026 — Claude Code: Platzhalter für das Einrichtungslogo im Kopf (Wunsch Tobi in der Sitzung, mit 0.22.0).
+- 08.11.2026 — Claude Code: Bauplan Schritt 20 „Bezugspflege und Einzeltrainer“ (0.23.0).

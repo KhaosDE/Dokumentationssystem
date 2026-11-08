@@ -691,7 +691,7 @@ Hinweis für einen späteren Echtbetrieb: Anmeldung mit Kürzel macht jede Handl
 Person zuordenbar; vor einem Einsatz Datenschutz und Mitarbeitervertretung beteiligen.
 
 ## Bezugspflege und Einzeltrainer
-Status: freigegeben (Bauplan Schritt 20)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Jedem Bewohner werden eine Bezugspflege und optional ein Einzeltrainer zugeteilt; beides
 wird farblich gekennzeichnet.

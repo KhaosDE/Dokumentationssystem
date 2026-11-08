@@ -383,6 +383,9 @@ public sealed class FilterKnopf : Control
 // Statusleiste unten mit dem Farbschlüssel der Marken (Farbe nie allein, docs/gestaltung.md).
 public sealed class Statusleiste : Control
 {
+    // Bezugspflege und Einzeltrainer haben die Farbe der Person (Schritt 20) – das Kürzel steht immer dabei.
+    public const string BezugText = "Streifen: Bezugspflege, Punkt: Einzeltrainer";
+
     public Statusleiste()
     {
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
@@ -390,7 +393,7 @@ public sealed class Statusleiste : Control
         BackColor = Stil.Fensterhintergrund;
         Height = Stil.Px(this, 30);
         AccessibleRole = AccessibleRole.StatusBar;
-        AccessibleName = "Farbschlüssel: " + string.Join("; ", Stil.Farbschluessel.Select(f => f.Text));
+        AccessibleName = "Farbschlüssel: " + string.Join("; ", Stil.Farbschluessel.Select(f => f.Text)) + "; " + BezugText;
     }
 
     protected override void OnPaint(PaintEventArgs e)
@@ -414,5 +417,15 @@ public sealed class Statusleiste : Control
             TextRenderer.DrawText(g, text, Stil.Klein, new Rectangle(x, 0, Width, Height), Stil.TextMittel, flags);
             x += TextRenderer.MeasureText(g, text, Stil.Klein, Size.Empty, TextFormatFlags.NoPadding).Width + Stil.Px(this, Stil.AbstandGross);
         }
+        // Streifen und Punkt in neutralem Grau (die echte Farbe ist die der Person), nur wenn Platz ist.
+        int bezugBreite = Stil.Px(this, 20) + TextRenderer.MeasureText(g, BezugText, Stil.Klein, Size.Empty, TextFormatFlags.NoPadding).Width;
+        if (x + bezugBreite > Width) return;
+        using (var grau = new SolidBrush(Stil.TextLeise))
+        {
+            int hoehe = Stil.Px(this, 12);
+            g.FillRectangle(grau, x, (Height - hoehe) / 2f, Stil.Px(this, 4), hoehe);
+            g.FillEllipse(grau, x + Stil.Px(this, 7), (Height - Stil.Px(this, 8)) / 2f, Stil.Px(this, 8), Stil.Px(this, 8));
+        }
+        TextRenderer.DrawText(g, BezugText, Stil.Klein, new Rectangle(x + Stil.Px(this, 20), 0, Width, Height), Stil.TextMittel, flags);
     }
 }

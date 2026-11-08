@@ -30,6 +30,16 @@ public sealed class EinstellungenFenster : Form
     // Wer angemeldet ist (Anmeldung mit Kürzel, Schritt 19); gewechselt wird oben rechts im Kopf.
     public Label Angemeldet { get; } = new() { AutoSize = true, Font = Stil.Fett, UseMnemonic = false };
 
+    // Eigene Farbe für Bezugspflege und Einzeltrainer (Schritt 20): gehört zur Person, gilt sofort.
+    public Panel MeineFarbe { get; } = new() { Size = new Size(28, 28), BorderStyle = BorderStyle.FixedSingle };
+    public Button FarbeKnopf { get; } = Stil.NebenKnopf("Farbe wählen …");
+    public Button FarbeVorgabeKnopf { get; } = Stil.NebenKnopf("Vorgabe");
+    public Func<Color, Color?> FarbeWaehlen { get; set; } = aktuell =>
+    {
+        using var dialog = new ColorDialog { Color = aktuell, FullOpen = true };
+        return dialog.ShowDialog() == DialogResult.OK ? dialog.Color : null;
+    };
+
     // Abschnitt „VERWALTUNG“: Mitarbeiter, Bereiche und Positionen, Rechte (Schritt 19).
     public Button MitarbeiterKnopf { get; } = Stil.NebenKnopf("Mitarbeiter …");
     public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche und Positionen …");
@@ -114,6 +124,29 @@ public sealed class EinstellungenFenster : Form
 
         if (speicher is not null)
         {
+            string? kuerzel = ich?.Kuerzel;
+            void FarbeZeigen() => MeineFarbe.BackColor = kuerzel is null ? Stil.Fensterhintergrund : ColorTranslator.FromHtml(speicher.Farbe(kuerzel));
+            FarbeKnopf.Click += (_, _) =>
+            {
+                if (kuerzel is not null && FarbeWaehlen(MeineFarbe.BackColor) is Color c)
+                {
+                    speicher.FarbeSetzen(kuerzel, $"#{c.R:X2}{c.G:X2}{c.B:X2}");
+                    FarbeZeigen();
+                }
+            };
+            FarbeVorgabeKnopf.Click += (_, _) => { if (kuerzel is not null) { speicher.FarbeSetzen(kuerzel, null); FarbeZeigen(); } };
+            foreach (var k in new[] { FarbeKnopf, FarbeVorgabeKnopf }) { k.AutoSize = true; Stil.Sperren(k, kuerzel is null ? RechteRegeln.NichtAngemeldetText : null); }
+            FarbeZeigen();
+            MeineFarbe.Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0);
+            raster.Controls.Add(Beschriftung("Meine Farbe"));
+            raster.Controls.Add(Formular.Reihe(MeineFarbe, FarbeKnopf, FarbeVorgabeKnopf));
+            raster.Controls.Add(new Label());
+            raster.Controls.Add(new Label
+            {
+                Text = "Für Bezugspflege (Streifen auf der Karte) und Einzeltrainer (Punkt). Gilt sofort, auf allen Rechnern.",
+                AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+            });
+
             Ganz(Abschnitt("VERWALTUNG"));
             MitarbeiterKnopf.Click += (_, _) => { using var f = new MitarbeiterFenster(speicher); Dialog.Zeigen(f, this); };
             ListenKnopf.Click += (_, _) => { using var f = new ListenFenster(speicher); Dialog.Zeigen(f, this); };

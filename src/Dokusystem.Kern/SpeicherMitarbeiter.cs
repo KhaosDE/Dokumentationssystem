@@ -20,13 +20,13 @@ public sealed partial class Speicher
         var bereiche = Zuordnungen("SELECT kuerzel, team FROM team_mitglieder");
         var positionen = Zuordnungen("SELECT mp.kuerzel, mp.position FROM mitarbeiter_positionen mp JOIN positionen p ON p.name = mp.position ORDER BY p.nr, p.name");
         var liste = new List<Mitarbeiter>();
-        using var befehl = Befehl("SELECT kuerzel, vorname, nachname, fachkraft, aktiv FROM kollegen ORDER BY nachname, vorname", null, []);
+        using var befehl = Befehl("SELECT kuerzel, vorname, nachname, fachkraft, aktiv, farbe FROM kollegen ORDER BY nachname, vorname", null, []);
         using var leser = befehl.ExecuteReader();
         while (leser.Read())
         {
             string k = leser.GetString(0);
             liste.Add(new Mitarbeiter(k, leser.GetString(1), leser.GetString(2), leser.GetInt64(3) == 1, leser.GetInt64(4) == 1,
-                bereiche.GetValueOrDefault(k) ?? [], positionen.GetValueOrDefault(k) ?? []));
+                bereiche.GetValueOrDefault(k) ?? [], positionen.GetValueOrDefault(k) ?? []) { Farbe = leser.IsDBNull(5) ? null : leser.GetString(5) });
         }
         return liste;
     }
@@ -77,8 +77,8 @@ public sealed partial class Speicher
     private void MitarbeiterSchreiben(Mitarbeiter m, bool neu, SqliteTransaction transaktion)
     {
         if (neu)
-            Ausfuehren("INSERT INTO kollegen (kuerzel, vorname, nachname, fachkraft, aktiv) VALUES ($k, $v, $n, $f, $a)", transaktion,
-                ("$k", m.Kuerzel), ("$v", m.Vorname), ("$n", m.Nachname), ("$f", m.Fachkraft ? 1 : 0), ("$a", m.Aktiv ? 1 : 0));
+            Ausfuehren("INSERT INTO kollegen (kuerzel, vorname, nachname, fachkraft, aktiv, farbe) VALUES ($k, $v, $n, $f, $a, $c)", transaktion,
+                ("$k", m.Kuerzel), ("$v", m.Vorname), ("$n", m.Nachname), ("$f", m.Fachkraft ? 1 : 0), ("$a", m.Aktiv ? 1 : 0), ("$c", m.Farbe));
         else
             Ausfuehren("UPDATE kollegen SET vorname = $v, nachname = $n, fachkraft = $f, aktiv = $a WHERE kuerzel = $k COLLATE NOCASE", transaktion,
                 ("$k", m.Kuerzel), ("$v", m.Vorname), ("$n", m.Nachname), ("$f", m.Fachkraft ? 1 : 0), ("$a", m.Aktiv ? 1 : 0));

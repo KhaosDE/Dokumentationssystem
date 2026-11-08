@@ -30,6 +30,16 @@ public sealed class BewohnerBereich : Panel
 
     // „Neuer Bericht …“ für einen Bewohner (Akte oder Rechtsklick auf eine Karte); das Hauptfenster öffnet ihn.
     public event Action<long>? BerichtGewuenscht;
+
+    // „Bezug ändern …“ in der Akte (Schritt 20).
+    public bool BezugOeffnen(long bewohnerId)
+    {
+        if (speicher.Bewohner(bewohnerId) is not Bewohner b) return false;
+        using var fenster = new BezugFenster(speicher, b);
+        bool gespeichert = Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK;
+        Akte.NeuLaden();
+        return gespeichert;
+    }
     private readonly Panel aufgabenRahmen = new() { Dock = DockStyle.Top, BackColor = Stil.Seite };
     public event Action? AufgabenAnzeigen;
     public BewohnerFilter AktiverFilter { get; private set; } = BewohnerFilter.Alle;
@@ -51,6 +61,7 @@ public sealed class BewohnerBereich : Panel
         this.speicher = speicher;
         this.kopf = kopf;
         Akte = new AkteAnsicht(speicher) { Dock = DockStyle.Fill, Visible = false };
+        Akte.BezugGewuenscht += id => BezugOeffnen(id);
         BackColor = Stil.Seite;
         foreach (var filter in Enum.GetValues<BewohnerFilter>())
         {
@@ -118,6 +129,8 @@ public sealed class BewohnerBereich : Panel
         string kuerzel = werte.Kuerzel;
         var status = speicher.GeltendeStatusmeldungen(jetzt);
         string? berichtGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
+        var bezuege = speicher.Bezuege();
+        var farben = BezugAnzeige.Farben(speicher);
         Raster.KartenSetzen(sichtbar.Select(b =>
         {
             // Mehrplatz: Statusmeldung vorne; Bewohner eines anderen Wohnbereichs hinten gekennzeichnet.
@@ -130,6 +143,7 @@ public sealed class BewohnerBereich : Panel
             karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
             karte.BerichtGewuenscht += gewaehlt => BerichtGewuenscht?.Invoke(gewaehlt.Id!.Value);
             karte.BerichtSperren(berichtGrund);
+            BezugAnzeige.Setzen(karte, bezuege.GetValueOrDefault(b.Id!.Value), farben);
             return karte;
         }));
         Akte.Visible = false;
@@ -244,6 +258,14 @@ public sealed class AkteAnsicht : Panel
     public Label OffenGefuehrt { get; } = new();
     public Label Wohnbereich { get; } = new();
     public Label Alter { get; } = new();
+    // Bezugspflege und Einzeltrainer (Schritt 20): Farbpunkt der Person, Name und Kürzel, seit wann.
+    public Label Bezugspflege { get; } = new();
+    public Label Einzeltrainer { get; } = new();
+    private readonly FarbPunkt bezugPunkt = new(), trainerPunkt = new();
+    public Button BezugKnopf { get; } = Stil.NebenKnopf("Bezug ändern …");
+    public Button BezugVerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
+    private readonly FlowLayoutPanel bezugKnoepfe = new() { AutoSize = true, WrapContents = false, BackColor = Stil.Flaeche, Margin = new Padding(0) };
+    public event Action<long>? BezugGewuenscht;
 
     // Marken im Kopf der Akte: Statusmeldung (lang, mit Bereich, Kürzel und Zeit), Zimmer, „offen geführt“,
     // Hinweise der Module (z. B. Widersprüche).
@@ -290,6 +312,7 @@ public sealed class AkteAnsicht : Panel
                  {
                      ("Geburtsdatum", Geburtsdatum), ("Aufnahmedatum", Aufnahmedatum), ("Beschlussende", Beschlussende),
                      ("Offen geführt", OffenGefuehrt), ("Wohnbereich", Wohnbereich),
+                     ("Bezugspflege", Bezugspflege), ("Einzeltrainer", Einzeltrainer),
                  })
         {
             tabelle.Controls.Add(new Label
@@ -302,6 +325,15 @@ public sealed class AkteAnsicht : Panel
             wert.ForeColor = Stil.TextNormal;
             wert.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
             wert.UseMnemonic = false;
+            if (wert == Bezugspflege || wert == Einzeltrainer)
+            {
+                var punkt = wert == Bezugspflege ? bezugPunkt : trainerPunkt;
+                punkt.Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0);
+                var mitPunkt = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0), BackColor = Stil.Flaeche };
+                mitPunkt.Controls.AddRange([punkt, wert]);
+                tabelle.Controls.Add(mitPunkt);
+                continue;
+            }
             if (wert != Geburtsdatum)
             {
                 tabelle.Controls.Add(wert);
@@ -317,6 +349,11 @@ public sealed class AkteAnsicht : Panel
             tabelle.Controls.Add(zelle);
         }
         stammdaten.Controls.Add(tabelle);
+        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0); }
+        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf]);
+        stammdaten.Controls.Add(bezugKnoepfe);
+        BezugKnopf.Click += (_, _) => { if (Bewohner?.Id is long id) BezugGewuenscht?.Invoke(id); };
+        BezugVerlaufKnopf.Click += (_, _) => BezugVerlaufZeigen();
 
         Reiter.Gewechselt += _ => ReiterZeigen();
         Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Berichte, Medikation, Wochenplan, Biografie, Reflexion, Heb]);
@@ -396,6 +433,33 @@ public sealed class AkteAnsicht : Panel
         AutoScrollPosition = new Point(-scroll.X, -scroll.Y);
     }
 
+    // Bezugspflege und Einzeltrainer mit Farbe der Person; „keine“ grau.
+    private void BezugZeigen(Bewohner b)
+    {
+        var bezug = speicher.Bezug(b.Id!.Value);
+        var farben = BezugAnzeige.Farben(speicher);
+        var namen = speicher.AlleMitarbeiter().ToDictionary(m => m.Kuerzel, m => m.Anzeige, StringComparer.OrdinalIgnoreCase);
+        void Zeile(Label text, FarbPunkt punkt, Zuordnung? z, string keine, string vorne)
+        {
+            text.Text = z is null ? keine : $"{vorne}{namen.GetValueOrDefault(z.Kuerzel, z.Kuerzel)} · seit {Datum.Text(z.Ab)}";
+            text.ForeColor = z is null ? Stil.TextLeise : Stil.TextNormal;
+            punkt.Farbe = z is null ? null : BezugAnzeige.Farbe(farben, z.Kuerzel);
+        }
+        Zeile(Bezugspflege, bezugPunkt, bezug.Bezugspflege, "keine", "");
+        Zeile(Einzeltrainer, trainerPunkt, bezug.Einzeltrainer, "keiner", bezug.Einzeltrainer is { } t ? $"{t.Art} · " : "");
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BezugKnopf);
+    }
+
+    public void BezugVerlaufZeigen()
+    {
+        if (Bewohner?.Id is not long id) return;
+        var namen = speicher.AlleMitarbeiter().ToDictionary(m => m.Kuerzel, m => m.Name, StringComparer.OrdinalIgnoreCase);
+        var verlauf = BezugRegeln.Verlauf(speicher.Bezugspflegen(id), speicher.Einzeltrainer(id), namen);
+        using var fenster = new TextFenster($"Bezugspflege und Einzeltrainer – {Bewohner.Name}",
+            verlauf.Count == 0 ? "Noch keine Einträge." : string.Join(Environment.NewLine, verlauf));
+        Dialog.Zeigen(fenster, FindForm());
+    }
+
     private void Fuellen(Bewohner b)
     {
         bild.Setzen(Bilder.Pfad(b.Bild), BewohnerRegeln.Initialen(b), b.Nachname);
@@ -442,6 +506,7 @@ public sealed class AkteAnsicht : Panel
         OffenGefuehrt.ForeColor = offenUnklar ? Stil.Achtung.Text : Stil.TextNormal;
         OffenGefuehrt.Font = offenUnklar ? Stil.FettKursiv : Stil.Fett;
         Wohnbereich.Text = b.Wohnbereich;
+        BezugZeigen(b);
         AutoScrollPosition = Point.Empty;
         PerformLayout();
         Invalidate(true);
@@ -497,9 +562,11 @@ public sealed class AkteAnsicht : Panel
         y += abschnitt.PreferredHeight + S(Stil.AbstandMini);
 
         var groesse = tabelle.GetPreferredSize(Size.Empty);
-        stammdaten.Bounds = new Rectangle(x, y, breite, groesse.Height + 2 * innen);
+        var knoepfe = bezugKnoepfe.GetPreferredSize(Size.Empty);
+        stammdaten.Bounds = new Rectangle(x, y, breite, groesse.Height + S(Stil.AbstandKlein) + knoepfe.Height + 2 * innen);
         tabelle.Location = new Point(innen, innen);
         tabelle.Size = groesse;
+        bezugKnoepfe.Bounds = new Rectangle(new Point(innen, tabelle.Bottom + S(Stil.AbstandKlein)), knoepfe);
         y += stammdaten.Height + rand;
         AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y);
     }

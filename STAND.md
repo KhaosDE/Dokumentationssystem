@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.22.0** (Mitarbeiter, Anmeldung und Rechte, Bauplan Schritt 19).
+Stand: 08.11.2026. Version: **0.23.0** (Bezugspflege und Einzeltrainer, Bauplan Schritt 20).
 
 ## Aktuell
 
@@ -34,7 +34,12 @@ Neu in 0.22.0: **Anmelden mit dem Kürzel** beim Start (ohne Passwort), **Mitarb
 Bereichen, Positionen und „Fachkraft“, eine **Rechte-Tabelle** nach Positionen. Ohne Recht bleiben
 Knöpfe sichtbar, aber grau und nennen den Grund.
 
-**Nächster Schritt:** Bauplan Schritt 20 „Bezugspflege und Einzeltrainer“ (0.23.0).
+Neu in 0.23.0: **Bezugspflege** und **Einzeltrainer** je Bewohner – farbig auf Karten und in der
+Akte (Farbe der Person, Kürzel immer dabei), Filter „Meine Bezugsbewohner“ und „Meine
+Einzeltrainings“, eigene Farbe in den Einstellungen.
+
+**Nächster Schritt:** Bauplan Schritt 21 „Medikation als Tabelle, Medikamentendatenbank in den
+Einstellungen“ (0.24.0).
 
 ## Fertig
 
@@ -383,6 +388,21 @@ Knöpfe sichtbar, aber grau und nennen den Grund.
   - Außerdem (Wunsch Tobi in der Sitzung): **Platzhalter für das Einrichtungslogo** oben rechts im
     Kopf – ein gestrichelter Rahmen „Logo der Einrichtung“, solange kein Bild gewählt ist; ein
     Klick öffnet die Einstellungen („Bild im Kopf“). Das Logo selbst kommt nie ins Repository.
+
+- 0.23.0 — Bezugspflege und Einzeltrainer (Bauplan Schritt 20, 08.11.2026):
+  - Akte → Stammdaten: Bezugspflege und Einzeltrainer (mit Art) mit Farbpunkt, Name, Kürzel und
+    „seit“; „Bezug ändern …“ (Recht „Bewohner anlegen und bearbeiten“) und „Verlauf …“. Wechsel
+    sind neue Einträge mit Datum und Kürzel; die Datenbank verbietet Überschreiben.
+  - Ab fünf Bezugsbewohnern ein Hinweis im Fenster, keine Grenze. Arten: DBT, Suchtgruppe; eine
+    neu eingetippte Art kommt in die Liste.
+  - Karten (Bewohner und Übersicht): kräftiger Farbstreifen links für die Bezugspflege, ihr
+    Kürzel als farbige Marke neben dem Zimmer; Einzeltrainer als kleiner Punkt mit „DBT · PR“.
+    Statusleiste: „Streifen: Bezugspflege, Punkt: Einzeltrainer“ (wenn Platz ist).
+  - Übersicht: „Meine Bezugsbewohner“ und „Meine Einzeltrainings“ (aus allen Bereichen).
+  - Einstellungen → „Meine Farbe“ (Farbauswahl, „Vorgabe“); die Farbe gehört zur Person und gilt
+    auf allen Rechnern. Ohne eigene Farbe eine feste Vorgabe aus dem Kürzel.
+  - Demo `daten/demo/bezug.json`: Bezugspflege für alle, Anna Bachstelze mit fünf (Hinweis),
+    ein früherer Wechsel bei Anton Ahorn, drei Einzeltrainings (DBT, Suchtgruppe).
 
 ## Offene Punkte
 
@@ -767,11 +787,28 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   Bereiche und Positionen pflegt, wer „Mitarbeiter verwalten (alle)“ hat.
 - 08.11.2026 (Schritt 19): Nicht angemeldet (nach „Abmelden“) ist alles gesperrt; beim Start ist
   die Anmeldung Pflicht („Beenden“ schließt das Programm).
+- 08.11.2026 (Schritt 20): Bezugspflege und Einzeltrainer ändert man in einem eigenen kleinen
+  Fenster aus den Stammdaten („Bezug ändern …“), nicht im Formular „Bearbeiten …“ – das ist schon
+  so hoch, dass es auf kleinen Bildschirmen nicht mehr ganz zu sehen wäre. Das Kürzel der
+  Bezugspflege steht als farbige Marke neben dem Zimmer (der Streifen selbst ist zu schmal für
+  Schrift). „Meine …“-Filter zeigen Bewohner aller Bereiche.
 - 08.11.2026 (Schritt 19): Bereich des Rechners (0.20.0) und Bereiche der Mitarbeiter sind dieselbe
   Liste; die Statusmeldung trägt weiter den Bereich des Rechners. Die Einstellungen der Module und
   Fristen bekommen ihre Rechte mit Schritt 29 (neue Einstellungen).
 
 ## Testliste für Tobi
+
+Version 0.23.0:
+
+1. Übersicht: Karten mit farbigem Streifen links und Kürzel neben dem Zimmer (Bezugspflege);
+   bei Berta Birke ein Punkt „DBT · PR“. Unten in der Statusleiste die Erklärung.
+2. Als „AB“: „Meine Bezugsbewohner“ → fünf Karten. Als „PR“: „Meine Einzeltrainings“ → Berta
+   Birke und Gustav Ginster (Wohnbereich B).
+3. Akte Karl Kiefer → Stammdaten: Bezugspflege Karin Lerche. „Bezug ändern …“ → Anna Bachstelze
+   → Hinweis „6 Bewohner“; Einzeltrainer Bruno Meise, Art „Achtsamkeit“ eintippen → Speichern.
+   „Verlauf …“ zeigt auch den früheren Eintrag.
+4. Einstellungen → „Meine Farbe“ → eine Farbe wählen → Streifen und Punkte dieser Person ändern
+   sich (auch auf dem zweiten Rechner).
 
 Version 0.22.0:
 
