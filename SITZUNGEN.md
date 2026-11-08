@@ -67,3 +67,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 26e „Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme“ (0.29.7).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26f „Fenster „Ärztliche Informationen““ (0.29.8).
 - 08.11.2026 — Bauplan Schritte 26h–26k freigegeben: 23 Bewohner je Bereich, Kopfzeile aufgeräumt mit Aktionsleiste, „Bewohner“ als Liste mit Berichten, Visite „Nächster Bewohner“ unter der Eingabe (Chat „Programme/Apps“).
+- 08.11.2026 — Übersicht nach Entwurf „Heute zuerst“ (26l) und Ansicht „Laufende Therapien“ als Anwesenheitstafel (26m) freigegeben (Chat „Programme/Apps“).

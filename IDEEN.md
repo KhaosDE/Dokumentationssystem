@@ -63,6 +63,8 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 26i | Kopfzeile nur „Wo bin ich“, Logo, Abmelden; Aktionen darunter | 0.29.11 |
 | 26j | Bereich „Bewohner“ als Liste mit Berichten | 0.29.12 |
 | 26k | Visite: „Nächster Bewohner“ unter der Texteingabe | 0.29.13 |
+| 26l | Übersicht neu: „Heute wichtig“ und Bewohnerliste | 0.29.14 |
+| 26m | Therapie: Ansicht „Laufende Therapien“ als Anwesenheitstafel | 0.29.15 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
@@ -1325,3 +1327,65 @@ Umfang:
   ausgegrauten Zustand: „Erst den Bericht zu diesem Bewohner schreiben.“
 - „◀ Vorheriger“ ist immer aktiv. Die Liste links bleibt anklickbar wie bisher.
 - Sonst keine Änderung an der Visite.
+
+## Übersicht neu: „Heute wichtig“ und Bewohnerliste
+Status: freigegeben (Bauplan Schritt 26l)
+Datum: 08.11.2026
+Was: Die Übersicht bekommt einen neuen Aufbau: links „Heute wichtig“, rechts alle Bewohner des
+Bereichs als Liste. Das Kartenraster in der Übersicht entfällt.
+Warum: Entscheidung Tobi (08.11.2026) aus vier Entwürfen (Variante B „Heute zuerst“). Mit
+23 Bewohnern je Bereich ist eine Zeile pro Person übersichtlicher als Karten.
+Umfang:
+- Kopfzeile und Aktionsleiste wie in Schritt 26i. Hauptaktion „Neuer Bericht …“; außerdem
+  „Neue Aufgabe …“, „Neue Nachricht …“, „Neuer Bewohner …“ (grün), rechts Bereichswahl
+  R1/R2/R3 und „Drucken …“.
+- **Links „Heute wichtig“** (etwa 360–400 px breit), vier Kästen untereinander, jeder mit
+  Überschrift in Großbuchstaben und Zähler:
+  1. **Übergaben offen:** Bewohner mit Zimmer, Text, „seit <Datum> · <Kürzel>“. Sie bleiben
+     stehen, bis sie erledigt sind.
+  2. **Termine heute:** Uhrzeit und Text aus dem Tagesplan, nach Uhrzeit sortiert, mit dem
+     Status aus dem Tagesplan (z. B. „gegangen“, „noch offen“).
+  3. **Laufender Dienst · noch offen:** „6 von 9 erledigt“, Fortschrittsbalken, die offenen
+     Aufgaben zum Abhaken (Kürzel und Uhrzeit wie bisher).
+  4. **Nachrichten ungelesen:** Absender → Empfänger und die erste Zeile.
+  Ein Klick auf einen Eintrag öffnet ihn an seiner Stelle (Übergabe, Tagesplan, Aufgaben,
+  Nachrichten). Ist ein Kasten leer, steht dort „Nichts offen“, er verschwindet nicht.
+- **Rechts die Bewohnerliste** als Tabelle, eine Zeile je Bewohner, nach Zimmer sortiert,
+  Spalten: Zimmer/Bett · Name · Bezugspflege (Farbe mit Kürzel) · Wo (im Haus, Ausgang bis …,
+  Termin …, in Therapie … bis …, Klinik seit …) · Hinweise (Marken: Beschluss endet …,
+  Allergie, Übergabe, Geburtstag). Darüber „Bewohner R2 · 23 · 17 im Haus“ und ein Suchfeld.
+  Mit 23 Bewohnern bei 1920 × 1080 ohne Bildlauf lesbar, wo möglich.
+- Doppelklick auf eine Zeile öffnet die Akte. Die Liste in der Übersicht zeigt **keine
+  Berichte**; das macht der Bereich „Bewohner“ (Schritt 26j). So unterscheiden sich beide.
+- Unter 1100 px Breite rutscht „Heute wichtig“ über die Liste.
+- Statusleiste: „DEMO — ausgedachte Daten“, Datum, Dienst, Stand, Farbschlüssel der Marken.
+
+## Therapie: Ansicht „Laufende Therapien“ als Anwesenheitstafel
+Status: freigegeben (Bauplan Schritt 26m)
+Datum: 08.11.2026
+Was: Im Therapie-Bereich eine neue Ansicht, die zeigt, welche Therapien gerade laufen und wer
+dort ist.
+Warum: Entscheidung Tobi (08.11.2026): Der Entwurf „Anwesenheitstafel“ (Variante C) soll für
+die Therapien verwendet werden, die aktuell laufen.
+Umfang:
+- Therapie-Bereich: neuer erster Reiter **„Laufende Therapien“**. Bereichswahl „Alle
+  Bereiche“ (Vorgabe für die Therapie) oder R1/R2/R3 (Vorgabe für einen Wohnbereich). Alle
+  sehen die Ansicht. Bestätigen darf, wer es heute im Tagesplan darf.
+- **Oben eine Tagesleiste** von 7 bis 21 Uhr: alle Therapieangebote des Tages als Balken in
+  ihrer Länge, ein orangefarbener Strich für „jetzt“. Ein Klick auf einen Balken öffnet das
+  Angebot. Überschneidungen liegen in eigenen Zeilen.
+- **Darunter eine Spalte je laufender Therapie:** Name, Ort, Therapeut-Kürzel, „bis 11:30“,
+  Belegung „5 von 8“. Darin die Teilnehmer als kleine Kärtchen (Bereich und Zimmer, Name,
+  Bezugspflege-Kürzel) mit dem Teilnahmestatus als Wort mit Farbe: „gegangen“, „noch offen“,
+  „abgesagt“, „ausgefallen“.
+- **Daneben zwei feste Spalten:** „Gleich“ (Beginn in den nächsten 30 Minuten, mit
+  Teilnehmerzahl) und „Noch offen“ (hat begonnen, Teilnahme nicht bestätigt; Knöpfe
+  „gegangen“, „abgesagt“ direkt am Kärtchen).
+- Läuft gerade nichts: „Gerade läuft keine Therapie. Nächste: <Name> um <Uhrzeit>.“
+- **Unten „Rest des Tages“:** die übrigen Angebote nach Uhrzeit, mit Teilnehmerzahl.
+- **Gleiche Daten wie Tagesplan und Wochenplan:** ein Teilnahme-Datensatz, kein zweiter.
+  Was hier bestätigt wird, steht sofort im Tagesplan, in der Übersicht („in Therapie … bis …“)
+  und im Wochenplan des Bewohners.
+- Aktualisiert sich jede Minute und bei Änderungen von anderen Rechnern (Mehrplatz).
+- Demo-Daten: Therapieangebote über den ganzen Tag, sodass beim Vorführen zu den meisten
+  Uhrzeiten etwas läuft. Je Angebot 3–8 Teilnehmer aus R1–R3.
