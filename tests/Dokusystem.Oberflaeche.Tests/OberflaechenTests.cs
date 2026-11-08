@@ -13,7 +13,7 @@ public class HauptfensterTests
         Assert.Contains("Demo — ausgedachte Daten", fenster.Text);
         Assert.Equal("Demo — ausgedachte Daten", KopfBereich.DemoHinweis);
         Assert.Equal(KopfBereich.DemoHinweis, fenster.Kopf.AccessibleName);
-        Assert.Equal(["Übersicht", "Tagesplan", "Bewohner", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+        Assert.Equal(["Übersicht", "Tagesplan", "Bewohner", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
                       "Ausgangsliste", "Einstellungen"],
             fenster.Navigation.Select(n => n.Text));
         Assert.Equal("Bewohner", fenster.AktiverBereich);

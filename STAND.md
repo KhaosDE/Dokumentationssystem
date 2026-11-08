@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.28.0** (Aufgaben nach Schichten mit Standardaufgaben, Bauplan Schritt 25).
+Stand: 08.11.2026. Version: **0.29.0** (Visiten, Bauplan Schritt 26).
 
 ## Aktuell
 
@@ -65,7 +65,15 @@ gruppiert** (oben die laufende, Liegengebliebenes davor) und **Standardaufgaben*
 Beginn jeder Schicht die Aufgaben entstehen; nicht erledigte bleiben „aus der Nachtschicht offen“,
 bis jemand sie erledigt oder **begründet schließt**. Ausdruck: Aufgaben der Schicht.
 
-**Nächster Schritt:** Bauplan Schritt 26 „Visiten“ (0.29.0).
+Neu in 0.29.0: **Visiten** unter „Übergabe“ – je Bewohner das Besprochene, geänderte Anordnungen
+(Art und Medikament, aus der Datenbank oder frei) und nötige Facharzttermine. Nach dem Speichern
+blendet das Programm sofort die **Aufgaben** ein: „Medikament anlegen …“ (Name vorbelegt, danach
+gleich die Verordnung), „Im Medikamentenplan eintragen …“ (Akte, Reiter „Medikamentenplan“, das
+passende Formular mit Arzt und Datum der Visite), „Termin eintragen …“ (Kalender beim Bewohner, auf
+Wunsch mit Fahrt). Die Medikation ändert das Programm nicht selbst. Je Bewohner entsteht ein Bericht
+(Lebensbereich 5).
+
+**Nächster Schritt:** Bauplan Schritt 27 „Ausgangsliste als übersichtliche Liste“ (0.30.0).
 
 ## Fertig
 
@@ -518,6 +526,33 @@ bis jemand sie erledigt oder **begründet schließt**. Ausdruck: Aufgaben der Sc
     hat“.
   - Demo `daten/demo/standardaufgaben.json`: Rundgänge, Türen und Fenster, Kühlschränke, Wäsche,
     Nachtbericht im Nachtdienst; Post und Pinnwand im Frühdienst; Abendrunde im Spätdienst.
+- 0.29.0 — Visiten (Bauplan Schritt 26, 08.11.2026):
+  - Seitenleiste „Visiten“ unter „Übergabe“: alle Visiten, neueste oben, Filter nach Bewohner und
+    Zeitraum (von/bis). Je Visite Datum, Art, Arzt, wer dabei war; je Bewohner das Besprochene und
+    Marken („Quetiapin: Dosis geändert“, „Anordnungen nicht geändert“, „Facharzttermin nötig:
+    Neurologie, dringend“).
+  - „Neue Visite …“ (Recht „Visiten eintragen“): Datum, Art (Hausarzt, Psychiater, Facharzt oder
+    frei), Arzt (ausgedacht), dabei (Kürzel), Bewohner hinzufügen; je Bewohner „Was wurde
+    besprochen?“, „Anordnungen geändert“ mit Zeilen (neu verordnet, Dosis geändert, pausiert,
+    abgesetzt; Medikament aus der Datenbank oder frei eingetippt) und „Facharzttermin nötig“
+    (Fachrichtung, dringend).
+  - Beim Speichern in einem Zug: die Visite, je Bewohner ein Bericht (Lebensbereich 5 – Quelle für
+    Monatsreflexion und HEB-Bogen), eine Übergabe („Visite: Anordnungen geändert“ bzw.
+    „Facharzttermin nötig“) und je geänderter Anordnung bzw. Facharzttermin eine Aufgabe für die
+    laufende Schicht.
+  - Einblendung „Aufgaben aus der Visite“ gleich danach, je Aufgabe ein Knopf; nach jeder
+    erledigten kommt sie mit den übrigen wieder, „Später“ schließt sie. Dieselben Knöpfe auf den
+    Karten unter „Aufgaben“ (Herkunft „aus einer Visite“).
+  - Medikament fehlt in der Datenbank → „Neues Medikament“ mit vorbelegtem Namen (Recht
+    „Medikament anlegen“), danach gleich „Neue Verordnung“ im Medikamentenplan des Bewohners.
+    Medikament vorhanden → Akte beim Reiter „Medikamentenplan“ und das passende Formular: neu →
+    „Neue Verordnung“, Dosis → Stufenplan, pausiert → Pause, abgesetzt → Absetzen; vorbelegt mit Arzt,
+    Datum und dem Hinweis „laut Visite …“ (steht im Verlauf). Gespeichert → Aufgabe erledigt.
+  - Facharzttermin: „Termin eintragen …“ oder „Erledigt“ fragt Datum, Uhrzeit, Ort und auf Wunsch
+    eine Fahrt (Fahrzeug, los/zurück, Fahrer; Warnung bei Doppelbuchung) → Termin „Facharzt: …“ im
+    Kalender (Bereich) beim Bewohner, Aufgabe erledigt.
+  - Demo `daten/demo/visiten.json`: drei Visiten (Dosis geändert, neues Medikament noch nicht in der
+    Datenbank, dringender Facharzttermin); ihre Aufgaben sind erledigt.
 
 ## Offene Punkte
 
@@ -959,6 +994,22 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 26): Visiten stehen in der Akte als Bericht im Reiter „Berichte“ (Text beginnt
+  mit „Visite …“, Lebensbereich 5) – kein eigener Reiter (die einfachere Lösung laut Auftrag).
+- 08.11.2026 (Schritt 26): Eine gespeicherte Visite wird nicht geändert (wie Berichte); Korrekturen
+  gehen über einen Nachtrag zum Bericht. Die Übergabe zur Visite gilt bis zur nächsten Schicht, die
+  Aufgaben bleiben stehen, bis sie erledigt sind.
+- 08.11.2026 (Schritt 26): Eine Medikations-Aufgabe ist erledigt, sobald das Formular im
+  Medikamentenplan gespeichert ist (Kürzel der angemeldeten Person); bricht man ab, bleibt sie offen.
+  „Dosis geändert“ öffnet den Stufenplan (eine Stufe ab heute = neue Grundverordnung); gibt es für das
+  Medikament noch keine Verordnung, öffnet „Neue Verordnung“. Die Verknüpfung zur Visite steht im
+  Hinweis der Änderung („laut Visite 08.11.2026 (Psychiater, Dr. …)“).
+- 08.11.2026 (Schritt 26): Frei eingetippte Medikamente werden der Datenbank zugeordnet, wenn
+  Wirkstoff oder ein Handelsname gleich lautet (beim Speichern der Visite und nach dem Anlegen).
+  Die Knöpfe der Aufgaben sind gesperrt wie die Formulare dahinter („Medikament anlegen“ bzw.
+  „Medikation bearbeiten“, beide nur Fachkräfte).
+- 08.11.2026 (Schritt 26): Die Demo-Fahrt, die gerade unterwegs ist, nimmt Emil Eiche mit (statt
+  Anton Ahorn), damit sein Status („in der Holzwerkstatt“) in Vorführung und Tests sichtbar bleibt.
 - 08.11.2026 (Schritt 25): Standardaufgaben entstehen, sobald das Programm die Aufgaben liest
   (Seite „Aufgaben“, Zähler in der Seitenleiste, Abgleich alle 30 Sekunden) – also zu Beginn der
   Schicht, sofern das Programm läuft. Für Schichten, in denen kein Rechner lief, entstehen sie nicht
@@ -1017,6 +1068,28 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
 ## Testliste für Tobi
 
+Version 0.29.0:
+
+1. Seitenleiste: „Visiten“ steht unter „Übergabe“. Drei Demo-Visiten; Bewohner „Anton Ahorn“ →
+   nur seine („Quetiapin: Dosis geändert“). „von“ = vorgestern → nur die Visite von gestern;
+   „bis“ = „abc“ → roter Hinweis.
+2. „Neue Visite …“ ohne Angaben → „Speichern“ → Hinweise. Dann Art „Psychiater“, Arzt „Dr. Test“,
+   Anton Ahorn hinzufügen: Besprochenes, „Anordnungen geändert“: Dosis geändert – Quetiapin; weitere
+   Anordnung: neu verordnet – „Testsalbe“ (eintippen). Berta Birke: Besprochenes, „Facharzttermin
+   nötig“: Kardiologie, dringend → Speichern.
+3. Sofort „Aufgaben aus der Visite“ mit drei Knöpfen. „Im Medikamentenplan eintragen …“ → Akte Anton
+   Ahorn, Reiter „Medikamentenplan“, Fenster „Stufenplan – Quetiapin“ mit Arzt, Datum und „laut
+   Visite …“; eine Stufe ab heute → Speichern → die Einblendung kommt mit zwei Aufgaben wieder.
+4. „Termin eintragen …“: Datum in 5 Tagen, 10:00, Ort; „Fahrt mit Fahrzeug eintragen“ 09:30–11:30 →
+   Speichern → Kalender: „Facharzt: Kardiologie“ bei Berta Birke; Fahrt beim VW Bus.
+5. „Später“ → unter „Aufgaben“ steht „Neues Medikament anlegen: Testsalbe …“ (aus einer Visite) mit
+   „Medikament anlegen …“ → Name vorbelegt → Speichern → „Neue Verordnung“ mit Testsalbe → Menge →
+   Speichern → Aufgabe erledigt.
+6. Akte Berta Birke, Reiter „Berichte“: „Visite … Facharzttermin nötig: Kardiologie, dringend.“
+   Übergabe: „Visite: Facharzttermin nötig“.
+7. Als „KL“ (keine Fachkraft): Visite eintragen geht; „Im Medikamentenplan eintragen …“ ist grau
+   („Nur für Fachkräfte.“).
+
 Version 0.28.0:
 
 1. Aufgaben: Überschriften nach Schicht („JETZT: …“ oben, davor ggf. „AUS FRÜHEREN SCHICHTEN
@@ -1035,7 +1108,7 @@ Version 0.27.0:
 1. Übersicht → „FAHRZEUGE“: Caddy „unterwegs seit …, zurück geplant … (Fahrer KL)“, VW Bus „vor
    Ort“. Emil Eiche hat auf seiner Karte „abwesend: unterwegs mit Caddy bis …“. Nach einiger Zeit
    wird der Caddy rot („Rückkehr überschritten“).
-2. Beim Caddy „zurück“ → „vor Ort“, Anton Ahorn ist nicht mehr abwesend.
+2. Beim Caddy „zurück“ → „vor Ort“, Emil Eiche ist nicht mehr abwesend.
 3. „Neue Fahrt …“: VW Bus, heute, 23:00–23:30, Sporttherapie, Berta Birke, Ziel „Hallenbad“ →
    beim VW Bus „nächste Fahrt 23:00“. Noch eine Fahrt mit dem VW Bus um 23:10 → gelbe Warnung
    „Doppelbuchung“, Knopf heißt „Trotzdem speichern“.

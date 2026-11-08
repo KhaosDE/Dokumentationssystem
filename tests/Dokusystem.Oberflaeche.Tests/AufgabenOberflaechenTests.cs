@@ -61,7 +61,7 @@ public class AufgabenOberflaechenTests
             Assert.Contains(seite.Karten, k => k.MarkenTexte.Any(m => m.StartsWith("für Spätdienst ")));
             Assert.False(seite.KuerzelHinweis.Visible);
             seite.ErledigteZeigen.Checked = true;
-            Assert.Equal("ERLEDIGT (1)", seite.Abschnitte.Last());
+            Assert.Equal("ERLEDIGT (4)", seite.Abschnitte.Last());   // 1 Demo-Aufgabe und 3 aus den Demo-Visiten (Schritt 26)
             Assert.StartsWith("erledigt ", seite.Karten.Last().MarkenTexte[0]);
             Assert.False(seite.Karten.Last().Erledigt.Visible);
         }

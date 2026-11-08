@@ -136,7 +136,9 @@ public sealed class AufgabenTests : IDisposable
     public void Demo_Aufgaben_relativ_zu_heute()
     {
         s.DemoZuruecksetzen();
-        var alle = s.Aufgaben(Jetzt, auchErledigte: true);
+        var mitVisiten = s.Aufgaben(Jetzt, auchErledigte: true);
+        Assert.Equal(3, mitVisiten.Count(a => a.VisiteAnordnungId is not null || a.VisiteEintragId is not null && !a.Offen));   // Demo-Visiten (Schritt 26): erledigt
+        var alle = mitVisiten.Where(a => a.VisiteAnordnungId is null && a.VisiteEintragId is null).ToList();
         Assert.Equal(6, alle.Count);
         Assert.Single(alle, a => !a.Offen);
         var ueberfaellig = Assert.Single(alle, a => AufgabenRegeln.Ueberfaellig(a, Jetzt));
@@ -149,7 +151,7 @@ public sealed class AufgabenTests : IDisposable
         Assert.Equal(5, s.OffeneAufgaben());
 
         s.DemoZuruecksetzen();   // zweimal laden verdoppelt nichts
-        Assert.Equal(6, s.Aufgaben(Jetzt, auchErledigte: true).Count);
+        Assert.Equal(9, s.Aufgaben(Jetzt, auchErledigte: true).Count);   // 6 + 3 aus den Demo-Visiten
     }
 
     [Fact]

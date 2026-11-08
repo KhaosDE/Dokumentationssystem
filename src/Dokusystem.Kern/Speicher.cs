@@ -25,6 +25,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoKalenderHaus = "demo_kalender_haus";            // Schritt 24: Demo-Termine im Kalender „Haus“
     private const string DemoFahrten = "demo_fahrten";                      // Schritt 24: Fahrzeuge und Fahrten
     private const string DemoStandardaufgaben = "demo_standardaufgaben";    // Schritt 25: Standardaufgaben je Schicht
+    private const string DemoVisiten = "demo_visiten";                      // Schritt 26: Visiten mit allen drei Fällen
     private const string DemoWochenplan = "demo_wochenplan";
     private const string DemoKalender = "demo_kalender";
     private const string DemoBiografie = "demo_biografie";
@@ -572,6 +573,42 @@ public sealed partial class Speicher : IDisposable
         ALTER TABLE aufgaben ADD COLUMN vorlage_id INTEGER REFERENCES aufgabe_vorlagen(id);
         CREATE UNIQUE INDEX aufgaben_aus_vorlage ON aufgaben (vorlage_id, schicht_tag, schicht) WHERE vorlage_id IS NOT NULL;
         """,
+        // 21 – Visiten: je Bewohner das Besprochene, geänderte Anordnungen und Facharzttermine; die
+        // Aufgaben daraus merken sich ihre Anordnung bzw. ihren Eintrag. Nichts wird überschrieben.
+        """
+        CREATE TABLE visiten (
+            id         INTEGER PRIMARY KEY,
+            datum      TEXT NOT NULL,
+            art        TEXT NOT NULL,
+            arzt       TEXT NOT NULL,
+            teilnehmer TEXT NOT NULL DEFAULT '',
+            erstellt   TEXT NOT NULL,
+            kuerzel    TEXT NOT NULL
+        );
+        CREATE TABLE visite_eintraege (
+            id          INTEGER PRIMARY KEY,
+            visite_id   INTEGER NOT NULL REFERENCES visiten(id) ON DELETE CASCADE,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            besprochen  TEXT NOT NULL,
+            facharzt    TEXT NOT NULL DEFAULT '',
+            dringend    INTEGER NOT NULL DEFAULT 0 CHECK (dringend IN (0, 1))
+        );
+        CREATE TABLE visite_anordnungen (
+            id             INTEGER PRIMARY KEY,
+            eintrag_id     INTEGER NOT NULL REFERENCES visite_eintraege(id) ON DELETE CASCADE,
+            art            TEXT NOT NULL CHECK (art IN ('neu', 'dosis', 'pause', 'absetzen')),
+            medikament_id  INTEGER,   -- Medikament aus der Datenbank (ohne Fremdschlüssel: der Demo-Bestand kann neu geladen werden)
+            medikament     TEXT NOT NULL
+        );
+        CREATE TRIGGER visiten_bleiben BEFORE UPDATE ON visiten
+            BEGIN SELECT RAISE(ABORT, 'Visiten werden nicht überschrieben.'); END;
+        CREATE TRIGGER visite_eintraege_bleiben BEFORE UPDATE ON visite_eintraege
+            BEGIN SELECT RAISE(ABORT, 'Visiten werden nicht überschrieben.'); END;
+        CREATE TRIGGER visite_anordnungen_bleiben BEFORE UPDATE ON visite_anordnungen
+            BEGIN SELECT RAISE(ABORT, 'Visiten werden nicht überschrieben.'); END;
+        ALTER TABLE aufgaben ADD COLUMN visite_anordnung_id INTEGER REFERENCES visite_anordnungen(id);
+        ALTER TABLE aufgaben ADD COLUMN visite_eintrag_id INTEGER REFERENCES visite_eintraege(id);
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -720,12 +757,12 @@ public sealed partial class Speicher : IDisposable
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
              therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null, wochenplan = Meta(DemoWochenplan) is null,
              kalender = Meta(DemoKalender) is null || Meta(DemoKalenderHaus) is null, fahrten = Meta(DemoFahrten) is null,
-             standard = Meta(DemoStandardaufgaben) is null,
+             standard = Meta(DemoStandardaufgaben) is null, visiten = Meta(DemoVisiten) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
@@ -739,6 +776,7 @@ public sealed partial class Speicher : IDisposable
         if (therapie || wochenplan) DemoWochenplanEinfuegen(transaktion);   // Teilnahmen hängen an den Zuteilungen
         if (kalender) DemoKalenderEinfuegen(transaktion);
         if (fahrten) DemoFahrtenEinfuegen(transaktion);
+        if (visiten) DemoVisitenEinfuegen(transaktion);
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
         if (heb) DemoHebEinfuegen(transaktion);
@@ -773,6 +811,7 @@ public sealed partial class Speicher : IDisposable
             DemoWochenplanEinfuegen(transaktion);
             DemoKalenderEinfuegen(transaktion);
             DemoFahrtenEinfuegen(transaktion);
+            DemoVisitenEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);
             DemoHebEinfuegen(transaktion);
