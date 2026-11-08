@@ -90,6 +90,9 @@ public sealed class Umgebung : IDisposable
         Speicher = new Speicher();
         Modulverwaltung.Anmelden(Speicher);
         Speicher.DemoBeimErstenStart();
+        // Standardaufgaben (Schritt 25) hängen von der Uhrzeit ab: in den Tests aus, damit die Zahlen
+        // gleich bleiben. Wer sie prüft, schaltet sie selbst ein.
+        foreach (var v in Speicher.Vorlagen()) Speicher.VorlageAktiv(v.Id, false);
     }
 
     public Bewohner Demo(string nachname) => Speicher.AlleBewohner().First(b => b.Nachname == nachname);

@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.27.0** (Kalender: Bereich und Haus, Fahrzeuge, Bauplan Schritt 24).
+Stand: 08.11.2026. Version: **0.28.0** (Aufgaben nach Schichten mit Standardaufgaben, Bauplan Schritt 25).
 
 ## Aktuell
 
@@ -60,7 +60,12 @@ nur mit Recht änderbar) und **Fahrzeuge** (VW Bus, Caddy): Fahrten eintragen, �
 „unterwegs seit …, zurück geplant …“ mit „losgefahren“/„zurück“ in Übersicht und Kalender,
 Warnung bei Doppelbuchung, Mitfahrende im Tagesplan und während der Fahrt abwesend.
 
-**Nächster Schritt:** Bauplan Schritt 25 „Aufgaben nach Schichten mit Standardaufgaben“ (0.28.0).
+Neu in 0.28.0: **Schichtzeiten** des Bereichs in den Einstellungen, **Aufgaben nach Schicht
+gruppiert** (oben die laufende, Liegengebliebenes davor) und **Standardaufgaben**, aus denen zu
+Beginn jeder Schicht die Aufgaben entstehen; nicht erledigte bleiben „aus der Nachtschicht offen“,
+bis jemand sie erledigt oder **begründet schließt**. Ausdruck: Aufgaben der Schicht.
+
+**Nächster Schritt:** Bauplan Schritt 26 „Visiten“ (0.29.0).
 
 ## Fertig
 
@@ -496,6 +501,23 @@ Warnung bei Doppelbuchung, Mitfahrende im Tagesplan und während der Fahrt abwes
   - Demo `daten/demo/fahrten.json`: Caddy gerade mit Emil Eiche zum Arzt unterwegs, eine
     Sporttherapie-Fahrt gestern, der Tierpark-Ausflug mit dem VW Bus in acht Tagen; im Kalender
     „Haus“ Hausversammlung und Brandschutzübung.
+
+- 0.28.0 — Aufgaben nach Schichten mit Standardaufgaben (Bauplan Schritt 25, 08.11.2026):
+  - Einstellungen → „SCHICHTEN“: Beginn von Früh, Spät, Nacht (Vorgabe 6, 14, 22 Uhr) für den
+    Bereich dieses Rechners; gilt für alle Rechner des Bereichs (Recht „Einstellungen des
+    Bereichs“). Danach richten sich Schicht der Berichte, Übergabe und Aufgaben.
+  - Aufgaben gruppiert: „AUS FRÜHEREN SCHICHTEN OFFEN“, „JETZT: Frühdienst Di 10.11.“, die
+    folgenden Schichten, „WER ZEIT HAT“.
+  - „Standardaufgaben …“: Text, Schicht, Wochentage (täglich oder ausgewählte), Uhrzeit,
+    Bewohner; neu, ändern, stilllegen (Recht „Aufgaben-Vorlagen verwalten“). Zu Beginn jeder
+    Schicht entstehen daraus die Aufgaben (je Vorlage und Schicht genau eine), Marke
+    „Standardaufgabe“, fällig zur Uhrzeit bzw. zum Schichtende.
+  - Nicht erledigte Standardaufgaben: Marke „aus der Nachtschicht offen“; „Schließen mit
+    Begründung …“ (Begründung Pflicht, steht danach bei der Aufgabe).
+  - „Aufgaben der Schicht drucken …“: was jetzt dran ist (auch Liegengebliebenes) und „wer Zeit
+    hat“.
+  - Demo `daten/demo/standardaufgaben.json`: Rundgänge, Türen und Fenster, Kühlschränke, Wäsche,
+    Nachtbericht im Nachtdienst; Post und Pinnwand im Frühdienst; Abendrunde im Spätdienst.
 
 ## Offene Punkte
 
@@ -937,6 +959,17 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 25): Standardaufgaben entstehen, sobald das Programm die Aufgaben liest
+  (Seite „Aufgaben“, Zähler in der Seitenleiste, Abgleich alle 30 Sekunden) – also zu Beginn der
+  Schicht, sofern das Programm läuft. Für Schichten, in denen kein Rechner lief, entstehen sie nicht
+  nachträglich. Je Vorlage und Schicht höchstens eine Aufgabe (Datenbank-Regel).
+- 08.11.2026 (Schritt 25): „Begründet schließen“ ist ein Abschluss mit Notiz (wie „erledigt“, aber
+  mit Begründung) – nur bei Standardaufgaben, die anderen werden erledigt oder weitergegeben.
+  Vorlagen sind Einstellungen: Ändern überschreibt sie, schon entstandene Aufgaben bleiben gleich.
+- 08.11.2026 (Schritt 25): Schichtzeiten je Bereich in der Datenbank; ein Rechner liest sie beim
+  Start und nach dem Speichern der Einstellungen. Früh vor Spät vor Nacht, die Nacht beginnt vor
+  Mitternacht. Die Oberflächentests legen die Demo-Standardaufgaben still, damit ihre Zahlen nicht
+  von der Uhrzeit abhängen.
 - 08.11.2026 (Schritt 24): „Haus“ ist ein Merkmal je Termin (wie die Art), kein zweiter Kalender
   in der Datenbank – so bleiben Verlauf, Konfliktschutz und Wochenplan gleich. Haus-Termine sind
   grau (die Farbe von „abwesend“ ist sonst nur auf Karten) und tragen „Haus:“ im Titel.
@@ -983,6 +1016,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.28.0:
+
+1. Aufgaben: Überschriften nach Schicht („JETZT: …“ oben, davor ggf. „AUS FRÜHEREN SCHICHTEN
+   OFFEN“). Im Nachtdienst stehen Rundgänge, Türen/Fenster, Nachtbericht als „Standardaufgabe“.
+2. Eine Standardaufgabe aus einer früheren Schicht: Marke „aus der Nachtschicht offen“; „Schließen
+   mit Begründung …“ ohne Text → Hinweis; mit Text → weg; „Erledigte zeigen“ → „geschlossen …:
+   Begründung“.
+3. „Standardaufgaben …“: als „CD“ nur ansehen; als „EF“ „Neue Standardaufgabe …“ (z. B. Montag
+   09:00, Frühdienst) → in der Liste; „Stilllegen“ → entsteht nicht mehr.
+4. Einstellungen → „SCHICHTEN“: z. B. Nacht 21:45 → Speichern → Berichte und Aufgaben richten sich
+   danach. Falsche Reihenfolge → Hinweis, nichts gespeichert.
+5. „Aufgaben der Schicht drucken …“ → Vorschau mit Überschrift „Aufgaben – Nachtdienst …“.
 
 Version 0.27.0:
 

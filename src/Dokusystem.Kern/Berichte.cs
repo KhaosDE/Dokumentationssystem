@@ -87,24 +87,28 @@ public static partial class BerichtRegeln
         _ => Schicht.Nacht,
     };
 
-    public static Schicht SchichtZu(DateTime zeit) => zeit.Hour switch
+    // Schichtzeiten des Bereichs (Schritt 25, Einstellungen); Vorgabe 6, 14 und 22 Uhr. Das Programm
+    // setzt sie beim Start und nach dem Speichern der Einstellungen.
+    public static Schichtzeiten Zeiten { get; set; } = Schichtzeiten.Vorgabe;
+
+    public static Schicht SchichtZu(DateTime zeit) => SchichtZu(zeit, Zeiten);
+
+    public static Schicht SchichtZu(DateTime zeit, Schichtzeiten z)
     {
-        >= 6 and < 14 => Schicht.Frueh,
-        >= 14 and < 22 => Schicht.Spaet,
-        _ => Schicht.Nacht,
-    };
+        var t = TimeOnly.FromDateTime(zeit);
+        return t >= z.Frueh && t < z.Spaet ? Schicht.Frueh : t >= z.Spaet && t < z.Nacht ? Schicht.Spaet : Schicht.Nacht;
+    }
 
     // Beginn der Schicht, in der „zeit“ liegt.
-    public static DateTime SchichtBeginn(DateTime zeit)
+    public static DateTime SchichtBeginn(DateTime zeit) => SchichtBeginn(zeit, Zeiten);
+
+    public static DateTime SchichtBeginn(DateTime zeit, Schichtzeiten z)
     {
-        var tag = zeit.Date;
-        return zeit.Hour switch
-        {
-            >= 6 and < 14 => tag.AddHours(6),
-            >= 14 and < 22 => tag.AddHours(14),
-            >= 22 => tag.AddHours(22),
-            _ => tag.AddDays(-1).AddHours(22),
-        };
+        var tag = DateOnly.FromDateTime(zeit);
+        var t = TimeOnly.FromDateTime(zeit);
+        if (t >= z.Frueh && t < z.Spaet) return tag.ToDateTime(z.Frueh);
+        if (t >= z.Spaet && t < z.Nacht) return tag.ToDateTime(z.Spaet);
+        return t >= z.Nacht ? tag.ToDateTime(z.Nacht) : tag.AddDays(-1).ToDateTime(z.Nacht);
     }
 
     // Übergabe: alles seit Beginn der vorigen Schicht.

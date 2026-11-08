@@ -13,7 +13,8 @@ public sealed class AufgabenSeite : Panel
     private readonly List<Control> inhalt = [];
 
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neue Aufgabe …");
-    public Button DruckKnopf { get; } = Stil.NebenKnopf("Offene Aufgaben drucken …");
+    public Button DruckKnopf { get; } = Stil.NebenKnopf("Aufgaben der Schicht drucken …");
+    public Button VorlagenKnopf { get; } = Stil.NebenKnopf("Standardaufgaben …");   // Schritt 25
     public CheckBox ErledigteZeigen { get; } = new() { Text = "Erledigte zeigen", AutoSize = true, BackColor = Stil.Seite };
     public Label KuerzelHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini) };
     public List<AufgabeKarte> Karten { get; } = [];
@@ -29,7 +30,8 @@ public sealed class AufgabenSeite : Panel
         this.speicher = speicher;
         AutoScroll = true;
         BackColor = Stil.Seite;
-        foreach (var c in new Control[] { DruckKnopf, ErledigteZeigen, KuerzelHinweis })
+        VorlagenKnopf.Click += (_, _) => { using var f = new VorlagenFenster(speicher); Dialog.Zeigen(f, FindForm()); Aktualisieren(); };
+        foreach (var c in new Control[] { DruckKnopf, VorlagenKnopf, ErledigteZeigen, KuerzelHinweis })
         {
             c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
             leiste.Controls.Add(c);
@@ -51,6 +53,7 @@ public sealed class AufgabenSeite : Panel
     {
         var jetzt = Jetzt();
         string kuerzel = Kuerzel;
+        speicher.StandardaufgabenErzeugen(jetzt);   // Schritt 25: Standardaufgaben der laufenden Schicht
         var alle = speicher.Aufgaben(jetzt, auchErledigte: true);
         var offen = alle.Where(a => a.Offen).ToList();
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}");
@@ -74,14 +77,19 @@ public sealed class AufgabenSeite : Panel
             var karte = new AufgabeKarte(a, a.BewohnerId is long id ? namen.GetValueOrDefault(id) : null, jetzt, kuerzel);
             karte.ErledigtGeklickt += x => Ausfuehren(() => speicher.AufgabeErledigt(x.Id, Kuerzel, Jetzt()));
             karte.WeitergebenGeklickt += Weitergeben;
+            karte.SchliessenGeklickt += Schliessen;
             Karten.Add(karte);
             inhalt.Add(karte);
         }
 
-        Abschnitt($"OFFEN ({offen.Count})");
-        offen.ForEach(Karte);
-        if (offen.Count == 0)
-            inhalt.Add(new Label { Text = "Keine offenen Aufgaben.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
+        // Schritt 25: gruppiert nach Schicht, oben die laufende (Liegengebliebenes davor).
+        foreach (var (titel, aufgaben) in AufgabenRegeln.Gruppen(offen, jetzt))
+        {
+            Abschnitt($"{titel} ({aufgaben.Count})");
+            aufgaben.ForEach(Karte);
+            if (aufgaben.Count == 0)
+                inhalt.Add(new Label { Text = "Für diese Schicht ist nichts offen.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
+        }
         if (ErledigteZeigen.Checked)
         {
             var erledigt = alle.Where(a => !a.Offen).OrderByDescending(a => a.Erledigt).ToList();
@@ -108,6 +116,13 @@ public sealed class AufgabenSeite : Panel
         if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
     }
 
+    // Begründet schließen (Schritt 25): nicht erledigt, aber erledigt im Sinne von „nicht mehr zu tun“.
+    public void Schliessen(Aufgabe a)
+    {
+        using var fenster = new SchliessenFenster(speicher, a);
+        if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
+    }
+
     public void Weitergeben(Aufgabe a)
     {
         using var fenster = new WeitergebenFenster(speicher, a);
@@ -118,8 +133,11 @@ public sealed class AufgabenSeite : Panel
     {
         var jetzt = Jetzt();
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}");
-        var druck = new AufgabenDruck(speicher.Aufgaben(jetzt), namen, jetzt);
-        Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, "Offene Aufgaben");
+        // Aufgabenliste der Schicht: was jetzt dran ist (auch Liegengebliebenes) und „wer Zeit hat“.
+        var schicht = SchichtTermin.Zu(jetzt);
+        var liste = speicher.Aufgaben(jetzt).Where(a => AufgabenRegeln.JetztDran(a, jetzt) || AufgabenRegeln.Zielschicht(a) is null).ToList();
+        var druck = new AufgabenDruck(liste, namen, jetzt, $"Aufgaben – {schicht.Text}");
+        Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, $"Aufgaben – {schicht.Text}");
     }
 
     protected override void OnLayout(LayoutEventArgs levent)
@@ -163,11 +181,13 @@ public sealed class AufgabeKarte : KartenFlaeche
     public Aufgabe Aufgabe { get; }
     public Button Erledigt { get; } = Stil.NebenKnopf("Erledigt");
     public Button Weitergeben { get; } = Stil.NebenKnopf("An die nächste Schicht weitergeben …");
+    public Button SchliessenKnopf { get; } = Stil.NebenKnopf("Schließen mit Begründung …");   // Schritt 25
     public IReadOnlyList<string> MarkenTexte { get; }
     public IEnumerable<string> VerlaufTexte => verlauf.Select(l => l.Text);
 
     public event Action<Aufgabe>? ErledigtGeklickt;
     public event Action<Aufgabe>? WeitergebenGeklickt;
+    public event Action<Aufgabe>? SchliessenGeklickt;
 
     public AufgabeKarte(Aufgabe a, string? bewohner, DateTime jetzt, string kuerzel)
     {
@@ -178,12 +198,18 @@ public sealed class AufgabeKarte : KartenFlaeche
             if (a.FaelligBis is not null)
                 liste.Add((AufgabenRegeln.FaelligText(a, jetzt), AufgabenRegeln.Ueberfaellig(a, jetzt) ? Stil.Beschluss : Stil.Zimmer));
             liste.Add((AufgabenRegeln.FuerText(a), Stil.Zimmer));
-            if (AufgabenRegeln.JetztDran(a, jetzt)) liste.Add(("jetzt dran", Stil.Unterwegs));
+            if (AufgabenRegeln.AusSchichtOffen(a, jetzt) is string aus) liste.Insert(0, (aus, Stil.Achtung));
+            else if (AufgabenRegeln.JetztDran(a, jetzt)) liste.Add(("jetzt dran", Stil.Unterwegs));
+        }
+        else if (a.Geschlossen)
+        {
+            liste.Add(($"geschlossen {BerichtRegeln.ZeitText(a.Erledigt!.Value)} · {a.ErledigtVon}: {a.ErledigtNotiz}", Stil.Zimmer));
         }
         else
         {
             liste.Add(($"erledigt {BerichtRegeln.ZeitText(a.Erledigt!.Value)} · {a.ErledigtVon}", Stil.Offen));
         }
+        if (a.VorlageId is not null) liste.Add(("Standardaufgabe", Stil.Hinweis));
         MarkenTexte = liste.Select(m => m.Item1).ToList();
         foreach (var (t, m) in liste) marken.Controls.Add(new MarkenFeld(t, m) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
 
@@ -211,9 +237,12 @@ public sealed class AufgabeKarte : KartenFlaeche
 
         Erledigt.Enabled = Weitergeben.Enabled = a.Offen && kuerzel.Length > 0;
         Erledigt.Visible = Weitergeben.Visible = a.Offen;
+        SchliessenKnopf.Enabled = Erledigt.Enabled;
+        SchliessenKnopf.Visible = a.Offen && a.VorlageId is not null;   // Standardaufgaben: begründet schließen
+        SchliessenKnopf.Click += (_, _) => SchliessenGeklickt?.Invoke(a);
         Erledigt.Click += (_, _) => ErledigtGeklickt?.Invoke(a);
         Weitergeben.Click += (_, _) => WeitergebenGeklickt?.Invoke(a);
-        foreach (var k in new[] { Erledigt, Weitergeben })
+        foreach (var k in new[] { Erledigt, Weitergeben, SchliessenKnopf })
         {
             k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
             knoepfe.Controls.Add(k);
@@ -452,13 +481,13 @@ public sealed class WeitergebenFenster : Form
 }
 
 // Ausdruck der offenen Aufgaben (A4 hoch), in der Reihenfolge der Liste.
-public sealed class AufgabenDruck(IReadOnlyList<Aufgabe> offen, IReadOnlyDictionary<long, string> namen, DateTime jetzt)
+public sealed class AufgabenDruck(IReadOnlyList<Aufgabe> offen, IReadOnlyDictionary<long, string> namen, DateTime jetzt, string ueberschrift = "Offene Aufgaben")
 {
     private int naechste;
 
     public PrintDocument DokumentBauen()
     {
-        var dokument = new PrintDocument { DocumentName = "Offene Aufgaben" };
+        var dokument = new PrintDocument { DocumentName = ueberschrift };
         dokument.BeginPrint += (_, _) => naechste = 0;
         dokument.PrintPage += (_, e) =>
         {
@@ -478,7 +507,7 @@ public sealed class AufgabenDruck(IReadOnlyList<Aufgabe> offen, IReadOnlyDiction
         using var fett = new Font("Segoe UI Semibold", 10F);
         using var klein = new Font("Segoe UI", 8F);
         using var linie = new Pen(Color.Gray, 0.2f);
-        g.DrawString("Offene Aufgaben", titel, Brushes.Black, links, y);
+        g.DrawString(ueberschrift, titel, Brushes.Black, links, y);
         y += 8f;
         g.DrawString($"Stand {BerichtRegeln.ZeitText(jetzt)} · {offen.Count} offen · {KopfBereich.DemoHinweis}", klein, Brushes.DimGray, links, y);
         y += 6f;

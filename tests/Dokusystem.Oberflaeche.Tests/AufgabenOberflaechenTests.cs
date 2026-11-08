@@ -50,8 +50,10 @@ public class AufgabenOberflaechenTests
             Assert.Same(seite, f.Seite("Aufgaben"));
             Assert.Equal("5 offene Aufgaben · 1 überfällig", f.Kopf.KleinText);
             Assert.Equal("Neue Aufgabe …", Assert.Single(f.Kopf.Knoepfe).Text);
-            Assert.Equal(["OFFEN (5)"], seite.Abschnitte);
-            var erste = seite.Karten[0];
+            // Schritt 25: gruppiert nach Schicht (Summe wie bisher 5), oben die laufende.
+            Assert.Equal(5, seite.Abschnitte.Sum(a => int.Parse(a[(a.LastIndexOf('(') + 1)..^1])));
+            Assert.Contains(seite.Abschnitte, a => a.StartsWith("JETZT: "));
+            var erste = seite.Karten.Single(k => k.MarkenTexte[0].StartsWith("überfällig seit "));
             Assert.StartsWith("überfällig seit ", erste.MarkenTexte[0]);
             Assert.Contains("jetzt dran", erste.MarkenTexte);
             Assert.Contains(erste.VerlaufTexte, v => v.StartsWith("weitergegeben von KL") && v.EndsWith("Drucker war leer, Papier ist bestellt."));
@@ -59,7 +61,7 @@ public class AufgabenOberflaechenTests
             Assert.Contains(seite.Karten, k => k.MarkenTexte.Any(m => m.StartsWith("für Spätdienst ")));
             Assert.False(seite.KuerzelHinweis.Visible);
             seite.ErledigteZeigen.Checked = true;
-            Assert.Equal(["OFFEN (5)", "ERLEDIGT (1)"], seite.Abschnitte);
+            Assert.Equal("ERLEDIGT (1)", seite.Abschnitte.Last());
             Assert.StartsWith("erledigt ", seite.Karten.Last().MarkenTexte[0]);
             Assert.False(seite.Karten.Last().Erledigt.Visible);
         }
@@ -177,7 +179,7 @@ public class AufgabenOberflaechenTests
             using (var ersatz = new DialogErsatz(_ => DialogResult.Cancel))
             {
                 f.Aufgaben.DruckKnopf.PerformClick();
-                Assert.StartsWith("Offene Aufgaben", Assert.Single(ersatz.Titel));
+                Assert.StartsWith("Aufgaben – ", Assert.Single(ersatz.Titel));   // Aufgabenliste der Schicht
             }
             var jetzt = DateTime.Now;
             var offen = u.Speicher.Aufgaben(jetzt);

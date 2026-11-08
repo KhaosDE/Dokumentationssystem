@@ -825,7 +825,7 @@ Umfang:
 - Mitfahrende Bewohner erscheinen in ihrem Tagesplan bzw. als abwesend.
 
 ## Aufgaben nach Schichten mit Standardaufgaben
-Status: freigegeben (Bauplan Schritt 25)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Die Aufgaben werden nach Schichten geordnet; es gibt wiederkehrende Standardaufgaben.
 Warum: Vorgabe Tobi (08.11.2026): Im Nachtdienst zum Beispiel gibt es immer Standardaufgaben,

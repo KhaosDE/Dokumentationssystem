@@ -24,13 +24,13 @@ public sealed partial class Speicher
     private long AufgabeEinfuegen(Aufgabe a, SqliteTransaction transaktion)
     {
         Ausfuehren("""
-            INSERT INTO aufgaben (bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser)
-            VALUES ($b, $r, $t, $f, $st, $s, $fb, $e, $v)
+            INSERT INTO aufgaben (bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id)
+            VALUES ($b, $r, $t, $f, $st, $s, $fb, $e, $v, $vo)
             """, transaktion,
             ("$b", a.BewohnerId), ("$r", a.BerichtId), ("$t", a.Text.Trim()), ("$f", AufgabenRegeln.FuerKuerzel(a.Fuer)),
             ("$st", a.FuerSchicht is SchichtTermin s1 ? Iso(s1.Tag) : null),
             ("$s", a.FuerSchicht is SchichtTermin s2 ? BerichtRegeln.Kuerzel(s2.Schicht) : null),
-            ("$fb", a.FaelligBis is DateTime f ? Zeit(f) : null), ("$e", Zeit(a.Erstellt)), ("$v", a.Verfasser));
+            ("$fb", a.FaelligBis is DateTime f ? Zeit(f) : null), ("$e", Zeit(a.Erstellt)), ("$v", a.Verfasser), ("$vo", a.VorlageId));
         return Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
     }
 
@@ -59,6 +59,113 @@ public sealed partial class Speicher
         AufgabenGeaendert?.Invoke();
     }
 
+    // Begründet schließen (Schritt 25): nicht erledigt, aber nicht mehr zu tun – mit Begründung.
+    public void AufgabeSchliessen(long id, string kuerzel, string begruendung, DateTime zeit)
+    {
+        var a = AufgabeOffen(id, kuerzel);
+        begruendung = begruendung.Trim().ReplaceLineEndings(" ");
+        if (begruendung.Length == 0) throw new Eingabefehler(["Bitte kurz begründen, warum die Aufgabe nicht erledigt wurde."]);
+        if (begruendung.Length > 200) throw new Eingabefehler(["Die Begründung ist zu lang (höchstens 200 Zeichen)."]);
+        Ausfuehren("INSERT INTO aufgabe_ereignisse (aufgabe_id, art, zeit, kuerzel, notiz) VALUES ($a, 'erledigt', $z, $k, $n)", null,
+            ("$a", a.Id), ("$z", Zeit(zeit)), ("$k", kuerzel.Trim()), ("$n", begruendung));
+        AufgabenGeaendert?.Invoke();
+    }
+
+    // ----- Standardaufgaben (Schritt 25) -----
+
+    public List<AufgabeVorlage> Vorlagen()
+    {
+        var liste = new List<AufgabeVorlage>();
+        using var befehl = Befehl("SELECT id, text, schicht, tage, uhrzeit, bewohner_id, aktiv, erstellt, kuerzel FROM aufgabe_vorlagen ORDER BY id", null, []);
+        using var leser = befehl.ExecuteReader();
+        while (leser.Read())
+            liste.Add(new AufgabeVorlage
+            {
+                Id = leser.GetInt64(0), Text = leser.GetString(1), Schicht = BerichtRegeln.SchichtAus(leser.GetString(2)),
+                Tage = AufgabenRegeln.TageAus(leser.GetInt32(3)), Uhrzeit = leser.IsDBNull(4) ? null : TimeOnly.ParseExact(leser.GetString(4), "HH:mm", CultureInfo.InvariantCulture),
+                BewohnerId = leser.IsDBNull(5) ? null : leser.GetInt64(5), Aktiv = leser.GetInt64(6) == 1,
+                Erstellt = AusZeit(leser.GetString(7)), Kuerzel = leser.GetString(8),
+            });
+        return liste;
+    }
+
+    // Neue Vorlage (Id 0) oder ändern. Vorlagen sind Einstellungen: Ändern überschreibt, schon
+    // entstandene Aufgaben bleiben, wie sie sind.
+    public AufgabeVorlage VorlageSpeichern(AufgabeVorlage v) => VorlageSpeichern(v, null);
+
+    private AufgabeVorlage VorlageSpeichern(AufgabeVorlage v, SqliteTransaction? transaktion)
+    {
+        if (v.BewohnerId is long b && Bewohner(b) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        (string, object?)[] werte =
+        [
+            ("$id", v.Id), ("$t", v.Text), ("$s", BerichtRegeln.Kuerzel(v.Schicht)), ("$ta", AufgabenRegeln.TageMaske(v.Tage)),
+            ("$u", v.Uhrzeit is TimeOnly u ? u.ToString("HH:mm", CultureInfo.InvariantCulture) : null), ("$b", v.BewohnerId),
+            ("$a", v.Aktiv ? 1 : 0), ("$e", Zeit(v.Erstellt)), ("$k", v.Kuerzel),
+        ];
+        long id = v.Id;
+        if (id == 0)
+        {
+            Ausfuehren("INSERT INTO aufgabe_vorlagen (text, schicht, tage, uhrzeit, bewohner_id, aktiv, erstellt, kuerzel) VALUES ($t, $s, $ta, $u, $b, $a, $e, $k)", transaktion, werte);
+            id = Convert.ToInt64(transaktion is null ? Wert("SELECT last_insert_rowid()") : WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
+        }
+        else
+            Ausfuehren("UPDATE aufgabe_vorlagen SET text = $t, schicht = $s, tage = $ta, uhrzeit = $u, bewohner_id = $b, aktiv = $a, kuerzel = $k WHERE id = $id", transaktion, werte);
+        if (transaktion is null) AufgabenGeaendert?.Invoke();
+        return v with { Id = id };
+    }
+
+    public void VorlageAktiv(long id, bool aktiv)
+    {
+        Ausfuehren("UPDATE aufgabe_vorlagen SET aktiv = $a WHERE id = $id", null, ("$a", aktiv ? 1 : 0), ("$id", id));
+        AufgabenGeaendert?.Invoke();
+    }
+
+    // Zu Beginn jeder Schicht: aus den passenden Standardaufgaben die Aufgaben dieser Schicht – jede
+    // nur einmal je Schicht (Datenbank-Regel). Läuft, wenn die Aufgaben gelesen werden.
+    public int StandardaufgabenErzeugen(DateTime jetzt)
+    {
+        var schicht = SchichtTermin.Zu(jetzt);
+        int neu = 0;
+        foreach (var v in Vorlagen().Where(v => AufgabenRegeln.Gilt(v, schicht)))
+        {
+            Ausfuehren("""
+                INSERT OR IGNORE INTO aufgaben (bewohner_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id)
+                VALUES ($b, $t, 'schicht', $st, $s, $fb, $e, $v, $vo)
+                """, null,
+                ("$b", v.BewohnerId), ("$t", v.Text), ("$st", Iso(schicht.Tag)), ("$s", BerichtRegeln.Kuerzel(schicht.Schicht)),
+                ("$fb", Zeit(AufgabenRegeln.FaelligIn(v, schicht))), ("$e", Zeit(schicht.Beginn)), ("$v", v.Kuerzel), ("$vo", v.Id));
+            neu += Convert.ToInt32(Wert("SELECT changes()"), CultureInfo.InvariantCulture);
+        }
+        if (neu > 0) AufgabenGeaendert?.Invoke();
+        return neu;
+    }
+
+    // ----- Schichtzeiten je Bereich (Schritt 25) -----
+
+    public Schichtzeiten Schichtzeiten(string bereich)
+    {
+        using var befehl = Befehl("SELECT frueh, spaet, nacht FROM schichtzeiten WHERE bereich = $b", null, [("$b", bereich)]);
+        using var leser = befehl.ExecuteReader();
+        if (!leser.Read()) return Kern.Schichtzeiten.Vorgabe;
+        static TimeOnly U(string s) => TimeOnly.ParseExact(s, "HH:mm", CultureInfo.InvariantCulture);
+        return new Schichtzeiten(U(leser.GetString(0)), U(leser.GetString(1)), U(leser.GetString(2)));
+    }
+
+    public void SchichtzeitenSetzen(string bereich, Schichtzeiten z)
+    {
+        static string T(TimeOnly t) => t.ToString("HH:mm", CultureInfo.InvariantCulture);
+        Ausfuehren("INSERT INTO schichtzeiten (bereich, frueh, spaet, nacht) VALUES ($b, $f, $s, $n) ON CONFLICT(bereich) DO UPDATE SET frueh = excluded.frueh, spaet = excluded.spaet, nacht = excluded.nacht",
+            null, ("$b", bereich), ("$f", T(z.Frueh)), ("$s", T(z.Spaet)), ("$n", T(z.Nacht)));
+    }
+
+    // Demo: Standardaufgaben je Schicht, besonders für den Nachtdienst.
+    private void DemoStandardaufgabenEinfuegen(SqliteTransaction transaktion)
+    {
+        Ausfuehren("DELETE FROM aufgabe_vorlagen WHERE kuerzel IN ('AB', 'CD', 'EF', 'KL')", transaktion);
+        foreach (var v in Demodaten.Standardaufgaben(Uhr())) VorlageSpeichern(v, transaktion);
+        SetzeMeta(DemoStandardaufgaben, "1", transaktion);
+    }
+
     private Aufgabe AufgabeOffen(long id, string kuerzel)
     {
         if (string.IsNullOrWhiteSpace(kuerzel)) throw new Eingabefehler(["Kürzel fehlt (Einstellungen)."]);
@@ -71,7 +178,7 @@ public sealed partial class Speicher
     {
         var liste = new List<Aufgabe>();
         using (var befehl = Befehl($"""
-            SELECT id, bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser
+            SELECT id, bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id
             FROM aufgaben {bedingung}
             """, null, parameter))
         using (var leser = befehl.ExecuteReader())
@@ -90,6 +197,7 @@ public sealed partial class Speicher
                     FaelligBis = leser.IsDBNull(7) ? null : AusZeit(leser.GetString(7)),
                     Erstellt = AusZeit(leser.GetString(8)),
                     Verfasser = leser.GetString(9),
+                    VorlageId = leser.IsDBNull(10) ? null : leser.GetInt64(10),
                 });
             }
         }
@@ -109,6 +217,7 @@ public sealed partial class Speicher
                 Weitergaben = eigene.Where(e => e.Art == "weitergegeben").Select(e => new Weitergabe(e.Zeit, e.Kuerzel, e.Notiz)).ToList(),
                 Erledigt = erledigt.Art is null ? null : erledigt.Zeit,
                 ErledigtVon = erledigt.Art is null ? null : erledigt.Kuerzel,
+                ErledigtNotiz = erledigt.Art is null ? "" : erledigt.Notiz,
             };
         }).ToList();
     }

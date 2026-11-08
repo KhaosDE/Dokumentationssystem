@@ -50,3 +50,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 22 „Therapien: Zuordnung und Rechte“ (0.25.0).
 - 08.11.2026 — Claude Code: Bauplan Schritt 23 „Tagesplan“ (0.26.0).
 - 08.11.2026 — Claude Code: Bauplan Schritt 24 „Kalender: Bereich und Haus, Fahrzeuge“ (0.27.0).
+- 08.11.2026 — Claude Code: Bauplan Schritt 25 „Aufgaben nach Schichten mit Standardaufgaben“ (0.28.0).
