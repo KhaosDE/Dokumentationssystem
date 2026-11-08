@@ -720,12 +720,15 @@ Umfang:
 - Ausdruck der Tabelle (wie bisher mit „Demo — nicht zum Stellen verwenden“).
 - **Medikamentendatenbank** nicht mehr in der Seitenleiste, sondern in den Einstellungen
   (Abschnitt „Medikamente“). Rechte nach „Mitarbeiter, Anmeldung und Rechte“.
-- **Prüfung neuer Medikamente:** Ein neu angelegtes Medikament steht auf „ungeprüft“ und ist
-  in der Auswahl so gekennzeichnet. Bestätigen kann nur, wer „Medikamentendatenbank
-  verwalten“ darf, und nicht die Person, die es angelegt hat (Vier-Augen-Prinzip). Beim
-  Bestätigen werden Quelle, Datum und Kürzel gespeichert. Knopf „In offizieller Datenbank
-  nachsehen“ öffnet die Suche des BfArM im **Browser** (das Programm selbst geht nicht ins
-  Internet, `CLAUDE.md`, Regel 6).
+- **Prüfung neuer Medikamente** (Vorgabe Tobi, 08.11.2026: kein Vier-Augen-Prinzip, das
+  dauert zu lange): Die **Fachkraft, die das Medikament anlegt, prüft es selbst** gegen eine
+  offizielle Quelle und bestätigt es im selben Formular. Beim Bestätigen sind **Quelle**
+  (Pflicht, z. B. Adresse der Fachinformation) und Prüfdatum anzugeben; Kürzel und Zeit setzt
+  das Programm. Ohne Bestätigung bleibt der Eintrag „ungeprüft“ und ist in der Auswahl so
+  gekennzeichnet. Knopf „In offizieller Datenbank nachsehen“ öffnet die Suche des BfArM im
+  **Browser** (das Programm selbst geht nicht ins Internet, `CLAUDE.md`, Regel 6). Wer
+  „Medikamentendatenbank verwalten“ darf, kann Einträge später korrigieren oder sperren;
+  jede Änderung bleibt im Verlauf.
 - Ein **automatischer** Abgleich mit offiziellen Datenbanken ist ausdrücklich nicht dabei: Er
   bräuchte Internet und Nutzungsrechte, die nicht geklärt sind.
 
@@ -815,13 +818,23 @@ Aufgabe auftauchen; ist ein Termin vereinbart, soll er in den Kalender.
 Umfang:
 - Visite anlegen: Datum, Art (z. B. Hausarzt, Psychiater, Facharzt), Arzt (ausgedacht),
   Teilnehmer (Kürzel), je Bewohner: Besprochenes (Text), **Anordnungen geändert ja/nein**
-  mit Beschreibung, Facharzttermin nötig (Fachrichtung, Dringlichkeit).
+  mit Art (neu verordnet, Dosis geändert, pausiert, abgesetzt) und Medikament (Auswahl aus
+  der Datenbank oder Freitext, falls noch nicht vorhanden), Facharzttermin nötig
+  (Fachrichtung, Dringlichkeit).
 - Ansicht: Liste aller Visiten, Filter nach Bewohner und Zeitraum; in der Akte ein Abschnitt
   „Visiten“ (im Reiter „Berichte“ oder eigener Reiter — die einfachere Lösung).
-- **Anordnung geändert:** erzeugt einen deutlich sichtbaren Hinweis „Medikation nach Visite
-  prüfen“ als Aufgabe für die nächste Schicht und in der Übergabe. Die Medikation wird
-  **nicht** automatisch geändert; eine berechtigte Person trägt die Änderung ein und verknüpft
-  sie mit der Visite.
+- **Anordnung geändert** (Vorgabe Tobi, 08.11.2026): **Sobald der Visiten-Bericht
+  gespeichert ist**, blendet das Programm sofort eine Aufgabe ein, je Änderung eine:
+  - Medikament **noch nicht in der Datenbank** → „Neues Medikament anlegen: …“ mit Knopf, der
+    das Anlegen-Formular öffnet (Name aus der Visite vorbelegt; nur Fachkräfte, siehe oben).
+    Danach geht es direkt weiter zur Verordnung.
+  - Medikament **vorhanden** → „Medikation ändern: … (neu / Dosis / Pause / absetzen)“ mit
+    Knopf, der das passende Formular der Medikation beim Bewohner öffnet, vorbelegt mit der
+    Visite als Anordnung (Arzt, Datum).
+  - Die Aufgabe steht zusätzlich in den Aufgaben der Schicht und in der Übergabe, bis sie
+    erledigt ist; „Später“ schließt nur die Einblendung.
+  - Die Medikation wird **nicht** automatisch geändert; eine berechtigte Person trägt die
+    Änderung über die Aufgabe ein, die Verknüpfung zur Visite bleibt sichtbar.
 - **Facharzttermin nötig:** erzeugt automatisch eine Aufgabe „Termin bei … vereinbaren“.
   Beim Erledigen fragt das Programm nach Datum, Uhrzeit, Ort; dann entsteht der Termin im
   Kalender (Bereich) beim Bewohner, und auf Wunsch eine Fahrt mit Fahrzeug.
