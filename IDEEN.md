@@ -741,19 +741,28 @@ Umfang:
   jede Änderung bleibt im Verlauf.
 - **Nachschlagen im Formular** (Wunsch Tobi, 08.11.2026): Über der Eingabemaske „Medikament
   anlegen/ändern“ eine **kleine eingebettete Browseransicht**, die zum eingegebenen Namen die
-  Suche öffnet. Umschaltbar zwischen zwei Quellen:
-  - **BfArM** (Arzneimittel-Informationssystem über PharmNet.Bund; Suche seit 02/2025
-    kostenlos),
-  - **Gelbe Liste** (gelbe-liste.de; für Fachinformationen ggf. Anmeldung als Fachkreis nötig —
-    nicht geprüft).
+  Suche öffnet — **nur beim BfArM** (Arzneimittel-Informationssystem über PharmNet.Bund; Suche
+  seit 02/2025 kostenlos). Die Gelbe Liste bleibt draußen (Entscheidung Tobi, 08.11.2026).
   Die Fachkraft liest dort nach und überträgt die Angaben **selbst** in die Maske. Hilfe dazu:
   Text in der Ansicht markieren, dann „In Feld übernehmen“ setzt ihn in das gerade gewählte
   Feld. Die aktuelle Adresse der Ansicht lässt sich per Knopf als **Quelle** übernehmen.
   Technik: WebView2 (`Microsoft.Web.WebView2`, BSD-3-Clause, Laufzeit in Windows 11
-  enthalten) — Begründung in `STAND.md`. Die Ansicht lässt nur Adressen der beiden Quellen zu
-  (feste Liste in den Einstellungen, Gruppe „Medikamente“); andere Links öffnen im normalen
-  Browser. Ist keine Verbindung da oder WebView2 fehlt: Hinweis statt Fehler, das Formular
-  bleibt voll nutzbar.
+  enthalten) — Begründung in `STAND.md`. Die Ansicht lässt nur Adressen des BfArM zu (feste
+  Liste in den Einstellungen, Gruppe „Medikamente“); andere Links öffnen im normalen Browser.
+  Ist keine Verbindung da oder WebView2 fehlt: Hinweis statt Fehler, das Formular bleibt voll
+  nutzbar, daneben der Knopf „Im Browser öffnen“.
+- **Abschaltbar:** Häkchen „Nachschlage-Ansicht anzeigen“ in den Einstellungen (Gruppe
+  „Medikamente“), Vorgabe an. Ausgeschaltet bleibt nur der Knopf „Im Browser öffnen“. Gedacht
+  für Rechner, auf denen WebView2 fehlt oder nicht erlaubt ist.
+- **Betrieb auf einem Windows Server** (Frage Tobi, 08.11.2026; die Version des Servers im Haus
+  ist noch nicht bekannt): Im README einen Abschnitt „Für die IT“ ergänzen —
+  - Programm (self-contained .NET 10) läuft auf Windows Server 2016, 2019, 2022, 2025; auf
+    Server 2012/2012 R2 nur mit Microsofts Zusatz-Updates (ESU), nicht empfohlen.
+  - Die Nachschlage-Ansicht braucht die „Microsoft Edge WebView2 Runtime“; auf Servern oft
+    nicht vorinstalliert, einmalig von der IT zu installieren (kostenlos). Auf Server
+    2012/2012 R2 gibt es sie nicht mehr — dort die Ansicht abschalten.
+  - Beim Start prüft das Programm, ob WebView2 vorhanden ist, und schreibt das Ergebnis in
+    „Über“ (Einstellungen), damit man es ohne Fehlersuche sieht.
 - **Neues Feld „Zulassungsnummer“** (ENR des BfArM), optional, damit ein Eintrag eindeutig
   wiederzufinden ist.
 - Ausdrücklich nicht: Seiten **automatisch auslesen** und Felder selbst füllen, und kein

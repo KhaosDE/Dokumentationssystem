@@ -37,8 +37,8 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
    eine Adresse im Browser öffnen (Entscheidung Tobi, 08.11.2026). E-Mail-Adressen in
    Demo-Daten nur mit der Endung `@example.org`.
    **Einzige eingebettete Webansicht:** im Formular „Medikament anlegen/ändern“ zum
-   Nachschlagen bei BfArM und Gelber Liste (Entscheidung Tobi, 08.11.2026). Nur diese
-   Adressen, gesucht wird nur mit dem Medikamentennamen — nie mit Angaben zu Bewohnern.
+   Nachschlagen beim BfArM (Entscheidung Tobi, 08.11.2026). Nur dessen Adressen, gesucht wird
+   nur mit dem Medikamentennamen — nie mit Angaben zu Bewohnern. Abschaltbar.
 7. **Fremde Vorlagen bleiben draußen.** PDF-Bögen des Kostenträgers, Logos und Namen der
    Einrichtung kommen nie ins Repository; das Programm lässt sie in den Einstellungen
    zuteilen und speichert sie im Datenordner.
