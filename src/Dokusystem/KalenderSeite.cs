@@ -240,9 +240,12 @@ public sealed class KalenderSeite : Panel
         leiste.MaximumSize = new Size(breite, 0);
         leiste.Bounds = new Rectangle(new Point(rand, y), leiste.GetPreferredSize(new Size(Math.Max(100, breite), 0)));
         y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
-        Fahrzeuge.MaximumSize = new Size(breite, 0);
-        Fahrzeuge.Bounds = new Rectangle(new Point(rand, y), Fahrzeuge.GetPreferredSize(new Size(breite, 0)));
-        y = Fahrzeuge.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        if (Fahrzeuge is FahrzeugLeiste fahrzeuge)   // im Konstruktor (AutoScroll) noch nicht angelegt
+        {
+            fahrzeuge.MaximumSize = new Size(breite, 0);
+            fahrzeuge.Bounds = new Rectangle(new Point(rand, y), fahrzeuge.GetPreferredSize(new Size(breite, 0)));
+            y = fahrzeuge.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        }
         foreach (var c in inhalt)
         {
             switch (c)
