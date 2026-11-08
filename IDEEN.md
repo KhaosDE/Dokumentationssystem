@@ -736,12 +736,28 @@ Umfang:
   offizielle Quelle und bestätigt es im selben Formular. Beim Bestätigen sind **Quelle**
   (Pflicht, z. B. Adresse der Fachinformation) und Prüfdatum anzugeben; Kürzel und Zeit setzt
   das Programm. Ohne Bestätigung bleibt der Eintrag „ungeprüft“ und ist in der Auswahl so
-  gekennzeichnet. Knopf „In offizieller Datenbank nachsehen“ öffnet die Suche des BfArM im
-  **Browser** (das Programm selbst geht nicht ins Internet, `CLAUDE.md`, Regel 6). Wer
+  gekennzeichnet. Wer
   „Medikamentendatenbank verwalten“ darf, kann Einträge später korrigieren oder sperren;
   jede Änderung bleibt im Verlauf.
-- Ein **automatischer** Abgleich mit offiziellen Datenbanken ist ausdrücklich nicht dabei: Er
-  bräuchte Internet und Nutzungsrechte, die nicht geklärt sind.
+- **Nachschlagen im Formular** (Wunsch Tobi, 08.11.2026): Über der Eingabemaske „Medikament
+  anlegen/ändern“ eine **kleine eingebettete Browseransicht**, die zum eingegebenen Namen die
+  Suche öffnet. Umschaltbar zwischen zwei Quellen:
+  - **BfArM** (Arzneimittel-Informationssystem über PharmNet.Bund; Suche seit 02/2025
+    kostenlos),
+  - **Gelbe Liste** (gelbe-liste.de; für Fachinformationen ggf. Anmeldung als Fachkreis nötig —
+    nicht geprüft).
+  Die Fachkraft liest dort nach und überträgt die Angaben **selbst** in die Maske. Hilfe dazu:
+  Text in der Ansicht markieren, dann „In Feld übernehmen“ setzt ihn in das gerade gewählte
+  Feld. Die aktuelle Adresse der Ansicht lässt sich per Knopf als **Quelle** übernehmen.
+  Technik: WebView2 (`Microsoft.Web.WebView2`, BSD-3-Clause, Laufzeit in Windows 11
+  enthalten) — Begründung in `STAND.md`. Die Ansicht lässt nur Adressen der beiden Quellen zu
+  (feste Liste in den Einstellungen, Gruppe „Medikamente“); andere Links öffnen im normalen
+  Browser. Ist keine Verbindung da oder WebView2 fehlt: Hinweis statt Fehler, das Formular
+  bleibt voll nutzbar.
+- **Neues Feld „Zulassungsnummer“** (ENR des BfArM), optional, damit ein Eintrag eindeutig
+  wiederzufinden ist.
+- Ausdrücklich nicht: Seiten **automatisch auslesen** und Felder selbst füllen, und kein
+  automatischer Abgleich des ganzen Bestands — Nutzungsrechte nicht geklärt.
 
 ## Therapien: Zuordnung und Rechte
 Status: freigegeben (Bauplan Schritt 22)

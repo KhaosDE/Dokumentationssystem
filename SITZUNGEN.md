@@ -41,3 +41,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Medikation bearbeiten: nur Fachkräfte (abwählbar); Medikation ändern nur im Medikamentenplan des Bewohners (Reiter umbenannt); Mitarbeiter mehreren Bereichen und Positionen zuordenbar (Chat „Programme/Apps“).
 - 08.11.2026 — Bauplan Schritt 29 „Einstellungen neu gegliedert“ freigegeben (Aufbau wie Windows-11-Einstellungen, zehn Gruppen) (Chat „Programme/Apps“).
 - 08.11.2026 — Claude Code: Bauplan Schritt 18 „Oberfläche: volle Fläche, einklappbares Seitenmenü“ (0.21.0).
+- 08.11.2026 — Medikament anlegen: eingebettete Nachschlage-Ansicht (BfArM, Gelbe Liste) über der Eingabemaske, Feld Zulassungsnummer; CLAUDE.md Regel 6 um diese einzige Webansicht ergänzt (Chat „Programme/Apps“).
