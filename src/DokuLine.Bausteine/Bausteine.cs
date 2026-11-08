@@ -386,6 +386,21 @@ public sealed class Statusleiste : Control
 {
     // Bezugspflege und Einzeltrainer haben die Farbe der Person (Schritt 20) – das Kürzel steht immer dabei.
     public const string BezugText = "Streifen: Bezugspflege, Punkt: Einzeltrainer";
+    private static readonly string Schluessel = "Farbschlüssel: " + string.Join("; ", Stil.Farbschluessel.Select(f => f.Text)) + "; " + BezugText;
+    private string statusText = "";
+
+    // Links vor dem Farbschlüssel (Schritt 26l): „DEMO — ausgedachte Daten · Datum · Dienst · Stand“.
+    public string StatusText
+    {
+        get => statusText;
+        set
+        {
+            if (statusText == value) return;
+            statusText = value;
+            AccessibleName = (value.Length > 0 ? value + "; " : "") + Schluessel;
+            Invalidate();
+        }
+    }
 
     public Statusleiste()
     {
@@ -394,7 +409,7 @@ public sealed class Statusleiste : Control
         BackColor = Stil.Fensterhintergrund;
         Height = Stil.Px(this, 30);
         AccessibleRole = AccessibleRole.StatusBar;
-        AccessibleName = "Farbschlüssel: " + string.Join("; ", Stil.Farbschluessel.Select(f => f.Text)) + "; " + BezugText;
+        AccessibleName = Schluessel;
     }
 
     protected override void OnPaint(PaintEventArgs e)
@@ -406,6 +421,13 @@ public sealed class Statusleiste : Control
         using (var linie = new Pen(Stil.Trennlinie)) g.DrawLine(linie, 0, 0, Width, 0);
         int x = Stil.Px(this, Stil.AbstandGross);
         var flags = TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
+        if (statusText.Length > 0)
+        {
+            TextRenderer.DrawText(g, statusText, Stil.Klein, new Rectangle(x, 0, Width, Height), Stil.TextMittel, flags);
+            x += TextRenderer.MeasureText(g, statusText, Stil.Klein, Size.Empty, TextFormatFlags.NoPadding).Width + Stil.Px(this, Stil.AbstandGross);
+            using (var trenner = new Pen(Stil.Trennlinie)) g.DrawLine(trenner, x, Stil.Px(this, 7), x, Height - Stil.Px(this, 7));
+            x += Stil.Px(this, Stil.AbstandGross);
+        }
         const string titel = "Farbschlüssel:";
         TextRenderer.DrawText(g, titel, Stil.Klein, new Rectangle(x, 0, Width, Height), Stil.TextLeise, flags);
         x += TextRenderer.MeasureText(g, titel, Stil.Klein, Size.Empty, TextFormatFlags.NoPadding).Width + Stil.Px(this, Stil.AbstandMittel);

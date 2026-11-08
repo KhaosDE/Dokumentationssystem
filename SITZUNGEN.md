@@ -75,3 +75,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 26i „Aktionsleiste unter der Kopfzeile“ (0.29.11).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26j „Bereich „Bewohner“ als Liste mit Berichten“ (0.29.12).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26k „Visite: „Nächster Bewohner“ unter der Texteingabe“ (0.29.13).
+- 08.11.2026 — Claude Code: Bauplan Schritt 26l „Übersicht neu: „Heute wichtig“ und Bewohnerliste“ (0.29.14).

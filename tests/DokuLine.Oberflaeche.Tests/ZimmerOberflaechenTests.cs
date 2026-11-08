@@ -52,11 +52,11 @@ public class ZimmerOberflaechenTests
         Hilfe.Zeigen(f);
         f.BereichWaehlen("Übersicht");
         var s = f.Uebersicht;
-        Assert.Equal([UebersichtSeite.EigeneBereiche, "R1", "R2", "R3"], s.BereichWahl.Items.Cast<string>());
-        s.BereichWahl.SelectedIndex = 2;   // R2
+        Assert.Equal([UebersichtSeite.EigeneBereiche, UebersichtSeite.AlleBereiche, "R1", "R2", "R3"], s.BereichWahl.Items.Cast<string>());
+        s.BereichWahl.SelectedItem = "R2";
         Assert.StartsWith("R2 · 23 Bewohner · 2 Betten frei · ", f.Kopf.KleinText);
-        Assert.Equal(23, s.Karten.Count);
-        s.BereichWahl.SelectedIndex = 3;   // R3
+        Assert.Equal(23, s.Zeilen.Count);
+        s.BereichWahl.SelectedItem = "R3";
         Assert.StartsWith("R3 · 23 Bewohner · 2 Betten frei · ", f.Kopf.KleinText);
         Hilfe.Foto(f, "105_uebersicht_bereich");
     });

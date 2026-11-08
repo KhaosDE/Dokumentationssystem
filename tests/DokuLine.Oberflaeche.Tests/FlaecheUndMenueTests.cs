@@ -88,8 +88,9 @@ public class FlaecheUndMenueTests
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.BereichWaehlen("Übersicht");
-        var karte = f.Uebersicht.Karten.Single(k => k.Bewohner.Nachname == "Birke");
-        Assert.Equal(["Akte öffnen", "Neuer Bericht …"], karte.ContextMenuStrip!.Items.Cast<ToolStripItem>().Select(i => i.Text));
+        Assert.True(f.Uebersicht.Waehlen(u.Demo("Birke").Id!.Value));   // Liste (Schritt 26l): Zeile wählen, Rechtsklick
+        var menue = f.Uebersicht.Liste.ContextMenuStrip!;
+        Assert.Equal(["Akte öffnen", "Neuer Bericht …"], menue.Items.Cast<ToolStripItem>().Select(i => i.Text));
         using (new DialogErsatz(fenster =>
         {
             var formular = Assert.IsType<BerichtFormular>(fenster);
@@ -100,7 +101,7 @@ public class FlaecheUndMenueTests
             formular.Rueckfrage = _ => DialogResult.No;
             return formular.Speichern() ? DialogResult.OK : DialogResult.Cancel;
         }))
-            karte.ContextMenuStrip.Items[1].PerformClick();
+            menue.Items[1].PerformClick();
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Berichte", f.Bewohner.Akte.Reiter.Aktiv);
         Assert.Contains(f.Bewohner.Akte.Berichte.Liste.Karten, k => k.Bericht.Text == "Hat beim Kochen geholfen.");

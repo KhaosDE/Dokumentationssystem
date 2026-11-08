@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.13** (Visite: „Nächster Bewohner“ unter der Eingabe, Bauplan Schritt 26k).
+Stand: 08.11.2026. Version: **0.29.14** (Übersicht neu: „Heute wichtig“ und Bewohnerliste, Bauplan Schritt 26l).
 
 ## Aktuell
 
@@ -145,13 +145,22 @@ niedriger. Ohne Aktion gibt es keine Leiste.
 Neu in 0.29.12: Der Bereich **„Bewohner“** ist eine **Liste** statt Karten (Zimmer und Bett, Name,
 Bezugspflege, Hinweise; sortierbar, Suche, Bereichswahl). **Rechts** stehen die **Berichte** des gewählten
 Bewohners mit den gewohnten Filtern; Pfeiltasten blättern. „Neuer Bericht …“ (Aktionsleiste) gilt für den
-gewählten Bewohner; die Akte öffnet ein Doppelklick oder „Akte öffnen“. Die Übersicht bleibt bei Karten.
+gewählten Bewohner; die Akte öffnet ein Doppelklick oder „Akte öffnen“.
 
 Neu in 0.29.13: In der Visite stehen **„◀ Vorheriger“** und **„Nächster Bewohner ▶“** direkt unter der
 Eingabe. „Nächster Bewohner ▶“ ist grau („Erst den Bericht zu diesem Bewohner schreiben.“), bis im Feld
 „Besprochenes“ etwas steht. Die Liste links bleibt frei wählbar, sonst ist die Visite wie bisher.
 
-**Nächster Schritt:** Bauplan Schritt 26l „Übersicht neu: „Heute wichtig“ und Bewohnerliste“ (0.29.14).
+Neu in 0.29.14: Die **Übersicht** ist neu aufgebaut. **Links „Heute wichtig“** mit vier Kästen:
+Übergaben offen, Termine heute (mit dem Status aus dem Tagesplan), laufender Dienst („6 von 9 erledigt“,
+Balken, offene Aufgaben zum Abhaken) und ungelesene Nachrichten; ein Klick führt an die Stelle. **Rechts**
+alle Bewohner des Bereichs als **Liste** (Zimmer/Bett, Name, Bezugspflege, **Wo**, Hinweise) mit Suche;
+Doppelklick öffnet die Akte. Die Aktionsleiste hat „Neuer Bericht …“, „Neue Aufgabe …“, „Neue Nachricht …“,
+„Neuer Bewohner …“ (grün), rechts die Bereichswahl und „Drucken …“. Ist die Fläche schmaler als 1100 px,
+steht „Heute wichtig“ oben. Die Statusleiste zeigt Demo-Hinweis, Datum, Dienst und Stand. Die Fahrzeuge
+stehen nur noch im Kalender.
+
+**Nächster Schritt:** Bauplan Schritt 26m „Therapie: „Laufende Therapien“ als Anwesenheitstafel“ (0.29.15).
 
 ## Fertig
 
@@ -831,6 +840,23 @@ Eingabe. „Nächster Bewohner ▶“ ist grau („Erst den Bericht zu diesem Be
   - „Nächster Bewohner ▶“ ist grau, solange „Besprochenes“ leer ist; Hinweis beim Darüberfahren und beim
     Klick: „Erst den Bericht zu diesem Bewohner schreiben.“ Sobald Text da ist, ist er aktiv.
   - „◀ Vorheriger“ ist immer aktiv; die Liste links bleibt anklickbar. Sonst keine Änderung.
+- 0.29.14 — Übersicht neu: „Heute wichtig“ und Bewohnerliste (Bauplan Schritt 26l, 08.11.2026):
+  - Links „Heute wichtig“ (380 px), vier Kästen mit Überschrift und Zähler: „Übergaben offen“ (Bewohner und
+    Zimmer, Text, „seit 07.11. · AB“), „Termine heute“ (Uhrzeit, Text, Status aus dem Tagesplan; gleiche
+    Termine zusammengefasst), „Laufender Dienst · noch offen“ („Spätdienst: 6 von 9 erledigt“, Balken,
+    Häkchen je offener Aufgabe, „Alle Aufgaben …“), „Nachrichten ungelesen“ („AB → R1: Betreff“). Leer:
+    „Nichts offen“.
+  - Klick: Übergabe → Bereich „Übergabe“, Termin → „Tagesplan“, Nachricht → der Verlauf, Überschrift → der
+    Bereich. Abhaken im Kasten trägt Kürzel und Uhrzeit ein wie in „Aufgaben“.
+  - Rechts die Bewohnerliste nach Zimmer: Zimmer/Bett · Name · Bezug (Farbe mit Kürzel) · Wo (im Haus,
+    Heimfahrt/Klinik/unterwegs mit …, unterwegs seit …, in Therapie … bis …, Termin … bis …) · Hinweise
+    (Beschluss, Allergie, Medikation, Übergabe, Geburtstag …). Kopf „BEWOHNER R1 · 23 · 17 IM HAUS“, Suche,
+    „Meine Bezugsbewohner“, „Meine Einzeltrainings“. Keine Berichte (die zeigt „Bewohner“).
+  - Aktionsleiste: „Neuer Bericht …“ (für die gewählte Zeile), „Neue Aufgabe …“, „Neue Nachricht …“, „Neuer
+    Bewohner …“ (grün); rechts Bereichswahl (eigene, alle, R1–R3) und „Drucken …“ (Querformat).
+  - Unter 1100 px Breite der Übersicht steht „Heute wichtig“ über der Liste (höchstens 40 % der Höhe).
+  - Statusleiste (alle Bereiche): „DEMO — ausgedachte Daten · So 08.11.2026 · Spätdienst · Stand 14:32“, dann
+    der Farbschlüssel.
 ## Offene Punkte
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
@@ -840,8 +866,9 @@ Eingabe. „Nächster Bewohner ▶“ ist grau („Erst den Bericht zu diesem Be
     1366 × 768 passen zwei Bewohner auf den Bildschirm.
   - **Küchendienst** geht reihum über alle belegten Zimmer aller drei Bereiche (42); je Wohnbereich
     getrennt wäre näher an der Wirklichkeit.
-  - **Übersicht:** Bei 1920 × 1080 sind 12 der 23 Karten ohne Bildlauf zu sehen; „Termine heute“ zählt bei
-    Gruppenterminen alle Namen auf (Spaziergang: 23 Namen). Schritt 26l baut die Übersicht neu.
+  - ~~**Übersicht:** Bei 1920 × 1080 sind 12 der 23 Karten ohne Bildlauf zu sehen; „Termine heute“ zählt bei
+    Gruppenterminen alle Namen auf (Spaziergang: 23 Namen).~~ Erledigt mit 0.29.14 (Liste, höchstens drei
+    Namen je Termin).
   - **Übergabe:** Jeder Eintrag ist eine große Karte; bei 1366 × 768 passen zwei der neun offenen Einträge
     auf den Bildschirm.
   - **Tagesplan:** Ein Gruppentermin („Spaziergang mit der Wohngruppe“) steht je Bewohner in einer eigenen
@@ -900,6 +927,25 @@ Eingabe. „Nächster Bewohner ▶“ ist grau („Erst den Bericht zu diesem Be
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26l): **Fahrzeuge** stehen nur noch im Kalender (dort gab es dieselbe Leiste schon);
+  in „Heute wichtig“ ist für sie kein Kasten vorgesehen. **Änderungen der Medikation** stehen als Hinweis in
+  der Bewohnerzeile („Medikation: Pause beginnt“) statt in einem eigenen Kasten.
+- 08.11.2026 (Schritt 26l): Die 1100 px gelten für die Fläche der Übersicht (ohne Seitenleiste). Beim
+  Start in der Fenstergröße 1180 × 800 steht „Heute wichtig“ deshalb oben; im Vollbild nebeneinander.
+- 08.11.2026 (Schritt 26l): „Laufender Dienst“: offen ist, was jetzt dran ist (auch aus früheren Schichten
+  liegen geblieben) und „wer Zeit hat“; erledigt zählt, was in dieser Schicht abgehakt wurde. Aufgaben für
+  spätere Schichten zählen nicht. Facharzttermine aus Visiten öffnen beim Abhaken das Formular wie in
+  „Aufgaben“. Aufgaben ohne Bewohner und Übergaben „Wohnbereich allgemein“ stehen in jedem Bereich.
+- 08.11.2026 (Schritt 26l): „Termine heute“ fasst gleiche Termine mit gleichem Status zusammen und nennt
+  höchstens drei Namen („+2“). „Wo“: abwesend vor Ausgang vor „in Therapie“ (erst nach „gegangen“) vor
+  einem Kalendertermin, der gerade läuft; Wochenplan-Einträge und unbestätigte Therapien zählen nicht.
+- 08.11.2026 (Schritt 26l): „Neuer Bericht …“ braucht eine gewählte Zeile; es gibt keine Vorauswahl, damit
+  nicht versehentlich für den ersten Bewohner geschrieben wird. Das Häkchen „alle Bereiche“ ist in die
+  Bereichswahl gewandert (wie im Bereich „Bewohner“).
+- 08.11.2026 (Schritt 26l): Grün für „Neuer Bewohner …“ nach `docs/gestaltung.md` („Aufnahme grün“); die
+  Hauptaktion bleibt die eine Akzentfarbe. Die Statusleiste gilt in allen Bereichen; „Stand“ ist die Zeit,
+  zu der die Ansicht zuletzt gelesen wurde.
 
 - 08.11.2026 (Schritt 26j): Die Liste zeigt zuerst die eigenen Bereiche (wie die Übersicht); „alle Bereiche“
   und R1–R3 sind wählbar. Die Filterknöpfe bleiben und zählen im gewählten Bereich.
@@ -1482,6 +1528,21 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.14 (am besten im Vollbild):
+
+1. Start als „EF“: links „Heute wichtig“ mit vier Kästen (Zähler in der Überschrift; leer: „Nichts offen“),
+   rechts die 23 Bewohner von R1 nach Zimmer, ohne Bildlauf. Kopf der Liste: „BEWOHNER R1 · 23 · … IM HAUS“.
+2. Spalte „Wo“: z. B. „Heimfahrt bis …“, „in Therapie: … bis …“; sonst „im Haus“. Hinweise wie Beschluss,
+   Allergie, Medikation, Übergabe.
+3. Klick auf eine Übergabe → „Übergabe“; auf einen Termin → „Tagesplan“; auf eine Nachricht → der Verlauf.
+4. Im Kasten „Laufender Dienst“ ein Häkchen setzen: die Aufgabe verschwindet, „x von y erledigt“ und der
+   Balken steigen; in „Aufgaben“ steht sie erledigt mit „EF“.
+5. Aktionsleiste: „Neuer Bericht …“ ist grau, bis eine Zeile gewählt ist; „Neuer Bewohner …“ ist grün;
+   rechts die Bereichswahl (R2 zeigt die 23 von R2) und „Drucken …“ (Vorschau im Querformat).
+6. Doppelklick auf eine Zeile öffnet die Akte. Fenster schmaler ziehen: „Heute wichtig“ rutscht über die Liste.
+7. Unten in der Statusleiste: „DEMO — ausgedachte Daten · Datum · Dienst · Stand …“.
+8. Die Fahrzeuge („vor Ort“/„unterwegs“) stehen im Kalender.
 
 Version 0.29.13:
 

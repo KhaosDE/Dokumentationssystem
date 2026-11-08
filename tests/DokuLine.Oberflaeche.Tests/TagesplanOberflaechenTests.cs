@@ -72,7 +72,8 @@ public class TagesplanOberflaechenTests
         f.Bewohner.AkteZeigen(ahorn);
         Assert.Equal(wo, f.Bewohner.Akte.WoText);
         f.BereichWaehlen("Übersicht");
-        Assert.Contains(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == ahorn).Marken, m => m.Text == wo);
+        Assert.Contains(f.Uebersicht.Zeilen.Single(k => k.Bewohner.Id == ahorn).Marken, m => m.Text == wo);
+        Assert.Equal(wo, f.Uebersicht.Zeilen.Single(k => k.Bewohner.Id == ahorn).Wo);   // Spalte „Wo“ (Schritt 26l)
 
         // Nach Bewohner, abgesagt (rutscht nach „Erledigt“), und ohne Anmeldung gesperrt.
         f.BereichWaehlen("Tagesplan");

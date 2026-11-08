@@ -15,12 +15,12 @@ public class BezugOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.BereichWaehlen("Übersicht");
-        var ahorn = f.Uebersicht.Karten.Single(k => k.Bewohner.Nachname == "Ahorn");
+        var ahorn = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Ahorn");
         Assert.Equal("AB", ahorn.Bezugspflege!.Value.Kuerzel);
         Assert.Equal(ColorTranslator.FromHtml("#2F6FB7").ToArgb(), ahorn.Bezugspflege.Value.Farbe.ToArgb());
         Assert.Null(ahorn.Trainer);
-        Assert.Contains("Bezugspflege AB", ahorn.AccessibleName);
-        Assert.Equal("DBT · PR", f.Uebersicht.Karten.Single(k => k.Bewohner.Nachname == "Birke").Trainer!.Value.Text);
+        Assert.Contains("Bezugspflege AB", ahorn.Beschreibung);
+        Assert.Equal("DBT · PR", f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Trainer!.Value.Text);
         Assert.Contains(Statusleiste.BezugText, f.Statusleiste.AccessibleName);
 
         f.BereichWaehlen("Bewohner");
@@ -72,15 +72,15 @@ public class BezugOberflaechenTests
         Assert.False(s.MeineBezugsbewohner.Enabled);   // nicht angemeldet
         f.BenutzerWaehlen("AB");
         s.MeineBezugsbewohner.Checked = true;
-        Assert.Equal(["Ahorn", "Birke", "Clematis", "Distel", "Eiche"], s.Karten.Select(k => k.Bewohner.Nachname));
+        Assert.Equal(["Ahorn", "Birke", "Clematis", "Distel", "Eiche"], s.Zeilen.Select(k => k.Bewohner.Nachname).Order());
         Assert.Contains("meine Bezugsbewohner", f.Kopf.KleinText);
         Hilfe.Foto(f, "68_uebersicht_meine");
         s.MeineBezugsbewohner.Checked = false;
         f.BenutzerWaehlen("PR");
         s.MeineEinzeltrainings.Checked = true;
-        Assert.Equal(["Birke", "Ginster", "Sonnenblume", "Tagetes"], s.Karten.Select(k => k.Bewohner.Nachname).Order());   // auch aus R2
+        Assert.Equal(["Birke", "Ginster", "Sonnenblume", "Tagetes"], s.Zeilen.Select(k => k.Bewohner.Nachname).Order());   // auch aus R2
         s.MeineEinzeltrainings.Checked = false;
-        Assert.Equal(46, s.Karten.Count);   // PR: R1 und R2
+        Assert.Equal(46, s.Zeilen.Count);   // PR: R1 und R2
     });
 
     [Fact]

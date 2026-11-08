@@ -195,6 +195,20 @@ public static class Stil
         return knopf;
     }
 
+    // Aufnahme eines Bewohners: grün (docs/gestaltung.md, Ausnahme wie in der Ausgangsliste). Keine
+    // Hauptaktion – die bleibt die eine Akzentfarbe der Ansicht.
+    public static Button AufnahmeKnopf(string text)
+    {
+        var knopf = Grundknopf(text);
+        knopf.BackColor = Erfolg;
+        knopf.ForeColor = Color.White;
+        knopf.Font = Standard;
+        knopf.FlatAppearance.BorderColor = Erfolg;
+        knopf.FlatAppearance.MouseOverBackColor = Mischen(Erfolg, Color.White, 0.15);
+        knopf.FlatAppearance.MouseDownBackColor = Mischen(Erfolg, Color.Black, 0.15);
+        return knopf;
+    }
+
     // Alle anderen Knöpfe: neutral.
     public static Button NebenKnopf(string text)
     {
