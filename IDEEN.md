@@ -50,8 +50,9 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 25 | Aufgaben nach Schichten mit Standardaufgaben | 0.28.0 |
 | 26 | Visiten | 0.29.0 |
 | 26a | Kürzel automatisch aus der Anmeldung | 0.29.1 |
-| 26b | Ärzteverzeichnis | 0.29.2 |
-| 26c | Visite: Übersicht aller Bewohner | 0.29.3 |
+| 26a1 | Umbenennung in DokuLine, Teil 1 (Übergang) | 0.29.2 |
+| 26b | Ärzteverzeichnis | 0.29.3 |
+| 26c | Visite: Übersicht aller Bewohner | 0.29.4 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
@@ -1049,3 +1050,53 @@ Umfang (ändert den Eintrag „Visiten“):
 - **Ausdruck „Visitenliste“:** alle Bewohner mit aktueller Medikation, ein Block je Bewohner,
   Platz für Notizen — als Papiervorlage, falls am Bildschirm nicht gearbeitet werden kann.
 - Die bisherige Eingabe „Neue Visite …“ für einzelne Bewohner bleibt erhalten.
+
+## Umbenennung in DokuLine, Teil 1 (Übergang)
+Status: freigegeben (Bauplan Schritt 26a1 — **vor allen anderen offenen Schritten bauen**)
+Datum: 08.11.2026
+Was: Das Programm heißt **DokuLine**, Leittext **„Betreuung auf Augenhöhe“**. Alles wird
+umbenannt: Programm, Programmdatei, Projekte, Datenordner, Dokumentation — und danach das
+Repository (`KhaosDE/Dokumentationssystem` → `KhaosDE/DokuLine`).
+Warum: Entscheidung Tobi (08.11.2026): Name „DokuLine“, Leittext „Betreuung auf Augenhöhe“;
+„Repo und so weiter müssen alle umbenannt werden“.
+**Warum in Teilen:** Der Updater bereits installierter Versionen akzeptiert nur Downloads,
+deren Adresse mit `https://github.com/KhaosDE/Dokumentationssystem/releases/download/`
+beginnt, und sucht die Datei `Dokumentationssystem.exe` (`Aktualisierung.cs`). Würde das
+Repository sofort umbenannt oder die Datei sofort anders heißen, bekämen diese Installationen
+keine Updates mehr. Deshalb zuerst eine Übergangsversion unter dem alten Repository-Namen,
+dann die Umbenennung des Repositorys, später das Aufräumen.
+Umfang Teil 1 (Claude Code, Repository heißt dabei noch `Dokumentationssystem`):
+- **Angezeigter Name** überall „DokuLine“: Fenstertitel, Kopf, Anmeldefenster, „Über“,
+  Druckvorschau-Fußzeile, README. Unter dem Namen der Leittext „Betreuung auf Augenhöhe“
+  (Anmeldefenster, Kopf der Übersicht, „Über“, README). Der Hinweis „Demo — ausgedachte
+  Daten“ bleibt unverändert.
+- **Projekte und Namensräume** umbenennen: `Dokusystem.*` → `DokuLine.*` (Ordner unter
+  `src/`, `.csproj`, Namensräume, Lösung `Dokumentationssystem.sln` → `DokuLine.sln`,
+  Tests, Workflow). Das Modul heißt dann `src/DokuLine.Modul.Ausgangsliste/`.
+- **Programmdatei** heißt `DokuLine.exe`. **Übergang:** Der Workflow veröffentlicht in jedem
+  Release **zusätzlich** dieselbe Datei als `Dokumentationssystem.exe` mit eigener
+  `.sha256`, damit alte Installationen sie finden. Release-Titel „DokuLine …“, Tags weiter
+  `build-<Laufnummer>`.
+- **Updater** (neu): akzeptiert beide Adress-Anfänge
+  (`…/KhaosDE/Dokumentationssystem/releases/download/` und
+  `…/KhaosDE/DokuLine/releases/download/`) und beide Dateinamen; fragt die neueste Version über
+  `…/repos/KhaosDE/DokuLine/releases/latest` ab und fällt auf die alte Adresse zurück, falls
+  die neue (noch) nicht antwortet. Er tauscht die laufende Datei unter ihrem **eigenen**
+  Dateinamen aus (heißt sie noch `Dokumentationssystem.exe`, bleibt das so). Tests für beide
+  Fälle.
+- **Datenordner** `%APPDATA%\DokuLine\`. Beim ersten Start: gibt es den neuen Ordner nicht,
+  aber `%APPDATA%\Dokumentationssystem\`, wird dessen Inhalt in den neuen Ordner **kopiert**
+  (Datenbank, Bilder, Einstellungen, Logs). Der alte Ordner bleibt unangetastet, damit nichts
+  verloren geht. Ein Eintrag im Protokoll sagt, dass kopiert wurde.
+- Selbst gewählter **Datenbank-Ort** (Mehrplatz) bleibt wie eingestellt.
+- **Dokumentation:** `CLAUDE.md` (Name, Pfade, Projektnamen; die Regeln selbst nicht ändern),
+  `README.md`, `STAND.md`, `docs/*.md`. In `IDEEN.md` nur Pfadangaben anpassen, erledigte
+  Einträge sonst unverändert lassen.
+- Nach dem Zusammenführen in `STAND.md` unter „Offene Punkte“ vermerken: „Teil 2:
+  Repository umbenennen — sobald dieses Release erschienen ist.“
+Teil 2 (kein Claude-Code-Auftrag, macht der Chat oder Tobi, **erst wenn Teil 1 als Release
+erschienen ist**): Repository auf GitHub in `DokuLine` umbenennen. GitHub leitet alte
+Adressen weiter; Version 0.29.2 kommt mit beiden Namen zurecht.
+Teil 3 (später, eigener Eintrag, erst wenn alle Installationen mindestens 0.29.2 haben):
+alten Dateinamen und alten Adress-Anfang entfernen, `%APPDATA%\Dokumentationssystem\` nicht
+mehr beachten.
