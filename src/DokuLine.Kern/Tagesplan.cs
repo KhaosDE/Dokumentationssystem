@@ -43,3 +43,87 @@ public static class TagesplanRegeln
 
     public static string InTherapieText(string titel, TimeOnly bis) => $"in Therapie: {titel} bis {bis:HH\\:mm}";
 }
+
+// Tagesplan als Anzeigetafel (Bauplan Schritt 26g), nach dem Vorbild einer Abflugtafel: Status als Wort
+// (die Farbe kommt dazu, nie allein) und drei Blöcke – „Jetzt und gleich“ oben, „Später heute“,
+// „Erledigt“ unten.
+public enum TafelStatus { Jetzt, Gleich, Geplant, Gegangen, NochOffen, Abgesagt, Ausgefallen, Zurueck, Vorbei }
+
+public enum TafelBlock { JetztUndGleich, Spaeter, Erledigt }
+
+public sealed record TafelZeile(TagesplanZeile Zeile, TafelStatus Status, TafelBlock Block)
+{
+    public Bewohner Bewohner => Zeile.Bewohner;
+    public Termin Termin => Zeile.Termin;
+}
+
+public static class TafelRegeln
+{
+    public const int GleichMinuten = 30;   // „GLEICH“: beginnt in den nächsten 30 Minuten
+
+    public static string Wort(TafelStatus s) => s switch
+    {
+        TafelStatus.Jetzt => "JETZT",
+        TafelStatus.Gleich => "GLEICH",
+        TafelStatus.Geplant => "GEPLANT",
+        TafelStatus.Gegangen => "GEGANGEN",
+        TafelStatus.NochOffen => "NOCH OFFEN",
+        TafelStatus.Abgesagt => "ABGESAGT",
+        TafelStatus.Ausgefallen => "AUSGEFALLEN",
+        TafelStatus.Zurueck => "ZURÜCK",
+        _ => "VORBEI",
+    };
+
+    public static string BlockText(TafelBlock b) => b switch
+    {
+        TafelBlock.JetztUndGleich => "JETZT UND GLEICH",
+        TafelBlock.Spaeter => "SPÄTER HEUTE",
+        _ => "ERLEDIGT",
+    };
+
+    // Ein Termin von heute: Status und Block nach Uhrzeit und (bei Therapien) Teilnahme.
+    // Therapien: „gegangen“ bis zum Ende, danach „zurück“; „abgesagt“ und „ausgefallen“ sind erledigt;
+    // ohne Bestätigung nach Beginn „noch offen“ – das bleibt oben, bis jemand es bestätigt.
+    // Andere Termine: „jetzt“ während, „vorbei“ danach. Ganztags läuft den ganzen Tag.
+    public static (TafelStatus Status, TafelBlock Block) Einordnen(TagesplanZeile z, DateTime jetzt)
+    {
+        var t = z.Termin;
+        var uhr = TimeOnly.FromDateTime(jetzt);
+        var von = t.Ganztags ? TimeOnly.MinValue : t.Von;
+        var bis = t.Ganztags ? TimeOnly.MaxValue : t.Bis;
+        bool vorbei = t.Tag < DateOnly.FromDateTime(jetzt) || (t.Tag == DateOnly.FromDateTime(jetzt) && uhr >= bis);
+        bool begonnen = vorbei || (t.Tag == DateOnly.FromDateTime(jetzt) && uhr >= von);
+        bool gleich = !begonnen && t.Tag == DateOnly.FromDateTime(jetzt) && (von.ToTimeSpan() - uhr.ToTimeSpan()).TotalMinutes <= GleichMinuten;
+        if (z.Therapie)
+            return z.Status switch
+            {
+                Teilnahme.Abgesagt => (TafelStatus.Abgesagt, TafelBlock.Erledigt),
+                Teilnahme.Ausgefallen => (TafelStatus.Ausgefallen, TafelBlock.Erledigt),
+                Teilnahme.Teilgenommen => vorbei ? (TafelStatus.Zurueck, TafelBlock.Erledigt) : (TafelStatus.Gegangen, TafelBlock.JetztUndGleich),
+                _ => begonnen ? (TafelStatus.NochOffen, TafelBlock.JetztUndGleich)
+                   : gleich ? (TafelStatus.Gleich, TafelBlock.JetztUndGleich) : (TafelStatus.Geplant, TafelBlock.Spaeter),
+            };
+        if (vorbei) return (TafelStatus.Vorbei, TafelBlock.Erledigt);
+        if (begonnen) return (TafelStatus.Jetzt, TafelBlock.JetztUndGleich);
+        return gleich ? (TafelStatus.Gleich, TafelBlock.JetztUndGleich) : (TafelStatus.Geplant, TafelBlock.Spaeter);
+    }
+
+    // Die Tafel: erst „Jetzt und gleich“, dann „Später heute“, dann „Erledigt“; darin nach Uhrzeit.
+    public static List<TafelZeile> Tafel(IEnumerable<TagesplanZeile> zeilen, DateTime jetzt) =>
+        TagesplanRegeln.NachUhrzeit(zeilen).Select(z => Zeile(z, jetzt))
+            .OrderBy(x => x.Block).ToList();   // OrderBy ist stabil: die Uhrzeit-Reihenfolge bleibt im Block
+
+    // „nach Bewohner“: dieselben Zeilen mit Status, nach Bewohner und Uhrzeit (ohne Blöcke).
+    public static List<TafelZeile> NachBewohner(IEnumerable<TagesplanZeile> zeilen, DateTime jetzt) =>
+        TagesplanRegeln.NachBewohner(zeilen).Select(z => Zeile(z, jetzt)).ToList();
+
+    private static TafelZeile Zeile(TagesplanZeile z, DateTime jetzt)
+    {
+        var (status, block) = Einordnen(z, jetzt);
+        return new TafelZeile(z, status, block);
+    }
+
+    // Kleiner Zusatz in der Status-Spalte: wann und von wem bestätigt („09:05 · CD“).
+    public static string Bestaetigt(TagesplanZeile z) =>
+        z.Therapie && z.Eintrag is TeilnahmeEintrag e && e.Status != Teilnahme.Offen ? $"{e.Erstellt:HH\\:mm} · {e.Kuerzel}" : "";
+}

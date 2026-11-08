@@ -1231,7 +1231,7 @@ Umfang:
 - HEB-Bogen und Visite zeigen die Diagnosen als Information an, das Programm wertet sie nicht.
 
 ## Tagesplan als Anzeigetafel
-Status: freigegeben (Bauplan Schritt 26g)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Der Tagesplan bekommt ein neues Aussehen nach dem Vorbild einer **Anzeigetafel am
 Flughafen**. Die aktuellen Termine stehen oben und sind hervorgehoben.

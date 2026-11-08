@@ -436,6 +436,13 @@ public sealed class Hauptfenster : Form
     }
 
     // Offene Fenster des Programms (Dialoge), die beim Abmelden geschlossen werden.
+    // F11 im Tagesplan: nur die Tafel, bildschirmfüllend (Schritt 26g).
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        if (keyData == Keys.F11 && AktiverBereich == "Tagesplan" && !Gesperrt) { Tagesplan.VollbildZeigen(); return true; }
+        return base.ProcessCmdKey(ref msg, keyData);
+    }
+
     public List<Form> OffeneFenster() =>
         [.. Application.OpenForms.Cast<Form>().Where(f => f != this && f is not Hauptfenster && f is not AnmeldenFenster && f is not AbmeldenFrage && f.Visible)];
 

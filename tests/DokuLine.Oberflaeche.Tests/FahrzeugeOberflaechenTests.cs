@@ -69,7 +69,8 @@ public class FahrzeugeOberflaechenTests
         Assert.Contains(f.Uebersicht.Karten.Single(k => k.Bewohner.Id == birke).Marken, m => m.Text.StartsWith("abwesend: unterwegs mit VW Bus"));
         f.BereichWaehlen("Tagesplan");
         f.Tagesplan.AlleBereiche.Checked = true;
-        Assert.Contains(f.Tagesplan.Karten, k => k.Zeile.Bewohner.Id == birke && k.MarkenTexte[0] == "Fahrt");
+        Assert.Contains(f.Tagesplan.Tafel.Zeilen, k => k.Daten.Bewohner.Id == birke && k.Daten.Termin.Quelle == TerminQuelle.Fahrt
+                                                      && k.Daten.Termin.Begleitung.StartsWith("VW Bus · Fahrer ", StringComparison.Ordinal));   // Spalte „Begleitung“ (26g)
 
         // Ohne Anmeldung: Knöpfe gesperrt.
         f.BenutzerWaehlen("");
