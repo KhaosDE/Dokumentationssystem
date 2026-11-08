@@ -186,16 +186,35 @@ public static class Demodaten
 
     private sealed class NachrichtenDatei
     {
-        public List<KollegeVorlage> Kollegen { get; set; } = [];
         public List<VerlaufVorlage> Verlaeufe { get; set; } = [];
     }
 
-    public sealed class KollegeVorlage
+    // ----- Mitarbeiter (daten/demo/mitarbeiter.json) -----
+
+    private sealed class MitarbeiterDatei
+    {
+        public List<string> Bereiche { get; set; } = [];
+        public List<MitarbeiterVorlage> Mitarbeiter { get; set; } = [];
+    }
+
+    private sealed class MitarbeiterVorlage
     {
         public string Kuerzel { get; set; } = "";
         public string Vorname { get; set; } = "";
         public string Nachname { get; set; } = "";
-        public List<string> Teams { get; set; } = [];
+        public bool Fachkraft { get; set; }
+        public bool Aktiv { get; set; } = true;
+        public List<string> Bereiche { get; set; } = [];
+        public List<string> Positionen { get; set; } = [];
+    }
+
+    public sealed record DemoMitarbeiter(List<string> Bereiche, List<Mitarbeiter> Mitarbeiter);
+
+    public static DemoMitarbeiter Mitarbeiter()
+    {
+        var datei = Lesen<MitarbeiterDatei>("mitarbeiter.json");
+        return new DemoMitarbeiter(datei.Bereiche,
+            datei.Mitarbeiter.Select(m => new Mitarbeiter(m.Kuerzel, m.Vorname, m.Nachname, m.Fachkraft, m.Aktiv, m.Bereiche, m.Positionen)).ToList());
     }
 
     public sealed class VerlaufVorlage
@@ -217,14 +236,13 @@ public static class Demodaten
 
     public sealed record DemoNachricht(Nachricht Nachricht);
     public sealed record DemoVerlauf(List<DemoNachricht> Nachrichten, List<string> ArchiviertVon);
-    public sealed record DemoPost(List<Kollege> Kollegen, List<DemoVerlauf> Verlaeufe);
+    public sealed record DemoPost(List<DemoVerlauf> Verlaeufe);
 
     // Kollegen, Teams und Verläufe aus daten/demo/nachrichten.json, Zeiten relativ zu „jetzt“.
     // Fehlt der genannte Bewohner (z. B. umbenannt), entfällt der Verlauf.
     public static DemoPost Nachrichten(IReadOnlyList<Bewohner> bewohner, DateTime jetzt)
     {
         var datei = Lesen<NachrichtenDatei>("nachrichten.json");
-        var kollegen = datei.Kollegen.Select(k => new Kollege(k.Kuerzel, k.Vorname, k.Nachname, k.Teams)).ToList();
         DateTime Minute(DateTime t) => new(t.Year, t.Month, t.Day, t.Hour, t.Minute, 0);
         var verlaeufe = new List<DemoVerlauf>();
         foreach (var v in datei.Verlaeufe)
@@ -250,7 +268,7 @@ public static class Demodaten
             }
             verlaeufe.Add(new DemoVerlauf(bisher.Select(x => new DemoNachricht(x)).ToList(), v.ArchiviertVon));
         }
-        return new DemoPost(kollegen, verlaeufe);
+        return new DemoPost(verlaeufe);
     }
 
     // ----- Medikamentendatenbank (echte Nachschlagedaten, keine Bewohnerdaten) -----

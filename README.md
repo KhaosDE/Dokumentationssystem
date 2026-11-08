@@ -117,11 +117,17 @@ Danach fragt Windows für diese Datei nicht mehr.
   spätestens nach 30 Sekunden nach. Haben zwei denselben Eintrag geändert, zeigt das Programm
   beide Fassungen und lässt wählen – es überschreibt nichts still. Zum Ausprobieren ohne
   zweiten Rechner: das Programm zweimal starten. Auch im gemeinsamen Ordner nur ausgedachte
-  Daten; Anmeldung, Rechte und Verschlüsselung gibt es nicht (das gehört zum Echtbetrieb).
+  Daten; Passwörter und Verschlüsselung gibt es nicht (das gehört zum Echtbetrieb).
 - **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
   her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren – im gemeinsamen Ordner
   für alle Rechner.
-- **Einstellungen** (links): wer angemeldet ist, Update beim Start, Module ein- und
+- **Anmelden:** Beim Start mit dem Kürzel (Demo: ohne Passwort; die ausgedachten Mitarbeiter
+  stehen im Anmeldefenster). Oben rechts „Angemeldet als …“ → „Abmelden / Benutzer wechseln“.
+  Was jemand darf, hängt an seiner Position (Einstellungen → „VERWALTUNG“ → „Rechte …“). Ohne
+  Recht bleiben Knöpfe grau und sagen beim Darüberfahren, warum.
+- **Logo der Einrichtung:** Oben rechts im Kopf steht ein Platzhalter. Ein Klick darauf öffnet die
+  Einstellungen; unter „Bild im Kopf“ lässt sich das eigene Logo wählen (es bleibt auf dem Rechner).
+- **Einstellungen** (links): Update beim Start, Module ein- und
   ausschalten, Frist „Beschluss endet bald“, eigenes Bild für den Kopf (z. B. ein Logo – die Datei wird nur in den
   Datenordner kopiert).
 

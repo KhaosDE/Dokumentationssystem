@@ -6,7 +6,8 @@ namespace Dokusystem.Oberflaeche.Tests;
 [Collection("Oberflaeche")]
 public class MedikamenteOberflaechenTests
 {
-    private static (Umgebung, Hauptfenster) Oeffnen(string kuerzel = "CD")
+    // PR: Psychologischer Fachdienst, Fachkraft – darf anlegen und verwalten (Rechte, Schritt 19).
+    private static (Umgebung, Hauptfenster) Oeffnen(string kuerzel = "PR")
     {
         var u = new Umgebung();
         if (kuerzel.Length > 0) Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
@@ -93,7 +94,7 @@ public class MedikamenteOberflaechenTests
             Assert.Contains("Fassung 2", verlauf);
             Assert.Contains("gilt jetzt", verlauf);
             Assert.Contains("Stärken: „1 mg“ → „1 mg, 2 mg“", verlauf);
-            Assert.Contains("von CD", verlauf);
+            Assert.Contains("von PR", verlauf);
         }
     });
 

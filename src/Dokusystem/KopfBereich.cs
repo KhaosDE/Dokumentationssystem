@@ -6,7 +6,8 @@ namespace Dokusystem;
 // abgerundete Fläche mit feinem Rand und weichem Farbverlauf – Orange von oben links, Blau von
 // rechts unten –, der nach rechts in reines Weiß ausläuft.
 // Links: kleine Zeile und Titel. Rechts oben das Logofeld: ein selbst gewähltes Bild aus den
-// Einstellungen (liegt im Datenordner, nie im Repository – Regel 7), sonst leer. Daneben der
+// Einstellungen (liegt im Datenordner, nie im Repository – Regel 7), sonst ein Platzhalter
+// „Logo der Einrichtung“ (Klick öffnet die Einstellungen). Daneben der
 // dauerhaft sichtbare Hinweis „Demo — ausgedachte Daten“ (Regel 4). Darunter rechts die Knöpfe.
 public sealed class KopfBereich : Panel
 {
@@ -16,13 +17,18 @@ public sealed class KopfBereich : Panel
     private const int Rand = 16, RandOben = 16, RandUnten = 8;   // Abstand zum Fensterrand
     private const int Innen = 16, InnenSeite = 24;
     private const int TitelHoehe = 64, Zeilenabstand = 8;
-    private const int LogoHoehe = 56, LogoMaxBreite = 220;
+    private const int LogoHoehe = 56, LogoMaxBreite = 220, PlatzhalterBreite = 150;
     public const int GesamtHoehe = RandOben + Innen + TitelHoehe + Zeilenabstand + Stil.KnopfHoehe + Innen + RandUnten;
 
     private readonly Label klein = new();
     private readonly Label titel = new();
     private readonly List<Button> knoepfe = [];
     private Image? logo;
+    private static readonly ToolTip Hinweis = new();
+
+    // Klick auf den Platzhalter (kein Logo gewählt): das Hauptfenster öffnet die Einstellungen.
+    public event Action? LogoGewuenscht;
+    public const string PlatzhalterText = "Logo der Einrichtung";
 
     // „Angemeldet als …“ unter dem Demo-Hinweis: Klick wechselt den Benutzer (ohne Passwort,
     // nur für die Vorführung – IDEEN „Nachrichten“).
@@ -64,9 +70,9 @@ public sealed class KopfBereich : Panel
     // name == null: niemand angemeldet (Hinweis in der Farbe „bitte klären“).
     public void BenutzerSetzen(string? name)
     {
-        BenutzerKnopf.Text = name is null ? "Nicht angemeldet – Benutzer wählen ▾" : $"Angemeldet als {name} ▾";
+        BenutzerKnopf.Text = name is null ? "Nicht angemeldet – Anmelden ▾" : $"Angemeldet als {name} ▾";
         BenutzerKnopf.ForeColor = name is null ? Stil.Achtung.Text : Stil.Akzent;
-        BenutzerKnopf.AccessibleName = (name is null ? "Nicht angemeldet" : $"Angemeldet als {name}") + ". Benutzer wechseln";
+        BenutzerKnopf.AccessibleName = (name is null ? "Nicht angemeldet. Anmelden" : $"Angemeldet als {name}. Abmelden / Benutzer wechseln");
         PerformLayout();
     }
 
@@ -75,7 +81,7 @@ public sealed class KopfBereich : Panel
     {
         var f = Flaeche;
         int rechts = f.Right - S(InnenSeite);
-        if (logo is null) return rechts;
+        if (logo is null) return rechts - S(PlatzhalterBreite) - S(Stil.AbstandMittel);
         var feld = new Rectangle(rechts - S(LogoMaxBreite), f.Top + S(Innen), S(LogoMaxBreite), S(LogoHoehe));
         return (int)(rechts - Einpassen(logo.Size, feld).Width) - S(Stil.AbstandMittel);
     }
@@ -116,6 +122,35 @@ public sealed class KopfBereich : Panel
     }
 
     public bool HatLogo => logo is not null;
+
+    // Wo der Platzhalter steht (leer, wenn ein Logo gewählt ist).
+    public Rectangle PlatzhalterFeld
+    {
+        get
+        {
+            if (logo is not null) return Rectangle.Empty;
+            var f = Flaeche;
+            int rechts = f.Right - S(InnenSeite);
+            return new Rectangle(rechts - S(PlatzhalterBreite), f.Top + S(Innen), S(PlatzhalterBreite), S(LogoHoehe));
+        }
+    }
+
+    public void PlatzhalterKlicken() { if (logo is null) LogoGewuenscht?.Invoke(); }
+
+    protected override void OnMouseMove(MouseEventArgs e)
+    {
+        base.OnMouseMove(e);
+        bool drauf = PlatzhalterFeld.Contains(e.Location);
+        Cursor = drauf ? Cursors.Hand : Cursors.Default;
+        string? text = drauf ? "Eigenes Logo wählen: Einstellungen → „Bild im Kopf“" : null;
+        if (Hinweis.GetToolTip(this) != (text ?? "")) Hinweis.SetToolTip(this, text);
+    }
+
+    protected override void OnMouseClick(MouseEventArgs e)
+    {
+        base.OnMouseClick(e);
+        if (e.Button == MouseButtons.Left && PlatzhalterFeld.Contains(e.Location)) PlatzhalterKlicken();
+    }
 
     // Bild im Seitenverhältnis in ein Feld einpassen (mittig).
     public static RectangleF Einpassen(Size bild, Rectangle feld)
@@ -208,6 +243,21 @@ public sealed class KopfBereich : Panel
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.DrawImage(logo, ziel);
             rechts = (int)ziel.X - S(Stil.AbstandMittel);
+        }
+        else
+        {
+            // Platzhalter: gestrichelter Rahmen mit Wort – das echte Logo kommt nie ins Repository (Regel 7).
+            var feld = PlatzhalterFeld;
+            using (var flaeche = Stil.Abgerundet(feld, Stil.RadiusKnopf * Skala))
+            using (var grund = new SolidBrush(Stil.Fensterhintergrund))
+            using (var strich = new Pen(Stil.KarteRand, 1.2f * Skala) { DashStyle = DashStyle.Dash })
+            {
+                g.FillPath(grund, flaeche);
+                g.DrawPath(strich, flaeche);
+            }
+            TextRenderer.DrawText(g, $"{PlatzhalterText}\n(Einstellungen)", Stil.Klein, feld, Stil.TextLeise,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+            rechts = feld.Left - S(Stil.AbstandMittel);
         }
 
         // Demo-Hinweis (Regel 4), als Marke „Achtung“ – mit Wort, nicht nur Farbe.

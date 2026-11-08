@@ -41,6 +41,16 @@ internal static class Program
         }
         if (hinweis is not null)
             MessageBox.Show(hinweis, "Dokumentationssystem", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        // Anmelden mit dem Kürzel (Schritt 19), ohne Passwort; „Beenden“ schließt das Programm.
+        using (var anmelden = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel, wechsel: false))
+        {
+            if (anmelden.ShowDialog() != DialogResult.OK || anmelden.Angemeldet is not Mitarbeiter angemeldet)
+            {
+                speicher.Dispose();
+                return 0;
+            }
+            Einstellungen.Aendern(w => w with { Kuerzel = angemeldet.Kuerzel });
+        }
         using (speicher)
         using (var fenster = new Hauptfenster(speicher))
         {

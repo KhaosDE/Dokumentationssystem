@@ -85,9 +85,12 @@ public sealed class WochenplanAnsicht : Panel
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
         if (t.Quelle == TerminQuelle.Therapie)
         {
+            string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);   // Rechte (Schritt 19)
+            if (grund is not null) menue.Items.Add(new ToolStripMenuItem(grund) { Enabled = false });
             foreach (var s in new[] { Teilnahme.Teilgenommen, Teilnahme.Abgesagt, Teilnahme.Ausgefallen, Teilnahme.Offen })
             {
-                var e = new ToolStripMenuItem(s == Teilnahme.Offen ? "zurück auf „offen“" : WochenplanRegeln.TeilnahmeText(s)) { Checked = t.Teilnahme == s };
+                var e = new ToolStripMenuItem(s == Teilnahme.Offen ? "zurück auf „offen“" : WochenplanRegeln.TeilnahmeText(s))
+                    { Checked = t.Teilnahme == s, Enabled = grund is null };
                 e.Click += (_, _) => TeilnahmeSetzen(t, s);
                 menue.Items.Add(e);
             }

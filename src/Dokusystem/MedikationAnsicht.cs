@@ -67,6 +67,8 @@ public sealed class MedikationAnsicht : Panel
     public void Aktualisieren()
     {
         if (bewohner is null) return;
+        string? grund = Recht.Grund(speicher, Funktionen.MedikationBearbeiten);   // Rechte (Schritt 19)
+        Stil.Sperren(NeuKnopf, grund);
         var tag = Stichtag();
         TagFehler.Visible = tag is null;
         TagFehler.Text = "Tag bitte als TT.MM.JJJJ eingeben.";
@@ -86,6 +88,7 @@ public sealed class MedikationAnsicht : Panel
                 foreach (var s in liste)
                 {
                     var karte = new VerordnungKarte(s);
+                    foreach (var k in new[] { karte.PauseKnopf, karte.PauseEndeKnopf, karte.StufenplanKnopf, karte.AbsetzenKnopf }) Stil.Sperren(k, grund);
                     karte.PauseKnopf.Click += (_, _) => Aendern(s.Verordnung, AenderungArt.Pause);
                     karte.PauseEndeKnopf.Click += (_, _) => Aendern(s.Verordnung, AenderungArt.PauseEnde);
                     karte.StufenplanKnopf.Click += (_, _) => Aendern(s.Verordnung, AenderungArt.Stufenplan);

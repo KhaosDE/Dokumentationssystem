@@ -642,7 +642,7 @@ Umfang:
   eingeklappt).
 
 ## Mitarbeiter, Anmeldung und Rechte
-Status: freigegeben (Bauplan Schritt 19)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Eine Mitarbeiterdatenbank, Anmeldung beim Programmstart mit dem Namenskürzel und eine
 Rechteverwaltung nach Positionen.
@@ -951,3 +951,12 @@ Umfang:
   Medikamentendatenbank, Datenbank-Ort, Fahrzeuge, Schichtzeiten …), zieht hierher um; es
   bleibt keine zweite Stelle.
 - Bildschirmfotos im Testlauf für jede Gruppe.
+
+## Platzhalter für das Einrichtungslogo
+Status: erledigt (08.11.2026; mit Version 0.22.0)
+Datum: 08.11.2026
+Was: In der obersten Leiste (Kopf) steht oben rechts ein Platzhalter für das Logo der Einrichtung.
+Warum: Wunsch Tobi in der Sitzung (08.11.2026).
+Umfang: Gestrichelter Rahmen „Logo der Einrichtung“, solange kein eigenes Bild gewählt ist; Klick
+öffnet die Einstellungen („Bild im Kopf“). Das echte Logo wählt jeder Rechner selbst; es liegt im
+Datenordner und kommt nie ins Repository (`CLAUDE.md`, Regel 7).

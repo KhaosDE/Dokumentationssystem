@@ -41,6 +41,8 @@ public sealed class MedikamenteSeite : Panel
     {
         var liste = speicher.Medikamente(Suche.Text);
         Anzahl = speicher.Medikamente().Count;
+        Recht.Anwenden(speicher, Funktionen.MedikamentAnlegen, NeuKnopf);   // Rechte (Schritt 19)
+        string? verwalten = Recht.Grund(speicher, Funktionen.MedikamenteVerwalten);
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
         inhalt.Clear();
@@ -48,6 +50,7 @@ public sealed class MedikamenteSeite : Panel
         foreach (var m in liste)
         {
             var karte = new MedikamentKarte(m);
+            Stil.Sperren(karte.AendernKnopf, verwalten);
             karte.AendernKnopf.Click += (_, _) => Bearbeiten(m);
             karte.VerlaufKnopf.Click += (_, _) => VerlaufZeigen(m);
             karte.KopierenKnopf.Click += (_, _) => Kopieren(m.Aktuell.Quelle);

@@ -15,7 +15,7 @@ public class NachrichtenOberflaechenTests
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        Assert.Equal("Nicht angemeldet – Benutzer wählen ▾", f.Kopf.BenutzerText);
+        Assert.Equal("Nicht angemeldet – Anmelden ▾", f.Kopf.BenutzerText);
         Assert.Null(Eintrag(f).Anzahl);
         Assert.False(f.Bewohner.NachrichtenHinweisSichtbar);
 
@@ -35,7 +35,7 @@ public class NachrichtenOberflaechenTests
         Assert.Empty(f.Nachrichten.Karten);                                        // OP hat nichts bekommen
         Assert.Equal(1, f.Nachrichten.Ordner[NachrichtenOrdner.Gesendet].Anzahl);   // nur „Schwimmkurs“ geschrieben
         f.BenutzerWaehlen("");
-        Assert.Equal("Nicht angemeldet – Benutzer wählen ▾", f.Kopf.BenutzerText);
+        Assert.Equal("Nicht angemeldet – Anmelden ▾", f.Kopf.BenutzerText);
         Assert.True(f.Nachrichten.Hinweis.Visible);
         Assert.False(f.Nachrichten.NeuKnopf.Enabled);
         Assert.Empty(f.Nachrichten.Karten);

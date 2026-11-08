@@ -181,6 +181,7 @@ public sealed class HebFenster : Form
         FertigKnopf.Text = fertig ? "Wieder als Entwurf" : "Als fertig markieren";
         SpeichernKnopf.Enabled = !fertig;
         BausteinKnopf.Enabled = !fertig;
+        Recht.Anwenden(speicher, Funktionen.Heb, SpeichernKnopf, FertigKnopf);   // Rechte (Schritt 19)
         Kopf.Text = $"{HebRegeln.ArtText(Bogen.Art)}" + (Bogen.Nummer is int n ? $" · Nr. {n}" : "") +
                     $" · Zeitraum {HebRegeln.ZeitraumText(Bogen)}{Environment.NewLine}" +
                     $"{bewohner.Name} · Aufnahme {Datum.Text(bewohner.Aufnahmedatum)} · Beschluss: {BewohnerRegeln.BeschlussText(bewohner)}" +

@@ -27,8 +27,13 @@ public sealed class EinstellungenFenster : Form
 
     // Wer angemeldet ist: eine der ausgedachten Kolleginnen oder Kollegen (gleich wie oben rechts
     // „Angemeldet als …“). Das Kürzel steht dann bei Berichten, Übergabe und Aufgaben.
-    public ComboBox Benutzer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
-    private readonly List<string> benutzerKuerzel = [];
+    // Wer angemeldet ist (Anmeldung mit Kürzel, Schritt 19); gewechselt wird oben rechts im Kopf.
+    public Label Angemeldet { get; } = new() { AutoSize = true, Font = Stil.Fett, UseMnemonic = false };
+
+    // Abschnitt „VERWALTUNG“: Mitarbeiter, Bereiche und Positionen, Rechte (Schritt 19).
+    public Button MitarbeiterKnopf { get; } = Stil.NebenKnopf("Mitarbeiter …");
+    public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche und Positionen …");
+    public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     public CheckBox AutoUpdate { get; } = new();
     public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
@@ -95,29 +100,33 @@ public sealed class EinstellungenFenster : Form
         Ganz(new MarkenFeld(KopfBereich.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
 
         Ganz(Abschnitt("ICH"));
-        Benutzer.Items.Add("– niemand –");
-        benutzerKuerzel.Add("");
-        foreach (var k in kollegen ?? [])
-        {
-            Benutzer.Items.Add($"{k.Anzeige} – {string.Join(", ", k.Teams)}");
-            benutzerKuerzel.Add(k.Kuerzel);
-        }
-        // Ein früher frei eingetragenes Kürzel bleibt wählbar, bis man jemand anderen wählt.
-        if (werte.Kuerzel.Length > 0 && !benutzerKuerzel.Contains(werte.Kuerzel))
-        {
-            Benutzer.Items.Add($"{werte.Kuerzel} (kein Benutzer der Demo)");
-            benutzerKuerzel.Add(werte.Kuerzel);
-        }
-        Benutzer.SelectedIndex = Math.Max(0, benutzerKuerzel.IndexOf(werte.Kuerzel));
-        Benutzer.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
+        var ich = speicher?.MitarbeiterLesen(werte.Kuerzel);
+        Angemeldet.Text = ich is null ? "niemand" : ich.Anzeige;
+        Angemeldet.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandMini);
         raster.Controls.Add(Beschriftung("Angemeldet als"));
-        raster.Controls.Add(Benutzer);
+        raster.Controls.Add(Angemeldet);
         raster.Controls.Add(new Label());
         raster.Controls.Add(new Label
         {
-            Text = "Nur für die Vorführung, ohne Passwort. Wechseln geht auch oben rechts im Kopf.",
+            Text = "Anmelden mit dem Kürzel, ohne Passwort (Demo). Wechseln: oben rechts „Abmelden / Benutzer wechseln“.",
             AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
         });
+
+        if (speicher is not null)
+        {
+            Ganz(Abschnitt("VERWALTUNG"));
+            MitarbeiterKnopf.Click += (_, _) => { using var f = new MitarbeiterFenster(speicher); Dialog.Zeigen(f, this); };
+            ListenKnopf.Click += (_, _) => { using var f = new ListenFenster(speicher); Dialog.Zeigen(f, this); };
+            RechteKnopf.Click += (_, _) => { using var f = new RechteFenster(speicher); Dialog.Zeigen(f, this); };
+            Stil.Sperren(MitarbeiterKnopf, Recht.Darf(speicher, Funktionen.MitarbeiterAlle) ? null : Recht.Grund(speicher, Funktionen.MitarbeiterBereich));
+            foreach (var k in new[] { MitarbeiterKnopf, ListenKnopf, RechteKnopf }) k.AutoSize = true;
+            Ganz(Formular.Reihe(MitarbeiterKnopf, ListenKnopf, RechteKnopf));
+            Ganz(new Label
+            {
+                Text = "Mitarbeiter mit Bereichen und Positionen; welche Position was darf, steht in der Rechte-Tabelle. Ohne Recht nur ansehen.",
+                AutoSize = true, MaximumSize = new Size(560, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+            });
+        }
 
         Ganz(Abschnitt("MEHRPLATZ"));
         Bereich.Items.AddRange([.. Kern.Bereiche.Vorschlaege]);
@@ -408,7 +417,6 @@ public sealed class EinstellungenFenster : Form
     {
         try
         {
-            string kuerzel = benutzerKuerzel[Math.Max(0, Benutzer.SelectedIndex)];
             if (Kern.Bereiche.Pruefen(Bereich.Text) is string bereichFehler)
             {
                 FehlerZeigen(bereichFehler);
@@ -416,7 +424,7 @@ public sealed class EinstellungenFenster : Form
             }
             Einstellungen.Aendern(w => w with
             {
-                Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked, BeschlussFristTage = (int)BeschlussFrist.Value, HebFristMonate = (int)HebFrist.Value,
+                AutoUpdate = AutoUpdate.Checked, BeschlussFristTage = (int)BeschlussFrist.Value, HebFristMonate = (int)HebFrist.Value,
                 Bereich = Kern.Bereiche.Bereinigen(Bereich.Text), DatenbankOrdner = DatenbankOrdner,
             });
             if (logoGeaendert && NeuesLogo is not null) Einstellungen.LogoSetzen(NeuesLogo);

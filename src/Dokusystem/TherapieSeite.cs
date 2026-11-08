@@ -62,6 +62,8 @@ public sealed class TherapieSeite : Panel
     {
         var tag = Stichtag;
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
+        string? grund = Recht.Grund(speicher, Funktionen.TherapienBearbeiten);   // Rechte (Schritt 19)
+        Stil.Sperren(NeuKnopf, grund);
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
         inhalt.Clear();
@@ -69,6 +71,7 @@ public sealed class TherapieSeite : Panel
         foreach (var a in speicher.Angebote())
         {
             var karte = new AngebotKarte(a, tag, namen);
+            foreach (var k in new[] { karte.ZuteilenKnopf, karte.AendernKnopf, karte.BeendenKnopf }) Stil.Sperren(k, grund);
             karte.ZuteilenKnopf.Click += (_, _) => Zuteilen(a);
             karte.AendernKnopf.Click += (_, _) => Bearbeiten(a);
             karte.BeendenKnopf.Click += (_, _) => Beenden(a);

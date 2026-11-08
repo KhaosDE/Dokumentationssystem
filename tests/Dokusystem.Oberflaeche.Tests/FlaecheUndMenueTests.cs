@@ -118,4 +118,25 @@ public class FlaecheUndMenueTests
             Assert.Single(ersatz.Titel);
         }
     });
+
+    [Fact]
+    public void Platzhalter_fuer_das_Logo_der_Einrichtung() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        Assert.False(f.Kopf.HatLogo);
+        Assert.False(f.Kopf.PlatzhalterFeld.IsEmpty);                       // ohne Logo: Platzhalter oben rechts
+        Assert.True(f.Kopf.PlatzhalterFeld.Right <= f.Kopf.Width);
+        bool geoeffnet = false;
+        f.EinstellungenZeigen = _ => { geoeffnet = true; return false; };
+        f.Kopf.PlatzhalterKlicken();
+        Assert.True(geoeffnet);                                             // Klick führt zu den Einstellungen
+        Hilfe.Foto(f.Kopf, "65_kopf_logo_platzhalter");
+        string logo = Path.Combine(u.Ordner, "logo.png");
+        Hilfe.Testbild(logo, 120, 40);
+        Einstellungen.LogoSetzen(logo);
+        f.Kopf.LogoSetzen(Einstellungen.LogoPfad());
+        Assert.True(f.Kopf.PlatzhalterFeld.IsEmpty);                        // mit Logo: kein Platzhalter
+    });
 }

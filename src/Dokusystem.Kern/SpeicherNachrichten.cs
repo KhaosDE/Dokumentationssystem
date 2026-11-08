@@ -10,7 +10,8 @@ public sealed partial class Speicher
     // Nach jeder Änderung an Nachrichten (neue Nachricht, gelesen, archiviert) – für Zähler.
     public event Action? NachrichtenGeaendert;
 
-    public List<Kollege> Kollegen()
+    // nurAktive: ohne Ausgeschiedene (z. B. als Empfänger); sonst alle (Namen an alten Einträgen).
+    public List<Kollege> Kollegen(bool nurAktive = false)
     {
         var teams = new Dictionary<string, List<string>>();
         using (var befehl = Befehl("SELECT kuerzel, team FROM team_mitglieder ORDER BY team", null, []))
@@ -21,7 +22,7 @@ public sealed partial class Speicher
                 liste.Add(leser.GetString(1));
             }
         var kollegen = new List<Kollege>();
-        using (var befehl = Befehl("SELECT kuerzel, vorname, nachname FROM kollegen ORDER BY nachname, vorname", null, []))
+        using (var befehl = Befehl($"SELECT kuerzel, vorname, nachname FROM kollegen {(nurAktive ? "WHERE aktiv = 1 " : "")}ORDER BY nachname, vorname", null, []))
         using (var leser = befehl.ExecuteReader())
             while (leser.Read())
                 kollegen.Add(new Kollege(leser.GetString(0), leser.GetString(1), leser.GetString(2), teams.GetValueOrDefault(leser.GetString(0)) ?? []));
@@ -196,15 +197,8 @@ public sealed partial class Speicher
     {
         var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
         var demo = Demodaten.Nachrichten(bewohner, Uhr());
-        Ausfuehren("DELETE FROM verlauf_archiv; DELETE FROM nachricht_gelesen; DELETE FROM nachricht_empfaenger; DELETE FROM nachrichten; " +
-                   "DELETE FROM team_mitglieder; DELETE FROM kollegen;", transaktion);
-        foreach (var k in demo.Kollegen)
-        {
-            Ausfuehren("INSERT INTO kollegen (kuerzel, vorname, nachname) VALUES ($k, $v, $n)", transaktion,
-                ("$k", k.Kuerzel), ("$v", k.Vorname), ("$n", k.Nachname));
-            foreach (var team in k.Teams)
-                Ausfuehren("INSERT INTO team_mitglieder (team, kuerzel) VALUES ($t, $k)", transaktion, ("$t", team), ("$k", k.Kuerzel));
-        }
+        // Die Kolleginnen und Kollegen (Mitarbeiter) und ihre Bereiche lädt DemoMitarbeiterEinfuegen.
+        Ausfuehren("DELETE FROM verlauf_archiv; DELETE FROM nachricht_gelesen; DELETE FROM nachricht_empfaenger; DELETE FROM nachrichten;", transaktion);
         foreach (var v in demo.Verlaeufe)
         {
             long? verlauf = null;
