@@ -21,16 +21,19 @@ public sealed partial class Speicher
         return AufgabeLesen(id)!;
     }
 
+    internal long AufgabeEinfuegenIn(Aufgabe a, SqliteTransaction transaktion) => AufgabeEinfuegen(a, transaktion);
+
     private long AufgabeEinfuegen(Aufgabe a, SqliteTransaction transaktion)
     {
         Ausfuehren("""
-            INSERT INTO aufgaben (bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id)
-            VALUES ($b, $r, $t, $f, $st, $s, $fb, $e, $v, $vo)
+            INSERT INTO aufgaben (bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id, visite_anordnung_id, visite_eintrag_id)
+            VALUES ($b, $r, $t, $f, $st, $s, $fb, $e, $v, $vo, $va, $ve)
             """, transaktion,
             ("$b", a.BewohnerId), ("$r", a.BerichtId), ("$t", a.Text.Trim()), ("$f", AufgabenRegeln.FuerKuerzel(a.Fuer)),
             ("$st", a.FuerSchicht is SchichtTermin s1 ? Iso(s1.Tag) : null),
             ("$s", a.FuerSchicht is SchichtTermin s2 ? BerichtRegeln.Kuerzel(s2.Schicht) : null),
-            ("$fb", a.FaelligBis is DateTime f ? Zeit(f) : null), ("$e", Zeit(a.Erstellt)), ("$v", a.Verfasser), ("$vo", a.VorlageId));
+            ("$fb", a.FaelligBis is DateTime f ? Zeit(f) : null), ("$e", Zeit(a.Erstellt)), ("$v", a.Verfasser), ("$vo", a.VorlageId),
+            ("$va", a.VisiteAnordnungId), ("$ve", a.VisiteEintragId));
         return Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
     }
 
@@ -178,7 +181,7 @@ public sealed partial class Speicher
     {
         var liste = new List<Aufgabe>();
         using (var befehl = Befehl($"""
-            SELECT id, bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id
+            SELECT id, bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id, visite_anordnung_id, visite_eintrag_id
             FROM aufgaben {bedingung}
             """, null, parameter))
         using (var leser = befehl.ExecuteReader())
@@ -198,6 +201,8 @@ public sealed partial class Speicher
                     Erstellt = AusZeit(leser.GetString(8)),
                     Verfasser = leser.GetString(9),
                     VorlageId = leser.IsDBNull(10) ? null : leser.GetInt64(10),
+                    VisiteAnordnungId = leser.IsDBNull(11) ? null : leser.GetInt64(11),
+                    VisiteEintragId = leser.IsDBNull(12) ? null : leser.GetInt64(12),
                 });
             }
         }

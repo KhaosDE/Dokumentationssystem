@@ -156,6 +156,37 @@ public sealed class MedikationAnsicht : Panel
         if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
     }
 
+    // Aus einer Visiten-Aufgabe (Schritt 26): das passende Formular, vorbelegt mit der Visite als
+    // Anordnung (Arzt, Datum) und einem Hinweis auf die Visite. Neu verordnet (oder noch keine
+    // Verordnung): „Neue Verordnung“; Dosis: Stufenplan; pausiert: Pause; abgesetzt: Absetzen.
+    // true = gespeichert.
+    public bool AusVisite(Visite visite, VisiteAnordnung anordnung, Medikament m)
+    {
+        if (bewohner?.Id is not long id) return false;
+        string datum = Datum.Text(visite.Datum), hinweis = $"laut {VisitenRegeln.Kopf(visite)}";
+        var heute = DateOnly.FromDateTime(Jetzt());
+        var bisher = speicher.Verordnungen(id).Where(v => v.MedikamentId == m.Id)
+            .Select(v => MedikationRegeln.Stand(v, heute)).Where(s => s.Zustand != Zustand.Abgesetzt)
+            .OrderBy(s => s.Verordnung.Bedarf).Select(s => s.Verordnung).FirstOrDefault();
+        DialogResult ergebnis;
+        if (anordnung.Art == AnordnungArt.Neu || bisher is null)
+        {
+            using var fenster = new VerordnungFenster(speicher, bewohner);
+            fenster.MedikamentWaehlen(m.Id);
+            (fenster.Arzt.Text, fenster.AngeordnetAm.Text, fenster.Hinweis.Text) = (visite.Arzt, datum, hinweis);
+            ergebnis = Dialog.Zeigen(fenster, FindForm());
+        }
+        else
+        {
+            var art = anordnung.Art switch { AnordnungArt.Dosis => AenderungArt.Stufenplan, AnordnungArt.Pause => AenderungArt.Pause, _ => AenderungArt.Absetzen };
+            using var fenster = new AenderungFenster(speicher, bisher, art);
+            (fenster.Arzt.Text, fenster.AngeordnetAm.Text, fenster.Hinweis.Text) = (visite.Arzt, datum, hinweis);
+            ergebnis = Dialog.Zeigen(fenster, FindForm());
+        }
+        Aktualisieren();
+        return ergebnis == DialogResult.OK;
+    }
+
     public void Drucken()
     {
         if (bewohner is null || Stichtag() is not DateOnly tag) return;
@@ -501,6 +532,14 @@ public sealed class VerordnungFenster : Form
         zeile(null, Formular.Knoepfe(this, "Speichern", () => Speichern()));
         Controls.Add(raster);
         Stil.DpiSkalierungEinschalten(this);
+    }
+
+    // Ein Medikament vorwählen (aus einer Visite, Schritt 26); gesperrte stehen nicht zur Wahl.
+    public bool MedikamentWaehlen(long medikamentId)
+    {
+        int i = medikamente.FindIndex(m => m.Id == medikamentId);
+        if (i >= 0) MedikamentWahl.SelectedIndex = i;
+        return i >= 0;
     }
 
     public bool Speichern()

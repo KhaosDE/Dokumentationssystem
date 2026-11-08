@@ -16,7 +16,7 @@ public sealed class Hauptfenster : Form
     // Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
     // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Akte, Reiter „Berichte“, Rechtsklick auf eine Karte).
     public static readonly string[] Bereiche =
-        ["Übersicht", "Tagesplan", "Bewohner", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+        ["Übersicht", "Tagesplan", "Bewohner", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
          "Einstellungen"];   // die Medikamentendatenbank steht seit Schritt 21 in den Einstellungen
 
     private readonly Speicher speicher;
@@ -36,6 +36,7 @@ public sealed class Hauptfenster : Form
     public KalenderSeite Kalender { get; }
     public UebersichtSeite Uebersicht { get; }
     public TagesplanSeite Tagesplan { get; }
+    public VisitenSeite Visiten { get; }
 
     // Damit öffnet das Programm (Program.cs). Tests beginnen bei „Bewohner“ (Konstruktor).
     public const string Startbereich = "Übersicht";
@@ -97,6 +98,11 @@ public sealed class Hauptfenster : Form
         Tagesplan = new TagesplanSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Tagesplan"] = Tagesplan;
         Tagesplan.Geaendert += () => { if (AktiverBereich == "Tagesplan") Kopf.TexteSetzen(Tagesplan.KopfText, "Tagesplan"); };
+        Visiten = new VisitenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Visiten"] = Visiten;
+        Visiten.Geaendert += () => { if (AktiverBereich == "Visiten") Kopf.TexteSetzen(Visiten.KopfText, "Visiten"); };
+        Visiten.AufgabeGewuenscht += a => VisitenAufgabe(a);
+        Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
         Uebersicht = new UebersichtSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Übersicht"] = Uebersicht;
         Uebersicht.Geaendert += () => { if (AktiverBereich == "Übersicht") Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht"); };
@@ -239,6 +245,7 @@ public sealed class Hauptfenster : Form
             case "Übersicht": Uebersicht.Aktualisieren(); break;
             case "Tagesplan": Tagesplan.Aktualisieren(); break;
             case "Übergabe": Uebergabe.Aktualisieren(); break;
+            case "Visiten": Visiten.Aktualisieren(); break;
             case "Aufgaben": Aufgaben.Aktualisieren(); break;
             case "Nachrichten": Nachrichten.Aktualisieren(); break;
             case "Kalender": Kalender.Aktualisieren(); break;
@@ -330,6 +337,13 @@ public sealed class Hauptfenster : Form
             Kopf.KnoepfeSetzen(Aufgaben.NeuKnopf);
             return;
         }
+        if (schluessel == "Visiten")
+        {
+            Visiten.Zeigen();
+            Kopf.TexteSetzen(Visiten.KopfText, "Visiten");
+            Kopf.KnoepfeSetzen(Visiten.NeuKnopf);
+            return;
+        }
         if (schluessel == "Übergabe")
         {
             Uebergabe.Besuch();
@@ -411,6 +425,50 @@ public sealed class Hauptfenster : Form
         Bewohner.AkteZeigen(bericht.BewohnerId);
         Bewohner.Akte.Reiter.Waehlen("Berichte");
         return bericht;
+    }
+
+    // Aufgabe aus einer Visite ausführen (Schritt 26). Facharzttermin: Datum, Uhrzeit, Ort (Kalender,
+    // auf Wunsch Fahrt). Medikation: fehlt das Medikament in der Datenbank, zuerst „Neues Medikament“
+    // (Name vorbelegt); dann die Akte beim Reiter „Medikamentenplan“ und dort das passende Formular.
+    // Ist es gespeichert, ist die Aufgabe erledigt. true = erledigt.
+    public bool VisitenAufgabe(Aufgabe a)
+    {
+        if (speicher.VisitenAufgabe(a) is not { } info) return false;
+        if (VisitenAblauf.Sperrgrund(speicher, info.Aktion) is string grund)
+        {
+            MessageBox.Show(this, grund, "Visiten", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return false;
+        }
+        bool erledigt;
+        if (info.Aktion == VisitenAktion.FacharztTermin)
+        {
+            using var fenster = new FacharztTerminFenster(speicher, a, info.Eintrag);
+            erledigt = Dialog.Zeigen(fenster, this) == DialogResult.OK;
+        }
+        else
+        {
+            var anordnung = info.Anordnung!;
+            var medikament = speicher.VisitenMedikament(anordnung);
+            if (medikament is null)
+            {
+                using var anlegen = new MedikamentFenster(speicher, null);
+                anlegen.Wirkstoff.Text = anordnung.Medikament;
+                if (Dialog.Zeigen(anlegen, this) != DialogResult.OK || anlegen.Gespeichert is not Medikament neu) return false;
+                medikament = neu;
+            }
+            BereichWaehlen("Bewohner");
+            Bewohner.AkteZeigen(info.Eintrag.BewohnerId);
+            Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
+            erledigt = Bewohner.Akte.Medikation.AusVisite(info.Visite, anordnung, medikament);
+            if (erledigt)
+            {
+                try { speicher.AufgabeErledigt(a.Id, Recht.Kuerzel, DateTime.Now); }
+                catch (Eingabefehler) { erledigt = false; }   // schon erledigt (anderer Arbeitsplatz)
+            }
+        }
+        AufgabenZaehlen();
+        if (AktiverBereich == "Visiten") Visiten.Aktualisieren();
+        return erledigt;
     }
 
     public bool EinstellungenOeffnen()

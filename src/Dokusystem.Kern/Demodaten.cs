@@ -469,6 +469,57 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Visiten (Schritt 26) -----
+
+    private sealed class VisitenDatei
+    {
+        public List<VisiteDaten> Visiten { get; set; } = [];
+    }
+
+    public sealed class VisiteDaten
+    {
+        public int VorTagen { get; set; }
+        public string Art { get; set; } = "";
+        public string Arzt { get; set; } = "";
+        public string Teilnehmer { get; set; } = "";
+        public List<VisiteEintragDaten> Eintraege { get; set; } = [];
+    }
+
+    public sealed class VisiteEintragDaten
+    {
+        public string Bewohner { get; set; } = "";
+        public string Besprochen { get; set; } = "";
+        public List<AnordnungDaten> Anordnungen { get; set; } = [];
+        public string Facharzt { get; set; } = "";
+        public bool Dringend { get; set; }
+    }
+
+    public sealed class AnordnungDaten
+    {
+        public string Art { get; set; } = "dosis";
+        public string Medikament { get; set; } = "";   // Wirkstoff; fehlt er in der Datenbank, bleibt es Freitext
+    }
+
+    // Visiten aus daten/demo/visiten.json; Medikamente werden über den Wirkstoff gefunden.
+    public static List<Visite> Visiten(IReadOnlyList<Bewohner> bewohner, IReadOnlyList<Medikament> medikamente, DateTime jetzt)
+    {
+        var heute = DateOnly.FromDateTime(jetzt);
+        return Lesen<VisitenDatei>("visiten.json").Visiten.Select(v => new Visite
+        {
+            Datum = heute.AddDays(-v.VorTagen), Art = v.Art, Arzt = v.Arzt, Teilnehmer = v.Teilnehmer, Kuerzel = "EF",
+            Erstellt = heute.AddDays(-v.VorTagen).ToDateTime(new TimeOnly(11, 30)),
+            Eintraege = v.Eintraege.Where(e => bewohner.Any(b => b.Nachname == e.Bewohner)).Select(e => new VisiteEintrag
+            {
+                BewohnerId = bewohner.First(b => b.Nachname == e.Bewohner).Id!.Value, Besprochen = e.Besprochen, Facharzt = e.Facharzt, Dringend = e.Dringend,
+                Anordnungen = e.Anordnungen.Select(a =>
+                {
+                    var m = medikamente.FirstOrDefault(x => x.Wirkstoff.Equals(a.Medikament, StringComparison.CurrentCultureIgnoreCase));
+                    return new VisiteAnordnung(0, VisitenRegeln.ArtAus(a.Art), m?.Id, m?.Wirkstoff ?? a.Medikament);
+                }).ToList(),
+            }).ToList(),
+        }).ToList();
+    }
+
     // ----- Standardaufgaben (Schritt 25) -----
 
     private sealed class StandardaufgabenDatei

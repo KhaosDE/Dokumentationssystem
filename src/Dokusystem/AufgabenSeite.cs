@@ -22,6 +22,8 @@ public sealed class AufgabenSeite : Panel
     public int Offen { get; private set; }
     public int Ueberfaellig { get; private set; }
     public event Action? Geaendert;
+    // Schritt 26: Aufgabe aus einer Visite ausführen (Medikamentenplan, Medikament anlegen, Termin) – das Hauptfenster.
+    public event Action<Aufgabe>? VisitenAufgabeGewuenscht;
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
 
@@ -74,8 +76,17 @@ public sealed class AufgabenSeite : Panel
         }
         void Karte(Aufgabe a)
         {
-            var karte = new AufgabeKarte(a, a.BewohnerId is long id ? namen.GetValueOrDefault(id) : null, jetzt, kuerzel);
-            karte.ErledigtGeklickt += x => Ausfuehren(() => speicher.AufgabeErledigt(x.Id, Kuerzel, Jetzt()));
+            (string, string?)? aktion = null;
+            if (a.Offen && (a.VisiteAnordnungId is not null || a.VisiteEintragId is not null) && speicher.VisitenAufgabe(a) is { } info)
+                aktion = (VisitenAblauf.KnopfText(info.Aktion), VisitenAblauf.Sperrgrund(speicher, info.Aktion));
+            var karte = new AufgabeKarte(a, a.BewohnerId is long id ? namen.GetValueOrDefault(id) : null, jetzt, kuerzel, aktion);
+            // Facharzttermin: „Erledigt“ fragt nach Datum, Uhrzeit und Ort (Schritt 26).
+            karte.ErledigtGeklickt += x =>
+            {
+                if (x.VisiteEintragId is not null) VisitenAufgabeGewuenscht?.Invoke(x);
+                else Ausfuehren(() => speicher.AufgabeErledigt(x.Id, Kuerzel, Jetzt()));
+            };
+            karte.AktionGeklickt += x => VisitenAufgabeGewuenscht?.Invoke(x);
             karte.WeitergebenGeklickt += Weitergeben;
             karte.SchliessenGeklickt += Schliessen;
             Karten.Add(karte);
@@ -182,14 +193,17 @@ public sealed class AufgabeKarte : KartenFlaeche
     public Button Erledigt { get; } = Stil.NebenKnopf("Erledigt");
     public Button Weitergeben { get; } = Stil.NebenKnopf("An die nächste Schicht weitergeben …");
     public Button SchliessenKnopf { get; } = Stil.NebenKnopf("Schließen mit Begründung …");   // Schritt 25
+    public Button AktionKnopf { get; } = Stil.NebenKnopf("");   // Schritt 26: Aufgabe aus einer Visite
     public IReadOnlyList<string> MarkenTexte { get; }
     public IEnumerable<string> VerlaufTexte => verlauf.Select(l => l.Text);
 
     public event Action<Aufgabe>? ErledigtGeklickt;
     public event Action<Aufgabe>? WeitergebenGeklickt;
     public event Action<Aufgabe>? SchliessenGeklickt;
+    public event Action<Aufgabe>? AktionGeklickt;
 
-    public AufgabeKarte(Aufgabe a, string? bewohner, DateTime jetzt, string kuerzel)
+    // aktion: Knopf für eine Aufgabe aus einer Visite (Text und ggf. Grund, warum gesperrt).
+    public AufgabeKarte(Aufgabe a, string? bewohner, DateTime jetzt, string kuerzel, (string Text, string? Sperrgrund)? aktion = null)
     {
         Aufgabe = a;
         var liste = new List<(string, Stil.Marke)>();
@@ -218,7 +232,8 @@ public sealed class AufgabeKarte : KartenFlaeche
         text.ForeColor = a.Offen ? Stil.TextNormal : Stil.TextLeise;
         herkunft.Text = (bewohner is null ? "Wohnbereich" : bewohner) +
                         $" · angelegt von {a.Verfasser}, {BerichtRegeln.ZeitText(a.Erstellt)}" +
-                        (a.BerichtId is not null ? " · aus einem Bericht" : "");
+                        (a.VisiteAnordnungId is not null || a.VisiteEintragId is not null ? " · aus einer Visite"
+                            : a.BerichtId is not null ? " · aus einem Bericht" : "");
         herkunft.Font = Stil.Klein;
         herkunft.ForeColor = Stil.TextLeise;
         foreach (var w in a.Weitergaben)
@@ -242,7 +257,15 @@ public sealed class AufgabeKarte : KartenFlaeche
         SchliessenKnopf.Click += (_, _) => SchliessenGeklickt?.Invoke(a);
         Erledigt.Click += (_, _) => ErledigtGeklickt?.Invoke(a);
         Weitergeben.Click += (_, _) => WeitergebenGeklickt?.Invoke(a);
-        foreach (var k in new[] { Erledigt, Weitergeben, SchliessenKnopf })
+        AktionKnopf.Visible = a.Offen && aktion is not null;
+        if (aktion is { } x)
+        {
+            AktionKnopf.Text = x.Text;
+            AktionKnopf.AutoSize = true;
+            Stil.Sperren(AktionKnopf, x.Sperrgrund);
+        }
+        AktionKnopf.Click += (_, _) => AktionGeklickt?.Invoke(a);
+        foreach (var k in new[] { AktionKnopf, Erledigt, Weitergeben, SchliessenKnopf })
         {
             k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
             knoepfe.Controls.Add(k);

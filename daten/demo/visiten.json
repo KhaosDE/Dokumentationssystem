@@ -1,0 +1,27 @@
+{
+  "hinweis": "Ausgedachte Visiten für die Demo mit allen drei Fällen: Dosis eines vorhandenen Medikaments geändert, ein Medikament, das noch nicht in der Datenbank steht, und ein nötiger Facharzttermin. Ärzte sind ausgedacht. vorTagen: Tage vor dem Laden der Demo-Daten.",
+  "visiten": [
+    {
+      "vorTagen": 6, "art": "Psychiater", "arzt": "Dr. Linde (ausgedacht)", "teilnehmer": "EF, PR",
+      "eintraege": [
+        { "bewohner": "Ahorn", "besprochen": "Schläft schlecht ein, tagsüber ruhig. Abenddosis wird erhöht.",
+          "anordnungen": [ { "art": "dosis", "medikament": "Quetiapin" } ] },
+        { "bewohner": "Birke", "besprochen": "Ansetzen läuft nach Plan, keine Beschwerden." }
+      ]
+    },
+    {
+      "vorTagen": 3, "art": "Hausarzt", "arzt": "Dr. Ulme (ausgedacht)", "teilnehmer": "CD",
+      "eintraege": [
+        { "bewohner": "Fichte", "besprochen": "Gelenkschmerzen im Knie, neues Schmerzgel zum Einreiben.",
+          "anordnungen": [ { "art": "neu", "medikament": "Beispielgel (ausgedacht)" } ] }
+      ]
+    },
+    {
+      "vorTagen": 1, "art": "Hausarzt", "arzt": "Dr. Ulme (ausgedacht)", "teilnehmer": "AB",
+      "eintraege": [
+        { "bewohner": "Distel", "besprochen": "Häufiger Schwindel beim Aufstehen, Abklärung beim Facharzt.",
+          "facharzt": "Neurologie", "dringend": true }
+      ]
+    }
+  ]
+}

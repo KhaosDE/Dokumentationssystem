@@ -9,6 +9,7 @@ public static class Symbole
     public const string Tagesplan = "\uE823";      // Recent (Uhr)
     public const string Bewohner = "\uE716";       // People
     public const string Uebergabe = "\uE8F1";      // Library
+    public const string Visiten = "\uE9D9";        // Diagnostic
     public const string Aufgaben = "\uE73E";       // CheckMark
     public const string Nachrichten = "\uE715";    // Mail
     public const string Kalender = "\uE787";       // Calendar
@@ -25,6 +26,7 @@ public static class Symbole
         "Tagesplan" => Tagesplan,
         "Bewohner" => Bewohner,
         "Übergabe" => Uebergabe,
+        "Visiten" => Visiten,
         "Aufgaben" => Aufgaben,
         "Nachrichten" => Nachrichten,
         "Kalender" => Kalender,

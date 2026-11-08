@@ -844,7 +844,7 @@ Umfang:
 - Ausdruck: Aufgabenliste der Schicht.
 
 ## Visiten
-Status: freigegeben (Bauplan Schritt 26)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Neuer Punkt in der Seitenleiste unter der Berichtsübersicht („Übergabe“) für Visiten: was
 besprochen wurde, ob sich Anordnungen geändert haben, und vereinbarte Facharzttermine.

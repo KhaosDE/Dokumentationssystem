@@ -59,6 +59,11 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Übergabe** (links): nur die Übergabe-Einträge, oben „Wohnbereich allgemein“, darunter je
   Bewohner. Mit eigenem Kürzel (Einstellungen) lassen sie sich als gelesen bestätigen,
   verlängern oder erledigen. „Übergabeblatt drucken …“ druckt die offenen Einträge.
+- **Visiten** (links, unter „Übergabe“): was in der Visite besprochen wurde, geänderte Anordnungen
+  und nötige Facharzttermine, je Bewohner; Liste mit Filter nach Bewohner und Zeitraum. Nach dem
+  Speichern zeigt das Programm sofort die Aufgaben dazu: Medikament anlegen, im Medikamentenplan
+  eintragen (das passende Formular mit Arzt und Datum der Visite) oder den Facharzttermin in den
+  Kalender eintragen (auf Wunsch mit Fahrt). Die Medikation ändert das Programm nicht selbst.
 - **Aufgaben** (links, mit Zähler): was die nächste Schicht (oder wer Zeit hat) tun soll,
   gruppiert nach Schicht (oben die laufende). Aufgaben bleiben stehen, bis jemand sie als erledigt
   markiert; schafft man es nicht, „An die nächste Schicht weitergeben …“ mit kurzer Notiz. Die

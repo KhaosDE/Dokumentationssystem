@@ -77,6 +77,8 @@ public sealed record Aufgabe
     public string? ErledigtVon { get; init; }
     public string ErledigtNotiz { get; init; } = "";   // Schritt 25: begründet geschlossen statt erledigt
     public long? VorlageId { get; init; }              // Schritt 25: aus einer Standardaufgabe entstanden
+    public long? VisiteAnordnungId { get; init; }      // Schritt 26: geänderte Anordnung einer Visite
+    public long? VisiteEintragId { get; init; }        // Schritt 26: Facharzttermin aus einer Visite
     public IReadOnlyList<Weitergabe> Weitergaben { get; init; } = [];
 
     public bool Offen => Erledigt is null;
