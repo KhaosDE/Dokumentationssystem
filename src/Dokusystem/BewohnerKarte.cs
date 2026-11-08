@@ -22,6 +22,7 @@ public sealed class BewohnerKarte : Control
     private bool maus;
 
     public event Action<Bewohner>? Gewaehlt;
+    public event Action<Bewohner>? BerichtGewuenscht;   // Rechtsklick → „Neuer Bericht …“
 
     // ungeleseneUebergaben: offene Übergabe-Einträge, die das eigene Kürzel noch nicht gelesen hat;
     // wichtigeBerichte: als „Wichtig“ gekennzeichnete Berichte der letzten 7 Tage.
@@ -49,6 +50,19 @@ public sealed class BewohnerKarte : Control
         string marken = Marken.Count > 0 ? ", " + string.Join(", ", Marken.Select(m => m.Text)) : "";
         AccessibleName = $"{bewohner.Name}, Zimmer {bewohner.Zimmer}{marken}. Akte öffnen";
         Text = bewohner.Name;
+        // Rechtsklick (oder Kontextmenü-Taste): Akte öffnen, Neuer Bericht.
+        var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
+        menue.Items.Add("Akte öffnen", null, (_, _) => Waehlen());
+        menue.Items.Add("Neuer Bericht …", null, (_, _) => BerichtWaehlen());
+        ContextMenuStrip = menue;
+    }
+
+    public void BerichtWaehlen() => BerichtGewuenscht?.Invoke(Bewohner);
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) ContextMenuStrip?.Dispose();
+        base.Dispose(disposing);
     }
 
     private int S(int wert) => Stil.Px(this, wert);

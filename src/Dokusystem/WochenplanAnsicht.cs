@@ -25,6 +25,10 @@ public sealed class WochenplanAnsicht : Panel
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
     public WochenRaster Raster { get; } = new();
 
+    // Höhe, die der Wochenplan in der Akte füllen darf (0 = nur so hoch wie nötig). Die Stunden
+    // verteilen sich darauf; reicht sie nicht, scrollt die Akte.
+    public int VerfuegbareHoehe { get; set; }
+
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
 
     public WochenplanAnsicht(Speicher speicher)
@@ -145,7 +149,8 @@ public sealed class WochenplanAnsicht : Panel
         base.OnLayout(levent);
         leiste.MaximumSize = new Size(Width, 0);
         leiste.Bounds = new Rectangle(Point.Empty, leiste.GetPreferredSize(new Size(Math.Max(100, Width), 0)));
-        Raster.SetBounds(0, leiste.Bottom + Stil.Px(this, Stil.AbstandKlein), Width, Raster.BenoetigteHoehe());
+        int oben = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        Raster.SetBounds(0, oben, Width, Raster.BenoetigteHoehe(VerfuegbareHoehe - oben));
         int hoehe = Raster.Bottom;
         if (Height != hoehe) Height = hoehe;
     }
@@ -156,6 +161,7 @@ public sealed class WochenplanAnsicht : Panel
 public sealed class WochenRaster : Control
 {
     private const int KopfHoehe = 42, StundeHoehe = 44, ZeitBreite = 52, GanztagsZeile = 40;
+    private int stunde;   // Höhe einer Stunde in Pixeln: mindestens StundeHoehe, sonst so viel, dass die Fläche gefüllt ist
     private DateOnly montag;
     private DateOnly heute;
     private int vonStunde = 7, bisStunde = 21;
@@ -188,7 +194,15 @@ public sealed class WochenRaster : Control
         Invalidate();
     }
 
-    public int BenoetigteHoehe() => S(KopfHoehe) + GanztagsHoehe() + (bisStunde - vonStunde) * S(StundeHoehe) + 1;
+    // verfuegbar: Höhe, die gefüllt werden darf (0 = nur so hoch wie nötig).
+    public int BenoetigteHoehe(int verfuegbar = 0)
+    {
+        int stunden = Math.Max(1, bisStunde - vonStunde), fest = S(KopfHoehe) + GanztagsHoehe() + 1;
+        stunde = Math.Max(S(StundeHoehe), (verfuegbar - fest) / stunden);
+        return fest + stunden * stunde;
+    }
+
+    private int Stunde => stunde > 0 ? stunde : S(StundeHoehe);
 
     // Ganztägige Termine stehen oben untereinander, je Termin eine Zeile mit Platz für zwei Textzeilen.
     private int GanztagsZeilen() => Termine.Where(t => t.Ganztags).GroupBy(t => t.Tag).Select(g => g.Count()).DefaultIfEmpty(0).Max();
@@ -248,7 +262,7 @@ public sealed class WochenRaster : Control
         }
         for (int h = vonStunde; h <= bisStunde; h++)
         {
-            int y = kopf + ganztags + (h - vonStunde) * S(StundeHoehe);
+            int y = kopf + ganztags + (h - vonStunde) * Stunde;
             g.DrawLine(linie, zeit, y, Width - S(4), y);
             if (h < bisStunde)
                 TextRenderer.DrawText(g, $"{h:00}:00", Stil.Klein, new Rectangle(S(4), y + S(2), zeit - S(8), S(18)), Stil.TextLeise, TextFormatFlags.Right);
@@ -264,8 +278,8 @@ public sealed class WochenRaster : Control
             else
             {
                 float breite = (spalte - S(6)) / Math.Max(1, spuren[k].Anzahl);
-                float y1 = kopf + ganztags + (float)((t.Von.ToTimeSpan().TotalHours - vonStunde) * S(StundeHoehe));
-                float y2 = kopf + ganztags + (float)((t.Bis.ToTimeSpan().TotalHours - vonStunde) * S(StundeHoehe));
+                float y1 = kopf + ganztags + (float)((t.Von.ToTimeSpan().TotalHours - vonStunde) * Stunde);
+                float y2 = kopf + ganztags + (float)((t.Bis.ToTimeSpan().TotalHours - vonStunde) * Stunde);
                 feld = new Rectangle((int)(x + spuren[k].Nr * breite), (int)y1 + S(1), (int)breite - (spuren[k].Anzahl > 1 ? S(2) : 0),
                     Math.Max(S(20), (int)(y2 - y1) - S(2)));
             }

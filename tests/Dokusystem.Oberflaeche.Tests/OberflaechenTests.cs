@@ -13,7 +13,7 @@ public class HauptfensterTests
         Assert.Contains("Demo — ausgedachte Daten", fenster.Text);
         Assert.Equal("Demo — ausgedachte Daten", KopfBereich.DemoHinweis);
         Assert.Equal(KopfBereich.DemoHinweis, fenster.Kopf.AccessibleName);
-        Assert.Equal(["Übersicht", "Bewohner", "Neuer Bericht …", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+        Assert.Equal(["Übersicht", "Bewohner", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
                       "Medikamente", "Ausgangsliste", "Einstellungen"],
             fenster.Navigation.Select(n => n.Text));
         Assert.Equal("Bewohner", fenster.AktiverBereich);
@@ -165,7 +165,7 @@ public class BewohnerOberflaechenTests
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Berta Birke", f.Kopf.TitelText);
         Assert.Equal("22.11.1958", f.Bewohner.Akte.Geburtsdatum.Text);
-        Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Status …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
+        Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Status …", "Neuer Bericht …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
         f.Kopf.Knoepfe[0].PerformClick();
         Assert.False(f.Bewohner.AkteSichtbar);
         Karten(f)[0].Waehlen();

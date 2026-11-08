@@ -614,7 +614,7 @@ Umfang:
   Datenbank-Ordner.
 
 ## Oberfläche: volle Fläche, einklappbares Seitenmenü
-Status: freigegeben (Bauplan Schritt 18)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Drei Änderungen an der Oberfläche nach Tobis Durchsicht von Version 0.20.0.
 Warum: Rückmeldung Tobi (08.11.2026) mit Bildschirmfoto der Bewohnerakte (Reiter

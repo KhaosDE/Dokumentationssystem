@@ -114,11 +114,21 @@ public sealed class HinweisFeld : Control
 }
 
 // Ein Eintrag in der Seitenleiste. Aktiv: heller Akzent als Fläche, Akzent als Textfarbe,
-// links ein schmaler Balken (docs/gestaltung.md).
+// links ein schmaler Balken (docs/gestaltung.md). Mit Symbol vor dem Text; eingeklappt nur das
+// Symbol, der Zähler als kleine Zahl daran.
 public sealed class SeitenleistenEintrag : Control
 {
     private bool aktiv;
     private bool maus;
+    private bool eingeklappt;
+
+    public string Symbol { get; set; } = "";
+
+    public bool Eingeklappt
+    {
+        get => eingeklappt;
+        set { eingeklappt = value; Invalidate(); }
+    }
 
     public SeitenleistenEintrag(string text)
     {
@@ -184,9 +194,26 @@ public sealed class SeitenleistenEintrag : Control
             using var pfad = Stil.Abgerundet(new RectangleF(feld.Left + 2 * s, feld.Top + Height * 0.25f, 3 * s, Height * 0.5f), 1.5f * s);
             g.FillPath(balken, pfad);
         }
+        var textFarbe = aktiv ? Stil.Akzent : Stil.TextNormal;
+        int links = Stil.Px(this, Stil.AbstandGross);
+        if (Symbol.Length > 0)
+        {
+            int symbolBreite = Stil.Px(this, 24);
+            var symbolFeld = eingeklappt
+                ? new Rectangle((Width - symbolBreite) / 2, 0, symbolBreite, Height)
+                : new Rectangle(links - Stil.Px(this, 4), 0, symbolBreite, Height);
+            TextRenderer.DrawText(g, Symbol, Stil.Symbolschrift, symbolFeld, textFarbe,
+                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine);
+            links = symbolFeld.Right + Stil.Px(this, Stil.AbstandKlein);
+            if (eingeklappt)
+            {
+                if (Anzahl is int klein) ZahlZeichnen(g, klein, new Rectangle(symbolFeld.Right - Stil.Px(this, 8), Stil.Px(this, 3), 0, Stil.Px(this, 16)), s);
+                return;
+            }
+        }
         TextRenderer.DrawText(g, Text, aktiv ? Stil.Fett : Stil.Standard,
-            new Rectangle(Stil.Px(this, Stil.AbstandGross), 0, Width - Stil.Px(this, Stil.AbstandGross), Height),
-            aktiv ? Stil.Akzent : Stil.TextNormal, TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+            new Rectangle(links, 0, Width - links, Height),
+            textFarbe, TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
         if (Anzahl is int anzahl)
         {
             var farbe = Dringend ? Stil.Beschluss : Stil.Zimmer;
@@ -197,6 +224,17 @@ public sealed class SeitenleistenEintrag : Control
             TextRenderer.DrawText(g, zahl, Stil.MarkeSchrift, zaehler, farbe.Text,
                 TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine);
         }
+    }
+
+    // Eingeklappt: die Zahl klein oben rechts am Symbol (feld.Width 0 = nach dem Text bemessen).
+    private void ZahlZeichnen(Graphics g, int anzahl, Rectangle feld, float s)
+    {
+        var marke = Dringend ? Stil.Beschluss : Stil.Zimmer;
+        string zahl = anzahl.ToString();
+        feld.Width = Math.Max(feld.Height, TextRenderer.MeasureText(zahl, Stil.Klein).Width + Stil.Px(this, 4));
+        Stil.FlaecheZeichnen(g, feld, 8 * s, marke.Flaeche, marke.Text);
+        TextRenderer.DrawText(g, zahl, Stil.Klein, feld, marke.Text,
+            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding | TextFormatFlags.SingleLine);
     }
 }
 

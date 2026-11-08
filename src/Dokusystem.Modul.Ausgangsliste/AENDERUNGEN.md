@@ -3,6 +3,11 @@
 Für den Abgleich mit der eigenständigen Ausgangsliste (`docs/bruecke-ausgangsliste.md`): je
 Version des Dokumentationssystems, was sich im Modul geändert hat. Neueste oben.
 
+## 0.21.0 (08.11.2026)
+
+- `AusgangslisteSeite`: keine feste Höchstbreite mehr (880); die Seite füllt die Breite des
+  Fensters (Bauplan Schritt 18 des Dokumentationssystems).
+
 ## 0.19.0 (08.11.2026)
 
 - `Platz.OffenGefuehrtLautAkte` und `Platz.Widerspruch`: „offen geführt“ aus der Bewohnerakte wird

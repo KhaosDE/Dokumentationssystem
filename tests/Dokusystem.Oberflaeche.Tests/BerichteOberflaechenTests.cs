@@ -36,7 +36,7 @@ public class BerichteOberflaechenTests
     });
 
     [Fact]
-    public void Neuer_Bericht_aus_der_Seitenleiste_mit_Hinweis_auf_die_Uebergabe() => Hilfe.Sta(() =>
+    public void Neuer_Bericht_aus_der_Akte_mit_Hinweis_auf_die_Uebergabe() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
@@ -48,14 +48,16 @@ public class BerichteOberflaechenTests
             var formular = Assert.IsType<BerichtFormular>(fenster);
             Assert.Equal("CD", formular.Verfasser.Text);                // eigenes Kürzel vorbelegt
             Assert.Matches(@"^\d\d\.\d\d\.\d{4}$", formular.Datum.Text);  // heutiges Datum vorbelegt
-            Assert.Equal(-1, formular.BewohnerWahl.SelectedIndex);      // Bewohner muss man wählen
-            formular.BewohnerWaehlen(u.Demo("Distel").Id!.Value);
+            Assert.False(formular.BewohnerWahl.Enabled);                // Bewohner steht fest (aus der Akte)
+            Assert.Equal(0, formular.BewohnerWahl.SelectedIndex);
             formular.Bereiche[2].Checked = true;
             formular.Inhalt.Text = "Hat den Tisch gedeckt. Termin beim Arzt am Donnerstag.";
             formular.Rueckfrage = woerter => { rueckfrage = woerter; return DialogResult.Yes; };
             return formular.Speichern() ? DialogResult.OK : DialogResult.Cancel;
         });
-        f.Navigation.Single(n => n.Text == "Neuer Bericht …").Ausloesen();
+        Assert.DoesNotContain(f.Navigation, n => n.Text == "Neuer Bericht …");   // kein Menüpunkt mehr (Schritt 18)
+        f.Bewohner.AkteZeigen(u.Demo("Distel").Id!.Value);
+        f.Kopf.Knoepfe.Single(k => k.Text == "Neuer Bericht …").PerformClick();
 
         Assert.NotNull(rueckfrage);
         Assert.Contains("Arzt", rueckfrage);

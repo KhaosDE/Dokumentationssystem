@@ -8,7 +8,6 @@ namespace Dokusystem;
 // gelöscht wird nichts.
 public sealed class AufgabenSeite : Panel
 {
-    private const int MaxBreite = 880;
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
     private readonly List<Control> inhalt = [];
@@ -127,7 +126,7 @@ public sealed class AufgabenSeite : Panel
     {
         base.OnLayout(levent);
         int rand = Stil.Px(this, Stil.AbstandGross);
-        int breite = Math.Min(ClientSize.Width - 2 * rand, Stil.Px(this, MaxBreite));
+        int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int y = rand + AutoScrollPosition.Y;
         leiste.MaximumSize = new Size(breite, 0);
         leiste.Location = new Point(rand, y);

@@ -41,13 +41,15 @@ Danach fragt Windows für diese Datei nicht mehr.
 - In den Stammdaten steht das **Alter** neben dem Geburtsdatum. Oben in der Akte stehen Marken:
   „offen geführt“, „offen geführt: nicht erfasst“ und Hinweise der Module – etwa, wenn die
   Ausgangsliste etwas anderes zur Unterbringung sagt als die Akte („bitte klären“).
+- **Seitenmenü einklappen:** Der Knopf mit den drei Strichen oben links macht das Menü schmal
+  (nur Symbole, der Name erscheint beim Darüberfahren). Das Programm merkt sich die Wahl.
 - **Übersicht** (links oben, öffnet beim Start): oben „Heute“ mit Abwesenden, den Terminen des
   Tages und den Änderungen in der Medikation; darunter alle Bewohner als Karten mit den Marken
   des Tages (z. B. „Beschluss endet in … Tagen“, „Medikation: Pause beginnt“, „heute 10:00 …“,
   „abwesend: …“). Klick auf eine Karte öffnet die Akte. Die Frist für „Beschluss endet bald“
   steht in den Einstellungen.
-- **Berichte** schreibt man in der Akte (Reiter „Berichte“ → „Neuer Bericht …“) oder über
-  **Neuer Bericht …** links. Zwei Kennzeichen: **Wichtig** (bleibt in der Akte hervorgehoben)
+- **Berichte** schreibt man in der Akte (oben „Neuer Bericht …“ oder Reiter „Berichte“) oder per
+  Rechtsklick auf eine Bewohnerkarte → „Neuer Bericht …“. Zwei Kennzeichen: **Wichtig** (bleibt in der Akte hervorgehoben)
   und **Übergabe** (erscheint im Bereich „Übergabe“, so lange wie gewählt). Korrigiert wird
   mit **Nachtrag …** – der ursprüngliche Text bleibt stehen.
 - **Übergabe** (links): nur die Übergabe-Einträge, oben „Wohnbereich allgemein“, darunter je

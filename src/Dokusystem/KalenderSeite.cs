@@ -10,7 +10,6 @@ namespace Dokusystem;
 // Ausdruck der Monats- oder Wochenansicht und der Teilnehmerliste eines Ausflugs.
 public sealed class KalenderSeite : Panel
 {
-    private const int MaxBreite = 1100;
     private static readonly CultureInfo De = CultureInfo.GetCultureInfo("de-DE");
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
@@ -221,7 +220,7 @@ public sealed class KalenderSeite : Panel
     {
         base.OnLayout(levent);
         int rand = Stil.Px(this, Stil.AbstandGross);
-        int breite = Math.Min(ClientSize.Width - 2 * rand, Stil.Px(this, MaxBreite));
+        int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int y = rand + AutoScrollPosition.Y;
         leiste.MaximumSize = new Size(breite, 0);
         leiste.Bounds = new Rectangle(new Point(rand, y), leiste.GetPreferredSize(new Size(Math.Max(100, breite), 0)));

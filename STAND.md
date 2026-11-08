@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.20.0** (Mehrplatzbetrieb, Demo-Stufe, Bauplan Schritt 17).
+Stand: 08.11.2026. Version: **0.21.0** (Oberfläche: volle Fläche, einklappbares Seitenmenü, Bauplan Schritt 18).
 
 ## Aktuell
 
@@ -27,8 +27,10 @@ Neu ist der **Mehrplatzbetrieb (Demo-Stufe)**: Datenbank lokal oder in einem gem
 Konfliktschutz mit beiden Fassungen, Bereichskennung je Rechner, Wohnbereich je Bewohner,
 **Statusmeldungen** für alle Bereiche und Abgleich alle 30 Sekunden.
 
-**Nächster Schritt:** Der Bauplan ist abgearbeitet; in `IDEEN.md` ist nichts mehr freigegeben.
-Bitte die Testlisten unten durchgehen – für 0.20.0 mit zwei Programmfenstern.
+Neu in 0.21.0: Die Inhalte füllen die ganze Fläche, das Seitenmenü lässt sich auf Symbole
+einklappen, „Neuer Bericht …“ gibt es nur noch beim Bewohner (Akte, Reiter, Rechtsklick).
+
+**Nächster Schritt:** Bauplan Schritt 19 „Mitarbeiter, Anmeldung und Rechte“ (0.22.0).
 
 ## Fertig
 
@@ -336,6 +338,20 @@ Bitte die Testlisten unten durchgehen – für 0.20.0 mit zwei Programmfenstern.
   - Demo: Ginster und Immergrün wohnen in „Wohnbereich B“; Statusmeldungen aus
     `daten/demo/status.json` (Ahorn „in der Holzwerkstatt“ von der Therapie, Immergrün „Besuch bei
     der Familie“ von Wohnbereich B, eine ältere im Verlauf).
+
+- 0.21.0 — Oberfläche: volle Fläche, einklappbares Seitenmenü (Bauplan Schritt 18, 08.11.2026):
+  - Keine feste Höchstbreite mehr: Akte (Kopf, Allergiehinweis, Reiter und ihr Inhalt),
+    Übergabe, Aufgaben, Nachrichten, Kalender, Therapie, Medikamente, Ausgangsliste und die
+    Platzhalter wachsen mit dem Fenster. Der Wochenplan verteilt die Tage auf die volle Breite
+    und die Stunden auf die Höhe bis zum unteren Rand (zu wenig Platz: Bildlauf).
+  - Seitenmenü: oben der Menü-Knopf (Symbol aus „Segoe Fluent Icons“, unter Windows 10 „Segoe
+    MDL2 Assets“). Eingeklappt nur Symbole mit Hinweis beim Darüberfahren, Zähler als kleine Zahl
+    am Symbol, aktiver Bereich hervorgehoben; unten Version/Bereich und „Demo-Daten
+    zurücksetzen“ als Symbol. Ausgeklappt stehen die Symbole vor den Namen. Der Zustand bleibt
+    in den Einstellungen (`menue_eingeklappt`).
+  - „Neuer Bericht …“ ist kein Menüpunkt mehr: Knopf im Kopf der Akte (neben „Status …“), im
+    Reiter „Berichte“ und per Rechtsklick auf eine Bewohnerkarte (Übersicht und Bewohner; das
+    Menü hat „Akte öffnen“ und „Neuer Bericht …“).
 
 ## Offene Punkte
 
@@ -692,7 +708,33 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   Umschalter etwas zeigt und die übrigen Demo-Abläufe gleich bleiben. Bereich „Leitung“ und
   „Therapie“ entsprechen den Teams der Demo-Nachrichten.
 
+- 08.11.2026 (Schritt 18): Die farbige Hauptaktion der Akte bleibt „Bearbeiten …“; „Neuer Bericht
+  …“ steht als normaler Knopf daneben (einfachste Lösung, nichts Gewohntes verschiebt sich).
+- 08.11.2026 (Schritt 18): Die Übersicht (Startseite) blieb, wie sie ist (Wunsch Tobi); ihr
+  Kartenraster füllte die Fläche schon. Fenster zum Bearbeiten (Dialoge) behalten ihre Größe – sie
+  sind keine Ansichten im Hauptfenster.
+- 08.11.2026 (Schritt 18): Wochenplan: Eine Stunde ist mindestens so hoch wie bisher (44 Punkte);
+  ist mehr Platz, wachsen die Stunden, bis der Plan den unteren Rand erreicht.
+- 08.11.2026 (Schritt 18): Symbole auch im ausgeklappten Menü (vor dem Namen), damit man die
+  Symbole der eingeklappten Leiste wiedererkennt. Ein Modul ohne eigenes Symbol bekommt ein
+  allgemeines Baustein-Symbol.
+
 ## Testliste für Tobi
+
+Version 0.21.0:
+
+1. Unten links „Version 0.21.0 · Build …“. Links steht kein „Neuer Bericht …“ mehr; vor jedem
+   Eintrag ein Symbol.
+2. Akte Anton Ahorn → Reiter „Wochenplan“: Die Tage gehen über die ganze Breite, der Plan reicht
+   bis unten. Fenster größer und kleiner ziehen: Alles wächst mit, nichts wird abgeschnitten
+   (auch bei 1366 × 768).
+3. Oben links den Menü-Knopf (drei Striche) drücken: Das Menü wird schmal, nur Symbole; über
+   einem Symbol erscheint der Name; „Aufgaben“ zeigt die Zahl klein am Symbol. Unten: Info-Symbol
+   (Version und Bereich) und „Demo-Daten zurücksetzen“ als Symbol. Programm neu starten → es
+   bleibt eingeklappt. Wieder ausklappen.
+4. Neuer Bericht: in der Akte oben „Neuer Bericht …“; im Reiter „Berichte“; in der Übersicht oder
+   unter „Bewohner“ Rechtsklick auf eine Karte → „Neuer Bericht …“. Der Bewohner steht jeweils
+   schon fest.
 
 Version 0.20.0 (zwei Programmfenster genügen):
 
