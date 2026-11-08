@@ -637,6 +637,18 @@ public sealed partial class Speicher : IDisposable
         );
         CREATE UNIQUE INDEX aerzte_name ON aerzte (name COLLATE NOCASE);
         """,
+        // 23 – Visite mit allen Bewohnern (Schritt 26c): je Bereich ein Entwurf, bis „Visite abschließen“.
+        """
+        CREATE TABLE visite_entwuerfe (
+            bereich    TEXT PRIMARY KEY,
+            datum      TEXT NOT NULL,
+            arzt       TEXT NOT NULL,
+            teilnehmer TEXT NOT NULL DEFAULT '',
+            kuerzel    TEXT NOT NULL,
+            begonnen   TEXT NOT NULL,
+            eintraege  TEXT NOT NULL DEFAULT '[]'
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;

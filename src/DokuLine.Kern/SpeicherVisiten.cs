@@ -88,6 +88,43 @@ public sealed partial class Speicher
         return id;
     }
 
+    // ----- Entwurf einer Visite mit allen Bewohnern (Schritt 26c) -----
+
+    public VisitenEntwurf? VisitenEntwurf(string bereich)
+    {
+        using var befehl = Befehl("SELECT datum, arzt, teilnehmer, kuerzel, begonnen, eintraege FROM visite_entwuerfe WHERE bereich = $b", null, [("$b", bereich)]);
+        using var leser = befehl.ExecuteReader();
+        if (!leser.Read()) return null;
+        return new VisitenEntwurf
+        {
+            Bereich = bereich, Datum = AusIso(leser.GetString(0)), Arzt = leser.GetString(1), Teilnehmer = leser.GetString(2), Kuerzel = leser.GetString(3),
+            Begonnen = AusZeit(leser.GetString(4)), Eintraege = VisitenEntwurfRegeln.AusJson(leser.GetString(5)),
+        };
+    }
+
+    public void VisitenEntwurfSpeichern(VisitenEntwurf v)
+    {
+        if (string.IsNullOrWhiteSpace(v.Kuerzel)) throw new Eingabefehler([RechteRegeln.NichtAngemeldetText]);
+        Ausfuehren("""
+            INSERT INTO visite_entwuerfe (bereich, datum, arzt, teilnehmer, kuerzel, begonnen, eintraege) VALUES ($b, $d, $a, $t, $k, $g, $e)
+            ON CONFLICT(bereich) DO UPDATE SET datum = $d, arzt = $a, teilnehmer = $t, kuerzel = $k, eintraege = $e
+            """, null,
+            ("$b", v.Bereich), ("$d", Iso(v.Datum)), ("$a", v.Arzt), ("$t", v.Teilnehmer), ("$k", v.Kuerzel), ("$g", Zeit(v.Begonnen)),
+            ("$e", VisitenEntwurfRegeln.AlsJson(v.Eintraege)));
+    }
+
+    public void VisitenEntwurfVerwerfen(string bereich) =>
+        Ausfuehren("DELETE FROM visite_entwuerfe WHERE bereich = $b", null, ("$b", bereich));
+
+    // „Visite abschließen“: aus dem Entwurf die Visite (Berichte, Übergaben, Aufgaben); der Entwurf ist dann weg.
+    public VisiteGespeichert VisiteAbschliessen(VisitenEntwurf v, DateTime jetzt)
+    {
+        var visite = VisitenRegeln.AusEingabe(VisitenEntwurfRegeln.AlsVisite(v), jetzt);
+        var gespeichert = VisiteSpeichern(visite);
+        VisitenEntwurfVerwerfen(v.Bereich);
+        return gespeichert;
+    }
+
     private long Neu(SqliteTransaction transaktion) => Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
 
     // Alle Visiten (neueste zuerst), optional nur eines Bewohners und in einem Zeitraum.
@@ -173,7 +210,7 @@ public sealed partial class Speicher
     private void DemoVisitenEinfuegen(SqliteTransaction transaktion)
     {
         // Aufgaben aus früheren Demo-Visiten zuerst (sie verweisen auf die Visiten).
-        Ausfuehren("DELETE FROM aufgaben WHERE visite_anordnung_id IS NOT NULL OR visite_eintrag_id IS NOT NULL; DELETE FROM visiten", transaktion);
+        Ausfuehren("DELETE FROM aufgaben WHERE visite_anordnung_id IS NOT NULL OR visite_eintrag_id IS NOT NULL; DELETE FROM visiten; DELETE FROM visite_entwuerfe", transaktion);
         var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
         var medikamente = MedikamenteLesen(transaktion, "");
         foreach (var v in Demodaten.Visiten(bewohner, medikamente, Uhr()))

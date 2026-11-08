@@ -62,3 +62,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 26a1 „Umbenennung in DokuLine, Teil 1 (Übergang)“ (0.29.2).
 - 08.11.2026 — Claude Code: Bauplan Schritte 26a2 „Position Administrator mit Kürzel TST“ und 26a3 „Abmelden sichtbar machen, Tastenkürzel F12“ (0.29.3).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26b „Ärzteverzeichnis“ (0.29.4).
+- 08.11.2026 — Claude Code: Bauplan Schritt 26c „Visite: Übersicht aller Bewohner“ (0.29.5).

@@ -57,7 +57,6 @@ public class VisitenOberflaechenTests
                 case VisiteFenster v:
                     Assert.False(v.Speichern());
                     fehlerLeer = v.Fehler.Text;
-                    v.Art.Text = "Psychiater";
                     v.Arzt.Text = "Dr. Test (ausgedacht)";
                     var a = v.BewohnerHinzufuegen("Ahorn");
                     a.Besprochen.Text = "Schläft besser, Dosis wird angepasst.";
@@ -109,9 +108,9 @@ public class VisitenOberflaechenTests
             f.Visiten.NeuKnopf.PerformClick();
 
         Assert.StartsWith("Bitte prüfen:", fehlerLeer);
-        Assert.Contains("Art der Visite fehlt", fehlerLeer);
+        Assert.Contains("Arzt fehlt", fehlerLeer);
         Assert.Equal(3, einblendungen);
-        Assert.StartsWith($"laut Visite {Heute()} (Psychiater, Dr. Test (ausgedacht))", verlaufHinweis);
+        Assert.StartsWith($"laut Visite {Heute()} (Dr. Test (ausgedacht))", verlaufHinweis);
         // Der Medikamentenplan des Bewohners ist offen; die Stufe steht dort.
         Assert.Equal("Bewohner", f.AktiverBereich);
         Assert.Equal("Medikamentenplan", f.Bewohner.Akte.Reiter.Aktiv);
@@ -163,7 +162,7 @@ public class VisitenOberflaechenTests
         var jetzt = DateTime.Now;
         u.Speicher.VisiteSpeichern(VisitenRegeln.AusEingabe(new VisiteEingabe
         {
-            Datum = Heute(), Art = "Hausarzt", Arzt = "Dr. Ulme (ausgedacht)", Kuerzel = "KL",
+            Datum = Heute(), Arzt = "Dr. Ulme (ausgedacht)", Kuerzel = "KL",
             Eintraege = [new VisiteEintragEingabe { BewohnerId = u.Demo("Clematis").Id!.Value, Besprochen = "Schlaf besprochen.", Anordnungen = [(AnordnungArt.Pause, null, "Mirtazapin")] }],
         }, jetzt));
         using var f = new Hauptfenster(u.Speicher);

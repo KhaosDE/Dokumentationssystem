@@ -13,7 +13,11 @@ public sealed class VisitenSeite : Panel
     private readonly List<Control> inhalt = [];
     private List<Bewohner> bewohner = [];
 
-    public Button NeuKnopf { get; } = Stil.HauptKnopf("Neue Visite …");
+    public Button NeuKnopf { get; } = Stil.NebenKnopf("Neue Visite …");   // einzelne Bewohner
+    // Schritt 26c: Visite mit allen Bewohnern des Bereichs (fortsetzen, wenn ein Entwurf besteht).
+    public Button BeginnenKnopf { get; } = Stil.HauptKnopf("Visite beginnen …");
+    public Button DruckKnopf { get; } = Stil.NebenKnopf("Visitenliste drucken …");
+    public VisitenRundgang? Rundgang { get; private set; }
     public ComboBox BewohnerFilter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
     public TextBox Von { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public TextBox Bis { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
@@ -29,7 +33,7 @@ public sealed class VisitenSeite : Panel
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        foreach (var c in new Control[] { Beschriftung("Bewohner"), BewohnerFilter, Beschriftung("von"), Von, Beschriftung("bis"), Bis, FilterFehler })
+        foreach (var c in new Control[] { Beschriftung("Bewohner"), BewohnerFilter, Beschriftung("von"), Von, Beschriftung("bis"), Bis, DruckKnopf, FilterFehler })
         {
             c.Margin = c is Label ? new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0) : new Padding(0, 0, Stil.AbstandMittel, Stil.AbstandKlein);
             leiste.Controls.Add(c);
@@ -41,13 +45,17 @@ public sealed class VisitenSeite : Panel
         Von.TextChanged += (_, _) => Aktualisieren();
         Bis.TextChanged += (_, _) => Aktualisieren();
         NeuKnopf.Click += (_, _) => NeueVisite();
+        BeginnenKnopf.Click += (_, _) => Beginnen();
+        DruckKnopf.Click += (_, _) => VisitenlisteDrucken();
         Controls.Add(leiste);
         AutoScroll = true;
     }
 
     private static Label Beschriftung(string text) => new() { Text = text, AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite };
 
-    public string KopfText => (Karten.Count == 1 ? "1 Visite" : $"{Karten.Count} Visiten") +
+    private static string Bereich => Einstellungen.Laden().Bereich;
+
+    public string KopfText => Rundgang is not null ? $"Visite läuft · {Rundgang.KopfText}" : (Karten.Count == 1 ? "1 Visite" : $"{Karten.Count} Visiten") +
                               (BewohnerFilter.SelectedIndex > 0 ? $" · {bewohner[BewohnerFilter.SelectedIndex - 1].Name}" : "");
 
     // Beim Öffnen des Bereichs: Bewohnerliste neu (Auswahl bleibt), dann die Liste.
@@ -77,6 +85,8 @@ public sealed class VisitenSeite : Panel
     {
         if (BewohnerFilter.Items.Count == 0) return;   // noch nicht gezeigt
         Stil.Sperren(NeuKnopf, Recht.Grund(speicher, Funktionen.Visiten));   // Rechte (Schritt 19)
+        Stil.Sperren(BeginnenKnopf, Recht.Grund(speicher, Funktionen.Visiten));
+        BeginnenKnopf.Text = speicher.VisitenEntwurf(Bereich) is null ? "Visite beginnen …" : "Visite fortsetzen";
         bool fehler = false;
         DateOnly? Lesen(TextBox feld)
         {
@@ -103,11 +113,69 @@ public sealed class VisitenSeite : Panel
         }
         if (Karten.Count == 0)
             inhalt.Add(new Label { Text = "Keine Visiten für diese Auswahl.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
-        foreach (var c in inhalt) Controls.Add(c);
+        foreach (var c in inhalt)
+        {
+            c.Visible = Rundgang is null;   // während einer Visite bleibt die Liste verborgen
+            Controls.Add(c);
+        }
         ResumeLayout(false);
         AutoScrollPosition = Point.Empty;
         PerformLayout();
         Geaendert?.Invoke();
+    }
+
+    // „Visite beginnen …“ (Datum, Arzt, dabei) bzw. eine unterbrochene Visite fortsetzen.
+    public bool Beginnen()
+    {
+        if (Recht.Grund(speicher, Funktionen.Visiten) is not null) return false;
+        var entwurf = speicher.VisitenEntwurf(Bereich);
+        if (entwurf is null)
+        {
+            using var fenster = new VisiteBeginnenFenster(speicher, Bereich);
+            if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK || fenster.Entwurf is null) return false;
+            entwurf = fenster.Entwurf;
+        }
+        RundgangZeigen(entwurf);
+        return true;
+    }
+
+    private void RundgangZeigen(VisitenEntwurf entwurf)
+    {
+        RundgangBeenden();
+        Rundgang = new VisitenRundgang(speicher, entwurf) { Jetzt = Jetzt };
+        Rundgang.Geaendert += () => Geaendert?.Invoke();
+        Rundgang.Unterbrochen += () => { RundgangBeenden(); Aktualisieren(); };
+        Rundgang.Abgeschlossen += gespeichert =>
+        {
+            RundgangBeenden();
+            Aktualisieren();
+            AufgabenEinblenden(gespeichert.Aufgaben);   // erst jetzt, gesammelt
+        };
+        foreach (Control c in Controls) if (c != Rundgang) c.Visible = false;
+        Controls.Add(Rundgang);
+        AutoScroll = false;
+        PerformLayout();
+        Geaendert?.Invoke();
+    }
+
+    private void RundgangBeenden()
+    {
+        if (Rundgang is null) return;
+        Controls.Remove(Rundgang);
+        Rundgang.Dispose();
+        Rundgang = null;
+        foreach (Control c in Controls) c.Visible = true;
+        AutoScroll = true;
+        PerformLayout();
+    }
+
+    public void VisitenlisteDrucken()
+    {
+        var heute = DateOnly.FromDateTime(Jetzt());
+        var bloecke = speicher.AlleBewohner().Where(b => b.Wohnbereich == Bereich).OrderBy(b => b.Zimmer, StringComparer.Ordinal)
+            .Select(b => (b, (IReadOnlyList<Tagesstand>)speicher.Verordnungen(b.Id!.Value).Select(v => MedikationRegeln.Stand(v, heute)).ToList())).ToList();
+        var druck = new VisitenlisteDruck(Bereich, heute, bloecke);
+        Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, $"Visitenliste {Bereich}");
     }
 
     public void NeueVisite()
@@ -147,6 +215,11 @@ public sealed class VisitenSeite : Panel
     protected override void OnLayout(LayoutEventArgs levent)
     {
         base.OnLayout(levent);
+        if (Rundgang is not null)   // die Visitenansicht füllt die ganze Fläche
+        {
+            Rundgang.SetBounds(0, 0, ClientSize.Width, ClientSize.Height);
+            return;
+        }
         int rand = Stil.Px(this, Stil.AbstandGross);
         int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int y = rand + AutoScrollPosition.Y;
@@ -171,7 +244,7 @@ public sealed class VisitenSeite : Panel
     }
 }
 
-// Eine Visite: Datum, Art, Arzt, wer dabei war; je Bewohner das Besprochene und Marken für geänderte
+// Eine Visite: Datum, Arzt (ältere auch die Art), wer dabei war; je Bewohner das Besprochene und Marken für geänderte
 // Anordnungen und nötige Facharzttermine. Mit Bewohnerfilter nur dessen Eintrag.
 public sealed class VisiteKarte : KartenFlaeche
 {
@@ -193,7 +266,7 @@ public sealed class VisiteKarte : KartenFlaeche
             texte.Add(text);
             return l;
         }
-        Text($"{Kern.Datum.Text(v.Datum)} · {v.Art} · {v.Arzt}", Stil.KarteName, Stil.TextNormal);
+        Text($"{Kern.Datum.Text(v.Datum)} · {(v.Art.Length > 0 ? $"{v.Art} · " : "")}{v.Arzt}", Stil.KarteName, Stil.TextNormal);
         Text((v.Teilnehmer.Length > 0 ? $"dabei: {v.Teilnehmer} · " : "") + $"eingetragen von {v.Kuerzel}, {BerichtRegeln.ZeitText(v.Erstellt)}", Stil.Klein, Stil.TextLeise);
         foreach (var e in v.Eintraege.Where(e => nurBewohner is null || e.BewohnerId == nurBewohner))
         {
@@ -232,7 +305,7 @@ public sealed class VisiteKarte : KartenFlaeche
     }
 }
 
-// „Neue Visite“: Datum, Art, Arzt (ausgedacht), wer dabei war, dann je Bewohner ein Feld. Der Inhalt
+// „Neue Visite“ für einzelne Bewohner: Datum, Arzt (aus dem Verzeichnis), wer dabei war, dann je Bewohner ein Feld. Der Inhalt
 // rollt; Fehler, „Speichern“ und „Abbrechen“ bleiben unten sichtbar.
 public sealed class VisiteFenster : Form
 {
@@ -249,7 +322,6 @@ public sealed class VisiteFenster : Form
     private readonly FlowLayoutPanel eintraege = new() { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0), BackColor = Stil.Fensterhintergrund };
 
     public TextBox DatumFeld { get; } = new() { Width = 100 };
-    public ComboBox Art { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 200 };
     public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
     public PersonenWahl Teilnehmer { get; }   // Schritt 26a: Auswahl, vorbelegt mit der angemeldeten Person
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 280 };
@@ -281,7 +353,6 @@ public sealed class VisiteFenster : Form
             raster.Controls.Add(feld);
         }
         DatumFeld.Text = Datum.Text(DateOnly.FromDateTime(Jetzt()));
-        Art.Items.AddRange([.. VisitenRegeln.Arten]);
         Teilnehmer = new PersonenWahl(speicher) { AccessibleName = "Dabei" };
         BewohnerWahl.Items.AddRange([.. bewohner.Select(b => (object)$"{b.Name}, Zi. {b.Zimmer}")]);
         if (BewohnerWahl.Items.Count > 0) BewohnerWahl.SelectedIndex = 0;
@@ -290,7 +361,6 @@ public sealed class VisiteFenster : Form
 
         Zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandMittel) });
         Zeile("Datum der Visite", DatumFeld);
-        Zeile("Art", Art);
         Zeile("Arzt", Arzt);
         Zeile("Dabei", Teilnehmer);
         Zeile("Bewohner", Formular.Reihe(BewohnerWahl, HinzufuegenKnopf));
@@ -353,7 +423,7 @@ public sealed class VisiteFenster : Form
         {
             var v = VisitenRegeln.AusEingabe(new VisiteEingabe
             {
-                Datum = DatumFeld.Text, Art = Art.Text, Arzt = Arzt.Text, Teilnehmer = Teilnehmer.AlsText, Kuerzel = Recht.Kuerzel,
+                Datum = DatumFeld.Text, Arzt = Arzt.Text, Teilnehmer = Teilnehmer.AlsText, Kuerzel = Recht.Kuerzel,
                 Eintraege = Eintraege.Select(e => e.Eingabe()).ToList(),
             }, Jetzt());
             Gespeichert = speicher.VisiteSpeichern(v);
