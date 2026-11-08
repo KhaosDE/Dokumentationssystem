@@ -63,7 +63,6 @@ public sealed class PlatzhalterKarte : KartenFlaeche
 // Eine ganze Seite für einen noch nicht gebauten Bereich.
 public sealed class PlatzhalterSeite : Panel
 {
-    private const int MaxBreite = 880;
     public PlatzhalterKarte Karte { get; } = new();
 
     public PlatzhalterSeite(Bauplan.Vorhaben vorhaben)
@@ -78,6 +77,6 @@ public sealed class PlatzhalterSeite : Panel
         base.OnLayout(levent);
         int rand = Stil.Px(this, Stil.AbstandGross);
         Karte.Location = new Point(rand, rand);
-        Karte.Width = Math.Min(ClientSize.Width - 2 * rand, Stil.Px(this, MaxBreite));
+        Karte.Width = Math.Max(100, ClientSize.Width - 2 * rand);
     }
 }

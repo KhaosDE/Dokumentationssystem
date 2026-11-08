@@ -65,6 +65,15 @@ public static class Stil
     public static readonly Font MarkeSchrift = new("Segoe UI Semibold", 9F);
     public static readonly Font Abschnitt = new("Segoe UI Semibold", 8.5F);   // „STAMMDATEN“
 
+    // Symbole: „Segoe Fluent Icons“ (Windows 11), sonst „Segoe MDL2 Assets“ (Windows 10, gleiche Zeichen).
+    public static readonly Font Symbolschrift = new(SymbolFamilie(), 12F);
+
+    private static string SymbolFamilie()
+    {
+        using var installiert = new System.Drawing.Text.InstalledFontCollection();
+        return installiert.Families.Any(f => f.Name == "Segoe Fluent Icons") ? "Segoe Fluent Icons" : "Segoe MDL2 Assets";
+    }
+
     // Logische Pixel (bei 100 %) in Bildschirmpixel umrechnen (125 %, 150 % …).
     public static int Px(Control bezug, int wert) => (int)Math.Round(wert * bezug.DeviceDpi / 96f);
     public static float Skala(Control bezug) => bezug.DeviceDpi / 96f;

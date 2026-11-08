@@ -12,10 +12,11 @@ namespace Dokusystem.Kern;
 //   heb_frist_monate     – Startseite: „HEB fällig“, wenn der letzte Bogen so alt ist (Vorgabe: 12)
 //   bereich              – Mehrplatz: Bereichskennung dieser Installation (Vorgabe: „Wohnbereich A“)
 //   datenbank_ordner     – Mehrplatz: gemeinsamer Ordner der Datenbank; leer = lokal im Datenordner
+//   menue_eingeklappt    – Seitenmenü nur mit Symbolen (Vorgabe: nein)
 // Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben.
 // Dieselbe Datei hat schon die Python-Version (bis 0.2.0) benutzt.
 public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90, int HebFristMonate = 12,
-    string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null);
+    string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false);
 
 public static partial class Einstellungen
 {
@@ -46,6 +47,8 @@ public static partial class Einstellungen
                 werte = werte with { Bereich = Bereiche.Bereinigen(bereich) };
             if (knoten["datenbank_ordner"] is JsonValue o && o.TryGetValue(out string? ordner) && !string.IsNullOrWhiteSpace(ordner))
                 werte = werte with { DatenbankOrdner = ordner.Trim() };
+            if (knoten["menue_eingeklappt"] is JsonValue m && m.TryGetValue(out bool eingeklappt))
+                werte = werte with { MenueEingeklappt = eingeklappt };
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
@@ -72,6 +75,7 @@ public static partial class Einstellungen
             ["heb_frist_monate"] = werte.HebFristMonate,
             ["bereich"] = Bereiche.Bereinigen(werte.Bereich),
             ["datenbank_ordner"] = string.IsNullOrWhiteSpace(werte.DatenbankOrdner) ? null : werte.DatenbankOrdner.Trim(),
+            ["menue_eingeklappt"] = werte.MenueEingeklappt,
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen

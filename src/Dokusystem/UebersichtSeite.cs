@@ -24,6 +24,7 @@ public sealed class UebersichtSeite : Panel
     public Label BereichHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, Visible = false, UseMnemonic = false };
     public List<BewohnerKarte> Karten { get; } = [];
     public event Action<long>? AkteGewuenscht;
+    public event Action<long>? BerichtGewuenscht;
     public event Action? Geaendert;
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
@@ -74,6 +75,7 @@ public sealed class UebersichtSeite : Panel
             if (allesZeigen && h.Bewohner.Wohnbereich != werte.Bereich) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
             var karte = new BewohnerKarte(h.Bewohner, heute, marken);
             karte.Gewaehlt += b => AkteGewuenscht?.Invoke(b.Id!.Value);
+            karte.BerichtGewuenscht += b => BerichtGewuenscht?.Invoke(b.Id!.Value);
             Karten.Add(karte);
         }
         Raster.KartenSetzen(Karten);

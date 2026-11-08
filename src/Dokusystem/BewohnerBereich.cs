@@ -26,6 +26,10 @@ public sealed class BewohnerBereich : Panel
     public event Action<long?>? NachrichtenAnzeigen;
     private readonly Button nachrichtenKnopf = Stil.NebenKnopf("Nachrichten …");
     private readonly Button statusKnopf = Stil.NebenKnopf("Status …");
+    private readonly Button berichtKnopf = Stil.NebenKnopf("Neuer Bericht …");
+
+    // „Neuer Bericht …“ für einen Bewohner (Akte oder Rechtsklick auf eine Karte); das Hauptfenster öffnet ihn.
+    public event Action<long>? BerichtGewuenscht;
     private readonly Panel aufgabenRahmen = new() { Dock = DockStyle.Top, BackColor = Stil.Seite };
     public event Action? AufgabenAnzeigen;
     public BewohnerFilter AktiverFilter { get; private set; } = BewohnerFilter.Alle;
@@ -77,6 +81,7 @@ public sealed class BewohnerBereich : Panel
         Nachrichten.OeffnenKnopf.Click += (_, _) => NachrichtenAnzeigen?.Invoke(null);
         nachrichtenKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) NachrichtenAnzeigen?.Invoke(id); };
         statusKnopf.Click += (_, _) => StatusOeffnen();
+        berichtKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) BerichtGewuenscht?.Invoke(id); };
         Controls.Add(Raster);
         Controls.Add(Akte);
         Controls.Add(FilterLeiste);
@@ -122,6 +127,7 @@ public sealed class BewohnerBereich : Panel
                 status.TryGetValue(b.Id!.Value, out var s) ? [StatusmeldungRegeln.Marke(s, jetzt)] : null,
                 b.Wohnbereich != werte.Bereich ? [new Marke(MarkenArt.Angabe, b.Wohnbereich)] : null);
             karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
+            karte.BerichtGewuenscht += gewaehlt => BerichtGewuenscht?.Invoke(gewaehlt.Id!.Value);
             return karte;
         }));
         Akte.Visible = false;
@@ -153,7 +159,7 @@ public sealed class BewohnerBereich : Panel
         Akte.Visible = true;
         AkteSichtbar = true;
         kopf.TexteSetzen("Bewohnerakte", b.Name);
-        kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, statusKnopf, bearbeitenKnopf);
+        kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, statusKnopf, berichtKnopf, bearbeitenKnopf);
     }
 
     // Statusmeldung setzen oder aufheben (Mehrplatzbetrieb); danach die Akte neu lesen.
@@ -199,7 +205,6 @@ public sealed class BewohnerBereich : Panel
 // oben, darunter Reiter für die Teile der Akte. Noch nicht gebaute Reiter zeigen „Kommt in Version …“.
 public sealed class AkteAnsicht : Panel
 {
-    private const int MaxBreite = 880;
     private const int BildGroesse = 96;
 
     private readonly KartenFlaeche kopfKarte = new();
@@ -431,7 +436,7 @@ public sealed class AkteAnsicht : Panel
     {
         base.OnLayout(levent);
         int rand = S(Stil.AbstandGross);
-        int breite = Math.Min(ClientSize.Width - 2 * rand, S(MaxBreite));
+        int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int x = rand, y = rand + AutoScrollPosition.Y;
         int innen = S(Stil.AbstandGross);
 
@@ -457,6 +462,8 @@ public sealed class AkteAnsicht : Panel
         foreach (Control ansicht in new Control[] { Berichte, Medikation, Wochenplan, Biografie, Reflexion, Heb }.Concat(ModulAnsichten))
         {
             if (!ansicht.Visible) continue;
+            // Der Wochenplan füllt die Höhe bis zum unteren Rand (Schritt 18).
+            if (ansicht == Wochenplan) Wochenplan.VerfuegbareHoehe = ClientSize.Height - (y - AutoScrollPosition.Y) - rand;
             ansicht.SetBounds(x, y, breite, ansicht.Height);
             ansicht.PerformLayout();
             y += ansicht.Height + rand;

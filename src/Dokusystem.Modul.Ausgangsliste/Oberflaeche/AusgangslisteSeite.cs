@@ -6,7 +6,6 @@ namespace Dokusystem.Modul.Ausgangsliste;
 // je Bewohner eine Karte, nach Zimmer. Ausdruck der Tagesliste über den Knopf im Kopf.
 public sealed class AusgangslisteSeite : ModulSeite
 {
-    private const int MaxBreite = 880;
     private readonly Datenbank db;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
     private readonly List<Control> inhalt = [];
@@ -127,7 +126,7 @@ public sealed class AusgangslisteSeite : ModulSeite
     {
         base.OnLayout(levent);
         int rand = Stil.Px(this, Stil.AbstandGross);
-        int breite = Math.Min(ClientSize.Width - 2 * rand, Stil.Px(this, MaxBreite));
+        int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int y = rand + AutoScrollPosition.Y;
         leiste.MaximumSize = new Size(breite, 0);
         leiste.Bounds = new Rectangle(new Point(rand, y), leiste.GetPreferredSize(new Size(Math.Max(100, breite), 0)));

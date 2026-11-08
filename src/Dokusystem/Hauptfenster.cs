@@ -10,12 +10,13 @@ namespace Dokusystem;
 // Noch nicht gebaute Bereiche zeigen „Kommt in Version …“ (Bauplan in IDEEN.md).
 public sealed class Hauptfenster : Form
 {
-    private const int LeisteBreite = 232;
+    private const int LeisteBreite = 232, LeisteSchmal = 60;
 
-    // Reihenfolge der Seitenleiste. „Neuer Bericht …“ und „Einstellungen“ öffnen ein Fenster statt einer Seite.
+    // Reihenfolge der Seitenleiste. „Einstellungen“ öffnet ein Fenster statt einer Seite.
     // Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
+    // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Akte, Reiter „Berichte“, Rechtsklick auf eine Karte).
     public static readonly string[] Bereiche =
-        ["Übersicht", "Bewohner", "Neuer Bericht …", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+        ["Übersicht", "Bewohner", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
          "Medikamente", "Einstellungen"];
 
     private readonly Speicher speicher;
@@ -40,6 +41,12 @@ public sealed class Hauptfenster : Form
     public const string Startbereich = "Übersicht";
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
+    // Einklappen: oben der Menü-Knopf; eingeklappt stehen unten Version/Bereich und „Demo-Daten
+    // zurücksetzen“ nur als Symbol mit Hinweis.
+    public SeitenleistenEintrag MenueKnopf { get; } = new("Menü einklappen") { Symbol = Symbole.Menue, Eingeklappt = true };
+    public SeitenleistenEintrag InfoSymbol { get; } = new("Version") { Symbol = Symbole.Info, Eingeklappt = true, Visible = false, Cursor = Cursors.Default };
+    public SeitenleistenEintrag DemoSymbol { get; } = new("Demo-Daten zurücksetzen …") { Symbol = Symbole.Zuruecksetzen, Eingeklappt = true, Visible = false };
+    public bool MenueEingeklappt { get; private set; }
     public Label Arbeitsplatz { get; } = new();   // Bereich und Ort der Datenbank
     private readonly ToolTip hinweis = new();
     private readonly System.Windows.Forms.Timer abgleich = new() { Interval = 30_000 };
@@ -97,13 +104,15 @@ public sealed class Hauptfenster : Form
             BereichWaehlen("Bewohner");
             Bewohner.AkteZeigen(id);
         };
+        Uebersicht.BerichtGewuenscht += id => NeuerBericht(id);
+        Bewohner.BerichtGewuenscht += id => NeuerBericht(id);
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);
 
         // ----- Seitenleiste -----
         leiste.Dock = DockStyle.Left;
-        leiste.Width = LeisteBreite;
+        leiste.Width = S(LeisteBreite);
         leiste.BackColor = Stil.Fensterhintergrund;
         leiste.Padding = new Padding(Stil.AbstandMittel);
         leiste.Paint += (_, e) =>
@@ -119,10 +128,12 @@ public sealed class Hauptfenster : Form
 
         foreach (string name in Bereiche)
         {
-            var eintrag = new SeitenleistenEintrag(name);
+            var eintrag = new SeitenleistenEintrag(name) { Symbol = Symbole.Fuer(name) };
             eintrag.Click += (_, _) => BereichWaehlen(name);
             Navigation.Add(eintrag);
         }
+        MenueKnopf.Click += (_, _) => MenueUmschalten();
+        DemoSymbol.Click += (_, _) => DemoZuruecksetzen();
 
         DemoKnopf.AutoSize = false;
         DemoKnopf.Padding = new Padding(Stil.AbstandMini, 0, Stil.AbstandMini, 0);   // passt so in eine Zeile
@@ -136,9 +147,9 @@ public sealed class Hauptfenster : Form
         Arbeitsplatz.AutoSize = true;
         Arbeitsplatz.UseMnemonic = false;
 
-        leiste.Controls.Add(programmName);
+        leiste.Controls.AddRange([MenueKnopf, programmName]);
         foreach (var eintrag in Navigation) leiste.Controls.Add(eintrag);
-        leiste.Controls.AddRange([Arbeitsplatz, DemoKnopf, VersionText]);
+        leiste.Controls.AddRange([Arbeitsplatz, DemoKnopf, VersionText, InfoSymbol, DemoSymbol]);
         leiste.Layout += (_, _) => LeisteAnordnen();
         ModuleAnzeigen();
         speicher.ModuleGeaendert += ModuleAnzeigen;
@@ -165,6 +176,7 @@ public sealed class Hauptfenster : Form
         AufgabenZaehlen();
         BenutzerAnzeigen();
         ArbeitsplatzAnzeigen();
+        MenueSetzen(Einstellungen.Laden().MenueEingeklappt, merken: false);
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
         // Erst „Bewohner“ (baut die Karten); das Programm wechselt danach zur Übersicht (Startbereich).
         BereichWaehlen("Bewohner");
@@ -191,6 +203,7 @@ public sealed class Hauptfenster : Form
         Arbeitsplatz.Text = $"{werte.Bereich} · {ort}" + (erreichbar ? "" : " – nicht erreichbar") + (neustart ? "\nneuer Ort nach Neustart" : "");
         Arbeitsplatz.ForeColor = erreichbar ? Stil.TextMittel : Stil.Beschluss.Text;
         hinweis.SetToolTip(Arbeitsplatz, $"Bereich dieses Arbeitsplatzes: {werte.Bereich}\nDatenbank: {speicher.Pfad}");
+        InfoAktualisieren();
         leiste.PerformLayout();
     }
 
@@ -247,11 +260,6 @@ public sealed class Hauptfenster : Form
         if (name == "Einstellungen")
         {
             EinstellungenOeffnen();
-            return;
-        }
-        if (name == "Neuer Bericht …")
-        {
-            NeuerBericht();
             return;
         }
         string schluessel = Schluessel(name);
@@ -383,10 +391,11 @@ public sealed class Hauptfenster : Form
         menue.Show(Kopf.BenutzerKnopf, new Point(Kopf.BenutzerKnopf.Width, Kopf.BenutzerKnopf.Height), ToolStripDropDownDirection.BelowLeft);
     }
 
-    // Neuer Bericht mit Bewohnerauswahl; danach die Akte des Bewohners beim Reiter „Berichte“.
-    public Bericht? NeuerBericht()
+    // Neuer Bericht für einen Bewohner (aus Akte oder Karte); danach seine Akte beim Reiter „Berichte“.
+    public Bericht? NeuerBericht(long bewohnerId)
     {
-        using var formular = new BerichtFormular(speicher, null);
+        if (speicher.Bewohner(bewohnerId) is not Kern.Bewohner b) return null;
+        using var formular = new BerichtFormular(speicher, b);
         if (Dialog.Zeigen(formular, this) != DialogResult.OK || formular.Gespeichert is not Bericht bericht) return null;
         BereichWaehlen("Bewohner");
         Bewohner.AkteZeigen(bericht.BewohnerId);
@@ -435,8 +444,9 @@ public sealed class Hauptfenster : Form
             seiten[name] = seite;
             modulSeiten[name] = seite;
             bereichsFlaeche.Controls.Add(seite);
-            var eintrag = new SeitenleistenEintrag(name);
+            var eintrag = new SeitenleistenEintrag(name) { Symbol = Symbole.Fuer(name), Eingeklappt = MenueEingeklappt };
             eintrag.Click += (_, _) => BereichWaehlen(name);
+            hinweis.SetToolTip(eintrag, MenueEingeklappt ? name : null);
             Navigation.Insert(vor++, eintrag);
             leiste.Controls.Add(eintrag);
         }
@@ -469,12 +479,45 @@ public sealed class Hauptfenster : Form
         base.Dispose(disposing);
     }
 
+    // Seitenmenü ein- oder ausklappen; der Zustand bleibt in den Einstellungen.
+    public void MenueUmschalten() => MenueSetzen(!MenueEingeklappt, merken: true);
+
+    private void MenueSetzen(bool eingeklappt, bool merken)
+    {
+        MenueEingeklappt = eingeklappt;
+        if (merken) Einstellungen.Aendern(w => w with { MenueEingeklappt = eingeklappt });
+        MenueKnopf.Text = eingeklappt ? "Menü ausklappen" : "Menü einklappen";
+        MenueKnopf.AccessibleName = MenueKnopf.Text;
+        hinweis.SetToolTip(MenueKnopf, MenueKnopf.Text);
+        foreach (var eintrag in Navigation)
+        {
+            eintrag.Eingeklappt = eingeklappt;
+            hinweis.SetToolTip(eintrag, eingeklappt ? eintrag.Text : null);
+        }
+        programmName.Visible = Arbeitsplatz.Visible = DemoKnopf.Visible = VersionText.Visible = !eingeklappt;
+        InfoSymbol.Visible = DemoSymbol.Visible = eingeklappt;
+        InfoAktualisieren();
+        hinweis.SetToolTip(DemoSymbol, DemoSymbol.Text);
+        leiste.Width = S(eingeklappt ? LeisteSchmal : LeisteBreite);   // die Inhalte nutzen die Fläche sofort (Dock)
+        leiste.PerformLayout();
+        leiste.Invalidate();
+    }
+
+    // Eingeklappt: Version und Bereich als Hinweis am Info-Symbol.
+    private void InfoAktualisieren()
+    {
+        InfoSymbol.Text = $"{VersionText.Text}\n{Arbeitsplatz.Text}";
+        InfoSymbol.AccessibleName = InfoSymbol.Text.Replace("\n", " · ");
+        hinweis.SetToolTip(InfoSymbol, InfoSymbol.Text);
+    }
+
     private void LeisteAnordnen()
     {
         int x = leiste.Padding.Left, breite = leiste.ClientSize.Width - leiste.Padding.Horizontal;
-        int y = leiste.Padding.Top + S(Stil.AbstandKlein);
-        programmName.Location = new Point(x + S(Stil.AbstandMini), y);
-        y += programmName.PreferredHeight + S(Stil.AbstandGross);
+        int y = leiste.Padding.Top;
+        MenueKnopf.Bounds = new Rectangle(x, y, MenueEingeklappt ? breite : S(40), S(36));
+        programmName.Location = new Point(MenueKnopf.Right + S(Stil.AbstandKlein), y + (S(36) - programmName.PreferredHeight) / 2);
+        y = MenueKnopf.Bottom + S(Stil.AbstandGross);
         foreach (var eintrag in Navigation)
         {
             // Einstellungen etwas abgesetzt: Sie sind kein Arbeitsbereich.
@@ -484,6 +527,12 @@ public sealed class Hauptfenster : Form
         }
 
         int unten = leiste.ClientSize.Height - leiste.Padding.Bottom;
+        if (MenueEingeklappt)
+        {
+            InfoSymbol.Bounds = new Rectangle(x, unten - S(36), breite, S(36));
+            DemoSymbol.Bounds = new Rectangle(x, InfoSymbol.Top - S(Stil.AbstandMini) - S(36), breite, S(36));
+            return;
+        }
         VersionText.Location = new Point(x + S(Stil.AbstandMini), unten - VersionText.PreferredHeight);
         unten = VersionText.Top - S(Stil.AbstandMittel);
         DemoKnopf.Bounds = new Rectangle(x, unten - S(Stil.KnopfHoehe), breite, S(Stil.KnopfHoehe));
