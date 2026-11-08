@@ -67,6 +67,7 @@ public class StandardaufgabenOberflaechenTests
         Einstellungen.Aendern(w => w with { Kuerzel = "EF" });   // Bereichsleitung
         using (var fenster = new VorlagenFenster(u.Speicher))
         {
+            Hilfe.Zeigen(fenster);   // die Liste nimmt eine Auswahl erst an, wenn sie angezeigt wird
             Assert.Null(Stil.Sperrgrund(fenster.NeuKnopf));
             using (new DialogErsatz(f =>
             {
