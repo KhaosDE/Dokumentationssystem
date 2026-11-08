@@ -1201,7 +1201,7 @@ Umfang:
   Küchendienstes bleiben im Modul).
 
 ## Fenster „Ärztliche Informationen“
-Status: freigegeben (Bauplan Schritt 26f)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Diagnosen und Allergien bekommen ein eigenes Fenster „Ärztliche Informationen“.
 Warum: Vorgabe Tobi (08.11.2026).

@@ -185,7 +185,9 @@ public sealed class HebFenster : Form, IEntwurfFenster
         Kopf.Text = $"{HebRegeln.ArtText(Bogen.Art)}" + (Bogen.Nummer is int n ? $" · Nr. {n}" : "") +
                     $" · Zeitraum {HebRegeln.ZeitraumText(Bogen)}{Environment.NewLine}" +
                     $"{bewohner.Name} · Aufnahme {Datum.Text(bewohner.Aufnahmedatum)} · Beschluss: {BewohnerRegeln.BeschlussText(bewohner)}" +
-                    (Bogen.Art == Bogenart.C ? "" : $" · {HebRegeln.PlanungText(HebRegeln.Planungsmonate(bewohner, Bogen.Erstellt))}");
+                    (Bogen.Art == Bogenart.C ? "" : $" · {HebRegeln.PlanungText(HebRegeln.Planungsmonate(bewohner, Bogen.Erstellt))}") +
+                    // Diagnosen nur als Information und nur mit Recht (Schritt 26f)
+                    (Recht.Darf(speicher, Funktionen.AerztlicheAnsehen) ? $"{Environment.NewLine}Diagnosen: {DiagnoseRegeln.Kurz(speicher.Diagnosen(bewohner.Id!.Value))}" : "");
         QuellenLaden();
     }
 

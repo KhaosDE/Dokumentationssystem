@@ -28,7 +28,7 @@ public sealed class MitarbeiterTests : IDisposable
             RechteRegeln.Positionen.Where(rechte[Funktionen.MitarbeiterBereich].Contains));
         Assert.Contains("Psychologischer Fachdienst", rechte[Funktionen.MedikamenteVerwalten]);
         Assert.DoesNotContain("Mitarbeiter Wohnbereich", rechte[Funktionen.MedikamenteVerwalten]);
-        Assert.Equal([Funktionen.MedikamentAnlegen, Funktionen.MedikationBearbeiten], s.NurFachkraft().Order());
+        Assert.Equal([Funktionen.AerztlicheBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.MedikationBearbeiten], s.NurFachkraft().Order());
         Assert.Empty(s.AlleMitarbeiter());
         Assert.Equal(RechteRegeln.NichtAngemeldetText, s.Grund("", Funktionen.BerichteSchreiben));
     }

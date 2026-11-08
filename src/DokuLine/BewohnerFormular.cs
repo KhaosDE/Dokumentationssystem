@@ -27,8 +27,6 @@ public sealed class BewohnerFormular : Form
     public Dreiwahl Beschluss { get; } = new(["ende", "kein_beschluss", "nicht_erfasst"],
                                              ["endet am", "kein Beschluss", "nicht erfasst"], "TT.MM.JJJJ");
     public Dreiwahl OffenGefuehrt { get; } = new(["ja", "nein", "nicht_erfasst"], ["ja", "nein", "nicht erfasst"], null);
-    public Dreiwahl Allergie { get; } = new(["eingetragen", "keine_bekannt", "nicht_erfasst"],
-                                            ["eingetragen:", "keine bekannt", "nicht erfasst"], "z. B. Haselnüsse");
     public Label Fehler { get; } = new();
     public Button SpeichernKnopf { get; } = Stil.HauptKnopf("Speichern");
 
@@ -90,12 +88,17 @@ public sealed class BewohnerFormular : Form
         Zeile("Geburtsdatum", Geburtsdatum);
         Zeile("Aufnahmedatum", Aufnahmedatum);
         Beschluss.Dock = DockStyle.Fill;
-        Allergie.Dock = DockStyle.Fill;
-        Beschluss.Margin = Allergie.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein);
+        Beschluss.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein);
         Zeile("Beschluss", Beschluss);
         OffenGefuehrt.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
         if (bewohner is not null) Zeile("Offen geführt", OffenGefuehrt);   // in der Aufnahme nicht (immer „nein“)
-        Zeile("Allergien", Allergie);
+        // Schritt 26f: Allergien bearbeitet man nur noch in „Ärztliche Informationen“ (Akte); neu: „nicht erfasst“.
+        Zeile("Allergien", new Label
+        {
+            Text = bewohner is null ? "nicht erfasst – in der Akte unter „Ärztliche Informationen …“ eintragen"
+                                    : BewohnerRegeln.AllergieText(bewohner) + " (ändern: „Ärztliche Informationen …“)",
+            AutoSize = true, MaximumSize = new Size(380, 0), ForeColor = Stil.TextMittel, Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein),
+        });
 
         // Bild: Vorschau, Knöpfe und Hinweis (Regel 2).
         var bildZeile = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) };
@@ -155,7 +158,6 @@ public sealed class BewohnerFormular : Form
             Aufnahmedatum.Text = werte.Aufnahmedatum;
             Beschluss.Setzen(werte.Beschluss, werte.Beschlussende);
             OffenGefuehrt.Setzen(werte.OffenGefuehrt, "");
-            Allergie.Setzen(werte.Allergie, werte.Allergien);
         }
         Vorname.TextChanged += (_, _) => BildZeigen();
         Nachname.TextChanged += (_, _) => BildZeigen();
@@ -257,8 +259,8 @@ public sealed class BewohnerFormular : Form
         Beschlussende = Beschluss.Feld.Text,
         OffenGefuehrt = bewohner is null ? "nein" : OffenGefuehrt.Zustand,   // Aufnahme: geschlossen (Schritt 26e)
         Wohnbereich = Wohnbereich.SelectedIndex >= 0 ? wohnbereiche[Wohnbereich.SelectedIndex].Name : "",
-        Allergie = Allergie.Zustand,
-        Allergien = Allergie.Feld.Text,
+        Allergie = bewohner is null ? "nicht_erfasst" : BewohnerRegeln.Kuerzel(bewohner.Allergie),
+        Allergien = bewohner?.Allergien ?? "",
     };
 
     private void FehlerZeigen(IEnumerable<string> fehler)

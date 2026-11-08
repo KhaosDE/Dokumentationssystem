@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.7** (Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme, Bauplan Schritt 26e).
+Stand: 08.11.2026. Version: **0.29.8** (Fenster „Ärztliche Informationen“, Bauplan Schritt 26f).
 
 ## Aktuell
 
@@ -118,7 +118,13 @@ A/B“, je sechs **Zimmer** mit **Betten** (Einzelzimmer oder „Bett Fenster“
 nach Bereich und zeigt „R2 · 2 Bewohner · 7 Betten frei“. Ältere Demo-Datenbanken werden einmal neu
 geladen; die bisherige liegt als Kopie daneben.
 
-**Nächster Schritt:** Bauplan Schritt 26f „Fenster „Ärztliche Informationen““ (0.29.8).
+Neu in 0.29.8: In der Akte der Knopf **„Ärztliche Informationen …“**: **Diagnosen** (ICD-10 freiwillig,
+Haupt-/Nebendiagnose, seit, gestellt von – aus dem Ärzteverzeichnis; nie löschen, nur „beenden am …“),
+**Allergien** mit den drei Zuständen und je Stoff der **Art der Reaktion**, dazu **„Hinweise für den
+Notfall“**. Der Allergiehinweis bleibt oben in der Akte; bearbeitet wird er nur noch dort. Neue Rechte
+„Ärztliche Informationen ansehen/bearbeiten“. Visite und HEB-Bogen zeigen die Diagnosen als Information.
+
+**Nächster Schritt:** Bauplan Schritt 26g „Tagesplan als Anzeigetafel“ (0.29.9).
 
 ## Fertig
 
@@ -708,6 +714,29 @@ geladen; die bisherige liegt als Kopie daneben.
   - Ältere Demo-Datenbanken (noch „Wohnbereich A/B“) werden beim ersten Start einmal neu geladen; vorher
     sichert das Programm sie als `dokumentationssystem-vor-0.29.7.db` neben der Datenbank (`update.log`
     vermerkt es).
+- 0.29.8 — Fenster „Ärztliche Informationen“ (Bauplan Schritt 26f, 08.11.2026):
+  - Akte: Knopf „Ärztliche Informationen …“ (neben „Status …“). Das Fenster hat drei Teile:
+    Diagnosen, Allergien und Unverträglichkeiten, Hinweise für den Notfall.
+  - Diagnosen (neue Tabelle `diagnosen`): ICD-10-Schlüssel freiwillig (geprüft auf die Form „F20.0“),
+    Bezeichnung, Haupt- oder Nebendiagnose, seit (nicht in der Zukunft), gestellt von (Auswahl aus dem
+    Ärzteverzeichnis, „Arzt anlegen …“ daneben), Hinweis (beim Darüberfahren). „Eingetragen von“ setzt
+    das Programm. Nichts wird gelöscht oder geändert: „Beenden …“ mit Datum; beendete Diagnosen stehen
+    grau unten mit „beendet am …“. Die Datenbank lehnt das Überschreiben selbst ab (außer „beenden“);
+    einen Knopf zum Löschen gibt es nicht.
+  - Allergien: dieselben drei Zustände wie bisher (Regel 5), gespeichert am Bewohner; je Stoff aus dem
+    Text (durch Komma getrennt) eine Zeile „Art der Reaktion (freiwillig)“ (neue Tabelle
+    `allergie_reaktionen`). Das Bewohnerformular hat kein Allergie-Feld mehr, nur einen Hinweis auf das
+    Fenster; der Allergiehinweis oben in der Akte bleibt für alle sichtbar.
+  - Hinweise für den Notfall: ein Freitext je Bewohner (neue Tabelle `notfallhinweise`).
+  - Rechte: „Ärztliche Informationen ansehen“ (alle Positionen außer Verwaltung) und „… bearbeiten“
+    (ebenso, mit „nur Fachkräfte“). Ohne „ansehen“ ist der Knopf grau mit Begründung; ohne
+    „bearbeiten“ öffnet das Fenster mit „Nur ansehen: …“ und grauen Knöpfen.
+  - Visite (Rundgang): unter dem Allergiehinweis „Diagnosen: …“ (nur aktuelle, Hauptdiagnosen zuerst).
+    HEB-Bogen: dieselbe Zeile im Kopf. Beides nur mit Recht „ansehen“; das Programm wertet sie nicht aus.
+  - Demo: 14 ausgedachte Diagnosen für die zehn Bewohner (allgemein gehalten, eine davon beendet),
+    zwei Reaktionen und zwei Notfallhinweise. Bestehende Demo-Datenbanken bekommen sie beim ersten Start.
+  - Behoben: Die Visite (0.29.5) zeigte „Allergien: Allergien: …“ doppelt, auf dem Bildschirm und in
+    der Visitenliste.
 
 ## Offene Punkte
 
@@ -765,6 +794,19 @@ geladen; die bisherige liegt als Kopie daneben.
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26f): „Bearbeiten nur Fachkräfte und Leitungen“ ist wie bei der Medikation
+  vorbelegt: alle Positionen außer Verwaltung, mit Häkchen „nur Fachkräfte“. Leitungen, die Fachkraft
+  sind, dürfen also; eine Leitung ohne Fachkraft (Demo: UT) nicht, weil „nur Fachkräfte“ im Rechte-Modell
+  für alle Positionen gilt. Wer das anders will, ändert es in der Rechte-Tabelle.
+- 08.11.2026 (Schritt 26f): Ein Knopf statt eines Reiters: Die Reiter der Akte sind Inhalte für alle;
+  ärztliche Angaben haben ein eigenes Recht „ansehen“, ein Knopf lässt sich dafür grau schalten.
+- 08.11.2026 (Schritt 26f): Der Allergiehinweis wird weiter am Bewohner gespeichert (Zustand und Text);
+  neu ist nur die Art der Reaktion je Stoff. So bleiben Übersicht, Filter, Karten und Ausdrucke unverändert.
+- 08.11.2026 (Schritt 26f): Eine Diagnose wird nicht geändert, sondern beendet und neu eingetragen –
+  so bleibt der Verlauf vollständig (wie bei Berichten mit Nachträgen).
+- 08.11.2026 (Schritt 26f): Die Diagnosen stehen in der Visite auf dem Bildschirm, nicht auf dem
+  ausgedruckten Visitenbogen: Der Ausdruck geht über den Tisch, der Bildschirm fragt das Recht ab.
 
 - 08.11.2026 (Schritt 26e): Bestehende Demo-Datenbanken werden einmal ganz neu geladen statt Feld für Feld
   umgestellt: Die Bereichsnamen stehen auch in Einträgen, die nie geändert werden (Statusmeldungen,
@@ -1292,6 +1334,24 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.8:
+
+1. Als „CD“ Anton Ahorn öffnen → oben „Ärztliche Informationen …“ → zwei Diagnosen (F20.0
+   Hauptdiagnose, E11.9 Nebendiagnose, gestellt von Dr. Linde bzw. Dr. Ulme). „Neue Diagnose …“: ICD
+   „X1“ → Hinweis „ICD-10: z. B. F20.0 – oder leer lassen“; „F41.1 Generalisierte Angststörung“,
+   Nebendiagnose, Arzt wählen → Speichern → steht in der Liste.
+2. E11.9 wählen → „Beenden …“ → heute → grau unten „beendet am …“. Nochmals „Beenden …“ → nichts.
+3. Allergien: „Haselnüsse“ mit „Schwellung im Mund, Atemnot möglich“. Text „Haselnüsse, Latex“ →
+   Feld verlassen → zweite Zeile „Latex“ → Reaktion eintragen → „Allergien speichern“. Fenster
+   schließen → oben in der Akte „Allergien: Haselnüsse, Latex“.
+4. „Hinweise für den Notfall“ ändern und speichern; wieder öffnen → der Text ist da.
+5. „Bearbeiten …“: kein Allergie-Feld mehr, nur der Hinweis auf „Ärztliche Informationen“.
+6. Als „KL“ (keine Fachkraft): Fenster öffnet mit „Nur ansehen: …“, Knöpfe grau. Als „WZ“
+   (Verwaltung): Knopf grau mit Begründung; der Allergiehinweis oben bleibt sichtbar.
+7. Visite beginnen (R1) → rechts „Allergien: …“ (einmal, nicht doppelt), darunter „Diagnosen: …“. HEB-Bogen öffnen → im Kopf
+   „Diagnosen: …“. Als „WZ“ fehlt die Zeile.
+8. Einstellungen → „VERWALTUNG“ → „Rechte …“: zwei neue Zeilen „Ärztliche Informationen ansehen/bearbeiten“.
 
 Version 0.29.7:
 

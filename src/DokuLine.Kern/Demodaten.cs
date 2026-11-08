@@ -55,6 +55,58 @@ public static class Demodaten
         return new DemoZimmer([.. datei.Bereiche.Select(b => (b.Name, b.Beschuetzt))], [.. datei.Zimmer.Select(z => new Kern.Zimmer(z.Nummer, z.Bereich, z.Betten))]);
     }
 
+    // ----- Ärztliche Informationen (Schritt 26f) -----
+
+    private sealed class AerztlichDatei
+    {
+        public List<DiagnoseDaten> Diagnosen { get; set; } = [];
+        public List<ReaktionDaten> Reaktionen { get; set; } = [];
+        public List<NotfallDaten> Notfall { get; set; } = [];
+    }
+
+    public sealed class DiagnoseDaten
+    {
+        public string Bewohner { get; set; } = "";
+        public string Icd { get; set; } = "";
+        public string Bezeichnung { get; set; } = "";
+        public string Art { get; set; } = "haupt";
+        public int SeitVorJahren { get; set; }
+        public string Arzt { get; set; } = "";
+        public string Hinweis { get; set; } = "";
+        public int? BeendetVorTagen { get; set; }
+    }
+
+    public sealed class ReaktionDaten
+    {
+        public string Bewohner { get; set; } = "";
+        public string Stoff { get; set; } = "";
+        public string Reaktion { get; set; } = "";
+    }
+
+    public sealed class NotfallDaten
+    {
+        public string Bewohner { get; set; } = "";
+        public string Text { get; set; } = "";
+    }
+
+    public sealed record DemoAerztlich(List<(string Nachname, Diagnose Diagnose)> Diagnosen, List<(string Nachname, string Stoff, string Reaktion)> Reaktionen,
+        List<(string Nachname, string Text)> Notfall);
+
+    public static DemoAerztlich Aerztlich(DateTime jetzt)
+    {
+        var datei = Lesen<AerztlichDatei>("aerztlich.json");
+        var heute = DateOnly.FromDateTime(jetzt);
+        return new DemoAerztlich(
+            [.. datei.Diagnosen.Select(x => (x.Bewohner, new Diagnose
+            {
+                Icd = x.Icd, Bezeichnung = x.Bezeichnung, Art = x.Art == "neben" ? DiagnoseArt.Neben : DiagnoseArt.Haupt,
+                Seit = heute.AddYears(-x.SeitVorJahren), Arzt = x.Arzt, Hinweis = x.Hinweis, Erstellt = jetzt.AddDays(-30), Kuerzel = "EF",
+                Beendet = x.BeendetVorTagen is int t ? heute.AddDays(-t) : null, BeendetKuerzel = x.BeendetVorTagen is null ? null : "EF",
+            }))],
+            [.. datei.Reaktionen.Select(r => (r.Bewohner, r.Stoff, r.Reaktion))],
+            [.. datei.Notfall.Select(n => (n.Bewohner, n.Text))]);
+    }
+
     // ----- Berichte -----
 
     public sealed class BerichtTexte
