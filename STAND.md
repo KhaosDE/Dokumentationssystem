@@ -964,8 +964,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   Vorlagen nutzen (Rechtecke mit runden Ecken, Farben, radiale Verläufe), und meldet andere SVG-Teile als
   Fehler. Ein neues Symbol mit denselben Mitteln braucht nur neue SVG-Dateien; mit anderen Formen (z. B.
   Pfaden) müsste das Skript erweitert werden.
-- 08.11.2026 (Schritt 26n): Die 256-px-Größe liegt als PNG in der `.ico`, die kleinen als klassisches
-  Symbolbild (32 Bit mit Alpha) – so lesen alle Windows-Versionen und `System.Drawing` die Datei.
+- 08.11.2026 (Schritt 26n): Die 256-px-Größe liegt als PNG in der `.ico` (für große Symbole im Explorer), die
+  kleinen als klassisches Symbolbild (32 Bit mit Alpha). Fenster und Taskleiste nutzen die klassischen Bilder;
+  `System.Drawing` wählt ohnehin nur unter ihnen (bis 64 px).
 - 08.11.2026 (Schritt 26n): „Zentral“: Das Programmsymbol ist das Vorgabesymbol aller Fenster. Windows Forms hat
   dafür keine öffentliche Einstellung; `Stil.SymbolFuerAlleFenster()` setzt das interne Feld über Reflection.
   Fehlt das Feld in einer künftigen .NET-Version, tragen Hauptfenster und alle Dialoge mit `Fenster.Grundform`
