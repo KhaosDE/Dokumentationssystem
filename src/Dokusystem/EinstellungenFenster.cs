@@ -9,6 +9,19 @@ public sealed class EinstellungenFenster : Form
     private const int LogoBreite = 160, LogoHoehe = 64;
 
     private readonly Panel logoVorschau = new();
+    // Inhalt mit Bildlaufleiste; „Speichern“ und „Abbrechen“ bleiben unten immer sichtbar
+    // (das Fenster ist höher als kleinere Bildschirme).
+    private readonly TableLayoutPanel raster = new()
+    {
+        ColumnCount = 2, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
+        Padding = new Padding(Stil.AbstandGross), Dock = DockStyle.Top,
+    };
+    private readonly Panel inhalt = new() { Dock = DockStyle.Fill, AutoScroll = true };
+    private readonly TableLayoutPanel unten = new()
+    {
+        ColumnCount = 1, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Dock = DockStyle.Bottom,
+        Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, Stil.AbstandGross),
+    };
     private Image? logoBild;
     private bool logoGeaendert;
 
@@ -62,14 +75,8 @@ public sealed class EinstellungenFenster : Form
         StartPosition = FormStartPosition.CenterParent;
         BackColor = Stil.Fensterhintergrund;
         Font = Stil.Standard;
-        AutoSize = true;
-        AutoSizeMode = AutoSizeMode.GrowAndShrink;
-
-        var raster = new TableLayoutPanel
-        {
-            ColumnCount = 2, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
-            Padding = new Padding(Stil.AbstandGross), Dock = DockStyle.Fill,
-        };
+        unten.BackColor = inhalt.BackColor = Stil.Fensterhintergrund;
+        unten.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         raster.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         raster.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 380));
 
@@ -255,7 +262,7 @@ public sealed class EinstellungenFenster : Form
         Fehler.Padding = new Padding(Stil.AbstandKlein);
         Fehler.Margin = new Padding(0, Stil.AbstandMittel, 0, 0);
         Fehler.Visible = false;
-        Ganz(Fehler);
+        unten.Controls.Add(Fehler);
 
         var speichern = Stil.HauptKnopf("Speichern");
         speichern.Click += (_, _) => Speichern();
@@ -269,15 +276,31 @@ public sealed class EinstellungenFenster : Form
             Margin = new Padding(0, Stil.AbstandGross, 0, 0),
         };
         leiste.Controls.AddRange([speichern, abbrechen]);
-        Ganz(leiste);
+        unten.Controls.Add(leiste);
 
-        Controls.Add(raster);
+        inhalt.Controls.Add(raster);
+        Controls.Add(inhalt);
+        Controls.Add(unten);
+        ClientSize = new Size(raster.PreferredSize.Width + SystemInformation.VerticalScrollBarWidth,
+            Math.Min(700, raster.PreferredSize.Height + unten.PreferredSize.Height));
         CancelButton = abbrechen;
         LogoLaden(Einstellungen.LogoPfad());
         Stil.DpiSkalierungEinschalten(this);
     }
 
     public bool HatLogo => logoBild is not null;
+
+    // Nach der Skalierung: so hoch wie nötig, höchstens so hoch wie der Bildschirm.
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        var flaeche = Screen.FromControl(this).WorkingArea;
+        int rahmen = Height - ClientSize.Height;
+        int breite = raster.GetPreferredSize(Size.Empty).Width + SystemInformation.VerticalScrollBarWidth;
+        int hoehe = raster.GetPreferredSize(new Size(breite, 0)).Height + unten.GetPreferredSize(new Size(breite, 0)).Height;
+        ClientSize = new Size(Math.Min(breite, flaeche.Width - 40), Math.Min(hoehe, flaeche.Height - rahmen - 40));
+        CenterToParent();
+    }
 
     // null = lokal. Ein gewählter Ordner muss erreichbar und beschreibbar sein.
     public bool OrdnerSetzen(string? ordner)

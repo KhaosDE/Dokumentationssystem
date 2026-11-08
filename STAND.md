@@ -331,6 +331,8 @@ Bitte die Testlisten unten durchgehen – für 0.20.0 mit zwei Programmfenstern.
     `data_version`), und liest dann Zähler (Aufgaben, Nachrichten) und die gezeigte Ansicht neu.
     Beim Wechsel der Ansicht wird ohnehin frisch gelesen. Damit gehen Nachrichten, Übergabe und
     Aufgaben auch zwischen Rechnern.
+  - Einstellungsfenster: Der Inhalt hat eine Bildlaufleiste, „Speichern“ und „Abbrechen“ stehen
+    immer sichtbar unten (vorher war das Fenster auf kleineren Bildschirmen unten abgeschnitten).
   - Demo: Ginster und Immergrün wohnen in „Wohnbereich B“; Statusmeldungen aus
     `daten/demo/status.json` (Ahorn „in der Holzwerkstatt“ von der Therapie, Immergrün „Besuch bei
     der Familie“ von Wohnbereich B, eine ältere im Verlauf).

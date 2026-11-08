@@ -54,16 +54,17 @@ public class MehrplatzOberflaechenTests
         using var formular = new BewohnerFormular(u.Speicher, birke);   // Arbeitsplatz 1 öffnet …
         zweiter.BewohnerSpeichern(birke with { Zimmer = "202" }, ausgangsfassung: birke);   // … Arbeitsplatz 2 speichert
         formular.Zimmer.Text = "303";
-        KonfliktFenster? gezeigt = null;
+        string andere = "", meine = "";
         using (new DialogErsatz(fenster =>
         {
-            gezeigt = Assert.IsType<KonfliktFenster>(fenster);
+            var gezeigt = Assert.IsType<KonfliktFenster>(fenster);
+            (andere, meine) = (gezeigt.Andere.Text, gezeigt.Meine.Text);   // vor dem Schließen lesen
             Hilfe.Foto(gezeigt, "54_konflikt");
             return DialogResult.Cancel;
         }))
             Assert.False(formular.Speichern());   // Abbrechen: nichts gespeichert, Eingaben bleiben
-        Assert.Contains("Zimmer: 202", gezeigt!.Andere.Text);
-        Assert.Contains("Zimmer: 303", gezeigt.Meine.Text);
+        Assert.Contains("Zimmer: 202", andere);
+        Assert.Contains("Zimmer: 303", meine);
         Assert.Equal("202", u.Demo("Birke").Zimmer);
         Assert.Equal("303", formular.Zimmer.Text);
 
