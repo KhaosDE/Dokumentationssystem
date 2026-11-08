@@ -1279,20 +1279,26 @@ Umfang:
 ## Kopfzeile nur „Wo bin ich“, Logo, Abmelden; Aktionen darunter
 Status: freigegeben (Bauplan Schritt 26i)
 Datum: 08.11.2026
-Was: Die Kopfzeile wird aufgeräumt. Knöpfe für Aktionen wandern in eine Leiste darunter.
+Was: Die Knöpfe für Aktionen wandern aus der Kopfzeile in eine Leiste darunter. Sonst bleibt die
+Kopfzeile, wie sie ist.
 Warum: Vorgabe Tobi (08.11.2026): In der Kopfzeile soll immer nur stehen, wo man ist, dazu Logo
 und Abmelden. Punkte wie „Neuer Bewohner“ oder „Neue Aufgabe“ gehören unter die Kopfzeile.
+Ergänzung Tobi (08.11.2026): „Die Kopfzeile soll vom Aussehen her gleich bleiben, nur die
+Punkte, die ich erwähnt habe, nach unten schieben.“
 Umfang:
-- **Kopfzeile, in allen Bereichen gleich:** links groß der Ort („Übersicht“, „Bewohnerakte“,
-  „Tagesplan“, „Einstellungen“ …), bei Bedarf klein davor der Bereich („R2 ·“); rechts das
-  Logo (falls zugeteilt), „Angemeldet: TST“ und „Abmelden (F12)“. Sonst nichts.
-- **Aktionsleiste direkt unter der Kopfzeile:** alle Aktionen des jeweiligen Bereichs, z. B.
-  „Neuer Bewohner …“, „Neue Aufgabe …“, „Neuer Bericht …“, „Drucken …“, Filter, Umschalter.
-  Links die Hauptaktion (farbig, eine pro Ansicht), rechts Drucken und Ansichtsschalter.
-  Einheitlich aufgebaut, damit man Knöpfe immer an derselben Stelle findet.
-- Der Hinweis **„Demo — ausgedachte Daten“** bleibt dauerhaft sichtbar (`CLAUDE.md`, Regel 4),
-  aber nicht mehr in der Kopfzeile: im Fenstertitel und als feste Marke links in der
-  Statusleiste unten.
+- **Kopfzeile (`KopfBereich`) bleibt im Aussehen unverändert:** abgerundete Fläche mit
+  Farbverlauf, kleine Zeile und Titel links, Logofeld bzw. Platzhalter rechts, Hinweis
+  „Demo — ausgedachte Daten“ an seiner Stelle, darunter „Angemeldet: …“ und „Abmelden (F12)“.
+  Farben, Schriften, Abstände, Schatten und Radien nicht ändern.
+- **Nur die Knopfzeile (`KnoepfeSetzen`) zieht um.** Die Kopfzeile wird um genau diese Zeile
+  niedriger, sonst nichts.
+- „Entwurf fortsetzen“ ist eine Aktion und zieht mit in die Aktionsleiste (rechts außen).
+- **Aktionsleiste direkt unter der Kopfzeile**, gleiche Breite und gleiche Seitenränder wie die
+  Kopfzeile, Knöpfe im bestehenden Stil (`Stil.cs`, Knopfhöhe 36 px). Reihenfolge in allen
+  Bereichen gleich: links die Hauptaktion (farbig, eine pro Ansicht), danach die übrigen
+  Aktionen, rechts Filter, Ansichtsschalter, „Drucken …“. So findet man Knöpfe immer an
+  derselben Stelle.
+- Gibt es in einer Ansicht keine Aktion, entfällt die Leiste (kein leerer Streifen).
 - Alle Bereiche umstellen, auch Akte, Visite, Kalender, Einstellungen und Modul Ausgangsliste.
 - Bildschirmfotos im Testlauf erneuern.
 
