@@ -20,8 +20,8 @@ public class VisitenOberflaechenTests
         Assert.Equal(namen.IndexOf("Übergabe") + 1, namen.IndexOf("Visiten"));
         f.BereichWaehlen("Visiten");
         var seite = f.Visiten;
-        Assert.Equal(3, seite.Karten.Count);   // Demo: drei Visiten mit allen drei Fällen
-        Assert.Equal("3 Visiten", seite.KopfText);
+        Assert.Equal(5, seite.Karten.Count);   // Demo: drei Visiten mit allen drei Fällen, seit Schritt 26h je eine in R2 und R3
+        Assert.Equal("5 Visiten", seite.KopfText);
         Assert.Contains(seite.Karten.SelectMany(k => k.Texte), t => t == "Quetiapin: Dosis geändert");
         Assert.Contains(seite.Karten.SelectMany(k => k.Texte), t => t == "Facharzttermin nötig: Neurologie, dringend");
         Hilfe.Foto(f, "83_visiten");

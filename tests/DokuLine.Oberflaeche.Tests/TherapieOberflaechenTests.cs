@@ -55,7 +55,7 @@ public class TherapieOberflaechenTests
             {
                 var neu = Assert.IsType<AngebotFenster>(fenster);
                 Assert.False(neu.Speichern());
-                neu.NameFeld.Text = "Gartengruppe";
+                neu.NameFeld.Text = "Kräutergruppe";   // „Gartengruppe“ gibt es seit Schritt 26h in R3
                 neu.Therapeut.Text = "Ben Amsel";
                 neu.Ort.Text = "Garten";
                 neu.TerminSetzen(0, DayOfWeek.Monday, "10:00", "11:00");   // überschneidet sich mit der Holzwerkstatt
@@ -63,7 +63,7 @@ public class TherapieOberflaechenTests
                 return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 f.Kopf.Knoepfe[0].PerformClick();
-            AngebotKarte Karte() => t.Karten.Single(k => k.Angebot.Fassungen[0].Name == "Gartengruppe");
+            AngebotKarte Karte() => t.Karten.Single(k => k.Angebot.Fassungen[0].Name == "Kräutergruppe");
             Assert.Contains("4 Plätze frei", Karte().MarkenTexte);
 
             string? warnung = null;
