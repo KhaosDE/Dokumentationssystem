@@ -3,7 +3,7 @@ using DokuLine.Modul.Ausgangsliste;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Modul Ausgangsliste: Seite mit Karten, Fenster für Ausgang, Anwesenheit (Rechtsregel) und
+// Modul Ausgangsliste: Seite als Liste (Schritt 27), Fenster für Ausgang, Anwesenheit (Rechtsregel) und
 // Unterbringung, Digitaler Ausgang, Küchendienst, Akte-Reiter, Marken auf den Bewohnerkarten und
 // die Modulverwaltung (ausschalten ohne Spuren, Daten bleiben).
 [Collection("Oberflaeche")]
@@ -19,8 +19,8 @@ public class AusgangslisteOberflaechenTests
         return (u, f, Assert.IsType<AusgangslisteSeite>(f.Seite("Ausgangsliste")));
     }
 
-    private static PlatzKarte Karte(AusgangslisteSeite s, string nachname) =>
-        s.Karten.Single(k => k.Platz.Bewohnername.EndsWith(" " + nachname, StringComparison.Ordinal));
+    private static ListenZeile Karte(AusgangslisteSeite s, string nachname) =>
+        s.Zeilen.Single(k => k.Platz.Bewohnername.EndsWith(" " + nachname, StringComparison.Ordinal));
 
     [Fact]
     public void Seite_mit_Karten_Kuechendienst_und_Kopf() => Hilfe.Sta(() =>
@@ -30,8 +30,15 @@ public class AusgangslisteOberflaechenTests
         using (f)
         {
             Assert.Equal("Tagesliste drucken …", Assert.Single(f.Kopf.Knoepfe).Text);
-            Assert.Equal(69, s.Karten.Count);   // alle Bereiche (Schritt 26h: 23 je Wohnbereich)
-            Assert.Equal("101", s.Karten[0].Platz.Zimmernummer);
+            Assert.Equal(69, s.Zeilen.Count);   // alle Bereiche (Schritt 26h: 23 je Wohnbereich)
+            // Oben, wer unterwegs ist (Demo: Clematis, Ginster), darunter alle anderen nach Zimmer.
+            Assert.True(s.Zeilen[0].Unterwegs);
+            Assert.StartsWith("UNTERWEGS (", s.Abschnitte[0]);
+            Assert.Equal("101", s.Zeilen.First(z => !z.Unterwegs).Platz.Zimmernummer);
+            Assert.Equal("im Haus", Karte(s, "Ahorn").StandText);
+            Assert.StartsWith("unterwegs seit ", Karte(s, "Clematis").StandText);
+            Assert.StartsWith("abwesend: ", Karte(s, "Holunder").StandText);
+            Hilfe.Foto(f, "88_ausgangsliste");
             Assert.StartsWith("Küchendienst heute: ", s.KuechendienstText.Text);
             Assert.Contains(Karte(s, "Holunder").MarkenTexte, t => t.StartsWith("abwesend: Heimfahrt bis"));
             if (DateTime.Now.TimeOfDay > TimeSpan.FromHours(2.5))   // Demo-Zeiten liegen kurz nach Mitternacht nicht weit genug zurück
@@ -42,6 +49,22 @@ public class AusgangslisteOberflaechenTests
             Assert.True(Karte(s, "Ahorn").AlleinKnopf.Visible);
             Assert.False(Karte(s, "Holunder").AlleinKnopf.Visible);   // abwesend
             Assert.True(Karte(s, "Clematis").ZurueckKnopf.Visible);
+            if (DateTime.Now.TimeOfDay > TimeSpan.FromHours(2.5))
+            {
+                Assert.True(Karte(s, "Ginster").Ueberfaellig);
+                Assert.StartsWith("überfällig seit ", Karte(s, "Ginster").StandText);
+                Assert.True(s.Zeilen[0].Ueberfaellig);   // Überfällige ganz oben
+            }
+
+            // Filter: nur unterwegs, nur mit Beschränkung.
+            s.NurUnterwegs.Checked = true;
+            Assert.All(s.Zeilen, z => Assert.True(z.Unterwegs));
+            Assert.NotEmpty(s.Zeilen);
+            s.NurUnterwegs.Checked = false;
+            s.NurBeschraenkung.Checked = true;
+            Assert.All(s.Zeilen, z => Assert.Equal(AnwesenheitsStatus.Ausgangsbeschraenkung, z.Platz.Status));
+            s.NurBeschraenkung.Checked = false;
+            Assert.Equal(69, s.Zeilen.Count);
 
             using (var ersatz = new DialogErsatz(_ => DialogResult.Cancel))
             {
@@ -73,7 +96,7 @@ public class AusgangslisteOberflaechenTests
                 Assert.Equal("Summe: 3 Std", a.Summe.Text);
                 return a.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
-                Karte(s, "Ahorn").AusgangKnopf.PerformClick();
+                Karte(s, "Ahorn").AusgangEintrag.PerformClick();
             Assert.StartsWith("Ausgang 3 Std: 3 Std allein", Karte(s, "Ahorn").AusgangZeile);
 
             using (var ersatz = new DialogErsatz(fenster =>
@@ -83,7 +106,7 @@ public class AusgangslisteOberflaechenTests
                 return DialogResult.Cancel;
             }))
             {
-                Karte(s, "Ahorn").VerlaufKnopf.PerformClick();
+                Karte(s, "Ahorn").VerlaufEintrag.PerformClick();
                 Assert.Single(ersatz.Titel);
             }
         }
@@ -109,7 +132,7 @@ public class AusgangslisteOberflaechenTests
                 st.Grund.Text = "Heimfahrt bis 20.11.2026";
                 return st.Setzen(AnwesenheitsStatus.Abwesenheit) ? DialogResult.OK : DialogResult.Cancel;
             }))
-                Karte(s, "Birke").AnwesenheitKnopf.PerformClick();
+                Karte(s, "Birke").AnwesenheitEintrag.PerformClick();
             Assert.Contains("abwesend: Heimfahrt bis 20.11.2026", Karte(s, "Birke").MarkenTexte);
             Assert.StartsWith("Abwesenheit: Heimfahrt bis 20.11.2026", Karte(s, "Birke").AusgangZeile);
 
@@ -121,7 +144,7 @@ public class AusgangslisteOberflaechenTests
                 Assert.Equal(Platz.HinweisNichtErfasst, st.Hinweis.Text);
                 return DialogResult.Cancel;
             }))
-                Karte(s, "Distel").AnwesenheitKnopf.PerformClick();
+                Karte(s, "Distel").AnwesenheitEintrag.PerformClick();
 
             f.BereichWaehlen("Bewohner");
             var birke = f.Bewohner.Zeilen.Single(k => k.Bewohner.Nachname == "Birke");
@@ -147,7 +170,7 @@ public class AusgangslisteOberflaechenTests
                 w.Rueckfrage = _ => DialogResult.Yes;
                 return w.Waehlen(Unterbringung.Beschluss) ? DialogResult.OK : DialogResult.Cancel;
             }))
-                Karte(s, "Distel").UnterbringungKnopf.PerformClick();
+                Karte(s, "Distel").UnterbringungEintrag.PerformClick();
             Assert.Contains("Beschluss", Karte(s, "Distel").UnterbringungZeile);
             var akte = u.Speicher.Bewohner(u.Demo("Distel").Id!.Value)!;
             Assert.Equal(BeschlussZustand.Ende, akte.Beschluss);

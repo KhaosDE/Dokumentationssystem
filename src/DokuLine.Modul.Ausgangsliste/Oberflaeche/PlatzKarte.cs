@@ -33,24 +33,9 @@ public sealed class PlatzKarte : KartenFlaeche
         MarkenTexte = liste.Select(m => m.Text).ToList();
         foreach (var m in liste) marken.Controls.Add(new MarkenFeld(m.Text, Stil.MarkeFuer(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
 
-        string ausgang;
-        if (p.HatStatus)
-        {
-            string frist = KartenText.Frist(p.StatusGrund, jetzt, out _);
-            ausgang = $"{Verlauf.Status(p.Status)}: {KartenText.GrundOhneTitel(p)}" + (frist.Length > 0 ? $" ({frist})" : "") +
-                      (p.Ausgang.Length > 0 ? $" · danach wieder: {p.Ausgang}" : "");
-        }
-        else if (p.Stunden > 0) ausgang = $"Ausgang {p.Stunden} Std: {KartenText.Aufteilung(p)}";
-        else ausgang = p.Ausgang.Length > 0 ? $"Ausgang: {string.Join(" · ", AusgangText.Bausteine(p.Ausgang).Where(b => !AusgangText.IstInfo(b)))}" : "Kein Ausgang eingetragen";
-        string unterbringung = p.Unterbringung switch
-        {
-            Unterbringung.NichtErfasst => "Unterbringung: nicht erfasst – Beschluss in der Akte klären",
-            Unterbringung.Forensik => "Unterbringung: Forensik",
-            _ => $"Unterbringung: {Verlauf.Unterbringung(p.Unterbringung)} · {p.FristText(jetzt)}",
-        };
-        var infos = new List<string>();
-        if (KartenText.Info(p) is { Length: > 0 } info) infos.Add($"Info: {info}");
-        if (!p.HatStatus && p.Stunden > 0) infos.AddRange(KartenText.Hinweise(p));   // sonst steht der Text schon in der Ausgangszeile
+        string ausgang = PlatzTexte.Ausgang(p, jetzt);
+        string unterbringung = "Unterbringung: " + PlatzTexte.Unterbringung(p, jetzt);
+        var infos = PlatzTexte.Infos(p);
         if (digital is not null && digital.Erledigt.Count > 0)
             infos.Add("Heute: " + string.Join(", ", digital.Erledigt.Select(e => $"{e.Zeitraum} (Hz. {e.Handzeichen})")));
 
@@ -106,5 +91,37 @@ public sealed class PlatzKarte : KartenFlaeche
         knoepfe.Bounds = new Rectangle(new Point(innen, y + Stil.Px(this, Stil.AbstandKlein)), knoepfe.GetPreferredSize(new Size(breite, 0)));
         int hoehe = knoepfe.Bottom + innen - Stil.Px(this, Stil.AbstandMini);
         if (Height != hoehe) Height = hoehe;
+    }
+}
+
+// Texte einer Karte bzw. Zeile: Ausgang (oder Grund des Status), Unterbringung, Infos.
+public static class PlatzTexte
+{
+    public static string Ausgang(Platz p, DateTime jetzt)
+    {
+        if (p.HatStatus)
+        {
+            string frist = KartenText.Frist(p.StatusGrund, jetzt, out _);
+            return $"{Verlauf.Status(p.Status)}: {KartenText.GrundOhneTitel(p)}" + (frist.Length > 0 ? $" ({frist})" : "") +
+                   (p.Ausgang.Length > 0 ? $" · danach wieder: {p.Ausgang}" : "");
+        }
+        if (p.Stunden > 0) return $"Ausgang {p.Stunden} Std: {KartenText.Aufteilung(p)}";
+        return p.Ausgang.Length > 0 ? $"Ausgang: {string.Join(" · ", AusgangText.Bausteine(p.Ausgang).Where(b => !AusgangText.IstInfo(b)))}" : "Kein Ausgang eingetragen";
+    }
+
+    // Ohne „Unterbringung:“ davor (die Karte setzt es davor, die Liste hat eine Spalte dafür).
+    public static string Unterbringung(Platz p, DateTime jetzt) => p.Unterbringung switch
+    {
+        Ausgangsliste.Unterbringung.NichtErfasst => "nicht erfasst – Beschluss in der Akte klären",
+        Ausgangsliste.Unterbringung.Forensik => "Forensik",
+        _ => $"{Verlauf.Unterbringung(p.Unterbringung)} · {p.FristText(jetzt)}",
+    };
+
+    public static List<string> Infos(Platz p)
+    {
+        var infos = new List<string>();
+        if (KartenText.Info(p) is { Length: > 0 } info) infos.Add($"Info: {info}");
+        if (!p.HatStatus && p.Stunden > 0) infos.AddRange(KartenText.Hinweise(p));   // sonst steht der Text schon beim Ausgang
+        return infos;
     }
 }

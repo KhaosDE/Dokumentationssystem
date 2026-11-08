@@ -3,6 +3,18 @@
 Für den Abgleich mit der eigenständigen Ausgangsliste (`docs/bruecke-ausgangsliste.md`): je
 Version von DokuLine, was sich im Modul geändert hat. Neueste oben.
 
+## 0.30.0 (08.11.2026)
+
+- `AusgangslisteSeite` zeigt eine **Liste** statt Karten (Bauplan Schritt 27 von
+  DokuLine), angelehnt an `Druckliste`: neue Klassen `ListenZeile` (eine Zeile je
+  Bewohner: Zimmer, Name, Ausgang, Unterbringung, heute von–bis mit Hz., Stand jetzt; Knöpfe
+  „raus allein“, „raus mit Bewohner“, „zurück“, „…“ mit Menü) und `ListenKopf` (Spaltenköpfe).
+  Unterwegs oben (Überfällige zuerst), Filter „nur unterwegs“ und „nur mit Beschränkung“.
+- `Aktionen`: die Abläufe (Ausgang ändern, Anwesenheit, Unterbringung, Verlauf, Beginnen,
+  Zurück) sind eigene Methoden; `Verbinden` gibt es für `PlatzKarte` und `ListenZeile`.
+- `PlatzTexte` (in `PlatzKarte.cs`): Ausgangs-, Unterbringungs- und Info-Texte für Karte und Zeile.
+- `PlatzKarte` bleibt für den Reiter „Ausgang“ in der Akte.
+
 ## 0.21.0 (08.11.2026)
 
 - `AusgangslisteSeite`: keine feste Höchstbreite mehr (880); die Seite füllt die Breite des
