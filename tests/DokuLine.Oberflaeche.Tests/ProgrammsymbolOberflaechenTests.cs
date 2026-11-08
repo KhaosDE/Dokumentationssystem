@@ -20,8 +20,10 @@ public class ProgrammsymbolOberflaechenTests
         using (var anmelden = new AnmeldenFenster(u.Speicher, ""))
             Assert.Same(Stil.Programmsymbol, anmelden.Icon);
         Assert.False(f.Kopf.HatLogo);                     // das Logofeld bleibt für die Einrichtung
-        using (var gross = new Icon(Stil.Programmsymbol, 256, 256))
-            Assert.Equal(256, gross.Width);
+        // Fenster und Taskleiste nehmen die klassischen Bilder bis 64 px; das 256-px-Bild (PNG) liest der
+        // Explorer für große Symbole – dass es in der Datei steckt, prüft ProgrammsymbolTests (Kern).
+        using (var gross = new Icon(Stil.Programmsymbol, 48, 48))
+            Assert.Equal(48, gross.Width);
         using (var klein = new Icon(Stil.Programmsymbol, 16, 16))
             Assert.Equal(16, klein.Width);
         Hilfe.Foto(f, "117_programmsymbol");
