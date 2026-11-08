@@ -14,6 +14,8 @@ public class TherapieOberflaechenTests
         var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.Navigation.Single(n => n.Text == "Therapie").Ausloesen();
+        Assert.Equal(TherapieSeite.LaufendReiter, f.Therapie.Reiter.Aktiv);   // Schritt 26m: erster Reiter
+        f.Therapie.Reiter.Waehlen(TherapieSeite.AngeboteReiter);
         return (u, f, f.Therapie);
     }
 
@@ -28,8 +30,8 @@ public class TherapieOberflaechenTests
         {
             Assert.Same(t, f.Seite("Therapie"));
             Assert.Equal("Neues Angebot …", Assert.Single(f.Kopf.Knoepfe).Text);
-            Assert.StartsWith("10 Angebote · ", f.Kopf.KleinText);   // seit Schritt 26h drei mehr
-            Assert.Equal(10, t.Karten.Count);
+            Assert.StartsWith("20 Angebote · ", f.Kopf.KleinText);   // seit Schritt 26h drei mehr, seit 26m zehn tägliche
+            Assert.Equal(20, t.Karten.Count);
             var holz = t.Karten.Single(k => k.Angebot.Am(DateOnly.FromDateTime(DateTime.Today)).Name == "Holzwerkstatt");
             Assert.Equal(["Therapie", "Gruppe", "Mo 09:00–11:30, Mi 09:00–11:30", "4 Plätze frei"], holz.MarkenTexte);
             Assert.StartsWith("Teilnehmer (2 von 6): Anton Ahorn, Dieter Distel", holz.TeilnehmerText);
@@ -145,9 +147,9 @@ public class TherapieOberflaechenTests
             Assert.Equal("Kochgruppe", Assert.Single(t.Karten).Angebot.Fassungen[^1].Name);
             Assert.StartsWith("1 Angebote · ", f.Kopf.KleinText);
             t.AnbieterFilter.SelectedItem = "Therapie";
-            Assert.Equal(6, t.Karten.Count);
+            Assert.Equal(16, t.Karten.Count);   // seit Schritt 26m zehn tägliche Angebote der Therapie
             t.AnbieterFilter.SelectedItem = TherapieSeite.AlleAnbieter;
-            Assert.Equal(10, t.Karten.Count);
+            Assert.Equal(20, t.Karten.Count);
 
             // Bereichsleitung R1: nur die eigenen Angebote; neue nur für R1.
             f.BenutzerWaehlen("EF");
@@ -174,7 +176,7 @@ public class TherapieOberflaechenTests
             f.BenutzerWaehlen("CD");
             Assert.All(t.Karten, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k.ZuteilenKnopf)));
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(t.NeuKnopf));
-            Assert.Equal(11, t.Karten.Count);
+            Assert.Equal(21, t.Karten.Count);
         }
     });
 }

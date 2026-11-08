@@ -57,7 +57,7 @@ public sealed class TherapieAnbieterTests : IDisposable
         Assert.Equal("EF", Demo("Kochgruppe").Fassungen[0].Kuerzel);
         Assert.Equal("R2", Demo("Kreativwerkstatt").Anbieter);
         Assert.Equal(TherapieRegeln.AnbieterTherapie, Demo("Holzwerkstatt").Anbieter);
-        Assert.Equal(6, s.Angebote().Count(a => a.Anbieter == TherapieRegeln.AnbieterTherapie));
+        Assert.Equal(16, s.Angebote().Count(a => a.Anbieter == TherapieRegeln.AnbieterTherapie));   // seit Schritt 26m zehn tägliche
         Assert.Equal("R3", Demo("Gartengruppe").Anbieter);   // Schritt 26h
     }
 
@@ -123,7 +123,7 @@ public sealed class TherapieAnbieterTests : IDisposable
         }
         Assert.True(s.DemoBeimErstenStart());
         Assert.Equal("R1", Demo("Kochgruppe").Anbieter);
-        Assert.Equal(10, s.Angebote().Count);
+        Assert.Equal(20, s.Angebote().Count);
         Assert.False(s.DemoBeimErstenStart());
     }
 }

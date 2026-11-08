@@ -1368,7 +1368,7 @@ Umfang:
 - Statusleiste: „DEMO — ausgedachte Daten“, Datum, Dienst, Stand, Farbschlüssel der Marken.
 
 ## Therapie: Ansicht „Laufende Therapien“ als Anwesenheitstafel
-Status: freigegeben (Bauplan Schritt 26m)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Im Therapie-Bereich eine neue Ansicht, die zeigt, welche Therapien gerade laufen und wer
 dort ist.

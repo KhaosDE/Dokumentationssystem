@@ -293,7 +293,7 @@ public sealed class Hauptfenster : Form
             case "Aufgaben": Aufgaben.Aktualisieren(); break;
             case "Nachrichten": Nachrichten.Aktualisieren(); break;
             case "Kalender": Kalender.Aktualisieren(); break;
-            case "Therapie": Therapie.Aktualisieren(); break;
+            case "Therapie": Therapie.NeuLesen(); break;
         }
         return true;
     }
