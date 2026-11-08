@@ -39,12 +39,12 @@ public sealed class MitarbeiterTests : IDisposable
         s.DemoBeimErstenStart();
         var alle = s.AlleMitarbeiter();
         Assert.Equal(14, alle.Count);   // mit TST (Schritt 26a2)
-        Assert.Equal(["Wohnbereich A", "Wohnbereich B", "Therapie", "Leitung", "Verwaltung"], s.Bereichsliste().Select(b => b.Name));
+        Assert.Equal(["R1", "R2", "R3", "Therapie", "Leitung", "Verwaltung"], s.Bereichsliste().Select(b => b.Name));
         Assert.All(RechteRegeln.Positionen, p => Assert.Contains(alle, m => m.Positionen.Contains(p)));   // je Position mindestens einer
         Assert.Contains(alle, m => m.Fachkraft);
         Assert.Contains(alle, m => !m.Fachkraft && m.Aktiv);
         Assert.False(s.MitarbeiterLesen("HI")!.Aktiv);
-        Assert.Equal(["Wohnbereich A", "Wohnbereich B"], s.MitarbeiterLesen("PR")!.Bereiche.Order());
+        Assert.Equal(["R1", "R2"], s.MitarbeiterLesen("PR")!.Bereiche.Order());
         Assert.Equal(["Bereichsleitung", "Mitarbeiter Wohnbereich"], s.MitarbeiterLesen("gh")!.Positionen);
         Assert.Equal(6, s.Positionsliste().Single(p => p.Name == "Mitarbeiter Wohnbereich").Zugeordnet);   // AB, CD, KL, GH, MN, HI
     }
@@ -86,7 +86,7 @@ public sealed class MitarbeiterTests : IDisposable
     public void Mitarbeiter_anlegen_und_aendern()
     {
         s.DemoBeimErstenStart();
-        var neu = new Mitarbeiter("QX", "Quirin", "Kranich", false, true, ["Wohnbereich B"], ["Mitarbeiter Wohnbereich"]);
+        var neu = new Mitarbeiter("QX", "Quirin", "Kranich", false, true, ["R2"], ["Mitarbeiter Wohnbereich"]);
         var fehler = Assert.Throws<Eingabefehler>(() => s.MitarbeiterSpeichern(neu with { Kuerzel = "ab" }, neu: true)).Fehler;
         Assert.Contains("Das Kürzel „ab“ ist schon vergeben.", fehler);
         fehler = Assert.Throws<Eingabefehler>(() => s.MitarbeiterSpeichern(neu with { Kuerzel = "Q X", Bereiche = [], Positionen = ["Kapitän"] }, neu: true)).Fehler;
@@ -95,8 +95,8 @@ public sealed class MitarbeiterTests : IDisposable
         Assert.Contains("Eine der Positionen gibt es nicht.", fehler);
         s.MitarbeiterSpeichern(neu, neu: true);
         Assert.Equal(15, s.AlleMitarbeiter().Count);
-        Assert.Contains(s.Kollegen(), k => k.Kuerzel == "QX" && k.Teams.Contains("Wohnbereich B"));   // auch für Nachrichten
-        s.MitarbeiterSpeichern(neu with { Fachkraft = true, Aktiv = false, Bereiche = ["Wohnbereich A", "Wohnbereich B"] }, neu: false);
+        Assert.Contains(s.Kollegen(), k => k.Kuerzel == "QX" && k.Teams.Contains("R2"));   // auch für Nachrichten
+        s.MitarbeiterSpeichern(neu with { Fachkraft = true, Aktiv = false, Bereiche = ["R1", "R2"] }, neu: false);
         var gelesen = s.MitarbeiterLesen("QX")!;
         Assert.True(gelesen.Fachkraft);
         Assert.False(gelesen.Aktiv);
@@ -108,8 +108,8 @@ public sealed class MitarbeiterTests : IDisposable
     public void Bereiche_und_Positionen_pflegen()
     {
         s.DemoBeimErstenStart();
-        Assert.Throws<Eingabefehler>(() => s.ListeneintragAnlegen(Liste.Bereiche, "wohnbereich a"));
-        s.ListeneintragUmbenennen(Liste.Bereiche, "Wohnbereich A", "Wohnbereich Nord");
+        Assert.Throws<Eingabefehler>(() => s.ListeneintragAnlegen(Liste.Bereiche, "r1"));
+        s.ListeneintragUmbenennen(Liste.Bereiche, "R1", "Wohnbereich Nord");
         Assert.Contains("Wohnbereich Nord", s.MitarbeiterLesen("AB")!.Bereiche);
         Assert.All(s.AlleBewohner().Where(b => b.Nachname is "Ahorn" or "Birke"), b => Assert.Equal("Wohnbereich Nord", b.Wohnbereich));
         Assert.Contains("Wohnbereich Nord", s.Teams());
@@ -135,7 +135,7 @@ public sealed class MitarbeiterTests : IDisposable
         Assert.True(RechteRegeln.DarfVerwalten(ef, alle: false, eigenerBereich: true, s.MitarbeiterLesen("PR")!.Bereiche));
         Assert.False(RechteRegeln.DarfVerwalten(ef, alle: false, eigenerBereich: true, s.MitarbeiterLesen("GH")!.Bereiche));
         Assert.True(RechteRegeln.DarfVerwalten(ef, alle: true, eigenerBereich: false, s.MitarbeiterLesen("GH")!.Bereiche));
-        Assert.False(RechteRegeln.DarfVerwalten(ef, alle: false, eigenerBereich: false, ["Wohnbereich A"]));
+        Assert.False(RechteRegeln.DarfVerwalten(ef, alle: false, eigenerBereich: false, ["R1"]));
     }
 
     [Fact]
@@ -143,10 +143,10 @@ public sealed class MitarbeiterTests : IDisposable
     {
         s.DemoBeimErstenStart();
         s.RechtSetzen(Funktionen.BerichteSchreiben, "Mitarbeiter Wohnbereich", false);
-        s.ListeneintragAnlegen(Liste.Bereiche, "Wohnbereich C");
+        s.ListeneintragAnlegen(Liste.Bereiche, "R4");
         s.DemoZuruecksetzen();
         Assert.True(s.Darf("CD", Funktionen.BerichteSchreiben));
-        Assert.DoesNotContain(s.Bereichsliste(), b => b.Name == "Wohnbereich C");
+        Assert.DoesNotContain(s.Bereichsliste(), b => b.Name == "R4");
         Assert.Equal(14, s.AlleMitarbeiter().Count);
     }
 }

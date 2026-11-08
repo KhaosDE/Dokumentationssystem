@@ -144,8 +144,8 @@ public sealed class VisitenTests : IDisposable
     [Fact]
     public void Entwurf_je_Bereich_bis_zum_Abschliessen()
     {
-        Assert.Null(s.VisitenEntwurf("Wohnbereich A"));
-        var v = new VisitenEntwurf { Bereich = "Wohnbereich A", Datum = new DateOnly(2026, 11, 9), Arzt = "Dr. Linde (ausgedacht)", Teilnehmer = "EF", Kuerzel = "EF", Begonnen = Jetzt };
+        Assert.Null(s.VisitenEntwurf("R1"));
+        var v = new VisitenEntwurf { Bereich = "R1", Datum = new DateOnly(2026, 11, 9), Arzt = "Dr. Linde (ausgedacht)", Teilnehmer = "EF", Kuerzel = "EF", Begonnen = Jetzt };
         v.Eintrag(B("Ahorn")).Besprochen = "Schläft besser.";
         v.Eintrag(B("Ahorn")).Anordnungen.Add(new EntwurfAnordnung { Art = "dosis", MedikamentId = s.Medikamente().First(m => m.Wirkstoff == "Quetiapin").Id, Medikament = "Quetiapin" });
         v.Eintrag(B("Birke")).FacharztNoetig = true;
@@ -155,20 +155,20 @@ public sealed class VisitenTests : IDisposable
         s.VisitenEntwurfSpeichern(v);
         Assert.Equal(2, VisitenEntwurfRegeln.Vorgemerkt(v));
 
-        var gelesen = s.VisitenEntwurf("Wohnbereich A")!;   // „auch nach einem Absturz“: steht in der Datenbank
+        var gelesen = s.VisitenEntwurf("R1")!;   // „auch nach einem Absturz“: steht in der Datenbank
         Assert.Equal(3, gelesen.Eintraege.Count);
         Assert.Equal("Schläft besser.", gelesen.Eintrag(B("Ahorn")).Besprochen);
         Assert.True(gelesen.Eintrag(B("Clematis")).Erledigt);
-        Assert.Null(s.VisitenEntwurf("Wohnbereich B"));
+        Assert.Null(s.VisitenEntwurf("R2"));
         gelesen.Eintrag(B("Ahorn")).Besprochen = "Schläft besser, Dosis angepasst.";
         s.VisitenEntwurfSpeichern(gelesen);   // überschreibt den Entwurf (kein zweiter)
-        Assert.Equal("Schläft besser, Dosis angepasst.", s.VisitenEntwurf("Wohnbereich A")!.Eintrag(B("Ahorn")).Besprochen);
+        Assert.Equal("Schläft besser, Dosis angepasst.", s.VisitenEntwurf("R1")!.Eintrag(B("Ahorn")).Besprochen);
 
-        var (visite, aufgaben) = s.VisiteAbschliessen(s.VisitenEntwurf("Wohnbereich A")!, Jetzt);
+        var (visite, aufgaben) = s.VisiteAbschliessen(s.VisitenEntwurf("R1")!, Jetzt);
         Assert.Equal(2, visite.Eintraege.Count);   // Clematis ohne Inhalt zählt nicht
         Assert.Equal("", visite.Art);
         Assert.Equal(2, aufgaben.Count);
-        Assert.Null(s.VisitenEntwurf("Wohnbereich A"));
+        Assert.Null(s.VisitenEntwurf("R1"));
         Assert.Contains(s.Berichte(B("Ahorn")), b => b.Text.StartsWith("Visite 09.11.2026 (Dr. Linde (ausgedacht)), dabei: EF: Schläft besser"));
     }
 }

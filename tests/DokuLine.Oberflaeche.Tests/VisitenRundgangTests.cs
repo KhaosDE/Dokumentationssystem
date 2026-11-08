@@ -20,7 +20,7 @@ public class VisitenRundgangTests
         Assert.Equal("Visite beginnen …", seite.BeginnenKnopf.Text);
         Assert.Contains(seite.BeginnenKnopf, f.Kopf.Knoepfe);
         long ahorn = u.Demo("Ahorn").Id!.Value, birke = u.Demo("Birke").Id!.Value;
-        int imBereich = u.Speicher.AlleBewohner().Count(b => b.Wohnbereich == "Wohnbereich A");
+        int imBereich = u.Speicher.AlleBewohner().Count(b => b.Wohnbereich == "R1");
 
         string? fehler = null;
         using (new DialogErsatz(fenster =>
@@ -51,7 +51,7 @@ public class VisitenRundgangTests
         Assert.Equal($"noch offen: {imBereich - 1} von {imBereich}", r.OffenText.Text);
         Assert.Equal("1 Aufgabe vorgemerkt", r.VorgemerktText.Text);
         Assert.True(r.Liste.Items[0].Checked);   // Häkchen „besprochen“
-        Assert.Equal("Schläft gut, Abenddosis bleibt.", u.Speicher.VisitenEntwurf("Wohnbereich A")!.Eintrag(ahorn).Besprochen);   // schon gespeichert
+        Assert.Equal("Schläft gut, Abenddosis bleibt.", u.Speicher.VisitenEntwurf("R1")!.Eintrag(ahorn).Besprochen);   // schon gespeichert
         Assert.Equal(birke, r.Bewohner[r.Aktuell].Id);
         r.Feld!.Besprochen.Text = "Herzklopfen beim Treppensteigen.";
         r.Feld.FacharztNoetig.Checked = true;
@@ -73,7 +73,7 @@ public class VisitenRundgangTests
         using (var ersatz = new DialogErsatz(_ => DialogResult.Cancel))
         {
             seite.VisitenlisteDrucken();
-            Assert.StartsWith("Visitenliste Wohnbereich A", Assert.Single(ersatz.Titel));
+            Assert.StartsWith("Visitenliste R1", Assert.Single(ersatz.Titel));
         }
 
         // Abschließen: erst jetzt gesammelt die Aufgaben.
@@ -88,7 +88,7 @@ public class VisitenRundgangTests
             r.AbschliessenKnopf.PerformClick();
         Assert.Equal(1, einblendungen);
         Assert.Null(seite.Rundgang);
-        Assert.Null(u.Speicher.VisitenEntwurf("Wohnbereich A"));
+        Assert.Null(u.Speicher.VisitenEntwurf("R1"));
         Assert.Equal(4, seite.Karten.Count);   // 3 Demo-Visiten und die neue
         Assert.Contains(u.Speicher.Berichte(ahorn), b => b.Text.Contains("(Dr. Linde (ausgedacht)), dabei: EF: Schläft gut"));
         Assert.Equal("Visite beginnen …", seite.BeginnenKnopf.Text);

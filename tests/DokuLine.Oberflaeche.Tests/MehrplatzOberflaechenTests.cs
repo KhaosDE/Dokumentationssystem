@@ -32,7 +32,7 @@ public class MehrplatzOberflaechenTests
         }))
             f1.Kopf.Knoepfe.Single(k => k.Text == "Status …").PerformClick();
         Assert.StartsWith("Status: beim Friseur · bis ", f1.Bewohner.Akte.StatusText);
-        Assert.EndsWith("Wohnbereich A, AB um " + DateTime.Now.ToString("HH:mm"), f1.Bewohner.Akte.StatusText);
+        Assert.EndsWith("R1, AB um " + DateTime.Now.ToString("HH:mm"), f1.Bewohner.Akte.StatusText);
 
         Assert.True(f2.AenderungenVonAnderen());    // spätestens nach 30 Sekunden
         Assert.True(Status());
@@ -52,8 +52,8 @@ public class MehrplatzOberflaechenTests
         using var zweiter = new Speicher(u.Speicher.Pfad);
         var birke = u.Demo("Birke");
         using var formular = new BewohnerFormular(u.Speicher, birke);   // Arbeitsplatz 1 öffnet …
-        zweiter.BewohnerSpeichern(birke with { Zimmer = "202" }, ausgangsfassung: birke);   // … Arbeitsplatz 2 speichert
-        formular.Zimmer.Text = "303";
+        zweiter.BewohnerSpeichern(birke with { Zimmer = "204" }, ausgangsfassung: birke);   // … Arbeitsplatz 2 speichert (Umzug nach R2)
+        Assert.True(formular.BettWaehlen("105 – Bett Tür"));
         string andere = "", meine = "";
         using (new DialogErsatz(fenster =>
         {
@@ -63,10 +63,10 @@ public class MehrplatzOberflaechenTests
             return DialogResult.Cancel;
         }))
             Assert.False(formular.Speichern());   // Abbrechen: nichts gespeichert, Eingaben bleiben
-        Assert.Contains("Zimmer: 202", andere);
-        Assert.Contains("Zimmer: 303", meine);
-        Assert.Equal("202", u.Demo("Birke").Zimmer);
-        Assert.Equal("303", formular.Zimmer.Text);
+        Assert.Contains("Zimmer: 204", andere);
+        Assert.Contains("Zimmer: 105 (Bett Tür)", meine);
+        Assert.Equal("204", u.Demo("Birke").Zimmer);
+        Assert.Equal("105", formular.Eingabe().Zimmer);   // Eingaben bleiben
 
         using (new DialogErsatz(fenster =>
         {
@@ -74,8 +74,8 @@ public class MehrplatzOberflaechenTests
             return DialogResult.OK;
         }))
             Assert.True(formular.Speichern());
-        Assert.Equal("303", u.Demo("Birke").Zimmer);
-        Assert.Equal("Wohnbereich A", u.Demo("Birke").Wohnbereich);   // das Formular behält den Wohnbereich
+        Assert.Equal("105", u.Demo("Birke").Zimmer);
+        Assert.Equal("R1", u.Demo("Birke").Wohnbereich);   // der Bereich folgt dem Bett
     });
 
     [Fact]
@@ -109,17 +109,17 @@ public class MehrplatzOberflaechenTests
         f.BereichWaehlen("Übersicht");
         var s = f.Uebersicht;
         Assert.Equal(8, s.Karten.Count);
-        Assert.All(s.Karten, k => Assert.Equal("Wohnbereich A", k.Bewohner.Wohnbereich));
-        Assert.StartsWith("8 Bewohner · Wohnbereich A · Stand ", f.Kopf.KleinText);
+        Assert.All(s.Karten, k => Assert.Equal("R1", k.Bewohner.Wohnbereich));
+        Assert.StartsWith("R1 · 8 Bewohner · 2 Betten frei · Stand ", f.Kopf.KleinText);
         Assert.False(s.BereichHinweis.Visible);
         // Statusmeldung eines anderen Bereichs (Therapie) auf der Karte, vorne.
         Assert.StartsWith("Status: in der Holzwerkstatt, bis ", s.Karten.Single(k => k.Bewohner.Nachname == "Ahorn").Marken[0].Text);
 
         s.AlleBereiche.Checked = true;
         Assert.Equal(10, s.Karten.Count);
-        Assert.StartsWith("10 Bewohner · alle Bereiche · ", f.Kopf.KleinText);
+        Assert.StartsWith("alle Bereiche · 10 Bewohner · 18 Betten frei · ", f.Kopf.KleinText);
         var ginster = s.Karten.Single(k => k.Bewohner.Nachname == "Ginster");
-        Assert.Equal("Wohnbereich B", ginster.Marken[^1].Text);
+        Assert.Equal("R2", ginster.Marken[^1].Text);
         Assert.StartsWith("Status: Besuch bei der Familie, bis ", s.Karten.Single(k => k.Bewohner.Nachname == "Immergrün").Marken[0].Text);
         Hilfe.Foto(f, "56_uebersicht_alle_bereiche");
 
@@ -133,7 +133,7 @@ public class MehrplatzOberflaechenTests
         f.BereichWaehlen("Bewohner");
         var karten = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().ToList();
         Assert.Equal(10, karten.Count);
-        Assert.Equal("Wohnbereich A", karten.Single(k => k.Bewohner.Nachname == "Birke").Marken[^1].Text);
+        Assert.Equal("R1", karten.Single(k => k.Bewohner.Nachname == "Birke").Marken[^1].Text);
     });
 
     [Fact]
@@ -148,7 +148,7 @@ public class MehrplatzOberflaechenTests
         Assert.StartsWith("Status: in der Holzwerkstatt · bis ", akte.StatusText);
         Assert.Contains("· Therapie, OP um ", akte.StatusText);
         Assert.Equal(akte.StatusText, akte.KopfMarken.First());   // vorne im Kopf
-        Assert.Equal("Wohnbereich A", akte.Wohnbereich.Text);
+        Assert.Equal("R1", akte.Wohnbereich.Text);
         Hilfe.Foto(f, "52_akte_status");
         using (new DialogErsatz(fenster =>
         {
@@ -165,7 +165,7 @@ public class MehrplatzOberflaechenTests
             Assert.True(f.Bewohner.StatusOeffnen());
         Assert.Null(akte.StatusText);
         Assert.DoesNotContain(akte.KopfMarken, m => m.StartsWith("Status:"));
-        Assert.Contains("CD (Wohnbereich A) · aufgehoben", StatusmeldungRegeln.Verlauf(u.Speicher.Statusmeldungen(u.Demo("Ahorn").Id!.Value))[0]);
+        Assert.Contains("CD (R1) · aufgehoben", StatusmeldungRegeln.Verlauf(u.Speicher.Statusmeldungen(u.Demo("Ahorn").Id!.Value))[0]);
     });
 
     [Fact]
@@ -176,20 +176,20 @@ public class MehrplatzOberflaechenTests
         Directory.CreateDirectory(ordner);
         using (var fenster = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
         {
-            Assert.Equal("Wohnbereich A", fenster.Bereich.Text);
+            Assert.Equal("R1", fenster.Bereich.Text);
             Assert.StartsWith("lokal", fenster.DatenbankOrt.Text);
             Assert.False(fenster.LokalKnopf.Enabled);
             Assert.False(fenster.OrdnerSetzen(Path.Combine(u.Ordner, "fehlt")));
             Assert.Contains("gibt es nicht", fenster.Fehler.Text);
             Assert.True(fenster.OrdnerSetzen(ordner));
             Assert.Equal($"gemeinsamer Ordner: {ordner}", fenster.DatenbankOrt.Text);
-            fenster.Bereich.Text = "Wohnbereich B";
+            fenster.Bereich.Text = "R2";
             Assert.True(fenster.Speichern());
         }
         var w = Einstellungen.Laden();
-        Assert.Equal(("Wohnbereich B", ordner), (w.Bereich, w.DatenbankOrdner));
+        Assert.Equal(("R2", ordner), (w.Bereich, w.DatenbankOrdner));
         using var f = new Hauptfenster(u.Speicher);
-        Assert.StartsWith("Wohnbereich B · Datenbank lokal", f.Arbeitsplatz.Text);
+        Assert.StartsWith("R2 · Datenbank lokal", f.Arbeitsplatz.Text);
         Assert.EndsWith("neuer Ort nach Neustart", f.Arbeitsplatz.Text);
     });
 }

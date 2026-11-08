@@ -29,6 +29,7 @@ public sealed record Bewohner
     public OffenGefuehrtZustand OffenGefuehrt { get; init; }
     public string? Bild { get; init; }   // Dateiname im Ordner „bilder“ des Datenordners
     public string Wohnbereich { get; init; } = Bereiche.Vorgabe;   // Mehrplatz: zu welchem Bereich er gehört
+    public string Bett { get; init; } = "";   // Schritt 26e: „einzel“, „fenster“, „tuer“; leer = kein Bett zugeordnet
 
     public string Name => $"{Vorname} {Nachname}";
 }
@@ -48,6 +49,7 @@ public sealed class BewohnerEingabe
     public string Beschlussende { get; set; } = "";
     public string OffenGefuehrt { get; set; } = "";
     public string Wohnbereich { get; set; } = "";
+    public string Bett { get; set; } = "";
 }
 
 // Eingaben passen nicht. Fehler enthält verständliche Sätze in der Reihenfolge des Formulars.
@@ -182,6 +184,8 @@ public static class BewohnerRegeln
         string allergien = allergie == AllergieZustand.Eingetragen ? (e.Allergien ?? "").Trim() : "";
         string wohnbereich = Bereiche.Bereinigen(e.Wohnbereich);
         if (WohnbereichPruefen(wohnbereich) is string w) fehler.Add(w);
+        string bett = (e.Bett ?? "").Trim();
+        if (!ZimmerRegeln.BettGueltig(bett)) fehler.Add("Bett: unbekannte Angabe.");
 
         foreach (string f in Pruefen(e.Vorname, e.Nachname, e.Zimmer, geburt, aufnahme, allergie, allergien, beschluss, ende, offen))
             if (!fehler.Contains(f) && !unlesbar.Any(feld => f.StartsWith(feld, StringComparison.Ordinal)))
@@ -204,6 +208,7 @@ public static class BewohnerRegeln
             OffenGefuehrt = offen!.Value,
             Bild = bild,
             Wohnbereich = wohnbereich,
+            Bett = bett,
         };
     }
 
@@ -221,11 +226,12 @@ public static class BewohnerRegeln
         Beschlussende = Datum.Text(b.Beschlussende),
         OffenGefuehrt = Kuerzel(b.OffenGefuehrt),
         Wohnbereich = b.Wohnbereich,
+        Bett = b.Bett,
     };
 
     // Alle Angaben als Text (für den Konflikt-Hinweis: beide Fassungen nebeneinander).
     public static string Beschreibung(Bewohner b) => string.Join(Environment.NewLine,
-        $"Name: {b.Name}", $"Zimmer: {b.Zimmer}", $"Wohnbereich: {b.Wohnbereich}",
+        $"Name: {b.Name}", $"Zimmer: {b.Zimmer}" + (b.Bett.Length > 0 ? $" ({ZimmerRegeln.BettText(b.Bett)})" : ""), $"Wohnbereich: {b.Wohnbereich}",
         $"Geburtsdatum: {Datum.Text(b.Geburtsdatum)}", $"Aufnahme: {Datum.Text(b.Aufnahmedatum)}",
         $"Beschlussende: {BeschlussText(b)}", $"Offen geführt: {OffenGefuehrtText(b)}", AllergieText(b),
         $"Bild: {(b.Bild is null ? "keins" : "hinterlegt")}");

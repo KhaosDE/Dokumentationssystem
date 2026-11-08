@@ -10,7 +10,7 @@ namespace DokuLine.Kern;
 //   logo        – Dateiname des eigenen Bildes für den Kopf im Ordner „logo“ (Vorgabe: keins)
 //   beschluss_frist_tage – Startseite: „Beschluss endet bald“ ab so vielen Tagen vorher (Vorgabe: 90)
 //   heb_frist_monate     – Startseite: „HEB fällig“, wenn der letzte Bogen so alt ist (Vorgabe: 12)
-//   bereich              – Mehrplatz: Bereichskennung dieser Installation (Vorgabe: „Wohnbereich A“)
+//   bereich              – Mehrplatz: Bereichskennung dieser Installation (Vorgabe: „R1“, bis 0.29.6 „Wohnbereich A“)
 //   datenbank_ordner     – Mehrplatz: gemeinsamer Ordner der Datenbank; leer = lokal im Datenordner
 //   menue_eingeklappt    – Seitenmenü nur mit Symbolen (Vorgabe: nein)
 //   nachschlage_ansicht  – Formular „Medikament“: eingebettete Nachschlage-Ansicht des BfArM (Vorgabe: ja)

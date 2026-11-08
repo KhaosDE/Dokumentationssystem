@@ -81,7 +81,7 @@ public sealed class TagesplanTests : IDisposable
         s.TeilnahmeSetzen(z.Termin.ZuteilungId!.Value, Montag, Teilnahme.Teilgenommen, "CD", jetzt);
         Assert.Contains(B("Distel").Id!.Value, s.InTherapie(jetzt.AddMinutes(5)).Keys);
         jetzt = jetzt.AddMinutes(20);
-        s.StatusmeldungSetzen(B("Distel").Id!.Value, "beim Arzt", jetzt.AddHours(1), "CD", "Wohnbereich A");
+        s.StatusmeldungSetzen(B("Distel").Id!.Value, "beim Arzt", jetzt.AddHours(1), "CD", "R1");
         Assert.DoesNotContain(B("Distel").Id!.Value, s.InTherapie(jetzt.AddMinutes(1)).Keys);
     }
 }

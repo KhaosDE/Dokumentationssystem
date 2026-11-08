@@ -64,3 +64,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 26b „Ärzteverzeichnis“ (0.29.4).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26c „Visite: Übersicht aller Bewohner“ (0.29.5).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26d „Kleine Verbesserungen: Nachrichten „gelesen“, Datum mit Punkten, Kopf der Akte“ (0.29.6).
+- 08.11.2026 — Claude Code: Bauplan Schritt 26e „Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme“ (0.29.7).

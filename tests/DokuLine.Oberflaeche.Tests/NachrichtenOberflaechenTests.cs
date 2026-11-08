@@ -82,7 +82,7 @@ public class NachrichtenOberflaechenTests
         using (new DialogErsatz(fenster =>
         {
             var antwort = Assert.IsType<NachrichtFenster>(fenster);
-            Assert.Equal([Empfaenger.Person("EF"), Empfaenger.Team("Wohnbereich A"), Empfaenger.Person("KL")], antwort.AntwortAn);
+            Assert.Equal([Empfaenger.Person("EF"), Empfaenger.Team("R1"), Empfaenger.Person("KL")], antwort.AntwortAn);
             antwort.Inhalt.Text = "Danke, Karin! Die Unterlagen liegen im Büro.";
             return antwort.Senden() ? DialogResult.OK : DialogResult.Cancel;
         }))

@@ -16,14 +16,17 @@ public sealed class Konflikt(string meldung, string andere, string meine) : Exce
     public const string Text = "Ein anderer Arbeitsplatz hat das inzwischen geändert.";
 }
 
-// Bereichskennung je Installation und Wohnbereich je Bewohner (ausgedacht, z. B. „Wohnbereich A“).
+// Bereichskennung je Installation und Wohnbereich je Bewohner (allgemeine Kürzel, z. B. „R1“).
 public static class Bereiche
 {
-    public const string Vorgabe = "Wohnbereich A";
+    public const string Vorgabe = "R1";   // Schritt 26e (vorher „Wohnbereich A“)
     public const int Laenge = 30;
 
     // Vorschläge in den Einstellungen; eigene Kennungen sind möglich.
-    public static readonly string[] Vorschlaege = ["Wohnbereich A", "Wohnbereich B", "Therapie", "Leitung"];
+    public static readonly string[] Vorschlaege = ["R1", "R2", "R3", "Therapie", "Leitung"];
+
+    // Schritt 26e: die alten Demo-Bereiche heißen jetzt R1 und R2 (Bereichskennung dieses Rechners).
+    public static string Umbenannt(string bereich) => bereich switch { "Wohnbereich A" => "R1", "Wohnbereich B" => "R2", _ => bereich };
 
     public static string Bereinigen(string? text) => string.IsNullOrWhiteSpace(text) ? Vorgabe : string.Join(' ', text.Split(' ', StringSplitOptions.RemoveEmptyEntries));
 
@@ -89,7 +92,7 @@ public static class StatusmeldungRegeln
     public static string BisText(Statusmeldung s, DateTime jetzt) =>
         $"bis {(s.GiltBis.Date == jetzt.Date ? "" : s.GiltBis.ToString("ddd dd.MM., ", De))}{s.GiltBis:HH:mm}";
 
-    // „beim Arzttermin · bis 11:30 · Wohnbereich A, CD um 09:10“ (für die Akte).
+    // „beim Arzttermin · bis 11:30 · R1, CD um 09:10“ (für die Akte).
     public static string Langtext(Statusmeldung s, DateTime jetzt) =>
         $"{s.Text} · {BisText(s, jetzt)} · {s.Bereich}, {s.Kuerzel} um {(s.Erstellt.Date == jetzt.Date ? "" : s.Erstellt.ToString("dd.MM., ", De))}{s.Erstellt:HH:mm}";
 

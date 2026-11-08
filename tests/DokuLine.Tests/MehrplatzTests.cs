@@ -34,7 +34,7 @@ public sealed class MehrplatzTests : IDisposable
     {
         long vorher = b.Datenstand();
         long eigenerVorher = a.Datenstand();
-        a.StatusmeldungSetzen(Demo(a, "Birke").Id!.Value, "beim Einkaufen", Jetzt.AddHours(1), "AB", "Wohnbereich A");
+        a.StatusmeldungSetzen(Demo(a, "Birke").Id!.Value, "beim Einkaufen", Jetzt.AddHours(1), "AB", "R1");
         Assert.NotEqual(vorher, b.Datenstand());          // b sieht: jemand anderes hat gespeichert
         Assert.Equal(eigenerVorher, a.Datenstand());      // eigenes Speichern zählt nicht
         Assert.Equal("beim Einkaufen", b.Statusmeldung(Demo(b, "Birke").Id!.Value, Jetzt)!.Text);
@@ -45,15 +45,15 @@ public sealed class MehrplatzTests : IDisposable
     {
         var beiA = Demo(a, "Birke");
         var beiB = Demo(b, "Birke");
-        a.BewohnerSpeichern(beiA with { Zimmer = "202" }, ausgangsfassung: beiA);
-        var k = Assert.Throws<Konflikt>(() => b.BewohnerSpeichern(beiB with { Zimmer = "303" }, ausgangsfassung: beiB));
-        Assert.Contains("Zimmer: 202", k.Andere);
-        Assert.Contains("Zimmer: 303", k.Meine);
-        Assert.Equal("202", Demo(a, "Birke").Zimmer);    // nichts still überschrieben
+        a.BewohnerSpeichern(beiA with { Zimmer = "204" }, ausgangsfassung: beiA);   // freie Einzelzimmer (Schritt 26e)
+        var k = Assert.Throws<Konflikt>(() => b.BewohnerSpeichern(beiB with { Zimmer = "206" }, ausgangsfassung: beiB));
+        Assert.Contains("Zimmer: 204", k.Andere);
+        Assert.Contains("Zimmer: 206", k.Meine);
+        Assert.Equal("204", Demo(a, "Birke").Zimmer);    // nichts still überschrieben
         // Dieselbe Änderung wie der andere ist kein Konflikt; ohne Ausgangsfassung („Meine speichern“) gewinnt meine.
-        b.BewohnerSpeichern(beiB with { Zimmer = "202" }, ausgangsfassung: beiB);
-        b.BewohnerSpeichern(beiB with { Zimmer = "303" });
-        Assert.Equal("303", Demo(a, "Birke").Zimmer);
+        b.BewohnerSpeichern(beiB with { Zimmer = "204", Wohnbereich = "R2" }, ausgangsfassung: beiB);
+        b.BewohnerSpeichern(beiB with { Zimmer = "206" });
+        Assert.Equal("206", Demo(a, "Birke").Zimmer);
     }
 
     [Fact]
@@ -103,22 +103,22 @@ public sealed class MehrplatzTests : IDisposable
     {
         long birke = Demo(a, "Birke").Id!.Value;
         Assert.Null(a.Statusmeldung(birke, Jetzt));
-        a.StatusmeldungSetzen(birke, "  beim Arzttermin ", Jetzt.AddHours(1), "AB", "Wohnbereich A");
+        a.StatusmeldungSetzen(birke, "  beim Arzttermin ", Jetzt.AddHours(1), "AB", "R1");
         var s = b.Statusmeldung(birke, Jetzt)!;   // auch am anderen Arbeitsplatz
-        Assert.Equal(("beim Arzttermin", "Wohnbereich A", "AB"), (s.Text, s.Bereich, s.Kuerzel));
-        Assert.Equal("beim Arzttermin · bis 11:00 · Wohnbereich A, AB um 10:00", StatusmeldungRegeln.Langtext(s, Jetzt));
+        Assert.Equal(("beim Arzttermin", "R1", "AB"), (s.Text, s.Bereich, s.Kuerzel));
+        Assert.Equal("beim Arzttermin · bis 11:00 · R1, AB um 10:00", StatusmeldungRegeln.Langtext(s, Jetzt));
         Assert.Equal(new Marke(MarkenArt.Status, "Status: beim Arzttermin, bis 11:00"), StatusmeldungRegeln.Marke(s, Jetzt));
         Assert.Null(a.Statusmeldung(birke, Jetzt.AddHours(1)));   // abgelaufen
 
         b.StatusmeldungSetzen(birke, "in der Holzwerkstatt", Jetzt.AddHours(2), "OP", "Therapie");   // ersetzt
         Assert.Equal("Therapie", a.Statusmeldung(birke, Jetzt)!.Bereich);
         Assert.Equal("in der Holzwerkstatt", a.GeltendeStatusmeldungen(Jetzt)[birke].Text);
-        a.StatusmeldungAufheben(birke, "AB", "Wohnbereich A");
+        a.StatusmeldungAufheben(birke, "AB", "R1");
         Assert.Null(b.Statusmeldung(birke, Jetzt));
         Assert.DoesNotContain(birke, b.GeltendeStatusmeldungen(Jetzt).Keys);
         var verlauf = StatusmeldungRegeln.Verlauf(a.Statusmeldungen(birke));
         Assert.Equal(3, verlauf.Count);                            // Verlauf bleibt
-        Assert.EndsWith("AB (Wohnbereich A) · aufgehoben", verlauf[0]);
+        Assert.EndsWith("AB (R1) · aufgehoben", verlauf[0]);
         Assert.Contains("in der Holzwerkstatt", verlauf[1]);
     }
 
@@ -126,7 +126,7 @@ public sealed class MehrplatzTests : IDisposable
     public void Statusmeldung_Pruefregeln_und_unveraenderlich()
     {
         long birke = Demo(a, "Birke").Id!.Value;
-        var fehler = Assert.Throws<Eingabefehler>(() => a.StatusmeldungSetzen(birke, "", Jetzt.AddHours(-1), "", "Wohnbereich A")).Fehler;
+        var fehler = Assert.Throws<Eingabefehler>(() => a.StatusmeldungSetzen(birke, "", Jetzt.AddHours(-1), "", "R1")).Fehler;
         Assert.Contains("Text fehlt.", fehler);
         Assert.Contains("„Gilt bis“ liegt in der Vergangenheit.", fehler);
         Assert.Contains(fehler, f => f.StartsWith("Kürzel fehlt"));
@@ -136,7 +136,7 @@ public sealed class MehrplatzTests : IDisposable
         Assert.Contains(Assert.Throws<Eingabefehler>(() => StatusmeldungRegeln.AusEingabe("x", "08.11.2026", "halb zehn", "AB", Jetzt)).Fehler,
             f => f.StartsWith("Gilt bis (Uhrzeit)"));
 
-        a.StatusmeldungSetzen(birke, "unterwegs", Jetzt.AddHours(1), "AB", "Wohnbereich A");
+        a.StatusmeldungSetzen(birke, "unterwegs", Jetzt.AddHours(1), "AB", "R1");
         using var befehl = a.Verbindung.CreateCommand();
         befehl.CommandText = "UPDATE statusmeldungen SET text = 'anders'";
         Assert.Throws<SqliteException>(() => befehl.ExecuteNonQuery());
@@ -146,7 +146,7 @@ public sealed class MehrplatzTests : IDisposable
     public void Wohnbereich_je_Bewohner()
     {
         var alle = a.AlleBewohner();
-        Assert.Equal(["Ginster", "Immergrün"], alle.Where(x => x.Wohnbereich == "Wohnbereich B").Select(x => x.Nachname));
+        Assert.Equal(["Ginster", "Immergrün"], alle.Where(x => x.Wohnbereich == "R2").Select(x => x.Nachname));
         Assert.Equal(alle.Count - 2, alle.Count(x => x.Wohnbereich == Bereiche.Vorgabe));
         var e = BewohnerRegeln.AlsEingabe(alle[0]);
         e.Wohnbereich = "  Wohnbereich   C ";
@@ -164,7 +164,7 @@ public sealed class MehrplatzTests : IDisposable
         var ahorn = status[Demo(a, "Ahorn").Id!.Value];
         Assert.Equal(("in der Holzwerkstatt", "Therapie", "OP"), (ahorn.Text, ahorn.Bereich, ahorn.Kuerzel));
         Assert.True(ahorn.GiltBis > Jetzt);
-        Assert.Equal("Wohnbereich B", status[Demo(a, "Immergrün").Id!.Value].Bereich);
+        Assert.Equal("R2", status[Demo(a, "Immergrün").Id!.Value].Bereich);
         Assert.Equal(2, a.Statusmeldungen(Demo(a, "Ahorn").Id!.Value).Count);   // eine ältere im Verlauf
         Assert.Equal(2, status.Count);
     }

@@ -13,7 +13,7 @@
     },
     {
       "name": "Kochgruppe", "art": "gruppe", "therapeut": "Emma Fink", "ort": "Lehrküche", "hoechstens": 5,
-      "anbieter": "Wohnbereich A", "kuerzel": "EF",
+      "anbieter": "R1", "kuerzel": "EF",
       "hinweis": "Einkauf am Vortag", "seitTagen": 300,
       "termine": [ { "tag": "Di", "von": "10:00", "bis": "12:30" } ],
       "teilnehmer": [
@@ -62,7 +62,7 @@
     },
     {
       "name": "Kreativwerkstatt", "art": "gruppe", "therapeut": "Georg Habicht", "ort": "Atelier", "hoechstens": 6,
-      "anbieter": "Wohnbereich B", "kuerzel": "GH",
+      "anbieter": "R2", "kuerzel": "GH",
       "hinweis": "", "seitTagen": 300,
       "termine": [ { "tag": "Do", "von": "09:30", "bis": "11:30" } ],
       "teilnehmer": [

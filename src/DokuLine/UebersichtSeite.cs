@@ -23,6 +23,9 @@ public sealed class UebersichtSeite : Panel
     public Label Medikation { get; } = new() { AutoSize = true, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
     public KartenRaster Raster { get; } = new();
     public CheckBox AlleBereiche { get; } = new() { Text = "alle Bereiche", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
+    // Schritt 26e: Filter nach Wohnbereich (R1, R2, R3); „eigene Bereiche“ wie bisher.
+    public ComboBox BereichWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 150, Font = Stil.Standard, AccessibleName = "Bereich" };
+    public const string EigeneBereiche = "eigene Bereiche";
     // Schritt 20: nur die eigenen Bezugsbewohner bzw. Einzeltrainings (aus allen Bereichen).
     public CheckBox MeineBezugsbewohner { get; } = new() { Text = "Meine Bezugsbewohner", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
     public CheckBox MeineEinzeltrainings { get; } = new() { Text = "Meine Einzeltrainings", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
@@ -40,7 +43,11 @@ public sealed class UebersichtSeite : Panel
         BackColor = Stil.Seite;
         Fahrzeuge = new FahrzeugLeiste(speicher);
         Fahrzeuge.Geaendert += Aktualisieren;
-        heuteKarte.Controls.AddRange([heuteTitel, MeineBezugsbewohner, MeineEinzeltrainings, AlleBereiche, BereichHinweis, HeuteText,
+        BereichWahl.Items.Add(EigeneBereiche);
+        BereichWahl.Items.AddRange([.. speicher.Wohnbereiche().Select(w => (object)w.Name)]);
+        BereichWahl.SelectedIndex = 0;
+        BereichWahl.SelectedIndexChanged += (_, _) => Aktualisieren();
+        heuteKarte.Controls.AddRange([heuteTitel, BereichWahl, MeineBezugsbewohner, MeineEinzeltrainings, AlleBereiche, BereichHinweis, HeuteText,
             termineTitel, Termine, medikationTitel, Medikation, fahrzeugeTitel, Fahrzeuge]);
         foreach (var c in new[] { AlleBereiche, MeineBezugsbewohner, MeineEinzeltrainings }) c.CheckedChanged += (_, _) => Aktualisieren();
         Controls.Add(heuteKarte);
@@ -68,6 +75,13 @@ public sealed class UebersichtSeite : Panel
         var eigene = jeder.Where(h => meine.Contains(h.Bewohner.Wohnbereich)).ToList();
         bool allesZeigen = AlleBereiche.Checked || eigene.Count == 0;
         var alle = allesZeigen ? jeder : eigene;
+        if (BereichWahl.SelectedIndex > 0 && BereichWahl.SelectedItem is string gewaehlt)
+        {
+            meine = [gewaehlt];
+            alle = jeder.Where(h => h.Bewohner.Wohnbereich == gewaehlt).ToList();
+            allesZeigen = false;
+        }
+        AlleBereiche.Enabled = BereichWahl.SelectedIndex <= 0;
         var bezuege = speicher.Bezuege();
         bool angemeldet = speicher.MitarbeiterLesen(werte.Kuerzel) is not null;
         MeineBezugsbewohner.Enabled = MeineEinzeltrainings.Enabled = angemeldet;
@@ -79,7 +93,7 @@ public sealed class UebersichtSeite : Panel
                                     ((meineBp && Meins(b.Bezugspflege)) || (meineEt && Meins(b.Einzeltrainer)))).ToList();
             allesZeigen = true;
         }
-        BereichHinweis.Visible = !AlleBereiche.Checked && eigene.Count == 0 && jeder.Count > 0;
+        BereichHinweis.Visible = BereichWahl.SelectedIndex <= 0 && !AlleBereiche.Checked && eigene.Count == 0 && jeder.Count > 0;
         BereichHinweis.Text = $"Für „{string.Join(", ", meine)}“ gibt es keine eigenen Bewohner – gezeigt werden alle Bereiche.";
         string bereichText = meineBp || meineEt
             ? string.Join(" und ", new[] { meineBp ? "meine Bezugsbewohner" : null, meineEt ? "meine Einzeltrainings" : null }.OfType<string>())
@@ -118,7 +132,12 @@ public sealed class UebersichtSeite : Panel
         Termine.Text = termine.Count == 0 ? "Keine Termine heute." : string.Join(Environment.NewLine, termine);
         var medikation = UebersichtRegeln.MedikationZeilen(alle);
         Medikation.Text = medikation.Count == 0 ? "Keine Änderungen heute." : string.Join(Environment.NewLine, medikation);
-        KopfText = $"{alle.Count} Bewohner · {bereichText} · Stand {jetzt:HH:mm} Uhr";
+        // Schritt 26e: „R2 · 9 Bewohner · 3 Betten frei“ (freie Betten der gezeigten Wohnbereiche).
+        var gezeigt = meineBp || meineEt ? [] : allesZeigen ? speicher.Wohnbereiche().Select(w => w.Name).ToList() : meine;
+        int frei = gezeigt.Sum(b => speicher.FreieBetten(b).Count);
+        string betten = gezeigt.Count == 0 || !speicher.Wohnbereiche().Any(w => gezeigt.Contains(w.Name)) ? ""
+            : frei == 1 ? " · 1 Bett frei" : $" · {frei} Betten frei";
+        KopfText = $"{bereichText} · {alle.Count} Bewohner{betten} · Stand {jetzt:HH:mm} Uhr";
         Fahrzeuge.Aktualisieren();
         PerformLayout();
         Geaendert?.Invoke();
@@ -134,17 +153,19 @@ public sealed class UebersichtSeite : Panel
         heuteTitel.Location = new Point(innen, innen);
         // Rechts oben, von rechts nach links: alle Bereiche, Meine Einzeltrainings, Meine Bezugsbewohner.
         // Reicht die Breite nicht, stehen sie in einer eigenen Zeile unter dem Titel (nichts überdeckt sich).
-        var filter = new[] { MeineBezugsbewohner, MeineEinzeltrainings, AlleBereiche };
+        var filter = new Control[] { BereichWahl, MeineBezugsbewohner, MeineEinzeltrainings, AlleBereiche };
+        static int Breite(Control c) => c is ComboBox ? c.Width : c.PreferredSize.Width;
+        static int Hoehe(Control c) => c is ComboBox ? c.Height : c.PreferredSize.Height;
         int abstand = Stil.Px(this, Stil.AbstandMittel);
-        int benoetigt = filter.Sum(c => c.PreferredSize.Width) + (filter.Length - 1) * abstand;
+        int benoetigt = filter.Sum(c => Breite(c)) + (filter.Length - 1) * abstand;
         int unterTitel = heuteTitel.Bottom + Stil.Px(this, Stil.AbstandMini);
         if (heuteTitel.Right + innen + benoetigt <= breite - innen)
         {
             int filterX = breite - innen - benoetigt;
             foreach (var c in filter)
             {
-                c.Location = new Point(filterX, heuteTitel.Top + (heuteTitel.Height - c.PreferredSize.Height) / 2);
-                filterX += c.PreferredSize.Width + abstand;
+                c.Location = new Point(filterX, heuteTitel.Top + (heuteTitel.Height - Hoehe(c)) / 2);
+                filterX += Breite(c) + abstand;
             }
         }
         else
@@ -152,10 +173,10 @@ public sealed class UebersichtSeite : Panel
             int filterX = innen, unten = unterTitel;
             foreach (var c in filter)
             {
-                if (filterX > innen && filterX + c.PreferredSize.Width > breite - innen) { filterX = innen; unterTitel = unten; }
+                if (filterX > innen && filterX + Breite(c) > breite - innen) { filterX = innen; unterTitel = unten; }
                 c.Location = new Point(filterX, unterTitel);
-                filterX += c.PreferredSize.Width + abstand;
-                unten = Math.Max(unten, c.Top + c.PreferredSize.Height + Stil.Px(this, Stil.AbstandMini));
+                filterX += Breite(c) + abstand;
+                unten = Math.Max(unten, c.Top + Hoehe(c) + Stil.Px(this, Stil.AbstandMini));
             }
             unterTitel = unten;
         }

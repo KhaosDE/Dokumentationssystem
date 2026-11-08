@@ -1,8 +1,8 @@
 {
   "hinweis": "Ausgedachte Statusmeldungen für die Demo (Mehrplatzbetrieb). Zeiten relativ zum Laden der Demo-Daten: vorMinuten = wann gesetzt, fuerStunden = wie lange sie gilt. Ältere Meldungen stehen davor im Verlauf (abgelaufen).",
   "meldungen": [
-    { "bewohner": "Ahorn", "text": "beim Arzttermin, Begleitung KL", "bereich": "Wohnbereich A", "kuerzel": "AB", "vorMinuten": 1500, "fuerStunden": 3 },
+    { "bewohner": "Ahorn", "text": "beim Arzttermin, Begleitung KL", "bereich": "R1", "kuerzel": "AB", "vorMinuten": 1500, "fuerStunden": 3 },
     { "bewohner": "Ahorn", "text": "in der Holzwerkstatt", "bereich": "Therapie", "kuerzel": "OP", "vorMinuten": 20, "fuerStunden": 2 },
-    { "bewohner": "Immergrün", "text": "Besuch bei der Familie", "bereich": "Wohnbereich B", "kuerzel": "GH", "vorMinuten": 45, "fuerStunden": 4 }
+    { "bewohner": "Immergrün", "text": "Besuch bei der Familie", "bereich": "R2", "kuerzel": "GH", "vorMinuten": 45, "fuerStunden": 4 }
   ]
 }
