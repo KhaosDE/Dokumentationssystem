@@ -58,3 +58,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Name festgelegt: „DokuLine – Betreuung auf Augenhöhe“ (Tobi). Bauplan Schritt 26a1 „Umbenennung in DokuLine, Teil 1 (Übergang)“ freigegeben; Repository-Umbenennung als Teil 2 nach dem Release (Chat „Programme/Apps“).
 - 08.11.2026 — Bauplan Schritt 26a2: Position „Administrator“ mit Kürzel TST freigegeben (Chat „Programme/Apps“).
 - 08.11.2026 — Bauplan Schritt 26a3: Abmelden sichtbar machen, Tastenkürzel F12 (Chat „Programme/Apps“).
+- 08.11.2026 — Bauplan Schritte 26d–26g freigegeben: Nachrichten gelesen→Archiv, Datum mit Punkten, Kopf der Akte; Bereiche R1–R3 mit Zimmern/Betten und Aufnahme; Fenster „Ärztliche Informationen“; Tagesplan als Anzeigetafel (Chat „Programme/Apps“).

@@ -55,6 +55,10 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 26a3 | Abmelden sichtbar machen, Tastenkürzel F12 | 0.29.3 |
 | 26b | Ärzteverzeichnis | 0.29.4 |
 | 26c | Visite: Übersicht aller Bewohner | 0.29.5 |
+| 26d | Kleine Verbesserungen: Nachrichten „gelesen“, Datum mit Punkten, Kopf der Akte | 0.29.6 |
+| 26e | Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme | 0.29.7 |
+| 26f | Fenster „Ärztliche Informationen“ | 0.29.8 |
+| 26g | Tagesplan als Anzeigetafel | 0.29.9 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
@@ -1144,3 +1148,105 @@ Umfang:
   „Als Entwurf speichern / Verwerfen / Abbrechen“. Entwürfe gehören dem Kürzel, das sie
   angefangen hat.
 - Tastenkürzel im Tooltip und in der Hilfe/„Über“ nennen.
+
+## Kleine Verbesserungen: Nachrichten „gelesen“, Datum mit Punkten, Kopf der Akte
+Status: freigegeben (Bauplan Schritt 26d)
+Datum: 08.11.2026
+Was: Drei kleine Änderungen nach Tobis Durchsicht.
+Warum: Rückmeldung Tobi (08.11.2026).
+Umfang:
+- **Nachrichten als gelesen markieren:** Knopf „Gelesen“ an jeder Nachricht im Posteingang
+  (auch mehrere markiert auf einmal). Eine gelesene Nachricht wandert **automatisch ins
+  Archiv** — für die Person, die sie gelesen hat (bei Team-Nachrichten bleibt sie bei den
+  anderen Teammitgliedern ungelesen). Aus dem Archiv lässt sie sich mit „Wieder als ungelesen“
+  zurückholen. Zähler „ungelesen“ passt sich an. Weiterhin wird nichts gelöscht.
+- **Datum mit automatischen Punkten — im ganzen Programm:** In jedem Datumsfeld setzt das
+  Programm die Punkte beim Tippen selbst: `08112026` wird zu `08.11.2026`, `081126` zu
+  `08.11.2026` (zweistellige Jahre als 20xx). Tippt man selbst Punkte, stört das nicht. Ein
+  gemeinsamer Baustein für alle Datumsfelder, keine Einzellösungen. Gilt auch für Uhrzeiten
+  sinngemäß: `0930` → `09:30`.
+- **Kopf der Bewohnerakte:** Öffnet man einen Bewohner, steht im Kopf groß **„Bewohnerakte“**.
+  Der Name erscheint nur **einmal**, auf der Karte darunter — nicht zusätzlich im Kopf.
+
+## Wohnbereiche R1–R3, Zimmer und Betten, Aufnahme
+Status: freigegeben (Bauplan Schritt 26e)
+Datum: 08.11.2026
+Was: Die Demo bekommt die Bereichsstruktur des Hauses, eine Zimmer- und Bettenverwaltung, und
+die Aufnahme zeigt freie Zimmer und Betten.
+Warum: Vorgaben Tobi (08.11.2026): Es gibt drei Wohnbereiche, **R1 offen**, **R2** und **R3
+beschützend** — „das übernehmen wir schon mal so“. Beim Anlegen eines Bewohners muss die
+Zimmerauswahl freie Zimmer und Betten zeigen (Bett Fenster, Bett Tür). „Offen geführt“ gehört
+nicht in die Aufnahme, weil nur geschlossen aufgenommen wird.
+Umfang:
+- **Bereiche** in Demo-Daten und Einstellungen: `R1` (offen), `R2` (beschützend), `R3`
+  (beschützend). Je Bereich ein Merkmal „offen / beschützend“. Die Bezeichnungen sind
+  allgemeine Kürzel, kein Name der Einrichtung (Entscheidung Tobi, 08.11.2026). Bisherige
+  Demo-Bereiche „Wohnbereich A/B“ werden ersetzt (Bewohner, Mitarbeiter, Therapie, Kalender,
+  Mehrplatz-Bereichskennung).
+- **Zimmer und Betten** (Kern, Einstellungen → „Wohnbereich“): je Zimmer Nummer, Bereich und
+  Betten. Einzelzimmer = ein Bett; Doppelzimmer = **„Bett Fenster“** und **„Bett Tür“**. Ein
+  Bett ist frei oder belegt (durch einen Bewohner). Demo: je Bereich etwa sechs Zimmer,
+  gemischt Einzel- und Doppelzimmer, Zimmernummern ausgedacht (z. B. R1: 101–106).
+- **Bewohner** haben künftig Zimmer **und** Bett. Bestehende Demo-Bewohner bekommen ein Bett
+  zugeordnet.
+- **Aufnahme („Neuer Bewohner …“):** Auswahl erst Bereich, dann eine Liste **nur der freien
+  Betten** („102 – Bett Fenster“, „104 – Einzelzimmer“). Belegte Betten erscheinen nicht.
+  Kein freies Bett: Hinweis „In diesem Bereich ist kein Bett frei“.
+- **„Offen geführt“** ist **nicht** im Aufnahmeformular. Neue Bewohner stehen automatisch auf
+  „nein“ (geschlossen aufgenommen); ändern lässt es sich später in der Akte.
+- Zimmerwechsel und Entlassung geben das Bett frei; ein Zimmerwechsel zeigt dieselbe Auswahl
+  freier Betten.
+- Übersicht: Filter nach Bereich, Kopfzeile „R2 · 9 Bewohner · 3 Betten frei“.
+- Modul Ausgangsliste nutzt dieselben Zimmer (keine zweite Zimmerliste; Zimmergruppen des
+  Küchendienstes bleiben im Modul).
+
+## Fenster „Ärztliche Informationen“
+Status: freigegeben (Bauplan Schritt 26f)
+Datum: 08.11.2026
+Was: Diagnosen und Allergien bekommen ein eigenes Fenster „Ärztliche Informationen“.
+Warum: Vorgabe Tobi (08.11.2026).
+Umfang:
+- In der Akte ein Knopf bzw. Reiter **„Ärztliche Informationen“**. Darin:
+  - **Diagnosen:** Liste mit ICD-10-Schlüssel (optional) und Bezeichnung, seit (Datum), Art
+    (Hauptdiagnose / Nebendiagnose), gestellt von (Arzt aus dem Ärzteverzeichnis), Hinweis.
+    Nichts wird gelöscht; nicht mehr zutreffende Diagnosen „beendet am …“, Verlauf bleibt.
+  - **Allergien und Unverträglichkeiten:** wie bisher mit den drei Zuständen (`CLAUDE.md`,
+    Regel 5), dazu je Eintrag Art der Reaktion (optional).
+  - Platz für weitere ärztliche Angaben (Freitext „Hinweise für den Notfall“).
+- Der **Allergiehinweis bleibt oben in der Akte sichtbar** (Sicherheit); bearbeitet wird er
+  nur noch in diesem Fenster.
+- **Rechte:** neue Funktionen „Ärztliche Informationen ansehen“ und „Ärztliche Informationen
+  bearbeiten“ in der Rechte-Tabelle. Vorbelegung: ansehen alle Positionen außer Verwaltung;
+  bearbeiten nur Fachkräfte (Häkchen „nur Fachkräfte“) und Leitungen. Ohne Recht ist der Knopf
+  ausgegraut mit Begründung; der Allergiehinweis bleibt für alle sichtbar.
+- **Demo-Daten:** ausgedachte Diagnosen für die ausgedachten Bewohner, allgemein gehalten und
+  zum psychiatrischen Wohnheim passend; keine Fallgeschichten (`CLAUDE.md`, Regel 1).
+- HEB-Bogen und Visite zeigen die Diagnosen als Information an, das Programm wertet sie nicht.
+
+## Tagesplan als Anzeigetafel
+Status: freigegeben (Bauplan Schritt 26g)
+Datum: 08.11.2026
+Was: Der Tagesplan bekommt ein neues Aussehen nach dem Vorbild einer **Anzeigetafel am
+Flughafen**. Die aktuellen Termine stehen oben und sind hervorgehoben.
+Warum: Rückmeldung Tobi (08.11.2026): Die Gestaltung muss überarbeitet werden, sie soll anders
+aussehen, die aktuellen Termine oben hervorgehoben „wie bei einem Flughafenterminal“.
+Umfang (Festlegungen aus dem Chat, Tobi kann sie ändern):
+- **Tafel-Optik** als eigener Bereich auf der Seite: dunkle Fläche, helle, große Schrift,
+  Uhrzeit in fester Zeichenbreite (Spalten stehen sauber untereinander), gut lesbar auf
+  Abstand. Oben rechts groß die aktuelle Uhrzeit und das Datum. Der Rest des Programms bleibt
+  im hellen Stil.
+- **Spalten** wie auf einer Abflugtafel: Zeit · Bewohner (mit Zimmer) · Termin bzw. Therapie ·
+  Ort · Begleitung/Fahrzeug · **Status**.
+- **Status als Wort mit Farbe** (Farbe nie allein): „JETZT“ (läuft gerade), „GLEICH“ (beginnt
+  in den nächsten 30 Minuten), „GEPLANT“, „GEGANGEN“, „NOCH OFFEN“ (hat begonnen, keine
+  Bestätigung), „ABGESAGT“, „AUSGEFALLEN“, „ZURÜCK“.
+- **Reihenfolge:** oben ein abgesetzter Block **„Jetzt und gleich“**, darunter „Später
+  heute“; vergangene Termine rutschen nach unten unter „Erledigt“ und werden blasser.
+- **Selbstaktualisierung** jede Minute (Uhrzeit, Status, Reihenfolge) und bei jeder Änderung,
+  auch von anderen Rechnern (Mehrplatz).
+- Bestätigen wie bisher direkt in der Zeile („gegangen“, „abgesagt“, „ausgefallen“) —
+  bedienbar ohne die Tafel zu verlassen.
+- Umschalter „nach Bewohner“ bleibt.
+- **Vollbild-Ansicht** (Knopf und Taste F11): nur die Tafel, z. B. für einen Bildschirm im
+  Dienstzimmer; Esc beendet.
+- Bildschirmfotos im Testlauf erneuern.
