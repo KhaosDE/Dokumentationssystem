@@ -1,5 +1,5 @@
 {
-  "hinweis": "Alle Angaben sind ausgedacht (Demo). Namen: Pflanzen mit gleichem Anfangsbuchstaben. Keine Bilder – das Programm zeigt Initialen. Datumsangaben im Format TT.MM.JJJJ. allergie: eingetragen | keine_bekannt | nicht_erfasst. beschluss: ende | kein_beschluss | nicht_erfasst. offenGefuehrt: ja | nein | nicht_erfasst.",
+  "hinweis": "Alle Angaben sind ausgedacht (Demo). Namen: Pflanzen mit gleichem Anfangsbuchstaben. Keine Bilder – das Programm zeigt Initialen. Datumsangaben im Format TT.MM.JJJJ. allergie: eingetragen | keine_bekannt | nicht_erfasst. beschluss: ende | kein_beschluss | nicht_erfasst. offenGefuehrt: ja | nein | nicht_erfasst. wohnbereich: ohne Angabe „Wohnbereich A“.",
   "bewohner": [
     {
       "vorname": "Anton", "nachname": "Ahorn", "zimmer": "101",
@@ -41,7 +41,8 @@
       "vorname": "Gustav", "nachname": "Ginster", "zimmer": "107",
       "geburtsdatum": "02.04.1980", "aufnahmedatum": "09.01.2024",
       "allergie": "nicht_erfasst",
-      "beschluss": "nicht_erfasst", "offenGefuehrt": "ja"
+      "beschluss": "nicht_erfasst", "offenGefuehrt": "ja",
+      "wohnbereich": "Wohnbereich B"
     },
     {
       "vorname": "Hanna", "nachname": "Holunder", "zimmer": "108",
@@ -53,7 +54,8 @@
       "vorname": "Ida", "nachname": "Immergrün", "zimmer": "109",
       "geburtsdatum": "11.10.1985", "aufnahmedatum": "02.03.2025",
       "allergie": "eingetragen", "allergien": "Pflasterkleber",
-      "beschluss": "kein_beschluss", "offenGefuehrt": "nein"
+      "beschluss": "kein_beschluss", "offenGefuehrt": "nein",
+      "wohnbereich": "Wohnbereich B"
     },
     {
       "vorname": "Karl", "nachname": "Kiefer", "zimmer": "110",

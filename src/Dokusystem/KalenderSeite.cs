@@ -182,7 +182,8 @@ public sealed class KalenderSeite : Panel
     public void Bearbeiten(KalenderTermin? k)
     {
         using var fenster = new KalenderFenster(speicher, k, Stichtag, BewohnerFilter);
-        if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
+        Dialog.Zeigen(fenster, FindForm());
+        Aktualisieren();   // immer neu lesen: auch nach „Andere übernehmen“ im Konflikt-Hinweis
     }
 
     public void Absagen(KalenderTermin k)
@@ -521,6 +522,8 @@ public sealed class KalenderFenster : Form
 
     public void BewohnerAnkreuzen(long id) => BewohnerListe.SetItemChecked(bewohner.FindIndex(b => b.Id == id), true);
 
+    private bool ohnePruefung;   // Mehrplatz: nach „Meine Fassung speichern“ im Konflikt-Hinweis
+
     public bool Speichern()
     {
         try
@@ -533,7 +536,22 @@ public sealed class KalenderFenster : Form
                 Treffpunkt = Art == KalenderArt.Ausflug ? Treffpunkt.Text : "", Begleitung = Art == KalenderArt.Ausflug ? Begleitung.Text : "",
                 Kuerzel = Einstellungen.Laden().Kuerzel,
             }, Jetzt());
-            Gespeichert = bisher is null ? speicher.KalenderAnlegen(f) : speicher.KalenderAendern(bisher.Id, f);
+            Gespeichert = bisher is null ? speicher.KalenderAnlegen(f) : speicher.KalenderAendern(bisher.Id, f, ohnePruefung ? null : bisher.Fassungen.Count);
+        }
+        catch (Konflikt k)
+        {
+            switch (KonfliktFenster.Fragen(this, k))
+            {
+                case KonfliktWahl.MeineSpeichern:
+                    ohnePruefung = true;
+                    return Speichern();
+                case KonfliktWahl.AndereUebernehmen:
+                    DialogResult = DialogResult.Cancel;
+                    Close();
+                    return false;
+                default:
+                    return false;
+            }
         }
         catch (Eingabefehler e)
         {

@@ -34,3 +34,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 07.11.2026 — Claude Code: Bauplan Schritt 15 „HEB-Bogen aus Berichten“ (0.18.0) – Bauplan vollständig.
 - 08.11.2026 — „Alles freigeben“ (Tobi): Bauplan um Schritt 16 „Bewohnerakte: Ergänzungen“ und Schritt 17 „Mehrplatzbetrieb (Demo-Stufe)“ erweitert; Echtbetrieb bleibt außerhalb (Chat „Programme/Apps“).
 - 08.11.2026 — Claude Code: Bauplan Schritt 16 „Bewohnerakte: Ergänzungen“ (0.19.0).
+- 08.11.2026 — Claude Code: Bauplan Schritt 17 „Mehrplatzbetrieb (Demo-Stufe)“ (0.20.0) – Bauplan vollständig.

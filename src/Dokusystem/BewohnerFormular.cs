@@ -15,6 +15,8 @@ public sealed class BewohnerFormular : Form
     public TextBox Vorname { get; } = Feld();
     public TextBox Nachname { get; } = Feld();
     public TextBox Zimmer { get; } = Feld();
+    // Mehrplatz: zu welchem Wohnbereich der Bewohner gehört (Vorschläge aus den vorhandenen, eigene möglich).
+    public ComboBox Wohnbereich { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Dock = DockStyle.Fill, Font = Stil.Standard, MaxLength = Kern.Bereiche.Laenge };
     public TextBox Geburtsdatum { get; } = Feld("TT.MM.JJJJ");
     public TextBox Aufnahmedatum { get; } = Feld("TT.MM.JJJJ");
     public Dreiwahl Beschluss { get; } = new(["ende", "kein_beschluss", "nicht_erfasst"],
@@ -33,6 +35,7 @@ public sealed class BewohnerFormular : Form
     {
         this.speicher = speicher;
         this.bewohner = bewohner;
+        ausgangsfassung = bewohner;
         string titel = bewohner is null ? "Neuer Bewohner" : $"Akte bearbeiten – {bewohner.Name}";
         Text = $"{titel} ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -77,6 +80,7 @@ public sealed class BewohnerFormular : Form
         Zeile("Vorname", Vorname);
         Zeile("Nachname", Nachname);
         Zeile("Zimmer", Zimmer);
+        Zeile("Wohnbereich", Wohnbereich);
         Zeile("Geburtsdatum", Geburtsdatum);
         Zeile("Aufnahmedatum", Aufnahmedatum);
         Beschluss.Dock = DockStyle.Fill;
@@ -126,9 +130,18 @@ public sealed class BewohnerFormular : Form
         Controls.Add(raster);
         CancelButton = abbrechen;
 
+        // Vorschläge: alle Wohnbereiche der vorhandenen Bewohner und „Wohnbereich A/B“; neu: der eigene Bereich,
+        // wenn er ein Wohnbereich ist.
+        var vorhanden = speicher.AlleBewohner().Select(x => x.Wohnbereich)
+            .Concat(Kern.Bereiche.Vorschlaege.Where(v => v.StartsWith("Wohnbereich", StringComparison.Ordinal)))
+            .Distinct().Order(StringComparer.CurrentCulture).ToList();
+        Wohnbereich.Items.AddRange([.. vorhanden]);
+        string eigener = Einstellungen.Laden().Bereich;
+        Wohnbereich.Text = vorhanden.Contains(eigener) ? eigener : Kern.Bereiche.Vorgabe;
         if (bewohner is not null)
         {
             var werte = BewohnerRegeln.AlsEingabe(bewohner);
+            Wohnbereich.Text = werte.Wohnbereich;
             Vorname.Text = werte.Vorname;
             Nachname.Text = werte.Nachname;
             Zimmer.Text = werte.Zimmer;
@@ -200,6 +213,7 @@ public sealed class BewohnerFormular : Form
         Beschluss = Beschluss.Zustand,
         Beschlussende = Beschluss.Feld.Text,
         OffenGefuehrt = OffenGefuehrt.Zustand,
+        Wohnbereich = Wohnbereich.Text,
         Allergie = Allergie.Zustand,
         Allergien = Allergie.Feld.Text,
     };
@@ -210,12 +224,31 @@ public sealed class BewohnerFormular : Form
         Fehler.Visible = true;
     }
 
+    // Mehrplatz: so sah der Bewohner beim Öffnen aus. Hat ihn ein anderer Arbeitsplatz inzwischen
+    // geändert, kommt der Konflikt-Hinweis (beide Fassungen) statt stillem Überschreiben.
+    private Bewohner? ausgangsfassung;
+
     public bool Speichern()
     {
         try
         {
             var b = BewohnerRegeln.AusEingabe(Eingabe(), bewohner?.Id);
-            Gespeichert = speicher.BewohnerSpeichern(b, NeuesBild, BildEntfernen);
+            Gespeichert = speicher.BewohnerSpeichern(b, NeuesBild, BildEntfernen, ausgangsfassung);
+        }
+        catch (Konflikt k)
+        {
+            switch (KonfliktFenster.Fragen(this, k))
+            {
+                case KonfliktWahl.MeineSpeichern:
+                    ausgangsfassung = null;
+                    return Speichern();
+                case KonfliktWahl.AndereUebernehmen:
+                    DialogResult = DialogResult.Cancel;   // die Akte zeigt danach die andere Fassung
+                    Close();
+                    return false;
+                default:
+                    return false;
+            }
         }
         catch (Eingabefehler e)
         {

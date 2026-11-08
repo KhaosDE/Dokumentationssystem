@@ -25,6 +25,7 @@ public sealed class BewohnerBereich : Panel
     public NachrichtenHinweis Nachrichten { get; } = new() { Visible = false };
     public event Action<long?>? NachrichtenAnzeigen;
     private readonly Button nachrichtenKnopf = Stil.NebenKnopf("Nachrichten …");
+    private readonly Button statusKnopf = Stil.NebenKnopf("Status …");
     private readonly Panel aufgabenRahmen = new() { Dock = DockStyle.Top, BackColor = Stil.Seite };
     public event Action? AufgabenAnzeigen;
     public BewohnerFilter AktiverFilter { get; private set; } = BewohnerFilter.Alle;
@@ -75,6 +76,7 @@ public sealed class BewohnerBereich : Panel
         Aufgaben.AlleKnopf.Click += (_, _) => AufgabenAnzeigen?.Invoke();
         Nachrichten.OeffnenKnopf.Click += (_, _) => NachrichtenAnzeigen?.Invoke(null);
         nachrichtenKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) NachrichtenAnzeigen?.Invoke(id); };
+        statusKnopf.Click += (_, _) => StatusOeffnen();
         Controls.Add(Raster);
         Controls.Add(Akte);
         Controls.Add(FilterLeiste);
@@ -107,13 +109,18 @@ public sealed class BewohnerBereich : Panel
         var sichtbar = alle.Where(b => Kennzeichen.Passt(b, AktiverFilter)).ToList();
         DateOnly heute = Heute();
         DateTime jetzt = Jetzt();
-        string kuerzel = Einstellungen.Laden().Kuerzel;
+        var werte = Einstellungen.Laden();
+        string kuerzel = werte.Kuerzel;
+        var status = speicher.GeltendeStatusmeldungen(jetzt);
         Raster.KartenSetzen(sichtbar.Select(b =>
         {
+            // Mehrplatz: Statusmeldung vorne; Bewohner eines anderen Wohnbereichs hinten gekennzeichnet.
             var karte = new BewohnerKarte(b, heute,
                 speicher.UngeleseneUebergaben(b.Id!.Value, kuerzel, jetzt),
                 speicher.WichtigeBerichteSeit(b.Id!.Value, jetzt.AddDays(-7)),
-                Modulverwaltung.Marken(speicher, b, jetzt));
+                Modulverwaltung.Marken(speicher, b, jetzt),
+                status.TryGetValue(b.Id!.Value, out var s) ? [StatusmeldungRegeln.Marke(s, jetzt)] : null,
+                b.Wohnbereich != werte.Bereich ? [new Marke(MarkenArt.Angabe, b.Wohnbereich)] : null);
             karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
             return karte;
         }));
@@ -123,6 +130,15 @@ public sealed class BewohnerBereich : Panel
         string anzahl = alle.Count == 1 ? "1 Bewohner" : $"{alle.Count} Bewohner";
         kopf.TexteSetzen(AktiverFilter == BewohnerFilter.Alle ? anzahl : $"{sichtbar.Count} von {anzahl}", "Bewohner");
         kopf.KnoepfeSetzen(neuKnopf);
+    }
+
+    // Mehrplatz: die gezeigte Ansicht neu lesen (Karten oder Kopf und Stammdaten der Akte).
+    public void NeuLesen()
+    {
+        if (!AkteSichtbar) { UebersichtZeigen(); return; }
+        if (Akte.Bewohner?.Id is not long id || speicher.Bewohner(id) is not Bewohner b) { UebersichtZeigen(); return; }
+        Akte.NeuLaden();
+        kopf.TexteSetzen("Bewohnerakte", b.Name);
     }
 
     public void AkteZeigen(long id)
@@ -137,7 +153,17 @@ public sealed class BewohnerBereich : Panel
         Akte.Visible = true;
         AkteSichtbar = true;
         kopf.TexteSetzen("Bewohnerakte", b.Name);
-        kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, bearbeitenKnopf);
+        kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, statusKnopf, bearbeitenKnopf);
+    }
+
+    // Statusmeldung setzen oder aufheben (Mehrplatzbetrieb); danach die Akte neu lesen.
+    public bool StatusOeffnen()
+    {
+        if (Akte.Bewohner?.Id is not long id || speicher.Bewohner(id) is not Bewohner b) return false;
+        using var fenster = new StatusmeldungFenster(speicher, b);
+        bool gespeichert = Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK;
+        Akte.NeuLaden();
+        return gespeichert;
     }
 
     public BewohnerFormular FormularErstellen(Bewohner? b) => new(speicher, b);
@@ -165,6 +191,7 @@ public sealed class BewohnerBereich : Panel
     {
         using var formular = FormularErstellen(b);
         if (FormularZeigen(formular) is Bewohner gespeichert) AkteZeigen(gespeichert.Id!.Value);
+        else if (b?.Id is long id) AkteZeigen(id);   // neu lesen: ein anderer Arbeitsplatz kann inzwischen gespeichert haben
     }
 }
 
@@ -198,11 +225,14 @@ public sealed class AkteAnsicht : Panel
     public Label Aufnahmedatum { get; } = new();
     public Label Beschlussende { get; } = new();
     public Label OffenGefuehrt { get; } = new();
+    public Label Wohnbereich { get; } = new();
     public Label Alter { get; } = new();
 
-    // Marken im Kopf der Akte: Zimmer, „offen geführt“, Hinweise der Module (z. B. Widersprüche).
+    // Marken im Kopf der Akte: Statusmeldung (lang, mit Bereich, Kürzel und Zeit), Zimmer, „offen geführt“,
+    // Hinweise der Module (z. B. Widersprüche).
     public IEnumerable<string> KopfMarken => kopfMarken.Controls.OfType<MarkenFeld>().Select(m => m.Text);
     public Bewohner? Bewohner { get; private set; }
+    public string? StatusText { get; private set; }   // die geltende Statusmeldung, wie sie im Kopf steht
 
     private readonly Speicher speicher;
 
@@ -242,7 +272,7 @@ public sealed class AkteAnsicht : Panel
         foreach (var (beschriftung, wert) in new[]
                  {
                      ("Geburtsdatum", Geburtsdatum), ("Aufnahmedatum", Aufnahmedatum), ("Beschlussende", Beschlussende),
-                     ("Offen geführt", OffenGefuehrt),
+                     ("Offen geführt", OffenGefuehrt), ("Wohnbereich", Wohnbereich),
                  })
         {
             tabelle.Controls.Add(new Label
@@ -332,6 +362,22 @@ public sealed class AkteAnsicht : Panel
     {
         Bewohner = b;
         Reiter.Waehlen("Stammdaten");
+        Fuellen(b);
+    }
+
+    // Mehrplatz: Kopf und Stammdaten neu lesen, ohne den Reiter zu wechseln (z. B. nach 30 Sekunden,
+    // wenn ein anderer Arbeitsplatz etwas gespeichert hat). Die anderen Reiter lesen beim Wechsel neu.
+    public void NeuLaden()
+    {
+        if (Bewohner?.Id is not long id || speicher.Bewohner(id) is not Bewohner b) return;
+        Bewohner = b;
+        var scroll = AutoScrollPosition;
+        Fuellen(b);
+        AutoScrollPosition = new Point(-scroll.X, -scroll.Y);
+    }
+
+    private void Fuellen(Bewohner b)
+    {
         bild.Setzen(Bilder.Pfad(b.Bild), BewohnerRegeln.Initialen(b), b.Nachname);
         name.Text = b.Name;
         zimmer.Text = $"Zimmer {b.Zimmer}";
@@ -340,11 +386,19 @@ public sealed class AkteAnsicht : Panel
             kopfMarken.Controls.Remove(alt);
             alt.Dispose();
         }
+        var jetzt = DateTime.Now;
         var marken = new List<Marke>();
         if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offenMarke) marken.Add(offenMarke);
-        marken.AddRange(Modulverwaltung.Marken(speicher, b, DateTime.Now));
+        marken.AddRange(Modulverwaltung.Marken(speicher, b, jetzt));
         foreach (var m in marken)
             kopfMarken.Controls.Add(new MarkenFeld(m.Text, Stil.MarkeFuer(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
+        StatusText = speicher.Statusmeldung(b.Id!.Value, jetzt) is Statusmeldung status ? "Status: " + StatusmeldungRegeln.Langtext(status, jetzt) : null;
+        if (StatusText is not null)
+        {
+            var feld = new MarkenFeld(StatusText, Stil.MarkeFuer(MarkenArt.Status)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) };
+            kopfMarken.Controls.Add(feld);
+            kopfMarken.Controls.SetChildIndex(feld, 0);   // vorne, vor dem Zimmer
+        }
         AccessibleName = $"Akte von {b.Name}";
 
         // Allergiehinweis: drei klar verschiedene Darstellungen (Regel 5), immer mit Wort.
@@ -367,6 +421,7 @@ public sealed class AkteAnsicht : Panel
         bool offenUnklar = b.OffenGefuehrt == OffenGefuehrtZustand.NichtErfasst;
         OffenGefuehrt.ForeColor = offenUnklar ? Stil.Achtung.Text : Stil.TextNormal;
         OffenGefuehrt.Font = offenUnklar ? Stil.FettKursiv : Stil.Fett;
+        Wohnbereich.Text = b.Wohnbereich;
         AutoScrollPosition = Point.Empty;
         PerformLayout();
         Invalidate(true);

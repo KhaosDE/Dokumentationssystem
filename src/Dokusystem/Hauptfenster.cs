@@ -5,6 +5,8 @@ namespace Dokusystem;
 // Hauptfenster: Seitenleiste links mit allen Bereichen (unten Demo-Daten und Version), rechts der
 // Kopf mit Logofeld und dauerhaft sichtbarem Demo-Hinweis, darunter der aktive Bereich, ganz unten
 // die Statusleiste mit dem Farbschlüssel.
+// Mehrplatz: Alle 30 Sekunden prüft das Fenster, ob ein anderer Arbeitsplatz (oder ein zweites
+// Fenster) etwas gespeichert hat, und liest dann Zähler und die gezeigte Ansicht neu.
 // Noch nicht gebaute Bereiche zeigen „Kommt in Version …“ (Bauplan in IDEEN.md).
 public sealed class Hauptfenster : Form
 {
@@ -38,6 +40,10 @@ public sealed class Hauptfenster : Form
     public const string Startbereich = "Übersicht";
     public List<SeitenleistenEintrag> Navigation { get; } = [];
     public Label VersionText { get; } = new();
+    public Label Arbeitsplatz { get; } = new();   // Bereich und Ort der Datenbank
+    private readonly ToolTip hinweis = new();
+    private readonly System.Windows.Forms.Timer abgleich = new() { Interval = 30_000 };
+    private long? datenstand;
     public Button DemoKnopf { get; } = Stil.NebenKnopf("Demo-Daten zurücksetzen …");
     public string AktiverBereich { get; private set; } = "";
 
@@ -125,10 +131,14 @@ public sealed class Hauptfenster : Form
         VersionText.Font = Stil.Klein;
         VersionText.ForeColor = Stil.TextLeise;
         VersionText.AutoSize = true;
+        Arbeitsplatz.Font = Stil.Klein;
+        Arbeitsplatz.ForeColor = Stil.TextMittel;
+        Arbeitsplatz.AutoSize = true;
+        Arbeitsplatz.UseMnemonic = false;
 
         leiste.Controls.Add(programmName);
         foreach (var eintrag in Navigation) leiste.Controls.Add(eintrag);
-        leiste.Controls.AddRange([DemoKnopf, VersionText]);
+        leiste.Controls.AddRange([Arbeitsplatz, DemoKnopf, VersionText]);
         leiste.Layout += (_, _) => LeisteAnordnen();
         ModuleAnzeigen();
         speicher.ModuleGeaendert += ModuleAnzeigen;
@@ -151,11 +161,75 @@ public sealed class Hauptfenster : Form
         speicher.TherapieGeaendert += UebersichtNeu;
         speicher.WochenplanGeaendert += UebersichtNeu;
         speicher.KalenderGeaendert += UebersichtNeu;
+        speicher.StatusGeaendert += StatusNeu;
         AufgabenZaehlen();
         BenutzerAnzeigen();
+        ArbeitsplatzAnzeigen();
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
         // Erst „Bewohner“ (baut die Karten); das Programm wechselt danach zur Übersicht (Startbereich).
         BereichWaehlen("Bewohner");
+        datenstand = Datenstand();
+        abgleich.Tick += (_, _) => AenderungenVonAnderen();
+        abgleich.Start();
+    }
+
+    // ------------------------------------------------------------------ Mehrplatz
+
+    private long? Datenstand()
+    {
+        try { return speicher.Datenstand(); }
+        catch (SpeicherFehler) { return null; }   // Netz kurz weg: beim nächsten Mal wieder versuchen
+    }
+
+    // „Wohnbereich A · Datenbank lokal“ unten in der Seitenleiste; der volle Pfad als Hinweis.
+    public void ArbeitsplatzAnzeigen(bool erreichbar = true)
+    {
+        var werte = Einstellungen.Laden();
+        bool gemeinsam = !string.Equals(Path.GetDirectoryName(speicher.Pfad), Pfade.Datenordner, StringComparison.OrdinalIgnoreCase);
+        string ort = gemeinsam ? "gemeinsamer Ordner" : "Datenbank lokal";
+        bool neustart = !string.Equals(Path.GetFullPath(Einstellungen.DatenbankPfad(werte)), Path.GetFullPath(speicher.Pfad), StringComparison.OrdinalIgnoreCase);
+        Arbeitsplatz.Text = $"{werte.Bereich} · {ort}" + (erreichbar ? "" : " – nicht erreichbar") + (neustart ? "\nneuer Ort nach Neustart" : "");
+        Arbeitsplatz.ForeColor = erreichbar ? Stil.TextMittel : Stil.Beschluss.Text;
+        hinweis.SetToolTip(Arbeitsplatz, $"Bereich dieses Arbeitsplatzes: {werte.Bereich}\nDatenbank: {speicher.Pfad}");
+        leiste.PerformLayout();
+    }
+
+    // Hat ein anderer Arbeitsplatz etwas gespeichert? Dann Zähler und die gezeigte Ansicht neu lesen.
+    // Fenster zum Bearbeiten bleiben unberührt; ihr Speichern prüft selbst (Konflikt-Hinweis).
+    public bool AenderungenVonAnderen()
+    {
+        long? stand = Datenstand();
+        ArbeitsplatzAnzeigen(stand is not null);
+        if (stand is null || stand == datenstand || IsDisposed) return false;
+        datenstand = stand;
+        AufgabenZaehlen();
+        NachrichtenZaehlen();
+        string schluessel = Schluessel(AktiverBereich);
+        if (modulSeiten.TryGetValue(schluessel, out var modulSeite))
+        {
+            modulSeite.Zeigen();
+            Kopf.TexteSetzen(modulSeite.KopfText, schluessel);
+            return true;
+        }
+        switch (schluessel)
+        {
+            case "Bewohner": Bewohner.NeuLesen(); break;
+            case "Übersicht": Uebersicht.Aktualisieren(); break;
+            case "Übergabe": Uebergabe.Aktualisieren(); break;
+            case "Aufgaben": Aufgaben.Aktualisieren(); break;
+            case "Nachrichten": Nachrichten.Aktualisieren(); break;
+            case "Kalender": Kalender.Aktualisieren(); break;
+            case "Therapie": Therapie.Aktualisieren(); break;
+            case "Medikamente": Medikamente.Aktualisieren(); break;
+        }
+        return true;
+    }
+
+    private void StatusNeu()
+    {
+        if (IsDisposed) return;
+        if (AktiverBereich == "Übersicht") Uebersicht.Aktualisieren();
+        else if (AktiverBereich == "Bewohner") Bewohner.NeuLesen();
     }
 
     private int S(int wert) => Stil.Px(this, wert);
@@ -327,6 +401,9 @@ public sealed class Hauptfenster : Form
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
         BenutzerAnzeigen();
         AufgabenZaehlen();
+        ArbeitsplatzAnzeigen();
+        if (AktiverBereich == "Übersicht") Uebersicht.Aktualisieren();   // Bereich kann sich geändert haben
+        else if (AktiverBereich == "Bewohner" && !Bewohner.AkteSichtbar) Bewohner.UebersichtZeigen();
         return true;
     }
 
@@ -384,6 +461,9 @@ public sealed class Hauptfenster : Form
             speicher.TherapieGeaendert -= UebersichtNeu;
             speicher.WochenplanGeaendert -= UebersichtNeu;
             speicher.KalenderGeaendert -= UebersichtNeu;
+            speicher.StatusGeaendert -= StatusNeu;
+            abgleich.Dispose();
+            hinweis.Dispose();
         }
         if (disposing) speicher.ModuleGeaendert -= ModuleAnzeigen;
         base.Dispose(disposing);
@@ -407,13 +487,17 @@ public sealed class Hauptfenster : Form
         VersionText.Location = new Point(x + S(Stil.AbstandMini), unten - VersionText.PreferredHeight);
         unten = VersionText.Top - S(Stil.AbstandMittel);
         DemoKnopf.Bounds = new Rectangle(x, unten - S(Stil.KnopfHoehe), breite, S(Stil.KnopfHoehe));
+        Arbeitsplatz.MaximumSize = new Size(breite - S(Stil.AbstandMini), 0);
+        Arbeitsplatz.Location = new Point(x + S(Stil.AbstandMini), DemoKnopf.Top - S(Stil.AbstandKlein) - Arbeitsplatz.PreferredHeight);
     }
 
     // Alle Bewohner und Bilder weg, Demo-Daten neu laden – mit Rückfrage.
     public bool DemoZuruecksetzen(bool nachfragen = true)
     {
+        bool gemeinsam = !string.Equals(Path.GetDirectoryName(speicher.Pfad), Pfade.Datenordner, StringComparison.OrdinalIgnoreCase);
         if (nachfragen && MessageBox.Show(this,
-                "Alle Änderungen und hinterlegten Bilder werden gelöscht und die ausgedachten Demo-Daten neu geladen.\n\nFortfahren?",
+                "Alle Änderungen und hinterlegten Bilder werden gelöscht und die ausgedachten Demo-Daten neu geladen." +
+                (gemeinsam ? "\n\nDie Datenbank liegt im gemeinsamen Ordner: Das gilt für alle Arbeitsplätze." : "") + "\n\nFortfahren?",
                 "Demo-Daten zurücksetzen", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
             != DialogResult.Yes)
             return false;

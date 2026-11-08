@@ -5,6 +5,7 @@ namespace Dokusystem;
 // Startseite „Übersicht“: oben der Bereich „Heute“ (Bewohner, Abwesende, Termine des Tages,
 // Änderungen in der Medikation), darunter je Bewohner eine Karte mit den Marken des Tages.
 // Klick auf eine Karte öffnet die Akte. Baut sich nach Änderungen und um Mitternacht neu auf.
+// Mehrplatz: Gezeigt wird der eigene Bereich (Einstellungen), umschaltbar auf „alle Bereiche“.
 public sealed class UebersichtSeite : Panel
 {
     private readonly Speicher speicher;
@@ -19,6 +20,8 @@ public sealed class UebersichtSeite : Panel
     public Label Termine { get; } = new() { AutoSize = true, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
     public Label Medikation { get; } = new() { AutoSize = true, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
     public KartenRaster Raster { get; } = new();
+    public CheckBox AlleBereiche { get; } = new() { Text = "alle Bereiche", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
+    public Label BereichHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, Visible = false, UseMnemonic = false };
     public List<BewohnerKarte> Karten { get; } = [];
     public event Action<long>? AkteGewuenscht;
     public event Action? Geaendert;
@@ -29,7 +32,8 @@ public sealed class UebersichtSeite : Panel
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        heuteKarte.Controls.AddRange([heuteTitel, HeuteText, termineTitel, Termine, medikationTitel, Medikation]);
+        heuteKarte.Controls.AddRange([heuteTitel, AlleBereiche, BereichHinweis, HeuteText, termineTitel, Termine, medikationTitel, Medikation]);
+        AlleBereiche.CheckedChanged += (_, _) => Aktualisieren();
         Controls.Add(heuteKarte);
         Controls.Add(Raster);
         // Immer aktuell: Datumswechsel um Mitternacht (jede Minute prüfen, nur wenn sichtbar neu bauen).
@@ -46,7 +50,15 @@ public sealed class UebersichtSeite : Panel
         gezeigtAm = heute;
         var werte = Einstellungen.Laden();
         int frist = werte.BeschlussFristTage;
-        var alle = speicher.Heute(jetzt, werte.HebFristMonate);
+        var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
+        // Eigener Bereich: nur seine Bewohner. Hat er keine (z. B. „Therapie“), alle mit Hinweis.
+        var eigene = jeder.Where(h => h.Bewohner.Wohnbereich == werte.Bereich).ToList();
+        bool allesZeigen = AlleBereiche.Checked || eigene.Count == 0;
+        var alle = allesZeigen ? jeder : eigene;
+        BereichHinweis.Visible = !AlleBereiche.Checked && eigene.Count == 0 && jeder.Count > 0;
+        BereichHinweis.Text = $"Für „{werte.Bereich}“ gibt es keine eigenen Bewohner – gezeigt werden alle Bereiche.";
+        string bereichText = allesZeigen ? "alle Bereiche" : werte.Bereich;
+        var status = speicher.GeltendeStatusmeldungen(jetzt);
         Karten.Clear();
         int abwesend = 0;
         foreach (var h in alle)
@@ -58,18 +70,20 @@ public sealed class UebersichtSeite : Panel
             marken.InsertRange(0, modul.Where(m => m.Art == MarkenArt.Abwesend));
             marken.AddRange(modul.Where(m => m.Art != MarkenArt.Abwesend));
             if (marken.Any(m => m.Art == MarkenArt.Abwesend)) abwesend++;
+            if (status.TryGetValue(h.Bewohner.Id!.Value, out var s)) marken.Insert(0, StatusmeldungRegeln.Marke(s, jetzt));
+            if (allesZeigen && h.Bewohner.Wohnbereich != werte.Bereich) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
             var karte = new BewohnerKarte(h.Bewohner, heute, marken);
             karte.Gewaehlt += b => AkteGewuenscht?.Invoke(b.Id!.Value);
             Karten.Add(karte);
         }
         Raster.KartenSetzen(Karten);
-        heuteTitel.Text = $"HEUTE · {heute.ToString("dddd, dd.MM.yyyy", System.Globalization.CultureInfo.GetCultureInfo("de-DE")).ToUpperInvariant()}";
+        heuteTitel.Text = $"HEUTE · {heute.ToString("dddd, dd.MM.yyyy", System.Globalization.CultureInfo.GetCultureInfo("de-DE")).ToUpperInvariant()} · {bereichText.ToUpperInvariant()}";
         HeuteText.Text = UebersichtRegeln.HeuteText(alle, abwesend);
         var termine = UebersichtRegeln.TerminZeilen(alle);
         Termine.Text = termine.Count == 0 ? "Keine Termine heute." : string.Join(Environment.NewLine, termine);
         var medikation = UebersichtRegeln.MedikationZeilen(alle);
         Medikation.Text = medikation.Count == 0 ? "Keine Änderungen heute." : string.Join(Environment.NewLine, medikation);
-        KopfText = $"{alle.Count} Bewohner · Stand {jetzt:HH:mm} Uhr";
+        KopfText = $"{alle.Count} Bewohner · {bereichText} · Stand {jetzt:HH:mm} Uhr";
         PerformLayout();
         Geaendert?.Invoke();
     }
@@ -82,8 +96,16 @@ public sealed class UebersichtSeite : Panel
         int breite = Math.Max(300, ClientSize.Width - 2 * rand);
         int y = rand;
         heuteTitel.Location = new Point(innen, innen);
+        AlleBereiche.Location = new Point(Math.Max(heuteTitel.Right + innen, breite - innen - AlleBereiche.PreferredSize.Width),
+            heuteTitel.Top + (heuteTitel.Height - AlleBereiche.PreferredSize.Height) / 2);
+        int unterTitel = heuteTitel.Bottom + Stil.Px(this, Stil.AbstandMini);
+        if (BereichHinweis.Visible)
+        {
+            BereichHinweis.Location = new Point(innen, unterTitel);
+            unterTitel = BereichHinweis.Bottom + Stil.Px(this, Stil.AbstandMini);
+        }
         HeuteText.MaximumSize = new Size(breite - 2 * innen, 0);
-        HeuteText.Location = new Point(innen, heuteTitel.Bottom + Stil.Px(this, Stil.AbstandMini));
+        HeuteText.Location = new Point(innen, unterTitel);
         int spalte = (breite - 3 * innen) / 2;
         int oben = HeuteText.Bottom + Stil.Px(this, Stil.AbstandMittel);
         termineTitel.Location = new Point(innen, oben);

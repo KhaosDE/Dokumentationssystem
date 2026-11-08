@@ -19,6 +19,20 @@ public sealed class EinstellungenFenster : Form
     public CheckBox AutoUpdate { get; } = new();
     public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
+
+    // Mehrplatz: Bereichskennung dieses Arbeitsplatzes und Ort der Datenbank (gilt nach Neustart).
+    public ComboBox Bereich { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 220, MaxLength = Kern.Bereiche.Laenge };
+    public Label DatenbankOrt { get; } = new() { AutoSize = true, MaximumSize = new Size(380, 0), UseMnemonic = false };
+    public Button OrdnerKnopf { get; } = Stil.NebenKnopf("Gemeinsamen Ordner wählen …");
+    public Button LokalKnopf { get; } = Stil.NebenKnopf("Lokal (Vorgabe)");
+    public string? DatenbankOrdner { get; private set; }
+
+    // Zum Testen ersetzbar: Ordnerauswahl (null = abgebrochen).
+    public Func<string?> OrdnerWaehlen { get; set; } = () =>
+    {
+        using var dialog = new FolderBrowserDialog { Description = "Gemeinsamen Ordner für die Datenbank wählen (z. B. ein Netzlaufwerk)", UseDescriptionForTitle = true };
+        return dialog.ShowDialog() == DialogResult.OK ? dialog.SelectedPath : null;
+    };
     public Dictionary<Bogenart, Label> Vorlagen { get; } = [];
 
     // Zum Testen ersetzbar: Dateiauswahl für eine PDF-Vorlage (null = abgebrochen).
@@ -97,6 +111,37 @@ public sealed class EinstellungenFenster : Form
             Text = "Nur für die Vorführung, ohne Passwort. Wechseln geht auch oben rechts im Kopf.",
             AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
         });
+
+        Ganz(Abschnitt("MEHRPLATZ"));
+        Bereich.Items.AddRange([.. Kern.Bereiche.Vorschlaege]);
+        Bereich.Text = werte.Bereich;
+        Bereich.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
+        raster.Controls.Add(Beschriftung("Bereich"));
+        raster.Controls.Add(Bereich);
+        raster.Controls.Add(new Label());
+        raster.Controls.Add(new Label
+        {
+            Text = "Ausgedachte Kennung dieses Arbeitsplatzes. Die Übersicht zeigt zuerst die Bewohner dieses Bereichs; " +
+                   "Statusmeldungen tragen ihn mit.",
+            AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+        });
+        DatenbankOrdner = werte.DatenbankOrdner;
+        DatenbankOrt.Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandMini);
+        OrdnerKnopf.Click += (_, _) => { if (OrdnerWaehlen() is string ordner) OrdnerSetzen(ordner); };
+        LokalKnopf.Click += (_, _) => OrdnerSetzen(null);
+        foreach (var k in new[] { OrdnerKnopf, LokalKnopf }) k.AutoSize = true;
+        var ortSpalte = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0) };
+        ortSpalte.Controls.AddRange([DatenbankOrt, Formular.Reihe(OrdnerKnopf, LokalKnopf)]);
+        raster.Controls.Add(Beschriftung("Datenbank"));
+        raster.Controls.Add(ortSpalte);
+        raster.Controls.Add(new Label());
+        raster.Controls.Add(new Label
+        {
+            Text = "Mehrere Rechner mit demselben Ordner arbeiten gemeinsam (zum Ausprobieren: zwei Programmfenster). " +
+                   "Gilt nach dem Neustart. Ist der Ordner leer, entstehen dort die Demo-Daten. Auch im gemeinsamen Ordner nur ausgedachte Daten.",
+            AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+        });
+        OrtAnzeigen();
 
         Ganz(Abschnitt("PROGRAMM"));
         AutoUpdate.Text = "Beim Start nach Updates suchen";
@@ -234,6 +279,26 @@ public sealed class EinstellungenFenster : Form
 
     public bool HatLogo => logoBild is not null;
 
+    // null = lokal. Ein gewählter Ordner muss erreichbar und beschreibbar sein.
+    public bool OrdnerSetzen(string? ordner)
+    {
+        if (ordner is not null && Speicher.OrdnerPruefen(ordner) is string fehler)
+        {
+            FehlerZeigen(fehler);
+            return false;
+        }
+        DatenbankOrdner = ordner;
+        Fehler.Visible = false;
+        OrtAnzeigen();
+        return true;
+    }
+
+    private void OrtAnzeigen()
+    {
+        DatenbankOrt.Text = DatenbankOrdner is null ? "lokal im Datenordner dieses Rechners" : $"gemeinsamer Ordner: {DatenbankOrdner}";
+        LokalKnopf.Enabled = DatenbankOrdner is not null;
+    }
+
     public bool VorlageZuteilen(Bogenart art, string pfad)
     {
         try
@@ -321,7 +386,16 @@ public sealed class EinstellungenFenster : Form
         try
         {
             string kuerzel = benutzerKuerzel[Math.Max(0, Benutzer.SelectedIndex)];
-            Einstellungen.Aendern(w => w with { Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked, BeschlussFristTage = (int)BeschlussFrist.Value, HebFristMonate = (int)HebFrist.Value });
+            if (Kern.Bereiche.Pruefen(Bereich.Text) is string bereichFehler)
+            {
+                FehlerZeigen(bereichFehler);
+                return false;
+            }
+            Einstellungen.Aendern(w => w with
+            {
+                Kuerzel = kuerzel, AutoUpdate = AutoUpdate.Checked, BeschlussFristTage = (int)BeschlussFrist.Value, HebFristMonate = (int)HebFrist.Value,
+                Bereich = Kern.Bereiche.Bereinigen(Bereich.Text), DatenbankOrdner = DatenbankOrdner,
+            });
             if (logoGeaendert && NeuesLogo is not null) Einstellungen.LogoSetzen(NeuesLogo);
             else if (LogoEntfernen) Einstellungen.LogoSetzen(null);
             foreach (var (schluessel, haken) in Module)

@@ -201,6 +201,14 @@ public static class HebRegeln
         };
     }
 
+    // Alle Felder als ein Text (für den Konflikt-Hinweis).
+    public static string AlsText(Bogenart art, HebFassung f) =>
+        (f.Fertig ? "fertig" : "Entwurf") + Environment.NewLine +
+        string.Join(Environment.NewLine, AlleTextfelder(art).Where(x => f.Text(x.Schluessel).Length > 0)
+            .Select(x => $"{Environment.NewLine}{(x.Bereich > 0 ? $"Bereich {x.Bereich} · " : "")}{x.Titel}:{Environment.NewLine}{f.Text(x.Schluessel)}")) +
+        Environment.NewLine + Environment.NewLine + "Hilfebedarf: " +
+        string.Join(", ", Enumerable.Range(1, 5).Select(i => $"{i}: {f.Hilfebedarf.GetValueOrDefault(i)?.ToString(CultureInfo.InvariantCulture) ?? "–"}"));
+
     public static bool Gleich(HebFassung a, HebFassung b) =>
         a.Fertig == b.Fertig && a.Texte.Count == b.Texte.Count && a.Texte.All(x => b.Text(x.Key) == x.Value) &&
         Enumerable.Range(1, 5).All(i => a.Hilfebedarf.GetValueOrDefault(i) == b.Hilfebedarf.GetValueOrDefault(i));

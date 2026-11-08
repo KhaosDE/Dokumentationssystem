@@ -70,7 +70,8 @@ public sealed class BiografieAnsicht : Panel
     {
         if (bewohner is null) return;
         using var fenster = new BiografieFenster(speicher, bewohner, Abschnitte[abschnitt]);
-        if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Zeigen(bewohner);
+        Dialog.Zeigen(fenster, FindForm());
+        Zeigen(bewohner);   // immer neu lesen: auch nach „Andere übernehmen“ im Konflikt-Hinweis
     }
 
     protected override void OnLayout(LayoutEventArgs levent)
@@ -217,12 +218,30 @@ public sealed class BiografieFenster : Form
         FormulierungHinweis.Visible = BiografieRegeln.FormulierungFehlt(probe);
     }
 
+    private int? erwartet;   // Mehrplatz: so viele Fassungen gab es beim Öffnen
+
     public bool Speichern()
     {
+        erwartet ??= abschnitt.Fassungen.Count;
         try
         {
             var f = BiografieRegeln.AusEingabe(abschnitt.Nummer, Inhalt.Text, Angegeben.Checked, Einstellungen.Laden().Kuerzel, DateTime.Now);
-            speicher.BiografieSpeichern(bewohner.Id!.Value, f);
+            speicher.BiografieSpeichern(bewohner.Id!.Value, f, erwartet < 0 ? null : erwartet);
+        }
+        catch (Konflikt k)
+        {
+            switch (KonfliktFenster.Fragen(this, k))
+            {
+                case KonfliktWahl.MeineSpeichern:
+                    erwartet = -1;   // ohne Prüfung: meine Fassung wird die neueste, die andere bleibt im Verlauf
+                    return Speichern();
+                case KonfliktWahl.AndereUebernehmen:
+                    DialogResult = DialogResult.Cancel;
+                    Close();
+                    return false;
+                default:
+                    return false;
+            }
         }
         catch (Eingabefehler e)
         {

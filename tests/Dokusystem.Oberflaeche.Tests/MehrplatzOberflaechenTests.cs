@@ -1,0 +1,194 @@
+using Dokusystem.Kern;
+
+namespace Dokusystem.Oberflaeche.Tests;
+
+// Mehrplatzbetrieb (Bauplan Schritt 17), getestet wie empfohlen mit zwei Fenstern auf derselben
+// Datenbank: Abgleich nach 30 Sekunden, Konflikt-Hinweis, Bereiche, Statusmeldungen, Einstellungen.
+[Collection("Oberflaeche")]
+public class MehrplatzOberflaechenTests
+{
+    [Fact]
+    public void Zwei_Fenster_sehen_die_Aenderungen_des_anderen() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "AB" });
+        using var zweiter = new Speicher(u.Speicher.Pfad);
+        using var f1 = new Hauptfenster(u.Speicher);
+        using var f2 = new Hauptfenster(zweiter);
+        Hilfe.Zeigen(f1);
+        Hilfe.Zeigen(f2);
+        f2.BereichWaehlen("Übersicht");
+        Assert.False(f2.AenderungenVonAnderen());   // nichts geändert: nichts neu lesen
+        bool Status() => f2.Uebersicht.Karten.Single(k => k.Bewohner.Nachname == "Birke").Marken.Any(m => m.Text.StartsWith("Status: beim Friseur, bis "));
+        Assert.False(Status());
+
+        f1.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
+        using (new DialogErsatz(fenster =>
+        {
+            var s = Assert.IsType<StatusmeldungFenster>(fenster);
+            Assert.False(s.AufhebenKnopf.Enabled);   // Birke hat noch keine
+            s.Inhalt.Text = "beim Friseur";
+            return s.Setzen() ? DialogResult.OK : DialogResult.Cancel;
+        }))
+            f1.Kopf.Knoepfe.Single(k => k.Text == "Status …").PerformClick();
+        Assert.StartsWith("Status: beim Friseur · bis ", f1.Bewohner.Akte.StatusText);
+        Assert.EndsWith("Wohnbereich A, AB um " + DateTime.Now.ToString("HH:mm"), f1.Bewohner.Akte.StatusText);
+
+        Assert.True(f2.AenderungenVonAnderen());    // spätestens nach 30 Sekunden
+        Assert.True(Status());
+        Assert.False(f2.AenderungenVonAnderen());
+
+        // Aufgaben zwischen den Fenstern: der Zähler des anderen stimmt nach dem Abgleich.
+        int vorher = f2.Navigation.Single(n => n.Text == "Aufgaben").Anzahl ?? 0;
+        u.Speicher.AufgabeSpeichern(AufgabenRegeln.AusEingabe(new AufgabeEingabe { Text = "Fenster putzen", Verfasser = "AB" }, DateTime.Now));
+        f2.AenderungenVonAnderen();
+        Assert.Equal(vorher + 1, f2.Navigation.Single(n => n.Text == "Aufgaben").Anzahl);
+    });
+
+    [Fact]
+    public void Konflikt_in_der_Akte_zeigt_beide_Fassungen() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var zweiter = new Speicher(u.Speicher.Pfad);
+        var birke = u.Demo("Birke");
+        using var formular = new BewohnerFormular(u.Speicher, birke);   // Arbeitsplatz 1 öffnet …
+        zweiter.BewohnerSpeichern(birke with { Zimmer = "202" }, ausgangsfassung: birke);   // … Arbeitsplatz 2 speichert
+        formular.Zimmer.Text = "303";
+        KonfliktFenster? gezeigt = null;
+        using (new DialogErsatz(fenster =>
+        {
+            gezeigt = Assert.IsType<KonfliktFenster>(fenster);
+            Hilfe.Foto(gezeigt, "54_konflikt");
+            return DialogResult.Cancel;
+        }))
+            Assert.False(formular.Speichern());   // Abbrechen: nichts gespeichert, Eingaben bleiben
+        Assert.Contains("Zimmer: 202", gezeigt!.Andere.Text);
+        Assert.Contains("Zimmer: 303", gezeigt.Meine.Text);
+        Assert.Equal("202", u.Demo("Birke").Zimmer);
+        Assert.Equal("303", formular.Zimmer.Text);
+
+        using (new DialogErsatz(fenster =>
+        {
+            ((KonfliktFenster)fenster).Waehlen(KonfliktWahl.MeineSpeichern);
+            return DialogResult.OK;
+        }))
+            Assert.True(formular.Speichern());
+        Assert.Equal("303", u.Demo("Birke").Zimmer);
+        Assert.Equal("Wohnbereich A", u.Demo("Birke").Wohnbereich);   // das Formular behält den Wohnbereich
+    });
+
+    [Fact]
+    public void Reflexion_andere_Fassung_uebernehmen() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
+        using var zweiter = new Speicher(u.Speicher.Pfad);
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        f.Bewohner.AkteZeigen(u.Demo("Eiche").Id!.Value);
+        f.Bewohner.Akte.Reiter.Waehlen("Reflexion");
+        var r = f.Bewohner.Akte.Reflexion;
+        zweiter.ReflexionSpeichern(ReflexionRegeln.AusEingabe(u.Demo("Eiche").Id!.Value, r.Monat, ["Vom anderen Arbeitsplatz.", "", "", "", ""], false, "GH", DateTime.Now));
+        r.Bereiche[0].Feld.Text = "Meine Eingabe.";
+        using (new DialogErsatz(fenster =>
+        {
+            ((KonfliktFenster)fenster).Waehlen(KonfliktWahl.AndereUebernehmen);
+            return DialogResult.OK;
+        }))
+            Assert.False(r.Speichern(false));
+        Assert.Equal("Vom anderen Arbeitsplatz.", r.Bereiche[0].Feld.Text);
+    });
+
+    [Fact]
+    public void Uebersicht_eigener_Bereich_oder_alle() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        f.BereichWaehlen("Übersicht");
+        var s = f.Uebersicht;
+        Assert.Equal(8, s.Karten.Count);
+        Assert.All(s.Karten, k => Assert.Equal("Wohnbereich A", k.Bewohner.Wohnbereich));
+        Assert.StartsWith("8 Bewohner · Wohnbereich A · Stand ", f.Kopf.KleinText);
+        Assert.False(s.BereichHinweis.Visible);
+        // Statusmeldung eines anderen Bereichs (Therapie) auf der Karte, vorne.
+        Assert.StartsWith("Status: in der Holzwerkstatt, bis ", s.Karten.Single(k => k.Bewohner.Nachname == "Ahorn").Marken[0].Text);
+
+        s.AlleBereiche.Checked = true;
+        Assert.Equal(10, s.Karten.Count);
+        Assert.StartsWith("10 Bewohner · alle Bereiche · ", f.Kopf.KleinText);
+        var ginster = s.Karten.Single(k => k.Bewohner.Nachname == "Ginster");
+        Assert.Equal("Wohnbereich B", ginster.Marken[^1].Text);
+        Assert.StartsWith("Status: Besuch bei der Familie, bis ", s.Karten.Single(k => k.Bewohner.Nachname == "Immergrün").Marken[0].Text);
+        Hilfe.Foto(f, "56_uebersicht_alle_bereiche");
+
+        // Ein Bereich ohne eigene Bewohner (z. B. Therapie) sieht alle, mit Hinweis.
+        s.AlleBereiche.Checked = false;
+        Einstellungen.Aendern(w => w with { Bereich = "Therapie" });
+        s.Aktualisieren();
+        Assert.Equal(10, s.Karten.Count);
+        Assert.True(s.BereichHinweis.Visible);
+        // Auf der Seite „Bewohner“ zeigen Karten fremder Wohnbereiche ihren Bereich.
+        f.BereichWaehlen("Bewohner");
+        var karten = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().ToList();
+        Assert.Equal(10, karten.Count);
+        Assert.Equal("Wohnbereich A", karten.Single(k => k.Bewohner.Nachname == "Birke").Marken[^1].Text);
+    });
+
+    [Fact]
+    public void Statusmeldung_in_der_Akte_setzen_und_aufheben() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
+        var akte = f.Bewohner.Akte;
+        Assert.StartsWith("Status: in der Holzwerkstatt · bis ", akte.StatusText);
+        Assert.Contains("· Therapie, OP um ", akte.StatusText);
+        Assert.Equal(akte.StatusText, akte.KopfMarken.First());   // vorne im Kopf
+        Assert.Equal("Wohnbereich A", akte.Wohnbereich.Text);
+        Hilfe.Foto(f, "52_akte_status");
+        using (new DialogErsatz(fenster =>
+        {
+            var s = Assert.IsType<StatusmeldungFenster>(fenster);
+            Assert.True(s.AufhebenKnopf.Enabled);
+            Assert.Contains("in der Holzwerkstatt", s.Aktuell.Text);
+            Assert.Contains("beim Arzttermin", s.Verlauf.Text);   // die ältere steht im Verlauf
+            Assert.False(s.Setzen());
+            Assert.Contains("Text fehlt.", s.Fehler.Text);
+            s.Inhalt.Text = "beim Spaziergang mit Begleitung";
+            Hilfe.Foto(s, "53_statusmeldung");
+            return s.Aufheben() ? DialogResult.OK : DialogResult.Cancel;
+        }))
+            Assert.True(f.Bewohner.StatusOeffnen());
+        Assert.Null(akte.StatusText);
+        Assert.DoesNotContain(akte.KopfMarken, m => m.StartsWith("Status:"));
+        Assert.Contains("CD (Wohnbereich A) · aufgehoben", StatusmeldungRegeln.Verlauf(u.Speicher.Statusmeldungen(u.Demo("Ahorn").Id!.Value))[0]);
+    });
+
+    [Fact]
+    public void Einstellungen_Bereich_und_gemeinsamer_Ordner() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        string ordner = Path.Combine(u.Ordner, "gemeinsam");
+        Directory.CreateDirectory(ordner);
+        using (var fenster = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
+        {
+            Assert.Equal("Wohnbereich A", fenster.Bereich.Text);
+            Assert.StartsWith("lokal", fenster.DatenbankOrt.Text);
+            Assert.False(fenster.LokalKnopf.Enabled);
+            Assert.False(fenster.OrdnerSetzen(Path.Combine(u.Ordner, "fehlt")));
+            Assert.Contains("gibt es nicht", fenster.Fehler.Text);
+            Assert.True(fenster.OrdnerSetzen(ordner));
+            Assert.Equal($"gemeinsamer Ordner: {ordner}", fenster.DatenbankOrt.Text);
+            fenster.Bereich.Text = "Wohnbereich B";
+            Assert.True(fenster.Speichern());
+        }
+        var w = Einstellungen.Laden();
+        Assert.Equal(("Wohnbereich B", ordner), (w.Bereich, w.DatenbankOrdner));
+        using var f = new Hauptfenster(u.Speicher);
+        Assert.StartsWith("Wohnbereich B · Datenbank lokal", f.Arbeitsplatz.Text);
+        Assert.EndsWith("neuer Ort nach Neustart", f.Arbeitsplatz.Text);
+    });
+}

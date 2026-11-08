@@ -122,6 +122,7 @@ public static class Stil
         Kern.MarkenArt.Ausgang => Zimmer,
         Kern.MarkenArt.Termin => Zimmer,
         Kern.MarkenArt.Angabe => Zimmer,
+        Kern.MarkenArt.Status => Unterwegs,
         _ => Achtung,
     };
 
@@ -130,7 +131,7 @@ public static class Stil
     [
         (Beschluss, "Beschluss, Allergie"),
         (Achtung, "nicht erfasst, Frist"),
-        (Unterwegs, "Übergabe"),
+        (Unterwegs, "Übergabe, Status"),
         (Hinweis, "wichtig"),
         (Abwesend, "abwesend"),
         (Zimmer, "Zimmer, Lebensbereich"),

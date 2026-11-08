@@ -26,9 +26,11 @@ internal static class Program
             "Dokumentationssystem", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         Speicher speicher;
+        string? hinweis;
         try
         {
-            speicher = new Speicher();
+            // Mehrplatz: Datenbank am eingestellten Ort (lokal oder gemeinsamer Ordner).
+            (speicher, hinweis) = Speicher.Oeffnen(Einstellungen.Laden());
             Modulverwaltung.Anmelden(speicher);
             speicher.DemoBeimErstenStart();
         }
@@ -37,6 +39,8 @@ internal static class Program
             MessageBox.Show(e.Message, "Dokumentationssystem", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
+        if (hinweis is not null)
+            MessageBox.Show(hinweis, "Dokumentationssystem", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         using (speicher)
         using (var fenster = new Hauptfenster(speicher))
         {

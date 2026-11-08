@@ -275,7 +275,9 @@ public sealed class HebFenster : Form
         ? Felder.Values.Any(b => b.Text.Trim().Length > 0) || Stufen().Values.Any(s => s is not null)
         : Felder.Any(x => x.Value.Text.Trim() != f.Text(x.Key)) || Stufen().Any(x => x.Value != f.Hilfebedarf.GetValueOrDefault(x.Key));
 
-    public bool Speichern(bool fertig)
+    public bool Speichern(bool fertig) => Speichern(fertig, ohnePruefung: false);
+
+    private bool Speichern(bool fertig, bool ohnePruefung)
     {
         try
         {
@@ -283,7 +285,24 @@ public sealed class HebFenster : Form
             if (fertig && HebRegeln.ZuLang(Bogen.Art, f) is { Count: > 0 } lang &&
                 Rueckfrage($"Diese Felder sind länger als im Bogen vorgesehen:\n{string.Join("\n", lang)}\n\nTrotzdem als fertig markieren?") != DialogResult.Yes)
                 return false;
-            Bogen = speicher.HebSpeichern(f);
+            Bogen = speicher.HebSpeichern(f, ohnePruefung ? null : Bogen.Fassungen.Count);
+        }
+        catch (Konflikt k)
+        {
+            switch (KonfliktFenster.Fragen(this, k))
+            {
+                case KonfliktWahl.MeineSpeichern:
+                    return Speichern(fertig, ohnePruefung: true);
+                case KonfliktWahl.AndereUebernehmen:
+                    Bogen = speicher.HebBogen(Bogen.Id) ?? Bogen;
+                    Laden();
+                    SeiteZeigen();
+                    MeldungZeigen("Die Fassung des anderen Arbeitsplatzes ist übernommen.", Stil.Offen);
+                    return false;
+                default:
+                    MeldungZeigen("Nicht gespeichert – ein anderer Arbeitsplatz hat den Bogen inzwischen geändert.", Stil.Achtung);
+                    return false;
+            }
         }
         catch (Eingabefehler e)
         {

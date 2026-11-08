@@ -33,11 +33,14 @@ public sealed partial class Speicher
     }
 
     // Neue Fassung; ist nichts geändert, entsteht keine.
-    public HebBogen HebSpeichern(HebFassung f)
+    public HebBogen HebSpeichern(HebFassung f, int? erwartet = null)
     {
         var bisher = HebBogen(f.BogenId) ?? throw new Eingabefehler(["Diesen HEB-Bogen gibt es nicht mehr."]);
         if (bisher.Aktuell is HebFassung alt && HebRegeln.Gleich(alt, f)) return bisher;
         using var transaktion = db.BeginTransaction();
+        FassungenPruefen(transaktion, "SELECT COUNT(*) FROM heb_fassungen WHERE bogen_id = $b", erwartet,
+            () => HebBogen(f.BogenId)?.Aktuell is HebFassung a ? FassungText(a.Kuerzel, a.Erstellt, HebRegeln.AlsText(bisher.Art, a)) : "",
+            FassungText(f.Kuerzel, f.Erstellt, HebRegeln.AlsText(bisher.Art, f)), ("$b", f.BogenId));
         HebFassungEinfuegen(f, transaktion);
         transaktion.Commit();
         return HebBogen(f.BogenId)!;

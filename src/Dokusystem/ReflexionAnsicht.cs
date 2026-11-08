@@ -113,14 +113,31 @@ public sealed class ReflexionAnsicht : Panel
     }
 
     // fertig: der Status nach dem Speichern. true = gespeichert.
-    public bool Speichern(bool fertig)
+    public bool Speichern(bool fertig) => Speichern(fertig, ohnePruefung: false);
+
+    private bool Speichern(bool fertig, bool ohnePruefung)
     {
         if (bewohner is null) return false;
         try
         {
             var f = ReflexionRegeln.AusEingabe(bewohner.Id!.Value, Monat, Bereiche.Select(b => b.Feld.Text).ToList(), fertig,
                 Einstellungen.Laden().Kuerzel, Jetzt());
-            speicher.ReflexionSpeichern(f);
+            speicher.ReflexionSpeichern(f, ohnePruefung ? null : Aktuell?.Fassungen.Count);
+        }
+        catch (Konflikt k)
+        {
+            switch (KonfliktFenster.Fragen(FindForm(), k))
+            {
+                case KonfliktWahl.MeineSpeichern:
+                    return Speichern(fertig, ohnePruefung: true);
+                case KonfliktWahl.AndereUebernehmen:
+                    Laden();
+                    MeldungZeigen("Die Fassung des anderen Arbeitsplatzes ist übernommen.", Stil.Offen);
+                    return false;
+                default:
+                    MeldungZeigen("Nicht gespeichert – ein anderer Arbeitsplatz hat die Reflexion inzwischen geändert.", Stil.Achtung);
+                    return false;
+            }
         }
         catch (Eingabefehler e)
         {
