@@ -358,7 +358,7 @@ public sealed class Hauptfenster : Form
         {
             Visiten.Zeigen();
             Kopf.TexteSetzen(Visiten.KopfText, "Visiten");
-            Kopf.KnoepfeSetzen(Visiten.NeuKnopf);
+            Kopf.KnoepfeSetzen(Visiten.BeginnenKnopf, Visiten.NeuKnopf);
             return;
         }
         if (schluessel == "Übergabe")

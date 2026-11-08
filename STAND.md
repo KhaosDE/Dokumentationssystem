@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.4** (Ärzteverzeichnis, Bauplan Schritt 26b).
+Stand: 08.11.2026. Version: **0.29.5** (Visite: Übersicht aller Bewohner, Bauplan Schritt 26c).
 
 ## Aktuell
 
@@ -97,7 +97,15 @@ Neu in 0.29.4: **Ärzteverzeichnis** (Einstellungen → „VERWALTUNG“) mit au
 Termin –, steht eine **Auswahl** statt eines Textfelds; „Arzt anlegen …“ gleich daneben (Recht
 „Ärzteverzeichnis verwalten“).
 
-**Nächster Schritt:** Bauplan Schritt 26c „Visite: Übersicht aller Bewohner“ (0.29.5).
+Neu in 0.29.5: **„Visite beginnen …“** (Datum, Arzt aus dem Verzeichnis, dabei) öffnet die
+**Visitenansicht** über die ganze Fläche: links alle Bewohner des Bereichs (Zimmer, Name,
+Bezugspflege, Häkchen „besprochen“, „noch offen: 7 von 10“), rechts Allergien, die **aktuelle
+Medikation** wie im Medikamentenplan, die letzte Visite, offene Aufgaben zur Medikation und die
+Eingabe. Alles steht sofort als **Entwurf** in der Datenbank; „Unterbrechen“ und später **„Visite
+fortsetzen“**. Erst **„Visite abschließen …“** legt Berichte und Aufgaben an und zeigt die Aufgaben
+gesammelt. Ausdruck **„Visitenliste“** als Papiervorlage. Das Feld „Art der Visite“ entfällt.
+
+**Nächster Schritt:** Bauplan Schritt 26d „Kleine Verbesserungen: Nachrichten „gelesen“, Datum mit Punkten, Kopf der Akte“ (0.29.6).
 
 ## Fertig
 
@@ -637,6 +645,24 @@ Termin –, steht eine **Auswahl** statt eines Textfelds; „Arzt anlegen …“
     Name, der nicht im Verzeichnis steht, bleibt wählbar („nicht im Verzeichnis“).
   - Demo `daten/demo/aerzte.json`: sieben ausgedachte Ärztinnen und Ärzte (eine inaktiv), Adressen
     nur `@example.org`; Dr. Ulme und Dr. Linde aus den bisherigen Demo-Daten stehen darin.
+- 0.29.5 — Visite: Übersicht aller Bewohner (Bauplan Schritt 26c, 08.11.2026):
+  - Seite „Visiten“: Hauptknopf „Visite beginnen …“ (oder „Visite fortsetzen“), daneben „Neue Visite …“
+    (einzelne Bewohner, wie bisher) und „Visitenliste drucken …“. Fenster „Visite beginnen“: Datum
+    (heute), Arzt (Auswahl aus dem Ärzteverzeichnis), dabei (angemeldete Person vorbelegt).
+  - Visitenansicht über die ganze Fläche. Kopfleiste: Datum, Arzt, dabei, „noch offen: X von N“,
+    „N Aufgaben vorgemerkt“, Sortierung „nach Zimmer“/„nach Name“, „◀ Vorheriger“, „Nächster ▶“,
+    „Unterbrechen“, „Visite abschließen …“. Links die Bewohner des eigenen Wohnbereichs mit Häkchen
+    „besprochen“ (setzt sich bei einem Eintrag selbst, lässt sich auch von Hand setzen). Rechts Name,
+    Zimmer, Allergien (drei Zustände), Tabelle der aktuellen Medikation und Bedarf (wie im
+    Medikamentenplan, mit Pausen und Stufen), letzte Visite in einer Zeile, offene Aufgaben zur
+    Medikation, darunter die Eingabe (Besprochenes, Anordnungen geändert, Facharzttermin nötig).
+  - Entwurf je Wohnbereich in der Datenbank (neue Tabelle `visite_entwuerfe`): gespeichert beim
+    Wechsel des Bewohners, beim Verlassen der Eingabe und 1,5 Sekunden nach dem Tippen.
+  - „Visite abschließen …“: eine Visite mit allen besprochenen Bewohnern (Berichte, Aufgaben wie in
+    0.29.0), danach **eine** Einblendung mit allen Aufgaben. Während der Visite keine Einblendungen.
+  - Ausdruck „Visitenliste“ (A4 hoch): je Bewohner ein Block mit Zimmer, Allergien, Medikation und
+    Linien für Notizen.
+  - Feld „Art der Visite“ entfällt (ältere Visiten zeigen die Art weiter im Kopf). Ein Arzt ist Pflicht.
 
 ## Offene Punkte
 
@@ -1104,6 +1130,13 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 26c): Der Entwurf gilt je Wohnbereich (eine laufende Visite pro Bereich), nicht je
+  Person – so kann eine Kollegin die Visite am anderen Rechner fortsetzen. Die Visitenansicht zeigt die
+  Bewohner des eigenen Bereichs (Einstellung „Bereich“ dieses Rechners).
+- 08.11.2026 (Schritt 26c): „Besprochen“ setzt sich, sobald bei einem Bewohner etwas eingetragen ist;
+  ein Häkchen ohne Eintrag (z. B. „nichts Neues“) lässt sich von Hand setzen und erzeugt keinen Bericht.
+- 08.11.2026 (Schritt 26c): Die Spalte „Art“ bleibt in der Datenbank, damit ältere Visiten lesbar
+  bleiben; neue Visiten speichern sie leer.
 - 08.11.2026 (Schritt 26b): Gespeichert wird weiter der Name des Arztes (wie bisher als Text), nicht eine
   Nummer – so bleiben ältere Einträge und Ausdrucke gleich, und ein umbenannter oder inaktiver Arzt
   ändert keine früheren Einträge. Namen sind im Verzeichnis eindeutig.
@@ -1190,6 +1223,20 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.5:
+
+1. „Visiten“ → „Visite beginnen …“: Datum heute, Arzt wählen (z. B. Dr. Linde), „dabei“ mit eigenem
+   Kürzel → „Beginnen“. Die Ansicht füllt die Fläche; links die Bewohner, oben „noch offen: … von …“.
+2. Rechts beim ersten Bewohner: Allergien, Medikation wie im Medikamentenplan, „Letzte Visite: …“.
+   Besprochenes eintippen → „Nächster ▶“: Häkchen links gesetzt, „noch offen“ eins weniger.
+3. Bei einem Bewohner „Anordnungen geändert“ (Dosis geändert, ein Medikament) und bei einem anderen
+   „Facharzttermin nötig“ mit Fachrichtung → oben „2 Aufgaben vorgemerkt“, keine Einblendung.
+4. „Unterbrechen“ → Knopf heißt „Visite fortsetzen“. Programm schließen und neu starten →
+   „Visite fortsetzen“ → alle Einträge sind noch da.
+5. „Visitenliste drucken …“ → Vorschau: je Bewohner ein Block mit Medikation und Notizlinien.
+6. „Visite abschließen …“ → eine Einblendung mit allen Aufgaben; die Visite steht in der Liste, je
+   Bewohner ein Bericht in der Akte.
 
 Version 0.29.4:
 

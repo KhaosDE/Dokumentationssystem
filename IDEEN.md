@@ -1026,7 +1026,7 @@ Umfang:
 - Demo: etwa sechs ausgedachte Ärztinnen und Ärzte verschiedener Fachrichtungen.
 
 ## Visite: Übersicht aller Bewohner
-Status: freigegeben (Bauplan Schritt 26c)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Eine Visitenansicht, in der man mit dem Arzt alle Bewohner der Reihe nach durchgeht —
 mit der aktuellen Medikation jedes Bewohners — und währenddessen den Bericht schreibt.

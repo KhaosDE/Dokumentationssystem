@@ -69,6 +69,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   Speichern zeigt das Programm sofort die Aufgaben dazu: Medikament anlegen, im Medikamentenplan
   eintragen (das passende Formular mit Arzt und Datum der Visite) oder den Facharzttermin in den
   Kalender eintragen (auf Wunsch mit Fahrt). Die Medikation ändert das Programm nicht selbst.
+  „Visite beginnen …“ geht mit dem Arzt alle Bewohner des Bereichs der Reihe nach durch: links die
+  Liste mit „besprochen“, rechts die aktuelle Medikation und die Eingabe. Alles bleibt als Entwurf
+  gespeichert (auch zum Fortsetzen später); die Aufgaben kommen gesammelt beim Abschließen. Dazu der
+  Ausdruck „Visitenliste“ als Papiervorlage.
 - **Aufgaben** (links, mit Zähler): was die nächste Schicht (oder wer Zeit hat) tun soll,
   gruppiert nach Schicht (oben die laufende). Aufgaben bleiben stehen, bis jemand sie als erledigt
   markiert; schafft man es nicht, „An die nächste Schicht weitergeben …“ mit kurzer Notiz. Die

@@ -23,12 +23,36 @@ public sealed class MedikationAnsicht : Panel
     public CheckBox AbgesetzteZeigen { get; } = new() { Text = "Abgesetzte zeigen", AutoSize = true, BackColor = Stil.Seite };
     public MarkenFeld Hinweis { get; } = new(MedikationRegeln.DruckHinweis, Stil.Achtung);
     public Label TagFehler { get; } = new() { AutoSize = true, ForeColor = Stil.Beschluss.Text, BackColor = Stil.Seite, Visible = false };
-    public DataGridView Tabelle { get; } = PlanTabelle.Bauen(
+    public DataGridView Tabelle { get; } = RegelTabelleBauen();
+    public DataGridView BedarfTabelle { get; } = BedarfTabelleBauen();
+
+    // Auch für die Visitenansicht (Schritt 26c): dieselben Tabellen wie im Medikamentenplan.
+    public static DataGridView RegelTabelleBauen() => PlanTabelle.Bauen(
         ("medikament", "Medikament", 30), ("morgens", "morgens", 7), ("mittags", "mittags", 7), ("abends", "abends", 7), ("nachts", "nachts", 7),
         ("arzt", "verordnet von", 13), ("seit", "seit", 9), ("status", "Status", 14), ("hinweis", "Hinweis", 16));
-    public DataGridView BedarfTabelle { get; } = PlanTabelle.Bauen(
+
+    public static DataGridView BedarfTabelleBauen() => PlanTabelle.Bauen(
         ("medikament", "Medikament", 30), ("anlass", "Anlass", 18), ("einzeldosis", "Einzeldosis", 9), ("hoechstens", "höchstens", 11),
         ("arzt", "verordnet von", 13), ("seit", "seit", 9), ("status", "Status", 14), ("hinweis", "Hinweis", 16));
+
+    // Füllt beide Tabellen mit dem, was am Tag gilt (Abgesetztes nur auf Wunsch).
+    public static void TabellenFuellen(DataGridView regel, DataGridView bedarf, IEnumerable<Tagesstand> staende, bool abgesetzteZeigen)
+    {
+        var liste = staende.ToList();
+        bool Gezeigt(Tagesstand s) => s.Sichtbar || s.Zustand == Zustand.NochNicht || (abgesetzteZeigen && s.Zustand == Zustand.Abgesetzt);
+        PlanTabelle.Fuellen(regel, liste.Where(s => Gezeigt(s) && !s.Verordnung.Bedarf), s =>
+        {
+            var v = s.Verordnung;
+            var d = s.Dosis.Werte.Select(w => Menge(w, v.Einheit)).ToArray();
+            return [MedikamentText(v), d[0], d[1], d[2], d[3], v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), StatusText(s), v.Hinweis];
+        });
+        PlanTabelle.Fuellen(bedarf, liste.Where(s => Gezeigt(s) && s.Verordnung.Bedarf), s =>
+        {
+            var v = s.Verordnung;
+            return [MedikamentText(v), v.BedarfAnlass, Menge(v.Dosis.Morgens, v.Einheit), v.BedarfHoechstens.Length > 0 ? v.BedarfHoechstens : "keine Angabe",
+                    v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), StatusText(s), v.Hinweis];
+        });
+    }
     public Label RegelLeer { get; } = Leer("Keine regelmäßige Medikation an diesem Tag.");
     public Label BedarfLeer { get; } = Leer("Keine Bedarfsmedikation.");
 
@@ -104,19 +128,7 @@ public sealed class MedikationAnsicht : Panel
         TagFehler.Visible = tag is null;
         TagFehler.Text = "Tag bitte als TT.MM.JJJJ eingeben.";
         var staende = tag is DateOnly t ? Staende(t) : [];
-        bool Gezeigt(Tagesstand s) => s.Sichtbar || s.Zustand == Zustand.NochNicht || (AbgesetzteZeigen.Checked && s.Zustand == Zustand.Abgesetzt);
-        PlanTabelle.Fuellen(Tabelle, staende.Where(s => Gezeigt(s) && !s.Verordnung.Bedarf), s =>
-        {
-            var v = s.Verordnung;
-            var d = s.Dosis.Werte.Select(w => Menge(w, v.Einheit)).ToArray();
-            return [MedikamentText(v), d[0], d[1], d[2], d[3], v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), StatusText(s), v.Hinweis];
-        });
-        PlanTabelle.Fuellen(BedarfTabelle, staende.Where(s => Gezeigt(s) && s.Verordnung.Bedarf), s =>
-        {
-            var v = s.Verordnung;
-            return [MedikamentText(v), v.BedarfAnlass, Menge(v.Dosis.Morgens, v.Einheit), v.BedarfHoechstens.Length > 0 ? v.BedarfHoechstens : "keine Angabe",
-                    v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), StatusText(s), v.Hinweis];
-        });
+        TabellenFuellen(Tabelle, BedarfTabelle, staende, AbgesetzteZeigen.Checked);
         Tabelle.Visible = Tabelle.Rows.Count > 0;
         RegelLeer.Visible = tag is not null && Tabelle.Rows.Count == 0;
         BedarfTabelle.Visible = BedarfTabelle.Rows.Count > 0;
@@ -124,10 +136,10 @@ public sealed class MedikationAnsicht : Panel
         PerformLayout();
     }
 
-    private static string MedikamentText(Verordnung v) => v.Medikament + (v.Staerke.Length > 0 ? $" · {v.Staerke}" : " · Stärke: keine Angabe");
+    public static string MedikamentText(Verordnung v) => v.Medikament + (v.Staerke.Length > 0 ? $" · {v.Staerke}" : " · Stärke: keine Angabe");
 
     // Menge je Einnahme; die Einheit nur, wenn es nicht „Stück“ sind (z. B. „20 Tropfen“).
-    private static string Menge(string wert, string einheit) =>
+    public static string Menge(string wert, string einheit) =>
         einheit.Length == 0 || einheit == "Stück" || wert == "0" ? wert : $"{wert} {einheit}";
 
     // Klick auf eine Zeile: Einzelheiten und Verlauf. Wählt man dort eine Änderung, öffnet sie sich danach.

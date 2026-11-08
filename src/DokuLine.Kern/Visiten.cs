@@ -23,7 +23,7 @@ public sealed record Visite
 {
     public long Id { get; init; }
     public DateOnly Datum { get; init; }
-    public string Art { get; init; } = "";
+    public string Art { get; init; } = "";   // seit Schritt 26c nicht mehr erfasst (ältere Visiten behalten sie)
     public string Arzt { get; init; } = "";
     public string Teilnehmer { get; init; } = "";
     public DateTime Erstellt { get; init; }
@@ -56,7 +56,6 @@ public enum VisitenAktion { MedikamentAnlegen, MedikationAendern, FacharztTermin
 
 public static class VisitenRegeln
 {
-    public static readonly string[] Arten = ["Hausarzt", "Psychiater", "Facharzt"];
 
     public static string ArtText(AnordnungArt a) => a switch
     {
@@ -79,8 +78,7 @@ public static class VisitenRegeln
             if (datum > DateOnly.FromDateTime(jetzt)) fehler.Add("Die Visite liegt in der Zukunft – bitte nach der Visite eintragen.");
         }
         catch (FormatException x) { fehler.Add(x.Message); }
-        if (string.IsNullOrWhiteSpace(e.Art)) fehler.Add("Art der Visite fehlt (z. B. Hausarzt).");
-        if (string.IsNullOrWhiteSpace(e.Arzt)) fehler.Add("Arzt fehlt (ausgedacht).");
+        if (string.IsNullOrWhiteSpace(e.Arzt)) fehler.Add("Arzt fehlt (aus dem Ärzteverzeichnis wählen).");
         if (string.IsNullOrWhiteSpace(e.Kuerzel)) fehler.Add("Kürzel fehlt (oben rechts „Angemeldet als …“).");
         var eintraege = e.Eintraege.Where(x => x.Besprochen.Trim().Length > 0 || x.Anordnungen.Count > 0 || x.Facharzt.Trim().Length > 0 || x.FacharztNoetig).ToList();
         if (eintraege.Count == 0) fehler.Add("Bitte für mindestens einen Bewohner eintragen, was besprochen wurde.");
@@ -103,7 +101,8 @@ public static class VisitenRegeln
         };
     }
 
-    public static string Kopf(Visite v) => $"Visite {Kern.Datum.Text(v.Datum)} ({v.Art}, {v.Arzt})";
+    // „Visite 08.11.2026 (Dr. Linde (ausgedacht))“; ältere Visiten mit Art: „(Psychiater, Dr. Linde …)“.
+    public static string Kopf(Visite v) => $"Visite {Kern.Datum.Text(v.Datum)} ({(v.Art.Length > 0 ? $"{v.Art}, " : "")}{v.Arzt})";
 
     public static string AufgabeText(Visite v, VisiteAnordnung a) =>
         a.MedikamentId is null
