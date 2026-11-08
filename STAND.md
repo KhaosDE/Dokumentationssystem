@@ -380,6 +380,9 @@ Knöpfe sichtbar, aber grau und nennen den Grund.
     hat er keinen mit Bewohnern, den Bereich des Rechners.
   - Demo `daten/demo/mitarbeiter.json`: 13 ausgedachte Mitarbeiter, je Position mindestens einer,
     Fachkräfte und Nicht-Fachkräfte, eine ausgeschiedene Person (Hugo Ibis).
+  - Außerdem (Wunsch Tobi in der Sitzung): **Platzhalter für das Einrichtungslogo** oben rechts im
+    Kopf – ein gestrichelter Rahmen „Logo der Einrichtung“, solange kein Bild gewählt ist; ein
+    Klick öffnet die Einstellungen („Bild im Kopf“). Das Logo selbst kommt nie ins Repository.
 
 ## Offene Punkte
 
@@ -786,6 +789,8 @@ Version 0.22.0:
    Rabe (A und B) schon; „Neuer Mitarbeiter …“ nur mit Bereich A.
 6. Als „PR“: Übersicht zeigt Wohnbereich A und B (10 Bewohner).
 7. „Abmelden“: alles grau, oben „Nicht angemeldet – Anmelden“.
+8. Oben rechts im Kopf: gestrichelter Platzhalter „Logo der Einrichtung“. Klick → Einstellungen →
+   „Bild im Kopf“ → eigenes Bild wählen → der Platzhalter ist weg, das Bild steht dort.
 
 Version 0.21.0:
 

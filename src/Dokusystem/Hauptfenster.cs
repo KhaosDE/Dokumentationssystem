@@ -87,6 +87,7 @@ public sealed class Hauptfenster : Form
             BereichWaehlen("Nachrichten", filterBehalten: true);
         };
         Kopf.BenutzerKnopf.Click += (_, _) => BenutzerWechseln();
+        Kopf.LogoGewuenscht += () => EinstellungenOeffnen();
         Medikamente = new MedikamenteSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Medikamente"] = Medikamente;
         Medikamente.Geaendert += () => { if (AktiverBereich == "Medikamente") Kopf.TexteSetzen(Medikamente.KopfText, "Medikamente"); };

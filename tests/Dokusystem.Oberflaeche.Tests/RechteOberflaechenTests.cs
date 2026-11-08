@@ -71,6 +71,7 @@ public class RechteOberflaechenTests
 
         // OP (Therapie): Akte ansehen ja, bearbeiten nein; Berichte schreiben ja.
         f.BenutzerWaehlen("OP");
+        f.BereichWaehlen("Bewohner");
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(Knopf("Bearbeiten …")));
         Assert.Null(Stil.Sperrgrund(Knopf("Neuer Bericht …")));
