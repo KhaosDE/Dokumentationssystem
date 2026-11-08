@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.9** (Tagesplan als Anzeigetafel, Bauplan Schritt 26g).
+Stand: 08.11.2026. Version: **0.29.10** (Demo-Daten: 23 Bewohner je Wohnbereich, Bauplan Schritt 26h).
 
 ## Aktuell
 
@@ -131,7 +131,13 @@ ZURÜCK, VORBEI). Oben **„Jetzt und gleich“**, darunter „Später heute“,
 erneuert sich jede Minute. Bestätigen in der Zeile („bestätigen ▾“). **Vollbild** mit Knopf oder **F11**,
 Esc beendet.
 
-**Nächster Schritt:** Bauplan Schritt 26h „Demo-Daten: 23 Bewohner je Wohnbereich“ (0.29.10).
+Neu in 0.29.10: Die Demo hat **23 Bewohner je Wohnbereich** (69 in R1–R3), je Bereich zwei Betten frei,
+dazu 14 weitere ausgedachte Mitarbeiter für die Bezugspflege (bis etwa vier Bewohner je Person). Alle
+Bereiche haben Daten für die neuen Bewohner: Berichte, Medikamentenplan, Diagnosen, Ausgang, Bezugspflege,
+Therapien (neu: Gartengruppe R3, Frühstücksgruppe R2, Entspannung), Termine, Biografien, Visiten in R2 und
+R3, HEB-Bögen. Ältere Demo-Datenbanken werden einmal neu geladen; die bisherige liegt als Kopie daneben.
+
+**Nächster Schritt:** Bauplan Schritt 26i „Kopfzeile nur „Wo bin ich“, Logo, Abmelden; Aktionen darunter“ (0.29.11).
 
 ## Fertig
 
@@ -767,8 +773,30 @@ Esc beendet.
   - Vollbild: Knopf oder F11 (im Tagesplan) – nur die Tafel über den ganzen Bildschirm, auch mit
     Demo-Hinweis; Esc oder F11 beendet. Beim Abmelden (F12) wird es geschlossen.
 
+- 0.29.10 — Demo-Daten: 23 Bewohner je Wohnbereich (Bauplan Schritt 26h, 08.11.2026):
+  - 59 weitere ausgedachte Bewohner (Pflanzennamen mit gleichem Anfangsbuchstaben, alle von L bis Z), also
+    23 je Wohnbereich. Zimmer erweitert auf 15 je Bereich (Einzel- und Doppelzimmer gemischt); frei sind je
+    zwei Betten: R1 105 Tür und 106 Tür, R2 204 und 206, R3 304 Tür und 306 Tür.
+  - 14 weitere ausgedachte Mitarbeiter (Vögel, wie bisher), darunter eine Bereichsleitung für R3 (VK),
+    teils Fachkräfte, teils nicht. Bezugspflege für alle neuen Bewohner, je Person bis etwa vier.
+  - Daten der neuen Bewohner: Berichte der letzten vier Wochen (wie bisher erzeugt; Übergabe-Einträge nur
+    bei jedem neunten, sonst wird die Übergabe unübersichtlich), Grundverordnungen und einige
+    Bedarfsmedikamente (`daten/demo/medikation.json`), je eine Hauptdiagnose (manchmal eine Neben-
+    diagnose), Ausgang, ein fertiger HEB-Bogen aus den letzten Monaten, drei neue Therapieangebote mit
+    Teilnehmern, vier Termine, sechs kurze Biografien, je eine Visite in R2 und R3, vier Einzeltrainings.
+  - Ältere Demo-Datenbanken werden beim ersten Start einmal neu geladen; vorher sichert das Programm sie
+    als `dokumentationssystem-vor-0.29.10.db` neben der Datenbank (`update.log` vermerkt es).
+  - Testlauf: Bildschirmfotos aller Hauptansichten bei 1920 × 1080 und 1366 × 768 (`109_…`) und die Zeit
+    für den Aufbau jeder Ansicht (`109_zeiten.txt`).
+  - Behoben (0.29.8): Im Fenster „Ärztliche Informationen“ ist das Allergie-Feld breiter, das Fenster
+    niedriger (passt auf 768 Pixel Höhe).
+  - Behoben (0.29.9): „bestätigen ▾“ auf der Tagesplan-Tafel bricht nicht mehr in zwei Zeilen um.
 ## Offene Punkte
 
+- Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten):
+  - **Ausgangsliste** zeigt alle 69 Bewohner aller Bereiche; einen Filter nach Wohnbereich hat sie nicht.
+  - **Küchendienst** geht reihum über alle belegten Zimmer aller drei Bereiche (42); je Wohnbereich
+    getrennt wäre näher an der Wirklichkeit.
 - **Teil 2: Repository umbenennen — sobald dieses Release erschienen ist** (`KhaosDE/Dokumentationssystem`
   → `KhaosDE/DokuLine`, kein Claude-Code-Auftrag). Installationen älter als 0.29.2 kennen nur die
   alte Download-Adresse; sie sollten vorher einmal gestartet werden, damit sie 0.29.2 holen.
@@ -823,6 +851,16 @@ Esc beendet.
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 08.11.2026 (Schritt 26h): Die neuen Demo-Bewohner heißen alle mit L bis Z, also nach „Kiefer“. So bleiben die
+  ersten zehn mit ihren Berichten, Übergaben und Beispielen in Tests und Testliste gleich (die Berichte
+  entstehen nach Namen sortiert).
+- 08.11.2026 (Schritt 26h): Wie in 0.29.7 wird eine ältere Demo-Datenbank einmal ganz neu geladen statt ergänzt
+  (neue Bewohner betreffen Zimmer, Bezugspflege, Medikation, Therapien und Berichte zugleich); die alte
+  liegt als Kopie daneben.
+- 08.11.2026 (Schritt 26h): Für die Bildschirmfotos stellt der Testlauf den Bildschirm des Windows-Rechners auf
+  1920 × 1080; gelingt das nicht, bleibt er bei 1024 × 768 und die großen Fotos sind entsprechend kleiner
+  (`109_zeiten.txt` nennt die tatsächliche Fenstergröße).
 
 - 08.11.2026 (Schritt 26g): „NOCH OFFEN“ bleibt oben in „Jetzt und gleich“, auch nach dem Ende der
   Therapie, bis jemand bestätigt – unten bei „Erledigt“ würde es übersehen.
@@ -1378,6 +1416,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.10:
+
+1. Nach dem Update: im Datenordner liegt `dokumentationssystem-vor-0.29.10.db`; `update.log` nennt die
+   Erweiterung.
+2. Übersicht: „R1 · 23 Bewohner · 2 Betten frei“; Auswahl R2 und R3: je 23 Bewohner, 2 Betten frei.
+3. „Bewohner“: 69 Karten; Filter „Allergie“ 14, „Beschluss“ 51, „Nicht erfasst“ 14.
+4. Ein neuer Bewohner (z. B. Rosa Rose): Akte mit Berichten, Medikamentenplan, Bezugspflege,
+   „Ärztliche Informationen …“ mit Diagnose, HEB-Bogen.
+5. Als „VK“ (Bereichsleitung R3) anmelden: Übersicht zeigt R3; Therapie → „Gartengruppe“.
+6. Einstellungen → „Zimmer und Betten …“: 45 Zimmer; „Neuer Bewohner …“ in R3 → „304 – Bett Tür“, „306 – Bett Tür“.
+7. Bitte selbst ansehen, wo es mit 23 Bewohnern unübersichtlich wird (Übersicht, Tagesplan, Übergabe,
+   Ausgangsliste), und in den Chat schreiben.
 
 Version 0.29.9:
 

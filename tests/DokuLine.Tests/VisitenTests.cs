@@ -132,7 +132,7 @@ public sealed class VisitenTests : IDisposable
     public void Demo_Visiten_mit_allen_drei_Faellen()
     {
         var visiten = s.Visiten();
-        Assert.Equal(3, visiten.Count);
+        Assert.Equal(5, visiten.Count);   // drei in R1, seit Schritt 26h je eine in R2 und R3
         var alle = visiten.SelectMany(v => v.Eintraege).ToList();
         Assert.Contains(alle, e => e.Anordnungen.Any(a => a.MedikamentId is not null && a.Art == AnordnungArt.Dosis));
         Assert.Contains(alle, e => e.Anordnungen.Any(a => a.MedikamentId is null && a.Art == AnordnungArt.Neu));

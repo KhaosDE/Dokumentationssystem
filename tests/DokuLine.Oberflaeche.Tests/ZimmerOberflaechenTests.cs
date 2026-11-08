@@ -14,7 +14,7 @@ public class ZimmerOberflaechenTests
         using (var ansehen = new ZimmerFenster(u.Speicher))
         {
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(ansehen.NeuKnopf));
-            Assert.Equal(18, ansehen.Liste.Items.Count);
+            Assert.Equal(45, ansehen.Liste.Items.Count);   // 15 je Bereich (Schritt 26h)
             Assert.Equal(3, ansehen.Bereiche.Items.Count);
         }
         Einstellungen.Aendern(w => w with { Kuerzel = "EF" });   // Bereichsleitung
@@ -27,14 +27,14 @@ public class ZimmerOberflaechenTests
         using (new DialogErsatz(f =>
         {
             var z = Assert.IsType<ZimmerFormular>(f);
-            z.Nummer.Text = "307";
+            z.Nummer.Text = "316";
             z.Bereich.SelectedIndex = 2;   // R3
             z.Doppel.Checked = true;
             return z.Speichern() ? DialogResult.OK : DialogResult.Cancel;
         }))
             fenster.NeuKnopf.PerformClick();
-        Assert.Equal(19, fenster.Liste.Items.Count);
-        Assert.Equal(11, u.Speicher.FreieBetten("R3").Count);
+        Assert.Equal(46, fenster.Liste.Items.Count);
+        Assert.Equal(4, u.Speicher.FreieBetten("R3").Count);
         // Belegtes Zimmer stilllegen geht nicht – Hinweis statt Fehler.
         fenster.Waehlen(fenster.Index("101"));
         Assert.False(fenster.Umschalten());
@@ -54,10 +54,10 @@ public class ZimmerOberflaechenTests
         var s = f.Uebersicht;
         Assert.Equal([UebersichtSeite.EigeneBereiche, "R1", "R2", "R3"], s.BereichWahl.Items.Cast<string>());
         s.BereichWahl.SelectedIndex = 2;   // R2
-        Assert.StartsWith("R2 · 2 Bewohner · 7 Betten frei · ", f.Kopf.KleinText);
-        Assert.Equal(2, s.Karten.Count);
-        s.BereichWahl.SelectedIndex = 3;   // R3: noch niemand
-        Assert.StartsWith("R3 · 0 Bewohner · 9 Betten frei · ", f.Kopf.KleinText);
+        Assert.StartsWith("R2 · 23 Bewohner · 2 Betten frei · ", f.Kopf.KleinText);
+        Assert.Equal(23, s.Karten.Count);
+        s.BereichWahl.SelectedIndex = 3;   // R3
+        Assert.StartsWith("R3 · 23 Bewohner · 2 Betten frei · ", f.Kopf.KleinText);
         Hilfe.Foto(f, "105_uebersicht_bereich");
     });
 }

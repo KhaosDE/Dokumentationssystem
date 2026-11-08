@@ -78,9 +78,9 @@ public class BezugOberflaechenTests
         s.MeineBezugsbewohner.Checked = false;
         f.BenutzerWaehlen("PR");
         s.MeineEinzeltrainings.Checked = true;
-        Assert.Equal(["Birke", "Ginster"], s.Karten.Select(k => k.Bewohner.Nachname));   // auch aus R2
+        Assert.Equal(["Birke", "Ginster", "Sonnenblume", "Tagetes"], s.Karten.Select(k => k.Bewohner.Nachname).Order());   // auch aus R2
         s.MeineEinzeltrainings.Checked = false;
-        Assert.Equal(10, s.Karten.Count);   // PR: R1 und B
+        Assert.Equal(46, s.Karten.Count);   // PR: R1 und R2
     });
 
     [Fact]

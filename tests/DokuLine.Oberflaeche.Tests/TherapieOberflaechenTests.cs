@@ -28,8 +28,8 @@ public class TherapieOberflaechenTests
         {
             Assert.Same(t, f.Seite("Therapie"));
             Assert.Equal("Neues Angebot …", Assert.Single(f.Kopf.Knoepfe).Text);
-            Assert.StartsWith("7 Angebote · ", f.Kopf.KleinText);
-            Assert.Equal(7, t.Karten.Count);
+            Assert.StartsWith("10 Angebote · ", f.Kopf.KleinText);   // seit Schritt 26h drei mehr
+            Assert.Equal(10, t.Karten.Count);
             var holz = t.Karten.Single(k => k.Angebot.Am(DateOnly.FromDateTime(DateTime.Today)).Name == "Holzwerkstatt");
             Assert.Equal(["Therapie", "Gruppe", "Mo 09:00–11:30, Mi 09:00–11:30", "4 Plätze frei"], holz.MarkenTexte);
             Assert.StartsWith("Teilnehmer (2 von 6): Anton Ahorn, Dieter Distel", holz.TeilnehmerText);
@@ -55,7 +55,7 @@ public class TherapieOberflaechenTests
             {
                 var neu = Assert.IsType<AngebotFenster>(fenster);
                 Assert.False(neu.Speichern());
-                neu.NameFeld.Text = "Gartengruppe";
+                neu.NameFeld.Text = "Kräutergruppe";   // „Gartengruppe“ gibt es seit Schritt 26h in R3
                 neu.Therapeut.Text = "Ben Amsel";
                 neu.Ort.Text = "Garten";
                 neu.TerminSetzen(0, DayOfWeek.Monday, "10:00", "11:00");   // überschneidet sich mit der Holzwerkstatt
@@ -63,7 +63,7 @@ public class TherapieOberflaechenTests
                 return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 f.Kopf.Knoepfe[0].PerformClick();
-            AngebotKarte Karte() => t.Karten.Single(k => k.Angebot.Fassungen[0].Name == "Gartengruppe");
+            AngebotKarte Karte() => t.Karten.Single(k => k.Angebot.Fassungen[0].Name == "Kräutergruppe");
             Assert.Contains("4 Plätze frei", Karte().MarkenTexte);
 
             string? warnung = null;
@@ -145,9 +145,9 @@ public class TherapieOberflaechenTests
             Assert.Equal("Kochgruppe", Assert.Single(t.Karten).Angebot.Fassungen[^1].Name);
             Assert.StartsWith("1 Angebote · ", f.Kopf.KleinText);
             t.AnbieterFilter.SelectedItem = "Therapie";
-            Assert.Equal(5, t.Karten.Count);
+            Assert.Equal(6, t.Karten.Count);
             t.AnbieterFilter.SelectedItem = TherapieSeite.AlleAnbieter;
-            Assert.Equal(7, t.Karten.Count);
+            Assert.Equal(10, t.Karten.Count);
 
             // Bereichsleitung R1: nur die eigenen Angebote; neue nur für R1.
             f.BenutzerWaehlen("EF");
@@ -174,7 +174,7 @@ public class TherapieOberflaechenTests
             f.BenutzerWaehlen("CD");
             Assert.All(t.Karten, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k.ZuteilenKnopf)));
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(t.NeuKnopf));
-            Assert.Equal(8, t.Karten.Count);
+            Assert.Equal(11, t.Karten.Count);
         }
     });
 }

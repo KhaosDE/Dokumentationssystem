@@ -61,7 +61,7 @@ public sealed class UebersichtTests : IDisposable
     {
         Assert.Contains(M("Holunder"), t => t.StartsWith("abwesend: Heimfahrt bis Mo 09.11."));
         var alle = s.Heute(Jetzt);
-        Assert.StartsWith("10 Bewohner · 1 abwesend · ", UebersichtRegeln.HeuteText(alle, 1));
+        Assert.StartsWith("69 Bewohner · 1 abwesend · ", UebersichtRegeln.HeuteText(alle, 1));   // 23 je Wohnbereich (Schritt 26h)
         Assert.All(alle.SelectMany(h => h.Termine), t => Assert.Equal(Heute, t.Tag));
         var mitTermin = alle.First(h => h.Termine.Count > 0);
         Assert.Contains(UebersichtRegeln.Marken(mitTermin, Heute, 90), m => m.Art == MarkenArt.Termin && m.Text.StartsWith("heute "));

@@ -59,7 +59,7 @@ public sealed class AusgangslisteTests : IDisposable
         t.DemoBeimErstenStart();   // ohne Modul
         t.ModulAnmelden(new AusgangslisteDaten());
         Assert.True(t.DemoBeimErstenStart());
-        Assert.Equal(10, new Datenbank(t).Laden().Count);
+        Assert.Equal(69, new Datenbank(t).Laden().Count);
         Assert.Contains(new Datenbank(t).Laden(), p => p.Status == AnwesenheitsStatus.Abwesenheit);
         Assert.False(t.DemoBeimErstenStart());
     }
@@ -165,10 +165,13 @@ public sealed class AusgangslisteTests : IDisposable
     public void Verlauf_und_Angaben_verschwinden_mit_dem_Bewohner()
     {
         using var befehl = s.Verbindung.CreateCommand();
+        const string Zaehlen = "SELECT (SELECT COUNT(*) FROM al_plaetze) + (SELECT COUNT(*) FROM al_verlauf WHERE text LIKE '%2 Allein / 1 MBW%')";
+        befehl.CommandText = Zaehlen;
+        long vorher = (long)befehl.ExecuteScalar()!;
         befehl.CommandText = $"DELETE FROM bewohner WHERE id = {B("Ahorn")}";
         befehl.ExecuteNonQuery();
-        befehl.CommandText = "SELECT (SELECT COUNT(*) FROM al_plaetze) + (SELECT COUNT(*) FROM al_verlauf WHERE text LIKE '%2 Allein / 1 MBW%')";
-        Assert.Equal(9L, (long)befehl.ExecuteScalar()!);
+        befehl.CommandText = Zaehlen;
+        Assert.Equal(vorher - 2, (long)befehl.ExecuteScalar()!);   // Ahorns Platz und sein Verlaufseintrag sind weg
     }
 
     [Fact]
@@ -184,7 +187,7 @@ public sealed class AusgangslisteTests : IDisposable
         Assert.Contains("201/202", zimmer);
         Assert.DoesNotContain("201", zimmer);
         Assert.Contains("101", zimmer);
-        Assert.Equal(7, zimmer.Count);
+        Assert.Equal(42, zimmer.Count);   // seit Schritt 26h alle belegten Zimmer aller drei Wohnbereiche (siehe STAND, Offene Punkte)
         // Reihum ohne Lücke.
         for (int i = 1; i < 20; i++) Assert.NotEqual(plan[i - 1].Zimmer, plan[i].Zimmer);
 
@@ -213,10 +216,11 @@ public sealed class AusgangslisteTests : IDisposable
     {
         Kuechendienst.ReihenfolgeSpeichern(db, ["105", "101", "unbekannt"]);
         var reihe = Kuechendienst.Reihenfolge(db, db.Laden());
-        Assert.Equal(["105", "101", "102", "103", "104", "106", "201", "202"], reihe);
+        Assert.Equal(["105", "101", "102", "103", "104", "106", "107"], reihe.Take(7));   // gespeicherte zuerst, dann nach Nummer
+        Assert.DoesNotContain("unbekannt", reihe);
         var fest = Kuechendienst.FesteReihenfolge(reihe, Kuechendienst.Gruppen(db));
-        Assert.Equal(7, fest.Count);
-        Assert.Equal(["201", "202"], fest[^1]);
+        Assert.Equal(reihe.Count - 1, fest.Count);   // 201 und 202 sind eine Gruppe
+        Assert.Contains(fest, g => g.SequenceEqual(["201", "202"]));
     }
 
     [Fact]

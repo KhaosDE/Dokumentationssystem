@@ -128,21 +128,21 @@ public class BewohnerOberflaechenTests
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         var knoepfe = f.Bewohner.FilterKnoepfe;
-        Assert.Equal([("Alle", 10), ("Beschluss", 5), ("Allergie", 4), ("Nicht erfasst", 4)],
+        Assert.Equal([("Alle", 69), ("Beschluss", 51), ("Allergie", 14), ("Nicht erfasst", 14)],   // 23 je Wohnbereich (Schritt 26h)
             knoepfe.Values.Select(k => (k.Text, k.Anzahl)));
         Assert.True(knoepfe[BewohnerFilter.Alle].Aktiv);
         knoepfe[BewohnerFilter.Allergie].Ausloesen();
-        Assert.Equal(4, Karten(f).Count);
+        Assert.Equal(14, Karten(f).Count);
         Assert.All(Karten(f), k => Assert.Equal(AllergieZustand.Eingetragen, k.Bewohner.Allergie));
-        Assert.Equal("4 von 10 Bewohner", f.Kopf.KleinText);
+        Assert.Equal("14 von 69 Bewohner", f.Kopf.KleinText);
         Assert.True(knoepfe[BewohnerFilter.Allergie].Aktiv);
         Assert.False(knoepfe[BewohnerFilter.Alle].Aktiv);
         Karten(f)[0].Waehlen();
         Assert.False(f.Bewohner.FilterLeiste.Visible);   // in der Akte keine Filter
         f.Bewohner.UebersichtZeigen();
-        Assert.Equal(4, Karten(f).Count);                // Filter bleibt beim Zurückkehren
+        Assert.Equal(14, Karten(f).Count);               // Filter bleibt beim Zurückkehren
         knoepfe[BewohnerFilter.Alle].Ausloesen();
-        Assert.Equal(10, Karten(f).Count);
+        Assert.Equal(69, Karten(f).Count);
     });
 
     [Fact]
@@ -239,7 +239,7 @@ public class BewohnerOberflaechenTests
             formular.Aufnahmedatum.Text = "01.01.1989";
             Assert.False(formular.Speichern());
             Assert.Contains("Aufnahmedatum liegt vor dem Geburtsdatum", formular.Fehler.Text);
-            Assert.Equal(10, u.Speicher.AlleBewohner().Count);
+            Assert.Equal(69, u.Speicher.AlleBewohner().Count);
             formular.Aufnahmedatum.Text = "1.2.2026";
             Assert.True(formular.Speichern());
             return formular.Gespeichert;
@@ -306,7 +306,7 @@ public class BewohnerOberflaechenTests
         Assert.True(f.DemoZuruecksetzen(nachfragen: false));
         Assert.False(f.Bewohner.AkteSichtbar);
         Assert.Equal("105", u.Demo("Eiche").Zimmer);
-        Assert.Equal(10, Karten(f).Count);
+        Assert.Equal(69, Karten(f).Count);
     });
 }
 

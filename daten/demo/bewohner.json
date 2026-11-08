@@ -1,67 +1,74 @@
 {
-  "hinweis": "Alle Angaben sind ausgedacht (Demo). Namen: Pflanzen mit gleichem Anfangsbuchstaben. Keine Bilder – das Programm zeigt Initialen. Datumsangaben im Format TT.MM.JJJJ. allergie: eingetragen | keine_bekannt | nicht_erfasst. beschluss: ende | kein_beschluss | nicht_erfasst. offenGefuehrt: ja | nein | nicht_erfasst. wohnbereich: ohne Angabe „R1“. bett: einzel | fenster | tuer (Zimmer und Betten stehen in zimmer.json).",
+  "hinweis": "Alle Angaben sind ausgedacht (Demo). Namen: Pflanzen mit gleichem Anfangsbuchstaben; 23 Bewohner je Wohnbereich (Schritt 26h), je Bereich zwei Betten frei. Keine Bilder – das Programm zeigt Initialen. Datumsangaben im Format TT.MM.JJJJ. allergie: eingetragen | keine_bekannt | nicht_erfasst. beschluss: ende | kein_beschluss | nicht_erfasst. offenGefuehrt: ja | nein | nicht_erfasst. wohnbereich: ohne Angabe „R1“. bett: einzel | fenster | tuer (Zimmer und Betten stehen in zimmer.json).",
   "bewohner": [
-    {
-      "vorname": "Anton", "nachname": "Ahorn", "zimmer": "101", "bett": "fenster",
-      "geburtsdatum": "14.03.1962", "aufnahmedatum": "01.09.2019",
-      "allergie": "eingetragen", "allergien": "Haselnüsse",
-      "beschluss": "ende", "beschlussende": "30.06.2027", "offenGefuehrt": "nein"
-    },
-    {
-      "vorname": "Berta", "nachname": "Birke", "zimmer": "102", "bett": "einzel",
-      "geburtsdatum": "22.11.1958", "aufnahmedatum": "15.02.2016",
-      "allergie": "keine_bekannt",
-      "beschluss": "kein_beschluss", "offenGefuehrt": "ja"
-    },
-    {
-      "vorname": "Clara", "nachname": "Clematis", "zimmer": "103", "bett": "fenster",
-      "geburtsdatum": "05.07.1971", "aufnahmedatum": "03.05.2021",
-      "allergie": "nicht_erfasst",
-      "beschluss": "ende", "beschlussende": "15.01.2027", "offenGefuehrt": "nein"
-    },
-    {
-      "vorname": "Dieter", "nachname": "Distel", "zimmer": "104", "bett": "einzel",
-      "geburtsdatum": "30.01.1967", "aufnahmedatum": "12.10.2018",
-      "allergie": "eingetragen", "allergien": "Wespen- und Bienenstiche",
-      "beschluss": "nicht_erfasst", "offenGefuehrt": "nicht_erfasst"
-    },
-    {
-      "vorname": "Emil", "nachname": "Eiche", "zimmer": "105", "bett": "fenster",
-      "geburtsdatum": "08.08.1975", "aufnahmedatum": "20.04.2022",
-      "allergie": "keine_bekannt",
-      "beschluss": "ende", "beschlussende": "31.03.2028", "offenGefuehrt": "nein"
-    },
-    {
-      "vorname": "Frieda", "nachname": "Fichte", "zimmer": "106", "bett": "fenster",
-      "geburtsdatum": "17.12.1955", "aufnahmedatum": "01.07.2014",
-      "allergie": "eingetragen", "allergien": "Erdbeeren",
-      "beschluss": "kein_beschluss", "offenGefuehrt": "nein"
-    },
-    {
-      "vorname": "Gustav", "nachname": "Ginster", "zimmer": "201", "bett": "fenster",
-      "geburtsdatum": "02.04.1980", "aufnahmedatum": "09.01.2024",
-      "allergie": "nicht_erfasst",
-      "beschluss": "nicht_erfasst", "offenGefuehrt": "ja",
-      "wohnbereich": "R2"
-    },
-    {
-      "vorname": "Hanna", "nachname": "Holunder", "zimmer": "101", "bett": "tuer",
-      "geburtsdatum": "25.06.1969", "aufnahmedatum": "18.08.2020",
-      "allergie": "keine_bekannt",
-      "beschluss": "ende", "beschlussende": "30.09.2027", "offenGefuehrt": "nein"
-    },
-    {
-      "vorname": "Ida", "nachname": "Immergrün", "zimmer": "202", "bett": "einzel",
-      "geburtsdatum": "11.10.1985", "aufnahmedatum": "02.03.2025",
-      "allergie": "eingetragen", "allergien": "Pflasterkleber",
-      "beschluss": "kein_beschluss", "offenGefuehrt": "nein",
-      "wohnbereich": "R2"
-    },
-    {
-      "vorname": "Karl", "nachname": "Kiefer", "zimmer": "103", "bett": "tuer",
-      "geburtsdatum": "19.05.1960", "aufnahmedatum": "14.11.2017",
-      "allergie": "nicht_erfasst",
-      "beschluss": "ende", "beschlussende": "28.02.2027", "offenGefuehrt": "nein"
-    }
+    {"vorname": "Anton", "nachname": "Ahorn", "zimmer": "101", "bett": "fenster", "geburtsdatum": "14.03.1962", "aufnahmedatum": "01.09.2019", "allergie": "eingetragen", "allergien": "Haselnüsse", "beschluss": "ende", "beschlussende": "30.06.2027", "offenGefuehrt": "nein"},
+    {"vorname": "Berta", "nachname": "Birke", "zimmer": "102", "bett": "einzel", "geburtsdatum": "22.11.1958", "aufnahmedatum": "15.02.2016", "allergie": "keine_bekannt", "beschluss": "kein_beschluss", "offenGefuehrt": "ja"},
+    {"vorname": "Clara", "nachname": "Clematis", "zimmer": "103", "bett": "fenster", "geburtsdatum": "05.07.1971", "aufnahmedatum": "03.05.2021", "allergie": "nicht_erfasst", "beschluss": "ende", "beschlussende": "15.01.2027", "offenGefuehrt": "nein"},
+    {"vorname": "Dieter", "nachname": "Distel", "zimmer": "104", "bett": "einzel", "geburtsdatum": "30.01.1967", "aufnahmedatum": "12.10.2018", "allergie": "eingetragen", "allergien": "Wespen- und Bienenstiche", "beschluss": "nicht_erfasst", "offenGefuehrt": "nicht_erfasst"},
+    {"vorname": "Emil", "nachname": "Eiche", "zimmer": "105", "bett": "fenster", "geburtsdatum": "08.08.1975", "aufnahmedatum": "20.04.2022", "allergie": "keine_bekannt", "beschluss": "ende", "beschlussende": "31.03.2028", "offenGefuehrt": "nein"},
+    {"vorname": "Frieda", "nachname": "Fichte", "zimmer": "106", "bett": "fenster", "geburtsdatum": "17.12.1955", "aufnahmedatum": "01.07.2014", "allergie": "eingetragen", "allergien": "Erdbeeren", "beschluss": "kein_beschluss", "offenGefuehrt": "nein"},
+    {"vorname": "Gustav", "nachname": "Ginster", "zimmer": "201", "bett": "fenster", "geburtsdatum": "02.04.1980", "aufnahmedatum": "09.01.2024", "allergie": "nicht_erfasst", "beschluss": "nicht_erfasst", "offenGefuehrt": "ja", "wohnbereich": "R2"},
+    {"vorname": "Hanna", "nachname": "Holunder", "zimmer": "101", "bett": "tuer", "geburtsdatum": "25.06.1969", "aufnahmedatum": "18.08.2020", "allergie": "keine_bekannt", "beschluss": "ende", "beschlussende": "30.09.2027", "offenGefuehrt": "nein"},
+    {"vorname": "Ida", "nachname": "Immergrün", "zimmer": "202", "bett": "einzel", "geburtsdatum": "11.10.1985", "aufnahmedatum": "02.03.2025", "allergie": "eingetragen", "allergien": "Pflasterkleber", "beschluss": "kein_beschluss", "offenGefuehrt": "nein", "wohnbereich": "R2"},
+    {"vorname": "Karl", "nachname": "Kiefer", "zimmer": "103", "bett": "tuer", "geburtsdatum": "19.05.1960", "aufnahmedatum": "14.11.2017", "allergie": "nicht_erfasst", "beschluss": "ende", "beschlussende": "28.02.2027", "offenGefuehrt": "nein"},
+    {"vorname": "Thea", "nachname": "Tagetes", "zimmer": "107", "bett": "fenster", "geburtsdatum": "04.02.1953", "aufnahmedatum": "18.09.2012", "allergie": "keine_bekannt", "beschluss": "kein_beschluss", "offenGefuehrt": "ja"},
+    {"vorname": "Quentin", "nachname": "Quendel", "zimmer": "107", "bett": "tuer", "geburtsdatum": "07.06.1976", "aufnahmedatum": "28.09.2010", "allergie": "keine_bekannt", "beschluss": "kein_beschluss", "offenGefuehrt": "ja"},
+    {"vorname": "Lotte", "nachname": "Löwenzahn", "zimmer": "108", "bett": "einzel", "geburtsdatum": "23.08.1976", "aufnahmedatum": "02.06.2010", "allergie": "eingetragen", "allergien": "Erdbeeren", "beschluss": "kein_beschluss", "offenGefuehrt": "ja"},
+    {"vorname": "Rainer", "nachname": "Raps", "zimmer": "109", "bett": "fenster", "geburtsdatum": "09.06.1993", "aufnahmedatum": "25.10.2024", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "14.06.2028"},
+    {"vorname": "Olaf", "nachname": "Oregano", "zimmer": "109", "bett": "tuer", "geburtsdatum": "20.07.1980", "aufnahmedatum": "02.03.2009", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "ja", "beschlussende": "20.12.2027"},
+    {"vorname": "Viola", "nachname": "Veilchen", "zimmer": "110", "bett": "einzel", "geburtsdatum": "19.03.1952", "aufnahmedatum": "23.01.2009", "allergie": "keine_bekannt", "beschluss": "kein_beschluss", "offenGefuehrt": "ja"},
+    {"vorname": "Philipp", "nachname": "Pflaume", "zimmer": "111", "bett": "fenster", "geburtsdatum": "06.02.1977", "aufnahmedatum": "06.02.2017", "allergie": "eingetragen", "allergien": "Penicillin", "beschluss": "kein_beschluss", "offenGefuehrt": "nein"},
+    {"vorname": "Ottilie", "nachname": "Orchidee", "zimmer": "111", "bett": "tuer", "geburtsdatum": "18.01.1977", "aufnahmedatum": "16.06.2016", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "13.01.2027"},
+    {"vorname": "Tessa", "nachname": "Tamariske", "zimmer": "112", "bett": "fenster", "geburtsdatum": "07.08.1957", "aufnahmedatum": "10.04.2015", "allergie": "eingetragen", "allergien": "Hausstaub", "beschluss": "kein_beschluss", "offenGefuehrt": "nein"},
+    {"vorname": "Maria", "nachname": "Malve", "zimmer": "112", "bett": "tuer", "geburtsdatum": "23.02.1970", "aufnahmedatum": "21.02.2024", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "ja", "beschlussende": "01.03.2027"},
+    {"vorname": "Theo", "nachname": "Tanne", "zimmer": "113", "bett": "einzel", "geburtsdatum": "11.02.1965", "aufnahmedatum": "09.06.2014", "allergie": "keine_bekannt", "beschluss": "kein_beschluss", "offenGefuehrt": "nein"},
+    {"vorname": "Ludwig", "nachname": "Lein", "zimmer": "114", "bett": "fenster", "geburtsdatum": "08.01.1981", "aufnahmedatum": "23.02.2024", "allergie": "eingetragen", "allergien": "Erdbeeren", "beschluss": "kein_beschluss", "offenGefuehrt": "ja"},
+    {"vorname": "Ronja", "nachname": "Rettich", "zimmer": "114", "bett": "tuer", "geburtsdatum": "18.12.1959", "aufnahmedatum": "02.10.2012", "allergie": "nicht_erfasst", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "06.03.2028"},
+    {"vorname": "Zacharias", "nachname": "Zypresse", "zimmer": "115", "bett": "fenster", "geburtsdatum": "02.07.1953", "aufnahmedatum": "18.02.2023", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "ja", "beschlussende": "11.03.2027"},
+    {"vorname": "Peter", "nachname": "Petersilie", "zimmer": "115", "bett": "tuer", "geburtsdatum": "18.01.1953", "aufnahmedatum": "09.07.2017", "allergie": "eingetragen", "allergien": "Kiwi", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "16.06.2027"},
+    {"vorname": "Sabine", "nachname": "Salbei", "zimmer": "201", "bett": "tuer", "geburtsdatum": "25.05.1998", "aufnahmedatum": "27.10.2021", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "27.05.2027", "wohnbereich": "R2"},
+    {"vorname": "Pia", "nachname": "Pfingstrose", "zimmer": "203", "bett": "fenster", "geburtsdatum": "25.01.1953", "aufnahmedatum": "06.10.2017", "allergie": "keine_bekannt", "beschluss": "nicht_erfasst", "offenGefuehrt": "nein", "wohnbereich": "R2"},
+    {"vorname": "Stefan", "nachname": "Sonnenblume", "zimmer": "203", "bett": "tuer", "geburtsdatum": "09.09.1986", "aufnahmedatum": "23.10.2021", "allergie": "eingetragen", "allergien": "Katzenhaare", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "15.05.2027", "wohnbereich": "R2"},
+    {"vorname": "Noah", "nachname": "Nussbaum", "zimmer": "205", "bett": "fenster", "geburtsdatum": "25.09.1950", "aufnahmedatum": "27.01.2011", "allergie": "nicht_erfasst", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "22.10.2028", "wohnbereich": "R2"},
+    {"vorname": "Wanda", "nachname": "Wicke", "zimmer": "205", "bett": "tuer", "geburtsdatum": "05.07.1954", "aufnahmedatum": "25.12.2010", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "13.08.2028", "wohnbereich": "R2"},
+    {"vorname": "Petra", "nachname": "Primel", "zimmer": "207", "bett": "fenster", "geburtsdatum": "25.07.1962", "aufnahmedatum": "20.05.2016", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "16.11.2027", "wohnbereich": "R2"},
+    {"vorname": "Otto", "nachname": "Olive", "zimmer": "207", "bett": "tuer", "geburtsdatum": "27.08.1973", "aufnahmedatum": "09.03.2015", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "18.04.2028", "wohnbereich": "R2"},
+    {"vorname": "Wolfgang", "nachname": "Waldmeister", "zimmer": "208", "bett": "einzel", "geburtsdatum": "19.06.1992", "aufnahmedatum": "27.08.2013", "allergie": "nicht_erfasst", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "20.08.2027", "wohnbereich": "R2"},
+    {"vorname": "Rosa", "nachname": "Rose", "zimmer": "209", "bett": "fenster", "geburtsdatum": "16.05.1978", "aufnahmedatum": "23.08.2015", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "06.02.2027", "wohnbereich": "R2"},
+    {"vorname": "Lena", "nachname": "Lavendel", "zimmer": "209", "bett": "tuer", "geburtsdatum": "20.04.1954", "aufnahmedatum": "25.01.2014", "allergie": "eingetragen", "allergien": "Erdbeeren", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "28.02.2027", "wohnbereich": "R2"},
+    {"vorname": "Oskar", "nachname": "Oleander", "zimmer": "210", "bett": "fenster", "geburtsdatum": "12.10.2000", "aufnahmedatum": "15.07.2022", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "22.02.2028", "wohnbereich": "R2"},
+    {"vorname": "Moritz", "nachname": "Mohn", "zimmer": "210", "bett": "tuer", "geburtsdatum": "25.03.1989", "aufnahmedatum": "13.05.2025", "allergie": "keine_bekannt", "beschluss": "nicht_erfasst", "offenGefuehrt": "nein", "wohnbereich": "R2"},
+    {"vorname": "Markus", "nachname": "Mais", "zimmer": "211", "bett": "einzel", "geburtsdatum": "17.09.1978", "aufnahmedatum": "10.03.2009", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "21.06.2028", "wohnbereich": "R2"},
+    {"vorname": "Silke", "nachname": "Sanddorn", "zimmer": "212", "bett": "fenster", "geburtsdatum": "17.06.1981", "aufnahmedatum": "28.11.2019", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "01.11.2027", "wohnbereich": "R2"},
+    {"vorname": "Pascal", "nachname": "Platane", "zimmer": "212", "bett": "tuer", "geburtsdatum": "25.07.1997", "aufnahmedatum": "24.01.2016", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "12.06.2027", "wohnbereich": "R2"},
+    {"vorname": "Wiebke", "nachname": "Wermut", "zimmer": "213", "bett": "fenster", "geburtsdatum": "05.09.1987", "aufnahmedatum": "24.10.2009", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "03.03.2028", "wohnbereich": "R2"},
+    {"vorname": "Zeno", "nachname": "Zitrone", "zimmer": "213", "bett": "tuer", "geburtsdatum": "08.09.1950", "aufnahmedatum": "16.03.2023", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "04.07.2027", "wohnbereich": "R2"},
+    {"vorname": "Zora", "nachname": "Zeder", "zimmer": "214", "bett": "fenster", "geburtsdatum": "02.12.1966", "aufnahmedatum": "14.10.2017", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "19.04.2027", "wohnbereich": "R2"},
+    {"vorname": "Werner", "nachname": "Weizen", "zimmer": "214", "bett": "tuer", "geburtsdatum": "09.03.1978", "aufnahmedatum": "05.03.2015", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "12.09.2027", "wohnbereich": "R2"},
+    {"vorname": "Martin", "nachname": "Mistel", "zimmer": "215", "bett": "fenster", "geburtsdatum": "04.03.1989", "aufnahmedatum": "12.06.2019", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "10.07.2027", "wohnbereich": "R2"},
+    {"vorname": "Nele", "nachname": "Nessel", "zimmer": "215", "bett": "tuer", "geburtsdatum": "25.08.1976", "aufnahmedatum": "10.11.2017", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "09.07.2027", "wohnbereich": "R2"},
+    {"vorname": "Lukas", "nachname": "Lilie", "zimmer": "301", "bett": "einzel", "geburtsdatum": "16.06.1980", "aufnahmedatum": "22.10.2017", "allergie": "eingetragen", "allergien": "Katzenhaare", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "19.05.2028", "wohnbereich": "R3"},
+    {"vorname": "Zita", "nachname": "Zinnie", "zimmer": "302", "bett": "fenster", "geburtsdatum": "28.11.1961", "aufnahmedatum": "20.04.2015", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "03.10.2027", "wohnbereich": "R3"},
+    {"vorname": "Pauline", "nachname": "Paprika", "zimmer": "302", "bett": "tuer", "geburtsdatum": "07.08.1959", "aufnahmedatum": "27.01.2018", "allergie": "nicht_erfasst", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "09.04.2028", "wohnbereich": "R3"},
+    {"vorname": "Nadine", "nachname": "Nachtkerze", "zimmer": "303", "bett": "einzel", "geburtsdatum": "14.12.1969", "aufnahmedatum": "27.09.2013", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "07.01.2028", "wohnbereich": "R3"},
+    {"vorname": "Yvonne", "nachname": "Ysop", "zimmer": "304", "bett": "fenster", "geburtsdatum": "24.12.1953", "aufnahmedatum": "11.04.2018", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "10.01.2027", "wohnbereich": "R3"},
+    {"vorname": "Sarah", "nachname": "Schafgarbe", "zimmer": "305", "bett": "einzel", "geburtsdatum": "22.06.1955", "aufnahmedatum": "19.02.2019", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "01.09.2028", "wohnbereich": "R3"},
+    {"vorname": "Marta", "nachname": "Magnolie", "zimmer": "306", "bett": "fenster", "geburtsdatum": "04.05.1966", "aufnahmedatum": "12.05.2022", "allergie": "keine_bekannt", "beschluss": "nicht_erfasst", "offenGefuehrt": "nein", "wohnbereich": "R3"},
+    {"vorname": "Rita", "nachname": "Ringelblume", "zimmer": "307", "bett": "fenster", "geburtsdatum": "11.05.1978", "aufnahmedatum": "21.03.2016", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "16.10.2027", "wohnbereich": "R3"},
+    {"vorname": "Sophie", "nachname": "Seerose", "zimmer": "307", "bett": "tuer", "geburtsdatum": "12.02.1989", "aufnahmedatum": "26.06.2010", "allergie": "nicht_erfasst", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "02.12.2027", "wohnbereich": "R3"},
+    {"vorname": "Thomas", "nachname": "Thymian", "zimmer": "308", "bett": "einzel", "geburtsdatum": "16.12.1965", "aufnahmedatum": "19.07.2009", "allergie": "eingetragen", "allergien": "Hausstaub", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "19.09.2028", "wohnbereich": "R3"},
+    {"vorname": "Luise", "nachname": "Lupine", "zimmer": "309", "bett": "fenster", "geburtsdatum": "08.08.1992", "aufnahmedatum": "16.02.2015", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "19.03.2027", "wohnbereich": "R3"},
+    {"vorname": "Robert", "nachname": "Rosmarin", "zimmer": "309", "bett": "tuer", "geburtsdatum": "21.02.1951", "aufnahmedatum": "10.03.2008", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "22.06.2027", "wohnbereich": "R3"},
+    {"vorname": "Valerie", "nachname": "Vanille", "zimmer": "310", "bett": "fenster", "geburtsdatum": "28.04.1951", "aufnahmedatum": "02.09.2013", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "18.04.2027", "wohnbereich": "R3"},
+    {"vorname": "Wilma", "nachname": "Wacholder", "zimmer": "310", "bett": "tuer", "geburtsdatum": "07.09.1983", "aufnahmedatum": "06.02.2017", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "22.11.2027", "wohnbereich": "R3"},
+    {"vorname": "Mona", "nachname": "Minze", "zimmer": "311", "bett": "einzel", "geburtsdatum": "19.01.1976", "aufnahmedatum": "24.07.2009", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "26.05.2027", "wohnbereich": "R3"},
+    {"vorname": "Leo", "nachname": "Lorbeer", "zimmer": "312", "bett": "fenster", "geburtsdatum": "19.05.1975", "aufnahmedatum": "14.10.2012", "allergie": "keine_bekannt", "beschluss": "nicht_erfasst", "offenGefuehrt": "nein", "wohnbereich": "R3"},
+    {"vorname": "Regina", "nachname": "Reseda", "zimmer": "312", "bett": "tuer", "geburtsdatum": "02.06.1972", "aufnahmedatum": "14.08.2023", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "04.11.2027", "wohnbereich": "R3"},
+    {"vorname": "Sven", "nachname": "Schilf", "zimmer": "313", "bett": "fenster", "geburtsdatum": "16.10.1999", "aufnahmedatum": "08.11.2023", "allergie": "eingetragen", "allergien": "Pflasterkleber", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "22.10.2028", "wohnbereich": "R3"},
+    {"vorname": "Quirin", "nachname": "Quitte", "zimmer": "313", "bett": "tuer", "geburtsdatum": "12.10.1954", "aufnahmedatum": "17.11.2021", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "19.03.2028", "wohnbereich": "R3"},
+    {"vorname": "Norbert", "nachname": "Narzisse", "zimmer": "314", "bett": "fenster", "geburtsdatum": "09.12.1987", "aufnahmedatum": "20.02.2017", "allergie": "keine_bekannt", "beschluss": "nicht_erfasst", "offenGefuehrt": "nein", "wohnbereich": "R3"},
+    {"vorname": "Tina", "nachname": "Tulpe", "zimmer": "314", "bett": "tuer", "geburtsdatum": "17.11.1971", "aufnahmedatum": "07.06.2020", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "28.06.2027", "wohnbereich": "R3"},
+    {"vorname": "Nina", "nachname": "Nelke", "zimmer": "315", "bett": "fenster", "geburtsdatum": "13.08.2000", "aufnahmedatum": "17.09.2024", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "13.05.2028", "wohnbereich": "R3"},
+    {"vorname": "Volker", "nachname": "Vogelbeere", "zimmer": "315", "bett": "tuer", "geburtsdatum": "03.01.2000", "aufnahmedatum": "13.05.2019", "allergie": "keine_bekannt", "beschluss": "ende", "offenGefuehrt": "nein", "beschlussende": "07.09.2028", "wohnbereich": "R3"}
   ]
 }

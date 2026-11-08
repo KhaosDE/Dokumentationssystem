@@ -89,7 +89,7 @@ public class VisitenRundgangTests
         Assert.Equal(1, einblendungen);
         Assert.Null(seite.Rundgang);
         Assert.Null(u.Speicher.VisitenEntwurf("R1"));
-        Assert.Equal(4, seite.Karten.Count);   // 3 Demo-Visiten und die neue
+        Assert.Equal(6, seite.Karten.Count);   // 5 Demo-Visiten (seit Schritt 26h) und die neue
         Assert.Contains(u.Speicher.Berichte(ahorn), b => b.Text.Contains("(Dr. Linde (ausgedacht)), dabei: EF: Schläft gut"));
         Assert.Equal("Visite beginnen …", seite.BeginnenKnopf.Text);
     });

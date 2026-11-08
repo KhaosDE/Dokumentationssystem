@@ -57,8 +57,10 @@ public class KennzeichenTests
     public void Filter_zaehlen_die_Demo_Daten()
     {
         var alle = Demodaten.Bewohner();
-        int Zahl(BewohnerFilter f) => alle.Count(b => Kennzeichen.Passt(b, f));
-        Assert.Equal(alle.Count, Zahl(BewohnerFilter.Alle));
+        Assert.Equal(69, alle.Count);   // Schritt 26h: 23 je Wohnbereich
+        var ersteZehn = alle.Take(10).ToList();   // Ahorn … Kiefer: daran hängen die Beispiele
+        int Zahl(BewohnerFilter f) => ersteZehn.Count(b => Kennzeichen.Passt(b, f));
+        Assert.Equal(alle.Count, alle.Count(b => Kennzeichen.Passt(b, BewohnerFilter.Alle)));
         Assert.Equal(5, Zahl(BewohnerFilter.Beschluss));
         Assert.Equal(4, Zahl(BewohnerFilter.Allergie));
         Assert.Equal(4, Zahl(BewohnerFilter.NichtErfasst));   // Clematis, Distel, Ginster, Kiefer

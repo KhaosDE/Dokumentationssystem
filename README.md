@@ -165,8 +165,8 @@ Danach fragt Windows für diese Datei nicht mehr.
   beide Fassungen und lässt wählen – es überschreibt nichts still. Zum Ausprobieren ohne
   zweiten Rechner: das Programm zweimal starten. Auch im gemeinsamen Ordner nur ausgedachte
   Daten; Passwörter und Verschlüsselung gibt es nicht (das gehört zum Echtbetrieb).
-- **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner wieder
-  her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren – im gemeinsamen Ordner
+- **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner (23 je Wohnbereich)
+  wieder her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren – im gemeinsamen Ordner
   für alle Rechner.
 - **Bezugspflege und Einzeltrainer:** In der Akte unter „Stammdaten“ („Bezug ändern …“). Auf
   den Karten zeigt ein farbiger Streifen die Bezugspflege, ein Punkt den Einzeltrainer – in der
