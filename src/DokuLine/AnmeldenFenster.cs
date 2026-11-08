@@ -51,7 +51,7 @@ public sealed class AnmeldenFenster : Form
         zeile(null, new Label { Text = "DEMO: AUSGEDACHTE MITARBEITER (KLICK ÜBERNIMMT DAS KÜRZEL)", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, Margin = new Padding(0, Stil.AbstandMittel, 0, 0) });
         var aktive = speicher.AlleMitarbeiter().Where(m => m.Aktiv).ToList();
         foreach (var m in aktive)
-            DemoListe.Items.Add($"{m.Kuerzel} – {m.Name} · {string.Join(", ", m.Positionen)}{(m.Fachkraft ? " · Fachkraft" : "")}");
+            DemoListe.Items.Add($"{m.Kuerzel} – {m.Name} · {string.Join(", ", m.Positionen)} · {m.Qualifikation}");
         DemoListe.SelectedIndexChanged += (_, _) =>
         {
             if (DemoListe.SelectedIndex >= 0) Kuerzel.Text = aktive[DemoListe.SelectedIndex].Kuerzel;

@@ -625,6 +625,25 @@ public static class Demodaten
 
     // ----- Visiten (Schritt 26) -----
 
+    // ----- Bedarfsgaben (0.33.0) -----
+
+    private sealed class BedarfDatei
+    {
+        public List<BedarfDaten> Gaben { get; set; } = [];
+    }
+
+    public sealed class BedarfDaten
+    {
+        public string Bewohner { get; set; } = "";
+        public int VorStunden { get; set; }
+        public string Menge { get; set; } = "1";
+        public string Anlass { get; set; } = "";
+        public string Kuerzel { get; set; } = "";
+        public string? Absprache { get; set; }
+    }
+
+    public static List<BedarfDaten> Bedarf() => Lesen<BedarfDatei>("bedarf.json").Gaben;
+
     private sealed class VisitenDatei
     {
         public List<VisiteDaten> Visiten { get; set; } = [];

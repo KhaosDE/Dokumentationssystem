@@ -81,3 +81,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 27 „Ausgangsliste als übersichtliche Liste“ (0.30.0).
 - 08.11.2026 — Claude Code: Bauplan Schritt 28 „E-Mail und Kalender über externe Programme“ (0.31.0).
 - 08.11.2026 — Claude Code: Bauplan Schritt 29 „Einstellungen neu gegliedert“ (0.32.0); Bauplan ab 07.11.2026 abgearbeitet.
+- 08.11.2026 — Claude Code: „Assistenzkraft und Fachkraft“ nach Freigabe durch Tobi gebaut: Qualifikation, Visiten nur Fachkräfte, „Bedarf gegeben …“ mit Absprache (0.33.0).

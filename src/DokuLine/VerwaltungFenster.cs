@@ -51,7 +51,7 @@ public sealed class MitarbeiterFenster : Form
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, Fenster.Hinweis("Ausgedachte Mitarbeiter der Demo. Das Kürzel ist zugleich die Anmeldung. Gelöscht wird niemand: " +
                                     "Wer ausscheidet, wird als „ausgeschieden“ markiert und bleibt an seinen Einträgen sichtbar."));
-        foreach (var (titel, breite) in new[] { ("Kürzel", 70), ("Name", 170), ("Fachkraft", 80), ("Bereiche", 180), ("Positionen", 180), ("Status", 80) })
+        foreach (var (titel, breite) in new[] { ("Kürzel", 70), ("Name", 170), ("Qualifikation", 110), ("Bereiche", 180), ("Positionen", 180), ("Status", 80) })
             Liste.Columns.Add(titel, breite);
         Liste.SelectedIndexChanged += (_, _) => KnoepfeSetzen();
         Liste.DoubleClick += (_, _) => Bearbeiten();
@@ -77,7 +77,7 @@ public sealed class MitarbeiterFenster : Form
         Liste.BeginUpdate();
         Liste.Items.Clear();
         foreach (var m in mitarbeiter)
-            Liste.Items.Add(new ListViewItem([m.Kuerzel, m.Name, m.Fachkraft ? "ja" : "nein", string.Join(", ", m.Bereiche),
+            Liste.Items.Add(new ListViewItem([m.Kuerzel, m.Name, m.Qualifikation, string.Join(", ", m.Bereiche),
                 string.Join(", ", m.Positionen), m.Aktiv ? "aktiv" : "ausgeschieden"]) { ForeColor = m.Aktiv ? Stil.TextNormal : Stil.TextLeise });
         Liste.EndUpdate();
         KnoepfeSetzen();
@@ -118,7 +118,8 @@ public sealed class MitarbeiterFenster : Form
     }
 }
 
-// Ein Mitarbeiter: Kürzel (nur beim Anlegen), Name, Fachkraft, aktiv, Bereiche und Positionen per Häkchen.
+// Ein Mitarbeiter: Kürzel (nur beim Anlegen), Name, Qualifikation (Assistenzkraft oder Fachkraft, 0.33.0), aktiv,
+// Bereiche und Positionen per Häkchen.
 // eigeneBereiche: Wer nur den eigenen Bereich verwalten darf, kann nur diese Bereiche ändern.
 public sealed class MitarbeiterFormular : Form
 {
@@ -128,7 +129,9 @@ public sealed class MitarbeiterFormular : Form
     public TextBox Kuerzel { get; } = new() { Width = 100, MaxLength = 6, CharacterCasing = CharacterCasing.Upper };
     public TextBox Vorname { get; } = new() { Width = 260 };
     public TextBox Nachname { get; } = new() { Width = 260 };
-    public CheckBox Fachkraft { get; } = new() { Text = "Fachkraft", AutoSize = true };
+    // Qualifikation: die kleinste Stufe ist die Assistenzkraft (Vorgabe für neue), darüber die Fachkraft.
+    public RadioButton Assistenzkraft { get; } = new() { Text = RechteRegeln.Assistenzkraft, AutoSize = true, Checked = true };
+    public RadioButton Fachkraft { get; } = new() { Text = RechteRegeln.Fachkraft, AutoSize = true };
     public CheckBox Aktiv { get; } = new() { Text = "aktiv (nicht ausgeschieden)", AutoSize = true, Checked = true };
     public Dictionary<string, CheckBox> Bereiche { get; } = [];
     public Dictionary<string, CheckBox> Positionen { get; } = [];
@@ -148,7 +151,9 @@ public sealed class MitarbeiterFormular : Form
         zeile(null, Fenster.Hinweis(bisher is null ? "Das Kürzel ist die Anmeldung und lässt sich später nicht mehr ändern." : "Das Kürzel bleibt, wie es ist."));
         zeile("Vorname", Vorname);
         zeile("Nachname", Nachname);
-        zeile(null, Formular.Reihe(Fachkraft, Aktiv));
+        zeile("Qualifikation", Formular.Reihe(Assistenzkraft, Fachkraft));
+        zeile(null, Fenster.Hinweis("Assistenzkräfte machen keine Visiten und geben Bedarfsmedikation nur nach Absprache mit einer Fachkraft."));
+        zeile(null, Aktiv);
         FlowLayoutPanel Haken(IEnumerable<Listeneintrag> liste, Dictionary<string, CheckBox> ziel, IReadOnlyList<string> gewaehlt, Func<string, bool> frei)
         {
             var feld = new FlowLayoutPanel { AutoSize = true, MaximumSize = new Size(560, 0), Margin = new Padding(0) };
@@ -174,6 +179,7 @@ public sealed class MitarbeiterFormular : Form
             Vorname.Text = bisher.Vorname;
             Nachname.Text = bisher.Nachname;
             Fachkraft.Checked = bisher.Fachkraft;
+            Assistenzkraft.Checked = !bisher.Fachkraft;
             Aktiv.Checked = bisher.Aktiv;
         }
         Aktiv.Enabled = !letzterAdmin;
@@ -310,7 +316,7 @@ public sealed class RechteFenster : Form
         Fenster.Grundform(this, "Rechte");
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
-        zeile(null, Fenster.Hinweis("Häkchen: Diese Position darf die Funktion. „Nur Fachkräfte“: zusätzlich muss die Person Fachkraft sein. " +
+        zeile(null, Fenster.Hinweis("Häkchen: Diese Position darf die Funktion. „Nur Fachkräfte“: zusätzlich muss die Person Fachkraft sein (nicht Assistenzkraft). " +
                                     "Wer mehrere Positionen hat, darf alles, was eine davon darf. Änderungen gelten sofort. " +
                                     "Der Administrator hat immer alle Rechte (auch ohne „Fachkraft“); seine Häkchen lassen sich nicht abwählen."));
         Tabelle.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Funktion", ReadOnly = true, Width = 300, Frozen = true });
