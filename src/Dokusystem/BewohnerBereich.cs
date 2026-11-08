@@ -341,6 +341,9 @@ public sealed class AkteAnsicht : Panel
         ReiterZeigen();
     }
 
+    // Nach einem Benutzerwechsel: den offenen Reiter neu zeigen (gesperrte Knöpfe nach den neuen Rechten).
+    public void AnsichtNeu() => ReiterZeigen();
+
     private void ReiterZeigen()
     {
         bool stamm = Reiter.Aktiv == "Stammdaten";

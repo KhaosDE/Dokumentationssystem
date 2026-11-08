@@ -380,7 +380,11 @@ public sealed class Hauptfenster : Form
         if (IsDisposed) return;
         BenutzerAnzeigen();
         AufgabenZaehlen();
-        if (AktiverBereich == "Bewohner") Bewohner.NeuLesen();
+        if (AktiverBereich == "Bewohner")
+        {
+            Bewohner.NeuLesen();
+            if (Bewohner.AkteSichtbar) Bewohner.Akte.AnsichtNeu();
+        }
         else if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
     }
 
