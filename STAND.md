@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.25.0** (Therapien: Zuordnung und Rechte, Bauplan Schritt 22).
+Stand: 08.11.2026. Version: **0.26.0** (Tagesplan, Bauplan Schritt 23).
 
 ## Aktuell
 
@@ -50,7 +50,12 @@ Neu in 0.25.0: Jedes **Therapieangebot gehört der Therapie oder einem Wohnberei
 Anbieter (Therapie: „Therapien bearbeiten“, Wohnbereich: neues Recht „Therapien des eigenen
 Bereichs bearbeiten“ und Zugehörigkeit zum Bereich).
 
-**Nächster Schritt:** Bauplan Schritt 23 „Tagesplan“ (0.26.0).
+Neu in 0.26.0: **Tagesplan** direkt unter „Übersicht“ – alle Termine von heute (Therapien,
+Wochenplan, Kalender) nach Uhrzeit oder nach Bewohner. Bei Therapien „gegangen“, „abgesagt“,
+„ausgefallen“ (derselbe Eintrag wie im Wochenplan); nach Beginn ohne Bestätigung „noch offen“.
+Nach „gegangen“ steht der Bewohner auf Karte und Akte als **„in Therapie: … bis …“**.
+
+**Nächster Schritt:** Bauplan Schritt 24 „Kalender: Bereich und Haus, Fahrzeuge“ (0.27.0).
 
 ## Fertig
 
@@ -452,6 +457,22 @@ Bereichs bearbeiten“ und Zugehörigkeit zum Bereich).
     gehören; sonst „Nur für Wohnbereich …“. Gesperrte Knöpfe bleiben sichtbar und nennen den Grund.
   - Demo: Kochgruppe gehört Wohnbereich A (Emma Fink), Kreativwerkstatt Wohnbereich B (Georg
     Habicht), die übrigen der Therapie. Nach dem Update werden die Demo-Angebote einmal neu geladen.
+
+- 0.26.0 — Tagesplan (Bauplan Schritt 23, 08.11.2026):
+  - Seitenleiste: „Tagesplan“ direkt unter „Übersicht“. Oben „Heute, …“, „nach Uhrzeit“ / „nach
+    Bewohner“ (mit Überschrift je Bewohner) und „alle Bereiche“ (sonst die eigenen Wohnbereiche
+    wie in der Übersicht).
+  - Je Termin eine Karte: Zeit und Titel, Bewohner mit Zimmer und Ort, Marke „Therapie“,
+    „Wochenplan“ oder „Kalender“. Bei Therapien „gegangen“, „abgesagt“, „ausgefallen“
+    (Recht „Therapie-Teilnahme bestätigen“); die Marke zeigt Status, Uhrzeit und Kürzel
+    („gegangen 09:05 · CD“). Nach Beginn ohne Bestätigung: „noch offen“ (gelb).
+  - Derselbe Eintrag wie im Wochenplan (dort „teilgenommen“); derselbe Status zweimal ergibt
+    keinen zweiten Eintrag.
+  - „Wo müsste er sein?“: Nach „gegangen“ zeigen Karte (Bewohner, Übersicht) und Akte bis zum Ende
+    des Termins „in Therapie: Holzwerkstatt bis 11:30“, danach nichts mehr (wieder im Haus). Eine
+    später gesetzte Statusmeldung geht vor.
+  - Kopf: „… Termine heute · Bereich · x von y Therapien bestätigt · z noch offen“. Andere Rechner
+    sehen Änderungen nach spätestens 30 Sekunden; der Tagesplan prüft dabei auch die Uhrzeit.
 
 ## Offene Punkte
 
@@ -893,6 +914,18 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 23): Knöpfe „gegangen/abgesagt/ausgefallen“ nur bei Therapien – nur dort
+  gibt es eine Teilnahme (wie im Wochenplan). Termine aus Wochenplan und Kalender (auch
+  Heimfahrten und Ausflüge) stehen zur Orientierung dabei. Fahrten mit Fahrzeugen kommen mit
+  Schritt 24.
+- 08.11.2026 (Schritt 23): „gegangen“ ist im Wochenplan „teilgenommen“ – ein Datensatz, zwei
+  Wörter: Im Tagesplan geht es darum, ob jemand losgegangen ist.
+- 08.11.2026 (Schritt 23): „Wo müsste er sein?“ gilt ab „gegangen“ bis zum Ende des Termins
+  (auch wenn vor Beginn bestätigt); „sofern nichts anderes eingetragen ist“: eine danach gesetzte
+  Statusmeldung geht vor. „noch offen“ ab Beginn des Termins.
+- 08.11.2026 (Schritt 23): Bereich wie in der Übersicht: die Wohnbereiche des Angemeldeten, sonst
+  der des Rechners; „alle Bereiche“ zeigt alle. Aktualisierung über den bestehenden Abgleich alle
+  30 Sekunden (Änderungen anderer Rechner und Uhrzeit), kein eigener Dienst.
 - 08.11.2026 (Schritt 22): Der Anbieter steht in jeder Fassung des Angebots (wie Name und
   Termine); es zählt die letzte. So bleibt ein Wechsel im Verlauf, und die Datenbank überschreibt
   weiter nichts.
@@ -913,6 +946,22 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.26.0:
+
+1. Links unter „Übersicht“ steht „Tagesplan“. Oben „Heute, …“; darunter alle Termine von heute
+   nach Uhrzeit (Therapien, Wochenplan, Kalender). An Tagen ohne Therapie: „Heute stehen keine
+   Termine an.“ oder nur Wochenplan-Einträge.
+2. Eine Therapie, die schon begonnen hat: gelbe Marke „noch offen“. „gegangen“ drücken → grüne
+   Marke „gegangen 09:05 · CD“; im Wochenplan des Bewohners steht „teilgenommen“.
+3. Danach Bewohner-Übersicht und Akte: Marke „in Therapie: … bis …“. Nach dem Ende der Therapie
+   verschwindet sie von selbst (spätestens nach 30 Sekunden im Tagesplan, sonst beim nächsten
+   Öffnen).
+4. „nach Bewohner“: je Bewohner eine Überschrift. „alle Bereiche“: auch die Termine von
+   Wohnbereich B.
+5. Zwei Fenster am selben gemeinsamen Ordner (Mehrplatz): „gegangen“ im einen → im anderen nach
+   höchstens 30 Sekunden sichtbar.
+6. Abmelden: Die Knöpfe sind grau („Bitte zuerst anmelden.“).
 
 Version 0.25.0:
 

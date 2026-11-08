@@ -52,6 +52,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   Rechtsklick auf eine Bewohnerkarte → „Neuer Bericht …“. Zwei Kennzeichen: **Wichtig** (bleibt in der Akte hervorgehoben)
   und **Übergabe** (erscheint im Bereich „Übergabe“, so lange wie gewählt). Korrigiert wird
   mit **Nachtrag …** – der ursprüngliche Text bleibt stehen.
+- **Tagesplan** (links, unter „Übersicht“): alle Termine von heute nach Uhrzeit oder nach
+  Bewohner. Bei Therapien „gegangen“, „abgesagt“, „ausgefallen“ (wie im Wochenplan); nach Beginn
+  ohne Bestätigung „noch offen“. Nach „gegangen“ zeigen Karte und Akte bis zum Ende „in Therapie:
+  … bis …“.
 - **Übergabe** (links): nur die Übergabe-Einträge, oben „Wohnbereich allgemein“, darunter je
   Bewohner. Mit eigenem Kürzel (Einstellungen) lassen sie sich als gelesen bestätigen,
   verlängern oder erledigen. „Übergabeblatt drucken …“ druckt die offenen Einträge.

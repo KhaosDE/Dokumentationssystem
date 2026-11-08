@@ -81,6 +81,7 @@ public sealed class UebersichtSeite : Panel
             ? string.Join(" und ", new[] { meineBp ? "meine Bezugsbewohner" : null, meineEt ? "meine Einzeltrainings" : null }.OfType<string>())
             : allesZeigen ? "alle Bereiche" : string.Join(", ", meine);
         var status = speicher.GeltendeStatusmeldungen(jetzt);
+        var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan (Schritt 23)
         string? berichtGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
         var farben = BezugAnzeige.Farben(speicher);
         Karten.Clear();
@@ -95,6 +96,7 @@ public sealed class UebersichtSeite : Panel
             marken.AddRange(modul.Where(m => m.Art != MarkenArt.Abwesend));
             if (marken.Any(m => m.Art == MarkenArt.Abwesend)) abwesend++;
             if (status.TryGetValue(h.Bewohner.Id!.Value, out var s)) marken.Insert(0, StatusmeldungRegeln.Marke(s, jetzt));
+            if (inTherapie.TryGetValue(h.Bewohner.Id!.Value, out var wo)) marken.Insert(0, wo);
             if (allesZeigen && !meine.Contains(h.Bewohner.Wohnbereich)) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
             var karte = new BewohnerKarte(h.Bewohner, heute, marken);
             karte.Gewaehlt += b => AkteGewuenscht?.Invoke(b.Id!.Value);

@@ -6,6 +6,7 @@ public static class Symbole
 {
     public const string Menue = "\uE700";          // GlobalNavigationButton
     public const string Uebersicht = "\uE80F";     // Home
+    public const string Tagesplan = "\uE823";      // Recent (Uhr)
     public const string Bewohner = "\uE716";       // People
     public const string Uebergabe = "\uE8F1";      // Library
     public const string Aufgaben = "\uE73E";       // CheckMark
@@ -21,6 +22,7 @@ public static class Symbole
     public static string Fuer(string bereich) => bereich switch
     {
         "Übersicht" => Uebersicht,
+        "Tagesplan" => Tagesplan,
         "Bewohner" => Bewohner,
         "Übergabe" => Uebergabe,
         "Aufgaben" => Aufgaben,
