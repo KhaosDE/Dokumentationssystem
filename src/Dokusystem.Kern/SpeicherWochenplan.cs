@@ -104,6 +104,8 @@ public sealed partial class Speicher
             fehler.Add("An diesem Tag ist kein Termin dieser Therapie.");
         if (tag > DateOnly.FromDateTime(jetzt) && status == Teilnahme.Teilgenommen) fehler.Add("„Teilgenommen“ geht erst am Tag selbst.");
         if (fehler.Count > 0) throw new Eingabefehler(fehler);
+        // Derselbe Status noch einmal (z. B. aus Tagesplan und Wochenplan): kein zweiter Eintrag.
+        if (TeilnahmeEintraege(tag).GetValueOrDefault(zuteilungId)?.Status == status) return;
         Ausfuehren("INSERT INTO teilnahmen (zuteilung_id, tag, status, erstellt, kuerzel) VALUES ($z, $t, $s, $e, $k)", null,
             ("$z", zuteilungId), ("$t", Iso(tag)), ("$s", WochenplanRegeln.TeilnahmeKuerzel(status)), ("$e", Zeit(jetzt)), ("$k", kuerzel.Trim()));
         WochenplanGeaendert?.Invoke();

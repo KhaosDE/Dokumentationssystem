@@ -16,7 +16,7 @@ public sealed class Hauptfenster : Form
     // Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
     // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Akte, Reiter „Berichte“, Rechtsklick auf eine Karte).
     public static readonly string[] Bereiche =
-        ["Übersicht", "Bewohner", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+        ["Übersicht", "Tagesplan", "Bewohner", "Übergabe", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
          "Einstellungen"];   // die Medikamentendatenbank steht seit Schritt 21 in den Einstellungen
 
     private readonly Speicher speicher;
@@ -35,6 +35,7 @@ public sealed class Hauptfenster : Form
     public TherapieSeite Therapie { get; }
     public KalenderSeite Kalender { get; }
     public UebersichtSeite Uebersicht { get; }
+    public TagesplanSeite Tagesplan { get; }
 
     // Damit öffnet das Programm (Program.cs). Tests beginnen bei „Bewohner“ (Konstruktor).
     public const string Startbereich = "Übersicht";
@@ -93,6 +94,9 @@ public sealed class Hauptfenster : Form
         Kalender = new KalenderSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Kalender"] = Kalender;
         Kalender.Geaendert += () => { if (AktiverBereich == "Kalender") Kopf.TexteSetzen(Kalender.KopfText, "Kalender"); };
+        Tagesplan = new TagesplanSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Tagesplan"] = Tagesplan;
+        Tagesplan.Geaendert += () => { if (AktiverBereich == "Tagesplan") Kopf.TexteSetzen(Tagesplan.KopfText, "Tagesplan"); };
         Uebersicht = new UebersichtSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Übersicht"] = Uebersicht;
         Uebersicht.Geaendert += () => { if (AktiverBereich == "Übersicht") Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht"); };
@@ -184,7 +188,9 @@ public sealed class Hauptfenster : Form
         // Erst „Bewohner“ (baut die Karten); das Programm wechselt danach zur Übersicht (Startbereich).
         BereichWaehlen("Bewohner");
         datenstand = Datenstand();
-        abgleich.Tick += (_, _) => AenderungenVonAnderen();
+        // Alle 30 Sekunden: Änderungen anderer Rechner; der Tagesplan zusätzlich wegen der Uhrzeit
+        // („noch offen“ nach Beginn, „in Therapie“ bis zum Ende).
+        abgleich.Tick += (_, _) => { if (!AenderungenVonAnderen() && AktiverBereich == "Tagesplan") Tagesplan.Aktualisieren(); };
         abgleich.Start();
     }
 
@@ -231,6 +237,7 @@ public sealed class Hauptfenster : Form
         {
             case "Bewohner": Bewohner.NeuLesen(); break;
             case "Übersicht": Uebersicht.Aktualisieren(); break;
+            case "Tagesplan": Tagesplan.Aktualisieren(); break;
             case "Übergabe": Uebergabe.Aktualisieren(); break;
             case "Aufgaben": Aufgaben.Aktualisieren(); break;
             case "Nachrichten": Nachrichten.Aktualisieren(); break;
@@ -292,6 +299,13 @@ public sealed class Hauptfenster : Form
         {
             Uebersicht.Aktualisieren();
             Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht");
+            Kopf.KnoepfeSetzen();
+            return;
+        }
+        if (schluessel == "Tagesplan")
+        {
+            Tagesplan.Aktualisieren();
+            Kopf.TexteSetzen(Tagesplan.KopfText, "Tagesplan");
             Kopf.KnoepfeSetzen();
             return;
         }

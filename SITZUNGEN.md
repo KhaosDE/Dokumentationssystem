@@ -48,3 +48,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 20 „Bezugspflege und Einzeltrainer“ (0.23.0).
 - 08.11.2026 — Claude Code: Bauplan Schritt 21 „Medikation als Tabelle, Medikamentendatenbank in den Einstellungen“ mit Nachschlage-Ansicht des BfArM (0.24.0).
 - 08.11.2026 — Claude Code: Bauplan Schritt 22 „Therapien: Zuordnung und Rechte“ (0.25.0).
+- 08.11.2026 — Claude Code: Bauplan Schritt 23 „Tagesplan“ (0.26.0).

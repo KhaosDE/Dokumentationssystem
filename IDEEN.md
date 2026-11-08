@@ -784,7 +784,7 @@ Umfang:
 - Demo-Daten mit beiden Anbietern.
 
 ## Tagesplan
-Status: freigegeben (Bauplan Schritt 23)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Neuer Punkt unter „Übersicht“: wer heute welche Therapien hat, mit Bestätigung, dass der
 Bewohner hingegangen ist.
