@@ -599,6 +599,30 @@ public static class Demodaten
             Name = a.Name, Fachrichtung = a.Fachrichtung, Praxis = a.Praxis, Telefon = a.Telefon, Email = a.Email, Aktiv = a.Aktiv,
         }).ToList();
 
+    // ----- Betreuer (Schritt 28) -----
+
+    private sealed class BetreuerDatei
+    {
+        public List<BetreuerDaten> Betreuer { get; set; } = [];
+    }
+
+    public sealed class BetreuerDaten
+    {
+        public string Bewohner { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Stelle { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Telefon { get; set; } = "";
+        public int VorTagen { get; set; } = 30;
+    }
+
+    // Betreuer aus daten/demo/betreuer.json (Nachname des Bewohners → Betreuer).
+    public static List<(string Nachname, Kern.Betreuer Betreuer)> Betreuer(DateTime jetzt) =>
+        Lesen<BetreuerDatei>("betreuer.json").Betreuer.Select(b => (b.Bewohner, new Kern.Betreuer
+        {
+            Name = b.Name, Stelle = b.Stelle, Email = b.Email, Telefon = b.Telefon, Geaendert = jetzt.Date.AddDays(-b.VorTagen).AddHours(10), Kuerzel = "EF",
+        })).ToList();
+
     // ----- Visiten (Schritt 26) -----
 
     private sealed class VisitenDatei

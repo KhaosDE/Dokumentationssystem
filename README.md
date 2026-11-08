@@ -144,7 +144,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   steht das in der Akte und auf der Übersicht.
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
   Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Zwei Kalender:
-  „Bereich“ und „Haus“ (Umschalter oben; Haus-Termine grau). Kein Abgleich mit anderen Kalendern.
+  „Bereich“ und „Haus“ (Umschalter oben; Haus-Termine grau). Austausch mit Outlook & Co. nur über
+  Dateien: „Als .ics speichern …“ (die gezeigten Termine) und „.ics übernehmen …“ (oder eine
+  .ics-Datei auf den Kalender ziehen) mit Vorschau und Zuordnung zu Bewohner und Kalender. Keine
+  Verbindung zu Outlook, Exchange, Google oder einem Mailserver.
 - **Fahrzeuge** (Übersicht und Kalender): je Firmenwagen „vor Ort“ oder „unterwegs seit …,
   zurück geplant …“ mit „losgefahren“ und „zurück“; „Neue Fahrt …“ mit Warnung bei Doppelbuchung.
   Mitfahrende stehen im Tagesplan und sind während der Fahrt abwesend. Die Fahrzeugliste steht in
@@ -181,6 +184,11 @@ Danach fragt Windows für diese Datei nicht mehr.
   den Karten zeigt ein farbiger Streifen die Bezugspflege, ein Punkt den Einzeltrainer – in der
   Farbe der Person (Einstellungen → „Meine Farbe“), immer mit Kürzel. In der Übersicht filtern
   „Meine Bezugsbewohner“ und „Meine Einzeltrainings“.
+- **Betreuer:** In der Akte unter „Stammdaten“ (Name, Stelle, Telefon, E-Mail; „Betreuer …“).
+  „E-Mail an Betreuer …“ zeigt zuerst den Hinweis „Keine Gesundheitsdaten unverschlüsselt per
+  E-Mail senden.“ und öffnet dann das E-Mail-Programm des Rechners mit Empfänger und Betreff – den
+  Text schreiben und senden Sie dort. Das Programm selbst verschickt nichts. Demo-Adressen enden auf
+  `@example.org` (dort kommt nichts an).
 - **Anmelden:** Beim Start mit dem Kürzel (Demo: ohne Passwort; die ausgedachten Mitarbeiter
   stehen im Anmeldefenster; TST ist der Administrator mit allen Rechten). **Abmelden:** Taste F12
   (aus jedem Fenster), der Knopf „Abmelden (F12)“ oben rechts, unten in der Seitenleiste oder in den

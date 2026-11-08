@@ -79,3 +79,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 26m „Therapie: „Laufende Therapien“ als Anwesenheitstafel“ (0.29.15).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26n „Programmsymbol „Hell wie die Kopfzeile““ (0.29.16).
 - 08.11.2026 — Claude Code: Bauplan Schritt 27 „Ausgangsliste als übersichtliche Liste“ (0.30.0).
+- 08.11.2026 — Claude Code: Bauplan Schritt 28 „E-Mail und Kalender über externe Programme“ (0.31.0).

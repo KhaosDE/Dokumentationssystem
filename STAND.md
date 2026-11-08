@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.30.0** (Ausgangsliste als übersichtliche Liste, Bauplan Schritt 27).
+Stand: 08.11.2026. Version: **0.31.0** (E-Mail und Kalender über externe Programme, Bauplan Schritt 28).
 
 ## Aktuell
 
@@ -175,7 +175,12 @@ Zimmer, Name, Ausgang, Unterbringung, heute von–bis mit Hz., Stand jetzt). Wer
 oben und ist hinterlegt, Überfällige rot mit „überfällig seit …“; „raus“/„zurück“ direkt in der
 Zeile, Filter „nur unterwegs“ und „nur mit Beschränkung“.
 
-**Nächster Schritt:** Bauplan Schritt 28 „E-Mail und Kalender über externe Programme“ (0.31.0).
+Neu in 0.31.0: **Betreuer** in der Akte (Name, Stelle, Telefon, E-Mail) und **„E-Mail an Betreuer
+…“** – nach dem Hinweis „Keine Gesundheitsdaten unverschlüsselt per E-Mail senden.“ öffnet sich das
+E-Mail-Programm des Rechners mit Empfänger und Betreff. Im Kalender **„Als .ics speichern …“** und
+**„.ics übernehmen …“** (auch per Ziehen) mit Vorschau und Zuordnung zu Bewohner und Bereich/Haus.
+
+**Nächster Schritt:** Bauplan Schritt 29 „Einstellungen neu gegliedert“ (0.32.0).
 
 ## Fertig
 
@@ -907,6 +912,19 @@ Zeile, Filter „nur unterwegs“ und „nur mit Beschränkung“.
   - Filter „nur unterwegs“ (mit Digitalem Ausgang) und „nur mit Beschränkung“.
   - Der Reiter „Ausgang“ in der Akte bleibt eine Karte. Änderungen im Modul:
     `src/DokuLine.Modul.Ausgangsliste/AENDERUNGEN.md`.
+- 0.31.0 — E-Mail und Kalender über externe Programme (Bauplan Schritt 28, 08.11.2026):
+  - Akte → „Stammdaten“: Zeile „Betreuer“ („nicht erfasst“ in Achtung-Farbe, wenn nichts
+    eingetragen ist), Knöpfe „Betreuer …“ (Recht „Bewohner anlegen und bearbeiten“; jede Änderung
+    eine neue Fassung) und „E-Mail an Betreuer …“ (gesperrt ohne Betreuer oder ohne E-Mail-Adresse).
+  - „E-Mail an Betreuer …“: Hinweis „Keine Gesundheitsdaten unverschlüsselt per E-Mail senden.“ mit
+    OK/Abbrechen, dann `mailto:` mit Empfänger und Betreff „Betreuung <Name>“ an das E-Mail-Programm
+    des Rechners. Kein eigener Versand, keine Gesundheitsangaben im Betreff.
+  - Kalender: „Als .ics speichern …“ speichert die gezeigten Termine (Zeitraum, Bewohner, Bereich/
+    Haus) im Standardformat; „.ics übernehmen …“ oder eine .ics-Datei auf den Kalender ziehen →
+    Vorschau mit Häkchen, Zuordnung (Art, Bewohner, Kalender Bereich/Haus – Haus nur mit Recht) →
+    „Übernehmen“ legt die Termine an (Hinweis „aus einer .ics-Datei …“).
+  - Demo `daten/demo/betreuer.json`: ausgedachte Betreuer, Adressen nur `@example.org`, Telefon
+    „0000 …“; eine Betreuerin ohne E-Mail, einige Bewohner ohne Eintrag.
 
 ## Offene Punkte
 
@@ -1511,6 +1529,21 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 28): Betreuer sind eine eigene Tabelle mit Fassungen (wie Bezug und
+  Biografie), nicht Teil des Bewohner-Formulars – so bleiben Formular und Konfliktschutz der
+  Stammdaten unverändert. Ein Betreuer je Bewohner (die neueste Fassung gilt).
+- 08.11.2026 (Schritt 28): E-Mail-Adressen werden nur einfach geprüft (ein @, Punkt im Namen danach,
+  keine Leerzeichen und keine Zeichen, die eine mailto-Adresse verändern). Der Betreff nennt nur den
+  Namen des Bewohners; Text und Versand macht der Mensch im E-Mail-Programm.
+- 08.11.2026 (Schritt 28): .ics: Das Programm schreibt Ortszeit ohne Zeitzone („floating“), das
+  verstehen Outlook und andere als Ortszeit. Beim Lesen: Zeiten mit „Z“ sind UTC und werden
+  umgerechnet, Zeiten mit Zeitzonen-Angabe gelten als Ortszeit (die Demo läuft in einer Zeitzone).
+  Wiederholungen (RRULE) übernimmt das Programm nicht – nur den ersten Termin, mit Hinweis. Erinnerungen
+  (VALARM) und Teilnehmer werden nicht gelesen. Exportiert werden Titel, Zeit, Ort und eine Beschreibung
+  (Art, Bewohner, Hinweis, „Demo — ausgedachte Daten“).
+- 08.11.2026 (Schritt 28): Die Zuordnung beim Übernehmen gilt für alle angekreuzten Termine zugleich;
+  wer verschiedene Zuordnungen braucht, übernimmt in mehreren Durchgängen. Entweder alle angekreuzten
+  werden angelegt oder keiner (bei einem Fehler).
 - 08.11.2026 (Schritt 27): Die Liste ist aus einzelnen Zeilen gebaut (keine Tabelle mit Zellen), weil
   „raus“/„zurück“ als echte Knöpfe in der Zeile stehen sollen. Spalten sind feste Anteile der Breite,
   alle Zeilen haben dieselbe Breite für den Knopfbereich, damit die Spalten fluchten. Die seltenen
@@ -1609,6 +1642,20 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.31.0:
+
+1. Akte Anton Ahorn → „Stammdaten“: „Betreuer: Heike Hecht (Betreuungsverein …) · Tel. … ·
+   h.hecht@example.org“. Akte Dieter Distel: „nicht erfasst“ (gelb), „E-Mail an Betreuer …“ grau.
+2. Bei Anton Ahorn „E-Mail an Betreuer …“ → Hinweis „Keine Gesundheitsdaten unverschlüsselt per
+   E-Mail senden.“ → OK → Outlook (bzw. das E-Mail-Programm) öffnet sich mit Empfänger und Betreff
+   „Betreuung Anton Ahorn“. Nicht senden (die Adresse ist ausgedacht). Abbrechen → nichts öffnet sich.
+3. Dieter Distel „Betreuer …“: falsche E-Mail („abc“) → Hinweis; richtig (`…@example.org`) →
+   Speichern → steht in der Akte. Als „OP“ (Therapie) ist „Betreuer …“ grau.
+4. Kalender → „Als .ics speichern …“ → Datei speichern → in Outlook öffnen: die Termine des Monats.
+5. In Outlook einen Termin als .ics speichern (oder Datei aus Schritt 4 nehmen) → Kalender „.ics
+   übernehmen …“ oder Datei auf den Kalender ziehen → Vorschau, „Wohnbereich“, „Haus“ (als „EF“) →
+   Übernehmen → Termine stehen im Kalender, im Hinweis „aus einer .ics-Datei“.
 
 Version 0.30.0:
 
