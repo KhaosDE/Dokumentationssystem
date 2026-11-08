@@ -16,9 +16,10 @@ public sealed class KopfBereich : Panel
     // Logische Maße (100 % Skalierung).
     private const int Rand = 16, RandOben = 16, RandUnten = 8;   // Abstand zum Fensterrand
     private const int Innen = 16, InnenSeite = 24;
-    private const int TitelHoehe = 64, Zeilenabstand = 8;
+    private const int TitelHoehe = 64;
     private const int LogoHoehe = 56, LogoMaxBreite = 220, PlatzhalterBreite = 150;
-    public const int GesamtHoehe = RandOben + Innen + TitelHoehe + Zeilenabstand + Stil.KnopfHoehe + Innen + RandUnten;
+    // Schritt 26i: ohne die Knopfzeile – die Knöpfe stehen in der Aktionsleiste darunter.
+    public const int GesamtHoehe = RandOben + Innen + TitelHoehe + Innen + RandUnten;
 
     private readonly Label klein = new();
     private readonly Label titel = new();
@@ -37,6 +38,9 @@ public sealed class KopfBereich : Panel
     public Button AbmeldenKnopf { get; } = Stil.NebenKnopf("Abmelden (F12)");
     public Button EntwurfKnopf { get; } = Stil.NebenKnopf("Entwurf fortsetzen");
     private const int BenutzerHoehe = 30;
+    // Schritt 26i: Die Aktionen des Bereichs stehen in einer Leiste direkt unter der Kopfzeile (das
+    // Hauptfenster legt sie dorthin); „Entwurf fortsetzen“ steht dort rechts außen.
+    public AktionsLeiste Leiste { get; } = new();
 
     public KopfBereich()
     {
@@ -57,7 +61,8 @@ public sealed class KopfBereich : Panel
         Height = S(GesamtHoehe);
         AccessibleName = DemoHinweis;
         EntwurfKnopf.Visible = false;
-        Controls.AddRange([BenutzerAnzeige, EntwurfKnopf, AbmeldenKnopf]);
+        Controls.AddRange([BenutzerAnzeige, AbmeldenKnopf]);
+        Leiste.EntwurfSetzen(EntwurfKnopf);
         BenutzerSetzen(null, null);
     }
 
@@ -79,8 +84,7 @@ public sealed class KopfBereich : Panel
     public void EntwuerfeSetzen(int anzahl)
     {
         EntwurfKnopf.Text = anzahl == 1 ? "Entwurf fortsetzen" : $"Entwürfe fortsetzen ({anzahl})";
-        EntwurfKnopf.Visible = anzahl > 0;
-        PerformLayout();
+        Leiste.EntwurfZeigen(anzahl > 0);
     }
 
     // Rechter Rand für Demo-Hinweis und Benutzer: links neben dem Logo, falls eines gewählt ist.
@@ -107,14 +111,13 @@ public sealed class KopfBereich : Panel
         Invalidate();
     }
 
-    // Die Knöpfe rechts unten, von links nach rechts (die Hauptaktion zuletzt, ganz rechts).
+    // Die Aktionen des Bereichs (Schritt 26i: in der Aktionsleiste unter der Kopfzeile). Knoepfe behält
+    // die übergebene Reihenfolge; wie sie in der Leiste stehen, entscheidet AktionsLeiste.Reihenfolge.
     public void KnoepfeSetzen(params Button[] neue)
     {
-        foreach (var alt in knoepfe) Controls.Remove(alt);
         knoepfe.Clear();
         knoepfe.AddRange(neue);
-        foreach (var knopf in knoepfe) Controls.Add(knopf);
-        PerformLayout();
+        Leiste.KnoepfeSetzen(neue);
     }
 
     public IReadOnlyList<Button> Knoepfe => knoepfe;
@@ -185,7 +188,7 @@ public sealed class KopfBereich : Panel
     {
         base.OnLayout(levent);
         var f = Flaeche;
-        int links = f.Left + S(InnenSeite), rechts = f.Right - S(InnenSeite), oben = f.Top + S(Innen);
+        int links = f.Left + S(InnenSeite), oben = f.Top + S(Innen);
         int textHoehe = klein.PreferredHeight + S(Stil.AbstandMini) + titel.PreferredHeight;
         int textOben = oben + Math.Max(0, (S(TitelHoehe) - textHoehe) / 2);
         klein.Location = new Point(links, textOben);
@@ -196,19 +199,6 @@ public sealed class KopfBereich : Panel
         int b = Math.Max(AbmeldenKnopf.PreferredSize.Width, TextRenderer.MeasureText(AbmeldenKnopf.Text, AbmeldenKnopf.Font).Width + S(24));
         AbmeldenKnopf.Bounds = new Rectangle(RechtsNebenLogo() - b, zeile, b, hoehe);
         BenutzerAnzeige.Location = new Point(AbmeldenKnopf.Left - S(Stil.AbstandKlein) - BenutzerAnzeige.PreferredWidth, zeile + (hoehe - BenutzerAnzeige.PreferredHeight) / 2);
-        int e = Math.Max(EntwurfKnopf.PreferredSize.Width, TextRenderer.MeasureText(EntwurfKnopf.Text, EntwurfKnopf.Font).Width + S(24));
-        EntwurfKnopf.Bounds = new Rectangle(BenutzerAnzeige.Left - S(Stil.AbstandMittel) - e, zeile, e, hoehe);
-
-        int y = oben + S(TitelHoehe) + S(Zeilenabstand);
-        int x = rechts;
-        for (int i = knoepfe.Count - 1; i >= 0; i--)
-        {
-            var knopf = knoepfe[i];
-            int breite = Math.Max(knopf.PreferredSize.Width, TextRenderer.MeasureText(knopf.Text, knopf.Font).Width + S(32));
-            x -= breite;
-            knopf.Bounds = new Rectangle(x, y, breite, S(Stil.KnopfHoehe));
-            x -= S(Stil.AbstandKlein);
-        }
     }
 
     protected override void OnPaint(PaintEventArgs e)
@@ -295,3 +285,102 @@ public sealed class KopfBereich : Panel
         g.FillPath(pinsel, ellipse);
     }
 }
+
+// Aktionsleiste direkt unter der Kopfzeile (Bauplan Schritt 26i): gleiche Breite und gleiche Seitenränder
+// wie die Kopfzeile, Knöpfe im bestehenden Stil. In allen Bereichen gleich angeordnet: links ein
+// Rücksprung („← Alle Bewohner“), dann die Hauptaktion (farbig), dann die übrigen Aktionen; rechts
+// „… drucken …“ und ganz außen „Entwurf fortsetzen“. Ohne Aktion entfällt die Leiste.
+public sealed class AktionsLeiste : Panel
+{
+    private const int Rand = 16, RandUnten = 8;   // wie KopfBereich
+    private readonly List<Button> knoepfe = [];
+    private Button? entwurf;
+
+    public AktionsLeiste()
+    {
+        Dock = DockStyle.Top;
+        BackColor = Stil.Seite;
+        Visible = false;
+        Height = S(Stil.KnopfHoehe + RandUnten);
+    }
+
+    private int S(int wert) => Stil.Px(this, wert);
+
+    internal void EntwurfSetzen(Button knopf)
+    {
+        entwurf = knopf;
+        Controls.Add(knopf);
+    }
+
+    public void KnoepfeSetzen(IEnumerable<Button> neue)
+    {
+        foreach (var alt in knoepfe) Controls.Remove(alt);
+        knoepfe.Clear();
+        knoepfe.AddRange(neue);
+        foreach (var knopf in knoepfe) Controls.Add(knopf);
+        Anordnen();
+    }
+
+    // Gruppe in der Leiste: 0 Rücksprung, 1 Hauptaktion, 2 übrige Aktionen, 3 rechts (Drucken).
+    public static int Gruppe(Button knopf) =>
+        knopf.Text.StartsWith('←') ? 0
+        : knopf.Text.Contains("drucken", StringComparison.OrdinalIgnoreCase) ? 3
+        : knopf is Knopf { Hauptaktion: true } ? 1
+        : 2;
+
+    // Links, wie sie stehen (stabil innerhalb der Gruppe), und rechts.
+    public static (List<Button> Links, List<Button> Rechts) Reihenfolge(IEnumerable<Button> knoepfe)
+    {
+        var sortiert = knoepfe.Select((k, i) => (k, i)).OrderBy(x => Gruppe(x.k)).ThenBy(x => x.i).Select(x => x.k).ToList();
+        return (sortiert.Where(k => Gruppe(k) < 3).ToList(), sortiert.Where(k => Gruppe(k) == 3).ToList());
+    }
+
+    // „Entwurf fortsetzen“ zeigen oder nicht. (Visible eines Knopfs gilt erst, wenn die Leiste zu sehen
+    // ist; deshalb merkt sich die Leiste den Wunsch selbst.)
+    public void EntwurfZeigen(bool zeigen)
+    {
+        entwurfSichtbar = zeigen;
+        if (entwurf is not null) entwurf.Visible = zeigen;
+        Anordnen();
+    }
+
+    private bool entwurfSichtbar;
+
+    public void Anordnen()
+    {
+        Visible = knoepfe.Count > 0 || entwurfSichtbar;
+        Height = S(Stil.KnopfHoehe + RandUnten);
+        PerformLayout();
+    }
+
+    protected override void OnLayout(LayoutEventArgs levent)
+    {
+        base.OnLayout(levent);
+        int hoehe = S(Stil.KnopfHoehe);
+        int Breite(Button k) => Math.Max(k.PreferredSize.Width, TextRenderer.MeasureText(k.Text, k.Font).Width + S(32));
+        var (links, rechts) = Reihenfolge(knoepfe);
+        int x = S(Rand);
+        foreach (var k in links)
+        {
+            int b = Breite(k);
+            k.Bounds = new Rectangle(x, 0, b, hoehe);
+            x += b + S(Stil.AbstandKlein);
+        }
+        int r = Width - S(Rand);
+        if (entwurf is not null && entwurfSichtbar)
+        {
+            int b = Breite(entwurf);
+            r -= b;
+            entwurf.Bounds = new Rectangle(r, 0, b, hoehe);
+            r -= S(Stil.AbstandMittel);
+        }
+        for (int i = rechts.Count - 1; i >= 0; i--)
+        {
+            int b = Breite(rechts[i]);
+            r -= b;
+            rechts[i].Bounds = new Rectangle(r, 0, b, hoehe);
+            r -= S(Stil.AbstandKlein);
+        }
+    }
+}
+

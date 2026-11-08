@@ -1278,7 +1278,7 @@ Umfang:
 - Start und Bildaufbau bleiben flüssig (Richtwert: Übersicht in unter einer Sekunde).
 
 ## Kopfzeile nur „Wo bin ich“, Logo, Abmelden; Aktionen darunter
-Status: freigegeben (Bauplan Schritt 26i)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Die Knöpfe für Aktionen wandern aus der Kopfzeile in eine Leiste darunter. Sonst bleibt die
 Kopfzeile, wie sie ist.

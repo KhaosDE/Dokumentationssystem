@@ -41,10 +41,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   Berichte, Medikation …) liegen auf Reitern.
 - In der Akte steht oben der **Allergiehinweis**: rot = Allergien eingetragen,
   grün = keine bekannt, gelb gestrichelt = noch nicht erfasst. Der Text sagt immer, was gilt.
-- **Ärztliche Informationen …** (oben rechts in der Akte): Diagnosen (werden nie gelöscht, nur
+- **Ärztliche Informationen …** (Aktionsleiste der Akte, unter der Kopfzeile): Diagnosen (werden nie gelöscht, nur
   „beendet“), Allergien mit der Art der Reaktion und Hinweise für den Notfall. Nur hier werden die
   Allergien geändert. Ansehen und Bearbeiten sind eigene Rechte (bearbeiten: Fachkräfte).
-- **Neuer Bewohner …** und **Bearbeiten …** (oben rechts) öffnen das Formular. Datum immer
+- **Neuer Bewohner …** und **Bearbeiten …** (Aktionsleiste unter der Kopfzeile) öffnen das Formular. Datum immer
   als TT.MM.JJJJ (z. B. 03.04.1965); die Punkte setzt das Programm beim Tippen selbst (`08112026`,
   auch `081126` für 20xx), bei Uhrzeiten den Doppelpunkt (`0930`). **Offen geführt** hat drei Zustände: ja, nein, nicht erfasst.
   Bei der **Aufnahme** wählt man erst den Wohnbereich (R1 offen, R2/R3 beschützend), dann eines der
@@ -53,6 +53,9 @@ Danach fragt Windows für diese Datei nicht mehr.
 - In den Stammdaten steht das **Alter** neben dem Geburtsdatum. Oben in der Akte stehen Marken:
   „offen geführt“, „offen geführt: nicht erfasst“ und Hinweise der Module – etwa, wenn die
   Ausgangsliste etwas anderes zur Unterbringung sagt als die Akte („bitte klären“).
+- **Aktionsleiste:** Die Knöpfe eines Bereichs („Neue Aufgabe …“, „Neuer Termin …“, in der Akte
+  „Bearbeiten …“, „Neuer Bericht …“ …) stehen in einer Leiste direkt unter der Kopfzeile, überall gleich
+  angeordnet: links die Hauptaktion (farbig), dann die übrigen, rechts „… drucken …“.
 - **Seitenmenü einklappen:** Der Knopf mit den drei Strichen oben links macht das Menü schmal
   (nur Symbole, der Name erscheint beim Darüberfahren). Das Programm merkt sich die Wahl.
 - **Übersicht** (links oben, öffnet beim Start): oben „Heute“ mit Abwesenden, den Terminen des
@@ -176,7 +179,7 @@ Danach fragt Windows für diese Datei nicht mehr.
   stehen im Anmeldefenster; TST ist der Administrator mit allen Rechten). **Abmelden:** Taste F12
   (aus jedem Fenster), der Knopf „Abmelden (F12)“ oben rechts, unten in der Seitenleiste oder in den
   Einstellungen. Danach ist nichts mehr zu sehen, bis sich jemand anmeldet; ein angefangener Bericht
-  kann als Entwurf bleiben („Entwurf fortsetzen“ oben rechts).
+  kann als Entwurf bleiben („Entwurf fortsetzen“ rechts in der Aktionsleiste).
   Was jemand darf, hängt an seiner Position (Einstellungen → „VERWALTUNG“ → „Rechte …“). Ohne
   Recht bleiben Knöpfe grau und sagen beim Darüberfahren, warum.
 - **Logo der Einrichtung:** Oben rechts im Kopf steht ein Platzhalter. Ein Klick darauf öffnet die

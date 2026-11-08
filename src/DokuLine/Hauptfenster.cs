@@ -182,6 +182,7 @@ public sealed class Hauptfenster : Form
         // ----- Inhalt rechts: Kopf oben, Bereich darunter -----
         var inhalt = new Panel { Dock = DockStyle.Fill, BackColor = Stil.Seite };
         inhalt.Controls.Add(bereichsFlaeche);
+        inhalt.Controls.Add(Kopf.Leiste);   // Schritt 26i: Aktionsleiste direkt unter der Kopfzeile
         inhalt.Controls.Add(Kopf);
         inhalt.Controls.Add(Statusleiste);
         bereichsFlaeche.BringToFront();   // Fill wird zuletzt angeordnet und nimmt den Rest

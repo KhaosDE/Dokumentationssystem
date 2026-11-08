@@ -72,3 +72,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Programmsymbol gewählt (Entwurf „Hell wie die Kopfzeile“), Auftrag 26n mit SVG-Vorlagen freigegeben (Chat „Programme/Apps“).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26g „Tagesplan als Anzeigetafel“ (0.29.9).
 - 08.11.2026 — Claude Code: Bauplan Schritt 26h „Demo-Daten: 23 Bewohner je Wohnbereich“ (0.29.10); IDEEN-Vorschlag „Assistenzkraft und Fachkraft“ (wartet auf Bestätigung).
+- 08.11.2026 — Claude Code: Bauplan Schritt 26i „Aktionsleiste unter der Kopfzeile“ (0.29.11).

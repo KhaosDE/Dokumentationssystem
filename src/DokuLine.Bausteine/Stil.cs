@@ -185,6 +185,7 @@ public static class Stil
     public static Button HauptKnopf(string text)
     {
         var knopf = Grundknopf(text);
+        if (knopf is Knopf k) k.Hauptaktion = true;
         knopf.BackColor = Akzent;
         knopf.ForeColor = Color.White;
         knopf.Font = Fett;
