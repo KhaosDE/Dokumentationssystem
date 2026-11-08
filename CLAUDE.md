@@ -67,6 +67,9 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 | `SITZUNGEN.md` | wird **angehängt** | ein Einzeiler pro Sitzung: Datum — was erledigt wurde |
 | `IDEEN.md` | wird überarbeitet | Aufträge aus den Chats, jeder mit Status |
 
+Vault-Ordner (Obsidian, nur Dokumentation): `Dokumentationssystem/`. Cloud-Sitzungen erreichen
+ihn nicht; Claude Code schreibt nur ins Repository.
+
 ## Technik
 
 **Windows-Programm in C# / .NET 10** (Entscheidung Tobi, 06.11.2026; vorher Python/PySide6
