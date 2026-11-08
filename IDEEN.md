@@ -51,6 +51,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 26 | Visiten | 0.29.0 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
+| 29 | Einstellungen neu gegliedert | 0.32.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -891,3 +892,46 @@ Umfang (vereinbar mit `CLAUDE.md`, Regel 6 — das Programm selbst geht nicht in
   aus dem E-Mail-Programm speichern und ins Programm ziehen). Beim Import Vorschau und
   Zuordnung zu Bewohner und Kalender (Bereich/Haus).
 - Ausdrücklich nicht: direkte Verbindung zu Outlook, Exchange, Google oder einem Mailserver.
+
+## Einstellungen neu gegliedert
+Status: freigegeben (Bauplan Schritt 29)
+Datum: 08.11.2026
+Was: Das Einstellungsmenü bekommt den Aufbau der Windows-11-Einstellungen: links Gruppen,
+rechts deren Inhalt, oben Suche. Alle Einstellungen der Schritte davor ziehen dorthin um.
+Warum: Frage Tobi „Was ist die beste Gestaltung für ein Einstellungsmenü?“, Vorschlag aus dem
+Chat freigegeben (08.11.2026). Grundlage: Microsoft „Guidelines for app settings“; abweichend
+davon mehrere Seiten statt einer, weil das Programm viele Einstellungen hat.
+Umfang:
+- **Einstieg:** „Einstellungen“ ganz unten in der Seitenleiste, fest dort. Öffnet als ganze
+  Seite im Inhaltsbereich (kein kleines Fenster), füllt die Fläche (Schritt 18).
+- **Links die Gruppen**, in dieser Reihenfolge, je mit Symbol aus „Segoe Fluent Icons“:
+
+  | Gruppe | Inhalt | Wer (Vorbelegung, Rechte-Tabelle) |
+  |---|---|---|
+  | Persönlich | eigene Farbe, Seitenmenü eingeklappt, Abmelden | jeder |
+  | Wohnbereich | Bereichskennung, Schichtzeiten, Fristen (Beschluss endet bald, HEB fällig), Logo | Bereichsleitung |
+  | Module | Ausgangsliste mit Untermodulen Küchendienst und Digitaler Ausgang, an/aus | Leitungen |
+  | Aufgaben | Standardaufgaben je Schicht | „Aufgaben-Vorlagen verwalten“ |
+  | Fahrzeuge | Fahrzeugliste | mit Recht |
+  | Vorlagen | HEB-PDFs A/B/C mit Feldzuordnung | mit Recht |
+  | Medikamente | Medikamentendatenbank | Fachkräfte (anlegen), Psychologischer Fachdienst (verwalten) |
+  | Verwaltung | Mitarbeiter, Bereiche und Positionen, Rechte-Tabelle | Leitungen, Verwaltung, Bereichsleitung (eigener Bereich) |
+  | System | Ort der Datenbank, Sicherung, Update, Demo-Daten zurücksetzen | Leitungen |
+  | Über | Version, Build, Lizenzen der Bausteine, Demo-Hinweis | jeder |
+
+- **Suchfeld** oben: findet Einstellungen über Namen und Erklärung und springt hin.
+- **Jede Einstellung als Karte:** Name, ein Satz Erklärung, rechts das Bedienelement.
+  Seltene Unterpunkte aufklappbar, höchstens eine Ebene. Kurze Gruppenüberschriften (ein Wort).
+- **Bedienelemente:** an/aus als Schalter (selbst gezeichnet im Stil der Ausgangsliste) oder
+  Häkchen — die einfachere Lösung, einheitlich im ganzen Menü; bis 5 Möglichkeiten
+  Auswahlknöpfe, mehr als 5 Klappliste; Aktionen als Knopf.
+- **Änderungen wirken sofort**, ohne „Speichern“. Ausnahme: ganze Datensätze (Mitarbeiter,
+  Medikament, Fahrzeug, Standardaufgabe, HEB-Feldzuordnung) haben „Speichern“ und
+  „Abbrechen“.
+- **Ohne Recht ausgegraut, nicht versteckt**, mit einem Satz „Dafür fehlt die Berechtigung“.
+- **Folgenreiches nur in „System“:** „Demo-Daten zurücksetzen“ und Wechsel des Datenbank-Orts
+  fragen immer vorher nach; Hinweis in Gefahrenfarbe mit Wort, Farbe nie allein.
+- Was bisher an anderen Stellen eingestellt wurde (Update-Häkchen, Logo, Kürzel, Module,
+  Medikamentendatenbank, Datenbank-Ort, Fahrzeuge, Schichtzeiten …), zieht hierher um; es
+  bleibt keine zweite Stelle.
+- Bildschirmfotos im Testlauf für jede Gruppe.
