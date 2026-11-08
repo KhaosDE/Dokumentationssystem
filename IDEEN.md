@@ -52,6 +52,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 26a | Kürzel automatisch aus der Anmeldung | 0.29.1 |
 | 26a1 | Umbenennung in DokuLine, Teil 1 (Übergang) | 0.29.2 |
 | 26a2 | Position „Administrator“ mit Kürzel TST | 0.29.3 |
+| 26a3 | Abmelden sichtbar machen, Tastenkürzel F12 | 0.29.3 |
 | 26b | Ärzteverzeichnis | 0.29.4 |
 | 26c | Visite: Übersicht aller Bewohner | 0.29.5 |
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
@@ -1122,3 +1123,24 @@ Umfang:
 - **Bestehende Datenbanken:** Fehlt TST beim Start, wird er einmalig ergänzt (auch ohne
   „Demo-Daten zurücksetzen“), Protokolleintrag. Ein vorhandener TST wird nicht verändert.
 - Anmeldung mit `TST` wie bei allen anderen (Demo ohne Passwort).
+
+## Abmelden sichtbar machen, Tastenkürzel F12
+Status: freigegeben (Bauplan Schritt 26a3, zusammen mit 26a2 in Version 0.29.3)
+Datum: 08.11.2026
+Was: Eine deutlich sichtbare Möglichkeit, sich abzumelden, und das Tastenkürzel **F12**.
+Warum: Rückmeldung Tobi (08.11.2026): „Es fehlt eine Möglichkeit, sich wieder abzumelden.
+Tastenkürzel dafür ist F12.“ Die bisherige Lösung (Klappmenü „Abmelden / Benutzer
+wechseln“ oben rechts, `Hauptfenster.cs`) wird nicht gefunden.
+Umfang:
+- **Oben rechts im Kopf:** „Angemeldet: TST“ (Kürzel und Name) und daneben ein eigener Knopf
+  **„Abmelden (F12)“** — kein verstecktes Klappmenü.
+- **F12** meldet in jedem Bereich und aus jedem Fenster des Programms heraus ab.
+- Zusätzlich: Symbol „Abmelden“ unten in der Seitenleiste (auch eingeklappt, mit Tooltip
+  „Abmelden (F12)“) und in den Einstellungen unter „Persönlich“.
+- **Nach dem Abmelden** sieht man nur noch das Anmeldefenster über dem leeren Hauptfenster —
+  keine Bewohnerdaten mehr sichtbar, damit man den Platz verlassen kann. Anmelden mit
+  anderem Kürzel = Benutzer wechseln.
+- **Ungespeicherte Eingaben** (z. B. ein angefangener Bericht): vor dem Abmelden fragen
+  „Als Entwurf speichern / Verwerfen / Abbrechen“. Entwürfe gehören dem Kürzel, das sie
+  angefangen hat.
+- Tastenkürzel im Tooltip und in der Hilfe/„Über“ nennen.
