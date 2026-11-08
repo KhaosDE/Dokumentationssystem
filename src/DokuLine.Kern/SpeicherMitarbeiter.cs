@@ -12,6 +12,11 @@ public sealed partial class Speicher
 {
     private const string Grundbestand = "rechte_vorbelegt";
     private const string DemoMitarbeiterSchluessel = "demo_mitarbeiter";
+    private const string AdminSchluessel = "admin_tst";   // Schritt 26a2: Position Administrator und TST einmal ergänzt
+    public const string AdminKuerzel = "TST";
+
+    // Was beim Öffnen von selbst ergänzt wurde (fürs Protokoll; die Oberfläche schreibt es in update.log).
+    public List<string> Startprotokoll { get; } = [];
 
     public event Action? MitarbeiterGeaendert;
 
@@ -60,6 +65,11 @@ public sealed partial class Speicher
         if (!neu && !alle.Any(x => x.Kuerzel.Equals(m.Kuerzel, StringComparison.OrdinalIgnoreCase)))
             throw new Eingabefehler(["Diesen Mitarbeiter gibt es nicht."]);
         var fehler = RechteRegeln.Pruefen(m, neu ? alle.Select(x => x.Kuerzel).ToList() : []);
+        // Den letzten aktiven Administrator weder ausscheiden lassen noch seine Position entziehen.
+        var bisher = alle.FirstOrDefault(x => x.Kuerzel.Equals(m.Kuerzel, StringComparison.OrdinalIgnoreCase));
+        if (!neu && RechteRegeln.IstAdministrator(bisher) && !RechteRegeln.IstAdministrator(m) &&
+            !alle.Any(x => x != bisher && RechteRegeln.IstAdministrator(x)))
+            fehler.Add(RechteRegeln.LetzterAdminText);
         var bekannteBereiche = Liste_(Liste.Bereiche).Select(x => x.Name).ToHashSet();
         var bekanntePositionen = Liste_(Liste.Positionen).Select(x => x.Name).ToHashSet();
         if (m.Bereiche.Any(b => !bekannteBereiche.Contains(b))) fehler.Add("Einen der Bereiche gibt es nicht.");
@@ -131,6 +141,7 @@ public sealed partial class Speicher
     public void ListeneintragUmbenennen(Liste art, string alt, string neu)
     {
         neu = NamePruefen(neu);
+        if (art == Liste.Positionen && alt == RechteRegeln.Administrator && neu != alt) throw new Eingabefehler([RechteRegeln.AdminPositionText]);
         if (alt == neu) return;
         if (Liste_(art).Any(x => x.Name.Equals(neu, StringComparison.OrdinalIgnoreCase) && x.Name != alt)) throw new Eingabefehler([$"„{neu}“ gibt es schon."]);
         using (var transaktion = db.BeginTransaction())
@@ -147,6 +158,7 @@ public sealed partial class Speicher
 
     public void ListeneintragAktivSetzen(Liste art, string name, bool aktiv)
     {
+        if (art == Liste.Positionen && name == RechteRegeln.Administrator && !aktiv) throw new Eingabefehler([RechteRegeln.AdminPositionText]);
         Ausfuehren($"UPDATE {Tabelle(art)} SET aktiv = $a WHERE name = $n", null, ("$a", aktiv ? 1 : 0), ("$n", name));
         MitarbeiterGeaendert?.Invoke();
     }
@@ -154,6 +166,7 @@ public sealed partial class Speicher
     // Löschen nur, solange niemand zugeordnet ist (und bei Bereichen kein Bewohner dort wohnt).
     public void ListeneintragLoeschen(Liste art, string name)
     {
+        if (art == Liste.Positionen && name == RechteRegeln.Administrator) throw new Eingabefehler([RechteRegeln.AdminPositionText]);
         var eintrag = Liste_(art).FirstOrDefault(x => x.Name == name) ?? throw new Eingabefehler([$"„{name}“ gibt es nicht."]);
         bool bewohner = art == Liste.Bereiche && AlleBewohner().Any(b => b.Wohnbereich == name);
         if (eintrag.Zugeordnet > 0 || bewohner)
@@ -186,6 +199,7 @@ public sealed partial class Speicher
 
     public void RechtSetzen(string funktion, string position, bool an)
     {
+        if (position == RechteRegeln.Administrator && !an) throw new Eingabefehler([RechteRegeln.AdminImmerText]);
         Ausfuehren(an ? "INSERT OR IGNORE INTO rechte (funktion, position) VALUES ($f, $p)" : "DELETE FROM rechte WHERE funktion = $f AND position = $p",
             null, ("$f", funktion), ("$p", position));
         MitarbeiterGeaendert?.Invoke();
@@ -231,6 +245,7 @@ public sealed partial class Speicher
                 transaktion.Commit();
             }
         }
+        AdministratorPruefen();
         // Später dazugekommene Funktionen einmal vorbelegen (bestehende Häkchen bleiben, wie sie sind).
         foreach (var f in RechteRegeln.Nachtraeglich.Where(f => Meta(NachtraeglichSchluessel(f)) is null))
         {
@@ -242,6 +257,34 @@ public sealed partial class Speicher
     }
 
     private static string NachtraeglichSchluessel(string funktion) => $"rechte_vorbelegt_{funktion}";
+
+    // Schritt 26a2, einmal je Datenbank: Position „Administrator“ (an erster Stelle, alle Häkchen) und –
+    // in einer schon benutzten Datenbank ohne TST – den Mitarbeiter TST in allen Bereichen. Ein
+    // vorhandener TST wird nicht verändert.
+    private void AdministratorPruefen()
+    {
+        if (Meta(AdminSchluessel) is not null) return;
+        using var transaktion = db.BeginTransaction();
+        if (WertIn(transaktion, "SELECT wert FROM meta WHERE schluessel = $s", ("$s", AdminSchluessel)) is not null) return;
+        Ausfuehren("INSERT OR IGNORE INTO positionen (name, nr) VALUES ($n, (SELECT COALESCE(MIN(nr), 1) - 1 FROM positionen))", transaktion,
+            ("$n", RechteRegeln.Administrator));
+        Ausfuehren("UPDATE positionen SET aktiv = 1 WHERE name = $n", transaktion, ("$n", RechteRegeln.Administrator));
+        foreach (var (f, _) in Funktionen.Alle)
+            Ausfuehren("INSERT OR IGNORE INTO rechte (funktion, position) VALUES ($f, $p)", transaktion, ("$f", f), ("$p", RechteRegeln.Administrator));
+        bool benutzt = Convert.ToInt64(WertIn(transaktion, "SELECT COUNT(*) FROM kollegen"), CultureInfo.InvariantCulture) > 0;
+        bool tstDa = WertIn(transaktion, "SELECT kuerzel FROM kollegen WHERE kuerzel = $k COLLATE NOCASE", ("$k", AdminKuerzel)) is not null;
+        if (benutzt && !tstDa)
+        {
+            var bereiche = new List<string>();
+            using (var befehl = Befehl("SELECT name FROM bereiche ORDER BY nr, name", transaktion, []))
+            using (var leser = befehl.ExecuteReader())
+                while (leser.Read()) bereiche.Add(leser.GetString(0));
+            MitarbeiterSchreiben(new Mitarbeiter(AdminKuerzel, "Test", "Administrator", true, true, bereiche, [RechteRegeln.Administrator]), neu: true, transaktion);
+            Startprotokoll.Add($"Mitarbeiter {AdminKuerzel} (Position „{RechteRegeln.Administrator}“, alle Bereiche) ergänzt.");
+        }
+        SetzeMeta(AdminSchluessel, "1", transaktion);
+        transaktion.Commit();
+    }
 
     private void FunktionVorbelegen(string funktion, SqliteTransaction transaktion)
     {
@@ -273,6 +316,7 @@ public sealed partial class Speicher
         var demo = Demodaten.Mitarbeiter();
         Ausfuehren("DELETE FROM kollegen; DELETE FROM rechte; DELETE FROM rechte_fachkraft; DELETE FROM positionen; DELETE FROM bereiche;", transaktion);
         GrundbestandEinfuegen(transaktion);
+        SetzeMeta(AdminSchluessel, "1", transaktion);   // TST steht in den Demo-Daten
         for (int i = 0; i < demo.Bereiche.Count; i++)
             Ausfuehren("INSERT INTO bereiche (name, nr) VALUES ($n, $i) ON CONFLICT(name) DO UPDATE SET nr = excluded.nr", transaktion,
                 ("$n", demo.Bereiche[i]), ("$i", i + 1));

@@ -22,9 +22,9 @@ public sealed class MitarbeiterTests : IDisposable
         var rechte = s.Rechte();
         Assert.Equal(Funktionen.Alle.Length, rechte.Count);
         Assert.All(Funktionen.Alle, f => Assert.Contains("Hausleitung", rechte[f.Schluessel]));       // die Leitungen dürfen alles
-        Assert.Equal(["Geschäftsführung", "Hausleitung", "Verwaltung", "Therapie"],
+        Assert.Equal(["Administrator", "Geschäftsführung", "Hausleitung", "Verwaltung", "Therapie"],
             RechteRegeln.Positionen.Where(rechte[Funktionen.TherapienBearbeiten].Contains));
-        Assert.Equal(["Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung"],
+        Assert.Equal(["Administrator", "Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung"],
             RechteRegeln.Positionen.Where(rechte[Funktionen.MitarbeiterBereich].Contains));
         Assert.Contains("Psychologischer Fachdienst", rechte[Funktionen.MedikamenteVerwalten]);
         Assert.DoesNotContain("Mitarbeiter Wohnbereich", rechte[Funktionen.MedikamenteVerwalten]);
@@ -38,7 +38,7 @@ public sealed class MitarbeiterTests : IDisposable
     {
         s.DemoBeimErstenStart();
         var alle = s.AlleMitarbeiter();
-        Assert.Equal(13, alle.Count);
+        Assert.Equal(14, alle.Count);   // mit TST (Schritt 26a2)
         Assert.Equal(["Wohnbereich A", "Wohnbereich B", "Therapie", "Leitung", "Verwaltung"], s.Bereichsliste().Select(b => b.Name));
         Assert.All(RechteRegeln.Positionen, p => Assert.Contains(alle, m => m.Positionen.Contains(p)));   // je Position mindestens einer
         Assert.Contains(alle, m => m.Fachkraft);
@@ -94,7 +94,7 @@ public sealed class MitarbeiterTests : IDisposable
         Assert.Contains("Bitte mindestens einen Bereich wählen.", fehler);
         Assert.Contains("Eine der Positionen gibt es nicht.", fehler);
         s.MitarbeiterSpeichern(neu, neu: true);
-        Assert.Equal(14, s.AlleMitarbeiter().Count);
+        Assert.Equal(15, s.AlleMitarbeiter().Count);
         Assert.Contains(s.Kollegen(), k => k.Kuerzel == "QX" && k.Teams.Contains("Wohnbereich B"));   // auch für Nachrichten
         s.MitarbeiterSpeichern(neu with { Fachkraft = true, Aktiv = false, Bereiche = ["Wohnbereich A", "Wohnbereich B"] }, neu: false);
         var gelesen = s.MitarbeiterLesen("QX")!;
@@ -147,6 +147,6 @@ public sealed class MitarbeiterTests : IDisposable
         s.DemoZuruecksetzen();
         Assert.True(s.Darf("CD", Funktionen.BerichteSchreiben));
         Assert.DoesNotContain(s.Bereichsliste(), b => b.Name == "Wohnbereich C");
-        Assert.Equal(13, s.AlleMitarbeiter().Count);
+        Assert.Equal(14, s.AlleMitarbeiter().Count);
     }
 }

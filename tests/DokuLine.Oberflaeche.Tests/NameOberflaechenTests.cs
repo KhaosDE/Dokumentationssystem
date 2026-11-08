@@ -14,7 +14,7 @@ public class NameOberflaechenTests
     public void Name_und_Leittext() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        using (var anmelden = new AnmeldenFenster(u.Speicher, "", wechsel: false))
+        using (var anmelden = new AnmeldenFenster(u.Speicher, ""))
         {
             var texte = Alle(anmelden).OfType<Label>().Select(l => l.Text).ToList();
             Assert.Contains("DokuLine", texte);

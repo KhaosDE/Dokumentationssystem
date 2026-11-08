@@ -5,7 +5,7 @@ namespace DokuLine;
 
 // Neuer Bericht: Bewohner (fest aus der Akte oder zur Auswahl), Datum und Uhrzeit, Schicht,
 // eingetragen von (Kürzel aus der Anmeldung, nicht änderbar), Lebensbereiche, Text, „für die Übergabe wichtig“.
-public sealed class BerichtFormular : Form
+public sealed class BerichtFormular : Form, IEntwurfFenster
 {
     private readonly Speicher speicher;
     private readonly List<Bewohner> auswahl;
@@ -34,6 +34,10 @@ public sealed class BerichtFormular : Form
     internal Func<string, DialogResult> Rueckfrage { get; set; }
     public Label Fehler { get; } = new();
     public Bericht? Gespeichert { get; private set; }
+    // Schritt 26a3: Entwurf der angemeldeten Person für diesen Bewohner (beim Abmelden gespeichert).
+    public Entwurf? Entwurf { get; private set; }
+    public Label EntwurfHinweis { get; } = new() { AutoSize = true, ForeColor = Stil.Hinweis.Text, BackColor = Stil.Hinweis.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
+    public Button EntwurfVerwerfenKnopf { get; } = Stil.NebenKnopf("Entwurf verwerfen");
 
     // Zum Testen ersetzbar.
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
@@ -64,6 +68,13 @@ public sealed class BerichtFormular : Form
         }
 
         Zeile(null, new MarkenFeld(KopfBereich.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandMittel) });
+        var entwurfZeile = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0, 0, 0, Stil.AbstandKlein) };
+        EntwurfVerwerfenKnopf.AutoSize = true;
+        EntwurfVerwerfenKnopf.Visible = false;
+        EntwurfVerwerfenKnopf.Margin = new Padding(Stil.AbstandKlein, 0, 0, 0);
+        EntwurfVerwerfenKnopf.Click += (_, _) => EntwurfVerwerfen();
+        entwurfZeile.Controls.AddRange([EntwurfHinweis, EntwurfVerwerfenKnopf]);
+        Zeile(null, entwurfZeile);
         BewohnerWahl.Items.AddRange(auswahl.Select(b => (object)$"{b.Nachname}, {b.Vorname} (Zi. {b.Zimmer})").ToArray());
         BewohnerWahl.SelectedIndex = auswahl.Count == 1 ? 0 : -1;
         BewohnerWahl.Enabled = fest is null;
@@ -140,6 +151,13 @@ public sealed class BerichtFormular : Form
 
         Controls.Add(raster);
         CancelButton = abbrechen;
+        if (fest?.Id is long id && speicher.EntwurfFuer(Recht.Kuerzel, EntwurfRegeln.Bericht, id) is Entwurf e && EntwurfRegeln.BerichtLesen(e.Inhalt) is BerichtEingabe gespeichert)
+        {
+            Entwurf = e;
+            EntwurfEinsetzen(gespeichert);
+            EntwurfHinweis.Text = $"Entwurf vom {BerichtRegeln.ZeitText(e.Geaendert)} übernommen.";
+            EntwurfHinweis.Visible = EntwurfVerwerfenKnopf.Visible = true;
+        }
         Rueckfrage = woerter => MessageBox.Show(this,
             $"Im Text steht „{woerter}“.\n\nSoll das in die Übergabe?\n\nJa: in die Übergabe (nächste Schicht).  Nein: ohne Übergabe speichern.",
             "Übergabe?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
@@ -147,6 +165,43 @@ public sealed class BerichtFormular : Form
     }
 
     public void BewohnerWaehlen(long id) => BewohnerWahl.SelectedIndex = auswahl.FindIndex(b => b.Id == id);
+
+    // ----- Entwurf (Schritt 26a3) -----
+
+    public bool HatEingaben => Inhalt.Text.Trim().Length > 0 || UebergabeText.Text.Trim().Length > 0;
+
+    // Beim Abmelden: die Eingaben als Entwurf der angemeldeten Person (nur mit gewähltem Bewohner).
+    public bool AlsEntwurfSpeichern()
+    {
+        var e = Eingabe();
+        if (e.BewohnerId == 0 || !Recht.Angemeldet) return false;
+        speicher.EntwurfSpeichern(Recht.Kuerzel, EntwurfRegeln.Bericht, e.BewohnerId, EntwurfRegeln.AlsJson(e), Jetzt());
+        return true;
+    }
+
+    private void EntwurfEinsetzen(BerichtEingabe e)
+    {
+        Datum.Text = e.Datum;
+        Uhrzeit.Text = e.Uhrzeit;
+        Schichtwahl.SelectedIndex = e.Schicht switch { Schicht.Frueh => 1, Schicht.Spaet => 2, Schicht.Nacht => 3, _ => 0 };
+        for (int n = 1; n <= 5; n++) Bereiche[n - 1].Checked = e.Bereiche.Contains(n);
+        Allgemein.Checked = e.Allgemein;
+        Inhalt.Text = e.Text;
+        Wichtig.Checked = e.Wichtig;
+        Uebergabe.Checked = e.Uebergabe;
+        UebergabeDauer.SelectedIndex = Math.Clamp((int)e.UebergabeDauer, 0, UebergabeDauer.Items.Count - 1);
+        UebergabeBis.Text = e.UebergabeBis;
+        UebergabeText.Text = e.UebergabeText;
+    }
+
+    public void EntwurfVerwerfen()
+    {
+        if (Entwurf is null) return;
+        speicher.EntwurfLoeschen(Entwurf.Id);
+        Entwurf = null;
+        EntwurfHinweis.Visible = EntwurfVerwerfenKnopf.Visible = false;
+        Inhalt.Text = UebergabeText.Text = "";
+    }
 
     protected override void Dispose(bool disposing)
     {
@@ -192,6 +247,7 @@ public sealed class BerichtFormular : Form
         {
             var eingabe = Eingabe();
             Gespeichert = speicher.BerichtSpeichern(BerichtRegeln.AusEingabe(eingabe, Jetzt()), BerichtRegeln.UebergabeAus(eingabe));
+            if (Entwurf is not null) { speicher.EntwurfLoeschen(Entwurf.Id); Entwurf = null; }
         }
         catch (Eingabefehler e)
         {

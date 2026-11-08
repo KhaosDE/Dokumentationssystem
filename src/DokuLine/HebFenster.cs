@@ -7,7 +7,7 @@ namespace DokuLine;
 // Stilhinweisen, der Hilfebedarf (nie vorbelegt), daneben die Quellen des Zeitraums (Berichte,
 // Wochenplan, fertige Reflexionen). Textbausteine werden ins zuletzt gewählte Feld eingefügt.
 // Das Programm schreibt keinen Text selbst (Regel 6).
-public sealed class HebFenster : Form
+public sealed class HebFenster : Form, IEntwurfFenster
 {
     private readonly Speicher speicher;
     private readonly Bewohner bewohner;
@@ -278,6 +278,10 @@ public sealed class HebFenster : Form
 
     public bool Speichern(bool fertig) => Speichern(fertig, ohnePruefung: false);
 
+    // Schritt 26a3: Beim Abmelden bleibt der Bogen als Entwurf (wie beim Schließen mit „Ja“).
+    public bool HatEingaben => Geaendert && !Bogen.Fertig;
+    public bool AlsEntwurfSpeichern() => Speichern(false);
+
     private bool Speichern(bool fertig, bool ohnePruefung)
     {
         try
@@ -348,7 +352,7 @@ public sealed class HebFenster : Form
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         base.OnFormClosing(e);
-        if (!e.Cancel && Geaendert && !Bogen.Fertig && Rueckfrage("Ungespeicherte Änderungen als Entwurf speichern?") == DialogResult.Yes)
+        if (!e.Cancel && !Abmeldung.SchliesstFenster && Geaendert && !Bogen.Fertig && Rueckfrage("Ungespeicherte Änderungen als Entwurf speichern?") == DialogResult.Yes)
             Speichern(false);
     }
 

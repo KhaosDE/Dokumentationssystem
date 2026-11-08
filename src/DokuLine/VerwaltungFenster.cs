@@ -132,6 +132,7 @@ public sealed class MitarbeiterFormular : Form
     public Dictionary<string, CheckBox> Bereiche { get; } = [];
     public Dictionary<string, CheckBox> Positionen { get; } = [];
     public Label Fehler { get; } = Fenster.Fehlerfeld();
+    public Label LetzterAdmin { get; } = Fenster.Hinweis(RechteRegeln.LetzterAdminText);
     public Mitarbeiter? Gespeichert { get; private set; }
 
     public MitarbeiterFormular(Speicher speicher, Mitarbeiter? bisher, IReadOnlyList<string>? eigeneBereiche)
@@ -159,8 +160,14 @@ public sealed class MitarbeiterFormular : Form
             return feld;
         }
         zeile("Bereiche", Haken(speicher.Bereichsliste(), Bereiche, bisher?.Bereiche ?? [], b => eigeneBereiche is null || eigeneBereiche.Contains(b)));
-        zeile("Positionen", Haken(speicher.Positionsliste(), Positionen, bisher?.Positionen ?? [], _ => true));
-        zeile(null, Fenster.Hinweis("Mehrere Positionen: Es gelten die Rechte aller zusammen."));
+        // Schritt 26a2: „Administrator“ vergibt nur ein Administrator; der letzte aktive bleibt es (Hinweis statt Fehler).
+        bool ichAdmin = RechteRegeln.IstAdministrator(speicher.MitarbeiterLesen(Recht.Kuerzel));
+        bool letzterAdmin = RechteRegeln.IstAdministrator(bisher) && speicher.AlleMitarbeiter().Count(RechteRegeln.IstAdministrator) == 1;
+        zeile("Positionen", Haken(speicher.Positionsliste(), Positionen, bisher?.Positionen ?? [], p => p != RechteRegeln.Administrator || (ichAdmin && !letzterAdmin)));
+        zeile(null, Fenster.Hinweis("Mehrere Positionen: Es gelten die Rechte aller zusammen. Der Administrator hat immer alle Rechte; " +
+                                    "die Position vergibt nur ein Administrator."));
+        LetzterAdmin.Visible = letzterAdmin;
+        zeile(null, LetzterAdmin);
         if (bisher is not null)
         {
             Vorname.Text = bisher.Vorname;
@@ -168,6 +175,7 @@ public sealed class MitarbeiterFormular : Form
             Fachkraft.Checked = bisher.Fachkraft;
             Aktiv.Checked = bisher.Aktiv;
         }
+        Aktiv.Enabled = !letzterAdmin;
         zeile(null, Fehler);
         zeile(null, Formular.Knoepfe(this, "Speichern", () => Speichern()));
         Controls.Add(raster);
@@ -302,7 +310,8 @@ public sealed class RechteFenster : Form
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, Fenster.Hinweis("Häkchen: Diese Position darf die Funktion. „Nur Fachkräfte“: zusätzlich muss die Person Fachkraft sein. " +
-                                    "Wer mehrere Positionen hat, darf alles, was eine davon darf. Änderungen gelten sofort."));
+                                    "Wer mehrere Positionen hat, darf alles, was eine davon darf. Änderungen gelten sofort. " +
+                                    "Der Administrator hat immer alle Rechte (auch ohne „Fachkraft“); seine Häkchen lassen sich nicht abwählen."));
         Tabelle.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Funktion", ReadOnly = true, Width = 300, Frozen = true });
         foreach (var p in positionen)
             Tabelle.Columns.Add(new DataGridViewCheckBoxColumn { HeaderText = p, Width = 82 });
@@ -338,6 +347,21 @@ public sealed class RechteFenster : Form
         Tabelle.ReadOnly = grund is not null;
         Gesperrt.Text = grund is null ? "" : $"Nur ansehen: {grund}";
         Gesperrt.Visible = grund is not null;
+        // Schritt 26a2: Spalte „Administrator“ immer voll, ausgegraut, mit Hinweis.
+        int admin = Spalte(RechteRegeln.Administrator);
+        if (admin > 0)
+        {
+            var spalte = Tabelle.Columns[admin];
+            spalte.ReadOnly = true;
+            spalte.DefaultCellStyle.BackColor = Stil.Seite;
+            spalte.DefaultCellStyle.ForeColor = Stil.TextLeise;
+            spalte.HeaderCell.ToolTipText = RechteRegeln.AdminImmerText;
+            foreach (DataGridViewRow r in Tabelle.Rows)
+            {
+                r.Cells[admin].Value = true;
+                r.Cells[admin].ToolTipText = RechteRegeln.AdminImmerText;
+            }
+        }
         laden = false;
     }
 
@@ -346,6 +370,7 @@ public sealed class RechteFenster : Form
     {
         if (Recht.Grund(speicher, Funktionen.RechteVerwalten) is not null) { Laden(); return false; }
         string funktion = Funktionen.Alle[zeile].Schluessel;
+        if (spalte == Spalte(RechteRegeln.Administrator)) { Laden(); return false; }   // immer alle Rechte
         if (spalte == positionen.Count + 1) speicher.NurFachkraftSetzen(funktion, an);
         else speicher.RechtSetzen(funktion, positionen[spalte - 1], an);
         if (Tabelle[spalte, zeile].Value is not bool b || b != an) { laden = true; Tabelle[spalte, zeile].Value = an; laden = false; }

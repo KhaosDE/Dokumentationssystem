@@ -72,12 +72,21 @@ public static partial class RechteRegeln
     public const string NichtAngemeldetText = "Bitte zuerst anmelden.";
     public const string NurFachkraftText = "Nur für Fachkräfte.";
 
+    // Schritt 26a2: Der Administrator hat immer alle Rechte, in allen Bereichen, auch ohne „Fachkraft“.
+    // Es bleibt immer mindestens ein aktiver Administrator, damit sich niemand aussperren kann.
+    public const string Administrator = "Administrator";
+    public const string AdminImmerText = "Der Administrator hat immer alle Rechte.";
+    public const string LetzterAdminText = "Mindestens ein aktiver Administrator muss bleiben – sonst kann niemand mehr Rechte und Mitarbeiter verwalten.";
+    public const string AdminPositionText = "Die Position „Administrator“ bleibt immer bestehen.";
+
+    public static bool IstAdministrator(Mitarbeiter? m) => m is not null && m.Aktiv && m.Positionen.Contains(Administrator);
+
     // Vorbelegung (Tobi, 08.11.2026; in der Tabelle änderbar): Geschäftsführung, Hausleitung und
     // Verwaltung dürfen alles; Mitarbeiterverwaltung im Wohnbereich nur die Bereichsleitung (eigener
     // Bereich); die Medikamentendatenbank verwaltet der Psychologische Fachdienst; „Therapien
     // bearbeiten“ nur die Position Therapie (und die drei Leitungen).
     public static readonly string[] Positionen =
-        ["Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung", "Mitarbeiter Wohnbereich",
+        [Administrator, "Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung", "Mitarbeiter Wohnbereich",
          "Psychologischer Fachdienst", "Pädagogischer Fachdienst", "Therapie"];
 
     public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen];
@@ -113,13 +122,14 @@ public static partial class RechteRegeln
     public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich];
 
     public static bool Vorbelegt(string position, string funktion) =>
-        position is "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||
+        position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||
         (Vorgabe.TryGetValue(position, out var f) && f.Contains(funktion));
 
     // Warum jemand etwas nicht darf (null = darf). rechte: Funktion → Positionen mit Häkchen.
     public static string? Grund(Mitarbeiter? m, string funktion, IReadOnlyDictionary<string, HashSet<string>> rechte, IReadOnlySet<string> nurFachkraft)
     {
         if (m is null || !m.Aktiv) return NichtAngemeldetText;
+        if (IstAdministrator(m)) return null;
         bool position = rechte.TryGetValue(funktion, out var erlaubt) && m.Positionen.Any(erlaubt.Contains);
         if (!position) return FehltText;
         if (nurFachkraft.Contains(funktion) && !m.Fachkraft) return NurFachkraftText;
@@ -133,7 +143,7 @@ public static partial class RechteRegeln
     {
         if (anbieter == TherapieRegeln.AnbieterTherapie) return Grund(m, Funktionen.TherapienBearbeiten, rechte, nurFachkraft);
         if (Grund(m, Funktionen.TherapienBereich, rechte, nurFachkraft) is string grund) return grund;
-        return m!.Bereiche.Contains(anbieter) ? null : $"Nur für {anbieter}.";
+        return IstAdministrator(m) || m!.Bereiche.Contains(anbieter) ? null : $"Nur für {anbieter}.";
     }
 
     // Für welche Anbieter jemand neue Angebote anlegen darf: „Therapie“ und die eigenen Wohnbereiche

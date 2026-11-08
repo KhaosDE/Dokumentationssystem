@@ -1,7 +1,8 @@
 {
-  "hinweis": "Ausgedachte Mitarbeiterinnen und Mitarbeiter, Bereiche und Positionen für die Demo. Anmelden mit dem Kürzel, ohne Passwort. farbe = eigene Farbe für Bezugspflege/Einzeltrainer (fehlt = Vorgabe aus dem Kürzel). aktiv: false = ausgeschieden (kann sich nicht mehr anmelden, bleibt an Einträgen sichtbar).",
+  "hinweis": "Ausgedachte Mitarbeiterinnen und Mitarbeiter, Bereiche und Positionen für die Demo. Anmelden mit dem Kürzel, ohne Passwort. farbe = eigene Farbe für Bezugspflege/Einzeltrainer (fehlt = Vorgabe aus dem Kürzel). aktiv: false = ausgeschieden (kann sich nicht mehr anmelden, bleibt an Einträgen sichtbar). TST = Administrator mit allen Rechten (Schritt 26a2), kein echter Name.",
   "bereiche": [ "Wohnbereich A", "Wohnbereich B", "Therapie", "Leitung", "Verwaltung" ],
   "mitarbeiter": [
+    { "kuerzel": "TST", "vorname": "Test", "nachname": "Administrator", "fachkraft": true, "bereiche": [ "Wohnbereich A", "Wohnbereich B", "Therapie", "Leitung", "Verwaltung" ], "positionen": [ "Administrator" ] },
     { "kuerzel": "AB", "farbe": "#2F6FB7", "vorname": "Anna", "nachname": "Bachstelze", "fachkraft": true, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
     { "kuerzel": "CD", "farbe": "#2E8B57", "vorname": "Carl", "nachname": "Dohle", "fachkraft": true, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Mitarbeiter Wohnbereich" ] },
     { "kuerzel": "EF", "vorname": "Emma", "nachname": "Fink", "fachkraft": true, "bereiche": [ "Wohnbereich A" ], "positionen": [ "Bereichsleitung" ] },

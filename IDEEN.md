@@ -1108,7 +1108,7 @@ alten Dateinamen und alten Adress-Anfang entfernen, `%APPDATA%\Dokumentationssys
 mehr beachten.
 
 ## Position „Administrator“ mit Kürzel TST
-Status: freigegeben (Bauplan Schritt 26a2)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Neue Position „Administrator“ und ein Mitarbeiter mit dem Kürzel **TST** in dieser
 Position.
@@ -1129,7 +1129,7 @@ Umfang:
 - Anmeldung mit `TST` wie bei allen anderen (Demo ohne Passwort).
 
 ## Abmelden sichtbar machen, Tastenkürzel F12
-Status: freigegeben (Bauplan Schritt 26a3, zusammen mit 26a2 in Version 0.29.3)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Eine deutlich sichtbare Möglichkeit, sich abzumelden, und das Tastenkürzel **F12**.
 Warum: Rückmeldung Tobi (08.11.2026): „Es fehlt eine Möglichkeit, sich wieder abzumelden.

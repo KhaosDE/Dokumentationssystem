@@ -29,6 +29,8 @@ public sealed class EinstellungenFenster : Form
     // „Angemeldet als …“). Das Kürzel steht dann bei Berichten, Übergabe und Aufgaben.
     // Wer angemeldet ist (Anmeldung mit Kürzel, Schritt 19); gewechselt wird oben rechts im Kopf.
     public Label Angemeldet { get; } = new() { AutoSize = true, Font = Stil.Fett, UseMnemonic = false };
+    public Button AbmeldenKnopf { get; } = Stil.NebenKnopf("Abmelden (F12)");
+    public bool AbmeldenGewuenscht { get; private set; }
 
     // Eigene Farbe für Bezugspflege und Einzeltrainer (Schritt 20): gehört zur Person, gilt sofort.
     public Panel MeineFarbe { get; } = new() { Size = new Size(28, 28), BorderStyle = BorderStyle.FixedSingle };
@@ -126,9 +128,14 @@ public sealed class EinstellungenFenster : Form
         raster.Controls.Add(new Label());
         raster.Controls.Add(new Label
         {
-            Text = "Anmelden mit dem Kürzel, ohne Passwort (Demo). Wechseln: oben rechts „Abmelden / Benutzer wechseln“.",
+            Text = "Anmelden mit dem Kürzel, ohne Passwort (Demo). Benutzer wechseln: abmelden und mit dem anderen Kürzel anmelden.",
             AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
         });
+        // Schritt 26a3: Abmelden auch hier (schließt die Einstellungen; danach das Anmeldefenster).
+        AbmeldenKnopf.AutoSize = true;
+        AbmeldenKnopf.Click += (_, _) => { AbmeldenGewuenscht = true; DialogResult = DialogResult.Cancel; Close(); };
+        raster.Controls.Add(new Label());
+        raster.Controls.Add(AbmeldenKnopf);
 
         if (speicher is not null)
         {
@@ -224,7 +231,7 @@ public sealed class EinstellungenFenster : Form
 
         Ganz(Abschnitt("PROGRAMM"));
         raster.Controls.Add(Beschriftung("Über"));
-        raster.Controls.Add(new Label { Text = $"{Programmversion.Name} – {Programmversion.Leittext}\n{Programmversion.Text}", AutoSize = true, ForeColor = Stil.TextNormal, Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein) });
+        raster.Controls.Add(new Label { Text = $"{Programmversion.Name} – {Programmversion.Leittext}\n{Programmversion.Text}\nTastenkürzel: F12 = Abmelden", AutoSize = true, ForeColor = Stil.TextNormal, Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein) });
         AutoUpdate.Text = "Beim Start nach Updates suchen";
         AutoUpdate.AutoSize = true;
         AutoUpdate.Checked = werte.AutoUpdate;

@@ -46,7 +46,7 @@ public class HauptfensterTests
         Assert.Equal("Bewohner", fenster.AktiverBereich);   // Einstellungen sind ein Fenster, kein Bereich
         var werte = Einstellungen.Laden();
         Assert.Equal(("EF", false), (werte.Kuerzel, werte.AutoUpdate));
-        Assert.Equal("Angemeldet als Emma Fink (EF) ▾", fenster.Kopf.BenutzerText);
+        Assert.Equal("Angemeldet: EF – Emma Fink", fenster.Kopf.BenutzerText);
         Assert.NotNull(Einstellungen.LogoPfad());
         Assert.True(fenster.Kopf.HatLogo);
 

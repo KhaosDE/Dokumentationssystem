@@ -11,12 +11,12 @@ public class RechteOberflaechenTests
     public void Anmelden_mit_Kuerzel() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        using (var fenster = new AnmeldenFenster(u.Speicher, "", wechsel: false))
+        using (var fenster = new AnmeldenFenster(u.Speicher, ""))
         {
             Hilfe.Zeigen(fenster);
             Assert.StartsWith("Anmelden", fenster.Text);
-            Assert.False(fenster.AbmeldenKnopf.Visible);
-            Assert.Equal(12, fenster.DemoListe.Items.Count);   // nur aktive Mitarbeiter
+            Assert.Equal("Beenden", fenster.BeendenKnopf.Text);
+            Assert.Equal(13, fenster.DemoListe.Items.Count);   // nur aktive Mitarbeiter (mit TST)
             fenster.Kuerzel.Text = "ZZ";
             Assert.False(fenster.Anmelden());
             Assert.Contains("nicht bekannt", fenster.Fehler.Text);
@@ -32,18 +32,20 @@ public class RechteOberflaechenTests
 
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
+        f.BenutzerWaehlen("");
+        Assert.Equal("Anmelden …", f.Kopf.AbmeldenKnopf.Text);
         using (new DialogErsatz(fenster =>
         {
             var anmelden = Assert.IsType<AnmeldenFenster>(fenster);
-            Assert.StartsWith("Abmelden / Benutzer wechseln", anmelden.Text);
+            Assert.StartsWith("Anmelden", anmelden.Text);
             anmelden.Kuerzel.Text = "op";
             return anmelden.Anmelden() ? DialogResult.OK : DialogResult.Cancel;
         }))
-            f.Kopf.BenutzerKnopf.PerformClick();
-        Assert.Equal("Angemeldet als Olga Pirol (OP) ▾", f.Kopf.BenutzerText);
-        using (new DialogErsatz(_ => DialogResult.Abort))   // „Abmelden“
-            f.BenutzerWechseln();
-        Assert.Equal("Nicht angemeldet – Anmelden ▾", f.Kopf.BenutzerText);
+            f.Kopf.AbmeldenKnopf.PerformClick();
+        Assert.Equal("Angemeldet: OP – Olga Pirol", f.Kopf.BenutzerText);
+        Assert.Equal("Abmelden (F12)", f.Kopf.AbmeldenKnopf.Text);
+        f.BenutzerWaehlen("");
+        Assert.Equal("Nicht angemeldet", f.Kopf.BenutzerText);
         Assert.Equal(RechteRegeln.NichtAngemeldetText, Stil.Sperrgrund(f.DemoKnopf));
     });
 
@@ -143,7 +145,7 @@ public class RechteOberflaechenTests
         using (var fenster = new MitarbeiterFenster(u.Speicher))
         {
             Hilfe.Zeigen(fenster);
-            Assert.Equal(13, fenster.Liste.Items.Count);
+            Assert.Equal(14, fenster.Liste.Items.Count);
             Assert.Null(Stil.Sperrgrund(fenster.NeuKnopf));
             fenster.Waehlen("GH");
             Assert.Equal("Nur Mitarbeiter des eigenen Bereichs.", Stil.Sperrgrund(fenster.BearbeitenKnopf));

@@ -609,6 +609,18 @@ public sealed partial class Speicher : IDisposable
         ALTER TABLE aufgaben ADD COLUMN visite_anordnung_id INTEGER REFERENCES visite_anordnungen(id);
         ALTER TABLE aufgaben ADD COLUMN visite_eintrag_id INTEGER REFERENCES visite_eintraege(id);
         """,
+        // 22 – Entwürfe (Schritt 26a3): angefangene Eingaben beim Abmelden; gehören dem Kürzel, das sie anfing.
+        """
+        CREATE TABLE entwuerfe (
+            id          INTEGER PRIMARY KEY,
+            kuerzel     TEXT NOT NULL COLLATE NOCASE,
+            art         TEXT NOT NULL,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            inhalt      TEXT NOT NULL,
+            geaendert   TEXT NOT NULL,
+            UNIQUE (kuerzel, art, bewohner_id)
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;

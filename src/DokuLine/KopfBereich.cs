@@ -30,14 +30,13 @@ public sealed class KopfBereich : Panel
     public event Action? LogoGewuenscht;
     public const string PlatzhalterText = "Logo der Einrichtung";
 
-    // „Angemeldet als …“ unter dem Demo-Hinweis: Klick wechselt den Benutzer (ohne Passwort,
-    // nur für die Vorführung – IDEEN „Nachrichten“).
-    public Button BenutzerKnopf { get; } = new()
-    {
-        FlatStyle = FlatStyle.Flat, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, Cursor = Cursors.Hand,
-        BackColor = Stil.Flaeche, ForeColor = Stil.Akzent, Font = Stil.Standard, TextAlign = ContentAlignment.MiddleRight,
-        UseMnemonic = false, TabStop = true,
-    };
+    // Schritt 26a3: unter dem Demo-Hinweis „Angemeldet: TST – Name“ und daneben ein eigener Knopf
+    // „Abmelden (F12)“ (ohne Anmeldung: „Anmelden …“) – kein verstecktes Klappmenü. Hat die angemeldete
+    // Person Entwürfe, steht davor „Entwurf fortsetzen“.
+    public Label BenutzerAnzeige { get; } = new() { AutoSize = true, BackColor = Color.Transparent, Font = Stil.Standard, UseMnemonic = false };
+    public Button AbmeldenKnopf { get; } = Stil.NebenKnopf("Abmelden (F12)");
+    public Button EntwurfKnopf { get; } = Stil.NebenKnopf("Entwurf fortsetzen");
+    private const int BenutzerHoehe = 30;
 
     public KopfBereich()
     {
@@ -57,22 +56,30 @@ public sealed class KopfBereich : Panel
         titel.Font = Stil.KopfTitel;
         Height = S(GesamtHoehe);
         AccessibleName = DemoHinweis;
-        BenutzerKnopf.FlatAppearance.BorderSize = 0;
-        BenutzerKnopf.FlatAppearance.MouseOverBackColor = Stil.AkzentHell;
-        BenutzerKnopf.FlatAppearance.MouseDownBackColor = Stil.AkzentHell;
-        BenutzerKnopf.Padding = new Padding(Stil.AbstandMini, 0, Stil.AbstandMini, 0);
-        Controls.Add(BenutzerKnopf);
-        BenutzerSetzen(null);
+        EntwurfKnopf.Visible = false;
+        Controls.AddRange([BenutzerAnzeige, EntwurfKnopf, AbmeldenKnopf]);
+        BenutzerSetzen(null, null);
     }
 
-    public string BenutzerText => BenutzerKnopf.Text;
+    public string BenutzerText => BenutzerAnzeige.Text;
 
-    // name == null: niemand angemeldet (Hinweis in der Farbe „bitte klären“).
-    public void BenutzerSetzen(string? name)
+    // kuerzel == null: niemand angemeldet (Hinweis in der Farbe „bitte klären“).
+    public void BenutzerSetzen(string? kuerzel, string? name)
     {
-        BenutzerKnopf.Text = name is null ? "Nicht angemeldet – Anmelden ▾" : $"Angemeldet als {name} ▾";
-        BenutzerKnopf.ForeColor = name is null ? Stil.Achtung.Text : Stil.Akzent;
-        BenutzerKnopf.AccessibleName = (name is null ? "Nicht angemeldet. Anmelden" : $"Angemeldet als {name}. Abmelden / Benutzer wechseln");
+        BenutzerAnzeige.Text = kuerzel is null ? "Nicht angemeldet" : $"Angemeldet: {kuerzel}" + (name is null ? "" : $" – {name}");
+        BenutzerAnzeige.ForeColor = kuerzel is null ? Stil.Achtung.Text : Stil.TextNormal;
+        AbmeldenKnopf.Text = kuerzel is null ? "Anmelden …" : "Abmelden (F12)";
+        AbmeldenKnopf.AccessibleName = AbmeldenKnopf.Text;
+        Hinweis.SetToolTip(AbmeldenKnopf, kuerzel is null
+            ? "Mit dem Kürzel anmelden."
+            : "Abmelden (Taste F12, aus jedem Fenster). Danach ist nichts mehr zu sehen, bis sich jemand anmeldet.");
+        PerformLayout();
+    }
+
+    public void EntwuerfeSetzen(int anzahl)
+    {
+        EntwurfKnopf.Text = anzahl == 1 ? "Entwurf fortsetzen" : $"Entwürfe fortsetzen ({anzahl})";
+        EntwurfKnopf.Visible = anzahl > 0;
         PerformLayout();
     }
 
@@ -184,9 +191,13 @@ public sealed class KopfBereich : Panel
         klein.Location = new Point(links, textOben);
         titel.Location = new Point(links - S(2), textOben + klein.PreferredHeight + S(Stil.AbstandMini));
 
-        // Benutzer unter dem Demo-Hinweis, rechtsbündig mit ihm.
-        var benutzer = BenutzerKnopf.PreferredSize;
-        BenutzerKnopf.Bounds = new Rectangle(RechtsNebenLogo() - benutzer.Width + S(Stil.AbstandMini), oben + S(26), benutzer.Width, benutzer.Height);
+        // Benutzer unter dem Demo-Hinweis, rechtsbündig mit ihm: [Entwurf fortsetzen] Angemeldet: … [Abmelden (F12)]
+        int zeile = oben + S(26), hoehe = S(BenutzerHoehe);
+        int b = Math.Max(AbmeldenKnopf.PreferredSize.Width, TextRenderer.MeasureText(AbmeldenKnopf.Text, AbmeldenKnopf.Font).Width + S(24));
+        AbmeldenKnopf.Bounds = new Rectangle(RechtsNebenLogo() - b, zeile, b, hoehe);
+        BenutzerAnzeige.Location = new Point(AbmeldenKnopf.Left - S(Stil.AbstandKlein) - BenutzerAnzeige.PreferredWidth, zeile + (hoehe - BenutzerAnzeige.PreferredHeight) / 2);
+        int e = Math.Max(EntwurfKnopf.PreferredSize.Width, TextRenderer.MeasureText(EntwurfKnopf.Text, EntwurfKnopf.Font).Width + S(24));
+        EntwurfKnopf.Bounds = new Rectangle(BenutzerAnzeige.Left - S(Stil.AbstandMittel) - e, zeile, e, hoehe);
 
         int y = oben + S(TitelHoehe) + S(Zeilenabstand);
         int x = rechts;
