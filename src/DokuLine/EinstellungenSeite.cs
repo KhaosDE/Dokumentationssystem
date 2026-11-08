@@ -313,7 +313,6 @@ public sealed class EinstellungenSeite : Panel
             var ich = speicher.MitarbeiterLesen(werte.Kuerzel);
             Angemeldet.Text = ich is null ? "niemand" : ich.Anzeige;
             FarbeZeigen();
-            foreach (var k in new[] { FarbeKnopf, FarbeVorgabeKnopf }) Stil.Sperren(k, ich is null ? RechteRegeln.NichtAngemeldetText : null);
             MenueEingeklappt.Checked = werte.MenueEingeklappt;
             Bereich.Text = werte.Bereich;
             var zeiten = speicher.Schichtzeiten(werte.Bereich);
@@ -329,6 +328,8 @@ public sealed class EinstellungenSeite : Panel
             AutoUpdate.Checked = werte.AutoUpdate;
             WebAnsichtStand.Text = $"WebView2 {Nachschlageansicht.Laufzeit}";
             foreach (var k in Karten) k.Sperren(k.Funktion is string r ? Recht.Grund(speicher, r) : null);
+            // Erst nach den Karten: Deren Sperre setzt die Knöpfe sonst wieder frei. Die eigene Farbe braucht eine Anmeldung.
+            foreach (var k in new[] { FarbeKnopf, FarbeVorgabeKnopf }) Stil.Sperren(k, ich is null ? RechteRegeln.NichtAngemeldetText : null);
             Stil.Sperren(MitarbeiterKnopf, Recht.Darf(speicher, Funktionen.MitarbeiterAlle) ? null : Recht.Grund(speicher, Funktionen.MitarbeiterBereich));
             Fehler.Visible = fehlerZeigen = false;
         }

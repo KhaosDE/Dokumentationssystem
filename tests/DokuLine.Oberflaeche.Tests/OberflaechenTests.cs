@@ -64,9 +64,9 @@ public class HauptfensterTests
         // Ohne Recht gesperrt, nicht versteckt (CD: kein Recht „Einstellungen des Bereichs“).
         fenster.BenutzerWaehlen("CD");
         Assert.Equal(RechteRegeln.FehltText, einstellungen.Karten.Single(k => k.Titel == "Schichtzeiten").Sperrgrund);
-        einstellungen.Bereich.Text = "Wohnbereich B";
+        einstellungen.Bereich.Text = "R2";
         Assert.False(einstellungen.BereichUebernehmen());
-        Assert.Equal("Wohnbereich A", Einstellungen.Laden().Bereich);
+        Assert.Equal("R1", Einstellungen.Laden().Bereich);   // seit Schritt 26e heißen die Bereiche R1–R3
         Assert.Equal(RechteRegeln.FehltText, einstellungen.Fehler.Text);
         fenster.BenutzerWaehlen("EF");
 
