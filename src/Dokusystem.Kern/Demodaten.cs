@@ -206,6 +206,7 @@ public static class Demodaten
         public bool Aktiv { get; set; } = true;
         public List<string> Bereiche { get; set; } = [];
         public List<string> Positionen { get; set; } = [];
+        public string? Farbe { get; set; }
     }
 
     public sealed record DemoMitarbeiter(List<string> Bereiche, List<Mitarbeiter> Mitarbeiter);
@@ -214,7 +215,7 @@ public static class Demodaten
     {
         var datei = Lesen<MitarbeiterDatei>("mitarbeiter.json");
         return new DemoMitarbeiter(datei.Bereiche,
-            datei.Mitarbeiter.Select(m => new Mitarbeiter(m.Kuerzel, m.Vorname, m.Nachname, m.Fachkraft, m.Aktiv, m.Bereiche, m.Positionen)).ToList());
+            datei.Mitarbeiter.Select(m => new Mitarbeiter(m.Kuerzel, m.Vorname, m.Nachname, m.Fachkraft, m.Aktiv, m.Bereiche, m.Positionen) { Farbe = m.Farbe }).ToList());
     }
 
     public sealed class VerlaufVorlage
@@ -784,4 +785,32 @@ public static class Demodaten
                 return (bewohner.First(b => b.Nachname == v.Bewohner).Id!.Value, v.Text, v.Bereich, v.Kuerzel, erstellt, erstellt.AddHours(v.FuerStunden));
             })
             .OrderBy(m => m.erstellt).ToList();
+
+    // ----- Bezugspflege und Einzeltrainer (daten/demo/bezug.json) -----
+
+    private sealed class BezugDatei
+    {
+        public List<BezugVorlage> Bezugspflege { get; set; } = [];
+        public List<BezugVorlage> Einzeltrainer { get; set; } = [];
+    }
+
+    private sealed class BezugVorlage
+    {
+        public string Bewohner { get; set; } = "";
+        public string Kuerzel { get; set; } = "";
+        public string Art { get; set; } = "";
+        public int VorTagen { get; set; }
+        public string Von { get; set; } = "";
+    }
+
+    public sealed record DemoBezug(long BewohnerId, bool Trainer, string Kuerzel, string Art, DateOnly Ab, string Von);
+
+    public static List<DemoBezug> Bezuege(IReadOnlyList<Bewohner> bewohner, DateOnly heute)
+    {
+        var datei = Lesen<BezugDatei>("bezug.json");
+        IEnumerable<DemoBezug> Liste(List<BezugVorlage> v, bool trainer) => v
+            .Where(x => bewohner.Any(b => b.Nachname == x.Bewohner))
+            .Select(x => new DemoBezug(bewohner.First(b => b.Nachname == x.Bewohner).Id!.Value, trainer, x.Kuerzel, x.Art, heute.AddDays(-x.VorTagen), x.Von));
+        return [.. Liste(datei.Bezugspflege, false), .. Liste(datei.Einzeltrainer, true)];
+    }
 }
