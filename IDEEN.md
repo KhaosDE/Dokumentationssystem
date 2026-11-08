@@ -804,7 +804,7 @@ Umfang:
 - Nicht bestätigte Termine nach Beginn: Marke „noch offen“.
 
 ## Kalender: Bereich und Haus, Fahrzeuge
-Status: freigegeben (Bauplan Schritt 24)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Zwei Kalender (Bereich und Haus) und eine Fahrzeugverwaltung für die beiden Firmenwagen.
 Warum: Vorgabe Tobi (08.11.2026): Es gibt einen Kalender für den Bereich und einen für das

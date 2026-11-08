@@ -128,7 +128,9 @@ public sealed partial class Speicher
         // Einzelne Termine aus dem Kalender (Arzttermine, Heimfahrten, Ausflüge) zusätzlich.
         var kalender = Kalender(montag, montag.AddDays(6), bewohnerId);
         var einzelne = Enumerable.Range(0, 7).Select(montag.AddDays)
-            .SelectMany(tag => kalender.Where(k => k.Am(tag)).Select(k => KalenderRegeln.AlsTermin(k, tag)));
+            .SelectMany(tag => kalender.Where(k => k.Am(tag)).Select(k => KalenderRegeln.AlsTermin(k, tag)))
+            // Fahrten, bei denen der Bewohner mitfährt (Schritt 24).
+            .Concat(Fahrten(montag, montag.AddDays(6)).Where(f => f.Bewohner.Contains(bewohnerId)).Select(FahrtRegeln.AlsTermin));
         return WochenplanRegeln.Woche(montag, PlanEintraege(bewohnerId), therapien, Teilnahmen(), einzelne);
     }
 

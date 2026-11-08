@@ -24,6 +24,10 @@ public sealed class KalenderSeite : Panel
     public Button VorKnopf { get; } = Stil.NebenKnopf("▶");
     public Button HeuteKnopf { get; } = Stil.NebenKnopf("Heute");
     public ComboBox Filter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 220 };
+    // Schritt 24: Kalender „Bereich“ und „Haus“ – beide, nur Bereich oder nur Haus.
+    public ComboBox Kalenderwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 170 };
+    public KalenderWahl Wahl => (KalenderWahl)Math.Max(0, Kalenderwahl.SelectedIndex);
+    public FahrzeugLeiste Fahrzeuge { get; }
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Drucken …");
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neuer Termin …");
     public MonatsRaster Monat { get; } = new();
@@ -47,7 +51,13 @@ public sealed class KalenderSeite : Panel
             Ansichten[a] = knopf;
             leiste.Controls.Add(knopf);
         }
-        foreach (var c in new Control[] { ZurueckKnopf, ZeitraumText, VorKnopf, HeuteKnopf, Filter, DruckKnopf })
+        Kalenderwahl.Items.AddRange(["Bereich und Haus", "nur Bereich", "nur Haus"]);
+        Kalenderwahl.SelectedIndex = 0;
+        Kalenderwahl.AccessibleName = "Welche Kalender";
+        Kalenderwahl.SelectedIndexChanged += (_, _) => Aktualisieren();
+        Fahrzeuge = new FahrzeugLeiste(speicher) { BackColor = Stil.Seite };
+        Fahrzeuge.Geaendert += () => Geaendert?.Invoke();
+        foreach (var c in new Control[] { ZurueckKnopf, ZeitraumText, VorKnopf, HeuteKnopf, Filter, Kalenderwahl, DruckKnopf })
         {
             c.Margin = new Padding(c == ZurueckKnopf ? Stil.AbstandMittel : 0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
             leiste.Controls.Add(c);
@@ -57,6 +67,7 @@ public sealed class KalenderSeite : Panel
         VorKnopf.AccessibleName = "Weiter";
         ZeitraumText.Margin = new Padding(Stil.AbstandKlein, Stil.AbstandKlein + 2, Stil.AbstandKlein, 0);
         Filter.Margin = new Padding(Stil.AbstandMittel, Stil.AbstandMini + 2, Stil.AbstandKlein, Stil.AbstandKlein);
+        Kalenderwahl.Margin = new Padding(0, Stil.AbstandMini + 2, Stil.AbstandKlein, Stil.AbstandKlein);
         ZurueckKnopf.Click += (_, _) => TagWaehlen(KalenderRegeln.Blaettern(Ansicht, Stichtag, -1));
         VorKnopf.Click += (_, _) => TagWaehlen(KalenderRegeln.Blaettern(Ansicht, Stichtag, 1));
         HeuteKnopf.Click += (_, _) => TagWaehlen(DateOnly.FromDateTime(Jetzt()));
@@ -67,6 +78,7 @@ public sealed class KalenderSeite : Panel
         Woche.TerminGeklickt += (t, _) => { if (t.KalenderId is long id) DetailZeigen(id); };
         Rueckfrage = text => MessageBox.Show(FindForm(), text, "Termin absagen", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
         Controls.Add(leiste);
+        Controls.Add(Fahrzeuge);
     }
 
     public long? BewohnerFilter => Filter.SelectedIndex > 0 ? bewohner[Filter.SelectedIndex - 1].Id : null;
@@ -111,7 +123,7 @@ public sealed class KalenderSeite : Panel
         var (von, bis) = Ansicht == KalenderAnsicht.Monat
             ? (WochenplanRegeln.Montag(new DateOnly(Stichtag.Year, Stichtag.Month, 1)), WochenplanRegeln.Montag(new DateOnly(Stichtag.Year, Stichtag.Month, 1)).AddDays(41))
             : KalenderRegeln.Zeitraum(Ansicht, Stichtag);
-        return speicher.Kalender(von, bis, BewohnerFilter);
+        return speicher.Kalender(von, bis, BewohnerFilter).Where(k => KalenderRegeln.Passt(k.Aktuell, Wahl)).ToList();
     }
 
     private Dictionary<long, string> Namen() => speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
@@ -120,6 +132,8 @@ public sealed class KalenderSeite : Panel
     {
         foreach (var (a, knopf) in Ansichten) knopf.Aktiv = a == Ansicht;
         ZeitraumText.Text = KalenderRegeln.ZeitraumText(Ansicht, Stichtag);
+        Fahrzeuge.Aktualisieren();
+        string? hausGrund = Recht.Grund(speicher, Funktionen.KalenderHaus);   // Haus-Termine: Recht „Kalender Haus bearbeiten“
         var termine = Termine();
         var namen = Namen();
         var heute = DateOnly.FromDateTime(Jetzt());
@@ -150,6 +164,7 @@ public sealed class KalenderSeite : Panel
                 foreach (var k in termine.Where(k => k.Am(Stichtag)))
                 {
                     var karte = new KalenderKarte(k, namen);
+                    if (k.Aktuell.Haus) foreach (var knopf in new[] { karte.AendernKnopf, karte.AbsagenKnopf }) Stil.Sperren(knopf, hausGrund);
                     karte.AendernKnopf.Click += (_, _) => Bearbeiten(k);
                     karte.AbsagenKnopf.Click += (_, _) => Absagen(k);
                     karte.VerlaufKnopf.Click += (_, _) => VerlaufZeigen(k);
@@ -225,6 +240,9 @@ public sealed class KalenderSeite : Panel
         leiste.MaximumSize = new Size(breite, 0);
         leiste.Bounds = new Rectangle(new Point(rand, y), leiste.GetPreferredSize(new Size(Math.Max(100, breite), 0)));
         y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        Fahrzeuge.MaximumSize = new Size(breite, 0);
+        Fahrzeuge.Bounds = new Rectangle(new Point(rand, y), Fahrzeuge.GetPreferredSize(new Size(breite, 0)));
+        y = Fahrzeuge.Bottom + Stil.Px(this, Stil.AbstandKlein);
         foreach (var c in inhalt)
         {
             switch (c)
@@ -333,7 +351,7 @@ public sealed class MonatsRaster : Control
                 for (int z = 0; z < Math.Min(3, zeilen.Count); z++)
                 {
                     var k = termine.Where(x => x.Am(d)).ElementAt(z);
-                    var marke = k.Aktuell.Art switch { KalenderArt.Heimfahrt => Stil.Achtung, KalenderArt.Ausflug => Stil.Hinweis, KalenderArt.Wohnbereich => Stil.Zimmer, _ => Stil.Unterwegs };
+                    var marke = k.Aktuell.Haus ? Stil.Abwesend : k.Aktuell.Art switch { KalenderArt.Heimfahrt => Stil.Achtung, KalenderArt.Ausflug => Stil.Hinweis, KalenderArt.Wohnbereich => Stil.Zimmer, _ => Stil.Unterwegs };
                     var r = new Rectangle(feld.X + S(3), y, feld.Width - S(6), S(ZeileHoehe) - S(2));
                     using (var b = new SolidBrush(marke.Flaeche)) g.FillRectangle(b, r);
                     TextRenderer.DrawText(g, (z == 2 && zeilen.Count > 3) ? $"+ {zeilen.Count - 2} weitere" : zeilen[z], Stil.Klein, r, marke.Text,
@@ -365,7 +383,11 @@ public sealed class KalenderKarte : KartenFlaeche
         Termin = k;
         var f = k.Aktuell;
         var marke = f.Art switch { KalenderArt.Heimfahrt => Stil.Achtung, KalenderArt.Ausflug => Stil.Hinweis, KalenderArt.Wohnbereich => Stil.Zimmer, _ => Stil.Unterwegs };
-        var liste = new List<(string, Stil.Marke)> { (KalenderRegeln.ArtText(f.Art), marke), (KalenderRegeln.ZeitText(f), Stil.Zimmer) };
+        var liste = new List<(string, Stil.Marke)>
+        {
+            ($"Kalender {KalenderRegeln.KalenderName(f.Haus)}", f.Haus ? Stil.Abwesend : Stil.Zimmer),   // Schritt 24
+            (KalenderRegeln.ArtText(f.Art), marke), (KalenderRegeln.ZeitText(f), Stil.Zimmer),
+        };
         if (k.Fassungen.Count > 1) liste.Add(("geändert", Stil.Hinweis));
         MarkenTexte = liste.Select(x => x.Item1).ToList();
         foreach (var (t, m) in liste) marken.Controls.Add(new MarkenFeld(t, m) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
@@ -428,6 +450,8 @@ public sealed class KalenderFenster : Form
 
     public RadioButton[] Arten { get; } = Enum.GetValues<KalenderArt>()
         .Select(a => new RadioButton { Text = KalenderRegeln.ArtText(a) == "Termin" ? "Termin eines Bewohners" : KalenderRegeln.ArtText(a), AutoSize = true }).ToArray();
+    public RadioButton BereichWahl { get; } = new() { Text = "Bereich", AutoSize = true, Checked = true };
+    public RadioButton HausWahl { get; } = new() { Text = "Haus", AutoSize = true };
     public TextBox Titel { get; } = new() { Width = 320 };
     public TextBox BeginnDatum { get; } = new() { Width = 100 };
     public TextBox BeginnUhrzeit { get; } = new() { Width = 60 };
@@ -462,6 +486,13 @@ public sealed class KalenderFenster : Form
         var arten = new FlowLayoutPanel { AutoSize = true, WrapContents = true, MaximumSize = new Size(460, 0), Margin = new Padding(0) };
         arten.Controls.AddRange(Arten);
         zeile("Art", arten);
+        // Schritt 24: Kalender „Haus“ nur mit dem Recht „Kalender Haus bearbeiten“.
+        zeile("Kalender", Formular.Reihe(BereichWahl, HausWahl));
+        if (Recht.Grund(speicher, Funktionen.KalenderHaus) is string hausGrund)
+        {
+            HausWahl.Enabled = false;
+            HausWahl.Text = $"Haus ({hausGrund.TrimEnd('.')})";
+        }
         zeile("Titel / Ziel", Titel);
         zeile("Beginn", Formular.Reihe(BeginnDatum, BeginnUhrzeit, Ganztags));
         zeile("Ende", Formular.Reihe(EndeDatum, EndeUhrzeit));
@@ -482,6 +513,7 @@ public sealed class KalenderFenster : Form
         {
             var f = bisher.Aktuell;
             Arten[(int)f.Art].Checked = true;
+            (f.Haus ? HausWahl : BereichWahl).Checked = true;
             Titel.Text = f.Titel;
             BeginnDatum.Text = Datum.Text(DateOnly.FromDateTime(f.Beginn));
             EndeDatum.Text = Datum.Text(KalenderRegeln.LetzterTag(f));
@@ -533,7 +565,7 @@ public sealed class KalenderFenster : Form
                 EndeDatum = EndeDatum.Text, EndeUhrzeit = EndeUhrzeit.Text, Ganztags = Ganztags.Checked, Ort = Ort.Text, Hinweis = Hinweis.Text,
                 Bewohner = Art == KalenderArt.Wohnbereich ? [] : BewohnerListe.CheckedIndices.Cast<int>().Select(i => bewohner[i].Id!.Value).ToList(),
                 Treffpunkt = Art == KalenderArt.Ausflug ? Treffpunkt.Text : "", Begleitung = Art == KalenderArt.Ausflug ? Begleitung.Text : "",
-                Kuerzel = Einstellungen.Laden().Kuerzel,
+                Haus = HausWahl.Checked, Kuerzel = Einstellungen.Laden().Kuerzel,
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.KalenderAnlegen(f) : speicher.KalenderAendern(bisher.Id, f, ohnePruefung ? null : bisher.Fassungen.Count);
         }

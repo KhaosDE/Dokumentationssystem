@@ -22,6 +22,7 @@ public sealed record KalenderFassung
     public string Treffpunkt { get; init; } = "";   // Ausflug
     public string Begleitung { get; init; } = "";   // Ausflug
     public bool Abgesagt { get; init; }
+    public bool Haus { get; init; }                 // Schritt 24: Kalender „Haus“ statt „Bereich“
     public DateTime Erstellt { get; init; }
     public string Kuerzel { get; init; } = "";
 }
@@ -51,8 +52,12 @@ public sealed class KalenderEingabe
     public List<long> Bewohner { get; set; } = [];
     public string Treffpunkt { get; set; } = "";
     public string Begleitung { get; set; } = "";
+    public bool Haus { get; set; }
     public string Kuerzel { get; set; } = "";
 }
+
+// Welche Kalender gezeigt werden (Schritt 24).
+public enum KalenderWahl { Beide, Bereich, Haus }
 
 public enum KalenderAnsicht { Monat, Woche, Tag }
 
@@ -122,14 +127,19 @@ public static class KalenderRegeln
         {
             Art = e.Art, Titel = e.Titel.Trim(), Beginn = beginn, Ende = ende, Ganztags = e.Ganztags, Ort = e.Ort.Trim(),
             Hinweis = e.Hinweis.Trim(), Bewohner = e.Bewohner.Distinct().ToList(), Treffpunkt = e.Treffpunkt.Trim(),
-            Begleitung = e.Begleitung.Trim(), Erstellt = jetzt, Kuerzel = e.Kuerzel.Trim(),
+            Begleitung = e.Begleitung.Trim(), Haus = e.Haus, Erstellt = jetzt, Kuerzel = e.Kuerzel.Trim(),
         };
     }
+
+    public static string KalenderName(bool haus) => haus ? "Haus" : "Bereich";
+
+    public static bool Passt(KalenderFassung f, KalenderWahl wahl) =>
+        wahl == KalenderWahl.Beide || (wahl == KalenderWahl.Haus) == f.Haus;
 
     // Alle Angaben als Text (für den Konflikt-Hinweis).
     public static string AlsText(KalenderFassung f, IReadOnlyDictionary<long, string> namen)
     {
-        var zeilen = new List<string> { $"{ArtText(f.Art)}: {f.Titel}{(f.Abgesagt ? " (abgesagt)" : "")}", ZeitText(f) };
+        var zeilen = new List<string> { $"{ArtText(f.Art)}: {f.Titel}{(f.Abgesagt ? " (abgesagt)" : "")}", ZeitText(f), $"Kalender: {KalenderName(f.Haus)}" };
         if (f.Ort.Length > 0) zeilen.Add($"Ort: {f.Ort}");
         if (f.Bewohner.Count > 0) zeilen.Add("Bewohner: " + string.Join(", ", f.Bewohner.Select(b => namen.GetValueOrDefault(b, "?"))));
         if (f.Treffpunkt.Length > 0) zeilen.Add($"Treffpunkt: {f.Treffpunkt}");
@@ -187,6 +197,7 @@ public static class KalenderRegeln
             KalenderArt.Ausflug => $"Ausflug: {f.Titel}",
             _ => f.Titel,
         };
+        if (f.Haus) titel = $"Haus: {titel}";   // Schritt 24: Haus-Termine beschriftet
         if (mehrtaegig && f.Art == KalenderArt.Heimfahrt) ganztags = true;
         return new Termin
         {

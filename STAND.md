@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.26.0** (Tagesplan, Bauplan Schritt 23).
+Stand: 08.11.2026. Version: **0.27.0** (Kalender: Bereich und Haus, Fahrzeuge, Bauplan Schritt 24).
 
 ## Aktuell
 
@@ -55,7 +55,12 @@ Wochenplan, Kalender) nach Uhrzeit oder nach Bewohner. Bei Therapien „gegangen
 „ausgefallen“ (derselbe Eintrag wie im Wochenplan); nach Beginn ohne Bestätigung „noch offen“.
 Nach „gegangen“ steht der Bewohner auf Karte und Akte als **„in Therapie: … bis …“**.
 
-**Nächster Schritt:** Bauplan Schritt 24 „Kalender: Bereich und Haus, Fahrzeuge“ (0.27.0).
+Neu in 0.27.0: **Kalender „Bereich“ und „Haus“** (Umschalter, Haus-Termine grau und beschriftet,
+nur mit Recht änderbar) und **Fahrzeuge** (VW Bus, Caddy): Fahrten eintragen, „vor Ort“ oder
+„unterwegs seit …, zurück geplant …“ mit „losgefahren“/„zurück“ in Übersicht und Kalender,
+Warnung bei Doppelbuchung, Mitfahrende im Tagesplan und während der Fahrt abwesend.
+
+**Nächster Schritt:** Bauplan Schritt 25 „Aufgaben nach Schichten mit Standardaufgaben“ (0.28.0).
 
 ## Fertig
 
@@ -473,6 +478,24 @@ Nach „gegangen“ steht der Bewohner auf Karte und Akte als **„in Therapie: 
     später gesetzte Statusmeldung geht vor.
   - Kopf: „… Termine heute · Bereich · x von y Therapien bestätigt · z noch offen“. Andere Rechner
     sehen Änderungen nach spätestens 30 Sekunden; der Tagesplan prüft dabei auch die Uhrzeit.
+
+- 0.27.0 — Kalender: Bereich und Haus, Fahrzeuge (Bauplan Schritt 24, 08.11.2026):
+  - Kalender: beim Anlegen „Kalender: Bereich / Haus“; oben „Bereich und Haus“, „nur Bereich“,
+    „nur Haus“. Haus-Termine grau mit „Haus:“ vor dem Titel bzw. Marke „Kalender Haus“; anlegen,
+    ändern und absagen nur mit „Kalender Haus bearbeiten“ (vorbelegt: Bereichsleitung, Leitungen).
+  - Fahrzeuge: Einstellungen → „Fahrzeuge …“ (Demo „VW Bus“, „Caddy“; hinzufügen, stilllegen).
+  - „Neue Fahrt …“: Fahrzeug, Datum, los – zurück (geplant), Zweck (Arzttermin, Ausflug,
+    Sporttherapie, Sonstiges), Fahrer (Kürzel), mitfahrende Bewohner, Ziel. Überschneidet sie sich
+    mit einer Fahrt desselben Fahrzeugs: Warnung, Speichern erst mit „Trotzdem speichern“.
+  - Übersicht („FAHRZEUGE“ in der Heute-Karte) und Kalender (oben): je Fahrzeug „vor Ort“ (mit der
+    nächsten Fahrt von heute) oder „unterwegs seit 09:40, zurück geplant 11:30 (Fahrer AB)“, rot mit
+    „Rückkehr überschritten“, Knöpfe „losgefahren“ und „zurück“ (Recht „Fahrzeuge eintragen“;
+    Uhrzeit und Kürzel setzt das Programm, eigene Einträge, nie überschrieben).
+  - Mitfahrende: im Wochen- und Tagesplan („Fahrt: Arzttermin (Caddy)“), während der Fahrt auf
+    Karten und in der Akte „abwesend: unterwegs mit Caddy bis 11:05“.
+  - Demo `daten/demo/fahrten.json`: Caddy gerade mit Anton Ahorn zum Arzt unterwegs, eine
+    Sporttherapie-Fahrt gestern, der Tierpark-Ausflug mit dem VW Bus in acht Tagen; im Kalender
+    „Haus“ Hausversammlung und Brandschutzübung.
 
 ## Offene Punkte
 
@@ -914,6 +937,20 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 24): „Haus“ ist ein Merkmal je Termin (wie die Art), kein zweiter Kalender
+  in der Datenbank – so bleiben Verlauf, Konfliktschutz und Wochenplan gleich. Haus-Termine sind
+  grau (die Farbe von „abwesend“ ist sonst nur auf Karten) und tragen „Haus:“ im Titel.
+- 08.11.2026 (Schritt 24): Fahrten sind eigene Einträge, „losgefahren“ und „zurück“ eigene
+  Ereignisse mit Uhrzeit und Kürzel (die Datenbank verbietet Überschreiben). Geändert oder gelöscht
+  wird eine Fahrt nicht – war nicht beauftragt; eine falsche Fahrt einfach nicht losfahren lassen.
+  „losgefahren“ gilt für die nächste noch nicht begonnene Fahrt von heute; ein Fahrzeug kann nur
+  einmal gleichzeitig unterwegs sein.
+- 08.11.2026 (Schritt 24): Doppelbuchung = geplante Zeiten überschneiden sich (eine zurückgekehrte
+  Fahrt zählt bis zur tatsächlichen Rückkehr). Warnung im Formular, Speichern bleibt möglich.
+- 08.11.2026 (Schritt 24): Abwesend sind Mitfahrende nur, solange die Fahrt „unterwegs“ ist (nach
+  „losgefahren“, vor „zurück“). Die Fahrzeugliste pflegt, wer „Fahrzeuge eintragen“ hat; Fahrzeuge
+  werden stillgelegt, nicht gelöscht. Bestehende Demo-Datenbanken bekommen Fahrzeuge, Fahrten und
+  die Haus-Termine nach dem Update einmal dazu (der Demo-Kalender wird dabei neu geladen).
 - 08.11.2026 (Schritt 23): Knöpfe „gegangen/abgesagt/ausgefallen“ nur bei Therapien – nur dort
   gibt es eine Teilnahme (wie im Wochenplan). Termine aus Wochenplan und Kalender (auch
   Heimfahrten und Ausflüge) stehen zur Orientierung dabei. Fahrten mit Fahrzeugen kommen mit
@@ -946,6 +983,22 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.27.0:
+
+1. Übersicht → „FAHRZEUGE“: Caddy „unterwegs seit …, zurück geplant … (Fahrer KL)“, VW Bus „vor
+   Ort“. Anton Ahorn hat auf seiner Karte „abwesend: unterwegs mit Caddy bis …“. Nach einiger Zeit
+   wird der Caddy rot („Rückkehr überschritten“).
+2. Beim Caddy „zurück“ → „vor Ort“, Anton Ahorn ist nicht mehr abwesend.
+3. „Neue Fahrt …“: VW Bus, heute, 23:00–23:30, Sporttherapie, Berta Birke, Ziel „Hallenbad“ →
+   beim VW Bus „nächste Fahrt 23:00“. Noch eine Fahrt mit dem VW Bus um 23:10 → gelbe Warnung
+   „Doppelbuchung“, Knopf heißt „Trotzdem speichern“.
+4. VW Bus „losgefahren“ → „unterwegs seit …“; Berta Birke abwesend; im Tagesplan „Fahrt“.
+5. Kalender: oben dieselben Fahrzeuge. „nur Haus“ → Hausversammlung und Brandschutzübung (grau,
+   „Haus: …“). Als „CD“: Haus-Termine nur ansehen (Knöpfe grau), im neuen Termin ist „Haus“ aus.
+   Als „EF“ (Bereichsleitung): Haus-Termin anlegen und ändern geht.
+6. Einstellungen → „Fahrzeuge …“: „Kleinbus“ hinzufügen, stilllegen → steht bei neuen Fahrten
+   nicht mehr zur Wahl.
 
 Version 0.26.0:
 

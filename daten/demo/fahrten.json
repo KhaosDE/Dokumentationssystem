@@ -1,0 +1,9 @@
+{
+  "hinweis": "Ausgedachte Fahrzeuge und Fahrten für die Demo. Zeiten relativ zum Laden der Demo-Daten (Minuten bzw. Tage). Fahrer sind Kürzel der ausgedachten Mitarbeiter.",
+  "fahrzeuge": [ "VW Bus", "Caddy" ],
+  "fahrten": [
+    { "fahrzeug": "Caddy", "losVorMinuten": 25, "dauerMinuten": 90, "zweck": "arzttermin", "fahrer": "KL", "bewohner": [ "Ahorn" ], "ziel": "Praxis am Lindenplatz (ausgedacht)" },
+    { "fahrzeug": "VW Bus", "inTagen": -1, "von": "13:30", "bis": "16:00", "zweck": "sporttherapie", "fahrer": "OP", "bewohner": [ "Birke", "Distel", "Kiefer" ], "ziel": "Hallenbad", "erledigt": true },
+    { "fahrzeug": "VW Bus", "inTagen": 8, "von": "09:00", "bis": "16:30", "zweck": "ausflug", "fahrer": "AB", "bewohner": [ "Ahorn", "Distel", "Eiche", "Immergrün" ], "ziel": "Tierpark" }
+  ]
+}

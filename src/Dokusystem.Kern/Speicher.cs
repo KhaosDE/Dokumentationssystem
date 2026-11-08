@@ -22,6 +22,8 @@ public sealed partial class Speicher : IDisposable
     private const string DemoMedikation = "demo_medikation";
     private const string DemoTherapie = "demo_therapie";
     private const string DemoTherapieAnbieter = "demo_therapie_anbieter";   // Schritt 22: Demo-Angebote mit Anbieter
+    private const string DemoKalenderHaus = "demo_kalender_haus";            // Schritt 24: Demo-Termine im Kalender „Haus“
+    private const string DemoFahrten = "demo_fahrten";                      // Schritt 24: Fahrzeuge und Fahrten
     private const string DemoWochenplan = "demo_wochenplan";
     private const string DemoKalender = "demo_kalender";
     private const string DemoBiografie = "demo_biografie";
@@ -513,6 +515,39 @@ public sealed partial class Speicher : IDisposable
         """
         ALTER TABLE angebot_fassungen ADD COLUMN anbieter TEXT NOT NULL DEFAULT 'Therapie';
         """,
+        // 19 – Kalender „Haus“ und Fahrzeuge mit Fahrten („losgefahren“, „zurück“ als eigene Einträge).
+        """
+        ALTER TABLE kalender_fassungen ADD COLUMN haus INTEGER NOT NULL DEFAULT 0 CHECK (haus IN (0, 1));
+        CREATE TABLE fahrzeuge (
+            name  TEXT PRIMARY KEY COLLATE NOCASE,
+            nr    INTEGER NOT NULL DEFAULT 0,
+            aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1))
+        );
+        CREATE TABLE fahrten (
+            id       INTEGER PRIMARY KEY,
+            fahrzeug TEXT NOT NULL,
+            von      TEXT NOT NULL,
+            bis      TEXT NOT NULL,
+            zweck    TEXT NOT NULL CHECK (zweck IN ('arzttermin', 'ausflug', 'sporttherapie', 'sonstiges')),
+            fahrer   TEXT NOT NULL,
+            bewohner TEXT NOT NULL DEFAULT '[]',
+            ziel     TEXT NOT NULL DEFAULT '',
+            erstellt TEXT NOT NULL,
+            kuerzel  TEXT NOT NULL
+        );
+        CREATE TABLE fahrt_ereignisse (
+            id       INTEGER PRIMARY KEY,
+            fahrt_id INTEGER NOT NULL REFERENCES fahrten(id) ON DELETE CASCADE,
+            art      TEXT NOT NULL CHECK (art IN ('los', 'zurueck')),
+            zeit     TEXT NOT NULL,
+            kuerzel  TEXT NOT NULL,
+            UNIQUE (fahrt_id, art)
+        );
+        CREATE TRIGGER fahrten_bleiben BEFORE UPDATE ON fahrten
+            BEGIN SELECT RAISE(ABORT, 'Fahrten werden nicht überschrieben.'); END;
+        CREATE TRIGGER fahrt_ereignisse_bleiben BEFORE UPDATE ON fahrt_ereignisse
+            BEGIN SELECT RAISE(ABORT, '„losgefahren“ und „zurück“ werden nicht überschrieben.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -659,12 +694,13 @@ public sealed partial class Speicher : IDisposable
         // Nach einem Update: Bereiche, die es beim ersten Laden noch nicht gab, nachholen.
         bool berichte = Meta(DemoBerichte) is null, aufgaben = Meta(DemoAufgaben) is null, nachrichten = Meta(DemoNachrichten) is null,
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
-             therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null,
+             therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null, wochenplan = Meta(DemoWochenplan) is null,
+             kalender = Meta(DemoKalender) is null || Meta(DemoKalenderHaus) is null, fahrten = Meta(DemoFahrten) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
@@ -676,6 +712,7 @@ public sealed partial class Speicher : IDisposable
         if (therapie) DemoTherapieEinfuegen(transaktion);
         if (therapie || wochenplan) DemoWochenplanEinfuegen(transaktion);   // Teilnahmen hängen an den Zuteilungen
         if (kalender) DemoKalenderEinfuegen(transaktion);
+        if (fahrten) DemoFahrtenEinfuegen(transaktion);
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
         if (heb) DemoHebEinfuegen(transaktion);
@@ -708,6 +745,7 @@ public sealed partial class Speicher : IDisposable
             DemoTherapieEinfuegen(transaktion);
             DemoWochenplanEinfuegen(transaktion);
             DemoKalenderEinfuegen(transaktion);
+            DemoFahrtenEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);
             DemoHebEinfuegen(transaktion);

@@ -29,7 +29,7 @@ public sealed record PlanEintrag
     public bool GiltAm(DateOnly tag) => Ab <= tag && (EndetAb is not DateOnly e || tag < e);
 }
 
-public enum TerminQuelle { Plan, Therapie, Kalender }
+public enum TerminQuelle { Plan, Therapie, Kalender, Fahrt }
 
 // Ein Termin an einem bestimmten Tag der angezeigten Woche.
 public sealed record Termin

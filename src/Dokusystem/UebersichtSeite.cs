@@ -13,6 +13,8 @@ public sealed class UebersichtSeite : Panel
     private readonly Label heuteTitel = new() { AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche };
     private readonly Label termineTitel = new() { Text = "TERMINE HEUTE", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche };
     private readonly Label medikationTitel = new() { Text = "MEDIKATION HEUTE", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche };
+    private readonly Label fahrzeugeTitel = new() { Text = "FAHRZEUGE", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche };
+    public FahrzeugLeiste Fahrzeuge { get; }   // Schritt 24: vor Ort / unterwegs
     private readonly System.Windows.Forms.Timer uhr = new() { Interval = 60_000 };
     private DateOnly gezeigtAm;
 
@@ -36,8 +38,10 @@ public sealed class UebersichtSeite : Panel
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
+        Fahrzeuge = new FahrzeugLeiste(speicher);
+        Fahrzeuge.Geaendert += Aktualisieren;
         heuteKarte.Controls.AddRange([heuteTitel, MeineBezugsbewohner, MeineEinzeltrainings, AlleBereiche, BereichHinweis, HeuteText,
-            termineTitel, Termine, medikationTitel, Medikation]);
+            termineTitel, Termine, medikationTitel, Medikation, fahrzeugeTitel, Fahrzeuge]);
         foreach (var c in new[] { AlleBereiche, MeineBezugsbewohner, MeineEinzeltrainings }) c.CheckedChanged += (_, _) => Aktualisieren();
         Controls.Add(heuteKarte);
         Controls.Add(Raster);
@@ -82,6 +86,7 @@ public sealed class UebersichtSeite : Panel
             : allesZeigen ? "alle Bereiche" : string.Join(", ", meine);
         var status = speicher.GeltendeStatusmeldungen(jetzt);
         var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan (Schritt 23)
+        var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten (Schritt 24): abwesend während der Fahrt
         string? berichtGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
         var farben = BezugAnzeige.Farben(speicher);
         Karten.Clear();
@@ -89,6 +94,7 @@ public sealed class UebersichtSeite : Panel
         foreach (var h in alle)
         {
             var modul = Modulverwaltung.Marken(speicher, h.Bewohner, jetzt);
+            if (mitfahrende.TryGetValue(h.Bewohner.Id!.Value, out var fahrt)) modul = [fahrt, .. modul];
             var marken = UebersichtRegeln.Marken(h, heute, frist);
             // Abwesend nur einmal: Meldet ein Modul schon „abwesend“, entfällt die Heimfahrt-Marke.
             if (modul.Any(m => m.Art == MarkenArt.Abwesend)) marken.RemoveAll(m => m.Art == MarkenArt.Abwesend);
@@ -113,6 +119,7 @@ public sealed class UebersichtSeite : Panel
         var medikation = UebersichtRegeln.MedikationZeilen(alle);
         Medikation.Text = medikation.Count == 0 ? "Keine Änderungen heute." : string.Join(Environment.NewLine, medikation);
         KopfText = $"{alle.Count} Bewohner · {bereichText} · Stand {jetzt:HH:mm} Uhr";
+        Fahrzeuge.Aktualisieren();
         PerformLayout();
         Geaendert?.Invoke();
     }
@@ -167,7 +174,11 @@ public sealed class UebersichtSeite : Panel
         medikationTitel.Location = new Point(2 * innen + spalte, oben);
         Medikation.MaximumSize = new Size(spalte, 0);
         Medikation.Location = new Point(2 * innen + spalte, medikationTitel.Bottom + Stil.Px(this, Stil.AbstandMini));
-        heuteKarte.Bounds = new Rectangle(rand, y, breite, Math.Max(Termine.Bottom, Medikation.Bottom) + innen);
+        // Fahrzeuge (Schritt 24) über die ganze Breite unter den beiden Spalten.
+        fahrzeugeTitel.Location = new Point(innen, Math.Max(Termine.Bottom, Medikation.Bottom) + Stil.Px(this, Stil.AbstandMittel));
+        Fahrzeuge.MaximumSize = new Size(breite - 2 * innen, 0);
+        Fahrzeuge.Bounds = new Rectangle(new Point(innen, fahrzeugeTitel.Bottom + Stil.Px(this, Stil.AbstandMini)), Fahrzeuge.GetPreferredSize(new Size(breite - 2 * innen, 0)));
+        heuteKarte.Bounds = new Rectangle(rand, y, breite, Fahrzeuge.Bottom + innen);
         y = heuteKarte.Bottom + Stil.Px(this, Stil.AbstandKlein);
         Raster.Bounds = new Rectangle(0, y, ClientSize.Width, Math.Max(Stil.Px(this, 120), ClientSize.Height - y));
     }
