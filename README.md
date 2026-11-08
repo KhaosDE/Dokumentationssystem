@@ -59,10 +59,13 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Übergabe** (links): nur die Übergabe-Einträge, oben „Wohnbereich allgemein“, darunter je
   Bewohner. Mit eigenem Kürzel (Einstellungen) lassen sie sich als gelesen bestätigen,
   verlängern oder erledigen. „Übergabeblatt drucken …“ druckt die offenen Einträge.
-- **Aufgaben** (links, mit Zähler): was die nächste Schicht (oder wer Zeit hat) tun soll.
-  Aufgaben bleiben stehen, bis jemand sie als erledigt markiert; schafft man es nicht,
-  „An die nächste Schicht weitergeben …“ mit kurzer Notiz. Die ersten offenen Aufgaben stehen
-  auch über den Bewohnerkarten. Aus einem Bericht heraus: „Aufgabe daraus …“.
+- **Aufgaben** (links, mit Zähler): was die nächste Schicht (oder wer Zeit hat) tun soll,
+  gruppiert nach Schicht (oben die laufende). Aufgaben bleiben stehen, bis jemand sie als erledigt
+  markiert; schafft man es nicht, „An die nächste Schicht weitergeben …“ mit kurzer Notiz. Die
+  ersten offenen Aufgaben stehen auch über den Bewohnerkarten. Aus einem Bericht heraus:
+  „Aufgabe daraus …“. **Standardaufgaben** (z. B. Rundgänge im Nachtdienst) entstehen zu Beginn
+  jeder Schicht von selbst; nicht erledigte bleiben „aus der Nachtschicht offen“, bis jemand sie
+  erledigt oder mit Begründung schließt. Die Schichtzeiten stehen in den Einstellungen.
 - **Angemeldet als …** (oben rechts): wer gerade am Programm sitzt – eine der ausgedachten
   Kolleginnen und Kollegen, ohne Passwort (nur für die Vorführung). Das Kürzel steht dann bei
   Berichten, Übergabe und Aufgaben.

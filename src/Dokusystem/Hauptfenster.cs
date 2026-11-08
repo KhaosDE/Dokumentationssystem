@@ -346,6 +346,7 @@ public sealed class Hauptfenster : Form
     public void AufgabenZaehlen()
     {
         var jetzt = DateTime.Now;
+        speicher.StandardaufgabenErzeugen(jetzt);   // Schritt 25: zu Schichtbeginn die Standardaufgaben
         var offen = speicher.Aufgaben(jetzt);
         int ueberfaellig = offen.Count(a => AufgabenRegeln.Ueberfaellig(a, jetzt));
         Navigation.Single(n => n.Text == "Aufgaben").ZaehlerSetzen(offen.Count, ueberfaellig > 0,

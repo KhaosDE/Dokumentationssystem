@@ -41,7 +41,8 @@ internal static class Program
         }
         if (hinweis is not null)
             MessageBox.Show(hinweis, "Dokumentationssystem", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        _ = Nachschlageansicht.Laufzeit;   // WebView2 vorhanden? Steht in den Einstellungen (Schritt 21).
+        _ = Nachschlageansicht.Laufzeit;
+        BerichtRegeln.Zeiten = speicher.Schichtzeiten(Einstellungen.Laden().Bereich);   // Schichtzeiten des Bereichs (Schritt 25)   // WebView2 vorhanden? Steht in den Einstellungen (Schritt 21).
         // Anmelden mit dem Kürzel (Schritt 19), ohne Passwort; „Beenden“ schließt das Programm.
         using (var anmelden = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel, wechsel: false))
         {

@@ -46,6 +46,10 @@ public sealed class EinstellungenFenster : Form
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     public Button MedikamenteKnopf { get; } = Stil.NebenKnopf("Medikamentendatenbank …");
     public Button FahrzeugeKnopf { get; } = Stil.NebenKnopf("Fahrzeuge …");
+    // Schritt 25: Schichtzeiten des Bereichs (dieses Rechners), für alle Rechner des Bereichs.
+    public TextBox Frueh { get; } = new() { Width = 60 };
+    public TextBox Spaet { get; } = new() { Width = 60 };
+    public TextBox Nacht { get; } = new() { Width = 60 };
     public CheckBox AutoUpdate { get; } = new();
     public CheckBox NachschlageAnsicht { get; } = new() { Text = "Nachschlage-Ansicht anzeigen (Formular „Medikament“)", AutoSize = true };
     public Label WebAnsichtStand { get; } = new() { AutoSize = true, MaximumSize = new Size(380, 0), Margin = new Padding(0, Stil.AbstandKlein, 0, Stil.AbstandKlein) };
@@ -298,6 +302,23 @@ public sealed class EinstellungenFenster : Form
         hebFrist.Controls.AddRange([HebFrist, new Label { Text = "Monate nach dem letzten Bogen", AutoSize = true, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) }]);
         raster.Controls.Add(hebFrist);
 
+        Ganz(Abschnitt("SCHICHTEN"));
+        var zeiten = speicher?.Schichtzeiten(werte.Bereich) ?? Kern.Schichtzeiten.Vorgabe;
+        Frueh.Text = zeiten.Frueh.ToString("HH:mm");
+        Spaet.Text = zeiten.Spaet.ToString("HH:mm");
+        Nacht.Text = zeiten.Nacht.ToString("HH:mm");
+        raster.Controls.Add(Beschriftung("Beginn Früh, Spät, Nacht"));
+        raster.Controls.Add(Formular.Reihe(Frueh, Spaet, Nacht));
+        raster.Controls.Add(new Label());
+        raster.Controls.Add(new Label
+        {
+            Text = $"Gilt für den Bereich „{werte.Bereich}“ auf allen Rechnern; die Nacht geht bis zum Beginn der Frühschicht. " +
+                   "Danach richten sich Schicht der Berichte, Übergabe und Aufgaben.",
+            AutoSize = true, MaximumSize = new Size(380, 0), Font = Stil.Klein, ForeColor = Stil.TextLeise,
+        });
+        if (speicher is not null && Recht.Grund(speicher, Funktionen.EinstellungenBereich) is not null)
+            foreach (var feld in new[] { Frueh, Spaet, Nacht }) feld.ReadOnly = true;   // nur ansehen
+
         Ganz(Abschnitt("HEB-VORLAGEN"));
         Ganz(new Label
         {
@@ -485,6 +506,17 @@ public sealed class EinstellungenFenster : Form
                 FehlerZeigen(bereichFehler);
                 return false;
             }
+            // Schichtzeiten (Schritt 25) zuerst prüfen: Bei einem Fehler wird nichts gespeichert.
+            Kern.Schichtzeiten? neueZeiten = null;
+            if (speicher is not null && !Frueh.ReadOnly)
+            {
+                try { neueZeiten = Kern.Schichtzeiten.AusEingabe(Frueh.Text, Spaet.Text, Nacht.Text); }
+                catch (Eingabefehler f)
+                {
+                    FehlerZeigen(string.Join(" ", f.Fehler));
+                    return false;
+                }
+            }
             Einstellungen.Aendern(w => w with
             {
                 AutoUpdate = AutoUpdate.Checked, NachschlageAnsicht = NachschlageAnsicht.Checked, BeschlussFristTage = (int)BeschlussFrist.Value, HebFristMonate = (int)HebFrist.Value,
@@ -494,6 +526,11 @@ public sealed class EinstellungenFenster : Form
             else if (LogoEntfernen) Einstellungen.LogoSetzen(null);
             foreach (var (schluessel, haken) in Module)
                 if (speicher!.ModulAn(schluessel) != haken.Checked) speicher.ModulSetzen(schluessel, haken.Checked);
+            if (neueZeiten is not null)
+            {
+                speicher!.SchichtzeitenSetzen(Kern.Bereiche.Bereinigen(Bereich.Text), neueZeiten);
+                BerichtRegeln.Zeiten = neueZeiten;
+            }
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException)
         {

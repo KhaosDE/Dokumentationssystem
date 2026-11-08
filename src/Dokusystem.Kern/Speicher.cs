@@ -24,6 +24,7 @@ public sealed partial class Speicher : IDisposable
     private const string DemoTherapieAnbieter = "demo_therapie_anbieter";   // Schritt 22: Demo-Angebote mit Anbieter
     private const string DemoKalenderHaus = "demo_kalender_haus";            // Schritt 24: Demo-Termine im Kalender „Haus“
     private const string DemoFahrten = "demo_fahrten";                      // Schritt 24: Fahrzeuge und Fahrten
+    private const string DemoStandardaufgaben = "demo_standardaufgaben";    // Schritt 25: Standardaufgaben je Schicht
     private const string DemoWochenplan = "demo_wochenplan";
     private const string DemoKalender = "demo_kalender";
     private const string DemoBiografie = "demo_biografie";
@@ -548,6 +549,29 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER fahrt_ereignisse_bleiben BEFORE UPDATE ON fahrt_ereignisse
             BEGIN SELECT RAISE(ABORT, '„losgefahren“ und „zurück“ werden nicht überschrieben.'); END;
         """,
+        // 20 – Schichtzeiten je Bereich und Standardaufgaben (Vorlagen); Aufgaben merken ihre Vorlage,
+        // je Vorlage und Schicht entsteht höchstens eine Aufgabe.
+        """
+        CREATE TABLE schichtzeiten (
+            bereich TEXT PRIMARY KEY,
+            frueh   TEXT NOT NULL,
+            spaet   TEXT NOT NULL,
+            nacht   TEXT NOT NULL
+        );
+        CREATE TABLE aufgabe_vorlagen (
+            id          INTEGER PRIMARY KEY,
+            text        TEXT NOT NULL,
+            schicht     TEXT NOT NULL CHECK (schicht IN ('frueh', 'spaet', 'nacht')),
+            tage        INTEGER NOT NULL DEFAULT 127,
+            uhrzeit     TEXT,
+            bewohner_id INTEGER REFERENCES bewohner(id) ON DELETE CASCADE,
+            aktiv       INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)),
+            erstellt    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        ALTER TABLE aufgaben ADD COLUMN vorlage_id INTEGER REFERENCES aufgabe_vorlagen(id);
+        CREATE UNIQUE INDEX aufgaben_aus_vorlage ON aufgaben (vorlage_id, schicht_tag, schicht) WHERE vorlage_id IS NOT NULL;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -696,15 +720,17 @@ public sealed partial class Speicher : IDisposable
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
              therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null, wochenplan = Meta(DemoWochenplan) is null,
              kalender = Meta(DemoKalender) is null || Meta(DemoKalenderHaus) is null, fahrten = Meta(DemoFahrten) is null,
+             standard = Meta(DemoStandardaufgaben) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
+        if (standard) DemoStandardaufgabenEinfuegen(transaktion);
         if (mitarbeiter) DemoMitarbeiterEinfuegen(transaktion);
         if (nachrichten) DemoNachrichtenEinfuegen(transaktion);
         if (medikamente) DemoMedikamenteEinfuegen(transaktion);
@@ -738,6 +764,7 @@ public sealed partial class Speicher : IDisposable
             SetzeMeta(DemoGeladen, "1", transaktion);
             DemoBerichteEinfuegen(transaktion);
             DemoAufgabenEinfuegen(transaktion);
+            DemoStandardaufgabenEinfuegen(transaktion);
             DemoMitarbeiterEinfuegen(transaktion);
             DemoNachrichtenEinfuegen(transaktion);
             DemoMedikamenteEinfuegen(transaktion);

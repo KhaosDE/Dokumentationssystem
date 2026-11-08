@@ -469,6 +469,34 @@ public static class Demodaten
         return liste;
     }
 
+    // ----- Standardaufgaben (Schritt 25) -----
+
+    private sealed class StandardaufgabenDatei
+    {
+        public List<VorlageDaten> Vorlagen { get; set; } = [];
+    }
+
+    public sealed class VorlageDaten
+    {
+        public string Schicht { get; set; } = "nacht";
+        public string Text { get; set; } = "";
+        public string? Uhrzeit { get; set; }
+        public List<string> Tage { get; set; } = [];
+    }
+
+    // Standardaufgaben aus daten/demo/standardaufgaben.json (angelegt von der Bereichsleitung „EF“).
+    public static List<Kern.AufgabeVorlage> Standardaufgaben(DateTime jetzt)
+    {
+        var alle = new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday };
+        return Lesen<StandardaufgabenDatei>("standardaufgaben.json").Vorlagen.Select(v => new Kern.AufgabeVorlage
+        {
+            Text = v.Text, Schicht = BerichtRegeln.SchichtAus(v.Schicht),
+            Tage = v.Tage.Count == 0 ? alle : v.Tage.Select(t => Kurztage[t]).ToList(),
+            Uhrzeit = v.Uhrzeit is string u ? TimeOnly.ParseExact(u, "HH:mm", System.Globalization.CultureInfo.InvariantCulture) : null,
+            Erstellt = jetzt.AddDays(-30), Kuerzel = "EF",
+        }).ToList();
+    }
+
     // ----- Fahrzeuge und Fahrten (Schritt 24) -----
 
     private sealed class FahrtenDatei

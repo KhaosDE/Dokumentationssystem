@@ -1,0 +1,14 @@
+{
+  "hinweis": "Ausgedachte Standardaufgaben je Schicht für die Demo (vor allem Nachtdienst). tage: leer = täglich, sonst Mo, Di, Mi, Do, Fr, Sa, So. uhrzeit optional.",
+  "vorlagen": [
+    { "schicht": "nacht", "text": "Rundgang durch den Wohnbereich", "uhrzeit": "23:00" },
+    { "schicht": "nacht", "text": "Rundgang durch den Wohnbereich", "uhrzeit": "03:00" },
+    { "schicht": "nacht", "text": "Haustüren und Fenster im Erdgeschoss prüfen", "uhrzeit": "22:30" },
+    { "schicht": "nacht", "text": "Kühlschränke prüfen, abgelaufene Lebensmittel aussortieren", "tage": [ "Mo", "Do" ] },
+    { "schicht": "nacht", "text": "Wäsche aus dem Trockner legen", "tage": [ "Mi", "Sa" ] },
+    { "schicht": "nacht", "text": "Nachtbericht schreiben", "uhrzeit": "05:30" },
+    { "schicht": "frueh", "text": "Post verteilen", "uhrzeit": "10:00", "tage": [ "Mo", "Di", "Mi", "Do", "Fr" ] },
+    { "schicht": "frueh", "text": "Wochenplan an der Pinnwand aktualisieren", "uhrzeit": "08:00", "tage": [ "Mo" ] },
+    { "schicht": "spaet", "text": "Abendrunde: Gemeinschaftsräume aufräumen", "uhrzeit": "21:30" }
+  ]
+}
