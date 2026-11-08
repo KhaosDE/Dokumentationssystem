@@ -49,6 +49,12 @@ public class AerzteOberflaechenTests
         using (var ohne = new AerzteFenster(u.Speicher))
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(ohne.NeuKnopf));
         Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
+        using (var seite = new EinstellungenSeite(u.Speicher))   // seit Schritt 29: Gruppe „Verwaltung“
+        {
+            var karte = Assert.Single(seite.Suchen("Ärzte"));
+            Assert.Equal("Verwaltung", karte.Gruppe);
+            Assert.Equal("Ärzteverzeichnis …", seite.AerzteKnopf.Text);
+        }
         using (var fenster = new AerzteFenster(u.Speicher))
         {
             Hilfe.Zeigen(fenster);

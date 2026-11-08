@@ -158,13 +158,10 @@ public class UebersichtOberflaechenTests
         var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
         bool Bald() => s.Zeilen.Single(k => k.Bewohner.Nachname == "Clematis").Marken.Any(m => m.Text.StartsWith("Beschluss endet in"));
         Assert.True(Bald());
-        f.EinstellungenZeigen = fenster =>
-        {
-            Assert.Equal(90, fenster.BeschlussFrist.Value);
-            fenster.BeschlussFrist.Value = 14;
-            return fenster.Speichern();
-        };
-        Assert.True(f.EinstellungenOeffnen());
+        f.BenutzerWaehlen("EF");
+        Assert.True(f.EinstellungenOeffnen("Wohnbereich"));
+        Assert.Equal(90, f.Einstellungsseite.BeschlussFrist.Value);
+        f.Einstellungsseite.BeschlussFrist.Value = 14;   // gilt sofort
         f.BereichWaehlen("Übersicht");
         Assert.False(Bald());
 

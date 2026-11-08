@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.31.0** (E-Mail und Kalender über externe Programme, Bauplan Schritt 28).
+Stand: 08.11.2026. Version: **0.32.0** (Einstellungen neu gegliedert, Bauplan Schritt 29).
 
 ## Aktuell
 
@@ -180,7 +180,12 @@ Neu in 0.31.0: **Betreuer** in der Akte (Name, Stelle, Telefon, E-Mail) und **�
 E-Mail-Programm des Rechners mit Empfänger und Betreff. Im Kalender **„Als .ics speichern …“** und
 **„.ics übernehmen …“** (auch per Ziehen) mit Vorschau und Zuordnung zu Bewohner und Bereich/Haus.
 
-**Nächster Schritt:** Bauplan Schritt 29 „Einstellungen neu gegliedert“ (0.32.0).
+Neu in 0.32.0: **Einstellungen als ganze Seite** wie in Windows 11 – links zehn Gruppen mit Symbol
+und eine Suche, rechts je Einstellung eine Karte; Änderungen gelten sofort, ohne Recht ist eine Karte
+grau und nennt den Grund. „Einstellungen“ steht fest unten in der Seitenleiste; „Demo-Daten
+zurücksetzen“ und „Standardaufgaben …“ gibt es nur noch dort (keine zweite Stelle).
+
+**Nächster Schritt:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
 ## Fertig
 
@@ -925,6 +930,29 @@ E-Mail-Programm des Rechners mit Empfänger und Betreff. Im Kalender **„Als .i
     „Übernehmen“ legt die Termine an (Hinweis „aus einer .ics-Datei …“).
   - Demo `daten/demo/betreuer.json`: ausgedachte Betreuer, Adressen nur `@example.org`, Telefon
     „0000 …“; eine Betreuerin ohne E-Mail, einige Bewohner ohne Eintrag.
+- 0.32.0 — Einstellungen neu gegliedert (Bauplan Schritt 29, 08.11.2026):
+  - „Einstellungen“ fest ganz unten in der Seitenleiste; öffnet als ganze Seite (kein Fenster mehr).
+  - Links Suche und zehn Gruppen mit Symbol: Persönlich (angemeldet als, „Abmelden (F12)“, meine
+    Farbe, Seitenmenü eingeklappt), Wohnbereich (Bereich dieses Rechners, Schichtzeiten, „Beschluss
+    endet bald“, „HEB fällig“, Logo, Zimmer und Betten), Module (Ausgangsliste mit Küchendienst und Digitalem Ausgang),
+    Aufgaben (Standardaufgaben), Fahrzeuge (Fahrzeugliste), Vorlagen (HEB-PDFs A/B/C mit Zuordnung),
+    Medikamente (Datenbank, Nachschlage-Ansicht), Verwaltung (Mitarbeiter, Bereiche und Positionen,
+    Rechte, Ärzteverzeichnis), System (Ort der Datenbank, Sicherung – noch nicht gebaut, Update, Demo-Daten
+    zurücksetzen), Über (Programmname und Leittext, Version, Tastenkürzel F12 und F11, Demo-Hinweis,
+    Bausteine und Lizenzen, WebView2).
+  - Seitenleiste unten: „Einstellungen“, darunter „Abmelden (F12)“, Arbeitsplatz und Version (eingeklappt:
+    die Symbole).
+  - Je Einstellung eine Karte: Name, ein Satz Erklärung, rechts (oder darunter) das Bedienelement.
+    Häkchen und Zahlen gelten beim Ändern, Textfelder (Bereich, Schichtzeiten) beim Verlassen oder
+    mit Enter; Fehler stehen oben in der Gruppe (rot hinterlegt, mit Text).
+  - Suche über Name, Erklärung und Gruppe: Trefferliste links, Enter oder Klick springt hin und hebt
+    die Karte mit einem Balken hervor.
+  - Ohne Recht: Karte grau mit dem Satz „Dafür fehlt die Berechtigung.“ (bzw. „Bitte zuerst
+    anmelden.“), Knöpfe sichtbar mit Grund.
+  - Ort der Datenbank und Demo-Daten zurücksetzen fragen vorher; Hinweis in Gefahrenfarbe mit
+    „Achtung:“.
+  - Umgezogen (keine zweite Stelle mehr): „Demo-Daten zurücksetzen“ aus der Seitenleiste,
+    „Standardaufgaben …“ von der Seite „Aufgaben“.
 
 ## Offene Punkte
 
@@ -1529,6 +1557,20 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 29): Bedienelemente einheitlich Häkchen statt selbst gezeichneter Schalter (die
+  einfachere Lösung laut Auftrag); keine Gruppe hat mehr als fünf Möglichkeiten, also keine
+  Auswahlknöpfe. Aufklappbare Unterpunkte braucht es nicht: Die Untermodule stehen eine Ebene tiefer
+  in der Karte ihres Moduls.
+- 08.11.2026 (Schritt 29): Rechte je Gruppe aus der bestehenden Rechte-Tabelle, ohne neue Funktion:
+  Wohnbereich und System (Datenbank-Ort, Update) → „Einstellungen des Bereichs“; Demo-Daten →
+  „Demo-Daten zurücksetzen“; Module → „Module ein- und ausschalten“; Fahrzeuge → „Fahrzeuge
+  eintragen“; Vorlagen → „HEB-Bogen erstellen“; Aufgaben, Medikamente und Verwaltung prüfen ihre
+  Rechte in ihren Fenstern wie bisher. Persönliches und „Über“ darf jeder. Damit darf eine
+  Mitarbeiterin ohne Leitungsrecht z. B. den Bereich des Rechners nicht mehr umstellen (vorher ging
+  das für alle).
+- 08.11.2026 (Schritt 29): „Sicherung“ steht als Karte unter „System“, ist aber noch nicht gebaut
+  (war nie beauftragt, siehe „Offene Punkte“). Die Nachschlage-Ansicht ist eine Einstellung je
+  Rechner und für alle änderbar.
 - 08.11.2026 (Schritt 28): Betreuer sind eine eigene Tabelle mit Fassungen (wie Bezug und
   Biografie), nicht Teil des Bewohner-Formulars – so bleiben Formular und Konfliktschutz der
   Stammdaten unverändert. Ein Betreuer je Bewohner (die neueste Fassung gilt).
@@ -1642,6 +1684,25 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.32.0:
+
+1. „Einstellungen“ steht ganz unten in der Seitenleiste (auch eingeklappt). Klick → ganze Seite,
+   links die Gruppen, oben die Suche. „Demo-Daten zurücksetzen“ ist aus der Seitenleiste
+   verschwunden (jetzt unter „System“).
+2. Als „EF“: „Persönlich“ → „Seitenmenü eingeklappt“ an → die Seitenleiste klappt sofort ein; aus →
+   wieder auf. „Meine Farbe“ ändern → gilt sofort.
+3. „Wohnbereich“: „Beschluss endet bald“ auf 14 → Übersicht zeigt weniger „Beschluss endet in …“.
+   Schichtzeiten „Spät“ auf 05:00 → beim Verlassen roter Hinweis; 14:30 → gilt.
+4. Suche „Logo“ → Treffer „Bild im Kopf (Logo) · Wohnbereich“ → Enter → Gruppe „Wohnbereich“, die
+   Karte hat links einen Balken.
+5. Als „CD“: „Wohnbereich“ ist grau mit „Dafür fehlt die Berechtigung.“; „Persönlich“ geht.
+6. „System“ → „Ort der Datenbank“ → „Lokal (Vorgabe)“/„Gemeinsamen Ordner wählen …“ fragt vorher;
+   „Demo-Daten zurücksetzen …“ fragt vorher (roter „Achtung“-Hinweis daneben).
+7. „Aufgaben“ → „Standardaufgaben …“ öffnet die Liste; auf der Seite „Aufgaben“ gibt es den Knopf
+   nicht mehr. „Über“: Version, Tastenkürzel (F12, F11) und Lizenzen.
+8. „Persönlich“ → „Abmelden (F12)“ → das Anmeldefenster. „Wohnbereich“ → „Zimmer und Betten …“ öffnet
+   die Zimmerliste. Seitenleiste unten: „Einstellungen“, darunter „Abmelden (F12)“.
 
 Version 0.31.0:
 

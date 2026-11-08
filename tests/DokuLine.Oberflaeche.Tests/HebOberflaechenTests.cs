@@ -91,7 +91,8 @@ public class HebOberflaechenTests
         using (u)
         using (f)
         {
-            f.EinstellungenZeigen = fenster =>
+            Assert.True(f.EinstellungenOeffnen("Vorlagen"));
+            var fenster = f.Einstellungsseite;
             {
                 Assert.StartsWith("keine Vorlage", fenster.Vorlagen[Bogenart.B].Text);
                 fenster.PdfWaehlen = () => TestPdf;
@@ -105,10 +106,8 @@ public class HebOberflaechenTests
                     zeile.Cells[1].Value = "Feld_Leitziel";
                     return zuordnung.Speichern() ? DialogResult.OK : DialogResult.Cancel;
                 }))
-                    using (var z = new HebZuordnungFenster(Bogenart.B)) Dialog.Zeigen(z, fenster);
-                return fenster.Speichern();
-            };
-            Assert.True(f.EinstellungenOeffnen());
+                    using (var z = new HebZuordnungFenster(Bogenart.B)) Dialog.Zeigen(z, f);
+            }
             Assert.Equal("Feld_Leitziel", HebPdf.Zuordnung(Bogenart.B)["leitziel"]);
 
             var entwurf = h.Karten.Single(k => !k.Bogen.Fertig).Bogen;

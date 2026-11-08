@@ -174,8 +174,12 @@ public class MehrplatzOberflaechenTests
         using var u = new Umgebung();
         string ordner = Path.Combine(u.Ordner, "gemeinsam");
         Directory.CreateDirectory(ordner);
-        using (var fenster = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
+        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });   // Bereichsleitung: darf die Einstellungen des Bereichs
+        using (var fenster = new EinstellungenSeite(u.Speicher))
         {
+            fenster.Zeigen();
+            bool gefragt = false;
+            fenster.Rueckfrage = _ => gefragt = true;   // Datenbank-Ort: fragt immer vorher
             Assert.Equal("R1", fenster.Bereich.Text);
             Assert.StartsWith("lokal", fenster.DatenbankOrt.Text);
             Assert.False(fenster.LokalKnopf.Enabled);
@@ -183,8 +187,9 @@ public class MehrplatzOberflaechenTests
             Assert.Contains("gibt es nicht", fenster.Fehler.Text);
             Assert.True(fenster.OrdnerSetzen(ordner));
             Assert.Equal($"gemeinsamer Ordner: {ordner}", fenster.DatenbankOrt.Text);
+            Assert.True(gefragt);
             fenster.Bereich.Text = "R2";
-            Assert.True(fenster.Speichern());
+            Assert.True(fenster.BereichUebernehmen());
         }
         var w = Einstellungen.Laden();
         Assert.Equal(("R2", ordner), (w.Bereich, w.DatenbankOrdner));

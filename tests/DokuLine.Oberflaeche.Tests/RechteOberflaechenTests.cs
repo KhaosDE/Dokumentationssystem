@@ -46,7 +46,8 @@ public class RechteOberflaechenTests
         Assert.Equal("Abmelden (F12)", f.Kopf.AbmeldenKnopf.Text);
         f.BenutzerWaehlen("");
         Assert.Equal("Nicht angemeldet", f.Kopf.BenutzerText);
-        Assert.Equal(RechteRegeln.NichtAngemeldetText, Stil.Sperrgrund(f.DemoKnopf));
+        f.EinstellungenOeffnen("System");   // „Demo-Daten zurücksetzen“ steht seit Schritt 29 nur noch dort
+        Assert.Equal(RechteRegeln.NichtAngemeldetText, Stil.Sperrgrund(f.Einstellungsseite.DemoKnopf));
     });
 
     [Fact]
@@ -116,7 +117,8 @@ public class RechteOberflaechenTests
             Assert.All(db.Seite.Karten, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k.SperrenKnopf)));
             Assert.False(db.Seite.Sperren(db.Seite.Karten[0].Medikament, true));
         }
-        Assert.NotNull(Stil.Sperrgrund(f.DemoKnopf));
+        f.Einstellungsseite.Zeigen();
+        Assert.NotNull(Stil.Sperrgrund(f.Einstellungsseite.DemoKnopf));
 
         // Rechte ändern wirkt sofort (Rechte-Tabelle, angemeldet als Geschäftsführung).
         f.BenutzerWaehlen("UT");
@@ -170,8 +172,11 @@ public class RechteOberflaechenTests
 
         // CD (ohne Mitarbeiterverwaltung): in den Einstellungen gesperrt; Bereiche und Positionen nur ansehen.
         Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
-        using (var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
+        using (var einstellungen = new EinstellungenSeite(u.Speicher))
+        {
+            einstellungen.Zeigen();
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(einstellungen.MitarbeiterKnopf));
+        }
         using (var listen = new ListenFenster(u.Speicher))
             Assert.All(listen.Knoepfe, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k)));
 

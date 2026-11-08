@@ -28,40 +28,55 @@ public class HauptfensterTests
         using var fenster = new Hauptfenster(u.Speicher);
         string logo = Path.Combine(u.Ordner, "eigenes-bild.png");
         Hilfe.Testbild(logo, 120, 40);
-        bool gezeigt = false;
-        fenster.EinstellungenZeigen = einstellungen =>
-        {
-            gezeigt = true;
-            Assert.True(einstellungen.AutoUpdate.Checked);
-            Assert.False(einstellungen.HatLogo);
-            Assert.Equal("Emma Fink (EF)", einstellungen.Angemeldet.Text);   // angemeldet wird oben rechts, nicht hier
-            einstellungen.AutoUpdate.Checked = false;
-            Assert.True(einstellungen.LogoSetzen(logo));
-            return einstellungen.Speichern();
-        };
         Assert.False(fenster.Kopf.HatLogo);
         fenster.BenutzerWaehlen("EF");
+        Hilfe.Zeigen(fenster);
+        // Schritt 29: eine ganze Seite, „Einstellungen“ fest unten in der Seitenleiste; Änderungen gelten sofort.
         fenster.Navigation.Single(n => n.Text == "Einstellungen").Ausloesen();
-        Assert.True(gezeigt);
-        Assert.Equal("Bewohner", fenster.AktiverBereich);   // Einstellungen sind ein Fenster, kein Bereich
+        Assert.Equal("Einstellungen", fenster.AktiverBereich);
+        var einstellungen = fenster.Einstellungsseite;
+        Assert.Equal("Persönlich", einstellungen.AktiveGruppe);
+        Assert.Equal(EinstellungenSeite.GruppenListe.Select(g => g.Name), einstellungen.Gruppen.Select(g => g.Text));
+        Assert.Equal("Emma Fink (EF)", einstellungen.Angemeldet.Text);
+        Assert.True(einstellungen.AutoUpdate.Checked);
+        Assert.False(einstellungen.HatLogo);
+        einstellungen.AutoUpdate.Checked = false;
+        Assert.True(einstellungen.LogoSetzen(logo));
         var werte = Einstellungen.Laden();
         Assert.Equal(("EF", false), (werte.Kuerzel, werte.AutoUpdate));
         Assert.Equal("Angemeldet: EF – Emma Fink", fenster.Kopf.BenutzerText);
         Assert.NotNull(Einstellungen.LogoPfad());
         Assert.True(fenster.Kopf.HatLogo);
 
-        fenster.EinstellungenZeigen = einstellungen =>
-        {
-            Assert.True(einstellungen.HatLogo);
-            Assert.Equal("Emma Fink (EF)", einstellungen.Angemeldet.Text);
-            Hilfe.Zeigen(einstellungen);   // PerformClick wirkt nur bei angezeigtem Fenster
-            einstellungen.LogoWeg.PerformClick();
-            return einstellungen.Speichern();
-        };
-        Hilfe.Zeigen(fenster);
-        Assert.True(fenster.EinstellungenOeffnen());
+        // Suche über Name und Erklärung; springt zur Gruppe.
+        Assert.Contains(einstellungen.Suchen("Logo"), k => k.Titel.StartsWith("Bild im Kopf"));
+        Assert.Contains(einstellungen.Suchen("Nachtdienst"), k => k.Titel == "Standardaufgaben");
+        Assert.True(einstellungen.Springen("Logo"));
+        Assert.Equal("Wohnbereich", einstellungen.AktiveGruppe);
+        Assert.True(einstellungen.Karten.Single(k => k.Titel.StartsWith("Bild im Kopf")).Hervorgehoben);
+        einstellungen.LogoWeg.PerformClick();
         Assert.Null(Einstellungen.LogoPfad());
         Assert.False(fenster.Kopf.HatLogo);
+        einstellungen.Suche.Text = "Schicht";
+        Assert.True(einstellungen.Treffer.Visible);
+        einstellungen.Suche.Text = "";
+
+        // Ohne Recht gesperrt, nicht versteckt (CD: kein Recht „Einstellungen des Bereichs“).
+        fenster.BenutzerWaehlen("CD");
+        Assert.Equal(RechteRegeln.FehltText, einstellungen.Karten.Single(k => k.Titel == "Schichtzeiten").Sperrgrund);
+        einstellungen.Bereich.Text = "R2";
+        Assert.False(einstellungen.BereichUebernehmen());
+        Assert.Equal("R1", Einstellungen.Laden().Bereich);   // seit Schritt 26e heißen die Bereiche R1–R3
+        Assert.Equal(RechteRegeln.FehltText, einstellungen.Fehler.Text);
+        fenster.BenutzerWaehlen("EF");
+
+        // Bildschirmfoto je Gruppe.
+        for (int i = 0; i < EinstellungenSeite.GruppenListe.Length; i++)
+        {
+            einstellungen.Gruppen[i].Ausloesen();
+            Assert.Equal(EinstellungenSeite.GruppenListe[i].Name, einstellungen.AktiveGruppe);
+            Hilfe.Foto(fenster, $"92_einstellungen_{i:00}");
+        }
     });
 
     [Fact]
@@ -418,8 +433,8 @@ public class BildschirmfotoTests
             Hilfe.Foto(kueche, "44_kuechendienst");
         using (var nacht = new DokuLine.Modul.Ausgangsliste.NachtberichtFenster(db.Laden(), db.AusgaengeLaden(DateTime.Now)))
             Hilfe.Foto(nacht, "45_nachtbericht");
-        using (var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
-            Hilfe.Foto(einstellungen, "46_einstellungen_module");
+        f.EinstellungenOeffnen("Module");
+        Hilfe.Foto(f, "46_einstellungen_module");
         f.Navigation.Single(n => n.Text == "Übersicht").Ausloesen();
         Hilfe.Foto(f, "9_uebersicht");
         string logo = Path.Combine(u.Ordner, "eigenes-bild.png");
@@ -498,8 +513,9 @@ public class BildschirmfotoTests
         f.Bewohner.FilterSetzen(BewohnerFilter.NichtErfasst);
         Hilfe.Foto(f, "12_filter_nicht_erfasst");
         f.Bewohner.FilterSetzen(BewohnerFilter.Alle);
-        using (var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen()))
-            Hilfe.Foto(einstellungen, "11_einstellungen");
+        f.EinstellungenOeffnen("Persönlich");
+        Hilfe.Foto(f, "11_einstellungen");
+        f.BereichWaehlen("Bewohner");
         using (var fortschritt = new Fortschrittsfenster())
         {
             fortschritt.Zeige("Neue Version wird geladen (Build 4 → Build 5) …", 0.42);

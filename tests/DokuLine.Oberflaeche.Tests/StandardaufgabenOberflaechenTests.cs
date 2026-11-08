@@ -94,14 +94,16 @@ public class StandardaufgabenOberflaechenTests
         var vorher = BerichtRegeln.Zeiten;
         try
         {
-            using var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher);
+            using var einstellungen = new EinstellungenSeite(u.Speicher);
+            einstellungen.Zeigen();
             Assert.Equal("06:00", einstellungen.Frueh.Text);
             einstellungen.Spaet.Text = "05:00";
-            Assert.False(einstellungen.Speichern());
+            Assert.False(einstellungen.SchichtzeitenUebernehmen());
+            Assert.True(einstellungen.Fehler.Text.Length > 0);
             einstellungen.Frueh.Text = "06:30";
             einstellungen.Spaet.Text = "14:30";
             einstellungen.Nacht.Text = "21:45";
-            Assert.True(einstellungen.Speichern());
+            Assert.True(einstellungen.SchichtzeitenUebernehmen());
             Assert.Equal(new TimeOnly(21, 45), u.Speicher.Schichtzeiten(Einstellungen.Laden().Bereich).Nacht);
             Assert.Equal(new TimeOnly(6, 30), BerichtRegeln.Zeiten.Frueh);
         }

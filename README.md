@@ -51,7 +51,7 @@ Danach fragt Windows für diese Datei nicht mehr.
   auch `081126` für 20xx), bei Uhrzeiten den Doppelpunkt (`0930`). **Offen geführt** hat drei Zustände: ja, nein, nicht erfasst.
   Bei der **Aufnahme** wählt man erst den Wohnbereich (R1 offen, R2/R3 beschützend), dann eines der
   **freien Betten** („105 – Bett Tür“, „104 – Einzelzimmer“); „offen geführt“ ist dann „nein“. Zimmer
-  und Betten: Einstellungen → „WOHNBEREICHE“ → „Zimmer und Betten …“.
+  und Betten: Einstellungen → „Wohnbereich“ → „Zimmer und Betten …“.
 - In den Stammdaten steht das **Alter** neben dem Geburtsdatum. Oben in der Akte stehen Marken:
   „offen geführt“, „offen geführt: nicht erfasst“ und Hinweise der Module – etwa, wenn die
   Ausgangsliste etwas anderes zur Unterbringung sagt als die Akte („bitte klären“).
@@ -93,7 +93,8 @@ Danach fragt Windows für diese Datei nicht mehr.
   ersten offenen Aufgaben stehen auch über den Bewohnerkarten. Aus einem Bericht heraus:
   „Aufgabe daraus …“. **Standardaufgaben** (z. B. Rundgänge im Nachtdienst) entstehen zu Beginn
   jeder Schicht von selbst; nicht erledigte bleiben „aus der Nachtschicht offen“, bis jemand sie
-  erledigt oder mit Begründung schließt. Die Schichtzeiten stehen in den Einstellungen.
+  erledigt oder mit Begründung schließt. Standardaufgaben und Schichtzeiten stehen in den
+  Einstellungen („Aufgaben“ bzw. „Wohnbereich“).
 - **Angemeldet: … / Abmelden (F12)** (oben rechts): wer gerade am Programm sitzt – eine der ausgedachten
   Kolleginnen und Kollegen, ohne Passwort (nur für die Vorführung). Das Kürzel setzt das
   Programm überall selbst („eingetragen von …“, nicht änderbar); Fahrer, Teilnehmer und
@@ -102,7 +103,7 @@ Danach fragt Windows für diese Datei nicht mehr.
   Verlauf, optional zu einem Bewohner (in der Akte „Nachrichten …“). Alles bleibt im Programm,
   kein E-Mail-Versand. Nachrichten werden nicht gelöscht, nur archiviert: „Gelesen“ (auch mehrere
   markiert) schiebt sie für mich ins Archiv, „Wieder als ungelesen“ holt sie zurück.
-- **Ärzteverzeichnis** (Einstellungen → „VERWALTUNG“ → „Ärzteverzeichnis …“): ausgedachte
+- **Ärzteverzeichnis** (Einstellungen → „Verwaltung“ → „Ärzteverzeichnis …“): ausgedachte
   Ärztinnen und Ärzte mit Fachrichtung, Praxis, Telefon und E-Mail. Überall, wo ein Arzt
   eingetragen wird (Verordnung, Pause/Stufenplan/Absetzen, Visite, Facharzttermin, Termin), wählt
   man aus dieser Liste; fehlt jemand: „Arzt anlegen …“ gleich daneben. Gelöscht wird nicht, nur
@@ -139,7 +140,7 @@ Danach fragt Windows für diese Datei nicht mehr.
   Felder des Bogens mit Zeichenzähler und Stilhinweisen, daneben die Berichte des Zeitraums, der
   Wochenplan und die fertigen Monatsreflexionen. Textbausteine per Klick, der Hilfebedarf wird
   nie vorgeschlagen. „Speichern“ (Entwurf), „Als fertig markieren“ (ein Mensch), „Drucken …“ und
-  „PDF ausfüllen …“: Unter Einstellungen → „HEB-VORLAGEN“ teilt man je Bogenart eine PDF mit
+  „PDF ausfüllen …“: Unter Einstellungen → „Vorlagen“ teilt man je Bogenart eine PDF mit
   Formularfeldern zu; ausgefüllt wird eine Kopie im Datenordner (Ordner `heb`). Ist ein HEB fällig,
   steht das in der Akte und auf der Übersicht.
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
@@ -168,17 +169,17 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Statusmeldung** (Akte → „Status …“): kurzer Text mit „gilt bis“, z. B. „beim Arzttermin“.
   Bereich, Kürzel und Uhrzeit kommen dazu. Sie steht auf der Karte und oben in der Akte – in
   allen Bereichen –, bis sie abläuft oder eine neue sie ersetzt. Der Verlauf bleibt.
-- **Mehrere Rechner (Demo)**: In den Einstellungen unter „MEHRPLATZ“ bekommt jeder Rechner eine
+- **Mehrere Rechner (Demo)**: In den Einstellungen unter „Wohnbereich“ bekommt jeder Rechner eine
   **Bereichskennung** (z. B. „R1“, „Therapie“); die Übersicht zeigt zuerst die
   Bewohner dieses Bereichs, umschaltbar auf „alle Bereiche“. Mit **„Gemeinsamen Ordner wählen
-  …“** liegt die Datenbank in einem Ordner, den mehrere Rechner erreichen (z. B. ein
+  …“** (Einstellungen → „System“) liegt die Datenbank in einem Ordner, den mehrere Rechner erreichen (z. B. ein
   Netzlaufwerk); das gilt nach dem Neustart. Jeder Rechner liest Änderungen der anderen
   spätestens nach 30 Sekunden nach. Haben zwei denselben Eintrag geändert, zeigt das Programm
   beide Fassungen und lässt wählen – es überschreibt nichts still. Zum Ausprobieren ohne
   zweiten Rechner: das Programm zweimal starten. Auch im gemeinsamen Ordner nur ausgedachte
   Daten; Passwörter und Verschlüsselung gibt es nicht (das gehört zum Echtbetrieb).
-- **Demo-Daten zurücksetzen …** (unten links) stellt die ausgedachten Demo-Bewohner (23 je Wohnbereich)
-  wieder her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren – im gemeinsamen Ordner
+- **Demo-Daten zurücksetzen …** (Einstellungen → „System“, fragt vorher) stellt die ausgedachten
+  Demo-Bewohner (23 je Wohnbereich) wieder her. Eigene Änderungen und hinterlegte Bilder gehen dabei verloren – im gemeinsamen Ordner
   für alle Rechner.
 - **Bezugspflege und Einzeltrainer:** In der Akte unter „Stammdaten“ („Bezug ändern …“). Auf
   den Karten zeigt ein farbiger Streifen die Bezugspflege, ein Punkt den Einzeltrainer – in der
@@ -192,15 +193,20 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Anmelden:** Beim Start mit dem Kürzel (Demo: ohne Passwort; die ausgedachten Mitarbeiter
   stehen im Anmeldefenster; TST ist der Administrator mit allen Rechten). **Abmelden:** Taste F12
   (aus jedem Fenster), der Knopf „Abmelden (F12)“ oben rechts, unten in der Seitenleiste oder in den
-  Einstellungen. Danach ist nichts mehr zu sehen, bis sich jemand anmeldet; ein angefangener Bericht
+  Einstellungen („Persönlich“). Danach ist nichts mehr zu sehen, bis sich jemand anmeldet; ein angefangener Bericht
   kann als Entwurf bleiben („Entwurf fortsetzen“ rechts in der Aktionsleiste).
-  Was jemand darf, hängt an seiner Position (Einstellungen → „VERWALTUNG“ → „Rechte …“). Ohne
+  Was jemand darf, hängt an seiner Position (Einstellungen → „Verwaltung“ → „Rechte …“). Ohne
   Recht bleiben Knöpfe grau und sagen beim Darüberfahren, warum.
 - **Logo der Einrichtung:** Oben rechts im Kopf steht ein Platzhalter. Ein Klick darauf öffnet die
   Einstellungen; unter „Bild im Kopf“ lässt sich das eigene Logo wählen (es bleibt auf dem Rechner).
-- **Einstellungen** (links): Update beim Start, Medikamentendatenbank und Nachschlage-Ansicht,
-  Module ein- und ausschalten, Frist „Beschluss endet bald“, eigenes Bild für den Kopf (z. B. ein Logo – die Datei wird nur in den
-  Datenordner kopiert).
+- **Einstellungen** (fest ganz unten in der Seitenleiste): eine ganze Seite wie die
+  Windows-11-Einstellungen – links die Gruppen (Persönlich, Wohnbereich, Module, Aufgaben,
+  Fahrzeuge, Vorlagen, Medikamente, Verwaltung, System, Über), oben die Suche, rechts je Einstellung
+  eine Karte mit Name, einem Satz Erklärung und dem Bedienelement. **Änderungen gelten sofort**
+  (Textfelder beim Verlassen); nur ganze Datensätze (Mitarbeiter, Medikament, Fahrzeug,
+  Standardaufgabe, HEB-Zuordnung) haben „Speichern“. Ohne Recht ist eine Karte grau und sagt warum.
+  Folgenreiches (Ort der Datenbank, Demo-Daten zurücksetzen) steht nur unter „System“ und fragt
+  vorher.
 
 ## Updates
 
@@ -215,7 +221,7 @@ nur bei den Releases dieses Repositorys, sonst geht es nirgends ins Internet.
 
 **Update abschalten** – eine der beiden Möglichkeiten:
 
-- Im Programm unter **Einstellungen** das Häkchen **„Beim Start nach Updates suchen“**
+- Im Programm unter **Einstellungen → System → „Update“** das Häkchen **„beim Start suchen“**
   entfernen.
 - Oder die `.exe` mit `--kein-update` starten (Verknüpfung anlegen, Rechtsklick →
   Eigenschaften → bei „Ziel“ hinten ` --kein-update` anhängen).
@@ -263,8 +269,8 @@ Datenordner (`%APPDATA%\DokuLine`).
 Arzneimittelsuche des BfArM in einem kleinen Fenster. Dafür braucht es die kostenlose
 „Microsoft Edge WebView2 Runtime“. In Windows 11 ist sie enthalten, auf Servern oft nicht – dann
 einmal von der IT installieren lassen. Für Windows Server 2012 und 2012 R2 gibt es sie nicht mehr;
-dort die Ansicht abschalten (Einstellungen → Medikamente → „Nachschlage-Ansicht anzeigen“).
-Ob WebView2 da ist, steht in den Einstellungen unter „Programm“. Fehlt sie, erscheint im
+dort die Ansicht abschalten (Einstellungen → Medikamente → „Nachschlage-Ansicht (BfArM)“).
+Ob WebView2 da ist, steht in den Einstellungen unter „Über“. Fehlt sie, erscheint im
 Formular nur ein Hinweis; alles andere funktioniert.
 
 **Netz:** Das Programm verbindet sich nur mit

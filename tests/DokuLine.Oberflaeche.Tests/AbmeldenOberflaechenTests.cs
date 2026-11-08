@@ -154,10 +154,11 @@ public class AbmeldenOberflaechenTests
         {
             Hilfe.Zeigen(f);
             f.BenutzerWaehlen("EF");
-            // Einstellungen → „Abmelden (F12)“.
-            f.EinstellungenZeigen = e => { Hilfe.Zeigen(e); e.AbmeldenKnopf.PerformClick(); return false; };
+            // Einstellungen → „Persönlich“ → „Abmelden (F12)“ (seit Schritt 29 eine Seite).
+            f.EinstellungenOeffnen("Persönlich");
+            Assert.Equal(Abmeldung.KnopfText, f.Einstellungsseite.AbmeldenKnopf.Text);
             using (new DialogErsatz(fenster => AnmeldenAls(fenster, "EF")))
-                f.EinstellungenOeffnen();
+                f.Einstellungsseite.AbmeldenKnopf.PerformClick();
             Assert.Equal("Angemeldet: EF – Emma Fink", f.Kopf.BenutzerText);
 
             // F12: die Taste wird abgefangen, das Abmelden läuft gleich danach.
