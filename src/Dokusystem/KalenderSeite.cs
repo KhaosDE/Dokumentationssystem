@@ -131,6 +131,7 @@ public sealed class KalenderSeite : Panel
     public void Aktualisieren()
     {
         foreach (var (a, knopf) in Ansichten) knopf.Aktiv = a == Ansicht;
+        Recht.NurAngemeldet(NeuKnopf);   // Schritt 26a: ohne Anmeldung nur ansehen
         ZeitraumText.Text = KalenderRegeln.ZeitraumText(Ansicht, Stichtag);
         Fahrzeuge.Aktualisieren();
         string? hausGrund = Recht.Grund(speicher, Funktionen.KalenderHaus);   // Haus-Termine: Recht „Kalender Haus bearbeiten“
@@ -464,7 +465,7 @@ public sealed class KalenderFenster : Form
     public CheckedListBox BewohnerListe { get; } = new() { Width = 320, Height = 150, CheckOnClick = true, IntegralHeight = false };
     public TextBox Ort { get; } = new() { Width = 320 };
     public TextBox Treffpunkt { get; } = new() { Width = 320 };
-    public TextBox Begleitung { get; } = new() { Width = 320, PlaceholderText = "z. B. Kürzel der Begleitpersonen" };
+    public PersonenWahl Begleitung { get; }   // Schritt 26a: Auswahl aus den Mitarbeitern
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public KalenderTermin? Gespeichert { get; private set; }
@@ -476,6 +477,7 @@ public sealed class KalenderFenster : Form
         this.speicher = speicher;
         this.bisher = bisher;
         bewohner = speicher.AlleBewohner();
+        Begleitung = new PersonenWahl(speicher) { AccessibleName = "Begleitung" };
         Text = (bisher is null ? "Neuer Termin" : "Termin ändern") + $" ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
@@ -530,7 +532,7 @@ public sealed class KalenderFenster : Form
             for (int i = 0; i < bewohner.Count; i++) BewohnerListe.SetItemChecked(i, f.Bewohner.Contains(bewohner[i].Id!.Value));
             Ort.Text = f.Ort;
             Treffpunkt.Text = f.Treffpunkt;
-            Begleitung.Text = f.Begleitung;
+            Begleitung.Setzen(PersonenWahl.Lesen(f.Begleitung));
             Hinweis.Text = f.Hinweis;
         }
         else
@@ -567,7 +569,7 @@ public sealed class KalenderFenster : Form
                 Art = Art, Titel = Titel.Text, BeginnDatum = BeginnDatum.Text, BeginnUhrzeit = BeginnUhrzeit.Text,
                 EndeDatum = EndeDatum.Text, EndeUhrzeit = EndeUhrzeit.Text, Ganztags = Ganztags.Checked, Ort = Ort.Text, Hinweis = Hinweis.Text,
                 Bewohner = Art == KalenderArt.Wohnbereich ? [] : BewohnerListe.CheckedIndices.Cast<int>().Select(i => bewohner[i].Id!.Value).ToList(),
-                Treffpunkt = Art == KalenderArt.Ausflug ? Treffpunkt.Text : "", Begleitung = Art == KalenderArt.Ausflug ? Begleitung.Text : "",
+                Treffpunkt = Art == KalenderArt.Ausflug ? Treffpunkt.Text : "", Begleitung = Art == KalenderArt.Ausflug ? Begleitung.AlsText : "",
                 Haus = HausWahl.Checked, Kuerzel = Einstellungen.Laden().Kuerzel,
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.KalenderAnlegen(f) : speicher.KalenderAendern(bisher.Id, f, ohnePruefung ? null : bisher.Fassungen.Count);

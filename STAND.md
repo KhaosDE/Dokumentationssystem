@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.29.0** (Visiten, Bauplan Schritt 26).
+Stand: 08.11.2026. Version: **0.29.1** (Kürzel automatisch aus der Anmeldung, Bauplan Schritt 26a).
 
 ## Aktuell
 
@@ -73,7 +73,13 @@ passende Formular mit Arzt und Datum der Visite), „Termin eintragen …“ (Ka
 Wunsch mit Fahrt). Die Medikation ändert das Programm nicht selbst. Je Bewohner entsteht ein Bericht
 (Lebensbereich 5).
 
-**Nächster Schritt:** Bauplan Schritt 27 „Ausgangsliste als übersichtliche Liste“ (0.30.0).
+Neu in 0.29.1: Das **Kürzel kommt aus der Anmeldung** – „eingetragen von“ ist in allen Formularen
+eine feste Anzeige (Bericht, Nachtrag, Aufgabe; die übrigen setzten es schon selbst). Fahrer,
+Teilnehmer der Visite und Begleitung eines Ausflugs sind eine **Auswahl aus den Mitarbeitern**,
+vorbelegt mit der angemeldeten Person. Ohne Anmeldung sind „Neue Aufgabe“, „Notiz“ und „Neuer
+Termin“ gesperrt („Bitte zuerst anmelden.“).
+
+**Nächster Schritt:** Bauplan Schritt 26b „Ärzteverzeichnis“ (0.29.2).
 
 ## Fertig
 
@@ -553,6 +559,18 @@ Wunsch mit Fahrt). Die Medikation ändert das Programm nicht selbst. Je Bewohner
     Kalender (Bereich) beim Bewohner, Aufgabe erledigt.
   - Demo `daten/demo/visiten.json`: drei Visiten (Dosis geändert, neues Medikament noch nicht in der
     Datenbank, dringender Facharzttermin); ihre Aufgaben sind erledigt.
+- 0.29.1 — Kürzel automatisch aus der Anmeldung (Bauplan Schritt 26a, 08.11.2026):
+  - „Eingetragen von“ (schreibgeschützt) statt Eingabefeld in „Neuer Bericht“, „Nachtrag“ und „Neue
+    Aufgabe“; „Medikament“, „Neue Verordnung“ und „Neue Visite“ zeigen es ebenso. Alle anderen
+    Einträge (Übergabe, Erledigt, Weitergeben, Teilnahme, Medikamentenplan, Statusmeldung, Fahrten,
+    Ausgang, Biografie, Reflexion, HEB, Nachrichten, Kalender) nahmen das Kürzel schon aus der
+    Anmeldung.
+  - Personen-Felder als Auswahl aus den aktiven Mitarbeitern, vorbelegt mit der angemeldeten Person:
+    Fahrer (Neue Fahrt, Facharzttermin), „Dabei“ (Visite, Häkchen), Begleitung (Ausflug, Häkchen).
+    Alte Freitext-Angaben bei der Begleitung bleiben beim Ändern erhalten.
+  - Ohne Anmeldung: „Neue Aufgabe …“, „Notiz für den Wohnbereich …“ und „Neuer Termin …“ gesperrt mit
+    „Bitte zuerst anmelden.“ (die übrigen Knöpfe waren über die Rechte schon gesperrt); Hinweise
+    „bitte zuerst oben rechts anmelden“ statt „unter Einstellungen ein Kürzel eintragen“.
 
 ## Offene Punkte
 
@@ -994,6 +1012,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 - 08.11.2026 (Schritt 21): Abhängigkeiten jetzt: `Microsoft.Data.Sqlite` (MIT), `PDFsharp` 6.2.4
   (MIT), `System.Security.Cryptography.Pkcs` 10.0.13 (MIT), `Microsoft.Web.WebView2` (BSD-3-Clause-
   artig); Tests mit xUnit (Apache-2.0).
+- 08.11.2026 (Schritt 26a): Eine eigene Einstellung „Kürzel“ gab es seit 0.22.0 nicht mehr; maßgeblich
+  ist die Anmeldung. Personen-Felder mit mehreren Personen speichern die Kürzel wie bisher als Text
+  („AB, CD“), damit ältere Einträge lesbar bleiben.
 - 08.11.2026 (Schritt 26): Visiten stehen in der Akte als Bericht im Reiter „Berichte“ (Text beginnt
   mit „Visite …“, Lebensbereich 5) – kein eigener Reiter (die einfachere Lösung laut Auftrag).
 - 08.11.2026 (Schritt 26): Eine gespeicherte Visite wird nicht geändert (wie Berichte); Korrekturen
@@ -1067,6 +1088,16 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.1:
+
+1. Als „CD“ angemeldet: „Neuer Bericht …“ → „Eingetragen von CD“ lässt sich nicht ändern. Ebenso
+   „Nachtrag …“ und „Neue Aufgabe …“.
+2. „Neue Fahrt …“: „Fahrer“ ist eine Liste der Mitarbeiter, „Carl Dohle (CD)“ vorgewählt.
+3. „Neue Visite …“: „Dabei“ hat ein Häkchen bei CD; weitere ankreuzen. Kalender, neuer Ausflug:
+   „Begleitung“ ebenso.
+4. Oben rechts abmelden: „Neue Aufgabe …“, „Notiz für den Wohnbereich …“, „Neuer Termin …“ sind grau
+   („Bitte zuerst anmelden.“). Wieder anmelden → frei.
 
 Version 0.29.0:
 

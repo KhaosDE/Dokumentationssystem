@@ -40,7 +40,7 @@ public sealed class AufgabenSeite : Panel
         }
         ErledigteZeigen.Margin = new Padding(Stil.AbstandKlein, Stil.AbstandKlein, Stil.AbstandKlein, 0);
         KuerzelHinweis.Margin = new Padding(0, Stil.AbstandKlein, 0, 0);
-        KuerzelHinweis.Text = "Für „erledigt“ und „weitergeben“ bitte unter Einstellungen ein Kürzel eintragen.";
+        KuerzelHinweis.Text = "Zum Eintragen, Erledigen und Weitergeben bitte zuerst oben rechts anmelden.";
         NeuKnopf.Click += (_, _) => NeueAufgabe();
         DruckKnopf.Click += (_, _) => Drucken();
         ErledigteZeigen.CheckedChanged += (_, _) => Aktualisieren();
@@ -62,6 +62,7 @@ public sealed class AufgabenSeite : Panel
         Offen = offen.Count;
         Ueberfaellig = offen.Count(a => AufgabenRegeln.Ueberfaellig(a, jetzt));
         KuerzelHinweis.Visible = kuerzel.Length == 0;
+        Recht.NurAngemeldet(NeuKnopf);   // Schritt 26a: ohne Anmeldung nur ansehen
 
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
@@ -326,7 +327,7 @@ public sealed class AufgabeFenster : Form
     public ComboBox SchichtArt { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 130 };
     public TextBox FaelligDatum { get; } = new() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public TextBox FaelligUhrzeit { get; } = new() { Width = 70, PlaceholderText = "SS:MM" };
-    public TextBox Verfasser { get; } = new() { Width = 80, PlaceholderText = "Kürzel" };
+    public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // Schritt 26a: aus der Anmeldung
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Aufgabe? Gespeichert { get; private set; }
 
@@ -392,9 +393,7 @@ public sealed class AufgabeFenster : Form
         fuer.Controls.Add(WerZeitHat);
         Zeile("Für wen?", fuer);
         Zeile("Fällig bis (freiwillig)", Reihe(FaelligDatum, FaelligUhrzeit));
-        Verfasser.Text = Einstellungen.Laden().Kuerzel;
-        Verfasser.MaxLength = Einstellungen.KuerzelLaenge;
-        Zeile("Angelegt von", Verfasser);
+        Zeile("Eingetragen von", Verfasser);
         Zeile(null, Fehler);
 
         var speichern = Stil.HauptKnopf("Speichern");
@@ -420,7 +419,7 @@ public sealed class AufgabeFenster : Form
         SchichtArt = (Schicht)Math.Max(0, SchichtArt.SelectedIndex),
         FaelligDatum = FaelligDatum.Text,
         FaelligUhrzeit = FaelligUhrzeit.Text,
-        Verfasser = Verfasser.Text,
+        Verfasser = Recht.Kuerzel,
     };
 
     public bool Speichern()

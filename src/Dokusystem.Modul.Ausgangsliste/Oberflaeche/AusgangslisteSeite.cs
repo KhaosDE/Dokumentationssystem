@@ -180,7 +180,7 @@ public static class Aktionen
             catch (Eingabefehler e)
             {
                 Melden(besitzer.FindForm(), string.Join("\n", e.Fehler.Select(f => f == "Handzeichen fehlt."
-                    ? "Handzeichen fehlt: Bitte oben rechts „Benutzer wählen“ – das Kürzel ist das Handzeichen." : f)));
+                    ? "Handzeichen fehlt: Bitte zuerst oben rechts anmelden – das Kürzel ist das Handzeichen." : f)));
                 return;
             }
             danach();
@@ -195,7 +195,7 @@ public static class Aktionen
             catch (Eingabefehler e)
             {
                 Melden(besitzer.FindForm(), string.Join("\n", e.Fehler.Select(f => f == "Handzeichen fehlt."
-                    ? "Handzeichen fehlt: Bitte oben rechts „Benutzer wählen“ – das Kürzel ist das Handzeichen." : f)));
+                    ? "Handzeichen fehlt: Bitte zuerst oben rechts anmelden – das Kürzel ist das Handzeichen." : f)));
                 return;
             }
             danach();

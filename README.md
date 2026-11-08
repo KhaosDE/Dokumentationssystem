@@ -72,8 +72,9 @@ Danach fragt Windows für diese Datei nicht mehr.
   jeder Schicht von selbst; nicht erledigte bleiben „aus der Nachtschicht offen“, bis jemand sie
   erledigt oder mit Begründung schließt. Die Schichtzeiten stehen in den Einstellungen.
 - **Angemeldet als …** (oben rechts): wer gerade am Programm sitzt – eine der ausgedachten
-  Kolleginnen und Kollegen, ohne Passwort (nur für die Vorführung). Das Kürzel steht dann bei
-  Berichten, Übergabe und Aufgaben.
+  Kolleginnen und Kollegen, ohne Passwort (nur für die Vorführung). Das Kürzel setzt das
+  Programm überall selbst („eingetragen von …“, nicht änderbar); Fahrer, Teilnehmer und
+  Begleitung wählt man aus den Mitarbeitern. Ohne Anmeldung lässt sich nur ansehen.
 - **Nachrichten** (links, mit Zähler): an Personen oder Teams, mit Antworten im selben
   Verlauf, optional zu einem Bewohner (in der Akte „Nachrichten …“). Alles bleibt im Programm,
   kein E-Mail-Versand. Nachrichten werden nicht gelöscht, nur archiviert.

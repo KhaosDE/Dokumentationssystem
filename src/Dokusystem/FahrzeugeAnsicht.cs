@@ -129,7 +129,7 @@ public sealed class FahrtFenster : Form
     public TextBox Von { get; } = new() { Width = 70, PlaceholderText = "09:00" };
     public TextBox Bis { get; } = new() { Width = 70, PlaceholderText = "11:00" };
     public ComboBox Zweck { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
-    public ComboBox Fahrer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 120 };
+    public PersonWahl Fahrer { get; }   // Schritt 26a: Auswahl aus den Mitarbeitern, vorbelegt mit der angemeldeten Person
     public CheckedListBox Mitfahrende { get; } = new() { Width = 300, Height = 150, CheckOnClick = true, IntegralHeight = false };
     public TextBox Ziel { get; } = new() { Width = 300, PlaceholderText = "z. B. Praxis, Hallenbad (ausgedacht)" };
     public Label Warnung { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
@@ -150,15 +150,14 @@ public sealed class FahrtFenster : Form
         Datum.Text = Kern.Datum.Text(DateOnly.FromDateTime(jetzt));
         Zweck.Items.AddRange([.. Enum.GetValues<FahrtZweck>().Select(FahrtRegeln.ZweckText)]);
         Zweck.SelectedIndex = 0;
-        Fahrer.Items.AddRange([.. speicher.AlleMitarbeiter().Where(m => m.Aktiv).Select(m => m.Kuerzel)]);
-        Fahrer.Text = Recht.Kuerzel;
+        Fahrer = new PersonWahl(speicher);
         Mitfahrende.Items.AddRange([.. bewohner.Select(b => b.Name)]);
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile("Fahrzeug", Fahrzeug);
         zeile("Datum, los – zurück", Formular.Reihe(Datum, Von, Bis));
         zeile("Zweck", Zweck);
-        zeile("Fahrer (Kürzel)", Fahrer);
+        zeile("Fahrer", Fahrer);
         zeile("Mitfahrende Bewohner", Mitfahrende);
         zeile("Ziel", Ziel);
         zeile(null, Fenster.Hinweis("Die Zeiten sind geplant. „losgefahren“ und „zurück“ trägt man in der Übersicht oder im Kalender ein. Mitfahrende stehen in ihrem Tagesplan und während der Fahrt als abwesend."));
@@ -184,7 +183,7 @@ public sealed class FahrtFenster : Form
             var f = FahrtRegeln.AusEingabe(new FahrtEingabe
             {
                 Fahrzeug = Fahrzeug.SelectedItem as string ?? "", Datum = Datum.Text, Von = Von.Text, Bis = Bis.Text,
-                Zweck = Enum.GetValues<FahrtZweck>()[Math.Max(0, Zweck.SelectedIndex)], Fahrer = Fahrer.Text,
+                Zweck = Enum.GetValues<FahrtZweck>()[Math.Max(0, Zweck.SelectedIndex)], Fahrer = Fahrer.Kuerzel,
                 Bewohner = Mitfahrende.CheckedIndices.Cast<int>().Select(i => bewohner[i].Id!.Value).ToList(), Ziel = Ziel.Text,
                 Kuerzel = Recht.Kuerzel,
             }, speicher.AktiveFahrzeuge(), Jetzt());

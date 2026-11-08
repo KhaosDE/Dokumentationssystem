@@ -74,8 +74,9 @@ public class BerichteOberflaechenTests
     public void Ohne_Pflichtangaben_wird_nicht_gespeichert() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "" });   // nicht angemeldet: kein Verfasser (Schritt 26a)
         using var formular = new BerichtFormular(u.Speicher, u.Demo("Ahorn"));
-        formular.Verfasser.Text = "";
+        Assert.Equal(Recht.NichtAngemeldetAnzeige, formular.Verfasser.Text);
         formular.Rueckfrage = _ => DialogResult.No;
         Assert.False(formular.Speichern());
         Assert.Contains("Verfasser", formular.Fehler.Text);

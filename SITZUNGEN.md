@@ -54,3 +54,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 26 „Visiten“ (0.29.0).
 - 08.11.2026 — Neu: Schritte 26a „Kürzel automatisch aus der Anmeldung“, 26b „Ärzteverzeichnis“, 26c „Visite: Übersicht aller Bewohner“ (ohne Art der Visite) freigegeben (Chat „Programme/Apps“).
 - 08.11.2026 — Projekt an den Obsidian-Vault angeschlossen (Ordner Dokumentationssystem/), CLAUDE.md nennt den Vault-Ordner (Chat „Programme/Apps“).
+- 08.11.2026 — Claude Code: Bauplan Schritt 26a „Kürzel automatisch aus der Anmeldung“ (0.29.1).
