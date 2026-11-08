@@ -124,7 +124,7 @@ public class AusgangslisteOberflaechenTests
                 Karte(s, "Distel").AnwesenheitKnopf.PerformClick();
 
             f.BereichWaehlen("Bewohner");
-            var birke = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().Single(k => k.Bewohner.Nachname == "Birke");
+            var birke = f.Bewohner.Zeilen.Single(k => k.Bewohner.Nachname == "Birke");
             Assert.Contains(birke.Marken, m => m.Art == MarkenArt.Abwesend && m.Text == "abwesend: Heimfahrt bis 20.11.");   // schmal: ohne Jahr
         }
     });
@@ -267,7 +267,7 @@ public class AusgangslisteOberflaechenTests
             Assert.DoesNotContain("Ausgang", f.Bewohner.Akte.Reiter.Namen);
             Assert.Empty(f.Bewohner.Akte.ModulAnsichten);
             // „abwesend: unterwegs mit …“ kommt von den Fahrten des Kerns (Schritt 24), nicht vom Modul.
-            Assert.DoesNotContain(f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().SelectMany(k => k.Marken),
+            Assert.DoesNotContain(f.Bewohner.Zeilen.SelectMany(k => k.Marken),
                 m => m.Art is MarkenArt.Ausgang || m.Art == MarkenArt.Abwesend && !m.Text.StartsWith("abwesend: unterwegs mit ", StringComparison.Ordinal));
 
             f.EinstellungenZeigen = fenster =>

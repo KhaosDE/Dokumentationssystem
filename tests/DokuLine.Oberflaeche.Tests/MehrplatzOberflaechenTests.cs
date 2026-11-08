@@ -131,7 +131,7 @@ public class MehrplatzOberflaechenTests
         Assert.True(s.BereichHinweis.Visible);
         // Auf der Seite „Bewohner“ zeigen Karten fremder Wohnbereiche ihren Bereich.
         f.BereichWaehlen("Bewohner");
-        var karten = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().ToList();
+        var karten = f.Bewohner.Zeilen;   // Bereich ohne eigene Bewohner: alle (Schritt 26j)
         Assert.Equal(69, karten.Count);
         Assert.Equal("R1", karten.Single(k => k.Bewohner.Nachname == "Birke").Marken[^1].Text);
     });

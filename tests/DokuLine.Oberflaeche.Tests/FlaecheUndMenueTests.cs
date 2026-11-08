@@ -107,14 +107,14 @@ public class FlaecheUndMenueTests
 
         // Auf der Seite „Bewohner“ genauso.
         f.BereichWaehlen("Bewohner");
-        var bewohnerKarte = f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().Single(k => k.Bewohner.Nachname == "Eiche");
+        Assert.True(f.Bewohner.Waehlen(u.Demo("Eiche").Id!.Value));   // Liste (Schritt 26j): Zeile wählen, „Neuer Bericht …“
         using (var ersatz = new DialogErsatz(fenster =>
         {
             Assert.StartsWith("Eiche, Emil", Assert.IsType<BerichtFormular>(fenster).BewohnerWahl.Text);
             return DialogResult.Cancel;
         }))
         {
-            bewohnerKarte.BerichtWaehlen();
+            Assert.True(f.Bewohner.NeuerBericht());
             Assert.Single(ersatz.Titel);
         }
     });

@@ -68,7 +68,7 @@ public class TagesplanOberflaechenTests
         // Wo müsste er sein? Karte und Akte zeigen „in Therapie: … bis 23:59“.
         string wo = TagesplanRegeln.InTherapieText(Name, new TimeOnly(23, 59));
         f.BereichWaehlen("Bewohner");
-        Assert.Contains(f.Bewohner.Raster.Controls.OfType<BewohnerKarte>().Single(k => k.Bewohner.Id == ahorn).Marken, m => m.Text == wo);
+        Assert.Contains(f.Bewohner.Zeilen.Single(k => k.Bewohner.Id == ahorn).Marken, m => m.Text == wo);
         f.Bewohner.AkteZeigen(ahorn);
         Assert.Equal(wo, f.Bewohner.Akte.WoText);
         f.BereichWaehlen("Übersicht");
