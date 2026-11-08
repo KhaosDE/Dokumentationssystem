@@ -194,6 +194,7 @@ public sealed class TherapieSeite : Panel
         int rand = Stil.Px(this, Stil.AbstandGross);
         int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int y = rand + AutoScrollPosition.Y;
+        if (Laufend is null) return;   // Layout schon im Konstruktor (AutoScroll), bevor die Tafel angelegt ist
         Reiter.SetBounds(rand, y, breite, Reiter.Height);
         y = Reiter.Bottom + Stil.Px(this, Stil.AbstandKlein);
         if (LaufendAktiv)
