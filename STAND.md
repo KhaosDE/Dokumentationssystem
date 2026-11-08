@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.29.12** (Bereich „Bewohner“ als Liste mit Berichten, Bauplan Schritt 26j).
+Stand: 08.11.2026. Version: **0.29.13** (Visite: „Nächster Bewohner“ unter der Eingabe, Bauplan Schritt 26k).
 
 ## Aktuell
 
@@ -147,7 +147,11 @@ Bezugspflege, Hinweise; sortierbar, Suche, Bereichswahl). **Rechts** stehen die 
 Bewohners mit den gewohnten Filtern; Pfeiltasten blättern. „Neuer Bericht …“ (Aktionsleiste) gilt für den
 gewählten Bewohner; die Akte öffnet ein Doppelklick oder „Akte öffnen“. Die Übersicht bleibt bei Karten.
 
-**Nächster Schritt:** Bauplan Schritt 26k „Visite: „Nächster Bewohner“ unter der Texteingabe“ (0.29.13).
+Neu in 0.29.13: In der Visite stehen **„◀ Vorheriger“** und **„Nächster Bewohner ▶“** direkt unter der
+Eingabe. „Nächster Bewohner ▶“ ist grau („Erst den Bericht zu diesem Bewohner schreiben.“), bis im Feld
+„Besprochenes“ etwas steht. Die Liste links bleibt frei wählbar, sonst ist die Visite wie bisher.
+
+**Nächster Schritt:** Bauplan Schritt 26l „Übersicht neu: „Heute wichtig“ und Bewohnerliste“ (0.29.14).
 
 ## Fertig
 
@@ -822,6 +826,11 @@ gewählten Bewohner; die Akte öffnet ein Doppelklick oder „Akte öffnen“. D
   - Aktionsleiste: „Neuer Bericht …“ (Hauptaktion, für den gewählten Bewohner; danach bleibt man in der
     Liste), „Akte öffnen“, „Neuer Bewohner …“. Die Akte öffnet auch ein Doppelklick oder Enter; „← Alle
     Bewohner“ führt zurück, die Auswahl bleibt. Rechtsklick: „Akte öffnen“, „Neuer Bericht …“.
+- 0.29.13 — Visite: „Nächster Bewohner“ unter der Texteingabe (Bauplan Schritt 26k, 08.11.2026):
+  - „◀ Vorheriger“ und „Nächster Bewohner ▶“ stehen nur noch unter dem Feld „Besprochenes“ (nicht mehr oben).
+  - „Nächster Bewohner ▶“ ist grau, solange „Besprochenes“ leer ist; Hinweis beim Darüberfahren und beim
+    Klick: „Erst den Bericht zu diesem Bewohner schreiben.“ Sobald Text da ist, ist er aktiv.
+  - „◀ Vorheriger“ ist immer aktiv; die Liste links bleibt anklickbar. Sonst keine Änderung.
 ## Offene Punkte
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
@@ -1473,6 +1482,14 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.29.13:
+
+1. Als „EF“ „Visite beginnen …“: unter dem Feld „Besprochenes“ „◀ Vorheriger“ und „Nächster Bewohner ▶“;
+   oben stehen sie nicht mehr.
+2. Feld leer: „Nächster Bewohner ▶“ grau, Klick zeigt „Erst den Bericht zu diesem Bewohner schreiben.“
+3. Etwas eintippen: der Knopf ist sofort aktiv → nächster Bewohner, dort wieder grau.
+4. „◀ Vorheriger“ geht immer; ein Klick in die Liste links wählt jeden Bewohner.
 
 Version 0.29.12:
 

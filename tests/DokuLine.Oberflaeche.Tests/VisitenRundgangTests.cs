@@ -93,4 +93,40 @@ public class VisitenRundgangTests
         Assert.Contains(u.Speicher.Berichte(ahorn), b => b.Text.Contains("(Dr. Linde (ausgedacht)), dabei: EF: Schläft gut"));
         Assert.Equal("Visite beginnen …", seite.BeginnenKnopf.Text);
     });
+
+    // Bauplan Schritt 26k: „◀ Vorheriger“ und „Nächster Bewohner ▶“ direkt unter der Eingabe; „Nächster“
+    // ist grau mit Hinweis, bis zum Bewohner etwas eingetragen ist. Die Liste links bleibt frei wählbar.
+    [Fact]
+    public void Naechster_Bewohner_erst_nach_dem_Eintrag() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
+        var entwurf = new VisitenEntwurf { Bereich = "R1", Datum = DateOnly.FromDateTime(DateTime.Now), Arzt = "Dr. Linde (ausgedacht)", Kuerzel = "EF", Begonnen = DateTime.Now };
+        using var fenster = new Form { Size = new Size(1200, 900) };
+        var r = new VisitenRundgang(u.Speicher, entwurf) { Dock = DockStyle.Fill };
+        fenster.Controls.Add(r);
+        Hilfe.Zeigen(fenster);
+        Assert.Equal("Nächster Bewohner ▶", r.NaechsterKnopf.Text);
+        Assert.Equal(VisitenRundgang.ErstEintragenText, Stil.Sperrgrund(r.NaechsterKnopf));
+        Assert.True(r.VorherigerKnopf.Enabled);
+        Assert.True(r.NaechsterKnopf.Top >= r.Feld!.Bottom);   // unter der Eingabe
+        Assert.True(r.VorherigerKnopf.Top >= r.Feld.Bottom);
+        int erster = r.Aktuell;
+        r.NaechsterKnopf.PerformClick();
+        Assert.Equal(erster, r.Aktuell);   // gesperrt: bleibt beim Bewohner
+
+        r.Feld.Besprochen.Text = "Keine Veränderung, Medikation bleibt.";
+        Assert.Null(Stil.Sperrgrund(r.NaechsterKnopf));
+        Hilfe.Foto(fenster, "113_visite_naechster_bewohner");
+        r.NaechsterKnopf.PerformClick();
+        Assert.Equal(erster + 1, r.Aktuell);
+        Assert.Equal(VisitenRundgang.ErstEintragenText, Stil.Sperrgrund(r.NaechsterKnopf));   // beim nächsten wieder leer
+
+        r.VorherigerKnopf.PerformClick();   // zurück geht immer
+        Assert.Equal(erster, r.Aktuell);
+        Assert.Null(Stil.Sperrgrund(r.NaechsterKnopf));   // hier steht schon etwas
+        r.Waehlen(5);                                      // die Liste links bleibt frei wählbar
+        Assert.Equal(5, r.Aktuell);
+    });
 }
+
