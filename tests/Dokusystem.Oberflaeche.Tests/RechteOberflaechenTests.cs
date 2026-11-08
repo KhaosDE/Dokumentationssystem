@@ -1,0 +1,169 @@
+using Dokusystem.Kern;
+
+namespace Dokusystem.Oberflaeche.Tests;
+
+// Mitarbeiter, Anmeldung und Rechte (Bauplan Schritt 19): Anmelden mit Kürzel, gesperrte Knöpfe
+// (sichtbar, mit Grund), Rechte-Tabelle, Mitarbeiter im eigenen Bereich verwalten.
+[Collection("Oberflaeche")]
+public class RechteOberflaechenTests
+{
+    [Fact]
+    public void Anmelden_mit_Kuerzel() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using (var fenster = new AnmeldenFenster(u.Speicher, "", wechsel: false))
+        {
+            Hilfe.Zeigen(fenster);
+            Assert.StartsWith("Anmelden", fenster.Text);
+            Assert.False(fenster.AbmeldenKnopf.Visible);
+            Assert.Equal(12, fenster.DemoListe.Items.Count);   // nur aktive Mitarbeiter
+            fenster.Kuerzel.Text = "ZZ";
+            Assert.False(fenster.Anmelden());
+            Assert.Contains("nicht bekannt", fenster.Fehler.Text);
+            fenster.Kuerzel.Text = "HI";
+            Assert.False(fenster.Anmelden());
+            Assert.Contains("ausgeschieden", fenster.Fehler.Text);
+            fenster.DemoListe.SelectedIndex = 0;
+            Assert.Equal(u.Speicher.AlleMitarbeiter().First(m => m.Aktiv).Kuerzel, fenster.Kuerzel.Text);
+            Hilfe.Foto(fenster, "60_anmelden");
+            Assert.True(fenster.Anmelden());
+            Assert.NotNull(fenster.Angemeldet);
+        }
+
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        using (new DialogErsatz(fenster =>
+        {
+            var anmelden = Assert.IsType<AnmeldenFenster>(fenster);
+            Assert.StartsWith("Abmelden / Benutzer wechseln", anmelden.Text);
+            anmelden.Kuerzel.Text = "op";
+            return anmelden.Anmelden() ? DialogResult.OK : DialogResult.Cancel;
+        }))
+            f.Kopf.BenutzerKnopf.PerformClick();
+        Assert.Equal("Angemeldet als Olga Pirol (OP) ▾", f.Kopf.BenutzerText);
+        using (new DialogErsatz(_ => DialogResult.Abort))   // „Abmelden“
+            f.BenutzerWechseln();
+        Assert.Equal("Nicht angemeldet – Anmelden ▾", f.Kopf.BenutzerText);
+        Assert.Equal(RechteRegeln.NichtAngemeldetText, Stil.Sperrgrund(f.DemoKnopf));
+    });
+
+    [Fact]
+    public void Ohne_Recht_gesperrt_aber_sichtbar() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        var akte = f.Bewohner.Akte;
+        Button Knopf(string text) => f.Kopf.Knoepfe.Single(k => k.Text == text);
+
+        // Nicht angemeldet: alles grau, mit Grund.
+        f.BereichWaehlen("Übersicht");
+        var karte = f.Uebersicht.Karten[0];
+        Assert.False(karte.ContextMenuStrip!.Items[1].Enabled);
+        Assert.Equal($"Neuer Bericht … – {RechteRegeln.NichtAngemeldetText}", karte.ContextMenuStrip.Items[1].Text);
+
+        // Die Übersicht richtet sich nach den Bereichen des Angemeldeten: PR (A und B) sieht beide.
+        f.BenutzerWaehlen("PR");
+        Assert.Equal(10, f.Uebersicht.Karten.Count);
+        Assert.StartsWith("10 Bewohner · Wohnbereich A, Wohnbereich B · ", f.Kopf.KleinText);
+        f.BenutzerWaehlen("MN");
+        Assert.Equal(2, f.Uebersicht.Karten.Count);   // Wohnbereich B
+
+        // OP (Therapie): Akte ansehen ja, bearbeiten nein; Berichte schreiben ja.
+        f.BenutzerWaehlen("OP");
+        f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
+        Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(Knopf("Bearbeiten …")));
+        Assert.Null(Stil.Sperrgrund(Knopf("Neuer Bericht …")));
+        using (var ersatz = new DialogErsatz(_ => DialogResult.Cancel))
+        {
+            Knopf("Bearbeiten …").PerformClick();
+            Assert.Empty(ersatz.Titel);   // gesperrt: kein Fenster
+        }
+        Hilfe.Foto(f, "64_akte_gesperrt");
+
+        // KL: Mitarbeiter Wohnbereich ohne Fachkraft – Medikation nur ansehen.
+        f.BenutzerWaehlen("KL");
+        Assert.Null(Stil.Sperrgrund(Knopf("Bearbeiten …")));   // die Akte aktualisiert sich beim Wechsel
+        akte.Reiter.Waehlen("Medikation");
+        Assert.Equal(RechteRegeln.NurFachkraftText, Stil.Sperrgrund(akte.Medikation.NeuKnopf));
+        Assert.All(akte.Medikation.Karten, k => Assert.Equal(RechteRegeln.NurFachkraftText, Stil.Sperrgrund(k.PauseKnopf)));
+
+        // CD: Fachkraft – Medikation ja; Therapien nein; Medikamentendatenbank anlegen ja, verwalten nein.
+        f.BenutzerWaehlen("CD");
+        akte.Reiter.Waehlen("Medikation");
+        Assert.Null(Stil.Sperrgrund(akte.Medikation.NeuKnopf));
+        f.BereichWaehlen("Therapie");
+        Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(f.Therapie.NeuKnopf));
+        Assert.All(f.Therapie.Karten, k => Assert.NotNull(Stil.Sperrgrund(k.ZuteilenKnopf)));
+        f.BereichWaehlen("Medikamente");
+        Assert.Null(Stil.Sperrgrund(f.Medikamente.NeuKnopf));
+        Assert.All(f.Medikamente.Karten, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k.AendernKnopf)));
+        Assert.NotNull(Stil.Sperrgrund(f.DemoKnopf));
+
+        // Rechte ändern wirkt sofort (Rechte-Tabelle, angemeldet als Geschäftsführung).
+        f.BenutzerWaehlen("UT");
+        using (var rechte = new RechteFenster(u.Speicher))
+        {
+            Assert.False(rechte.Tabelle.ReadOnly);
+            Assert.True(rechte.Setzen(rechte.Zeile(Funktionen.TherapienBearbeiten), rechte.Spalte("Mitarbeiter Wohnbereich"), true));
+            Hilfe.Foto(rechte, "61_rechte");
+        }
+        f.BenutzerWaehlen("CD");
+        f.BereichWaehlen("Therapie");
+        Assert.Null(Stil.Sperrgrund(f.Therapie.NeuKnopf));
+        using (var rechte = new RechteFenster(u.Speicher))
+        {
+            Assert.True(rechte.Tabelle.ReadOnly);   // CD darf Rechte nur ansehen
+            Assert.StartsWith("Nur ansehen:", rechte.Gesperrt.Text);
+            Assert.False(rechte.Setzen(rechte.Zeile(Funktionen.Module), rechte.Spalte("Mitarbeiter Wohnbereich"), true));
+        }
+    });
+
+    [Fact]
+    public void Mitarbeiter_im_eigenen_Bereich_verwalten() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });   // Bereichsleitung Wohnbereich A
+        using (var fenster = new MitarbeiterFenster(u.Speicher))
+        {
+            Hilfe.Zeigen(fenster);
+            Assert.Equal(13, fenster.Liste.Items.Count);
+            Assert.Null(Stil.Sperrgrund(fenster.NeuKnopf));
+            fenster.Waehlen("GH");
+            Assert.Equal("Nur Mitarbeiter des eigenen Bereichs.", Stil.Sperrgrund(fenster.BearbeitenKnopf));
+            fenster.Waehlen("PR");   // Wohnbereich A und B
+            Assert.Null(Stil.Sperrgrund(fenster.BearbeitenKnopf));
+            Hilfe.Foto(fenster, "62_mitarbeiter");
+            using var neu = fenster.FormularErstellen(null);
+            Assert.False(neu.Bereiche["Wohnbereich B"].Enabled);   // nur eigene Bereiche
+            Assert.True(neu.Bereiche["Wohnbereich A"].Enabled);
+            neu.Kuerzel.Text = "qx";
+            neu.Vorname.Text = "Quirin";
+            neu.Nachname.Text = "Kranich";
+            Assert.False(neu.Speichern());
+            Assert.Contains("mindestens einen Bereich", neu.Fehler.Text);
+            neu.Bereiche["Wohnbereich A"].Checked = true;
+            neu.Positionen["Mitarbeiter Wohnbereich"].Checked = true;
+            Hilfe.Foto(neu, "63_mitarbeiter_formular");
+            Assert.True(neu.Speichern());
+            Assert.Equal("QX", neu.Gespeichert!.Kuerzel);
+        }
+        Assert.Equal(["Wohnbereich A"], u.Speicher.MitarbeiterLesen("QX")!.Bereiche);
+
+        // CD (ohne Mitarbeiterverwaltung): in den Einstellungen gesperrt; Bereiche und Positionen nur ansehen.
+        Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
+        using (var einstellungen = new EinstellungenFenster(u.Speicher.Kollegen(), u.Speicher))
+            Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(einstellungen.MitarbeiterKnopf));
+        using (var listen = new ListenFenster(u.Speicher))
+            Assert.All(listen.Knoepfe, k => Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(k)));
+
+        // WZ (Verwaltung): darf Bereiche anlegen.
+        Einstellungen.Aendern(w => w with { Kuerzel = "WZ" });
+        using (var listen = new ListenFenster(u.Speicher))
+        {
+            listen.Name_.Text = "Wohnbereich C";
+            Assert.True(listen.Ausfuehren(() => u.Speicher.ListeneintragAnlegen(Liste.Bereiche, listen.Name_.Text)));
+            Assert.Contains("Wohnbereich C", listen.Listen[Liste.Bereiche].Items.Cast<string>().Last());
+        }
+    });
+}

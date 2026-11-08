@@ -215,9 +215,13 @@ public sealed class BerichteAnsicht : Panel
 
     public List<Bericht> Berichte => bewohner?.Id is long id ? speicher.Berichte(id, Filter()) : [];
 
+    private string? schreibGrund;   // Rechte (Schritt 19): warum der Angemeldete keine Berichte schreiben darf
+
     public void Aktualisieren()
     {
         if (bewohner is null) return;
+        schreibGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
+        Stil.Sperren(NeuKnopf, schreibGrund);
         var berichte = Berichte;
         Liste.Setzen(berichte.Select(KarteBauen), "Keine Berichte für diese Auswahl.");
         Anzahl.Text = berichte.Count == 1 ? "1 Bericht" : $"{berichte.Count} Berichte";
@@ -227,6 +231,7 @@ public sealed class BerichteAnsicht : Panel
     private BerichtKarte KarteBauen(Bericht b)
     {
         var karte = new BerichtKarte(b);
+        Stil.Sperren(karte.NachtragKnopf, schreibGrund);
         karte.NachtragGewuenscht += NachtragSchreiben;
         karte.AufgabeGewuenscht += AufgabeDaraus;
         return karte;

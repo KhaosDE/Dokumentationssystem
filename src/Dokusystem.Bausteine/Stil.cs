@@ -205,9 +205,18 @@ public static class Stil
         return knopf;
     }
 
+    // Fehlt eine Berechtigung, bleibt der Knopf sichtbar, aber grau; Darüberfahren oder Klicken
+    // nennt den Grund (z. B. „Dafür fehlt die Berechtigung.“). grund == null: wieder frei.
+    public static void Sperren(Button knopf, string? grund)
+    {
+        if (knopf is Knopf k) k.Sperrgrund = grund;
+    }
+
+    public static string? Sperrgrund(Button knopf) => (knopf as Knopf)?.Sperrgrund;
+
     private static Button Grundknopf(string text)
     {
-        var knopf = new Button
+        var knopf = new Knopf
         {
             Text = text,
             FlatStyle = FlatStyle.Flat,

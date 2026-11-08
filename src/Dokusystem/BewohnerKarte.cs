@@ -57,7 +57,21 @@ public sealed class BewohnerKarte : Control
         ContextMenuStrip = menue;
     }
 
-    public void BerichtWaehlen() => BerichtGewuenscht?.Invoke(Bewohner);
+    // Rechte (Schritt 19): ohne „Berichte schreiben“ ist der Eintrag grau und nennt den Grund.
+    public string? BerichtGrund { get; private set; }
+
+    public void BerichtSperren(string? grund)
+    {
+        BerichtGrund = grund;
+        var eintrag = ContextMenuStrip!.Items[1];
+        eintrag.Enabled = grund is null;
+        eintrag.Text = grund is null ? "Neuer Bericht …" : $"Neuer Bericht … – {grund}";
+    }
+
+    public void BerichtWaehlen()
+    {
+        if (BerichtGrund is null) BerichtGewuenscht?.Invoke(Bewohner);
+    }
 
     protected override void Dispose(bool disposing)
     {

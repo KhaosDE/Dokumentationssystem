@@ -52,14 +52,19 @@ public sealed class UebersichtSeite : Panel
         var werte = Einstellungen.Laden();
         int frist = werte.BeschlussFristTage;
         var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
-        // Eigener Bereich: nur seine Bewohner. Hat er keine (z. B. „Therapie“), alle mit Hinweis.
-        var eigene = jeder.Where(h => h.Bewohner.Wohnbereich == werte.Bereich).ToList();
+        // Eigene Bereiche: die Wohnbereiche des angemeldeten Mitarbeiters (Schritt 19); hat er keinen
+        // mit Bewohnern, der Bereich dieses Rechners. Hat auch der keine Bewohner (z. B. „Therapie“),
+        // alle mit Hinweis.
+        var meine = speicher.MitarbeiterLesen(werte.Kuerzel)?.Bereiche.Where(b => jeder.Any(h => h.Bewohner.Wohnbereich == b)).ToList()
+            is { Count: > 0 } liste ? liste : [werte.Bereich];
+        var eigene = jeder.Where(h => meine.Contains(h.Bewohner.Wohnbereich)).ToList();
         bool allesZeigen = AlleBereiche.Checked || eigene.Count == 0;
         var alle = allesZeigen ? jeder : eigene;
         BereichHinweis.Visible = !AlleBereiche.Checked && eigene.Count == 0 && jeder.Count > 0;
-        BereichHinweis.Text = $"Für „{werte.Bereich}“ gibt es keine eigenen Bewohner – gezeigt werden alle Bereiche.";
-        string bereichText = allesZeigen ? "alle Bereiche" : werte.Bereich;
+        BereichHinweis.Text = $"Für „{string.Join(", ", meine)}“ gibt es keine eigenen Bewohner – gezeigt werden alle Bereiche.";
+        string bereichText = allesZeigen ? "alle Bereiche" : string.Join(", ", meine);
         var status = speicher.GeltendeStatusmeldungen(jetzt);
+        string? berichtGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
         Karten.Clear();
         int abwesend = 0;
         foreach (var h in alle)
@@ -72,10 +77,11 @@ public sealed class UebersichtSeite : Panel
             marken.AddRange(modul.Where(m => m.Art != MarkenArt.Abwesend));
             if (marken.Any(m => m.Art == MarkenArt.Abwesend)) abwesend++;
             if (status.TryGetValue(h.Bewohner.Id!.Value, out var s)) marken.Insert(0, StatusmeldungRegeln.Marke(s, jetzt));
-            if (allesZeigen && h.Bewohner.Wohnbereich != werte.Bereich) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
+            if (allesZeigen && !meine.Contains(h.Bewohner.Wohnbereich)) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
             var karte = new BewohnerKarte(h.Bewohner, heute, marken);
             karte.Gewaehlt += b => AkteGewuenscht?.Invoke(b.Id!.Value);
             karte.BerichtGewuenscht += b => BerichtGewuenscht?.Invoke(b.Id!.Value);
+            karte.BerichtSperren(berichtGrund);
             Karten.Add(karte);
         }
         Raster.KartenSetzen(Karten);

@@ -34,14 +34,13 @@ public class HauptfensterTests
             gezeigt = true;
             Assert.True(einstellungen.AutoUpdate.Checked);
             Assert.False(einstellungen.HatLogo);
-            Assert.Equal("– niemand –", einstellungen.Benutzer.Text);
-            Assert.Equal(9, einstellungen.Benutzer.Items.Count);   // niemand + 8 ausgedachte Kollegen
-            einstellungen.Benutzer.SelectedIndex = einstellungen.Benutzer.Items.Cast<string>().ToList().FindIndex(x => x.StartsWith("Emma Fink (EF)"));
+            Assert.Equal("Emma Fink (EF)", einstellungen.Angemeldet.Text);   // angemeldet wird oben rechts, nicht hier
             einstellungen.AutoUpdate.Checked = false;
             Assert.True(einstellungen.LogoSetzen(logo));
             return einstellungen.Speichern();
         };
         Assert.False(fenster.Kopf.HatLogo);
+        fenster.BenutzerWaehlen("EF");
         fenster.Navigation.Single(n => n.Text == "Einstellungen").Ausloesen();
         Assert.True(gezeigt);
         Assert.Equal("Bewohner", fenster.AktiverBereich);   // Einstellungen sind ein Fenster, kein Bereich
@@ -54,7 +53,7 @@ public class HauptfensterTests
         fenster.EinstellungenZeigen = einstellungen =>
         {
             Assert.True(einstellungen.HatLogo);
-            Assert.StartsWith("Emma Fink (EF)", einstellungen.Benutzer.Text);
+            Assert.Equal("Emma Fink (EF)", einstellungen.Angemeldet.Text);
             Hilfe.Zeigen(einstellungen);   // PerformClick wirkt nur bei angezeigtem Fenster
             einstellungen.LogoWeg.PerformClick();
             return einstellungen.Speichern();
@@ -224,6 +223,7 @@ public class BewohnerOberflaechenTests
     public void Neuer_Bewohner_steht_auf_nicht_erfasst_und_prueft() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });   // Recht „Bewohner anlegen“ (Schritt 19)
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.Bewohner.FormularZeigen = formular =>

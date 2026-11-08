@@ -1,6 +1,6 @@
 # STAND — Dokumentationssystem
 
-Stand: 08.11.2026. Version: **0.21.0** (Oberfläche: volle Fläche, einklappbares Seitenmenü, Bauplan Schritt 18).
+Stand: 08.11.2026. Version: **0.22.0** (Mitarbeiter, Anmeldung und Rechte, Bauplan Schritt 19).
 
 ## Aktuell
 
@@ -30,7 +30,11 @@ Konfliktschutz mit beiden Fassungen, Bereichskennung je Rechner, Wohnbereich je 
 Neu in 0.21.0: Die Inhalte füllen die ganze Fläche, das Seitenmenü lässt sich auf Symbole
 einklappen, „Neuer Bericht …“ gibt es nur noch beim Bewohner (Akte, Reiter, Rechtsklick).
 
-**Nächster Schritt:** Bauplan Schritt 19 „Mitarbeiter, Anmeldung und Rechte“ (0.22.0).
+Neu in 0.22.0: **Anmelden mit dem Kürzel** beim Start (ohne Passwort), **Mitarbeiter** mit
+Bereichen, Positionen und „Fachkraft“, eine **Rechte-Tabelle** nach Positionen. Ohne Recht bleiben
+Knöpfe sichtbar, aber grau und nennen den Grund.
+
+**Nächster Schritt:** Bauplan Schritt 20 „Bezugspflege und Einzeltrainer“ (0.23.0).
 
 ## Fertig
 
@@ -352,6 +356,30 @@ einklappen, „Neuer Bericht …“ gibt es nur noch beim Bewohner (Akte, Reiter
   - „Neuer Bericht …“ ist kein Menüpunkt mehr: Knopf im Kopf der Akte (neben „Status …“), im
     Reiter „Berichte“ und per Rechtsklick auf eine Bewohnerkarte (Übersicht und Bewohner; das
     Menü hat „Akte öffnen“ und „Neuer Bericht …“).
+
+- 0.22.0 — Mitarbeiter, Anmeldung und Rechte (Bauplan Schritt 19, 08.11.2026):
+  - **Anmelden** beim Start mit dem Kürzel (Fenster „Anmelden“, ohne Passwort; Platz für ein
+    Passwortfeld später). Oben rechts „Angemeldet als …“ öffnet „Abmelden / Benutzer wechseln“.
+    Das frühere „Benutzer wählen“ (Menü und Einstellungen) ist weg. Ausgeschiedene können sich
+    nicht anmelden.
+  - **Mitarbeiter** (Einstellungen → „VERWALTUNG“ → „Mitarbeiter …“): Kürzel (fest), Name,
+    Fachkraft ja/nein, aktiv/ausgeschieden, Bereiche und Positionen per Häkchen (mehrere möglich).
+    Gelöscht wird niemand. Die bisherigen Kolleginnen und Kollegen der Nachrichten sind jetzt die
+    Mitarbeiter; Nachrichten an einen Bereich gehen an alle seine Mitarbeiter.
+  - **Bereiche und Positionen** als Listen: anlegen, umbenennen (Zuordnungen, Bewohner und
+    Nachrichten gehen mit), stilllegen, löschen nur ohne Zuordnung.
+  - **Rechte-Tabelle** (Funktionen × Positionen, dazu „nur Fachkräfte“), Vorbelegung nach Tobi;
+    Änderungen gelten sofort. Bearbeiten nur mit „Rechte verwalten“, sonst nur ansehen.
+  - Geprüft werden: Bewohner anlegen/bearbeiten, Berichte und Nachträge (auch Rechtsklick auf
+    Karten), Medikation (nur Fachkräfte), Medikament anlegen (nur Fachkräfte) und Medikamente
+    ändern, Therapien (anlegen, ändern, zuteilen, beenden), Teilnahme im Wochenplan, HEB-Bogen,
+    Mitarbeiter, Bereiche/Positionen, Rechte, Demo-Daten zurücksetzen. Die übrigen Funktionen der
+    Tabelle (Visiten, Kalender Haus, Fahrzeuge, Aufgaben-Vorlagen, Module, Einstellungen des
+    Bereichs) greifen mit ihren Bauplan-Schritten.
+  - Die Übersicht zeigt die Wohnbereiche des Angemeldeten (z. B. beide bei Paula Rabe);
+    hat er keinen mit Bewohnern, den Bereich des Rechners.
+  - Demo `daten/demo/mitarbeiter.json`: 13 ausgedachte Mitarbeiter, je Position mindestens einer,
+    Fachkräfte und Nicht-Fachkräfte, eine ausgeschiedene Person (Hugo Ibis).
 
 ## Offene Punkte
 
@@ -719,7 +747,45 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   Symbole der eingeklappten Leiste wiedererkennt. Ein Modul ohne eigenes Symbol bekommt ein
   allgemeines Baustein-Symbol.
 
+- 08.11.2026 (Schritt 19): Rechte prüft die Oberfläche (gesperrte Knöpfe); der Kern speichert
+  weiterhin, was er bekommt. Für die Demo reicht das; im Echtbetrieb müsste auch der Speicher
+  prüfen. Ein gesperrter Knopf ist grau, aber nicht ausgeschaltet: Windows zeigt an
+  ausgeschalteten Knöpfen keinen Hinweis. Ein Klick zeigt den Grund und tut sonst nichts.
+- 08.11.2026 (Schritt 19): Vorbelegung, wo Tobi nichts festgelegt hat: Die „drei Leitungen“ sind
+  Geschäftsführung, Hausleitung und Verwaltung (sie dürfen alles). Bereichsleitung: alles für den
+  Wohnbereich außer Medikamentendatenbank verwalten, Therapien, Mitarbeiter (alle), Rechte und
+  Module. Mitarbeiter Wohnbereich: Bewohner, Berichte, Visiten, Medikation und Medikament anlegen
+  (nur Fachkräfte), Teilnahme, Fahrzeuge, HEB. Psychologischer Fachdienst: Berichte, Visiten,
+  Medikation, Medikamente anlegen und verwalten, Teilnahme, HEB. Pädagogischer Fachdienst:
+  Bewohner, Berichte, Visiten, Teilnahme, HEB. Therapie: Berichte, Therapien, Teilnahme, Fahrzeuge.
+  „Demo-Daten zurücksetzen“: Leitungen und Bereichsleitung.
+- 08.11.2026 (Schritt 19): „Mitarbeiter verwalten (eigener Bereich)“: Bearbeiten darf man
+  Mitarbeiter mit mindestens einem gemeinsamen Bereich, zuordnen nur die eigenen Bereiche.
+  Bereiche und Positionen pflegt, wer „Mitarbeiter verwalten (alle)“ hat.
+- 08.11.2026 (Schritt 19): Nicht angemeldet (nach „Abmelden“) ist alles gesperrt; beim Start ist
+  die Anmeldung Pflicht („Beenden“ schließt das Programm).
+- 08.11.2026 (Schritt 19): Bereich des Rechners (0.20.0) und Bereiche der Mitarbeiter sind dieselbe
+  Liste; die Statusmeldung trägt weiter den Bereich des Rechners. Die Einstellungen der Module und
+  Fristen bekommen ihre Rechte mit Schritt 29 (neue Einstellungen).
+
 ## Testliste für Tobi
+
+Version 0.22.0:
+
+1. Programm starten: Fenster „Anmelden“. Unten die ausgedachten Mitarbeiter; ein Klick übernimmt
+   das Kürzel. „HI“ eintippen → „ausgeschieden“. Mit „OP“ anmelden.
+2. Akte Anton Ahorn: „Bearbeiten …“ ist grau; darüberfahren oder klicken → „Dafür fehlt die
+   Berechtigung.“ „Neuer Bericht …“ geht.
+3. Oben rechts „Angemeldet als Olga Pirol (OP)“ → als „KL“ anmelden → Reiter „Medikation“: Knöpfe
+   grau mit „Nur für Fachkräfte.“ Als „CD“: Medikation geht, unter „Therapie“ ist „Neues
+   Angebot …“ grau.
+4. Als „UT“ (Geschäftsführung): Einstellungen → „VERWALTUNG“ → „Rechte …“: Tabelle mit Häkchen;
+   bei „Therapien bearbeiten“ die Spalte „Mitarbeiter Wohnbereich“ anhaken → als „CD“ ist „Neues
+   Angebot …“ frei.
+5. Als „EF“ (Bereichsleitung A): „Mitarbeiter …“ → Georg Habicht (B) nicht bearbeitbar, Paula
+   Rabe (A und B) schon; „Neuer Mitarbeiter …“ nur mit Bereich A.
+6. Als „PR“: Übersicht zeigt Wohnbereich A und B (10 Bewohner).
+7. „Abmelden“: alles grau, oben „Nicht angemeldet – Anmelden“.
 
 Version 0.21.0:
 

@@ -86,7 +86,7 @@ public sealed class Hauptfenster : Form
             Nachrichten.BewohnerZeigen(bewohnerId);
             BereichWaehlen("Nachrichten", filterBehalten: true);
         };
-        Kopf.BenutzerKnopf.Click += (_, _) => BenutzerMenueZeigen();
+        Kopf.BenutzerKnopf.Click += (_, _) => BenutzerWechseln();
         Medikamente = new MedikamenteSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Medikamente"] = Medikamente;
         Medikamente.Geaendert += () => { if (AktiverBereich == "Medikamente") Kopf.TexteSetzen(Medikamente.KopfText, "Medikamente"); };
@@ -133,7 +133,11 @@ public sealed class Hauptfenster : Form
             Navigation.Add(eintrag);
         }
         MenueKnopf.Click += (_, _) => MenueUmschalten();
-        DemoSymbol.Click += (_, _) => DemoZuruecksetzen();
+        DemoSymbol.Click += (_, _) =>
+        {
+            if (Recht.Grund(speicher, Funktionen.DemoZuruecksetzen) is string grund) hinweis.Show(grund, DemoSymbol, DemoSymbol.Width, 0, 3000);
+            else DemoZuruecksetzen();
+        };
 
         DemoKnopf.AutoSize = false;
         DemoKnopf.Padding = new Padding(Stil.AbstandMini, 0, Stil.AbstandMini, 0);   // passt so in eine Zeile
@@ -173,6 +177,7 @@ public sealed class Hauptfenster : Form
         speicher.WochenplanGeaendert += UebersichtNeu;
         speicher.KalenderGeaendert += UebersichtNeu;
         speicher.StatusGeaendert += StatusNeu;
+        speicher.MitarbeiterGeaendert += RechteNeu;
         AufgabenZaehlen();
         BenutzerAnzeigen();
         ArbeitsplatzAnzeigen();
@@ -359,36 +364,32 @@ public sealed class Hauptfenster : Form
         string kuerzel = Einstellungen.Laden().Kuerzel;
         Kopf.BenutzerSetzen(speicher.Kollege(kuerzel)?.Anzeige ?? (kuerzel.Length > 0 ? kuerzel : null));
         NachrichtenZaehlen();
+        Recht.Anwenden(speicher, Funktionen.DemoZuruecksetzen, DemoKnopf);   // Rechte (Schritt 19)
     }
 
     public void BenutzerWaehlen(string kuerzel)
     {
         Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
-        BenutzerAnzeigen();
-        AufgabenZaehlen();
-        if (AktiverBereich == "Bewohner")
-        {
-            if (!Bewohner.AkteSichtbar) Bewohner.UebersichtZeigen();
-        }
-        else BereichWaehlen(AktiverBereich, filterBehalten: true);
+        RechteNeu();
     }
 
-    private void BenutzerMenueZeigen()
+    // Anmeldung oder Rechte geändert: Kopf, Zähler und die gezeigte Ansicht (gesperrte Knöpfe) neu.
+    private void RechteNeu()
     {
-        var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false, ShowCheckMargin = true };
-        string ich = Einstellungen.Laden().Kuerzel;
-        foreach (var k in speicher.Kollegen())
-        {
-            var eintrag = new ToolStripMenuItem($"{k.Anzeige} – {string.Join(", ", k.Teams)}") { Checked = k.Kuerzel == ich };
-            eintrag.Click += (_, _) => BenutzerWaehlen(k.Kuerzel);
-            menue.Items.Add(eintrag);
-        }
-        menue.Items.Add(new ToolStripSeparator());
-        var niemand = new ToolStripMenuItem("Abmelden (niemand)") { Checked = ich.Length == 0 };
-        niemand.Click += (_, _) => BenutzerWaehlen("");
-        menue.Items.Add(niemand);
-        menue.Closed += (_, _) => BeginInvoke(menue.Dispose);
-        menue.Show(Kopf.BenutzerKnopf, new Point(Kopf.BenutzerKnopf.Width, Kopf.BenutzerKnopf.Height), ToolStripDropDownDirection.BelowLeft);
+        if (IsDisposed) return;
+        BenutzerAnzeigen();
+        AufgabenZaehlen();
+        if (AktiverBereich == "Bewohner") Bewohner.NeuLesen();
+        else if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
+    }
+
+    // „Abmelden / Benutzer wechseln“ oben rechts: Anmelden mit Kürzel (Schritt 19).
+    public void BenutzerWechseln()
+    {
+        using var fenster = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel, wechsel: true);
+        var ergebnis = Dialog.Zeigen(fenster, this);
+        if (ergebnis == DialogResult.OK && fenster.Angemeldet is Kern.Mitarbeiter m) BenutzerWaehlen(m.Kuerzel);
+        else if (ergebnis == DialogResult.Abort) BenutzerWaehlen("");
     }
 
     // Neuer Bericht für einen Bewohner (aus Akte oder Karte); danach seine Akte beim Reiter „Berichte“.
@@ -472,6 +473,7 @@ public sealed class Hauptfenster : Form
             speicher.WochenplanGeaendert -= UebersichtNeu;
             speicher.KalenderGeaendert -= UebersichtNeu;
             speicher.StatusGeaendert -= StatusNeu;
+            speicher.MitarbeiterGeaendert -= RechteNeu;
             abgleich.Dispose();
             hinweis.Dispose();
         }

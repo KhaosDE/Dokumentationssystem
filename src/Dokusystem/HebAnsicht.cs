@@ -30,6 +30,7 @@ public sealed class HebAnsicht : Panel
     public void Zeigen(Bewohner b)
     {
         bewohner = speicher.Bewohner(b.Id!.Value) ?? b;
+        Recht.Anwenden(speicher, Funktionen.Heb, NeuKnopf);   // Rechte (Schritt 19)
         var boegen = speicher.HebBoegen(b.Id!.Value);
         SuspendLayout();
         foreach (var k in Karten) { Controls.Remove(k); k.Dispose(); }

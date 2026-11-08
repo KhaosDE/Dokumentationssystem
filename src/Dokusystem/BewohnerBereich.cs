@@ -117,6 +117,7 @@ public sealed class BewohnerBereich : Panel
         var werte = Einstellungen.Laden();
         string kuerzel = werte.Kuerzel;
         var status = speicher.GeltendeStatusmeldungen(jetzt);
+        string? berichtGrund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
         Raster.KartenSetzen(sichtbar.Select(b =>
         {
             // Mehrplatz: Statusmeldung vorne; Bewohner eines anderen Wohnbereichs hinten gekennzeichnet.
@@ -128,6 +129,7 @@ public sealed class BewohnerBereich : Panel
                 b.Wohnbereich != werte.Bereich ? [new Marke(MarkenArt.Angabe, b.Wohnbereich)] : null);
             karte.Gewaehlt += gewaehlt => AkteZeigen(gewaehlt.Id!.Value);
             karte.BerichtGewuenscht += gewaehlt => BerichtGewuenscht?.Invoke(gewaehlt.Id!.Value);
+            karte.BerichtSperren(berichtGrund);
             return karte;
         }));
         Akte.Visible = false;
@@ -135,7 +137,15 @@ public sealed class BewohnerBereich : Panel
         AkteSichtbar = false;
         string anzahl = alle.Count == 1 ? "1 Bewohner" : $"{alle.Count} Bewohner";
         kopf.TexteSetzen(AktiverFilter == BewohnerFilter.Alle ? anzahl : $"{sichtbar.Count} von {anzahl}", "Bewohner");
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, neuKnopf);
         kopf.KnoepfeSetzen(neuKnopf);
+    }
+
+    // Rechte des Angemeldeten auf die Knöpfe im Kopf der Akte (Schritt 19).
+    private void AkteKnoepfeSperren()
+    {
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, bearbeitenKnopf);
+        Recht.Anwenden(speicher, Funktionen.BerichteSchreiben, berichtKnopf);
     }
 
     // Mehrplatz: die gezeigte Ansicht neu lesen (Karten oder Kopf und Stammdaten der Akte).
@@ -145,6 +155,7 @@ public sealed class BewohnerBereich : Panel
         if (Akte.Bewohner?.Id is not long id || speicher.Bewohner(id) is not Bewohner b) { UebersichtZeigen(); return; }
         Akte.NeuLaden();
         kopf.TexteSetzen("Bewohnerakte", b.Name);
+        AkteKnoepfeSperren();
     }
 
     public void AkteZeigen(long id)
@@ -159,6 +170,7 @@ public sealed class BewohnerBereich : Panel
         Akte.Visible = true;
         AkteSichtbar = true;
         kopf.TexteSetzen("Bewohnerakte", b.Name);
+        AkteKnoepfeSperren();
         kopf.KnoepfeSetzen(zurueckKnopf, nachrichtenKnopf, statusKnopf, berichtKnopf, bearbeitenKnopf);
     }
 

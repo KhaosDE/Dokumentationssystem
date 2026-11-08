@@ -39,6 +39,7 @@ public class AkteErgaenzungenTests
     public void Offen_gefuehrt_im_Formular() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "CD" });   // Recht „Bewohner bearbeiten“ (Schritt 19)
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);

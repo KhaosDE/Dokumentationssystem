@@ -64,9 +64,9 @@ public sealed class KopfBereich : Panel
     // name == null: niemand angemeldet (Hinweis in der Farbe „bitte klären“).
     public void BenutzerSetzen(string? name)
     {
-        BenutzerKnopf.Text = name is null ? "Nicht angemeldet – Benutzer wählen ▾" : $"Angemeldet als {name} ▾";
+        BenutzerKnopf.Text = name is null ? "Nicht angemeldet – Anmelden ▾" : $"Angemeldet als {name} ▾";
         BenutzerKnopf.ForeColor = name is null ? Stil.Achtung.Text : Stil.Akzent;
-        BenutzerKnopf.AccessibleName = (name is null ? "Nicht angemeldet" : $"Angemeldet als {name}") + ". Benutzer wechseln";
+        BenutzerKnopf.AccessibleName = (name is null ? "Nicht angemeldet. Anmelden" : $"Angemeldet als {name}. Abmelden / Benutzer wechseln");
         PerformLayout();
     }
 

@@ -1,15 +1,5 @@
 {
-  "hinweis": "Ausgedachte Kolleginnen und Kollegen, Teams und Nachrichten für die Demo. Zeiten relativ zum Laden der Demo-Daten (Stunden vor jetzt). {vorname} = Vorname des Bewohners.",
-  "kollegen": [
-    { "kuerzel": "AB", "vorname": "Anna", "nachname": "Bachstelze", "teams": [ "Wohnbereich A" ] },
-    { "kuerzel": "CD", "vorname": "Carl", "nachname": "Dohle", "teams": [ "Wohnbereich A" ] },
-    { "kuerzel": "EF", "vorname": "Emma", "nachname": "Fink", "teams": [ "Wohnbereich A" ] },
-    { "kuerzel": "KL", "vorname": "Karin", "nachname": "Lerche", "teams": [ "Wohnbereich A" ] },
-    { "kuerzel": "GH", "vorname": "Georg", "nachname": "Habicht", "teams": [ "Wohnbereich B" ] },
-    { "kuerzel": "MN", "vorname": "Max", "nachname": "Nachtigall", "teams": [ "Wohnbereich B" ] },
-    { "kuerzel": "OP", "vorname": "Olga", "nachname": "Pirol", "teams": [ "Therapie" ] },
-    { "kuerzel": "RS", "vorname": "Rudi", "nachname": "Specht", "teams": [ "Leitung" ] }
-  ],
+  "hinweis": "Ausgedachte Nachrichten für die Demo (Mitarbeiter und Bereiche in mitarbeiter.json). Zeiten relativ zum Laden der Demo-Daten (Stunden vor jetzt). {vorname} = Vorname des Bewohners.",
   "verlaeufe": [
     {
       "betreff": "Arzttermin am Donnerstag",

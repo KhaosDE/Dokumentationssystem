@@ -642,7 +642,7 @@ Umfang:
   eingeklappt).
 
 ## Mitarbeiter, Anmeldung und Rechte
-Status: freigegeben (Bauplan Schritt 19)
+Status: erledigt (08.11.2026)
 Datum: 08.11.2026
 Was: Eine Mitarbeiterdatenbank, Anmeldung beim Programmstart mit dem Namenskürzel und eine
 Rechteverwaltung nach Positionen.

@@ -441,6 +441,36 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER statusmeldungen_bleiben BEFORE UPDATE ON statusmeldungen
             BEGIN SELECT RAISE(ABORT, 'Statusmeldungen werden nicht überschrieben – eine neue ersetzt die alte.'); END;
         """,
+        // 15 – Mitarbeiter, Anmeldung und Rechte: Fachkraft und aktiv je Mitarbeiter (Tabelle
+        //      „kollegen“), Listen der Bereiche und Positionen, Positionen je Mitarbeiter (die Bereiche
+        //      stehen in „team_mitglieder“), Rechte als Häkchen Funktion × Position, „nur Fachkräfte“.
+        """
+        ALTER TABLE kollegen ADD COLUMN fachkraft INTEGER NOT NULL DEFAULT 0 CHECK (fachkraft IN (0, 1));
+        ALTER TABLE kollegen ADD COLUMN aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1));
+        CREATE TABLE bereiche (
+            name  TEXT PRIMARY KEY,
+            aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)),
+            nr    INTEGER NOT NULL DEFAULT 0
+        );
+        CREATE TABLE positionen (
+            name  TEXT PRIMARY KEY,
+            aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)),
+            nr    INTEGER NOT NULL DEFAULT 0
+        );
+        CREATE TABLE mitarbeiter_positionen (
+            kuerzel  TEXT NOT NULL REFERENCES kollegen(kuerzel) ON DELETE CASCADE,
+            position TEXT NOT NULL REFERENCES positionen(name) ON UPDATE CASCADE,
+            PRIMARY KEY (kuerzel, position)
+        );
+        CREATE TABLE rechte (
+            funktion TEXT NOT NULL,
+            position TEXT NOT NULL REFERENCES positionen(name) ON DELETE CASCADE ON UPDATE CASCADE,
+            PRIMARY KEY (funktion, position)
+        );
+        CREATE TABLE rechte_fachkraft (
+            funktion TEXT PRIMARY KEY
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -462,6 +492,7 @@ public sealed partial class Speicher : IDisposable
             db.Open();
             Ausfuehren("PRAGMA foreign_keys = ON");
             Aufbauen();
+            GrundbestandPruefen();
         }
         catch (SqliteException e)
         {
@@ -588,14 +619,15 @@ public sealed partial class Speicher : IDisposable
              medikamente = Meta(DemoMedikamente) is null, medikation = Meta(DemoMedikation) is null,
              therapie = Meta(DemoTherapie) is null, wochenplan = Meta(DemoWochenplan) is null, kalender = Meta(DemoKalender) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
-             status = Meta(DemoStatus) is null;
+             status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !modulNeu)
             return false;
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);
+        if (mitarbeiter) DemoMitarbeiterEinfuegen(transaktion);
         if (nachrichten) DemoNachrichtenEinfuegen(transaktion);
         if (medikamente) DemoMedikamenteEinfuegen(transaktion);
         if (medikamente || medikation) DemoMedikationEinfuegen(transaktion);   // hängt am Medikamenten-Bestand
@@ -626,6 +658,7 @@ public sealed partial class Speicher : IDisposable
             SetzeMeta(DemoGeladen, "1", transaktion);
             DemoBerichteEinfuegen(transaktion);
             DemoAufgabenEinfuegen(transaktion);
+            DemoMitarbeiterEinfuegen(transaktion);
             DemoNachrichtenEinfuegen(transaktion);
             DemoMedikamenteEinfuegen(transaktion);
             DemoMedikationEinfuegen(transaktion);
@@ -647,6 +680,7 @@ public sealed partial class Speicher : IDisposable
         WochenplanGeaendert?.Invoke();
         KalenderGeaendert?.Invoke();
         StatusGeaendert?.Invoke();
+        MitarbeiterGeaendert?.Invoke();
         ModuleGeaendert?.Invoke();
     }
 
