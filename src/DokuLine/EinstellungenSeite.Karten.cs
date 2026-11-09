@@ -137,7 +137,9 @@ public sealed partial class EinstellungenSeite
             MedikamenteKnopf);
         NachschlageAnsicht.CheckedChanged += (_, _) => { if (!laedt) Einstellungen.Aendern(w => w with { NachschlageAnsicht = NachschlageAnsicht.Checked }); };
         Karte("Medikamente", "Nachschlage-Ansicht (BfArM)", "Eingebettete Suche des BfArM über der Maske „Medikament“ – die einzige Webansicht im Programm, nur feste Adressen (" +
-            string.Join(", ", ExterneAdressen.Nachschlagebereiche) + "). Aus: nur „Im Browser öffnen“.", NachschlageAnsicht);
+            string.Join(", ", ExterneAdressen.Nachschlagebereiche) + "). Das BfArM erhält dabei nur, was jede Webseite erhält: den Suchbegriff (nur den " +
+            "Medikamentennamen, den man selbst einfügt), die IP-Adresse der Einrichtung und die Uhrzeit – nie Angaben zu Bewohnern. Anfragen an andere " +
+            "Adressen werden blockiert; Cookies und Verlauf gelten nur bis zum Schließen. Aus: nur „Im Browser öffnen“.", NachschlageAnsicht);
 
         // Verwaltung
         MitarbeiterKnopf.Click += (_, _) => FensterZeigen(new MitarbeiterFenster(speicher));

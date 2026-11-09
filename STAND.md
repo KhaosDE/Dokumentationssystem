@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.21** (Bauplan Schritt 29o: Therapie-Anzeige für den Fernseher).
+Stand: 09.11.2026. Version: **0.33.22** (Bauplan Schritt 29p: Nachschlagen beim BfArM abgesichert).
 
 ## Aktuell
 
@@ -308,8 +308,14 @@ mit Uhrzeit, Ort und den Namen der Teilnehmer aus diesem Bereich (Vorname und er
 umschaltbar), ohne Zimmer, Marken, Bezugspflege und Teilnahmestatus; die Seite lädt sich jede Minute neu. Nur Anfragen
 aus dem eigenen Netz, nur lesend. Ohne Netzwerk-Fernseher: „Anzeige im Vollbild“ auf einem zweiten Bildschirm.
 
+Neu in 0.33.22: Das **Nachschlagen beim BfArM** gibt so wenig wie möglich nach außen: Die Ansicht lädt nur Adressen des
+BfArM – Anfragen an andere (fremde Schriften, Statistik, Werbung) werden blockiert und beim Schließen im Protokoll
+`nachschlagen.log` gezählt (nur Rechnernamen). Sie läuft als privates Fenster (Cookies und Verlauf nur bis zum
+Schließen), ohne SmartScreen-Prüfung (sonst gingen die Adressen an Microsoft), ohne automatisches Ausfüllen. In den
+Einstellungen steht, was das BfArM dabei erhält: Suchbegriff, IP-Adresse der Einrichtung, Uhrzeit.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29p „Nachschlagen beim BfArM absichern“ (0.33.22).
+als Nächstes 30 „Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger“ (0.34.0).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1352,6 +1358,10 @@ als Nächstes 29p „Nachschlagen beim BfArM absichern“ (0.33.22).
   - Schutztest: Nur `AnzeigeServer.cs` darf annehmen, nur aus dem LAN, nie verbinden; kein anderes Projekt startet einen
     Server. README: Abschnitt „Anzeige für den Fernseher“ mit Firewall-Hinweis.
 
+- 0.33.22 — Bauplan Schritt 29p: `Nachschlagen.RessourceZulaessig` und `ProtokollZeile`; in der Ansicht Filter für alle
+  Anfragen (`WebResourceRequested`), privates Fenster, `IsReputationCheckingRequired = false`; Hinweis in den
+  Einstellungen; Schutztest prüft die Einstellungen der Ansicht.
+
 ## Offene Punkte
 
 - 09.11.2026 (0.33.21), für den Echtbetrieb: Namen von Bewohnern auf einem Bildschirm im Gemeinschaftsbereich zeigen,
@@ -1437,6 +1447,11 @@ als Nächstes 29p „Nachschlagen beim BfArM absichern“ (0.33.22).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.33.22): BfArM-Ansicht – statt „Cookies und Verlauf beim Schließen löschen“ läuft sie als privates
+  Fenster (`IsInPrivateModeEnabled`): Dann wird gar nichts davon auf die Platte geschrieben, auch nicht bei einem
+  Absturz. Erlaubt bleiben neben dem BfArM (https) nur `data:`, `blob:` und `about:blank` (bleiben im Rechner).
+  Blockierte Anfragen landen gesammelt beim Schließen der Ansicht als eine Zeile im Protokoll, mit Rechnernamen ohne
+  Pfad und Suchbegriff.
 - 09.11.2026 (0.33.21): Anzeige für den Fernseher – eigener kleiner Server auf `TcpListener` statt `HttpListener`:
   `HttpListener` bräuchte für Adressen im Netz unter Windows Administratorrechte (URL-Reservierung). Die Daten liest der
   Server nicht selbst aus der Datenbank, sondern aus einem Stand, den das Programm jede Minute setzt (die Datenbank ist
@@ -2262,6 +2277,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.22: Medikament anlegen → „Nachschlagen“: Die BfArM-Suche erscheint wie bisher; unten steht ggf. „… Anfragen
+an andere Adressen blockiert“. Nach dem Schließen liegt `%APPDATA%\DokuLine\nachschlagen.log` mit der Zahl.
 
 Version 0.33.21:
 

@@ -354,6 +354,13 @@ public class NetzNurImUpdateTests
         Assert.Equal(["Nachschlageansicht.cs"], funde);
         string ansicht = File.ReadAllText(Path.Combine(Repo.Wurzel, "src", "DokuLine", "Nachschlageansicht.cs"));
         Assert.Contains("Nachschlagen.Zulaessig", ansicht);   // jede Navigation wird geprüft
+        // Bauplan 29p: alle Anfragen gefiltert, privates Fenster, keine SmartScreen-Prüfung, kein Ausfüllen.
+        Assert.Contains("AddWebResourceRequestedFilter(\"*\", CoreWebView2WebResourceContext.All)", ansicht);
+        Assert.Contains("Nachschlagen.RessourceZulaessig(e.Request.Uri)", ansicht);
+        Assert.Contains("IsInPrivateModeEnabled = true", ansicht);
+        Assert.Contains("IsReputationCheckingRequired = false", ansicht);
+        Assert.Contains("IsPasswordAutosaveEnabled = false", ansicht);
+        Assert.Contains("IsGeneralAutofillEnabled = false", ansicht);
         var projekte = Directory.EnumerateFiles(Path.Combine(Repo.Wurzel, "src"), "*.csproj", SearchOption.AllDirectories)
             .Where(d => File.ReadAllText(d).Contains("Microsoft.Web.WebView2"))
             .Select(Path.GetFileName);

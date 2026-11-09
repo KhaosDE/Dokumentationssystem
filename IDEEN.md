@@ -2197,7 +2197,7 @@ Umfang:
   vorher mit Leitung und Datenschutz klären.
 
 ## Nachschlagen beim BfArM absichern
-Status: freigegeben (Bauplan Schritt 29p; „Alles freigeben“, Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.22; Bauplan Schritt 29p; „Alles freigeben“, Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die eingebettete BfArM-Ansicht (WebView2) gibt so wenig wie möglich nach außen.
 Warum: Frage Tobi (09.11.2026): Kann die Medikamentenschnittstelle ins Internet ein

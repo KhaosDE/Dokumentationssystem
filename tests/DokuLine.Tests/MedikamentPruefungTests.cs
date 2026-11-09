@@ -140,4 +140,26 @@ public sealed class MedikamentPruefungTests : IDisposable
         Assert.Equal(300, Nachschlagen.Bereinigen(new string('x', 500)).Length);
         Assert.False(Nachschlagen.Zulaessig(null));
     }
+    // Bauplan 29p: Nur Anfragen an das BfArM; Schriften, Statistik und Werbung anderer Anbieter werden blockiert.
+    [Theory]
+    [InlineData("https://www.bfarm.de/SiteGlobals/Fonts/a.woff2", true)]
+    [InlineData("https://portal.bfarm.de/api/suche?x=1", true)]
+    [InlineData("data:image/png;base64,AAAA", true)]
+    [InlineData("blob:https://portal.bfarm.de/1234", true)]
+    [InlineData("about:blank", true)]
+    [InlineData("https://fonts.googleapis.com/css2?family=X", false)]
+    [InlineData("https://www.google-analytics.com/collect", false)]
+    [InlineData("http://www.bfarm.de/", false)]
+    [InlineData("https://bfarm.de.example.org/", false)]
+    [InlineData("kein Link", false)]
+    public void Ressourcen_nur_vom_BfArM(string adresse, bool erlaubt) => Assert.Equal(erlaubt, Nachschlagen.RessourceZulaessig(adresse));
+
+    [Fact]
+    public void Protokoll_nur_mit_Rechnernamen()
+    {
+        string zeile = Nachschlagen.ProtokollZeile(new DateTime(2026, 11, 9, 14, 20, 0),
+            ["https://fonts.googleapis.com/css2?family=X", "https://www.google-analytics.com/collect?id=geheim", "https://fonts.googleapis.com/b"]);
+        Assert.Equal("2026-11-09 14:20 – 3 Anfragen an andere Adressen blockiert: fonts.googleapis.com, www.google-analytics.com", zeile);
+        Assert.DoesNotContain("geheim", zeile);
+    }
 }

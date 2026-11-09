@@ -116,3 +116,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.33.19 ruhigerer und schnellerer Wechsel zwischen den Bereichen, Messung mit --messen (Bauplan 29m).
 - 09.11.2026 — Claude Code: 0.33.20 Therapie als eigener Bereich mit eigener Seitenleiste, Seite „Wochenpläne“, Bewohner nach Wohnbereich gruppiert, Berichtsart „Therapie“ mit Angebot (Bauplan 29n).
 - 09.11.2026 — Claude Code: 0.33.21 Anzeige der laufenden Therapien für den Fernseher im Wohnbereich (nur LAN, Zugangscode, standardmäßig aus) und als Vollbild (Bauplan 29o).
+- 09.11.2026 — Claude Code: 0.33.22 BfArM-Nachschlagen abgesichert: fremde Anfragen blockiert und gezählt, privates Fenster, ohne SmartScreen und Ausfüllen, Hinweis in den Einstellungen (Bauplan 29p).
