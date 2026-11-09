@@ -82,7 +82,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 29k | Visite: Psychiater und Hausarzt getrennt, Berichte in der Dokumentation | 0.33.13 |
 | 29l | Medikamentenänderung auffällig markieren und in die Übergabe | 0.33.14 |
 | 29m | Schnellerer Wechsel zwischen den Bereichen | 0.33.15 |
-| 29n | Schlanke Ansicht für die Therapie | 0.33.16 |
+| 29n | Therapie als eigener Bereich (Dokumentation, Nachrichten, Aufgaben, Wochenpläne) | 0.33.16 |
 | 29o | Therapie-Anzeige für den Fernseher im Wohnbereich | 0.33.17 |
 | 29p | Nachschlagen beim BfArM absichern | 0.33.18 |
 | 30 | Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger | 0.34.0 |
@@ -1918,7 +1918,8 @@ alles, was die R1 betrifft.“ Die Auswahl in den einzelnen Fenstern wird dadurc
 Umfang:
 - In der Übersicht gut sichtbar oben: **„Wohnbereich: R1 · R2 · R3“** als drei große
   Umschaltknöpfe (kein Klappmenü). Für Positionen, die alle Bereiche sehen (Therapie, Leitung):
-  zusätzlich „Alle“.
+  zusätzlich „Alle“. Wer das Recht für die Therapie hat, sieht außerdem den Knopf **„Therapie“**
+  (eigener Bereich, Schritt 29n).
 - Die Wahl gilt für **alle Bereiche**: Dokumentation, Übergabe, Tagesplan, Visiten, Aufgaben,
   Kalender (Bereichskalender), Therapie (Laufende Therapien), Ausgangsliste, Nachrichten an Teams.
 - Die **Bereichswahl in den einzelnen Fenstern entfällt** (z. B. Dokumentation, Übersicht-Liste,
@@ -2106,21 +2107,46 @@ Umfang:
     Inhaltsbereich), sofern es messbar hilft.
 - Nichts am Verhalten ändern; vorher/nachher messen und in `STAND.md` festhalten.
 
-## Schlanke Ansicht für die Therapie
-Status: freigegeben (Bauplan Schritt 29n; Vorgabe Tobi 09.11.2026)
+## Therapie als eigener Bereich (Dokumentation, Nachrichten, Aufgaben, Wochenpläne)
+Status: freigegeben (Bauplan Schritt 29n; Vorgaben Tobi 09.11.2026)
 Datum: 09.11.2026
-Was: Wer in der Therapie arbeitet, bekommt eine schlankere Startansicht mit weniger Angaben.
-Warum: Rückmeldung Tobi (09.11.2026): Die Ansicht für die Therapie anders gestalten, da hier weniger
-Infos benötigt werden als auf den Wohnbereichen.
-Umfang (Annahme aus dem Chat, Tobi kann sie ändern):
-- Für die Position **Therapie** startet das Programm mit **„Laufende Therapien“** statt der
-  Übersicht.
-- Die Seitenleiste zeigt für die Therapie nur, was sie braucht (über die Rechte, Schritt 29c):
-  Laufende Therapien, Angebote, Tagesplan, Nachrichten, Verzeichnisse.
-- „Laufende Therapien“ in der Therapie-Fassung ohne Wohnbereichsangaben, die nur der Wohnbereich
-  braucht (Bezugspflege, Marken wie Beschluss oder Medikation); je Teilnehmer nur Name, Bereich und
-  Teilnahme.
-- Wohnbereich „Alle“ als Vorgabe (Schritt 29d).
+Was: Die Therapie ist ein eigener Bereich neben R1, R2 und R3, mit einer schlanken, eigenen
+Seitenleiste.
+Warum: Vorgaben Tobi (09.11.2026): Die Ansicht für die Therapie anders gestalten, da hier weniger
+Infos nötig sind als auf den Wohnbereichen. „Therapie als eigenen Bereich machen. Sie brauchen auch
+den Bereich Dokumentation, Nachrichten, Aufgaben und eine extra Seite, in der sie eine
+Bewohnerliste haben; mit Klick auf den Bewohner sieht man den Wochenplan.“
+Umfang:
+- **Bereich „Therapie“** in der Bereichswahl der Übersicht (Schritt 29d): R1 · R2 · R3 ·
+  **Therapie**. Der Knopf erscheint nur mit dem Recht für die Therapie (Vorbelegung: Position
+  Therapie, Leitungen, Administrator). Rechner der Therapie haben „Therapie“ als
+  Bereichskennung und starten dort.
+- **Seitenleiste im Bereich Therapie** (nur diese Einträge, in dieser Reihenfolge):
+  1. **Laufende Therapien** (Startseite, wie Schritt 26m)
+  2. **Angebote** (bisheriger Reiter „Angebote“)
+  3. **Wochenpläne** (neu, siehe unten)
+  4. **Dokumentation** (wie Schritt 29b)
+  5. **Aufgaben** (Aufgaben des Teams Therapie)
+  6. **Nachrichten** (Team Therapie und eigene)
+  7. **Verzeichnisse** und **Einstellungen** (soweit Rechte)
+  Übersicht, Übergabe, Visiten, Medikamentenplan und Ausgangsliste erscheinen dort nicht.
+- **Bewohner im Bereich Therapie:** alle Bewohner aus R1–R3, die mindestens ein Angebot der
+  Therapie haben; in den Bewohnerleisten nach Wohnbereich gruppiert (kleine Überschrift „R1“,
+  „R2“, „R3“), darunter „Nachname, Vorname“. Schalter „alle Bewohner des Hauses“ für die übrigen.
+- **Neue Seite „Wochenpläne“:** links die Bewohnerleiste (wie in der Dokumentation, schmal,
+  abgerundet), rechts beim Klick der **Wochenplan** des Bewohners (Montag bis Sonntag, ohne Datum,
+  Schritt 29i). Angebote der Therapie sind hervorgehoben; ändern kann die Therapie nur ihre eigenen
+  Angebote (Schritt „Therapien: Zuordnung und Rechte“), alles andere ist nur zu lesen. Drucken.
+- **Dokumentation der Therapie:** Berichte aus dem Bereich Therapie bekommen die Berichtsart
+  **„Therapie“** (neu in der Liste der Berichtsarten, 29b) und den Namen des Angebots. Sie stehen
+  in derselben Dokumentation des Bewohners und sind damit auch im Wohnbereich zu lesen. Die
+  Therapie sieht die Berichte der Wohnbereiche ebenfalls (lesen), soweit die Rechte es erlauben.
+- **Laufende Therapien in der Therapie-Fassung** ohne Angaben, die nur der Wohnbereich braucht
+  (Bezugspflege, Marken wie Beschluss oder Medikation): je Teilnehmer Name, Bereich, Teilnahme.
+- **Aufgaben und Nachrichten:** neues Team „Therapie“ als Empfänger; Aufgaben ohne
+  Schichtbezug (die Therapie arbeitet tagsüber), mit Fälligkeitsdatum.
+- Demo: zwei ausgedachte Mitarbeitende der Position Therapie, Aufgaben und Nachrichten für das
+  Team Therapie, Therapie-Berichte bei mehreren Bewohnern.
 
 ## Therapie-Anzeige für den Fernseher im Wohnbereich
 Status: freigegeben (Bauplan Schritt 29o; Vorgabe Tobi 09.11.2026)
