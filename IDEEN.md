@@ -69,6 +69,9 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
+| 30 | Akte: Reiter Betreuer, Krankenkasse, Kostenträger | 0.34.0 |
+| 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine | 0.35.0 |
+| 32 | Vorhandene digitale Akte übernehmen | 0.36.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -1468,3 +1471,102 @@ Umsetzung (Vorschlag von Claude Code, von Tobi bestätigt):
   Menge, Anlass; zeigt, wie viel heute schon gegeben wurde und was höchstens erlaubt ist. Bei einer
   Assistenzkraft Pflichtfeld „in Absprache mit“ (Fachkraft aus der Liste); erscheint als Bericht in der Akte.
 
+
+## Akte: Reiter Betreuer, Krankenkasse, Kostenträger
+Status: freigegeben (Bauplan Schritt 30; OK Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Die Bewohnerakte bekommt drei neue Reiter für die Verwaltungsangaben.
+Warum: Vorgabe Tobi (09.11.2026): Das Bewohnerstammblatt muss weiter ausgebaut werden. Neben den
+Daten, die auch durch die Biografie ergänzt werden, gehören Reiter für Krankenkasse,
+Kostenträger, Betreuer und Dokumente hinein.
+Umfang (Vorschlag):
+- **Reihenfolge der Reiter:** Stammdaten · Betreuer · Krankenkasse · Kostenträger · Dokumente ·
+  Berichte · Medikamentenplan · Wochenplan · Biografie · Reflexion · HEB (Modul-Reiter wie
+  „Ausgang“ danach). Die Stammdaten zeigen je eine Kurzzeile („Betreuer: …“, „Krankenkasse: …“,
+  „Kostenträger: … bis …“), ein Klick springt in den Reiter.
+- **Drei Zustände** für jede Angabe (`CLAUDE.md`, Regel 5): eingetragen · „keine“ (z. B. keine
+  gesetzliche Betreuung) · „nicht erfasst“ (in Achtung-Farbe).
+- **Jede Änderung ist eine neue Fassung** mit Kürzel und Datum, der Verlauf bleibt sichtbar
+  („ab Datum …“). Bearbeiten mit dem Recht „Bewohner anlegen und bearbeiten“.
+- **Betreuer** (die bisherige Zeile aus den Stammdaten zieht hierher um):
+  - Art: Berufsbetreuer · ehrenamtlich · Angehörige · Vorsorgebevollmächtigte.
+  - Name, Stelle bzw. Büro, Telefon, E-Mail (Demo: nur `@example.org`), Anschrift.
+  - **Aufgabenbereiche** zum Ankreuzen (z. B. Gesundheitssorge, Aufenthaltsbestimmung,
+    Vermögenssorge, Behörden und Ämter, Wohnungsangelegenheiten, Post, Unterbringung) plus
+    Freitext. Liste in den Einstellungen änderbar.
+  - Bestellt am, **Überprüfung bis** → Marke „Betreuung endet …“ 8 Wochen vorher.
+  - Weitere Personen: Ersatzbetreuer, Angehörige als Kontakt (je mit eigener Zeile).
+  - Knöpfe „E-Mail an Betreuer …“ (wie bisher) und „Betreuerausweis öffnen“ (aus „Dokumente“).
+- **Krankenkasse:**
+  - Kasse (Auswahl aus einer Liste in den Einstellungen, Demo: ausgedachte Kassen wie
+    „Musterkasse Süd“), Versichertennummer (Demo: ausgedacht), Status (Mitglied,
+    familienversichert …).
+  - **Zuzahlungsbefreiung:** ja (gültig bis …) · nein · nicht erfasst → Marke „Befreiung endet …“
+    4 Wochen vorher.
+  - Pflegegrad: keiner · 1–5 · nicht erfasst. Ansprechpartner und Telefon der Kasse.
+- **Kostenträger:**
+  - Kostenträger (Auswahl, Demo: ausgedacht, z. B. „Bezirk Musterland“), Aktenzeichen,
+    Sachbearbeiter mit Telefon und E-Mail.
+  - **Bewilligungen** als Liste: Leistung (Freitext bzw. Auswahl), Bescheid vom, **bewilligt
+    von–bis** → Marke „Kostenzusage endet …“ 12 Wochen vorher (rechtzeitig für den HEB-Bogen).
+    Die aktuelle Bewilligung steht oben, abgelaufene darunter.
+  - Der HEB-Bogen übernimmt Kostenträger und Aktenzeichen von hier.
+- Die neuen Fristen erscheinen in der Übersicht unter „Heute wichtig“ und als Marke in der
+  Bewohnerliste.
+- Demo-Daten: alle drei Reiter für alle Bewohner, gemischt mit „keine“ und „nicht erfasst“.
+
+## Akte: Reiter „Dokumente“ – digitale Akte in DokuLine
+Status: freigegeben (Bauplan Schritt 31; OK Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Jeder Bewohner bekommt eine Dokumentenablage in DokuLine, sauber nach Bereichen sortiert,
+direkt aus der Akte zu öffnen.
+Warum: Vorgabe Tobi (09.11.2026): Heute liegt für jeden Bewohner ein Ordner in einem Ordner (die
+digitale Akte). Man muss das Programm verlassen und den Explorer öffnen, um wichtige Dokumente
+aufzurufen. Sinnvoller ist, wenn alle Dokumente sauber sortiert in DokuLine hinterlegt sind und
+ohne Umschweife zugänglich.
+Umfang (Vorschlag):
+- **Eigene Ablage** (Entscheidung Tobi, 09.11.2026): DokuLine kopiert die Dokumente in seine
+  Ablage und verwaltet sie dort, mit Rechten und Protokoll; kein bloßes Anzeigen eines fremden
+  Ordners.
+- **Ablage:** Die Dateien liegen im Datenordner (`%APPDATA%\DokuLine\Dokumente\<Bewohner-Nr>\`,
+  im Mehrplatzbetrieb neben der gemeinsamen Datenbank), nie im Repository. Die Datenbank kennt
+  zu jeder Datei: Kategorie, Titel, Datum des Dokuments, **gültig bis** (optional), Hinweis,
+  hinzugefügt von (Kürzel) und am, Prüfsumme.
+- **Kategorien** (in den Einstellungen änderbar), Vorschlag: Aufnahme und Verträge · Betreuung
+  und Gericht · Kostenträger und Bescheide · Krankenkasse · Ärztliches und Befunde · Ausweise
+  und Behörden · Schriftverkehr · Sonstiges.
+- **Ansicht:** links die Kategorien mit Zähler, rechts die Dokumente als Liste (Titel, Datum,
+  gültig bis, hinzugefügt von), neueste oben, Suchfeld über alle Kategorien. Abgelaufene
+  Dokumente mit Marke „abgelaufen“. Ein Klick auf eine Frist springt in den passenden Reiter.
+- **Öffnen** per Doppelklick im Standardprogramm des Rechners (Übergabe an ein Programm auf dem
+  Rechner, `CLAUDE.md` Regel 6; keine eingebettete Webansicht). „Im Ordner zeigen …“ als
+  Ausweg.
+- **Hinzufügen:** Dateien in die Liste ziehen oder „Dokument hinzufügen …“. Danach ein kurzer
+  Dialog: Kategorie (vorgeschlagen nach Dateiname), Titel, Datum, gültig bis. Die Datei wird in
+  die Ablage **kopiert**; das Original bleibt, wo es war.
+- **Verknüpfung mit den Reitern:** z. B. Betreuerausweis → Reiter „Betreuer“, Bescheid →
+  Bewilligung im Reiter „Kostenträger“, Beschluss → Unterbringung. Dort ein Knopf „Dokument
+  öffnen“.
+- **Nichts geht verloren:** „Entfernen“ verschiebt in einen Papierkorb der Ablage (mit Kürzel
+  und Grund), endgültig löschen nur mit eigenem Recht. Ersetzen legt eine neue Fassung an.
+- **Rechte** (Rechtematrix): „Dokumente ansehen“, „Dokumente hinzufügen“, „Dokumente endgültig
+  löschen“. Protokoll: wer wann welches Dokument geöffnet, hinzugefügt oder entfernt hat.
+- **Demo-Daten:** Das Programm erzeugt selbst ausgedachte Beispiel-PDFs (PDFsharp) mit großem
+  Aufdruck „DEMO — ausgedachte Daten“, z. B. Betreuerausweis, Kostenzusage, Arztbrief, ohne
+  echte Logos, Behörden- oder Einrichtungsnamen (`CLAUDE.md`, Regeln 1 und 7).
+
+## Vorhandene digitale Akte übernehmen
+Status: freigegeben (Bauplan Schritt 32; OK Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Ein Assistent, der einen vorhandenen Ordner „ein Unterordner je Bewohner“ in die
+Dokumentenablage übernimmt.
+Warum: Die bisherige digitale Akte (Ordner im Explorer) soll nicht von Hand umgezogen werden
+müssen.
+Umfang (Vorschlag):
+- Einstellungen → „Digitale Akte übernehmen …“: Hauptordner wählen. Das Programm ordnet die
+  Unterordner den Bewohnern zu (nach Name, Vorschlag zum Bestätigen), Unterordner zweiter Ebene
+  den Kategorien (nach Namen, Zuordnung einstellbar).
+- Vorschau vor dem Übernehmen: Zahl der Dateien je Bewohner und Kategorie, nicht zugeordnete
+  Ordner und Dateien. Übernehmen **kopiert**, der alte Ordner bleibt unverändert.
+- Bericht danach (übernommen, übersprungen, doppelt) und Eintrag im Protokoll.
+- In der Demo nur mit ausgedachten Ordnern zum Vorführen (Testordner aus den Demo-Daten).
