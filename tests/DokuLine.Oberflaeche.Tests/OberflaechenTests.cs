@@ -61,16 +61,19 @@ public class HauptfensterTests
         Assert.True(einstellungen.Treffer.Visible);
         einstellungen.Suche.Text = "";
 
-        // Ohne Recht gesperrt, nicht versteckt (CD: kein Recht „Einstellungen des Bereichs“).
+        // Ohne Recht ausgeblendet (CD: kein Recht „Einstellungen des Bereichs“); übernehmen geht auch nicht.
         fenster.BenutzerWaehlen("CD");
-        Assert.Equal(RechteRegeln.FehltText, einstellungen.Karten.Single(k => k.Titel == "Schichtzeiten").Sperrgrund);
+        var schichtzeiten = einstellungen.Karten.Single(k => k.Titel == "Schichtzeiten");
+        Assert.Equal(RechteRegeln.FehltText, schichtzeiten.Sperrgrund);
+        Assert.True(schichtzeiten.OhneRecht);
+        Assert.DoesNotContain(schichtzeiten, einstellungen.Suchen("Schicht"));
         einstellungen.Bereich.Text = "R2";
         Assert.False(einstellungen.BereichUebernehmen());
-        Assert.Equal("R1", Einstellungen.Laden().Bereich);   // seit Schritt 26e heißen die Bereiche R1–R3
+        Assert.Equal("R1", Einstellungen.Laden().Bereich);
         Assert.Equal(RechteRegeln.FehltText, einstellungen.Fehler.Text);
-        fenster.BenutzerWaehlen("EF");
 
-        // Bildschirmfoto je Gruppe.
+        // Bildschirmfoto je Gruppe (Administrator: alle Gruppen).
+        fenster.BenutzerWaehlen("TST");
         for (int i = 0; i < EinstellungenSeite.GruppenListe.Length; i++)
         {
             einstellungen.Gruppen[i].Ausloesen();

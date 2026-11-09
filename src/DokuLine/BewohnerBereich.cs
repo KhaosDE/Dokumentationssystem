@@ -270,6 +270,7 @@ public sealed class BewohnerBereich : Panel
         if (Namen.ContextMenuStrip is { } menue)
         {
             menue.Items[1].Enabled = Stil.Sperrgrund(BerichtNeuKnopf) is null;
+            menue.Items[1].Visible = !RechteRegeln.FehltRecht(Stil.Sperrgrund(BerichtNeuKnopf));
             menue.Items[1].Text = Stil.Sperrgrund(BerichtNeuKnopf) is string grund
                 ? $"Neuer Bericht … – {grund}"
                 : "Neuer Bericht …";

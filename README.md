@@ -195,8 +195,9 @@ Danach fragt Windows für diese Datei nicht mehr.
   (aus jedem Fenster), der Knopf „Abmelden (F12)“ oben rechts, unten in der Seitenleiste oder in den
   Einstellungen („Persönlich“). Danach ist nichts mehr zu sehen, bis sich jemand anmeldet; ein angefangener Bericht
   kann als Entwurf bleiben („Entwurf fortsetzen“ rechts in der Aktionsleiste).
-  Was jemand darf, hängt an seiner Position (Einstellungen → „Verwaltung“ → „Rechte …“). Ohne
-  Recht bleiben Knöpfe grau und sagen beim Darüberfahren, warum.
+  Was jemand darf, hängt an seiner Position (Einstellungen → „Verwaltung“ → „Rechte …“). Was jemand
+  nicht darf, sieht er nicht: Knöpfe, Menüeinträge, Einstellungen und Bereiche der Seitenleiste ohne Recht
+  sind ausgeblendet. Grau mit Hinweis bleibt nur, was gerade nicht geht (z. B. ohne Anmeldung).
 - **Logo der Einrichtung:** Oben rechts im Kopf steht ein Platzhalter. Ein Klick darauf öffnet die
   Einstellungen; unter „Bild im Kopf“ lässt sich das eigene Logo wählen (es bleibt auf dem Rechner).
 - **Einstellungen** (fest ganz unten in der Seitenleiste): eine ganze Seite wie die
@@ -204,7 +205,8 @@ Danach fragt Windows für diese Datei nicht mehr.
   Fahrzeuge, Vorlagen, Medikamente, Verwaltung, System, Über), oben die Suche, rechts je Einstellung
   eine Karte mit Name, einem Satz Erklärung und dem Bedienelement. **Änderungen gelten sofort**
   (Textfelder beim Verlassen); nur ganze Datensätze (Mitarbeiter, Medikament, Fahrzeug,
-  Standardaufgabe, HEB-Zuordnung) haben „Speichern“. Ohne Recht ist eine Karte grau und sagt warum.
+  Standardaufgabe, HEB-Zuordnung) haben „Speichern“. Karten ohne Recht fehlen, Gruppen ohne eine
+  erlaubte Karte ebenso; ohne Anmeldung sind Karten grau und sagen warum.
   Folgenreiches (Ort der Datenbank, Demo-Daten zurücksetzen) steht nur unter „System“ und fragt
   vorher.
 

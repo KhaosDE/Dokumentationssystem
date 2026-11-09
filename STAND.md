@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.5** (Bauplan Schritt 29b: Bereich Dokumentation).
+Stand: 09.11.2026. Version: **0.33.6** (Bauplan Schritt 29c: Fehlendes ausblenden statt ausgrauen).
 
 ## Aktuell
 
@@ -221,8 +221,12 @@ mit Nachtrag, Berichtsart, Lebensbereich, Schicht, Verfasser, Suche mit Hervorhe
 **speichern**. Neu ist die **Berichtsart** beim Schreiben (Vorgabe „Alltag“, Liste in den Einstellungen). Der Reiter
 „Berichte“ in der Akte entfällt; dort führt „Berichte ansehen“ zur Dokumentation.
 
+Neu in 0.33.6: **Was jemand nicht darf, sieht er nicht.** Knöpfe, Menüeinträge, Einstellungen und Bereiche der
+Seitenleiste ohne Recht sind ausgeblendet, die übrigen rücken zusammen (z. B. „Visiten“ fehlt für Assistenzkräfte).
+Grau mit Hinweis bleibt nur, was gerade nicht geht. Nach An- und Abmelden baut sich alles sofort neu auf.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29c „Rechte: Fehlendes ausblenden statt ausgrauen“ (0.33.6).
+als Nächstes 29d „Wohnbereich einmal in der Übersicht wählen“ mit 29q und 29r (0.33.7).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1105,6 +1109,18 @@ als Nächstes 29c „Rechte: Fehlendes ausblenden statt ausgrauen“ (0.33.6).
     Akte oder Übersicht zeigt die Dokumentation den Bewohner mit dem neuen Bericht.
   - Die Akte steht in einer eigenen Datei (`AkteAnsicht.cs`); `BerichteAnsicht.cs` (Karten, Liste) entfällt.
 
+- 0.33.6 — Bauplan Schritt 29c „Fehlendes ausblenden statt ausgrauen“:
+  - `RechteRegeln.FehltRecht`: „Dafür fehlt die Berechtigung.“ und „Nur für Fachkräfte.“ bedeuten ausblenden;
+    alle anderen Gründe (ohne Anmeldung, kein Bewohner gewählt, kein Betreuer …) lassen den Knopf grau mit Hinweis.
+  - `Knopf`: ohne Recht unsichtbar, auch wenn der Aufruf ihn zeigen will; mit dem Recht kommt er wieder. Damit gilt
+    das für alle Knöpfe, die über `Stil.Sperren`/`Recht.Anwenden` gesperrt werden.
+  - Aktionsleiste: ausgeblendete Knöpfe nehmen keinen Platz; ohne sichtbaren Knopf entfällt die Leiste.
+  - Seitenleiste: „Visiten“ (eigenes Recht) verschwindet ohne Recht; steht man gerade dort, geht es zur Übersicht.
+  - Menüs: „Neuer Bericht …“ (Übersicht, Dokumentation), „Nachtrag schreiben …“ (Bericht), Teilnahme im Wochenplan.
+  - Einstellungen: Karten ohne Recht (oder deren einziger Knopf ohne Recht) fehlen, auch in der Suche; Gruppen ohne
+    erlaubte Karte verschwinden. „Persönlich“, „Über“ und „Verzeichnisse“ (ansehen dürfen alle) bleiben.
+  - Neu aufgebaut wird nach An- und Abmelden und nach Änderungen an Mitarbeitern oder Rechten.
+
 ## Offene Punkte
 
 - Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
@@ -1181,6 +1197,14 @@ als Nächstes 29c „Rechte: Fehlendes ausblenden statt ausgrauen“ (0.33.6).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.6): Ohne Anmeldung bleibt alles grau mit „Bitte zuerst anmelden.“ statt ausgeblendet: Es gibt
+  dann noch niemanden, dem ein Recht fehlt, und man sieht, was es nach der Anmeldung gibt.
+- 09.11.2026 (0.33.6): Ausgeblendet wird zentral im `Knopf` (nach dem Sperrgrund) statt an jeder der rund 50
+  Stellen einzeln – so kann keine Stelle vergessen werden. Felder (Häkchen, Listen) in gesperrten Fenstern bleiben
+  „nur ansehen“, weil der Inhalt angesehen werden darf.
+- 09.11.2026 (0.33.6): Nur „Visiten“ hat als Bereich ein eigenes Recht; die übrigen Bereiche darf jeder ansehen und
+  bleiben in der Seitenleiste.
 
 - 09.11.2026 (0.33.5): „Medikation geändert“ ist ein Bericht der Art „Medikation“, der keine Bedarfsgabe ist. Das
   Programm erkennt Änderungen nicht selbst aus dem Text (Regel 6); wer eine Änderung dokumentiert, wählt die Art.
@@ -1911,6 +1935,15 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.6:
+
+1. Als „KL“ (Assistenzkraft) anmelden → in der Seitenleiste fehlt „Visiten“, die übrigen Einträge rücken zusammen.
+2. Als „OP“ (Therapie) eine Akte öffnen → „Bearbeiten …“ fehlt; die übrigen Knöpfe stehen ohne Lücke.
+3. Als „CD“ Einstellungen → „Wohnbereich“ zeigt nur „Zimmer und Betten“; „Module“ und „System“ fehlen, unter
+   „Verwaltung“ fehlt „Mitarbeiter“. Suche „Schicht“ findet „Schichtzeiten“ nicht.
+4. Abmelden (F12) → anmelden mit „AB“ → „Visiten“ ist wieder da, ohne Neustart.
+5. Ohne Anmeldung: Knöpfe grau mit „Bitte zuerst anmelden.“
 
 Version 0.33.5:
 

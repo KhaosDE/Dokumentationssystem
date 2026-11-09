@@ -357,6 +357,7 @@ public sealed class UebersichtSeite : Panel
         {
             string? grund = Stil.Sperrgrund(BerichtNeuKnopf);
             menue.Items[1].Enabled = grund is null;
+            menue.Items[1].Visible = !RechteRegeln.FehltRecht(grund);
             menue.Items[1].Text = grund is null ? "Neuer Bericht …" : $"Neuer Bericht … – {grund}";
         }
     }

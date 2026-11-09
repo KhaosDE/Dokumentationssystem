@@ -83,9 +83,9 @@ public sealed class WochenplanAnsicht : Panel
     private void TerminMenue(Termin t, Point wo)
     {
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
-        if (t.Quelle == TerminQuelle.Therapie)
+        string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);
+        if (t.Quelle == TerminQuelle.Therapie && !RechteRegeln.FehltRecht(grund))
         {
-            string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);   // Rechte (Schritt 19)
             if (grund is not null) menue.Items.Add(new ToolStripMenuItem(grund) { Enabled = false });
             foreach (var s in new[] { Teilnahme.Teilgenommen, Teilnahme.Abgesagt, Teilnahme.Ausgefallen, Teilnahme.Offen })
             {

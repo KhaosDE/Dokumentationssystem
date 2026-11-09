@@ -1903,7 +1903,7 @@ Umfang:
   wird zur schmalen Seitenleiste.
 
 ## Rechte: Fehlendes ausblenden statt ausgrauen
-Status: freigegeben (Bauplan Schritt 29c; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.6; Bauplan Schritt 29c, Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Was ein Mitarbeiter nicht darf, sieht er nicht.
 Warum: Vorgabe Tobi (09.11.2026): Elemente, für die der Mitarbeiter keine Berechtigung hat, sollen
