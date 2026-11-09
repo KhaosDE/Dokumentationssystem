@@ -86,6 +86,7 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche, Positionen, Berichtsarten …");
     public Button AkteListenKnopf { get; } = Stil.NebenKnopf("Krankenkassen, Kostenträger, Aufgaben, Kategorien …");
     public Button UebernahmeKnopf { get; } = Stil.NebenKnopf("Digitale Akte übernehmen …");
+    public Button EinrichtungKnopf { get; } = Stil.NebenKnopf("Angaben der Einrichtung …");
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     // System, Über
     public Label DatenbankOrt { get; } = new() { AutoSize = true, MaximumSize = new Size(360, 0), UseMnemonic = false };

@@ -141,8 +141,8 @@ public class BewohnerOberflaechenTests
         Assert.DoesNotContain("Berta Birke", f.Kopf.KleinText);
         Assert.Equal("Berta Birke", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal("22.11.1958", f.Bewohner.Akte.Geburtsdatum.Text);
-        Assert.Equal(["← Dokumentation", "Berichte ansehen", "Nachrichten …", "Status …", "Ärztliche Informationen …", "Neuer Bericht …",
-            "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
+        Assert.Equal(["← Dokumentation", "Berichte ansehen", "Nachrichten …", "Status …", "Ärztliche Informationen …", "Überleitungsbogen …",
+            "Neuer Bericht …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
         f.Kopf.Knoepfe[0].PerformClick();
         Assert.False(f.Bewohner.AkteSichtbar);
         Assert.Equal("Berta Birke", f.Bewohner.Gewaehlt!.Name);   // die Wahl bleibt

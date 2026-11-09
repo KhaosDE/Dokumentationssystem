@@ -173,6 +173,7 @@ public sealed partial class Hauptfenster : Form
             Bewohner.AkteZeigen(id);
         };
         Uebersicht.BerichtGewuenscht += id => NeuerBericht(id);
+        Uebersicht.UeberleitungGewuenscht += b => Bewohner.UeberleitungOeffnen(b);
         Uebersicht.BereichGewechselt += ArbeitsbereichWaehlen;
         Bewohner.BerichtGewuenscht += id => NeuerBericht(id);
         foreach (var (name, vorhaben) in Bauplan.Bereiche)

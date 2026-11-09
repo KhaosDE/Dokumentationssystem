@@ -121,3 +121,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.34.1 Zuständigkeit Forensik/FOSA mit Marken, Bestellweg und „Bestellung per E-Mail …“ im Medikamentenplan (Bauplan 30a); dazu Visite nach Zimmer und Tests für 0.33.9–0.33.20 angepasst.
 - 09.11.2026 — Claude Code: 0.35.0 Akte mit Reiter „Dokumente“: eigene Ablage, kopieren statt verschieben, Prüfsumme, Protokoll, Papierkorb, Demo-PDFs (Bauplan 31).
 - 09.11.2026 — Claude Code: 0.36.0 Vorhandene digitale Akte übernehmen: Vorschau mit Zuordnung, kopieren, Doppelte überspringen, Bericht (Bauplan 32).
+- 09.11.2026 — Claude Code: 0.37.0 Überleitungsbogen auf Knopfdruck: Zusammenstellen, Druck und PDF, Kopie in die Dokumente, Bericht und Statusmeldung (Bauplan 33).

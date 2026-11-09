@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.36.0** (Bauplan Schritt 32: vorhandene digitale Akte übernehmen).
+Stand: 09.11.2026. Version: **0.37.0** (Bauplan Schritt 33: Überleitungsbogen auf Knopfdruck).
 
 ## Aktuell
 
@@ -349,8 +349,16 @@ Unterordner, darin Unterordner je Kategorie. Die Vorschau schlägt je Ordner den
 überspringt Dateien, die schon da sind (gleiche Prüfsumme), und zeigt danach einen Bericht. Jede übernommene Datei steht
 im Protokoll mit „übernommen aus der digitalen Akte“. Zum Vorführen legt „Demo-Ordner anlegen“ einen ausgedachten Ordner an.
 
+Neu in 0.37.0: **„Überleitungsbogen …“** in der Akte und per Rechtsklick in Übersicht und Bewohnerliste. Anlass,
+Zeitpunkt (jetzt), Begleitung, Abschnitte zum Abhaken und Besonderheiten; das Blatt stellt Einrichtung, Person,
+Allergien, Diagnosen und Notfallhinweise, Medikamentenplan von heute (mit Bedarf und Pausen), Betreuung und Zuständige
+(bei Forensik: Betreuer „nicht zuständig“), Krankenkasse, Ärzte und Beschluss zusammen – Fehlendes als „nicht erfasst“.
+„Erstellen“ legt eine Kopie mit Datum in die Dokumente, schreibt auf Wunsch den Bericht „Überleitungsbogen erstellt: …“
+(wichtig, Übergabe) und die Statusmeldung „in der Klinik seit …“, dann die Druckvorschau; „Als PDF speichern …“ geht
+auch. Die Angaben der Einrichtung stehen in den Einstellungen (Datenordner, Vorgabe ausgedacht).
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 33 „Überleitungsbogen auf Knopfdruck“ (0.37.0).
+als Nächstes 34 „Abgängigkeitsmeldung“ (0.38.0).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1421,6 +1429,10 @@ als Nächstes 33 „Überleitungsbogen auf Knopfdruck“ (0.37.0).
 - 0.36.0 — Bauplan Schritt 32: `AkteUebernahme.cs` (Zuordnung nach Name, Kategorie nach Ordnername, Vorschau, Bericht,
   Demo-Ordner), `Speicher.AkteUebernehmen`, `AkteUebernahmeFenster`, Karte in den Einstellungen.
 
+- 0.37.0 — Bauplan Schritt 33: `Ueberleitung.cs` (`UeberleitungRegeln`, `Einrichtung` in `einrichtung.json`,
+  `TextPdf` mit mehreren Seiten ohne Schriftdateien), `Speicher.UeberleitungDaten/Ablegen/Bericht/Status`,
+  `UeberleitungFenster` mit `UeberleitungDruck`, `EinrichtungFenster`, Einstiege in Akte, Bewohnerliste und Übersicht.
+
 ## Offene Punkte
 
 - 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
@@ -1516,6 +1528,12 @@ als Nächstes 33 „Überleitungsbogen auf Knopfdruck“ (0.37.0).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.37.0): Überleitungsbogen – die Abwesenheit wird als **Statusmeldung** „in der Klinik seit …“ (7 Tage,
+alle Bereiche sehen sie) eingetragen statt im Modul Ausgangsliste: Das Modul hat dafür keine Schnittstelle nach außen,
+die Statusmeldung erscheint aber überall (Akte, Übersicht). Das Protokoll „wer hat wann einen Bogen erstellt“ ist das
+Protokoll der Dokumente (Grund „Überleitungsbogen: Anlass“). Schweigepflicht und Vitalwerte stehen bis zu den Schritten
+35 und 36 als „nicht erfasst“ auf dem Blatt. Ein Telefon für alle Bereiche (Dienstzimmer); je Bereich wäre eine Liste
+mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lässt sich trotzdem drucken.
 - 09.11.2026 (0.36.0): Übernahme – der Bewohner wird nur vorgeschlagen, wenn Vor- und Nachname im Ordnernamen stehen
   oder der Nachname eindeutig ist; sonst „nicht übernehmen“ zum Bestätigen. Die Kategorie kommt aus dem Namen des
   Unterordners (gleicher Name oder Stichwort), Dateien direkt im Ordner des Bewohners nach ihrem Dateinamen; eine eigene
@@ -2368,6 +2386,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.37.0: Akte → „Überleitungsbogen …“ → Anlass eintragen, „Erstellen“: Druckvorschau ansehen; danach unter
+„Dokumente“ die Kopie, unter Berichte den wichtigen Bericht und oben die Statusmeldung „in der Klinik seit …“.
 
 Version 0.36.0: Einstellungen → Verwaltung → „Digitale Akte übernehmen …“ → „Demo-Ordner anlegen“, Zuordnung ansehen,
 „Übernehmen“; danach in der Akte unter „Dokumente“ nachsehen.

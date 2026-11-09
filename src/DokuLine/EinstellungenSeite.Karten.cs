@@ -77,6 +77,10 @@ public sealed partial class EinstellungenSeite
         Karte("Wohnbereich", "Zimmer und Betten", "Wohnbereiche (offen oder beschützend) mit ihren Zimmern: Einzelzimmer oder „Bett Fenster“ und „Bett Tür“. Die Aufnahme zeigt nur freie Betten.",
             ZimmerKnopf);
 
+        EinrichtungKnopf.Click += (_, _) => { using var f = new EinrichtungFenster(speicher); Dialog.Zeigen(f, FindForm()); };
+        Karte("Wohnbereich", "Angaben der Einrichtung", "Name, Anschrift und Telefon des Dienstzimmers für den Überleitungsbogen. Nur im Datenordner, nie im Programm.",
+            EinrichtungKnopf, Funktionen.EinstellungenBereich);
+
         // Anzeige für den Fernseher
         AnzeigeKnopf.Click += (_, _) => { using var f = new AnzeigeFenster(speicher, Anzeige); Dialog.Zeigen(f, FindForm()); Geaendert?.Invoke(); };
         Karte("Wohnbereich", "Anzeige für den Fernseher", "Laufende Therapien je Wohnbereich als nur lesende Seite im lokalen Netz, mit Zugangscode. " +

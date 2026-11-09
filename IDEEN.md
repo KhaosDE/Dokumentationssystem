@@ -1623,7 +1623,7 @@ Umfang (Vorschlag):
 - In der Demo nur mit ausgedachten Ordnern zum Vorführen (Testordner aus den Demo-Daten).
 
 ## Überleitungsbogen auf Knopfdruck
-Status: freigegeben (Bauplan Schritt 33; Auswahl Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.37.0; Bauplan Schritt 33; Auswahl Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ein Blatt für Klinik, Notarzt oder Rettungsdienst, das das Programm aus vorhandenen Angaben
 zusammenstellt.

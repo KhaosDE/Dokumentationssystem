@@ -67,6 +67,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
 
     public event Action<long>? AkteGewuenscht;
     public event Action<long>? BerichtGewuenscht;
+    public event Action<Bewohner>? UeberleitungGewuenscht;
     public event Action<string>? StelleGewuenscht;          // „Übergabe“, „Tagesplan“, „Aufgaben“
     public event Action<Verlauf>? VerlaufGewuenscht;        // Nachricht öffnen
     public event Action<Aufgabe>? VisitenAufgabeGewuenscht;
@@ -107,6 +108,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
         menue.Items.Add("Akte öffnen", null, (_, _) => AkteOeffnen());
         menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
+        menue.Items.Add("Überleitungsbogen …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) UeberleitungGewuenscht?.Invoke(z.Bewohner); });
         Liste.ContextMenuStrip = menue;
         rechts.Controls.AddRange([ListenKopf, Suche, MeineBezugsbewohner, MeineEinzeltrainings, BereichHinweis, Liste]);
 

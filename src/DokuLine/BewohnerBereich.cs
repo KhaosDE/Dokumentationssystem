@@ -58,6 +58,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     private readonly Button nachrichtenKnopf = Stil.NebenKnopf("Nachrichten …");
     private readonly Button statusKnopf = Stil.NebenKnopf("Status …");
     private readonly Button berichtKnopf = Stil.NebenKnopf("Neuer Bericht …");
+    public Button UeberleitungKnopf { get; } = Stil.NebenKnopf("Überleitungsbogen …");
     public Button AerztlichKnopf { get; } = Stil.NebenKnopf("Ärztliche Informationen …");
 
     // „Neuer Bericht …“ aus der Akte; das Hauptfenster öffnet ihn.
@@ -104,6 +105,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
         menue.Items.Add("Akte öffnen", null, (_, _) => AkteOeffnen());
         menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
+        menue.Items.Add("Überleitungsbogen …", null, (_, _) => { if (Gewaehlt is Bewohner g) UeberleitungOeffnen(g); });
         Namen.ContextMenuStrip = menue;
         EinklappenKnopf.AccessibleName = "Bewohnerliste ein- oder ausklappen";
         EinklappenKnopf.Click += (_, _) => Einklappen(!Eingeklappt);
@@ -130,6 +132,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         nachrichtenKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) NachrichtenAnzeigen?.Invoke(id); };
         statusKnopf.Click += (_, _) => StatusOeffnen();
         AerztlichKnopf.Click += (_, _) => AerztlichOeffnen();
+        UeberleitungKnopf.Click += (_, _) => { if (Akte.Bewohner is Bewohner a) UeberleitungOeffnen(a); };
         berichtKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) BerichtGewuenscht?.Invoke(id); };
         Controls.Add(listenFlaeche);
         Controls.Add(Akte);
@@ -329,7 +332,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         AkteKnoepfeSperren();
         // Der Name steht nur einmal, auf der Karte darunter.
         KopfSetzen("Dokumentation", "Bewohnerakte",
-            [zurueckKnopf, berichteKnopf, nachrichtenKnopf, statusKnopf, AerztlichKnopf, berichtKnopf, bearbeitenKnopf]);
+            [zurueckKnopf, berichteKnopf, nachrichtenKnopf, statusKnopf, AerztlichKnopf, UeberleitungKnopf, berichtKnopf, bearbeitenKnopf]);
     }
 
     // Statusmeldung setzen oder aufheben (Mehrplatzbetrieb); danach die Akte neu lesen.
@@ -354,6 +357,13 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     }
 
     public BewohnerFormular FormularErstellen(Bewohner? b) => new(speicher, b);
+
+    // Überleitungsbogen (Bauplan 33): aus der Akte, per Rechtsklick in der Bewohnerliste und in der Übersicht.
+    public void UeberleitungOeffnen(Bewohner b)
+    {
+        using var fenster = new UeberleitungFenster(speicher, b);
+        Dialog.Zeigen(fenster, FindForm());
+    }
 
     // „Neuer Bewohner …“ aus der Übersicht: Formular; der gespeicherte Bewohner oder null.
     public Bewohner? NeuerBewohner()

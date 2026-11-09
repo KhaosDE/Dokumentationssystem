@@ -248,3 +248,57 @@ public sealed partial class Speicher
         return new UebernahmeErgebnis(uebernommen, doppelt, fehler, uebersprungen);
     }
 }
+
+// Überleitungsbogen (Bauplan 33): Angaben zusammenstellen, Kopie in die Dokumente, Bericht und Statusmeldung.
+public sealed partial class Speicher
+{
+    public const string UeberleitungKategorie = "Ärztliches und Befunde";
+
+    public UeberleitungDaten UeberleitungDaten(long bewohnerId, DateTime jetzt)
+    {
+        var b = Bewohner(bewohnerId) ?? throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        var heute = DateOnly.FromDateTime(jetzt);
+        var personen = Personen().ToDictionary(p => p.Id);
+        string Person(long? id) => id is long x && personen.TryGetValue(x, out var p)
+            ? string.Join(", ", new[] { p.Name, p.Praxis, p.Telefon.Length > 0 ? $"Tel. {p.Telefon}" : "" }.Where(s => s.Length > 0)) : AngabenRegeln.NichtErfasst;
+        return new UeberleitungDaten(b, Einrichtung.Laden(), Diagnosen(bewohnerId), Notfallhinweise(bewohnerId),
+            [.. Verordnungen(bewohnerId).Select(v => MedikationRegeln.Stand(v, heute))], Angaben(bewohnerId, heute), Person, heute);
+    }
+
+    // Kopie mit Datum in die Dokumente (Kategorie „Ärztliches und Befunde“); im Protokoll steht der Anlass.
+    public Dokument UeberleitungAblegen(long bewohnerId, string anlass, byte[] pdf, string kuerzel, DateTime jetzt)
+    {
+        string ordner = Path.Combine(Path.GetTempPath(), $"dokuline-ueberleitung-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(ordner);
+        try
+        {
+            string datei = Path.Combine(ordner, $"Überleitungsbogen {jetzt:yyyy-MM-dd HH-mm}.pdf");
+            File.WriteAllBytes(datei, pdf);
+            string kategorie = Dokumentkategorien().Contains(UeberleitungKategorie) ? UeberleitungKategorie : Dokumentkategorien().FirstOrDefault() ?? "";
+            return DokumentHinzufuegen(bewohnerId, datei, new DokumentEingabe
+            {
+                Kategorie = kategorie, Titel = $"Überleitungsbogen {jetzt:dd.MM.yyyy}", Datum = DateOnly.FromDateTime(jetzt), Hinweis = anlass.Trim(),
+            }, kuerzel, jetzt, grund: $"Überleitungsbogen: {anlass.Trim()}");
+        }
+        finally { Directory.Delete(ordner, recursive: true); }
+    }
+
+    // Wer wann einen Bogen erstellt hat.
+    public List<DokumentEreignis> Ueberleitungen(long bewohnerId) =>
+        [.. DokumentProtokoll(bewohnerId).Where(e => e.Aktion == DokumentAktion.Hinzugefuegt && e.Grund.StartsWith("Überleitungsbogen", StringComparison.Ordinal))];
+
+    // Danach auf Wunsch: wichtiger Bericht mit Übergabe und die Statusmeldung „in der Klinik seit …“ für alle Bereiche.
+    public Bericht UeberleitungBericht(long bewohnerId, string anlass, string kuerzel, DateTime jetzt)
+    {
+        var e = new BerichtEingabe
+        {
+            BewohnerId = bewohnerId, Datum = Datum.Text(DateOnly.FromDateTime(jetzt)), Uhrzeit = jetzt.ToString("HH:mm", CultureInfo.InvariantCulture),
+            Verfasser = kuerzel, Allgemein = true, Text = $"Überleitungsbogen erstellt: {(anlass.Trim().Length > 0 ? anlass.Trim() : "ohne Anlass")}.",
+            Wichtig = true, Uebergabe = true, UebergabeDauer = UebergabeDauer.DreiTage,
+        };
+        return BerichtSpeichern(BerichtRegeln.AusEingabe(e, jetzt), BerichtRegeln.UebergabeAus(e));
+    }
+
+    public Statusmeldung UeberleitungStatus(long bewohnerId, string kuerzel, string bereich, DateTime jetzt) =>
+        StatusmeldungSetzen(bewohnerId, $"in der Klinik seit {jetzt:dd.MM. HH:mm}", jetzt.AddDays(7), kuerzel, bereich);
+}

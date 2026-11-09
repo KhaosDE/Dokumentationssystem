@@ -35,7 +35,7 @@ public class AktionsleisteTests
         f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         Assert.Equal(["← Dokumentation", "Bearbeiten …", "Berichte ansehen", "Nachrichten …", "Status …", "Ärztliche Informationen …",
-            "Neuer Bericht …"],
+            "Überleitungsbogen …", "Neuer Bericht …"],
             f.Kopf.Knoepfe.OrderBy(k => k.Left).Select(k => k.Text));
         Hilfe.Foto(f, "111_aktionsleiste_akte");
 
