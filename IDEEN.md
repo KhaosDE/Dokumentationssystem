@@ -1821,15 +1821,16 @@ Umfang:
   Sonst gäbe es wieder zwei fast gleiche Bereiche (Rückmeldung Tobi zu Übersicht/Bewohner,
   08.11.2026). Die Akte öffnet man weiter per Doppelklick in Übersicht und Dokumentation oder
   über „Akte öffnen“.
-- **Links die Bewohner-Seitenleiste** (schmal, etwa 260 px, einklappbar): ganz oben **„Alle
-  Bewohner“**, darunter Zimmer und Name je Bewohner, Bereichswahl und Suchfeld darüber. Hinter
-  jedem Namen die **Zahl der Berichte, die zum aktuellen Filter passen**, und eine kleine Marke,
-  wenn darunter „Wichtig“ oder „Übergabe“ offen ist. Pfeiltasten blättern.
+- **Links die Bewohner-Seitenleiste** (schmal, etwa 240 px, einklappbar). Ergänzung Tobi
+  (09.11.2026): **kein Eintrag „Alle Bewohner“**; aufgeführt wird nur jeder Bewohner mit
+  **„Nachname, Vorname“**, alphabetisch nach Nachname, ohne Zimmer, Zähler oder Marken.
+  Darüber Bereichswahl und Suchfeld. Pfeiltasten blättern, die Berichte wechseln mit. Beim
+  Öffnen ist der erste Bewohner gewählt (bzw. der zuletzt gewählte).
 - **Rechts die Berichte als dichte Liste statt Karten:**
   - Gruppiert nach Tag mit Tagesüberschrift („Montag, 09.11.2026 · 6 Berichte“), neueste oben.
-  - Ein Bericht = eine Zeile mit fester Spaltenfolge: Uhrzeit · Schicht · (bei „Alle
-    Bewohner“: Zimmer und Name) · Marken (Wichtig, Übergabe, Berichtsart, Lebensbereiche als
-    Kurzwort) · Text · Kürzel. Haarlinie zwischen den Berichten, keine Kästen.
+  - Ein Bericht = eine Zeile mit fester Spaltenfolge: Uhrzeit · Schicht · Marken (Wichtig,
+    Übergabe, Berichtsart, Lebensbereiche als Kurzwort) · Text · Kürzel. Haarlinie zwischen den
+    Berichten, keine Kästen.
   - Der Text zeigt **höchstens zwei Zeilen**, dann „… mehr“. Ein Klick klappt den Bericht in
     der Liste auf (kein neues Fenster). Umschalter in der Aktionsleiste: **„kompakt“** (zwei
     Zeilen, Vorgabe) · **„vollständig“** (ganzer Text).
@@ -1837,7 +1838,8 @@ Umfang:
   - „Wichtig“ bekommt am Zeilenanfang ein Wort-Zeichen in Gefahr-Farbe, „Übergabe“ in
     Hinweis-Farbe; der übrige Bericht bleibt neutral (Farbe sparsam, `docs/gestaltung.md`).
   - Richtwert: Bei 1920 × 1080 mindestens 15 Berichte im Kompaktmodus ohne Bildlauf.
-- **Filterleiste über der Liste** (gilt für einen Bewohner und für „Alle Bewohner“):
+- **Filterleiste über der Liste** (gilt für den gewählten Bewohner; bleibt beim Wechsel des
+  Bewohners eingestellt):
   - Zeitraum: Heute · 7 Tage (Vorgabe) · 30 Tage · frei wählbar.
   - Kennzeichen: Wichtig · Übergabe · mit Nachtrag.
   - **Berichtsart** (neu, siehe unten), Lebensbereich, Schicht, Verfasser (Kürzel).
@@ -1850,8 +1852,7 @@ Umfang:
   Betreuer/Behörde · Besonderes Vorkommnis. Liste in den Einstellungen änderbar. Berichte aus
   Visite und Abgängigkeitsmeldung bekommen ihre Art automatisch. Vorhandene Demo-Berichte
   erhalten passende Arten.
-- **Aktionsleiste:** „Neuer Bericht …“ (Hauptaktion; für den gewählten Bewohner, bei „Alle
-  Bewohner“ mit Auswahl), „Akte öffnen“, kompakt/vollständig, „Drucken …“ (druckt, was der
+- **Aktionsleiste:** „Neuer Bericht …“ (Hauptaktion, für den gewählten Bewohner), „Akte öffnen“, kompakt/vollständig, „Drucken …“ (druckt, was der
   Filter zeigt).
 - **Akte:** Der Reiter „Berichte“ entfällt. Im Akte-Kopf ein Knopf „Berichte ansehen“, der die
   Dokumentation mit diesem Bewohner öffnet. HEB, Reflexion, Visite und Übergabe lesen die
