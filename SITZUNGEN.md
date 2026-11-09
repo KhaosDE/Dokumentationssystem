@@ -105,3 +105,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: Bauplan 29s Teil 1 – Format- und Maßprüfung im Build, docs/aufbau.md (0.33.8).
 - 09.11.2026 — Claude Code: Bauplan 29s Teil 2 – Kommentare ohne Verlauf, docs/technik.md (0.33.9).
 - 09.11.2026 — Claude Code: Bauplan 29s Teil 3 – gemeinsame Schnittstelle der Bereichsseiten, große Dateien geteilt (0.33.10).
+- 09.11.2026 — Claude Code: 0.33.11 Kuvert für ungelesene Nachrichten in der Kopfzeile, Hinweis in der Dokumentation entfernt (Bauplan 29e).

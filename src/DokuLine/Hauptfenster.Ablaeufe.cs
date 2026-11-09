@@ -80,13 +80,13 @@ public sealed partial class Hauptfenster
         Bewohner.AufgabenSetzen(offen, jetzt);
     }
 
-    // Zähler ungelesener Nachrichten des angemeldeten Benutzers (Seitenleiste und Hinweis über den Karten).
+    // Zähler ungelesener Nachrichten des angemeldeten Benutzers (Seitenleiste und Kuvert in der Kopfzeile).
     public void NachrichtenZaehlen()
     {
         var ich = speicher.Kollege(Einstellungen.Laden().Kuerzel);
         int n = ich is null ? 0 : speicher.UngeleseneNachrichten(ich.Kuerzel);
         Navigation.Single(e => e.Text == "Nachrichten").ZaehlerSetzen(n > 0 ? n : null, false, $"{n} ungelesen");
-        Bewohner.NachrichtenSetzen(n, ich?.Name);
+        Kopf.NachrichtenSetzen(ich is null ? null : n);
     }
 
     // Den ältesten eigenen Entwurf fortsetzen (öffnet „Neuer Bericht“ mit dem Entwurf).

@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Nachrichten: „Angemeldet als …“, Zähler, Hinweis über den Karten, Ordner, Verlauf öffnen,
+// Nachrichten: „Angemeldet als …“, Zähler, Kuvert in der Kopfzeile, Ordner, Verlauf öffnen,
 // antworten, archivieren, neue Nachricht mit Bewohnerbezug aus der Akte.
 [Collection("Oberflaeche")]
 public class NachrichtenOberflaechenTests
@@ -10,22 +10,24 @@ public class NachrichtenOberflaechenTests
     private static SeitenleistenEintrag Eintrag(Hauptfenster f) => f.Navigation.Single(n => n.Text == "Nachrichten");
 
     [Fact]
-    public void Angemeldet_als_im_Kopf_mit_Zaehler_und_Hinweis() => Hilfe.Sta(() =>
+    public void Angemeldet_als_im_Kopf_mit_Zaehler_und_Kuvert() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         Assert.Equal("Nicht angemeldet", f.Kopf.BenutzerText);
         Assert.Null(Eintrag(f).Anzahl);
-        Assert.False(f.Bewohner.NachrichtenHinweisSichtbar);
+        Assert.False(f.Kopf.Kuvert.Visible);
 
         f.BenutzerWaehlen("AB");
         Assert.Equal("Angemeldet: AB – Anna Bachstelze", f.Kopf.BenutzerText);
         Assert.Equal("AB", Einstellungen.Laden().Kuerzel);   // gilt auch für Berichte, Übergabe, Aufgaben
         Assert.Equal(3, Eintrag(f).Anzahl);
-        Assert.True(f.Bewohner.NachrichtenHinweisSichtbar);
-        Assert.Equal("3 ungelesene Nachrichten für Anna Bachstelze", f.Bewohner.Nachrichten.Text2);
-        f.Bewohner.Nachrichten.OeffnenKnopf.PerformClick();
+        Assert.True(f.Kopf.Kuvert.Visible);
+        Assert.Equal(3, f.Kopf.Kuvert.Ungelesen);
+        Assert.Equal("3 ungelesene Nachrichten", f.Kopf.Kuvert.HinweisText);
+        Assert.True(f.Kopf.Kuvert.Right < f.Kopf.BenutzerAnzeige.Left);            // links neben „Angemeldet: …“
+        f.Kopf.Kuvert.Klicken();
         Assert.Equal("Nachrichten", f.AktiverBereich);
         Assert.Equal("R1 · Anna Bachstelze · 3 ungelesen", f.Kopf.KleinText);
 
@@ -33,9 +35,13 @@ public class NachrichtenOberflaechenTests
         Assert.Equal("Angemeldet: OP – Olga Pirol", f.Kopf.BenutzerText);
         Assert.Equal("Nachrichten", f.AktiverBereich);
         Assert.Empty(f.Nachrichten.Karten);                                        // OP hat nichts bekommen
+        Assert.True(f.Kopf.Kuvert.Visible);
+        Assert.Equal(0, f.Kopf.Kuvert.Ungelesen);
+        Assert.Equal("Keine ungelesenen Nachrichten", f.Kopf.Kuvert.HinweisText);
         Assert.Equal(1, f.Nachrichten.Ordner[NachrichtenOrdner.Gesendet].Anzahl);   // nur „Schwimmkurs“ geschrieben
         f.BenutzerWaehlen("");
         Assert.Equal("Nicht angemeldet", f.Kopf.BenutzerText);
+        Assert.False(f.Kopf.Kuvert.Visible);
         Assert.True(f.Nachrichten.Hinweis.Visible);
         Assert.False(f.Nachrichten.NeuKnopf.Enabled);
         Assert.Empty(f.Nachrichten.Karten);

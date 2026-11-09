@@ -92,6 +92,7 @@ public sealed partial class Hauptfenster : Form
             BereichWaehlen("Nachrichten", filterBehalten: true);
         };
         Kopf.AbmeldenKnopf.Click += (_, _) => AbmeldenOderAnmelden();
+        Kopf.Kuvert.Click += (_, _) => BereichWaehlen("Nachrichten");
         Kopf.EntwurfKnopf.Click += (_, _) => EntwurfFortsetzen();
         speicher.EntwuerfeGeaendert += EntwuerfeZaehlen;
         Kopf.LogoGewuenscht += () => EinstellungenOeffnen("Wohnbereich");

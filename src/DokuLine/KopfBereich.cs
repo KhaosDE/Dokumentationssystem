@@ -37,6 +37,8 @@ public sealed class KopfBereich : Panel
     public Label BenutzerAnzeige { get; } = new() { AutoSize = true, BackColor = Color.Transparent, Font = Stil.Standard, UseMnemonic = false };
     public Button AbmeldenKnopf { get; } = Stil.NebenKnopf("Abmelden (F12)");
     public Button EntwurfKnopf { get; } = Stil.NebenKnopf("Entwurf fortsetzen");
+    // Links neben „Angemeldet: …“; nur sichtbar, wenn jemand angemeldet ist.
+    public KuvertKnopf Kuvert { get; } = new() { Visible = false };
     private const int BenutzerHoehe = 30;
     // Die Aktionen des Bereichs stehen in einer Leiste direkt unter der Kopfzeile (das
     // Hauptfenster legt sie dorthin); „Entwurf fortsetzen“ steht dort rechts außen.
@@ -61,7 +63,7 @@ public sealed class KopfBereich : Panel
         Height = S(GesamtHoehe);
         AccessibleName = DemoHinweis;
         EntwurfKnopf.Visible = false;
-        Controls.AddRange([BenutzerAnzeige, AbmeldenKnopf, Eingesprungen]);
+        Controls.AddRange([BenutzerAnzeige, AbmeldenKnopf, Eingesprungen, Kuvert]);
         Leiste.EntwurfSetzen(EntwurfKnopf);
         BenutzerSetzen(null, null);
     }
@@ -78,6 +80,14 @@ public sealed class KopfBereich : Panel
         Hinweis.SetToolTip(AbmeldenKnopf, kuerzel is null
             ? "Mit dem Kürzel anmelden."
             : "Abmelden (Taste F12, aus jedem Fenster). Danach ist nichts mehr zu sehen, bis sich jemand anmeldet.");
+        PerformLayout();
+    }
+
+    // null: niemand angemeldet, kein Kuvert.
+    public void NachrichtenSetzen(int? ungelesen)
+    {
+        Kuvert.Visible = ungelesen is not null;
+        Kuvert.Setzen(ungelesen ?? 0);
         PerformLayout();
     }
 
@@ -217,6 +227,7 @@ public sealed class KopfBereich : Panel
         int b = Math.Max(AbmeldenKnopf.PreferredSize.Width, TextRenderer.MeasureText(AbmeldenKnopf.Text, AbmeldenKnopf.Font).Width + S(24));
         AbmeldenKnopf.Bounds = new Rectangle(RechtsNebenLogo() - b, zeile, b, hoehe);
         BenutzerAnzeige.Location = new Point(AbmeldenKnopf.Left - S(Stil.AbstandKlein) - BenutzerAnzeige.PreferredWidth, zeile + (hoehe - BenutzerAnzeige.PreferredHeight) / 2);
+        Kuvert.Location = new Point(BenutzerAnzeige.Left - S(Stil.AbstandKlein) - Kuvert.Width, zeile + (hoehe - Kuvert.Height) / 2);
     }
 
     protected override void OnPaint(PaintEventArgs e)

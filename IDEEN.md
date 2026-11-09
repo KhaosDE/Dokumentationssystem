@@ -1949,7 +1949,7 @@ Umfang:
 - Rechte bleiben unverändert.
 
 ## Nachrichten: Kuvert in der Kopfzeile statt Hinweis in jedem Fenster
-Status: freigegeben (Bauplan Schritt 29e; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.11; Bauplan Schritt 29e; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ungelesene Nachrichten zeigt ein Kuvert in der Kopfzeile an, nicht mehr ein Hinweis in den
 Fenstern.

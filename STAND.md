@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.10** (Bauplan Schritt 29s, Teil 3: Bereichsseiten und große Dateien).
+Stand: 09.11.2026. Version: **0.33.11** (Bauplan Schritt 29e: Kuvert für Nachrichten in der Kopfzeile).
 
 ## Aktuell
 
@@ -242,8 +242,13 @@ Neu in 0.33.9 (Aufräumen, das Programm verhält sich wie vorher): Die Kommentar
 Neu in 0.33.10 (Aufräumen, das Programm verhält sich wie vorher): Alle Bereiche der Seitenleiste folgen einer
 gemeinsamen Schnittstelle; die größten Dateien sind geteilt. Damit ist Schritt 29s abgeschlossen.
 
+Neu in 0.33.11: In der Kopfzeile links neben „Angemeldet: …“ steht ein **Kuvert**. Mit ungelesenen Nachrichten trägt
+es einen roten Kreis mit Ausrufezeichen und daneben die Zahl („3“); der Hinweis beim Darüberfahren sagt „3 ungelesene
+Nachrichten“. Ohne ungelesene ist es grau und ohne Zeichen. Ein Klick öffnet „Nachrichten“. Der Hinweis über der
+Liste im Bereich „Dokumentation“ entfällt; der Zähler in der Seitenleiste bleibt.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29e „Nachrichten: Kuvert in der Kopfzeile“ (0.33.11).
+als Nächstes 29f „Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation)“ (0.33.12).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1188,6 +1193,13 @@ als Nächstes 29e „Nachrichten: Kuvert in der Kopfzeile“ (0.33.11).
     Verlauf (301), 14 Dateien über 400 Zeilen (21), 87 Methoden über 40 Zeilen (88), rund 2.050 Zeilen über 120
     Zeichen (2.057).
 
+- 0.33.11 — Bauplan Schritt 29e:
+  - `KuvertKnopf` (Bausteine): Kuvert-Symbol, roter Kreis mit „!“ und Zahl bei ungelesenen Nachrichten, Tooltip,
+    mit Tastatur bedienbar; nur sichtbar, wenn jemand angemeldet ist.
+  - `KopfBereich.NachrichtenSetzen`; das Hauptfenster zählt wie bisher und setzt Seitenleiste und Kuvert.
+  - Der Nachrichten-Hinweis über der Liste im Bereich „Dokumentation“ ist entfernt (Klasse `NachrichtenHinweis`
+    gelöscht).
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1269,6 +1281,10 @@ als Nächstes 29e „Nachrichten: Kuvert in der Kopfzeile“ (0.33.11).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.11): Das Kuvert zeigt die Zahl zusätzlich als Text neben dem roten Kreis, damit die Farbe nicht
+  allein die Information trägt (`docs/gestaltung.md`). Ohne Anmeldung steht kein Kuvert da, weil es dann niemanden
+  gibt, dessen Nachrichten gezählt werden. Ab 100 ungelesenen steht „99+“.
 
 - 09.11.2026 (0.33.10): Lange Zeilen und lange Methoden werden nicht auf einmal umgebrochen: Ein maschineller Umbruch
   macht den Code schlechter lesbar (bei 29b ausprobiert), ein Umbau von Hand aller 2.000 Stellen wäre ein großes
@@ -2029,6 +2045,13 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.11:
+
+1. Als „AB“ anmelden: oben links neben „Angemeldet: AB – …“ ein Kuvert mit rotem Ausrufezeichen und „3“. Maus
+   darüber → „3 ungelesene Nachrichten“. Klick → Bereich „Nachrichten“.
+2. Als „OP“ anmelden: Kuvert grau, ohne Zeichen. Abmelden (F12): kein Kuvert.
+3. Bereich „Dokumentation“: über der Liste steht kein Nachrichten-Hinweis mehr.
 
 Version 0.33.10: Jeden Bereich der Seitenleiste einmal öffnen – Kopfzeile und Aktionsleiste sind wie vorher
 (Aufräumen, keine neue Funktion).

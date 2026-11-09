@@ -56,7 +56,6 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     private long? zuletzt;
     // Offene Aufgaben über der Liste (Wohnbereich-ToDo), mit Knopf zu allen.
     public AufgabenKurzliste Aufgaben { get; } = new();
-    public NachrichtenHinweis Nachrichten { get; } = new() { Visible = false };
     public event Action<long?>? NachrichtenAnzeigen;
     private readonly Button nachrichtenKnopf = Stil.NebenKnopf("Nachrichten …");
     private readonly Button statusKnopf = Stil.NebenKnopf("Status …");
@@ -134,10 +133,8 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         aufgabenRahmen.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross,
             Stil.AbstandKlein);
         aufgabenRahmen.Controls.Add(Aufgaben);
-        aufgabenRahmen.Controls.Add(Nachrichten);
         aufgabenRahmen.Layout += (_, _) => AufgabenAnordnen();
         Aufgaben.AlleKnopf.Click += (_, _) => AufgabenAnzeigen?.Invoke();
-        Nachrichten.OeffnenKnopf.Click += (_, _) => NachrichtenAnzeigen?.Invoke(null);
         nachrichtenKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) NachrichtenAnzeigen?.Invoke(id); };
         statusKnopf.Click += (_, _) => StatusOeffnen();
         AerztlichKnopf.Click += (_, _) => AerztlichOeffnen();
@@ -158,14 +155,8 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     private void AufgabenAnordnen()
     {
         var p = aufgabenRahmen.Padding;
-        int breite = Math.Max(100, aufgabenRahmen.ClientSize.Width - p.Horizontal), y = p.Top;
-        if (nachrichtenSichtbar)
-        {
-            Nachrichten.SetBounds(p.Left, y, breite, Nachrichten.Height);
-            Nachrichten.PerformLayout();
-            y = Nachrichten.Bottom + Stil.Px(this, Stil.AbstandKlein);
-        }
-        Aufgaben.SetBounds(p.Left, y, breite, Aufgaben.Height);
+        int breite = Math.Max(100, aufgabenRahmen.ClientSize.Width - p.Horizontal);
+        Aufgaben.SetBounds(p.Left, p.Top, breite, Aufgaben.Height);
         Aufgaben.PerformLayout();
         int hoehe = Aufgaben.Bottom + p.Bottom;
         if (aufgabenRahmen.Height != hoehe) aufgabenRahmen.Height = hoehe;
@@ -369,18 +360,6 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     }
 
     public BewohnerFormular FormularErstellen(Bewohner? b) => new(speicher, b);
-
-    // Hinweis auf ungelesene Nachrichten über den Karten (nur wenn es welche gibt).
-    private bool nachrichtenSichtbar;
-    public bool NachrichtenHinweisSichtbar => nachrichtenSichtbar;
-
-    public void NachrichtenSetzen(int ungelesen, string? name)
-    {
-        nachrichtenSichtbar = ungelesen > 0 && name is not null;
-        Nachrichten.Visible = nachrichtenSichtbar;
-        if (nachrichtenSichtbar) Nachrichten.Setzen(ungelesen, name);
-        aufgabenRahmen.PerformLayout();
-    }
 
     public void AufgabenSetzen(IReadOnlyList<Aufgabe> offen, DateTime jetzt)
     {
