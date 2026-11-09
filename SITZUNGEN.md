@@ -97,3 +97,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Vorschlag 37 (offen): Betriebsmodus für den Terminalserver (ein Server für beide Häuser, Thin Clients) (Chat „Programme/Apps“).
 - 09.11.2026 — Schritt 37 Betriebsmodus freigegeben, CLAUDE.md Regel 4 geändert (echte Daten nur im Betriebsmodus nach schriftlicher Freigabe); Bereichswahl nach Personal getrennt (Wohnbereich ohne „Therapie“) (Chat „Programme/Apps“).
 - 09.11.2026 — Schritt 29r freigegeben: Überschriften der Kästen in der Übersicht als eingerahmte Kopfleiste (Chat „Programme/Apps“).
+- 09.11.2026 — Code-Regeln in docs/code-regeln.md, Verweis in CLAUDE.md, Schritt 29s „Aufräumen nach den Code-Regeln“ freigegeben (Chat „Programme/Apps“).

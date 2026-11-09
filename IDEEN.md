@@ -75,6 +75,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 29d | Wohnbereich einmal in der Übersicht wählen, gilt überall | 0.33.6 |
 | 29q | Aufgaben gehören zu einem Bewohner oder einem Bereich | 0.33.6 |
 | 29r | Übersicht: Überschriften der Kästen eingerahmt | 0.33.6 |
+| 29s | Aufräumen nach den Code-Regeln (ohne neue Funktionen) | 0.33.7 |
 | 29e | Nachrichten: Kuvert in der Kopfzeile statt Hinweis in jedem Fenster | 0.33.7 |
 | 29f | Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation) | 0.33.8 |
 | 29g | Tagesplan im normalen Programmstil, kleiner und übersichtlicher | 0.33.9 |
@@ -2304,3 +2305,25 @@ Umfang:
   Darüberfahren etwas kräftiger.
 - Dieselbe Kopfleiste überall, wo es solche Kästen gibt (z. B. Laufende Therapien, Wochenpläne),
   damit es im Programm einheitlich bleibt (`docs/gestaltung.md` ergänzen).
+
+## Aufräumen nach den Code-Regeln (ohne neue Funktionen)
+Status: freigegeben (Bauplan Schritt 29s; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Der vorhandene Code wird nach `docs/code-regeln.md` aufgeräumt. Das Programm verhält sich
+danach genau wie vorher.
+Warum: Vorgabe Tobi (09.11.2026): Der Code soll effektiver werden und für jemanden, der ihn sich
+ansieht, ersichtlich sein; kürzere Kommentare machen die Dateien kleiner.
+Umfang (in mehreren kleinen Pull Requests, jeder mit grünen Tests):
+1. `.editorconfig` und `dotnet format --verify-no-changes` im Windows-Build; Skript in
+   `werkzeuge/`, das Dateien über 400 Zeilen, Methoden über 40 Zeilen und Zeilen über 120 Zeichen
+   auflistet (Hinweis im Build, kein Fehler).
+2. `docs/aufbau.md` mit Überblick und Glossar (Code-Regeln, Abschnitt 4).
+3. Kommentare: Verlauf („Schritt …“, „0.xx: vorher …“) entfernen, Dateiköpfe auf höchstens drei
+   Zeilen, auskommentierten Code löschen.
+4. Gemeinsame Schnittstelle für die Bereichsseiten; `Hauptfenster.BereichWaehlen` ohne
+   `if`-Kette.
+5. Die größten Dateien teilen (zuerst `Hauptfenster`, `KalenderSeite`, `MedikationAnsicht`,
+   `BewohnerBereich`, `VisitenSeite`, `EinstellungenSeite`).
+6. **Vorher/nachher in `STAND.md`:** Zeilen gesamt, Kommentarzeilen, Dateien über 400 Zeilen,
+   Zeilen über 120 Zeichen (Ausgangswerte stehen in `docs/code-regeln.md`).
+- Kann mit Schritt 29m (schnellerer Wechsel) zusammen geplant werden, aber getrennte Pull Requests.

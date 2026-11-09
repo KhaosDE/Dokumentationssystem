@@ -62,6 +62,8 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 - Anhalten und fragen nur, wenn eine Regel aus „Unverhandelbar“ verletzt würde oder
   etwas Unumkehrbares nötig ist.
 - Kleine, lauffähige Schritte: ändern, testen, committen, `STAND.md` aktualisieren.
+- **Code-Regeln:** `docs/code-regeln.md` gilt für jede Änderung (Kommentare nur „warum“, kein
+  Verlauf im Code, Größen, Namen, Tempo, Datenschutz). Abweichungen begründen in `STAND.md`.
 - Zweig: Arbeitszweig mit Pull Request. Zusammenführen nach `main` erst, wenn Tests und
   Windows-Build grün sind; dann darfst du selbst zusammenführen. Jeder Push nach `main`
   erzeugt ein Release, das Tobis Programm als Update bekommt.
