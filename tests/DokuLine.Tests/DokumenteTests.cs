@@ -118,3 +118,72 @@ public sealed class DokumenteTests : IDisposable
         Assert.Equal(kategorien, s.Dokumentkategorien());
     }
 }
+
+// Bauplan 32: vorhandene digitale Akte übernehmen.
+[Collection("Datenordner")]
+public sealed class AkteUebernahmeTests : IDisposable
+{
+    private static readonly DateTime Jetzt = new(2026, 11, 9, 10, 0, 0);
+    private readonly Datenordner daten = new();
+    private readonly Speicher s;
+    private readonly string ziel = Path.Combine(Path.GetTempPath(), $"dokuline-akte-{Guid.NewGuid():N}");
+
+    public AkteUebernahmeTests()
+    {
+        s = new Speicher { Uhr = () => Jetzt };
+        s.DemoZuruecksetzen();
+    }
+
+    public void Dispose()
+    {
+        s.Dispose();
+        daten.Dispose();
+        try { Directory.Delete(ziel, recursive: true); } catch (IOException) { }
+    }
+
+    private static Bewohner B(long id, string vorname, string nachname) =>
+        new() { Id = id, Vorname = vorname, Nachname = nachname, Zimmer = "1", Geburtsdatum = new(1980, 1, 1), Aufnahmedatum = new(2020, 1, 1) };
+
+    [Fact]
+    public void Zuordnung_nach_Name()
+    {
+        var liste = new[] { B(1, "Anton", "Ahorn"), B(2, "Berta", "Birke"), B(3, "Bernd", "Birke") };
+        Assert.Equal(1, AkteUebernahme.Zuordnen("Ahorn, Anton", liste));
+        Assert.Equal(1, AkteUebernahme.Zuordnen("AHORN_ANTON", liste));
+        Assert.Equal(1, AkteUebernahme.Zuordnen("Ahorn", liste));         // einziger mit dem Nachnamen
+        Assert.Null(AkteUebernahme.Zuordnen("Birke", liste));             // zwei mit dem Nachnamen: zum Bestätigen
+        Assert.Equal(3, AkteUebernahme.Zuordnen("Birke Bernd", liste));
+        Assert.Null(AkteUebernahme.Zuordnen("Muster, Max", liste));
+        var kategorien = DokumentRegeln.Kategorienvorgabe;
+        Assert.Equal("Krankenkasse", AkteUebernahme.KategorieFuerOrdner("krankenkasse", kategorien));
+        Assert.Equal("Ärztliches und Befunde", AkteUebernahme.KategorieFuerOrdner("Arztbriefe", kategorien));
+    }
+
+    [Fact]
+    public void Vorschau_Kopieren_Doppelte_und_Bericht()
+    {
+        var bewohner = s.AlleBewohner();
+        string wurzel = AkteUebernahme.DemoOrdnerAnlegen(ziel, bewohner);
+        var plan = AkteUebernahme.Planen(wurzel, bewohner, s.Dokumentkategorien());
+        Assert.Equal(4, plan.Count);
+        Assert.Equal(3, plan.Count(o => o.BewohnerId is not null));
+        Assert.Contains(plan, o => o.Name.StartsWith("Muster") && o.BewohnerId is null);
+        var erster = plan.First(o => o.BewohnerId is not null);
+        Assert.Equal(["Aufnahme und Verträge", "Kostenträger und Bescheide", "Ärztliches und Befunde"],
+            erster.Dateien.Select(d => d.Kategorie).Order(StringComparer.Ordinal));
+        long id = erster.BewohnerId!.Value;
+        int vorher = s.Dokumente(id).Count;
+        var e = s.AkteUebernehmen(plan, "CD", Jetzt);
+        Assert.Equal(9, e.Uebernommen);
+        Assert.Single(e.Uebersprungen);
+        Assert.Empty(e.Fehler);
+        Assert.Equal(vorher + 3, s.Dokumente(id).Count);
+        Assert.True(File.Exists(erster.Dateien[0].Pfad));   // der alte Ordner bleibt
+        Assert.Contains(s.DokumentProtokoll(id), x => x.Grund == AkteUebernahme.Grund);
+        // Ein zweites Mal: alles schon da.
+        var zweimal = s.AkteUebernehmen(plan, "CD", Jetzt);
+        Assert.Equal((0, 9), (zweimal.Uebernommen, zweimal.Doppelt));
+        Assert.StartsWith("Übernommen: 0 · schon vorhanden (übersprungen): 9", AkteUebernahme.Bericht(zweimal));
+        Assert.Throws<Eingabefehler>(() => s.AkteUebernehmen(plan, "OP", Jetzt));   // Therapie: kein Recht
+    }
+}

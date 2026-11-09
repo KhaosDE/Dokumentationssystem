@@ -1607,7 +1607,7 @@ Umfang (Vorschlag):
   echte Logos, Behörden- oder Einrichtungsnamen (`CLAUDE.md`, Regeln 1 und 7).
 
 ## Vorhandene digitale Akte übernehmen
-Status: freigegeben (Bauplan Schritt 32; OK Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.36.0; Bauplan Schritt 32; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ein Assistent, der einen vorhandenen Ordner „ein Unterordner je Bewohner“ in die
 Dokumentenablage übernimmt.

@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.35.0** (Bauplan Schritt 31: Akte, Reiter „Dokumente“).
+Stand: 09.11.2026. Version: **0.36.0** (Bauplan Schritt 32: vorhandene digitale Akte übernehmen).
 
 ## Aktuell
 
@@ -343,8 +343,14 @@ Protokoll; eine außerhalb veränderte Datei erkennt DokuLine an der Prüfsumme.
 Krankenkasse und Kostenträger führt „Dokumente (…) …“ zur passenden Kategorie. Demo: Betreuerausweis, Kostenzusage
 und Arztbrief als kleine PDF mit großem „DEMO — ausgedachte Daten“ bei je vier Bewohnern jedes Bereichs.
 
+Neu in 0.36.0: **„Digitale Akte übernehmen …“** (Einstellungen → Verwaltung): Hauptordner wählen – je Bewohner ein
+Unterordner, darin Unterordner je Kategorie. Die Vorschau schlägt je Ordner den Bewohner vor (nach Name, in der Liste
+änderbar) und zeigt Dateien und Kategorien; „Übernehmen“ kopiert in die Ablage „Dokumente“ (der alte Ordner bleibt),
+überspringt Dateien, die schon da sind (gleiche Prüfsumme), und zeigt danach einen Bericht. Jede übernommene Datei steht
+im Protokoll mit „übernommen aus der digitalen Akte“. Zum Vorführen legt „Demo-Ordner anlegen“ einen ausgedachten Ordner an.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 32 „Vorhandene digitale Akte übernehmen“ (0.36.0).
+als Nächstes 33 „Überleitungsbogen auf Knopfdruck“ (0.37.0).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1412,6 +1418,9 @@ als Nächstes 32 „Vorhandene digitale Akte übernehmen“ (0.36.0).
   Papierkorb legen“, „… endgültig löschen“; `DokumenteAnsicht`, `DokumentFenster`, Knopf „Dokumente (…) …“ in den
   Reitern.
 
+- 0.36.0 — Bauplan Schritt 32: `AkteUebernahme.cs` (Zuordnung nach Name, Kategorie nach Ordnername, Vorschau, Bericht,
+  Demo-Ordner), `Speicher.AkteUebernehmen`, `AkteUebernahmeFenster`, Karte in den Einstellungen.
+
 ## Offene Punkte
 
 - 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
@@ -1507,6 +1516,10 @@ als Nächstes 32 „Vorhandene digitale Akte übernehmen“ (0.36.0).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.36.0): Übernahme – der Bewohner wird nur vorgeschlagen, wenn Vor- und Nachname im Ordnernamen stehen
+  oder der Nachname eindeutig ist; sonst „nicht übernehmen“ zum Bestätigen. Die Kategorie kommt aus dem Namen des
+  Unterordners (gleicher Name oder Stichwort), Dateien direkt im Ordner des Bewohners nach ihrem Dateinamen; eine eigene
+  Zuordnungstabelle der Ordnernamen gibt es nicht (einfachere Lösung). Als Datum gilt das Änderungsdatum der Datei.
 - 09.11.2026 (0.35.0): Dokumente – der Papierkorb ist ein Vermerk (Ereignis), die Datei bleibt an ihrem Platz, bis sie
   endgültig gelöscht wird; so bleibt die Zeile der Datenbank unverändert. Der Dateiname in der Ablage bekommt eine
   zufällige Kennung davor (kein Überschreiben, keine Pfadangaben aus dem Original). Umbenannte Kategorien: Dokumente
@@ -2355,6 +2368,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.36.0: Einstellungen → Verwaltung → „Digitale Akte übernehmen …“ → „Demo-Ordner anlegen“, Zuordnung ansehen,
+„Übernehmen“; danach in der Akte unter „Dokumente“ nachsehen.
 
 Version 0.35.0:
 

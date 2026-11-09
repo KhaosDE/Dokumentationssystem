@@ -81,7 +81,8 @@ public sealed partial class Speicher
     }
 
     // Kopiert die Datei in die Ablage (das Original bleibt) und trägt sie ein; vorgaenger: „Ersetzen“.
-    public Dokument DokumentHinzufuegen(long bewohnerId, string quelle, DokumentEingabe e, string kuerzel, DateTime jetzt, long? vorgaenger = null)
+    public Dokument DokumentHinzufuegen(long bewohnerId, string quelle, DokumentEingabe e, string kuerzel, DateTime jetzt, long? vorgaenger = null,
+        string grund = "")
     {
         Recht(kuerzel, Funktionen.DokumenteHinzufuegen);
         if (Bewohner(bewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
@@ -100,7 +101,7 @@ public sealed partial class Speicher
             string summe;
             using (var strom = File.OpenRead(ziel)) summe = Convert.ToHexString(SHA256.HashData(strom));
             using var transaktion = db.BeginTransaction();
-            id = DokumentEinfuegen(bewohnerId, e, name, Path.GetFileName(quelle), info.Length, summe, kuerzel.Trim(), jetzt, vorgaenger, transaktion);
+            id = DokumentEinfuegen(bewohnerId, e, name, Path.GetFileName(quelle), info.Length, summe, kuerzel.Trim(), jetzt, vorgaenger, transaktion, grund);
             if (vorgaenger is long alt) Ereignis(alt, DokumentAktion.Ersetzt, jetzt, kuerzel, $"durch Nr. {id}", transaktion);
             transaktion.Commit();
         }
@@ -174,7 +175,7 @@ public sealed partial class Speicher
     }
 
     private long DokumentEinfuegen(long bewohnerId, DokumentEingabe e, string datei, string original, long groesse, string summe, string kuerzel,
-        DateTime jetzt, long? vorgaenger, SqliteTransaction transaktion)
+        DateTime jetzt, long? vorgaenger, SqliteTransaction transaktion, string grund = "")
     {
         Ausfuehren("""
             INSERT INTO dokumente (bewohner_id, kategorie, titel, datum, gueltig_bis, hinweis, datei, original, groesse, pruefsumme, hinzugefuegt, kuerzel, vorgaenger)
@@ -183,7 +184,7 @@ public sealed partial class Speicher
             ("$g", e.GueltigBis is DateOnly g ? TagText(g) : null), ("$h", e.Hinweis.Trim()), ("$n", datei), ("$o", original), ("$s", groesse),
             ("$p", summe), ("$z", Zeit(jetzt)), ("$u", kuerzel), ("$v", vorgaenger));
         long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
-        Ereignis(id, DokumentAktion.Hinzugefuegt, jetzt, kuerzel, "", transaktion);
+        Ereignis(id, DokumentAktion.Hinzugefuegt, jetzt, kuerzel, grund, transaktion);
         return id;
     }
 
@@ -211,5 +212,39 @@ public sealed partial class Speicher
                 inhalt.Length, Convert.ToHexString(SHA256.HashData(inhalt)), "EF", jetzt.AddDays(-20), null, transaktion);
         }
         SetzeMeta(DemoDokumente, "1", transaktion);
+    }
+}
+
+// Übernahme einer vorhandenen digitalen Akte (Bauplan 32).
+public sealed partial class Speicher
+{
+    // Kopiert die Dateien der zugeordneten Ordner in die Ablage; schon vorhandene (gleiche Prüfsumme) werden übersprungen.
+    public UebernahmeErgebnis AkteUebernehmen(IEnumerable<UebernahmeOrdner> plan, string kuerzel, DateTime jetzt)
+    {
+        Recht(kuerzel, Funktionen.DokumenteHinzufuegen);
+        int uebernommen = 0, doppelt = 0;
+        var fehler = new List<string>();
+        var uebersprungen = new List<string>();
+        foreach (var ordner in plan)
+        {
+            if (ordner.BewohnerId is not long id) { uebersprungen.Add($"{ordner.Name} ({ordner.Dateien.Count} Dateien)"); continue; }
+            var vorhanden = AlleDokumente(id).Where(d => !d.Geloescht).Select(d => d.Pruefsumme).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var datei in ordner.Dateien)
+            {
+                try
+                {
+                    string summe = AkteUebernahme.Pruefsumme(datei.Pfad);
+                    if (!vorhanden.Add(summe)) { doppelt++; continue; }
+                    DokumentHinzufuegen(id, datei.Pfad, new DokumentEingabe { Kategorie = datei.Kategorie, Titel = datei.Titel, Datum = datei.Datum },
+                        kuerzel, jetzt, grund: AkteUebernahme.Grund);
+                    uebernommen++;
+                }
+                catch (Exception e) when (e is Eingabefehler or IOException or UnauthorizedAccessException)
+                {
+                    fehler.Add($"{Path.GetFileName(datei.Pfad)}: {(e is Eingabefehler x ? string.Join(" ", x.Fehler) : e.Message)}");
+                }
+            }
+        }
+        return new UebernahmeErgebnis(uebernommen, doppelt, fehler, uebersprungen);
     }
 }

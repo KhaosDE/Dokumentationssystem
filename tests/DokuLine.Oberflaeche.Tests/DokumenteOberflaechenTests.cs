@@ -93,3 +93,25 @@ public class DokumenteOberflaechenTests
         Assert.NotNull(Stil.Sperrgrund(d.LoeschenKnopf));
     });
 }
+
+// Bauplan Schritt 32: Digitale Akte übernehmen – Demo-Ordner, Vorschau, Zuordnung ändern, kopieren.
+[Collection("Oberflaeche")]
+public class AkteUebernahmeOberflaechenTests
+{
+    [Fact]
+    public void Vorschau_und_Uebernehmen() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
+        using var fenster = new AkteUebernahmeFenster(u.Speicher);
+        Assert.NotNull(Stil.Sperrgrund(fenster.UebernehmenKnopf));   // noch nichts gewählt
+        fenster.DemoKnopf.PerformClick();
+        Assert.Equal(4, fenster.Vorschau.Rows.Count);
+        var muster = fenster.Vorschau.Rows.Cast<DataGridViewRow>().Single(r => (r.Cells["ordner"].Value as string ?? "").StartsWith("Muster"));
+        Assert.Equal(AkteUebernahmeFenster.NichtUebernehmen, muster.Cells["bewohner"].Value);
+        Assert.Contains("3 von 4 Ordnern zugeordnet", fenster.Zusammenfassung.Text);
+        Hilfe.Foto(fenster, "140_akte_uebernehmen");
+        Assert.True(fenster.Uebernehmen());
+        Assert.Equal(9, fenster.Ergebnis!.Uebernommen);
+    });
+}

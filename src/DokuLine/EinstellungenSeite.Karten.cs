@@ -151,6 +151,9 @@ public sealed partial class EinstellungenSeite
         AkteListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, ListenFenster.Akte));
         Karte("Verwaltung", "Listen für die Akte", "Auswahl in den Reitern Krankenkasse, Kostenträger, Betreuung und Dokumente (Demo: ausgedachte Namen).",
             AkteListenKnopf);
+        UebernahmeKnopf.Click += (_, _) => { using var f = new AkteUebernahmeFenster(speicher); Dialog.Zeigen(f, FindForm()); Geaendert?.Invoke(); };
+        Karte("Verwaltung", "Digitale Akte übernehmen", "Vorhandene Ordner (ein Unterordner je Bewohner) in die Ablage „Dokumente“ kopieren – mit Vorschau; " +
+            "der alte Ordner bleibt unverändert.", UebernahmeKnopf, Funktionen.DokumenteHinzufuegen);
         Karte("Verwaltung", "Rechte", "Tabelle: welche Position was darf, je Funktion „nur Fachkräfte“. Ohne Recht nur ansehen.", RechteKnopf);
 
         // System (folgenreich: fragt vorher)
