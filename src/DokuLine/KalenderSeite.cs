@@ -210,7 +210,7 @@ public sealed class KalenderSeite : Panel, IBereichSeite
         Geaendert?.Invoke();
     }
 
-    private static string Kuerzel => Einstellungen.Laden().Kuerzel;
+    private static string Kuerzel => Recht.Kuerzel;
 
     // Klick in der Wochenansicht: zum Tag springen, dort stehen Knöpfe und Einzelheiten.
     public void DetailZeigen(long id)

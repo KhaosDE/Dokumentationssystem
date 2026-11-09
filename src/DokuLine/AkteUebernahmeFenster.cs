@@ -52,7 +52,8 @@ public sealed class AkteUebernahmeFenster : Form
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, Fenster.Hinweis("Ein Unterordner je Bewohner, darin Unterordner je Kategorie. Das Programm schlägt die Zuordnung vor; " +
                                     "bitte prüfen. Übernehmen kopiert die Dateien – der alte Ordner bleibt, wie er ist. In der Demo nur ausgedachte Ordner."));
-        zeile("Hauptordner", Formular.Reihe(Ordner, WaehlenKnopf, DemoKnopf));
+        DemoKnopf.Visible = !Betrieb.Aktiv;   // ausgedachte Ordner gehören nie in echte Akten
+        zeile("Hauptordner", Betrieb.Aktiv ? Formular.Reihe(Ordner, WaehlenKnopf) : Formular.Reihe(Ordner, WaehlenKnopf, DemoKnopf));
         zeile(null, Vorschau);
         zeile(null, Zusammenfassung);
         zeile(null, Fehler);

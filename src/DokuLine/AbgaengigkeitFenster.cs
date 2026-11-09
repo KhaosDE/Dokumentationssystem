@@ -65,7 +65,12 @@ public sealed class AbgaengigkeitFenster : Form
         MeldeblattKnopf.Click += (_, _) => MeldeblattDrucken();
         PdfKnopf.Click += (_, _) => PdfSpeichern();
         ZurueckKnopf.Click += (_, _) => Zurueck();
-        NeueMeldungKnopf.Click += (_, _) => { Meldung = null; Aufbauen(); };
+        NeueMeldungKnopf.Click += (_, _) =>
+        {
+            Meldung = null;
+            foreach (var feld in new[] { ZuletztWo, ZuletztUhrzeit, ZuletztVon, Kleidung, Gefaehrdung, Orte, Kontakte, Zustand, StellenHinweis }) feld.Text = "";
+            Aufbauen();
+        };
         Meldung = Weiterfuehren(speicher.Abgaengigkeiten(bewohner.Id!.Value), DateTime.Now);
         Controls.Add(flaeche);
         Aufbauen();
@@ -93,7 +98,16 @@ public sealed class AbgaengigkeitFenster : Form
     private void Aufbauen()
     {
         flaeche.SuspendLayout();
-        foreach (Control c in flaeche.Controls.Cast<Control>().ToList()) { flaeche.Controls.Remove(c); if (c is TableLayoutPanel) c.Dispose(); }
+        // Die Felder (Eigenschaften des Fensters) werden beim nächsten Aufbau wieder eingehängt: erst herauslösen, dann das
+        // alte Raster mit seinen Beschriftungen freigeben – sonst wären sie mit freigegeben.
+        Control[] bleibende = [VermisstDatum, VermisstUhrzeit, ZuletztWo, ZuletztUhrzeit, ZuletztVon, Kleidung, Gefaehrdung, Medikamente, Orte, Kontakte,
+            Stellen, StellenHinweis, MeldeblattKnopf, PdfKnopf, ZurueckDatum, ZurueckUhrzeit, Zustand, ZurueckKnopf, Entwarnt, NeueMeldungKnopf, Fehler];
+        foreach (Control c in flaeche.Controls.Cast<Control>().ToList())
+        {
+            flaeche.Controls.Remove(c);
+            foreach (var feld in bleibende) feld.Parent?.Controls.Remove(feld);
+            c.Dispose();
+        }
         Fehler.Visible = false;
         var raster = Formular.Raster(out var zeile);
         raster.Dock = DockStyle.Top;
@@ -113,7 +127,7 @@ public sealed class AbgaengigkeitFenster : Form
         VermisstUhrzeit.Text = jetzt.ToString("HH:mm", CultureInfo.InvariantCulture);
         var daten = speicher.UeberleitungDaten(bewohner.Id!.Value, jetzt);
         var medikamente = AbgaengigkeitRegeln.BenoetigteMedikamente(daten);
-        Medikamente.Text = medikamente.Count > 0 ? $"Benötigt laut Plan: {string.Join(", ", medikamente)}" : "Regelmäßige Medikamente laut Plan: keine";
+        Medikamente.Text = medikamente.Count > 0 ? $"Benötigt laut Plan: {string.Join(", ", medikamente)}" : AbgaengigkeitRegeln.KeineMedikamenteText;
         if (Kontakte.Text.Length == 0) Kontakte.Text = AbgaengigkeitRegeln.KontakteVorschlag(daten).Replace("\n", Environment.NewLine);
         zeile("Vermisst seit", Formular.Reihe(VermisstDatum, VermisstUhrzeit));
         zeile("Zuletzt gesehen", Formular.Reihe(ZuletztWo, new Label { Text = "um", AutoSize = true, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) }, ZuletztUhrzeit,
@@ -298,6 +312,8 @@ public sealed class AbgaengigkeitFenster : Form
     {
         if (Meldung is null) return false;
         var pdf = TextPdf.Erzeugen(AbgaengigkeitRegeln.Titel(bewohner), Meldeblatt(), Stil.DemoHinweis);
-        return PdfZiel() is string ziel && !Fehlerhaft(() => File.WriteAllBytes(ziel, pdf));
+        if (PdfZiel() is not string ziel || Fehlerhaft(() => File.WriteAllBytes(ziel, pdf))) return false;
+        speicher.Zugriff(Recht.Kuerzel, bewohner.Id, ZugriffRegeln.Gedruckt, "Meldeblatt Abgängigkeit (PDF)");
+        return true;
     }
 }

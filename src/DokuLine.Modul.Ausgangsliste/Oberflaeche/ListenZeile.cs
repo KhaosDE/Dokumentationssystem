@@ -57,7 +57,7 @@ public sealed class ListenZeile : Panel
         Unterwegs = digital?.Laufend is not null;
         Ueberfaellig = Unterwegs && digital!.Ueberfaellig;
         Abgaengig = abgaengig is not null;
-        AbgaengigkeitFrage = !Abgaengig && Ueberfaellig && digital!.ZurueckBis is TimeSpan grenze && AbgaengigkeitRegeln.WartezeitVorbei(grenze, jetzt.TimeOfDay, wartezeit);
+        AbgaengigkeitFrage = !Abgaengig && Ueberfaellig && digital!.ZurueckUm is DateTime grenze && AbgaengigkeitRegeln.WartezeitVorbei(grenze, jetzt, wartezeit);
         AusgangZeile = PlatzTexte.Ausgang(p, jetzt);
         UnterbringungZeile = PlatzTexte.Unterbringung(p, jetzt);
         var heute = new List<string>();

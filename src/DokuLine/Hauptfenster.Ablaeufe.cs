@@ -81,7 +81,7 @@ public sealed partial class Hauptfenster
     // Zähler ungelesener Nachrichten des angemeldeten Benutzers (Seitenleiste und Kuvert in der Kopfzeile).
     public void NachrichtenZaehlen()
     {
-        var ich = speicher.Kollege(Einstellungen.Laden().Kuerzel);
+        var ich = speicher.Kollege(Recht.Kuerzel);
         int n = ich is null ? 0 : speicher.UngeleseneNachrichten(ich.Kuerzel);
         Navigation.Single(e => e.Text == "Nachrichten").ZaehlerSetzen(n > 0 ? n : null, false, $"{n} ungelesen");
         Kopf.NachrichtenSetzen(ich is null ? null : n);

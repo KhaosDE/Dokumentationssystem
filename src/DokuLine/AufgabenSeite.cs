@@ -50,7 +50,7 @@ public sealed class AufgabenSeite : Panel, IBereichSeite
         Controls.Add(leiste);
     }
 
-    private static string Kuerzel => Einstellungen.Laden().Kuerzel;
+    private static string Kuerzel => Recht.Kuerzel;
 
     public string KopfText => (Offen == 1 ? "1 offene Aufgabe" : $"{Offen} offene Aufgaben") + (Ueberfaellig > 0 ? $" · {Ueberfaellig} überfällig" : "");
 

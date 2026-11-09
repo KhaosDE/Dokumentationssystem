@@ -121,7 +121,7 @@ public sealed class ReflexionAnsicht : Panel
         try
         {
             var f = ReflexionRegeln.AusEingabe(bewohner.Id!.Value, Monat, Bereiche.Select(b => b.Feld.Text).ToList(), fertig,
-                Einstellungen.Laden().Kuerzel, Jetzt());
+                Recht.Kuerzel, Jetzt());
             speicher.ReflexionSpeichern(f, ohnePruefung ? null : Aktuell?.Fassungen.Count);
         }
         catch (Konflikt k)

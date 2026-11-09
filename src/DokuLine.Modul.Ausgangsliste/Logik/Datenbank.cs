@@ -231,8 +231,11 @@ public sealed class Datenbank(Speicher speicher, SqliteTransaction? transaktion 
     public List<AusgangEintrag> AusgaengeLaden(DateTime datum)
     {
         var liste = new List<AusgangEintrag>();
-        using var befehl = Befehl("SELECT id, bewohner_id, datum, beginn, ende, art, hdz_beginn, hdz_ende FROM al_ausgaenge WHERE datum = $d ORDER BY beginn, id",
-            ("$d", Tag(datum)));
+        // Dazu, wer seit gestern noch unterwegs ist: Wer um 22 Uhr geht, ist nach Mitternacht nicht verschwunden.
+        using var befehl = Befehl("""
+            SELECT id, bewohner_id, datum, beginn, ende, art, hdz_beginn, hdz_ende FROM al_ausgaenge
+            WHERE datum = $d OR (datum = $gestern AND ende IS NULL) ORDER BY datum, beginn, id
+            """, ("$d", Tag(datum)), ("$gestern", Tag(datum.AddDays(-1))));
         using var leser = befehl.ExecuteReader();
         while (leser.Read())
             liste.Add(new AusgangEintrag
@@ -258,7 +261,7 @@ public sealed class Datenbank(Speicher speicher, SqliteTransaction? transaktion 
     {
         var platz = Pflicht(bewohnerId);
         var jetzt = Jetzt();
-        var stand = DigitalerAusgang.StandFuer(platz, AusgaengeLaden(jetzt), jetzt.TimeOfDay);
+        var stand = DigitalerAusgang.StandFuer(platz, AusgaengeLaden(jetzt), jetzt);
         var fehler = new List<string>();
         if (!DigitalerAusgang.Arten.Contains(art)) fehler.Add("Unbekannte Art des Ausgangs.");
         else if (DigitalerAusgang.BeginnenNichtMoeglich(platz, stand, art) is string grund) fehler.Add(grund);
@@ -281,6 +284,8 @@ public sealed class Datenbank(Speicher speicher, SqliteTransaction? transaktion 
                 ?? throw new Eingabefehler(["Dieser Ausgang ist schon beendet."]);
         if (string.IsNullOrWhiteSpace(handzeichen)) throw new Eingabefehler(["Handzeichen fehlt."]);
         var ende = new TimeSpan(jetzt.Hour, jetzt.Minute, 0);
+        // Seit gestern unterwegs: Die Liste ist je Tag (wie der Papierbogen) – der Ausgang endet dort um 23:59.
+        if (e.Datum.Date < jetzt.Date) ende = new TimeSpan(23, 59, 0);
         if (ende < e.Beginn) ende = e.Beginn;
         e.Ende = ende;
         e.HdzEnde = handzeichen.Trim().ToUpperInvariant();

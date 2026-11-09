@@ -141,7 +141,7 @@ public sealed class StatusFenster : Form
     {
         try
         {
-            db.StatusSetzen(platz.BewohnerId, status, grund, Einstellungen.Laden().Kuerzel);
+            db.StatusSetzen(platz.BewohnerId, status, grund, Sitzung.Kuerzel);
         }
         catch (Eingabefehler e)
         {

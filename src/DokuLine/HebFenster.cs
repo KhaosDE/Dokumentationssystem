@@ -289,7 +289,7 @@ public sealed class HebFenster : Form, IEntwurfFenster
     {
         try
         {
-            var f = HebRegeln.AusEingabe(Bogen.Id, Bogen.Art, Texte(), Stufen(), fertig, Einstellungen.Laden().Kuerzel, DateTime.Now);
+            var f = HebRegeln.AusEingabe(Bogen.Id, Bogen.Art, Texte(), Stufen(), fertig, Recht.Kuerzel, DateTime.Now);
             if (fertig && HebRegeln.ZuLang(Bogen.Art, f) is { Count: > 0 } lang &&
                 Rueckfrage($"Diese Felder sind länger als im Bogen vorgesehen:\n{string.Join("\n", lang)}\n\nTrotzdem als fertig markieren?") != DialogResult.Yes)
                 return false;

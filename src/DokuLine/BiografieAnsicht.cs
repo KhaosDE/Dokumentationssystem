@@ -225,7 +225,7 @@ public sealed class BiografieFenster : Form
         erwartet ??= abschnitt.Fassungen.Count;
         try
         {
-            var f = BiografieRegeln.AusEingabe(abschnitt.Nummer, Inhalt.Text, Angegeben.Checked, Einstellungen.Laden().Kuerzel, DateTime.Now);
+            var f = BiografieRegeln.AusEingabe(abschnitt.Nummer, Inhalt.Text, Angegeben.Checked, Recht.Kuerzel, DateTime.Now);
             speicher.BiografieSpeichern(bewohner.Id!.Value, f, erwartet < 0 ? null : erwartet);
         }
         catch (Konflikt k)

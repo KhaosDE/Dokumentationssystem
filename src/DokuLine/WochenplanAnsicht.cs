@@ -70,7 +70,7 @@ public sealed class WochenplanAnsicht : Panel
         PerformLayout();
     }
 
-    private static string Kuerzel => Einstellungen.Laden().Kuerzel;
+    private static string Kuerzel => Recht.Kuerzel;
 
     // Kontextmenü beim Klick auf einen freien Eintrag; Therapien ändert der Bereich „Therapie“.
     private void TerminMenue(Termin t, Point wo)
@@ -360,7 +360,7 @@ public sealed class PlanEintragFenster : Form
             var neu = WochenplanRegeln.AusEingabe(new PlanEingabe
             {
                 Tag = Wochentag.SelectedIndex >= 0 ? TherapieRegeln.Woche[Wochentag.SelectedIndex] : null, Von = Von.Text, Bis = Bis.Text,
-                Titel = Titel.Text, Ort = Ort.Text, Hinweis = Hinweis.Text, Ab = Ab.Text, Kuerzel = Einstellungen.Laden().Kuerzel,
+                Titel = Titel.Text, Ort = Ort.Text, Hinweis = Hinweis.Text, Ab = Ab.Text, Kuerzel = Recht.Kuerzel,
             }, bewohner.Id!.Value, Jetzt()) with
             { Ersetzt = alt?.Id };
             var konflikte = speicher.PlanUeberschneidungen(neu);

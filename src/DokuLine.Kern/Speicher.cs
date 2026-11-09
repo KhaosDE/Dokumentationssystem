@@ -1137,6 +1137,7 @@ public sealed partial class Speicher : IDisposable
     // Update nur die neuen Bereiche (für die vorhandenen Bewohner). true = etwas geladen.
     public bool DemoBeimErstenStart()
     {
+        if (Betrieb.Aktiv || IstBetriebsdatenbank) return false;
         if (Meta(DemoGeladen) is null)
         {
             DemoZuruecksetzen();
@@ -1208,6 +1209,7 @@ public sealed partial class Speicher : IDisposable
         if (bezug || mitarbeiter) DemoBezugEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
         transaktion.Commit();
+        if (dokumente) AblageAufraeumen();
         if (modulNeu) ModuleGeaendert?.Invoke();
         return true;
     }
@@ -1226,6 +1228,7 @@ public sealed partial class Speicher : IDisposable
     // Bereiche neu laden – alles oder nichts.
     public void DemoZuruecksetzen()
     {
+        if (Betrieb.Aktiv || IstBetriebsdatenbank) throw new SpeicherFehler(Betrieb.DemoVerbotenText);
         var demo = Demodaten.Bewohner();   // erst lesen: Ist etwas kaputt, bleibt alles, wie es war
         var alteBilder = AlleBewohner().Select(b => b.Bild).Where(b => b is not null).ToList();
         using (var transaktion = db.BeginTransaction())
@@ -1266,6 +1269,7 @@ public sealed partial class Speicher : IDisposable
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
+        AblageAufraeumen();
         AufgabenGeaendert?.Invoke();
         NachrichtenGeaendert?.Invoke();
         MedikationGeaendert?.Invoke();

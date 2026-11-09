@@ -77,6 +77,15 @@ public static class DokumentRegeln
     public static string TitelVorschlag(string dateiname) =>
         string.Join(' ', Path.GetFileNameWithoutExtension(dateiname).Replace('_', ' ').Replace('-', ' ').Split(' ', StringSplitOptions.RemoveEmptyEntries));
 
+    // Nur Dokumente und Bilder: Programme, Skripte und Verknüpfungen würden beim Öffnen über Windows im Konto dessen
+    // laufen, der sie öffnet (Terminalserver: ein anderer Kollege). Office-Dateien mit Makros (…m) bleiben draußen.
+    public static readonly string[] ErlaubteEndungen =
+        [".pdf", ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".tif", ".tiff", ".txt", ".rtf", ".doc", ".docx", ".odt", ".xls", ".xlsx", ".ods", ".csv", ".eml", ".msg"];
+    public const string NichtErlaubtText = "Diese Dateiart wird nicht übernommen – nur Dokumente und Bilder (z. B. PDF, Word, Excel, JPG). " +
+                                           "Programme und Verknüpfungen könnten beim Öffnen Schaden anrichten.";
+
+    public static bool Erlaubt(string dateiname) => ErlaubteEndungen.Contains(Path.GetExtension(dateiname).ToLowerInvariant());
+
     // Name in der Ablage: eindeutige Kennung davor, nur ungefährliche Zeichen; die Endung bleibt (sie entscheidet, womit
     // Windows öffnet).
     public static string AblageName(string kennung, string original)

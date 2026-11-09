@@ -116,7 +116,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
     public bool Setzen(TherapieTermin t, TafelTeilnehmer p, Teilnahme status)
     {
         if (Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen) is not null || !Schutz.Frei()) return false;
-        try { speicher.TeilnahmeSetzen(p.ZuteilungId, t.Tag, status, Einstellungen.Laden().Kuerzel, Jetzt()); }
+        try { speicher.TeilnahmeSetzen(p.ZuteilungId, t.Tag, status, Recht.Kuerzel, Jetzt()); }
         catch (Eingabefehler e)
         {
             MessageBox.Show(FindForm(), string.Join("\n", e.Fehler), "Laufende Therapien", MessageBoxButtons.OK, MessageBoxIcon.Information);

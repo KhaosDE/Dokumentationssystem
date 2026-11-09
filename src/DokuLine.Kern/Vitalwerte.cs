@@ -195,8 +195,16 @@ public static class VitalRegeln
         _ => null,
     };
 
-    public static string GrenzeText(VitalGrenze g, Func<long?, string> arzt)
+    // Gespeichert wie die Werte (Blutzucker in mg/dl); angezeigt und eingegeben in der Einheit der Einstellungen.
+    public static VitalGrenze GrenzeAnzeige(VitalGrenze g, VitalRichtwerte r) => g with
     {
+        Von = g.Von is double v ? Anzeige(g.Art, v, r) : null,
+        Bis = g.Bis is double b ? Anzeige(g.Art, b, r) : null,
+    };
+
+    public static string GrenzeText(VitalGrenze gespeichert, Func<long?, string> arzt, VitalRichtwerte r)
+    {
+        var g = GrenzeAnzeige(gespeichert, r);
         string Bereich(double? von, double? bis) => von is null ? $"bis {Zahl(bis!.Value)}" : bis is null ? $"ab {Zahl(von.Value)}" : $"{Zahl(von.Value)}–{Zahl(bis.Value)}";
         string bereich = g.Art == Blutdruck
             ? string.Join(", ", new[] { g.Von is null && g.Bis is null ? "" : $"systolisch {Bereich(g.Von, g.Bis)}", g.Von2 is null && g.Bis2 is null ? "" : $"diastolisch {Bereich(g.Von2, g.Bis2)}" }.Where(x => x.Length > 0))

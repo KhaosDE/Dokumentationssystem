@@ -35,7 +35,8 @@ public sealed class BetriebTests : IDisposable
     {
         Assert.Null(Betrieb.Laden(programm));   // ohne Datei: Demo
         string ordner = Path.Combine(programm, "daten");
-        Json($$"""{ "datenordner": {{System.Text.Json.JsonSerializer.Serialize(ordner)}}, "sperre_minuten": 5, "sicherung_um": "03:15" }""");
+        string sicherung = Path.Combine(programm, "sicherungen");
+        Json($$"""{ "datenordner": {{System.Text.Json.JsonSerializer.Serialize(ordner)}}, "sicherungsordner": {{System.Text.Json.JsonSerializer.Serialize(sicherung)}}, "sperre_minuten": 5, "sicherung_um": "03:15" }""");
         var w = Betrieb.Laden(programm)!;
         Assert.Equal((ordner, 5, 24, new TimeOnly(3, 15)), (w.Datenordner, w.SperreMinuten, w.ProtokollMonate, w.SicherungUm));
         string benutzer = Pfade.Benutzerordner;
@@ -44,8 +45,21 @@ public sealed class BetriebTests : IDisposable
         Assert.Equal(ordner, Pfade.Datenordner);                    // gemeinsam (Datenbank, Bilder, Ablage)
         Assert.Equal(benutzer, Pfade.Benutzerordner);               // Einstellungen je Benutzer
         Assert.Equal(Path.Combine(benutzer, Einstellungen.Datei), Pfade.ImBenutzerordner(Einstellungen.Datei));
-        Assert.Equal(Path.Combine(ordner, "sicherungen"), Betrieb.Sicherungsordner);
+        Assert.Equal(sicherung, Betrieb.Sicherungsordner);
+        // Im Betrieb zählt nur die Anmeldung dieses Programmlaufs, nicht das Kürzel in der Datei des Benutzers.
+        Einstellungen.Aendern(e => e with { Kuerzel = "TST" });
+        Assert.Equal("", Sitzung.Kuerzel);
+        Sitzung.Anmelden("AB");
+        Einstellungen.Aendern(e => e with { Kuerzel = "TST" });
+        Assert.Equal("AB", Sitzung.Kuerzel);
+        Sitzung.Anmelden("");
         Betrieb.Setzen(null);
+        Assert.Equal("", Sitzung.Kuerzel);   // Demo: wieder aus den Einstellungen
+        // Sicherungsordner ist Pflicht und darf nicht im Datenordner liegen (den dürfen alle Benutzer ändern).
+        Json($$"""{ "datenordner": {{System.Text.Json.JsonSerializer.Serialize(ordner)}} }""");
+        Assert.Throws<SpeicherFehler>(() => Betrieb.Laden(programm));
+        Json($$"""{ "datenordner": {{System.Text.Json.JsonSerializer.Serialize(ordner)}}, "sicherungsordner": {{System.Text.Json.JsonSerializer.Serialize(Path.Combine(ordner, "sich"))}} }""");
+        Assert.Contains("nicht im Datenordner", Assert.Throws<SpeicherFehler>(() => Betrieb.Laden(programm)).Message);
         Json("""{ "datenordner": "relativ\\daten" }""");
         Assert.Throws<SpeicherFehler>(() => Betrieb.Laden(programm));
         Json("""{ "datenordner": "C:\\DokuLine", "sperre_minuten": 0 }""");
@@ -83,9 +97,43 @@ public sealed class BetriebTests : IDisposable
         Assert.True(s.Gesperrt(m.Kuerzel));
         s.Entsperren(m.Kuerzel, "TST");
         Assert.Equal(AnmeldeErgebnis.Ok, s.PasswortAnmelden(m.Kuerzel, "Sonnenblume-42").Ergebnis);
+        Assert.Equal(AnmeldeErgebnis.Falsch, s.PasswortAnmelden("XYZ", "egal").Ergebnis);   // unbekannt wie falsch
+        s.EinmalpasswortSetzen(m.Kuerzel, "Einmal-1234", "TST", Jetzt.AddDays(-PasswortRegeln.EinmalTage - 1));
+        Assert.Equal(AnmeldeErgebnis.Abgelaufen, s.PasswortAnmelden(m.Kuerzel, "Einmal-1234").Ergebnis);
         using var befehl = s.Verbindung.CreateCommand();
         befehl.CommandText = "SELECT hash || salz FROM passwoerter";
         Assert.DoesNotContain("Sonnenblume", (string)befehl.ExecuteScalar()!);
+    }
+
+    [Fact]
+    public void Einmalpasswort_nur_fuer_Mitarbeiter_mit_weniger_Rechten()
+    {
+        var alle = s.AlleMitarbeiter().Where(x => x.Aktiv).ToList();
+        var leitung = alle.First(x => x.Positionen.SequenceEqual(["Bereichsleitung"]));
+        string bereich = leitung.Bereiche[0];
+        var eigener = alle.First(x => x.Positionen.SequenceEqual(["Mitarbeiter Wohnbereich"]) && x.Bereiche.SequenceEqual([bereich]));
+        var fremder = alle.First(x => x.Positionen.SequenceEqual(["Mitarbeiter Wohnbereich"]) && !x.Bereiche.Contains(bereich));
+        var hausleitung = alle.First(x => x.Positionen.SequenceEqual(["Hausleitung"]));
+        s.EinmalpasswortSetzen(eigener.Kuerzel, "Einmal-1234", leitung.Kuerzel, Jetzt);
+        Assert.Throws<Eingabefehler>(() => s.EinmalpasswortSetzen(fremder.Kuerzel, "Einmal-1234", leitung.Kuerzel, Jetzt));      // anderer Bereich
+        Assert.Throws<Eingabefehler>(() => s.EinmalpasswortSetzen(hausleitung.Kuerzel, "Einmal-1234", leitung.Kuerzel, Jetzt));  // mehr Rechte
+        Assert.Throws<Eingabefehler>(() => s.EinmalpasswortSetzen("TST", "Einmal-1234", hausleitung.Kuerzel, Jetzt));            // Administrator
+        Assert.Throws<Eingabefehler>(() => s.EinmalpasswortSetzen(leitung.Kuerzel, "Einmal-1234", leitung.Kuerzel, Jetzt));      // sich selbst
+        s.EinmalpasswortSetzen(leitung.Kuerzel, "Einmal-1234", hausleitung.Kuerzel, Jetzt);
+        s.EinmalpasswortSetzen(hausleitung.Kuerzel, "Einmal-1234", "TST", Jetzt);
+        Assert.Throws<Eingabefehler>(() => s.Entsperren(hausleitung.Kuerzel, leitung.Kuerzel));
+    }
+
+    [Fact]
+    public void Betriebsdatenbank_oeffnet_die_Demo_nie()
+    {
+        Assert.False(s.IstBetriebsdatenbank);
+        s.AlsBetriebMarkieren();
+        Assert.True(s.IstBetriebsdatenbank);
+        Assert.Equal(Betrieb.DemoVerbotenText, Assert.Throws<SpeicherFehler>(s.DemoZuruecksetzen).Message);
+        Assert.False(s.DemoBeimErstenStart());
+        s.Dispose();
+        Assert.Equal(Betrieb.DemoVerbotenText, Assert.Throws<SpeicherFehler>(() => Speicher.Oeffnen(Einstellungen.Laden())).Message);
     }
 
     [Fact]
@@ -130,9 +178,19 @@ public sealed class BetriebTests : IDisposable
     public void Sicherung_pruefen_aufraeumen_und_zuruecksichern()
     {
         string ordner = Path.Combine(programm, "sicherungen");
+        // Zur Sicherung gehört die Ablage neben der Datenbank (Dokumente, Bilder).
+        string dokumente = Path.Combine(Path.GetDirectoryName(s.Pfad)!, DokumentRegeln.Ordner), bilder = Pfade.ImDatenordner(Bilder.Ordner);
+        Directory.CreateDirectory(dokumente);
+        Directory.CreateDirectory(bilder);
+        File.WriteAllText(Path.Combine(dokumente, "alt.txt"), "ausgedacht");
+        File.WriteAllText(Path.Combine(bilder, "platzhalter.png"), "kein Bild");
         Assert.True(SicherungRegeln.Faellig(null, Jetzt, new TimeOnly(2, 30)));
         var erste = s.SicherungErstellen(ordner, Jetzt);
+        Assert.EndsWith(".zip", erste.Pfad);
         Assert.Null(Speicher.SicherungPruefen(erste.Pfad));
+        using (var zip = System.IO.Compression.ZipFile.OpenRead(erste.Pfad))
+            Assert.Superset(new HashSet<string> { SicherungRegeln.DatenbankEintrag, $"{DokumentRegeln.Ordner}/alt.txt", $"{Bilder.Ordner}/platzhalter.png" },
+                zip.Entries.Select(e => e.FullName).ToHashSet());
         Assert.Equal(Jetzt, s.LetzteSicherungZeit);
         Assert.False(SicherungRegeln.Faellig(s.LetzteSicherungZeit, Jetzt.AddHours(5), new TimeOnly(2, 30)));
         Assert.True(SicherungRegeln.Faellig(s.LetzteSicherungZeit, Jetzt.AddDays(1).Date.AddHours(3), new TimeOnly(2, 30)));
@@ -152,9 +210,15 @@ public sealed class BetriebTests : IDisposable
         Assert.Equal(vorher - 1, s.AlleBewohner().Count);
         var assistenz = s.AlleMitarbeiter().First(x => x.Aktiv && x.Positionen.SequenceEqual(["Mitarbeiter Wohnbereich"]));
         Assert.Throws<Eingabefehler>(() => s.Ruecksichern(erste.Pfad, assistenz.Kuerzel));
+        File.Delete(Path.Combine(dokumente, "alt.txt"));
+        File.WriteAllText(Path.Combine(dokumente, "neu.txt"), "ausgedacht");
         string kopie = s.Ruecksichern(erste.Pfad, "TST");
         Assert.True(File.Exists(kopie));
         Assert.Equal(vorher, s.AlleBewohner().Count);
+        Assert.True(File.Exists(Path.Combine(dokumente, "alt.txt")));
+        Assert.False(File.Exists(Path.Combine(dokumente, "neu.txt")));   // liegt im Ordner „…-vor-ruecksicherung-…“ daneben
+        Assert.Single(Directory.GetDirectories(Path.GetDirectoryName(dokumente)!, DokumentRegeln.Ordner + "-vor-ruecksicherung-*"));
+        Assert.Empty(Directory.GetDirectories(Path.GetDirectoryName(s.Pfad)!, "ruecksicherung-*"));   // ausgepackter Stand aufgeräumt
         Assert.Throws<Eingabefehler>(() => s.Ruecksichern(Path.Combine(ordner, SicherungRegeln.Name(Jetzt.AddDays(-1))), "TST"));
     }
 

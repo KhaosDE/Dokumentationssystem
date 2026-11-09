@@ -47,8 +47,8 @@ public static class AbgaengigkeitRegeln
     public static Marke Marke(Abgaengigkeit a) => new(MarkenArt.Abgaengig, MarkeText(a));
 
     // Ausgangsliste: Rückkehrzeit mehr als die Wartezeit überschritten → Hinweis mit Frage.
-    public static bool WartezeitVorbei(TimeSpan zurueckBis, TimeSpan jetzt, int wartezeitMinuten) =>
-        jetzt - zurueckBis >= TimeSpan.FromMinutes(wartezeitMinuten);
+    public static bool WartezeitVorbei(DateTime zurueckUm, DateTime jetzt, int wartezeitMinuten) =>
+        jetzt - zurueckUm >= TimeSpan.FromMinutes(wartezeitMinuten);
 
     public static string UeberschrittenText(TimeSpan zurueckBis) =>
         $"Rückkehrzeit überschritten seit {zurueckBis.ToString("hh\\:mm", CultureInfo.InvariantCulture)} – Abgängigkeit melden?";
@@ -111,6 +111,9 @@ public static class AbgaengigkeitRegeln
 
     public static string Titel(Bewohner b) => $"Meldeblatt Abgängigkeit {b.Name}";
 
+    // Regel 5: Leer im Plan heißt nicht „nimmt nichts“.
+    public const string KeineMedikamenteText = "Im Medikamentenplan ist nichts Regelmäßiges eingetragen – bitte nachfragen";
+
     // Meldeblatt für die Polizei: Personenbeschreibung, Bild (Platzhalter), Kleidung, zuletzt gesehen, Gefährdung, Kontakt der Einrichtung.
     public static List<UeberleitungAbschnitt> Meldeblatt(UeberleitungDaten d, Abgaengigkeit a)
     {
@@ -130,7 +133,7 @@ public static class AbgaengigkeitRegeln
             new("Kleidung heute", [W(m.Kleidung)]),
             new("Zuletzt gesehen", [$"Wo: {W(m.ZuletztWo)}", $"Wann: {(m.ZuletztWann is DateTime w ? w.ToString("dd.MM.yyyy HH:mm", De) : AngabenRegeln.NichtErfasst)}",
                 $"Von: {W(m.ZuletztVon)}"]),
-            new("Gefährdung", [W(m.Gefaehrdung), medikamente.Count > 0 ? $"Benötigt laut Plan: {string.Join(", ", medikamente)}" : "Regelmäßige Medikamente laut Plan: keine"]),
+            new("Gefährdung", [W(m.Gefaehrdung), medikamente.Count > 0 ? $"Benötigt laut Plan: {string.Join(", ", medikamente)}" : KeineMedikamenteText]),
             new("Mögliche Aufenthaltsorte", [W(m.Orte)]),
             new("Kontakte", [.. W(m.Kontakte).Split('\n').Select(z => z.TrimEnd('\r')).Where(z => z.Length > 0)]),
             new("Kontakt der Einrichtung", [$"{d.Einrichtung.Name}, Bereich {b.Wohnbereich}", d.Einrichtung.Anschrift, $"Telefon Dienstzimmer: {d.Einrichtung.Telefon}"]),

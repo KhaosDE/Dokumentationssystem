@@ -262,7 +262,11 @@ public sealed class SicherungFenster : Form
     public bool Sichern()
     {
         try { var s = speicher.SicherungErstellen(Betrieb.Sicherungsordner, DateTime.Now); Fuellen(); return Melden($"Gesichert und geprüft: {Path.GetFileName(s.Pfad)}", false); }
-        catch (Exception e) when (e is SpeicherFehler or IOException or UnauthorizedAccessException) { return Melden(e.Message, true); }
+        catch (Exception e) when (e is SpeicherFehler or IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+        {
+            return Melden(Betrieb.Aktiv ? $"Aus einer Sitzung lässt sich nicht sichern ({e.Message}). Im Betrieb sichert die Aufgabenplanung; " +
+                                          "von Hand: Aufgabenplanung → „DokuLine Sicherung“ → Ausführen." : e.Message, true);
+        }
     }
 
     public bool Pruefen()
@@ -271,14 +275,20 @@ public sealed class SicherungFenster : Form
         return Speicher.SicherungPruefen(staende[Liste.SelectedIndex].Pfad) is string f ? Melden($"Fehlerhaft: {f}", true) : Melden("In Ordnung.", false);
     }
 
+    public const string RuecksichernImBetrieb = "Im Betrieb wird nur zurückgesichert, wenn alle abgemeldet sind: PowerShell als Administrator, " +
+                                                "„DokuLine.exe --ruecksichern <Sicherungsdatei>“ (docs/betrieb.md).";
+
     public bool Ruecksichern()
     {
+        // Im Betrieb arbeiten andere Sitzungen mit derselben Datenbank weiter – zurückgesichert wird nur, wenn alle abgemeldet sind.
+        if (Betrieb.Aktiv) return Melden(RuecksichernImBetrieb, true);
         if (Liste.SelectedIndex < 0) return Melden("Bitte zuerst einen Stand wählen.", true);
         var s = staende[Liste.SelectedIndex];
         if (!Bestaetigen($"Den Stand vom {s.Zeit:dd.MM.yyyy HH:mm} zurückspielen? Alles, was danach eingetragen wurde, ist dann nicht mehr da " +
                          "(der jetzige Stand wird vorher als Kopie neben der Datenbank abgelegt). Bitte vorher alle anderen abmelden lassen.")) return false;
         try { string vorher = speicher.Ruecksichern(s.Pfad, Recht.Kuerzel); return Melden($"Zurückgesichert. Der vorige Stand liegt als „{Path.GetFileName(vorher)}“ daneben.", false); }
         catch (Eingabefehler e) { return Melden(string.Join(" ", e.Fehler), true); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException or InvalidDataException) { return Melden(e.Message, true); }
     }
 }
 
@@ -400,9 +410,8 @@ public sealed class HaeuserFenster : Form
 
     public bool Ausfuehren(Action aktion)
     {
-        try { aktion(); Fehler.Visible = false; Name_.Text = ""; }
+        try { aktion(); Fehler.Visible = false; Name_.Text = ""; return true; }
         catch (Eingabefehler e) { Fehler.Text = string.Join(" ", e.Fehler); Fehler.Visible = true; return false; }
-        Fuellen();
-        return true;
+        finally { Fuellen(); }   // auch nach einem Fehler den gespeicherten Stand zeigen
     }
 }

@@ -27,8 +27,11 @@ normal in der alten Version. Abschalten: Häkchen „Beim Start nach Updates suc
 
 Eine Datei `betrieb.json` im Programmordner schaltet den Betrieb ein (Schlüssel `datenordner`, `sicherungsordner`,
 `sperre_minuten`, `protokoll_monate`, `sicherung_um`; Anleitung in `docs/betrieb.md`). Im Betrieb liegt die Datenbank im
-gemeinsamen Datenordner (WAL), die Einstellungsdatei je Benutzer in `%APPDATA%\DokuLine`. Kommandozeile für die
-Aufgabenplanung: `--sicherung`, `--update-einspielen` (nur im Betrieb).
+gemeinsamen Datenordner (WAL), die Einstellungsdatei je Benutzer in `%APPDATA%\DokuLine`; das angemeldete Kürzel nur im
+Arbeitsspeicher (`Sitzung`). Kommandozeile (nur im Betrieb): für die Aufgabenplanung `--sicherung` (Dienstkonto) und
+`--update-einspielen` (SYSTEM), ohne Fenster; für den Verwalter `--update-herunterladen`, `--update-vorbereiten <Datei>`
+und `--ruecksichern <Sicherung.zip>`, Ergebnis in einem Meldungsfenster. Protokoll: Sicherung und Rücksicherung in
+`update.log` im Sicherungsordner, Update in `<Programmordner>\update\update.log`.
 
 ## Einstellungsdatei (`src/DokuLine.Kern/Einstellungen.cs`)
 

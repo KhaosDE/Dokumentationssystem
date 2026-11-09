@@ -160,8 +160,10 @@ public sealed class AbgaengigkeitTests : IDisposable
         var wo = HeuteWichtigRegeln.Wo([new Marke(MarkenArt.Abwesend, "abwesend: Heimfahrt"), AbgaengigkeitRegeln.Marke(a)], [], Jetzt);
         Assert.Equal((AbgaengigkeitRegeln.MarkeText(a), MarkenArt.Abgaengig), (wo.Text, wo.Art));
         var bis = new TimeSpan(15, 0, 0);
-        Assert.False(AbgaengigkeitRegeln.WartezeitVorbei(bis, new TimeSpan(15, 29, 0), 30));
-        Assert.True(AbgaengigkeitRegeln.WartezeitVorbei(bis, new TimeSpan(15, 30, 0), 30));
+        Assert.False(AbgaengigkeitRegeln.WartezeitVorbei(Jetzt.Date + bis, Jetzt.Date.AddHours(15.4833), 30));
+        Assert.True(AbgaengigkeitRegeln.WartezeitVorbei(Jetzt.Date + bis, Jetzt.Date + new TimeSpan(15, 30, 0), 30));
+        // Über Mitternacht: zurück bis 23:45, um 00:20 ist die Wartezeit vorbei.
+        Assert.True(AbgaengigkeitRegeln.WartezeitVorbei(Jetzt.Date.AddHours(23.75), Jetzt.Date.AddDays(1).AddMinutes(20), 30));
         Assert.Equal("Rückkehrzeit überschritten seit 15:00 – Abgängigkeit melden?", AbgaengigkeitRegeln.UeberschrittenText(bis));
         Assert.Null(AbgaengigkeitRegeln.WartezeitPruefen(30));
         Assert.NotNull(AbgaengigkeitRegeln.WartezeitPruefen(4));
@@ -175,14 +177,14 @@ public sealed class AbgaengigkeitTests : IDisposable
         var p = db.Platz(s.AlleBewohner().First(b => db.Platz(b.Id!.Value) is Platz x && DigitalerAusgang.Anspruch(x, "allein") > 0).Id!.Value)!;
         var eintrag = new AusgangEintrag { BewohnerId = p.BewohnerId, Datum = Jetzt.Date, Beginn = new TimeSpan(10, 0, 0), Art = "allein", HdzBeginn = "EF" };
         var bis = DigitalerAusgang.ZurueckBis(p, eintrag)!.Value;
-        DigitalStand Stand(TimeSpan jetzt) => DigitalerAusgang.StandFuer(p, [eintrag], jetzt);
+        DigitalStand Stand(DateTime jetzt) => DigitalerAusgang.StandFuer(p, [eintrag], jetzt);
         var kurz = Jetzt.Date + bis + TimeSpan.FromMinutes(10);
-        Assert.Contains(AusgangsMarken.Fuer(p, kurz, Stand(kurz.TimeOfDay)), m => m.Text.StartsWith("überfällig seit"));
+        Assert.Contains(AusgangsMarken.Fuer(p, kurz, Stand(kurz)), m => m.Text.StartsWith("überfällig seit"));
         var lang = Jetzt.Date + bis + TimeSpan.FromMinutes(31);
-        Assert.Contains(AusgangsMarken.Fuer(p, lang, Stand(lang.TimeOfDay), wartezeit: 30), m => m.Text == AbgaengigkeitRegeln.UeberschrittenText(bis));
-        Assert.DoesNotContain(AusgangsMarken.Fuer(p, lang, Stand(lang.TimeOfDay), wartezeit: 60), m => m.Text.StartsWith("Rückkehrzeit"));
+        Assert.Contains(AusgangsMarken.Fuer(p, lang, Stand(lang), wartezeit: 30), m => m.Text == AbgaengigkeitRegeln.UeberschrittenText(bis));
+        Assert.DoesNotContain(AusgangsMarken.Fuer(p, lang, Stand(lang), wartezeit: 60), m => m.Text.StartsWith("Rückkehrzeit"));
         var a = s.AbgaengigkeitMelden(p.BewohnerId, M(), "EF", Jetzt);
-        var marken = AusgangsMarken.Fuer(p, lang, Stand(lang.TimeOfDay), wartezeit: 30, abgaengig: a);
+        var marken = AusgangsMarken.Fuer(p, lang, Stand(lang), wartezeit: 30, abgaengig: a);
         Assert.Equal(AbgaengigkeitRegeln.MarkeText(a), marken[0].Text);
         Assert.DoesNotContain(marken, m => m.Text.StartsWith("Rückkehrzeit"));   // schon gemeldet: keine Frage mehr
     }

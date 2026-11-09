@@ -140,12 +140,13 @@ public sealed class KalenderFenster : Form
                 EndeDatum = EndeDatum.Text, EndeUhrzeit = EndeUhrzeit.Text, Ganztags = Ganztags.Checked, Ort = Ort.Text, Hinweis = Hinweis.Text,
                 Bewohner = Art == KalenderArt.Wohnbereich ? [] : BewohnerListe.CheckedIndices.Cast<int>().Select(i => bewohner[i].Id!.Value).ToList(),
                 Treffpunkt = Art == KalenderArt.Ausflug ? Treffpunkt.Text : "", Begleitung = Art == KalenderArt.Ausflug ? Begleitung.AlsText : "",
-                Haus = HausWahl.Checked, Kuerzel = Einstellungen.Laden().Kuerzel,
+                Haus = HausWahl.Checked, Kuerzel = Recht.Kuerzel,
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.KalenderAnlegen(f) : speicher.KalenderAendern(bisher.Id, f, ohnePruefung ? null : bisher.Fassungen.Count);
-            // Häuser (Bauplan 37): ein neuer Haus-Termin gilt für das Haus des gewählten Bereichs.
-            if (bisher is null && f.Haus && speicher.HausVonBereich().TryGetValue(Arbeitsbereich.Gewaehlt, out var haus))
-                speicher.KalenderHausSetzen(Gespeichert.Id, haus);
+            // Häuser (Bauplan 37): ein Haus-Termin gilt für das Haus des gewählten Bereichs (bei „Alle“ für alle Häuser);
+            // ein Termin, der kein Haus-Termin mehr ist, verliert sein Haus.
+            if (!f.Haus) speicher.KalenderHausSetzen(Gespeichert.Id, null);
+            else if (speicher.HausVonBereich().TryGetValue(Arbeitsbereich.Gewaehlt, out var haus)) speicher.KalenderHausSetzen(Gespeichert.Id, haus);
         }
         catch (Konflikt k)
         {

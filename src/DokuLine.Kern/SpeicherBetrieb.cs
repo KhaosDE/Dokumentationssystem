@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO.Compression;
 using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
@@ -12,34 +13,62 @@ public sealed partial class Speicher
 
     public bool HatPasswort(string kuerzel) => Wert("SELECT 1 FROM passwoerter WHERE kuerzel = $k", ("$k", kuerzel.Trim())) is not null;
 
-    // Anmelden mit Passwort: nach 5 Fehlversuchen gesperrt; ein Einmalpasswort muss danach geändert werden.
+    // Anmelden mit Passwort: nach 5 Fehlversuchen gesperrt; ein Einmalpasswort muss danach geändert werden und gilt 7 Tage.
+    // Unbekannte und ausgeschiedene Kürzel melden dasselbe wie ein falsches Passwort (verrät nicht, wer existiert).
     public (AnmeldeErgebnis Ergebnis, Mitarbeiter? Mitarbeiter) PasswortAnmelden(string kuerzel, string passwort)
     {
-        var m = Anmelden(kuerzel);   // unbekannt oder ausgeschieden: Eingabefehler wie bisher
-        using var befehl = Befehl("SELECT hash, salz, iterationen, einmal, fehlversuche, gesperrt FROM passwoerter WHERE kuerzel = $k", null, [("$k", m.Kuerzel)]);
-        using var leser = befehl.ExecuteReader();
-        if (!leser.Read()) return (AnmeldeErgebnis.OhnePasswort, null);
-        string hash = leser.GetString(0), salz = leser.GetString(1);
-        int iterationen = leser.GetInt32(2), fehl = leser.GetInt32(4);
-        bool einmal = leser.GetInt64(3) == 1, gesperrt = leser.GetInt64(5) == 1;
-        leser.Close();
-        if (gesperrt) return (AnmeldeErgebnis.Gesperrt, null);
-        if (!PasswortRegeln.Pruefen(passwort, hash, salz, iterationen))
+        var m = MitarbeiterLesen(kuerzel.Trim());
+        if (m is null || !m.Aktiv) return (AnmeldeErgebnis.Falsch, null);
+        string hash, salz, geaendert;
+        int iterationen;
+        bool einmal;
+        using (var befehl = Befehl("SELECT hash, salz, iterationen, einmal, gesperrt, geaendert FROM passwoerter WHERE kuerzel = $k", null, [("$k", m.Kuerzel)]))
+        using (var leser = befehl.ExecuteReader())
         {
-            fehl++;
-            Ausfuehren("UPDATE passwoerter SET fehlversuche = $f, gesperrt = $g WHERE kuerzel = $k", null,
-                ("$f", fehl), ("$g", fehl >= PasswortRegeln.Fehlversuche ? 1 : 0), ("$k", m.Kuerzel));
-            return (fehl >= PasswortRegeln.Fehlversuche ? AnmeldeErgebnis.Gesperrt : AnmeldeErgebnis.Falsch, null);
+            if (!leser.Read()) return (AnmeldeErgebnis.OhnePasswort, null);
+            if (leser.GetInt64(4) == 1) return (AnmeldeErgebnis.Gesperrt, null);
+            (hash, salz, iterationen, einmal, geaendert) = (leser.GetString(0), leser.GetString(1), leser.GetInt32(2), leser.GetInt64(3) == 1, leser.GetString(5));
         }
-        Ausfuehren("UPDATE passwoerter SET fehlversuche = 0 WHERE kuerzel = $k", null, ("$k", m.Kuerzel));
+        bool richtig = PasswortRegeln.Pruefen(passwort, hash, salz, iterationen);
+        // Zählen und Sperren in einem Schritt (mehrere Sitzungen gleichzeitig verlieren keinen Fehlversuch); eine
+        // inzwischen gesetzte Sperre gilt auch für einen richtigen Versuch.
+        using var transaktion = db.BeginTransaction();
+        if (!richtig)
+            Ausfuehren("""
+                UPDATE passwoerter SET fehlversuche = fehlversuche + 1,
+                    gesperrt = CASE WHEN fehlversuche + 1 >= $max THEN 1 ELSE gesperrt END WHERE kuerzel = $k
+                """, transaktion, ("$max", PasswortRegeln.Fehlversuche), ("$k", m.Kuerzel));
+        bool gesperrt = WertIn(transaktion, "SELECT gesperrt FROM passwoerter WHERE kuerzel = $k", ("$k", m.Kuerzel)) is long g && g == 1;
+        if (richtig && !gesperrt) Ausfuehren("UPDATE passwoerter SET fehlversuche = 0 WHERE kuerzel = $k", transaktion, ("$k", m.Kuerzel));
+        transaktion.Commit();
+        if (gesperrt) return (AnmeldeErgebnis.Gesperrt, null);
+        if (!richtig) return (AnmeldeErgebnis.Falsch, null);
+        if (einmal && Uhr() - AusZeit(geaendert) > TimeSpan.FromDays(PasswortRegeln.EinmalTage)) return (AnmeldeErgebnis.Abgelaufen, null);
         return (einmal ? AnmeldeErgebnis.AendernPflicht : AnmeldeErgebnis.Ok, m);
     }
 
-    // Einmalpasswort setzen (Leitung oder Verwalter): entsperrt auch; beim nächsten Anmelden muss es geändert werden.
+    // Einmalpasswort vergeben und entsperren: nur für Mitarbeiter, die man verwalten darf (eigener Bereich bzw. alle),
+    // nie für jemanden mit mehr Rechten (sonst übernähme man dessen Konto) und für Administratoren nur als Administrator.
+    private Mitarbeiter PasswortZielPruefen(string kuerzel, string durch)
+    {
+        var ich = MitarbeiterLesen(durch) ?? throw new Eingabefehler([RechteRegeln.NichtAngemeldetText]);
+        var ziel = MitarbeiterLesen(kuerzel) ?? throw new Eingabefehler([$"Das Kürzel „{kuerzel}“ ist nicht bekannt."]);
+        bool alle = Grund(durch, Funktionen.MitarbeiterAlle) is null, bereich = Grund(durch, Funktionen.MitarbeiterBereich) is null;
+        if (!alle && !bereich) throw new Eingabefehler([Grund(durch, Funktionen.MitarbeiterBereich)!]);
+        if (ziel.Kuerzel.Equals(ich.Kuerzel, StringComparison.OrdinalIgnoreCase))
+            throw new Eingabefehler(["Das eigene Passwort ändern Sie unter „Passwort ändern“."]);
+        if (RechteRegeln.IstAdministrator(ziel) && !RechteRegeln.IstAdministrator(ich))
+            throw new Eingabefehler(["Das Passwort eines Administrators setzt nur ein Administrator zurück."]);
+        if (!RechteRegeln.DarfVerwalten(ich, alle, bereich, ziel.Bereiche)) throw new Eingabefehler([$"{ziel.Name} gehört nicht zu Ihrem Bereich."]);
+        if (!RechteRegeln.IstAdministrator(ich) && Funktionen.Alle.Any(f => Grund(ziel.Kuerzel, f.Schluessel) is null && Grund(durch, f.Schluessel) is not null))
+            throw new Eingabefehler([$"{ziel.Name} hat Rechte, die Sie nicht haben – das Passwort setzt die Hausleitung oder der Verwalter zurück."]);
+        return ziel;
+    }
+
+    // Einmalpasswort setzen: entsperrt auch; beim nächsten Anmelden muss es geändert werden.
     public void EinmalpasswortSetzen(string kuerzel, string passwort, string durch, DateTime jetzt)
     {
-        if (Grund(durch, Funktionen.MitarbeiterBereich) is not null && Grund(durch, Funktionen.MitarbeiterAlle) is string grund) throw new Eingabefehler([grund]);
-        var m = MitarbeiterLesen(kuerzel) ?? throw new Eingabefehler([$"Das Kürzel „{kuerzel}“ ist nicht bekannt."]);
+        var m = PasswortZielPruefen(kuerzel, durch);
         PasswortSchreiben(m.Kuerzel, passwort, einmal: true, durch, jetzt);
     }
 
@@ -55,8 +84,8 @@ public sealed partial class Speicher
 
     public void Entsperren(string kuerzel, string durch)
     {
-        if (Grund(durch, Funktionen.MitarbeiterBereich) is not null && Grund(durch, Funktionen.MitarbeiterAlle) is string grund) throw new Eingabefehler([grund]);
-        Ausfuehren("UPDATE passwoerter SET gesperrt = 0, fehlversuche = 0 WHERE kuerzel = $k", null, ("$k", kuerzel.Trim()));
+        var m = PasswortZielPruefen(kuerzel, durch);
+        Ausfuehren("UPDATE passwoerter SET gesperrt = 0, fehlversuche = 0 WHERE kuerzel = $k", null, ("$k", m.Kuerzel));
     }
 
     // Erster Start im Betrieb (noch niemand angelegt): der Verwalter mit Position „Administrator“, allen Bereichen und Passwort.
@@ -79,6 +108,16 @@ public sealed partial class Speicher
     }
 
     public void WalEinschalten() => Ausfuehren("PRAGMA journal_mode = WAL");
+
+    public bool IstBetriebsdatenbank => Meta(Betrieb.MetaSchluessel) is not null;
+
+    public void AlsBetriebMarkieren()
+    {
+        if (IstBetriebsdatenbank) return;
+        using var transaktion = db.BeginTransaction();
+        SetzeMeta(Betrieb.MetaSchluessel, "1", transaktion);
+        transaktion.Commit();
+    }
 
     public bool Gesperrt(string kuerzel) => Wert("SELECT gesperrt FROM passwoerter WHERE kuerzel = $k", ("$k", kuerzel.Trim())) is long g && g == 1;
 
@@ -132,24 +171,41 @@ public sealed partial class Speicher
 
     public DateTime? LetzteSicherungZeit => Meta(LetzteSicherung) is string s ? AusZeit(s) : null;
 
-    // Sicherung mit der Sicherungsfunktion von SQLite (auch bei laufendem Betrieb in sich stimmig), danach geprüft.
+    // Was neben der Datenbank zu den Daten gehört: die Ablage der Dokumente und die hinterlegten Bilder.
+    private string[] AblageOrdner => [Path.Combine(Path.GetDirectoryName(Path.GetFullPath(Pfad))!, DokumentRegeln.Ordner), Pfade.ImDatenordner(Bilder.Ordner)];
+
+    // Sicherung als eine Datei (ZIP): die Datenbank (Sicherungsfunktion von SQLite, auch bei laufendem Betrieb in sich
+    // stimmig) und die Ablage der Dokumente und Bilder; danach geprüft. Nicht mehr nötige Stände werden gelöscht.
     public Sicherung SicherungErstellen(string ordner, DateTime jetzt)
     {
         Directory.CreateDirectory(ordner);
         string ziel = Path.Combine(ordner, SicherungRegeln.Name(jetzt));
-        string zwischen = ziel + ".neu";
-        if (File.Exists(zwischen)) File.Delete(zwischen);
-        using (var datei = new SqliteConnection($"Data Source={zwischen};Mode=ReadWriteCreate;Pooling=False"))
+        string zwischen = $"{ziel}.{Environment.ProcessId}.neu";
+        string db_kopie = Path.Combine(Path.GetTempPath(), $"dokuline-sicherung-{Guid.NewGuid():N}.db");
+        try
         {
-            datei.Open();
-            db.BackupDatabase(datei);
+            using (var datei = new SqliteConnection($"Data Source={db_kopie};Mode=ReadWriteCreate;Pooling=False"))
+            {
+                datei.Open();
+                db.BackupDatabase(datei);
+            }
+            using (var zip = ZipFile.Open(zwischen, ZipArchiveMode.Create))
+            {
+                zip.CreateEntryFromFile(db_kopie, SicherungRegeln.DatenbankEintrag, CompressionLevel.Fastest);
+                foreach (string quelle in AblageOrdner.Where(Directory.Exists))
+                    foreach (string f in Directory.EnumerateFiles(quelle, "*", SearchOption.AllDirectories))
+                        zip.CreateEntryFromFile(f, $"{Path.GetFileName(quelle)}/{Path.GetRelativePath(quelle, f).Replace('\\', '/')}",
+                            CompressionLevel.NoCompression);
+            }
+            if (SicherungPruefen(zwischen) is string fehler) throw new SpeicherFehler($"Die Sicherung ist fehlerhaft und wurde verworfen: {fehler}");
+            File.Move(zwischen, ziel, overwrite: true);
         }
-        if (SicherungPruefen(zwischen) is string fehler)
+        finally
         {
-            File.Delete(zwischen);
-            throw new SpeicherFehler($"Die Sicherung ist fehlerhaft und wurde verworfen: {fehler}");
+            foreach (string rest in new[] { zwischen, db_kopie })
+                try { if (File.Exists(rest)) File.Delete(rest); }
+                catch (IOException) { }
         }
-        File.Move(zwischen, ziel, overwrite: true);
         using (var transaktion = db.BeginTransaction())
         {
             SetzeMeta(LetzteSicherung, Zeit(jetzt), transaktion);
@@ -162,22 +218,24 @@ public sealed partial class Speicher
     }
 
     public static List<Sicherung> Sicherungen(string ordner) =>
-        !Directory.Exists(ordner) ? [] : [.. Directory.EnumerateFiles(ordner, SicherungRegeln.Praefix + "*.db")
+        !Directory.Exists(ordner) ? [] : [.. Directory.EnumerateFiles(ordner, SicherungRegeln.Praefix + "*" + SicherungRegeln.Endung)
             .Select(p => (Pfad: p, Zeit: SicherungRegeln.ZeitAus(p)))
             .Where(x => x.Zeit is not null)
             .Select(x => new Sicherung(x.Pfad, x.Zeit!.Value, new FileInfo(x.Pfad).Length))
             .OrderByDescending(s => s.Zeit)];
 
-    // null = in Ordnung; sonst der Grund. Prüft, ob die Datei eine vollständige DokuLine-Datenbank ist.
+    // null = in Ordnung; sonst der Grund. Prüft, ob die ZIP-Datei eine vollständige DokuLine-Datenbank enthält.
     public static string? SicherungPruefen(string pfad)
     {
+        string ordner = Path.Combine(Path.GetTempPath(), $"dokuline-pruefen-{Guid.NewGuid():N}");
         try
         {
-            using var datei = new SqliteConnection($"Data Source={pfad};Mode=ReadOnly;Pooling=False");
-            datei.Open();
-            using var pruefen = datei.CreateCommand();
+            string datei = DatenbankAuspacken(pfad, ordner);
+            using var verbindung = new SqliteConnection($"Data Source={datei};Mode=ReadOnly;Pooling=False");
+            verbindung.Open();
+            using var pruefen = verbindung.CreateCommand();
             pruefen.CommandText = "PRAGMA integrity_check";
-            if (pruefen.ExecuteScalar() as string is not "ok") return "Die Datei ist beschädigt.";
+            if (pruefen.ExecuteScalar() as string is not "ok") return "Die Datenbank darin ist beschädigt.";
             pruefen.CommandText = "PRAGMA user_version";
             int stand = Convert.ToInt32(pruefen.ExecuteScalar(), CultureInfo.InvariantCulture);
             if (stand < 1 || stand > AktuellerStand) return $"Unbekannter Stand der Datenbank ({stand}).";
@@ -185,19 +243,61 @@ public sealed partial class Speicher
             pruefen.ExecuteScalar();
             return null;
         }
-        catch (SqliteException e) { return e.Message; }
+        catch (Exception e) when (e is SqliteException or InvalidDataException or IOException) { return e.Message; }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            try { if (Directory.Exists(ordner)) Directory.Delete(ordner, recursive: true); }
+            catch (IOException) { }
+        }
     }
 
-    // Rücksicherung: erst eine Kopie des jetzigen Stands, dann die geprüfte Sicherung zurückspielen.
+    private static string DatenbankAuspacken(string zip, string ordner)
+    {
+        using var archiv = ZipFile.OpenRead(zip);
+        var eintrag = archiv.GetEntry(SicherungRegeln.DatenbankEintrag) ?? throw new InvalidDataException("Die Datei enthält keine Datenbank.");
+        Directory.CreateDirectory(ordner);
+        string ziel = Path.Combine(ordner, SicherungRegeln.DatenbankEintrag);
+        eintrag.ExtractToFile(ziel, overwrite: true);
+        return ziel;
+    }
+
+    // Rücksicherung: erst eine Kopie des jetzigen Stands (Datenbank, Ablage), dann die geprüfte Sicherung zurückspielen.
     public string Ruecksichern(string sicherung, string kuerzel)
     {
         if (Grund(kuerzel, Funktionen.BetriebVerwalten) is string grund) throw new Eingabefehler([grund]);
+        return Ruecksichern(sicherung);
+    }
+
+    // Ohne Rechteprüfung: nur für „--ruecksichern“, das ein Windows-Administrator mit erhöhten Rechten startet.
+    public string Ruecksichern(string sicherung)
+    {
         if (SicherungPruefen(sicherung) is string fehler) throw new Eingabefehler([$"Diese Sicherung lässt sich nicht verwenden: {fehler}"]);
         string vorher = SicherungAnlegen("vor-ruecksicherung");
-        using (var quelle = new SqliteConnection($"Data Source={sicherung};Mode=ReadOnly;Pooling=False"))
+        // Neben der Datenbank auspacken, nicht im Temp-Ordner: Ordner lassen sich unter Windows nur auf demselben Laufwerk verschieben.
+        string ordner = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(Pfad))!, $"ruecksicherung-{Guid.NewGuid():N}");
+        try
         {
-            quelle.Open();
-            quelle.BackupDatabase(db);
+            ZipFile.ExtractToDirectory(sicherung, ordner);   // prüft, dass kein Eintrag aus dem Ordner herausführt
+            // Erst die Datenbank: Scheitert sie, ist noch nichts verändert.
+            using (var quelle = new SqliteConnection($"Data Source={Path.Combine(ordner, SicherungRegeln.DatenbankEintrag)};Mode=ReadOnly;Pooling=False"))
+            {
+                quelle.Open();
+                quelle.BackupDatabase(db);
+            }
+            string stempel = Uhr().ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
+            foreach (string ablage in AblageOrdner)
+            {
+                if (Directory.Exists(ablage)) Directory.Move(ablage, $"{ablage}-vor-ruecksicherung-{stempel}");
+                string aus = Path.Combine(ordner, Path.GetFileName(ablage));
+                if (Directory.Exists(aus)) Directory.Move(aus, ablage);
+            }
+        }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            try { if (Directory.Exists(ordner)) Directory.Delete(ordner, recursive: true); }
+            catch (IOException) { }
         }
         Ausfuehren("PRAGMA foreign_keys = ON");
         Aufbauen();   // eine ältere Sicherung bekommt die neueren Datenbank-Schritte

@@ -292,18 +292,13 @@ public sealed partial class Hauptfenster : Form
         Betrieb.Aktiv && Recht.Darf(speicher, Funktionen.BetriebVerwalten) && SicherungRegeln.Warnen(speicher.LetzteSicherungZeit, jetzt)
             ? $" · Achtung: letzte Sicherung {(speicher.LetzteSicherungZeit is DateTime l ? $"vom {l:dd.MM.yyyy}" : "fehlt")}" : "";
 
-    // Betrieb (alle 30 Sekunden): nach der eingestellten Zeit ohne Eingabe sperren; die nächtliche Sicherung nachholen,
-    // falls die Aufgabenplanung sie nicht gemacht hat.
+    // Betrieb (alle 30 Sekunden): nach der eingestellten Zeit ohne Eingabe sperren. Gesichert wird nicht aus den Sitzungen
+    // (dort fehlt das Schreibrecht im Sicherungsordner), sondern von der Aufgabenplanung; fehlt die Sicherung, warnt die
+    // Statusleiste den Verwalter.
     public void BetriebPruefen(DateTime jetzt)
     {
         if (Betrieb.Werte is not BetriebWerte b) return;
         if (Recht.Angemeldet && !Gesperrt && Leerlauf.Dauer() >= TimeSpan.FromMinutes(b.SperreMinuten)) Abmelden(automatisch: true);
-        if (!SicherungRegeln.Faellig(speicher.LetzteSicherungZeit, jetzt, b.SicherungUm)) return;
-        try { speicher.SicherungErstellen(Betrieb.Sicherungsordner, jetzt); }
-        catch (Exception e) when (e is SpeicherFehler or IOException or UnauthorizedAccessException)
-        {
-            DokuLine.Update.Aktualisierung.Protokoll($"Sicherung fehlgeschlagen: {e.Message}");
-        }
     }
 
     // „Bewohner“ ist der frühere Name von „Dokumentation“ (Module und Aufrufe von außen). „Laufende Therapien“ und

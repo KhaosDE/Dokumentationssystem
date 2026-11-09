@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.41.0** (Bauplan Schritt 37: Betriebsmodus für den Terminalserver).
+Stand: 09.11.2026. Version: **0.41.1** (Korrekturen aus der abschließenden Fehlersuche).
 
 ## Aktuell
 
@@ -403,7 +403,33 @@ und nächtliches Einspielen mit Rückweg, **Häuser** mit ihren Bereichen (Berei
 unten „Betrieb“ statt des Demo-Hinweises. Anleitung, Ordnerrechte, Windows-Server-Versionen und die Liste der
 Freigaben: `docs/betrieb.md`. Sicherung, Zugriffsprotokoll und Häuser gibt es auch in der Demo.
 
-**Nächster Schritt:** Der Bauplan ist abgearbeitet; abschließende Fehlersuche (Auftrag Tobi, 09.11.2026).
+Neu in 0.41.1 (abschließende Fehlersuche, vier Prüfrichtungen: Speicher, Regeln, Oberfläche, Sicherheit; jeder Fund
+am Code nachgeprüft):
+
+- **Betrieb, Sicherheit:** Das angemeldete Kürzel steht nur im Arbeitsspeicher (die Einstellungsdatei gehört dem
+  Benutzer). Fehlversuche werden in einem Schritt gezählt; ein unbekanntes Kürzel meldet dasselbe wie ein falsches
+  Passwort; Einmalpasswörter gelten 7 Tage; Einmalpasswort und Entsperren nur für Mitarbeiter im eigenen Bereich ohne
+  höhere Rechte, für Administratoren nur durch einen Administrator; 600 000 Durchläufe beim Hash. Eine Datenbank aus dem
+  Betrieb öffnet die Demo nie. Dokumente nur als Dokument oder Bild (keine Programme, Skripte, Verknüpfungen, Makros).
+  Die Anzeige für den Fernseher und der Demo-Ordner der Aktenübernahme sind im Betrieb aus. Bei der automatischen
+  Sperre werden offene Rückfragen und Dateiauswahlen ausgeblendet und nach der Anmeldung wieder gezeigt.
+- **Sicherung:** eine ZIP-Datei mit Datenbank, Dokumenten und Bildern; `sicherungsordner` ist Pflicht und liegt nicht
+  im Datenordner; gesichert wird nur von der Aufgabenplanung (Sicherungskonto, nicht SYSTEM), Warnung bleibt; die
+  Rücksicherung bringt auch Dokumente und Bilder zurück, klappt über Laufwerke hinweg und geht im Betrieb nur per Befehl,
+  wenn alle abgemeldet sind. Das Update wird im Programmordner vorbereitet; die Download-Adresse wird streng geprüft. Die
+  Befehle des Verwalters zeigen ihr Ergebnis in einem Fenster.
+- **Regeln (Regel 5):** Überleitungsbogen „im Medikamentenplan nichts eingetragen – bitte nachfragen“ statt „keine
+  Medikamente“, Zuständigkeit „nicht erfasst“, Zeilenumbrüche im PDF; Meldebogen ebenso. Eine Lücke zwischen zwei
+  Kostenzusagen fällt auf. Angehörige: leere Liste nur über „keine bekannt“. Neues Formular „Zuständigkeit“ steht auf
+  „nicht erfasst“. Schweigepflicht: ein Widerruf in der Zukunft heißt „Widerruf ab …“, stillgelegte Personen bleiben
+  wählbar.
+- **Sonstiges:** Ausgang über Mitternacht (Abgängigkeit, offene Ausgänge von gestern); Blutzucker-Grenzen in mmol/l
+  richtig umgerechnet; Meldebogen-Fenster behält beim Umschalten seine Felder, „Neue Meldung“ leert sie; PDF von
+  Meldebogen und Überleitung ins Zugriffsprotokoll; Aktenübernahme ordnet „Ahorn, Berta“ nicht Anton Ahorn zu;
+  gleichzeitiges Speichern bei Vitalwerten und Abgängigkeit; Haus beim Ändern eines Kalendertermins.
+
+**Nächster Schritt:** keiner offen – neue Aufträge kommen über `IDEEN.md`. Vor echtem Einsatz: Freigaben und
+Betriebsprobe (`docs/betrieb.md`, Abschnitt 10).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1499,12 +1525,26 @@ Freigaben: `docs/betrieb.md`. Sicherung, Zugriffsprotokoll und Häuser gibt es a
   Häuser), Datenbank-Schritt 40, `Pfade.Benutzerordner`, `Betriebsaufgaben` (`--sicherung`, `--update-einspielen`),
   `BetriebFenster.cs` (Ersteinrichtung, Passwort ändern, Passwörter, Zugriffsprotokoll, Sicherung, Update, Häuser),
   `Leerlauf`, Anmeldung mit Passwort, `docs/betrieb.md`.
+- 0.41.1 — Fehlersuche nach dem Bauplan: `Sitzung` (Kürzel im Arbeitsspeicher), Passwortprüfung atomar mit Ablauf und
+  Zielprüfung, Kennzeichen „Betrieb“ in der Datenbank, Sicherung als ZIP mit Ablage und Rücksicherung, Befehle des
+  Verwalters (`--ruecksichern`, `--update-…`) mit Meldungsfenster, Dateiarten der Ablage, Dialoge beim Sperren,
+  Korrekturen in Überleitung, Meldebogen, Kostenzusage, Angehörigen, Schweigepflicht, Vitalwerten und Ausgangsliste;
+  neue Tests dazu (Kern 435). Schutz gegen hängende Tests: jeder Oberflächentest höchstens 3 Minuten, einzelne Tests
+  10 Minuten (`--blame-hang-timeout`), der Windows-Job 45 Minuten (ein offener Dialog im Test „Akte übernehmen“ hatte
+  einen Lauf über eine halbe Stunde aufgehalten).
 
 ## Offene Punkte
 
-- 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
-  muss den Ordner „Dokumente“ mitnehmen (Sicherung ist noch nicht gebaut, siehe oben). Die Dateien sind nicht
-  verschlüsselt – für den Echtbetrieb mit der IT klären (Zugriffsrechte auf den Ordner).
+- 09.11.2026 (0.41.1), **Restrisiko Betrieb:** Die DokuLine-Benutzer müssen die Datenbankdatei lesen und schreiben
+  können; wer am Server angemeldet ist, könnte sie an DokuLine vorbei öffnen. Gegenmaßnahmen außerhalb des Programms
+  (AppLocker, Ordner ausblenden) stehen in `docs/betrieb.md`, Abschnitt 8; ganz schließt es erst ein eigener Serverdienst.
+  Mit Datenschutz und IT klären.
+- 09.11.2026 (0.41.1): Nicht auf einem echten Windows Server getestet: Aufgabenplanung mit dem Sicherungskonto, die
+  Befehle des Verwalters, das Ausblenden von Windows-Dialogen bei der automatischen Sperre (die Tests unter Windows
+  prüfen nur die Sperre selbst). Bitte bei der Betriebsprobe.
+- 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); die Sicherung
+  nimmt sie seit 0.41.1 mit. Die Dateien sind nicht verschlüsselt – für den Echtbetrieb mit der IT klären
+  (Zugriffsrechte auf den Ordner, BitLocker).
 - 09.11.2026 (0.34.1), **Bedenken Datenschutz:** „Bestellung per E-Mail …“ legt Name, Geburtsdatum und Medikamente in
   eine E-Mail – Gesundheitsdaten. Das Programm sendet nichts selbst (`mailto:`, Regel 6) und zeigt vorher einen Hinweis;
   ob eine E-Mail an Forensik/FOSA zulässig ist (Verschlüsselung, Einwilligung), müssen Leitung und Datenschutz vor dem
@@ -1594,6 +1634,22 @@ Freigaben: `docs/betrieb.md`. Sicherung, Zugriffsprotokoll und Häuser gibt es a
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.41.1): Aus den Sitzungen wird nicht gesichert (ersetzt „oder nächster Start“ aus 0.41.0): Die Benutzer
+  sollen die Sicherungen nicht ändern können, also dürfen sie nicht in den Sicherungsordner schreiben. Die Sicherung läuft
+  mit einem eigenen Konto statt als SYSTEM, weil sie die Datenbank liest, die alle Benutzer ändern dürfen; das Einspielen
+  des Updates bleibt SYSTEM (es liest nur aus dem Programmordner).
+- 09.11.2026 (0.41.1): Rücksicherung im Betrieb nur per Befehl (`--ruecksichern`), weil andere Sitzungen sonst mit einem
+  veralteten Stand weiterarbeiten würden; der Befehl bricht ab, solange DokuLine irgendwo offen ist.
+- 09.11.2026 (0.41.1): Die Befehle des Verwalters zeigen ihr Ergebnis in einem Meldungsfenster, weil DokuLine ein
+  Fensterprogramm ist und nichts in die PowerShell schreibt; die nächtlichen Aufgaben öffnen nie ein Fenster (niemand
+  könnte es schließen).
+- 09.11.2026 (0.41.1): Windows-Dialoge werden bei der automatischen Sperre ausgeblendet statt geschlossen: Schließen
+  würde „Abbrechen“ oder „Nein“ auslösen und damit womöglich etwas tun, das niemand entschieden hat.
+- 09.11.2026 (0.41.1): Dateiarten der Ablage als feste Liste erlaubter Endungen statt einer Sperrliste: Neue gefährliche
+  Endungen gibt es immer wieder, eine Sperrliste wäre nie vollständig.
+- 09.11.2026 (0.41.1): Einmalpasswörter gelten 7 Tage und werden nur für Mitarbeiter ohne höhere Rechte vergeben – sonst
+  könnte eine Leitung das Konto einer Person mit mehr Rechten übernehmen.
 
 - 09.11.2026 (0.41.0): Betriebsmodus – Einstellungen (Kürzel, Menü, Bereich des Rechners) bleiben je Benutzer in
   `%APPDATA%\DokuLine`, weil auf dem Terminalserver alle Sitzungen auf einem Rechner laufen; alles Gemeinsame (Datenbank,
@@ -2500,6 +2556,14 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.41.1: Akte → „Dokumente“ → eine `.exe` oder `.lnk` hinzufügen → wird abgelehnt. Kostenträger mit einer
+abgelaufenen und einer späteren Bewilligung → Marke „Kostenzusage: heute keine geltende (nächste ab …)“. Einstellungen →
+„Vitalwerte: allgemeine Richtwerte“ → Blutzucker in mmol/l; Akte → Vitalwerte → „Grenzen und Messaufträge …“ →
+Blutzucker 4–10 → wird wieder als 4–10 angezeigt. Angehörige ohne Person speichern →
+Fehlermeldung. Im Betrieb (Betriebsprobe): Sicherung über die Aufgabenplanung mit dem Sicherungskonto, ZIP-Datei
+ansehen (Datenbank, Dokumente, Bilder), `--ruecksichern` nach `docs/betrieb.md`; eine Rückfrage offen lassen und
+10 Minuten warten → Sperre, nach der Anmeldung ist die Rückfrage wieder da.
 
 Version 0.41.0 (Betriebsprobe nur auf einem Test-Rechner, nur ausgedachte Daten): Ordner nach `docs/betrieb.md`
 anlegen, `betrieb.json` neben die `.exe`, starten → Ersteinrichtung, Mitarbeiter anlegen, Einmalpasswort vergeben,

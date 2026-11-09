@@ -61,7 +61,7 @@ public sealed class VitalwerteAnsicht : KartenFlaeche
         string? vorher = VerlaufArt.SelectedItem as string;
         VerlaufArt.Items.Clear();
         VerlaufArt.Items.AddRange([.. arten]);
-        VerlaufArt.SelectedIndex = Math.Max(0, arten.IndexOf(vorher ?? VitalRegeln.Blutdruck));
+        if (arten.Count > 0) VerlaufArt.SelectedIndex = Math.Max(0, arten.IndexOf(vorher ?? VitalRegeln.Blutdruck));
         Tabelle.BeginUpdate();
         Tabelle.Items.Clear();
         foreach (var w in Gezeigt)
@@ -81,7 +81,7 @@ public sealed class VitalwerteAnsicht : KartenFlaeche
         Tabelle.EndUpdate();
         var arzt = AngabenAnsicht.PersonText(speicher);
         Angeordnet.Text = grenzen.Count == 0 ? "Angeordnete Bereiche: keine (es gelten nur die allgemeinen Richtwerte als Hinweis)."
-            : "Angeordnete Bereiche: " + string.Join(" · ", grenzen.Values.Select(g => VitalRegeln.GrenzeText(g, arzt)));
+            : "Angeordnete Bereiche: " + string.Join(" · ", grenzen.Values.Select(g => VitalRegeln.GrenzeText(g, arzt, r)));
         var auftraege = speicher.Messauftraege(id);
         Auftraege.Text = auftraege.Count == 0 ? "Messaufträge: keine."
             : "Messaufträge: " + string.Join(" · ", auftraege.Select(m => $"{m.Art} {VitalRegeln.RhythmusText(m)}, {BerichtRegeln.SchichtText(m.Schicht)}"));
@@ -108,7 +108,7 @@ public sealed class VitalwerteAnsicht : KartenFlaeche
         if (Bewohner is null || VerlaufArt.SelectedItem is not string art) return;
         var r = speicher.Richtwerte();
         Verlauf.Setzen(art, [.. Gezeigt.Where(w => w.Art == art).OrderBy(w => w.Zeit).Select(w => (w.Zeit, VitalRegeln.Anzeige(art, w.Wert, r), w.Wert2))],
-            speicher.Grenzen(Bewohner.Id!.Value).GetValueOrDefault(art), VitalRegeln.Einheit(art, r));
+            speicher.Grenzen(Bewohner.Id!.Value).GetValueOrDefault(art) is VitalGrenze g ? VitalRegeln.GrenzeAnzeige(g, r) : null, VitalRegeln.Einheit(art, r));
     }
 
     public bool Erfassen()

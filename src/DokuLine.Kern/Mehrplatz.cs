@@ -142,19 +142,28 @@ public sealed partial class Speicher
             if (OrdnerPruefen(Pfade.Datenordner) is string fehlt) throw new SpeicherFehler(fehlt);
             var betrieb = new Speicher();
             betrieb.WalEinschalten();
+            betrieb.AlsBetriebMarkieren();
             return (betrieb, null);
         }
-        if (!Einstellungen.Gemeinsam(werte)) return (new Speicher(), null);
+        if (!Einstellungen.Gemeinsam(werte)) return (DemoOeffnen(null), null);
         try
         {
             if (OrdnerPruefen(werte.DatenbankOrdner!) is string fehler) throw new SpeicherFehler(fehler);
-            return (new Speicher(Einstellungen.DatenbankPfad(werte)), null);
+            return (DemoOeffnen(Einstellungen.DatenbankPfad(werte)), null);
         }
         catch (Exception e) when (e is SpeicherFehler or IOException or UnauthorizedAccessException)
         {
-            return (new Speicher(), $"Der gemeinsame Ordner ist nicht erreichbar: {e.Message}\n\n" +
+            return (DemoOeffnen(null), $"Der gemeinsame Ordner ist nicht erreichbar: {e.Message}\n\n" +
                                     "Das Programm arbeitet jetzt mit der lokalen Datenbank. Den Ort ändern Sie in den Einstellungen.");
         }
+    }
+
+    private static Speicher DemoOeffnen(string? pfad)
+    {
+        var s = pfad is null ? new Speicher() : new Speicher(pfad);
+        if (!s.IstBetriebsdatenbank) return s;
+        s.Dispose();
+        throw new SpeicherFehler(Betrieb.DemoVerbotenText);
     }
 
     // Lässt sich in den Ordner schreiben? Rückgabe: Fehlertext oder null.

@@ -55,7 +55,7 @@ public sealed class UebergabeSeite : Panel, IBereichSeite
         Controls.Add(leiste);
     }
 
-    private static string Kuerzel => Einstellungen.Laden().Kuerzel;
+    private static string Kuerzel => Recht.Kuerzel;
 
     // Beim Öffnen des Bereichs: Was nach dem letzten Besuch mit diesem Kürzel kam, gilt als „neu“.
     public void Besuch()

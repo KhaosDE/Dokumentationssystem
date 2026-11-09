@@ -166,7 +166,7 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
         try
         {
             var werte = Einstellungen.Laden();
-            var ich = speicher.MitarbeiterLesen(werte.Kuerzel);
+            var ich = speicher.MitarbeiterLesen(Recht.Kuerzel);
             Angemeldet.Text = ich is null ? "niemand" : ich.Anzeige;
             FarbeZeigen();
             MenueEingeklappt.Checked = werte.MenueEingeklappt;

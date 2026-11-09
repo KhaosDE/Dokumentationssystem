@@ -90,7 +90,7 @@ public sealed class UnterbringungFenster : Form
                   : "");
         if (Rueckfrage(frage) != DialogResult.Yes) return false;
 
-        string kuerzel = Einstellungen.Laden().Kuerzel;
+        string kuerzel = Sitzung.Kuerzel;
         try
         {
             if (wert == Unterbringung.Forensik)

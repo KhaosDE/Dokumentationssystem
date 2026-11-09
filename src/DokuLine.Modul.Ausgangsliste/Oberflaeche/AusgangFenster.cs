@@ -92,7 +92,7 @@ public sealed class AusgangFenster : Form
     {
         try
         {
-            db.AusgangSetzen(platz.BewohnerId, aktuell, Einstellungen.Laden().Kuerzel);
+            db.AusgangSetzen(platz.BewohnerId, aktuell, Sitzung.Kuerzel);
         }
         catch (Eingabefehler e)
         {

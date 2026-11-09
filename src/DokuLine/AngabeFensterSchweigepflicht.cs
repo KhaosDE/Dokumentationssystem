@@ -39,6 +39,9 @@ public sealed partial class AngabeFenster
         }
         Fuellen();
         var personen = Enum.GetValues<PersonGruppe>().Where(g => g != PersonGruppe.Sonstige).SelectMany(g => speicher.Personen(g, nurAktive: true)).ToList();
+        // Stillgelegte Personen, die schon eingetragen sind, bleiben wählbar (sonst ginge die Zuordnung beim Übernehmen verloren).
+        foreach (var id in Entbindungen.Select(e => e.PersonId).OfType<long>().Distinct().Where(id => personen.All(p => p.Id != id)))
+            if (speicher.PersonNach(id) is Person alt) personen.Add(alt);
         EntbindungPerson = Personenwahl(PersonGruppe.Angehoerige, null, "(keine Person – Stelle rechts)", personen);
         EntbindungPerson.Width = 300;
         EntbindungStelle = new ComboBox { DropDownStyle = ComboBoxStyle.DropDown, Width = 200 };

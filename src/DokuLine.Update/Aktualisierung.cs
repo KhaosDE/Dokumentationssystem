@@ -79,7 +79,10 @@ public static partial class Aktualisierung
 
     // ------------------------------------------------------------------ Logik (ohne Netz testbar)
 
-    public static bool ErlaubterDownload(string url) => Praefixe.Any(p => url.StartsWith(p, StringComparison.Ordinal));
+    // Nach dem Auflösen von „..“ und Kodierungen (so, wie die Adresse wirklich angefragt wird).
+    public static bool ErlaubterDownload(string url) =>
+        Uri.TryCreate(url, UriKind.Absolute, out var u) && u.Scheme == Uri.UriSchemeHttps && string.IsNullOrEmpty(u.Query) &&
+        Praefixe.Any(p => u.AbsoluteUri.StartsWith(p, StringComparison.Ordinal));
 
     // Neueste Version erfragen: zuerst beim umbenannten Repository, sonst beim alten Namen.
     public static JsonNode? NeuesteRelease(Func<string, JsonNode?> holeJson)
@@ -177,12 +180,16 @@ public static partial class Aktualisierung
 
     // ------------------------------------------------------------------ Protokoll
 
-    // Eine Zeile an update.log im Datenordner anhängen; nur die letzten LogZeilen bleiben.
+    // Wohin update.log geht: Vorgabe der Datenordner. Die Aufgaben im Betrieb, die mit mehr Rechten laufen, schreiben in
+    // einen Ordner, den Benutzer nicht ändern können (sonst ließe sich die Datei auf eine fremde umlenken).
+    public static Func<string> LogOrdner { get; set; } = () => Pfade.Datenordner;
+
+    // Eine Zeile an update.log anhängen; nur die letzten LogZeilen bleiben.
     public static void Protokoll(string text)
     {
         try
         {
-            string datei = Pfade.ImDatenordner(Log);
+            string datei = Path.Combine(LogOrdner(), Log);
             Directory.CreateDirectory(Path.GetDirectoryName(datei)!);
             var zeilen = File.Exists(datei) ? File.ReadAllLines(datei).ToList() : [];
             zeilen.Add($"{DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture)}  {text}");

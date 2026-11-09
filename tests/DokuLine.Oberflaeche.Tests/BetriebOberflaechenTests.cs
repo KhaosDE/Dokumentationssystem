@@ -64,6 +64,8 @@ public class BetriebOberflaechenTests
                 using var f = new Hauptfenster(u.Speicher);
                 Hilfe.Zeigen(f);
                 f.BenutzerWaehlen("TST");
+                Assert.Equal("TST", Recht.Kuerzel);
+                Assert.Contains("letzte Sicherung fehlt", f.SicherungWarnung(DateTime.Now));   // nur für den Verwalter
                 bool gesperrt = false;
                 // Das Anmeldefenster nach der Sperre: hier nur festhalten, dass gesperrt ist (Abbrechen schließt das Programm).
                 using (new DialogErsatz(fenster => { if (fenster is AnmeldenFenster) gesperrt = f.Gesperrt; return DialogResult.Cancel; }))
@@ -75,8 +77,7 @@ public class BetriebOberflaechenTests
                     f.BetriebPruefen(DateTime.Now);
                 }
                 Assert.True(gesperrt);   // nach 10 Minuten ohne Eingabe gesperrt
-                Assert.NotNull(u.Speicher.LetzteSicherungZeit);   // fällige Sicherung nachgeholt
-                Assert.NotEmpty(Speicher.Sicherungen(Betrieb.Sicherungsordner));
+                Assert.Null(u.Speicher.LetzteSicherungZeit);   // Sitzungen sichern nicht – das macht die Aufgabenplanung
             }
             finally { Leerlauf.Dauer = vorher; }
 
@@ -107,6 +108,12 @@ public class BetriebOberflaechenTests
             Assert.True(sicherung.Ruecksichern());
             Hilfe.Foto(sicherung, "153_sicherung");
         }
+        ImBetrieb(u, () =>
+        {
+            using var sicherung = new SicherungFenster(u.Speicher);
+            Assert.False(sicherung.Ruecksichern());   // im Betrieb nur per Befehl, wenn alle abgemeldet sind
+            Assert.Equal(SicherungFenster.RuecksichernImBetrieb, sicherung.Fehler.Text);
+        });
         using (var haeuser = new HaeuserFenster(u.Speicher))
         {
             haeuser.Name_.Text = "Haus am See (ausgedacht)";

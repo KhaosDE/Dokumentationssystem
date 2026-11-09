@@ -31,7 +31,7 @@ public sealed class AusgangReiter : ModulReiter
         {
             var jetzt = db.Jetzt();
             bool digital = db.Speicher.ModulAn(DigitalerAusgang.Schluessel);
-            var stand = digital ? DigitalerAusgang.StandFuer(p, db.AusgaengeLaden(jetzt), jetzt.TimeOfDay) : null;
+            var stand = digital ? DigitalerAusgang.StandFuer(p, db.AusgaengeLaden(jetzt), jetzt) : null;
             bool kueche = db.Speicher.ModulAn(Kuechendienst.Schluessel) && p.Anwesend &&
                           Kuechendienst.ZimmerAm(db.KuechendienstLaden(), jetzt).Contains(p.Zimmernummer);
             Karte = new PlatzKarte(p, jetzt, stand, kueche, mitName: false);
