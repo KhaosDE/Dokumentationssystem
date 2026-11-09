@@ -48,6 +48,9 @@ public static class Funktionen
     public const string BereichTherapie = "bereich_therapie";             // Übersicht: Knopf „Therapie“
     public const string BereicheAlle = "bereiche_alle";                   // Übersicht: Knopf „Alle“
     public const string AnzeigeVerwalten = "anzeige_verwalten";           // Therapie-Anzeige für den Fernseher
+    public const string DokumenteAnsehen = "dokumente_ansehen";           // Akte, Reiter „Dokumente“
+    public const string DokumenteHinzufuegen = "dokumente_hinzufuegen";
+    public const string DokumenteLoeschen = "dokumente_loeschen";
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -76,6 +79,9 @@ public static class Funktionen
         (BereicheWohnbereiche, "Wohnbereiche wählen (Übersicht)"),
         (BereichTherapie, "Bereich Therapie wählen (Übersicht)"),
         (AnzeigeVerwalten, "Anzeige für den Fernseher verwalten"),
+        (DokumenteAnsehen, "Dokumente ansehen"),
+        (DokumenteHinzufuegen, "Dokumente hinzufügen und in den Papierkorb legen"),
+        (DokumenteLoeschen, "Dokumente endgültig löschen"),
         (BereicheAlle, "Alle Bereiche zusammen ansehen (Übersicht)"),
         (DemoZuruecksetzen, "Demo-Daten zurücksetzen"),
     ];
@@ -129,23 +135,24 @@ public static partial class RechteRegeln
             Funktionen.BedarfGeben, Funktionen.AufgabenVorlagen, Funktionen.Heb, Funktionen.MitarbeiterBereich, Funktionen.EinstellungenBereich,
             Funktionen.DemoZuruecksetzen, Funktionen.TherapienBereich, Funktionen.Aerzte,
             Funktionen.BereicheWohnbereiche, Funktionen.AnzeigeVerwalten,
+            Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
         ],
         ["Mitarbeiter Wohnbereich"] =
         [
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten,
             Funktionen.MedikamentAnlegen, Funktionen.TeilnahmeBestaetigen, Funktionen.Fahrzeuge, Funktionen.Heb,
-            Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche,
+            Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen,
         ],
         ["Psychologischer Fachdienst"] =
         [
             Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen,
             Funktionen.MedikamenteVerwalten, Funktionen.TeilnahmeBestaetigen, Funktionen.Heb, Funktionen.Aerzte,
-            Funktionen.BereicheWohnbereiche,
+            Funktionen.BereicheWohnbereiche, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen,
         ],
         ["Pädagogischer Fachdienst"] =
         [
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.TeilnahmeBestaetigen, Funktionen.Heb,
-            Funktionen.Aerzte, Funktionen.BereicheWohnbereiche,
+            Funktionen.Aerzte, Funktionen.BereicheWohnbereiche, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen,
         ],
         ["Therapie"] =
         [
@@ -158,7 +165,7 @@ public static partial class RechteRegeln
     // Datenbanken einmal nachträglich vorbelegt.
     public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten,
         Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
-        Funktionen.AnzeigeVerwalten];
+        Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.

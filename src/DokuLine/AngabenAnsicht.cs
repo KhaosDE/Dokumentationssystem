@@ -14,6 +14,9 @@ public sealed class AngabenAnsicht : KartenFlaeche
     public Button AendernKnopf { get; } = Stil.HauptKnopf("Ändern …");
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
     public Button ZustaendigkeitKnopf { get; } = Stil.NebenKnopf("Zuständigkeit ändern …");
+    // „Dokumente …“: der Reiter „Dokumente“ mit der passenden Kategorie (z. B. Betreuerausweis, Bescheide).
+    public Button DokumenteKnopf { get; } = Stil.NebenKnopf("Dokumente …");
+    public event Action<string>? DokumenteGewuenscht;
     public Angabe Art { get; private set; }
     public Bewohner? Bewohner { get; private set; }
     public List<(string Beschriftung, string Wert, bool Achtung)> Zeilen { get; private set; } = [];
@@ -26,8 +29,9 @@ public sealed class AngabenAnsicht : KartenFlaeche
         AendernKnopf.Click += (_, _) => Aendern();
         VerlaufKnopf.Click += (_, _) => VerlaufZeigen();
         ZustaendigkeitKnopf.Click += (_, _) => Aendern(Angabe.Zustaendigkeit);
-        foreach (var k in new[] { AendernKnopf, ZustaendigkeitKnopf, VerlaufKnopf }) k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
-        knoepfe.Controls.AddRange([AendernKnopf, ZustaendigkeitKnopf, VerlaufKnopf]);
+        DokumenteKnopf.Click += (_, _) => { if (DokumentRegeln.KategorieFuer(Art) is string k) DokumenteGewuenscht?.Invoke(k); };
+        foreach (var k in new[] { AendernKnopf, ZustaendigkeitKnopf, VerlaufKnopf, DokumenteKnopf }) k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
+        knoepfe.Controls.AddRange([AendernKnopf, ZustaendigkeitKnopf, VerlaufKnopf, DokumenteKnopf]);
         Controls.AddRange([tabelle, Stand, knoepfe]);
     }
 
@@ -59,6 +63,9 @@ public sealed class AngabenAnsicht : KartenFlaeche
             Zeilen = [.. ZustaendigkeitRegeln.Zeilen(zust, person), .. Zeilen];
         }
         ZustaendigkeitKnopf.Visible = betreuung;
+        DokumenteKnopf.Visible = DokumentRegeln.KategorieFuer(art) is not null;
+        if (DokumentRegeln.KategorieFuer(art) is string kategorie)
+            DokumenteKnopf.Text = $"Dokumente ({speicher.Dokumente(b.Id!.Value).Count(d => d.Kategorie == kategorie)}) …";
         SuspendLayout();
         tabelle.SuspendLayout();
         foreach (Control c in tabelle.Controls.Cast<Control>().ToList()) { tabelle.Controls.Remove(c); c.Dispose(); }

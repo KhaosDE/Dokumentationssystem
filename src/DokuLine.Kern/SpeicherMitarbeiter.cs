@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-public enum Liste { Bereiche, Positionen, Berichtsarten, Krankenkassen, Kostentraeger, Betreuungsaufgaben }
+public enum Liste { Bereiche, Positionen, Berichtsarten, Krankenkassen, Kostentraeger, Betreuungsaufgaben, Dokumentkategorien }
 
 // Mitarbeiter, Bereiche, Positionen und Rechte im Speicher. Die Mitarbeiter stehen in der Tabelle
 // „kollegen“ (seit den Nachrichten), ihre Bereiche in „team_mitglieder“ – so gehen Nachrichten an
@@ -131,6 +131,7 @@ public sealed partial class Speicher
                                    "AND json_extract(x.inhalt, '$.Kasse') = k.name) FROM krankenkassen k ORDER BY nr, name",
             Liste.Kostentraeger => "SELECT name, aktiv, (SELECT COUNT(*) FROM akte_angaben x WHERE x.art = 'kostentraeger' AND x.zustand = 'eingetragen' " +
                                    "AND json_extract(x.inhalt, '$.Name') = k.name) FROM kostentraeger k ORDER BY nr, name",
+            Liste.Dokumentkategorien => "SELECT name, aktiv, (SELECT COUNT(*) FROM dokumente d WHERE d.kategorie = k.name) FROM dokumentkategorien k ORDER BY nr, name",
             _ => "SELECT name, aktiv, 0 FROM betreuungsaufgaben ORDER BY nr, name",
         };
         var liste = new List<Listeneintrag>();
@@ -147,6 +148,7 @@ public sealed partial class Speicher
         Liste.Krankenkassen => "krankenkassen",
         Liste.Kostentraeger => "kostentraeger",
         Liste.Betreuungsaufgaben => "betreuungsaufgaben",
+        Liste.Dokumentkategorien => "dokumentkategorien",
         _ => "berichtsarten",
     };
 
@@ -157,6 +159,7 @@ public sealed partial class Speicher
         Liste.Berichtsarten => "Berichtsarten",
         Liste.Krankenkassen => "Krankenkassen",
         Liste.Kostentraeger => "Kostenträger",
+        Liste.Dokumentkategorien => "Kategorien der Dokumente",
         _ => "Aufgabenbereiche der Betreuung",
     };
 

@@ -1567,7 +1567,7 @@ Umfang (Vorschlag):
 - Demo-Daten: alle drei Reiter für alle Bewohner, gemischt mit „keine“ und „nicht erfasst“.
 
 ## Akte: Reiter „Dokumente“ – digitale Akte in DokuLine
-Status: freigegeben (Bauplan Schritt 31; OK Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.35.0; Bauplan Schritt 31; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Jeder Bewohner bekommt eine Dokumentenablage in DokuLine, sauber nach Bereichen sortiert,
 direkt aus der Akte zu öffnen.

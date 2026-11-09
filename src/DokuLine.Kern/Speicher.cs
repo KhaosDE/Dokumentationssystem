@@ -828,6 +828,42 @@ public sealed partial class Speicher : IDisposable
         INSERT OR IGNORE INTO betreuungsaufgaben (name, nr) VALUES ('Gesundheitssorge', 1), ('Aufenthaltsbestimmung', 2), ('Vermögenssorge', 3),
             ('Behörden und Ämter', 4), ('Wohnungsangelegenheiten', 5), ('Post', 6), ('Unterbringung', 7);
         """,
+        // 36 – Akte, Reiter „Dokumente“: Angaben je Datei (die Datei liegt in der Ablage neben der Datenbank), Ereignisse
+        // (hinzugefügt, geöffnet, Papierkorb …) statt Änderungen; Kategorien als Liste.
+        """
+        CREATE TABLE IF NOT EXISTS dokumente (
+            id           INTEGER PRIMARY KEY,
+            bewohner_id  INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            kategorie    TEXT NOT NULL,
+            titel        TEXT NOT NULL,
+            datum        TEXT NOT NULL,
+            gueltig_bis  TEXT,
+            hinweis      TEXT NOT NULL DEFAULT '',
+            datei        TEXT NOT NULL,
+            original     TEXT NOT NULL,
+            groesse      INTEGER NOT NULL,
+            pruefsumme   TEXT NOT NULL,
+            hinzugefuegt TEXT NOT NULL,
+            kuerzel      TEXT NOT NULL,
+            vorgaenger   INTEGER REFERENCES dokumente(id)
+        );
+        CREATE INDEX IF NOT EXISTS dokumente_bewohner ON dokumente (bewohner_id);
+        CREATE TRIGGER IF NOT EXISTS dokumente_bleiben BEFORE UPDATE ON dokumente
+            BEGIN SELECT RAISE(ABORT, 'Dokumente werden nicht überschrieben – Änderungen sind Ereignisse.'); END;
+        CREATE TABLE IF NOT EXISTS dokument_ereignisse (
+            id          INTEGER PRIMARY KEY,
+            dokument_id INTEGER NOT NULL REFERENCES dokumente(id) ON DELETE CASCADE,
+            aktion      TEXT NOT NULL,
+            zeit        TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            grund       TEXT NOT NULL DEFAULT ''
+        );
+        CREATE INDEX IF NOT EXISTS dokument_ereignisse_dokument ON dokument_ereignisse (dokument_id);
+        CREATE TABLE IF NOT EXISTS dokumentkategorien (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO dokumentkategorien (name, nr) VALUES ('Aufnahme und Verträge', 1), ('Betreuung und Gericht', 2),
+            ('Kostenträger und Bescheide', 3), ('Krankenkasse', 4), ('Ärztliches und Befunde', 5), ('Ausweise und Behörden', 6),
+            ('Schriftverkehr', 7), ('Sonstiges', 8);
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1001,10 +1037,10 @@ public sealed partial class Speicher : IDisposable
              aerztlich = Meta(DemoAerztlich) is null, betreuer = Meta(DemoBetreuer) is null, personen = Meta(DemoPersonen) is null, bedarf = Meta(DemoBedarf) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
-             akte = Meta(DemoAkte) is null;
+             akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1027,6 +1063,7 @@ public sealed partial class Speicher : IDisposable
         if (betreuer) DemoBetreuerEinfuegen(transaktion);
         if (personen || betreuer) DemoPersonenEinfuegen(transaktion);   // übernimmt auch die Betreuer
         if (akte || personen || betreuer || aerzte) DemoAkteAngabenEinfuegen(transaktion);   // hängt an Personen und Betreuern
+        if (dokumente) DemoDokumenteEinfuegen(transaktion);
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
@@ -1080,6 +1117,7 @@ public sealed partial class Speicher : IDisposable
             DemoBetreuerEinfuegen(transaktion);
             DemoPersonenEinfuegen(transaktion);
             DemoAkteAngabenEinfuegen(transaktion);
+            DemoDokumenteEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);

@@ -149,7 +149,7 @@ public sealed partial class EinstellungenSeite
         Karte("Verwaltung", "Bereiche, Positionen und Berichtsarten",
             "Listen zum Zuordnen; stilllegen statt löschen, solange etwas zugeordnet ist.", ListenKnopf);
         AkteListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, ListenFenster.Akte));
-        Karte("Verwaltung", "Listen für die Akte", "Auswahl in den Reitern Krankenkasse, Kostenträger und Betreuung (Demo: ausgedachte Namen).",
+        Karte("Verwaltung", "Listen für die Akte", "Auswahl in den Reitern Krankenkasse, Kostenträger, Betreuung und Dokumente (Demo: ausgedachte Namen).",
             AkteListenKnopf);
         Karte("Verwaltung", "Rechte", "Tabelle: welche Position was darf, je Funktion „nur Fachkräfte“. Ohne Recht nur ansehen.", RechteKnopf);
 

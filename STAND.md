@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.34.1** (Bauplan Schritt 30a: Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente).
+Stand: 09.11.2026. Version: **0.35.0** (Bauplan Schritt 31: Akte, Reiter „Dokumente“).
 
 ## Aktuell
 
@@ -333,8 +333,18 @@ und **„FOSA“** stehen im Kopf der Akte und in der Bewohnerliste der Übersic
 **„Bestellung per E-Mail …“**: Medikamente ankreuzen, Hinweis zum Datenschutz bestätigen, dann öffnet sich das
 E-Mail-Programm mit Empfänger, Betreff und Liste. Demo: je Bereich zwei Bewohner mit Forensik, drei mit FOSA.
 
+Neu in 0.35.0: Die Akte hat den Reiter **„Dokumente“** – eine eigene Ablage je Bewohner in DokuLine. Links die Kategorien
+mit Zähler (dazu „Alle“ und „Papierkorb“), rechts die Dokumente (Titel, Kategorie, Datum, gültig bis mit „abgelaufen“,
+wer hat sie hinzugefügt), Suche über alle Kategorien. Doppelklick öffnet im Standardprogramm des Rechners. „Dokument
+hinzufügen …“ oder Dateien in die Liste ziehen: Die Datei wird **kopiert** (das Original bleibt), die Kategorie nach dem
+Dateinamen vorgeschlagen. „Ersetzen …“ legt eine neue Fassung an, „In den Papierkorb …“ verlangt einen Grund, endgültig
+löschen geht nur aus dem Papierkorb und nur mit eigenem Recht. Jedes Öffnen, Hinzufügen und Entfernen steht im
+Protokoll; eine außerhalb veränderte Datei erkennt DokuLine an der Prüfsumme. In den Reitern Betreuung, Ärzte,
+Krankenkasse und Kostenträger führt „Dokumente (…) …“ zur passenden Kategorie. Demo: Betreuerausweis, Kostenzusage
+und Arztbrief als kleine PDF mit großem „DEMO — ausgedachte Daten“ bei je vier Bewohnern jedes Bereichs.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 31 „Akte: Reiter Dokumente“ (0.35.0).
+als Nächstes 32 „Vorhandene digitale Akte übernehmen“ (0.36.0).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1396,8 +1406,17 @@ als Nächstes 31 „Akte: Reiter Dokumente“ (0.35.0).
 - Beim Ausliefern von 0.33.9–0.33.20 behoben: Der Visiten-Rundgang stand beim Öffnen in Namensreihenfolge statt nach
   Zimmer (Doppelzimmer: erst Fenster, dann Tür); Oberflächentests an die neuen Versionen angepasst.
 
+- 0.35.0 — Bauplan Schritt 31: `Dokumente.cs` (Modell, `DokumentRegeln`, `DemoPdf` ohne Schriftdateien),
+  `SpeicherDokumente.cs` (Ablage `Dokumente\<Nr>` neben der Datenbank, SHA-256, Ereignisse), Datenbank-Schritt 36
+  (`dokumente`, `dokument_ereignisse`, Liste `dokumentkategorien`), Rechte „Dokumente ansehen“, „… hinzufügen und in den
+  Papierkorb legen“, „… endgültig löschen“; `DokumenteAnsicht`, `DokumentFenster`, Knopf „Dokumente (…) …“ in den
+  Reitern.
+
 ## Offene Punkte
 
+- 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
+  muss den Ordner „Dokumente“ mitnehmen (Sicherung ist noch nicht gebaut, siehe oben). Die Dateien sind nicht
+  verschlüsselt – für den Echtbetrieb mit der IT klären (Zugriffsrechte auf den Ordner).
 - 09.11.2026 (0.34.1), **Bedenken Datenschutz:** „Bestellung per E-Mail …“ legt Name, Geburtsdatum und Medikamente in
   eine E-Mail – Gesundheitsdaten. Das Programm sendet nichts selbst (`mailto:`, Regel 6) und zeigt vorher einen Hinweis;
   ob eine E-Mail an Forensik/FOSA zulässig ist (Verschlüsselung, Einwilligung), müssen Leitung und Datenschutz vor dem
@@ -1488,6 +1507,11 @@ als Nächstes 31 „Akte: Reiter Dokumente“ (0.35.0).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.35.0): Dokumente – der Papierkorb ist ein Vermerk (Ereignis), die Datei bleibt an ihrem Platz, bis sie
+  endgültig gelöscht wird; so bleibt die Zeile der Datenbank unverändert. Der Dateiname in der Ablage bekommt eine
+  zufällige Kennung davor (kein Überschreiben, keine Pfadangaben aus dem Original). Umbenannte Kategorien: Dokumente
+  behalten die Kategorie, unter der sie abgelegt wurden; sie steht dann zusätzlich in der Liste links. Höchstens 50 MB je
+  Datei. „Im Ordner zeigen“ öffnet den Ordner des Bewohners im Explorer.
 - 09.11.2026 (0.34.1): Zuständigkeit und Bestellweg sind zwei weitere Angaben im selben Fassungsmodell wie die Reiter
   (Datenbank-Schritt 35 kennt sie, er ist noch nicht ausgeliefert). Bei FOSA ohne Forensik bleibt der Betreuer zuständig
   (Vorgabe). Der Bestellweg schlägt nach der Zuständigkeit vor; ohne eigene Angabe steht „nicht erfasst“ (der Vorschlag
@@ -2331,6 +2355,13 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.35.0:
+
+1. Akte → Reiter „Dokumente“: einen Demo-Brief doppelklicken (öffnet im PDF-Programm).
+2. Eine eigene Datei in die Liste ziehen, Angaben prüfen, hinzufügen; danach „In den Papierkorb …“ und im Papierkorb
+   „Endgültig löschen …“.
+3. Reiter „Kostenträger“ → „Dokumente (…) …“.
 
 Version 0.34.1:
 

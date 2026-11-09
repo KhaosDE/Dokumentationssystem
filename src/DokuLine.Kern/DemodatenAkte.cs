@@ -98,3 +98,24 @@ public static partial class Demodaten
         }
     }
 }
+
+// Demo-Dokumente: je Wohnbereich bei den ersten vier Bewohnern Betreuerausweis, Kostenzusage und Arztbrief als kleine PDF
+// mit großem „DEMO — ausgedachte Daten“; eine Kostenzusage ist abgelaufen.
+public static partial class Demodaten
+{
+    public static IEnumerable<(Bewohner Bewohner, string Kategorie, string Titel, DateOnly Datum, DateOnly? GueltigBis, string[] Zeilen)> Dokumente(
+        IReadOnlyList<Bewohner> bewohner, DateOnly heute)
+    {
+        foreach (var gruppe in bewohner.GroupBy(b => b.Wohnbereich))
+            foreach (var (b, i) in gruppe.OrderBy(b => b.Nachname, StringComparer.CurrentCulture).Take(4).Select((b, i) => (b, i)))
+            {
+                string name = $"{b.Vorname} {b.Nachname}";
+                yield return (b, "Betreuung und Gericht", "Betreuerausweis", heute.AddDays(-400 - 9 * i), heute.AddDays(300 + 40 * i),
+                    [$"Betreute Person: {name} (ausgedacht)", "Betreuerin: Betreuungsverein (ausgedacht)", "Aufgabenbereiche: Gesundheitssorge, Behörden"]);
+                yield return (b, "Kostenträger und Bescheide", "Kostenzusage", heute.AddDays(-200 - 13 * i), i == 3 ? heute.AddDays(-5) : heute.AddDays(160 - 20 * i),
+                    [$"Leistungsberechtigt: {name} (ausgedacht)", "Leistung: Besondere Wohnform (Eingliederungshilfe)", "Kostenträger: Bezirk Musterland (ausgedacht)"]);
+                yield return (b, "Ärztliches und Befunde", "Arztbrief", heute.AddDays(-30 - 11 * i), null,
+                    [$"Patient: {name} (ausgedacht)", "Kurzer ausgedachter Brief ohne Diagnose.", "Praxis am Lindenplatz (ausgedacht)"]);
+            }
+    }
+}

@@ -119,3 +119,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.33.22 BfArM-Nachschlagen abgesichert: fremde Anfragen blockiert und gezählt, privates Fenster, ohne SmartScreen und Ausfüllen, Hinweis in den Einstellungen (Bauplan 29p).
 - 09.11.2026 — Claude Code: 0.34.0 Akte mit Reitern Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger (Fassungen, drei Zustände, Fristen in der Übersicht, Ärzte bei der Aufnahme) (Bauplan 30).
 - 09.11.2026 — Claude Code: 0.34.1 Zuständigkeit Forensik/FOSA mit Marken, Bestellweg und „Bestellung per E-Mail …“ im Medikamentenplan (Bauplan 30a); dazu Visite nach Zimmer und Tests für 0.33.9–0.33.20 angepasst.
+- 09.11.2026 — Claude Code: 0.35.0 Akte mit Reiter „Dokumente“: eigene Ablage, kopieren statt verschieben, Prüfsumme, Protokoll, Papierkorb, Demo-PDFs (Bauplan 31).
