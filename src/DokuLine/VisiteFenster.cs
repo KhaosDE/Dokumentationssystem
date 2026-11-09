@@ -26,16 +26,18 @@ public sealed class VisiteFenster : Form
     public List<VisiteEintragFeld> Eintraege { get; } = [];
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(640, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Speicher.VisiteGespeichert? Gespeichert { get; private set; }
+    public string Art { get; }   // Psychiater oder Hausarzt (Umschalter der Visitenseite)
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
 
-    public VisiteFenster(Speicher speicher, long? bewohnerId = null)
+    public VisiteFenster(Speicher speicher, long? bewohnerId = null, string art = VisitenRegeln.Psychiater)
     {
         this.speicher = speicher;
+        Art = art;
         bewohner = speicher.AlleBewohner();
         Arzt = new ArztWahl(speicher);
         medikamente = speicher.Medikamente().Where(m => !m.Gesperrt).ToList();
-        Text = $"Neue Visite ({Stil.DemoHinweis})";
+        Text = $"Neue Visite {art} ({Stil.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
         ShowInTaskbar = false;
@@ -120,7 +122,7 @@ public sealed class VisiteFenster : Form
         {
             var v = VisitenRegeln.AusEingabe(new VisiteEingabe
             {
-                Datum = DatumFeld.Text, Arzt = Arzt.Text, Teilnehmer = Teilnehmer.AlsText, Kuerzel = Recht.Kuerzel,
+                Datum = DatumFeld.Text, Art = Art, Arzt = Arzt.Text, Teilnehmer = Teilnehmer.AlsText, Kuerzel = Recht.Kuerzel,
                 Eintraege = Eintraege.Select(e => e.Eingabe()).ToList(),
             }, Jetzt());
             Gespeichert = speicher.VisiteSpeichern(v);

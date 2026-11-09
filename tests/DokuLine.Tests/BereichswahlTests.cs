@@ -99,6 +99,7 @@ public sealed class BereichswahlTests : IDisposable
                 BEGIN SELECT RAISE(ABORT, 'Aufgaben werden nicht überschrieben – Änderungen sind Ereignisse.'); END;
             INSERT INTO aufgabe_vorlagen (text, schicht, tage, aktiv, erstellt, kuerzel)
                 VALUES ('Rundgang', 'nacht', 127, 1, '2026-11-01T10:00', 'AB');
+            ALTER TABLE visite_entwuerfe DROP COLUMN art;
             PRAGMA user_version = 31;
             """);
         int ohneBewohner;

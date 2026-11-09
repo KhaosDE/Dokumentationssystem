@@ -28,7 +28,7 @@ public sealed class VisitenTests : IDisposable
 
     private VisiteEingabe Eingabe() => new()
     {
-        Datum = "09.11.2026", Arzt = "Dr. Test (ausgedacht)", Teilnehmer = "EF", Kuerzel = "EF",
+        Datum = "09.11.2026", Art = VisitenRegeln.Psychiater, Arzt = "Dr. Test (ausgedacht)", Teilnehmer = "EF", Kuerzel = "EF",
         Eintraege =
         [
             new VisiteEintragEingabe
@@ -51,7 +51,7 @@ public sealed class VisitenTests : IDisposable
         var fehler = Assert.Throws<Eingabefehler>(() => VisitenRegeln.AusEingabe(new VisiteEingabe { Datum = "10.11.2026" }, Jetzt)).Fehler;
         Assert.Contains(fehler, f => f.Contains("in der Zukunft"));
         Assert.Contains("Arzt fehlt (aus dem Ärzteverzeichnis wählen).", fehler);
-        Assert.DoesNotContain(fehler, f => f.Contains("Art der Visite"));   // Schritt 26c: entfällt
+        Assert.Contains("Psychiater oder Hausarzt? Bitte wählen.", fehler);
         Assert.Contains("Bitte für mindestens einen Bewohner eintragen, was besprochen wurde.", fehler);
         var e = Eingabe();
         e.Eintraege[0].Besprochen = "";
@@ -71,7 +71,7 @@ public sealed class VisitenTests : IDisposable
         var (visite, aufgaben) = s.VisiteSpeichern(VisitenRegeln.AusEingabe(Eingabe(), Jetzt));
         Assert.Equal(3, aufgaben.Count);
         Assert.Equal(aufgabenVorher + 3, s.Aufgaben(Jetzt, auchErledigte: true).Count);
-        Assert.StartsWith("Medikation ändern: Quetiapin (Dosis geändert) – Visite 09.11.2026 (Dr. Test (ausgedacht))", aufgaben[0].Text);
+        Assert.StartsWith("Medikation ändern: Quetiapin (Dosis geändert) – Visite Psychiater – Dr. Test (ausgedacht), 09.11.2026", aufgaben[0].Text);
         Assert.StartsWith("Neues Medikament anlegen: Beispielsalbe (ausgedacht) (neu verordnet)", aufgaben[1].Text);
         Assert.StartsWith("Termin bei Kardiologie vereinbaren (dringend)", aufgaben[2].Text);
         Assert.All(aufgaben, a => Assert.Equal(SchichtTermin.Zu(Jetzt), a.FuerSchicht));   // Aufgaben der laufenden Schicht
@@ -81,12 +81,14 @@ public sealed class VisitenTests : IDisposable
         Assert.Null(s.VisitenAufgabe(s.Aufgaben(Jetzt).First(a => a.VisiteAnordnungId is null && a.VisiteEintragId is null)));
 
         // Berichte (Lebensbereich 5) und Übergaben.
-        var bericht = s.Berichte(B("Ahorn")).First(b => b.Text.StartsWith("Visite 09.11.2026"));
+        var bericht = s.Berichte(B("Ahorn")).First(b => b.Text.StartsWith("Visite Psychiater – Dr. Test (ausgedacht), 09.11.2026"));
+        Assert.Equal(DokuRegeln.ArtVisite, bericht.Art);
+        Assert.Equal("Visite Psychiater – Dr. Test (ausgedacht), 09.11.2026", DokuRegeln.FettAnfang(bericht));   // hervorgehoben
         Assert.Equal([5], bericht.Bereiche);
         Assert.Contains("Anordnungen geändert: Quetiapin", bericht.Text);
         Assert.True(bericht.Uebergabe);
         Assert.Contains(s.Uebergaben(Jetzt), u => u.Text == "Visite: Facharzttermin nötig");
-        Assert.DoesNotContain(s.Berichte(B("Clematis")), b => b.Text.StartsWith("Visite 09.11.2026"));
+        Assert.DoesNotContain(s.Berichte(B("Clematis")), b => b.Text.StartsWith("Visite Psychiater"));
 
         // Nach dem Anlegen des Medikaments geht es mit der Verordnung weiter (auch über einen Handelsnamen).
         var neu = s.MedikamentAnlegen(MedikamentRegeln.AusEingabe(new MedikamentEingabe
@@ -145,7 +147,11 @@ public sealed class VisitenTests : IDisposable
     public void Entwurf_je_Bereich_bis_zum_Abschliessen()
     {
         Assert.Null(s.VisitenEntwurf("R1"));
-        var v = new VisitenEntwurf { Bereich = "R1", Datum = new DateOnly(2026, 11, 9), Arzt = "Dr. Linde (ausgedacht)", Teilnehmer = "EF", Kuerzel = "EF", Begonnen = Jetzt };
+        var v = new VisitenEntwurf
+        {
+            Bereich = "R1", Art = VisitenRegeln.Hausarzt, Datum = new DateOnly(2026, 11, 9), Arzt = "Dr. Linde (ausgedacht)", Teilnehmer = "EF",
+            Kuerzel = "EF", Begonnen = Jetzt,
+        };
         v.Eintrag(B("Ahorn")).Besprochen = "Schläft besser.";
         v.Eintrag(B("Ahorn")).Anordnungen.Add(new EntwurfAnordnung { Art = "dosis", MedikamentId = s.Medikamente().First(m => m.Wirkstoff == "Quetiapin").Id, Medikament = "Quetiapin" });
         v.Eintrag(B("Birke")).FacharztNoetig = true;
@@ -156,6 +162,7 @@ public sealed class VisitenTests : IDisposable
         Assert.Equal(2, VisitenEntwurfRegeln.Vorgemerkt(v));
 
         var gelesen = s.VisitenEntwurf("R1")!;   // „auch nach einem Absturz“: steht in der Datenbank
+        Assert.Equal(VisitenRegeln.Hausarzt, gelesen.Art);
         Assert.Equal(3, gelesen.Eintraege.Count);
         Assert.Equal("Schläft besser.", gelesen.Eintrag(B("Ahorn")).Besprochen);
         Assert.True(gelesen.Eintrag(B("Clematis")).Erledigt);
@@ -170,9 +177,9 @@ public sealed class VisitenTests : IDisposable
         Assert.NotNull(s.VisitenEntwurf("R1"));   // Entwurf bleibt
         var (visite, aufgaben) = s.VisiteAbschliessen(s.VisitenEntwurf("R1")!, "EF", Jetzt);
         Assert.Equal(2, visite.Eintraege.Count);   // Clematis ohne Inhalt zählt nicht
-        Assert.Equal("", visite.Art);
+        Assert.Equal(VisitenRegeln.Hausarzt, visite.Art);
         Assert.Equal(2, aufgaben.Count);
         Assert.Null(s.VisitenEntwurf("R1"));
-        Assert.Contains(s.Berichte(B("Ahorn")), b => b.Text.StartsWith("Visite 09.11.2026 (Dr. Linde (ausgedacht)), dabei: EF: Schläft besser"));
+        Assert.Contains(s.Berichte(B("Ahorn")), b => b.Text.StartsWith("Visite Hausarzt – Dr. Linde (ausgedacht), 09.11.2026, dabei: EF: Schläft besser"));
     }
 }

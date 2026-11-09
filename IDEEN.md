@@ -2062,7 +2062,7 @@ Umfang:
   `src/DokuLine.Modul.Ausgangsliste/AENDERUNGEN.md` vermerken.
 
 ## Visite: Psychiater und Hausarzt getrennt, Berichte in der Dokumentation
-Status: freigegeben (Bauplan Schritt 29k; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.17; Bauplan Schritt 29k; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Visitenseite unterscheidet Psychiater-Visite und Hausarzt-Visite. Visitenberichte stehen
 hervorgehoben in der Dokumentation.

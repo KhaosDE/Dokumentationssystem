@@ -3,8 +3,8 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Visite mit allen Bewohnern: Man geht mit dem Arzt die Bewohner des Bereichs
-// der Reihe nach durch. Links die Liste (Zimmer, Name, Bezugspflege, Häkchen „besprochen“), rechts
+// Visite mit allen Bewohnern: Man geht mit dem Arzt (Psychiater oder Hausarzt) die Bewohner des Bereichs
+// der Reihe nach durch; „Weitere Bewohner …“ nimmt jemanden aus einem anderen Bereich dazu. Links die Liste (Zimmer, Name, Bezugspflege, Häkchen „besprochen“), rechts
 // zum gewählten Bewohner Allergiehinweis, Diagnosen (nur mit Recht), die aktuelle Medikation (wie im Medikamentenplan), die
 // letzte Visite, offene Aufgaben zur Medikation und darunter die Eingabe. Beim Wechsel steht alles
 // sofort als Entwurf in der Datenbank. Während der Visite gibt es keine Einblendungen; erst „Visite
@@ -40,6 +40,9 @@ public sealed class VisitenRundgang : Panel
     public const string ErstEintragenText = "Erst den Bericht zu diesem Bewohner schreiben.";
     private readonly FlowLayoutPanel weiter = new() { AutoSize = true, WrapContents = false, BackColor = Stil.Seite, Margin = new Padding(0) };
     public Button UnterbrechenKnopf { get; } = Stil.NebenKnopf("Unterbrechen");
+    public Button WeitereKnopf { get; } = Stil.NebenKnopf("Weitere Bewohner …");
+    // Auswahl für „Weitere Bewohner …“ (Index oder null); zum Testen ersetzbar.
+    public Func<IReadOnlyList<string>, int?> WeitereWaehlen { get; set; }
     public Button AbschliessenKnopf { get; } = Stil.HauptKnopf("Visite abschließen …");
     public Label Name_ { get; } = new() { AutoSize = true, Font = Stil.Ueberschrift, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false };
     public Label Allergie { get; } = new() { AutoSize = true, Font = Stil.Fett, BackColor = Stil.Seite, UseMnemonic = false };
@@ -64,14 +67,16 @@ public sealed class VisitenRundgang : Panel
         this.speicher = speicher;
         Entwurf = entwurf;
         BackColor = Stil.Seite;
-        alle = speicher.AlleBewohner().Where(b => b.Wohnbereich == entwurf.Bereich).ToList();
+        WeitereWaehlen = texte => Eingabe.Waehlen(FindForm(), "Weitere Bewohner", "Wer kommt dazu?", texte);
+        // Dazu, wer schon im Entwurf steht (auch aus anderen Bereichen, über „Weitere Bewohner …“).
+        alle = speicher.AlleBewohner().Where(b => b.Wohnbereich == entwurf.Bereich || entwurf.Eintraege.Any(e => e.BewohnerId == b.Id)).ToList();
         Bewohner = [.. alle];
-        titel.Text = $"Visite {Datum.Text(entwurf.Datum)} · {entwurf.Arzt}" + (entwurf.Teilnehmer.Length > 0 ? $" · dabei: {entwurf.Teilnehmer}" : "");
+        titel.Text = $"Visite {entwurf.Art} {Datum.Text(entwurf.Datum)} · {entwurf.Arzt}" + (entwurf.Teilnehmer.Length > 0 ? $" · dabei: {entwurf.Teilnehmer}" : "");
         Sortierung.Items.AddRange(["nach Zimmer", "nach Name"]);
         Sortierung.SelectedIndex = 0;
         Sortierung.AccessibleName = "Sortierung";
         Sortierung.SelectedIndexChanged += (_, _) => Sortieren();
-        foreach (var c in new Control[] { titel, OffenText, VorgemerktText, Sortierung, UnterbrechenKnopf, AbschliessenKnopf })
+        foreach (var c in new Control[] { titel, OffenText, VorgemerktText, Sortierung, WeitereKnopf, UnterbrechenKnopf, AbschliessenKnopf })
         {
             c.Margin = new Padding(0, 0, Stil.AbstandMittel, Stil.AbstandKlein);
             if (c is Button b) b.AutoSize = true;
@@ -83,6 +88,7 @@ public sealed class VisitenRundgang : Panel
         foreach (var k in new[] { VorherigerKnopf, NaechsterKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0); }
         weiter.Controls.AddRange([VorherigerKnopf, NaechsterKnopf]);
         UnterbrechenKnopf.Click += (_, _) => Unterbrechen();
+        WeitereKnopf.Click += (_, _) => WeitereHinzufuegen();
         AbschliessenKnopf.Click += (_, _) => Abschliessen();
         merkenUhr.Tick += (_, _) => { merkenUhr.Stop(); Merken(); };
         Liste.Columns.Add("Zi.", 50);
@@ -104,6 +110,19 @@ public sealed class VisitenRundgang : Panel
     private static Label Abschnitt(string text) => new() { Text = text, AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite };
 
     public string KopfText => OffenText.Text;
+
+    // „Weitere Bewohner …“: jemand aus einem anderen Bereich kommt dazu und wird gleich gewählt.
+    public bool WeitereHinzufuegen()
+    {
+        var andere = speicher.AlleBewohner().Where(b => alle.All(a => a.Id != b.Id))
+            .OrderBy(b => b.Nachname, StringComparer.CurrentCulture).ThenBy(b => b.Vorname, StringComparer.CurrentCulture).ToList();
+        if (andere.Count == 0 || WeitereWaehlen([.. andere.Select(b => $"{b.Nachname}, {b.Vorname} · Zi. {b.Zimmer} ({b.Wohnbereich})")]) is not int i
+            || i < 0 || i >= andere.Count) return false;
+        alle.Add(andere[i]);
+        Sortieren();
+        Waehlen(Bewohner.FindIndex(b => b.Id == andere[i].Id));
+        return true;
+    }
 
     private void Sortieren()
     {
@@ -341,7 +360,7 @@ public sealed class VisitenRundgang : Panel
 public sealed class VisiteBeginnenFenster : Form
 {
     private readonly Speicher speicher;
-    private readonly string bereich;
+    private readonly string bereich, art;
 
     public TextBox DatumFeld { get; } = new DatumFeld() { Width = 100 };
     public ArztWahl Arzt { get; }
@@ -351,20 +370,21 @@ public sealed class VisiteBeginnenFenster : Form
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
 
-    public VisiteBeginnenFenster(Speicher speicher, string bereich)
+    public VisiteBeginnenFenster(Speicher speicher, string bereich, string art = VisitenRegeln.Psychiater)
     {
         this.speicher = speicher;
         this.bereich = bereich;
+        this.art = art;
         Arzt = new ArztWahl(speicher);
         Teilnehmer = new PersonenWahl(speicher) { AccessibleName = "Dabei" };
-        Fenster.Grundform(this, "Visite beginnen");
+        Fenster.Grundform(this, $"Visite {art} beginnen");
         DatumFeld.Text = Datum.Text(DateOnly.FromDateTime(Jetzt()));
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile("Datum", DatumFeld);
-        zeile("Arzt", Arzt);
+        zeile(art, Arzt);
         zeile("Dabei", Teilnehmer);
-        zeile(null, Fenster.Hinweis($"Danach geht man die Bewohner von „{bereich}“ der Reihe nach durch. Alles wird sofort als Entwurf gespeichert; " +
+        zeile(null, Fenster.Hinweis($"Danach geht man die Bewohner von „{bereich}“ der Reihe nach durch; „Weitere Bewohner …“ nimmt andere dazu. Alles wird sofort als Entwurf gespeichert; " +
                                     "Berichte, Übergaben und Aufgaben entstehen erst mit „Visite abschließen“."));
         zeile("Eingetragen von", Recht.KuerzelAnzeige());
         zeile(null, Fehler);
@@ -391,7 +411,10 @@ public sealed class VisiteBeginnenFenster : Form
             Fehler.Visible = true;
             return false;
         }
-        Entwurf = new VisitenEntwurf { Bereich = bereich, Datum = tag, Arzt = Arzt.Gewaehlt, Teilnehmer = Teilnehmer.AlsText, Kuerzel = Recht.Kuerzel, Begonnen = Jetzt() };
+        Entwurf = new VisitenEntwurf
+        {
+            Bereich = bereich, Art = art, Datum = tag, Arzt = Arzt.Gewaehlt, Teilnehmer = Teilnehmer.AlsText, Kuerzel = Recht.Kuerzel, Begonnen = Jetzt(),
+        };
         speicher.VisitenEntwurfSpeichern(Entwurf);
         DialogResult = DialogResult.OK;
         Close();

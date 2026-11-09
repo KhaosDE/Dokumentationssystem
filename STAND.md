@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.16** (Bauplan Schritt 29j: Ausgangsliste auf einen Blick).
+Stand: 09.11.2026. Version: **0.33.17** (Bauplan Schritt 29k: Visite Psychiater und Hausarzt).
 
 ## Aktuell
 
@@ -275,8 +275,13 @@ Zimmer · Name · Status · Rückkehr, ohne Unterbringung, Beschluss und Fristen
 (allein, mit Bewohner) bzw. „zurück“ und „…“; Doppelklick macht dasselbe. Außerdem passen die kleinen Knöpfe in der
 Übergabe und im Tagesplan jetzt in ihre Zeile.
 
+Neu in 0.33.17: Die **Visiten** haben oben den Umschalter **Psychiater · Hausarzt**. Die Liste zeigt die Visiten des
+gewählten Arztes; „Visite beginnen …“ und „Neue Visite …“ gelten für ihn. In der Visite nimmt **„Weitere Bewohner …“**
+jemanden aus einem anderen Bereich dazu. Jeder Visitenbericht steht in der Dokumentation als Bericht der Art „Visite“ und
+beginnt fett mit „Visite Psychiater – Dr. …, Datum“ (bzw. Hausarzt); Filter „Visite“ wie bisher.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29k „Visite: Psychiater und Hausarzt getrennt“ (0.33.17).
+als Nächstes 29l „Medikamentenänderung auffällig markieren und in die Übergabe“ (0.33.18).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1262,6 +1267,13 @@ als Nächstes 29k „Visite: Psychiater und Hausarzt getrennt“ (0.33.17).
   - `Stil.KleinerKnopf`: kleiner Knopf ohne Mindesthöhe für kompakte Zeilen. Korrektur: Die Knöpfe in Übergabe-Zeilen
     (0.33.14) und „bestätigen ▾“ im Tagesplan (0.33.13) hatten noch die Mindesthöhe 36 px und ragten über die Zeile.
 
+- 0.33.17 — Bauplan Schritt 29k:
+  - Kern: `VisitenRegeln.Psychiater`/`Hausarzt`/`Arten`; die Art ist Pflicht; `Kopf` = „Visite Psychiater – Dr. …,
+    Datum“ (fetter Anfang des Berichts). `VisitenEntwurf.Art`, Datenbank-Schritt 33 (`visite_entwuerfe.art`).
+    Demo-Visiten: Dr. Linde Psychiater, Dr. Ulme Hausarzt.
+  - Oberfläche: Umschalter auf der Visitenseite, Art in „Visite beginnen“ und „Neue Visite“, „Weitere Bewohner …“ im
+    Rundgang (bleibt im Entwurf).
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1343,6 +1355,12 @@ als Nächstes 29k „Visite: Psychiater und Hausarzt getrennt“ (0.33.17).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.17): Visite: Die Liste der Bewohner bleibt bis Schritt 30 (Ärzte je Bewohner) „alle Bewohner des
+  Bereichs“; „Weitere Bewohner …“ nimmt Bewohner anderer Bereiche dazu. Je Bereich bleibt es bei einem Entwurf: Läuft
+  eine Psychiater-Visite, zeigt „Visite Psychiater fortsetzen“ sie auch, wenn „Hausarzt“ gewählt ist (zwei offene
+  Visiten gleichzeitig wären verwirrend). Ältere Visiten ohne Art stehen unter beiden; ein Entwurf ohne Art bekommt beim
+  Fortsetzen die gewählte.
 
 - 09.11.2026 (0.33.16): In der Ausgangsliste fallen auch die Spalten „Ausgang“ (Stunden) und „Heute“ weg: Sonst passen
   nicht alle 23 Bewohner und zwei Spalten nicht nebeneinander. Die Ausgangsstunden stehen im Hinweis am Namen und im
@@ -2135,6 +2153,10 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.17: Visiten: oben „Psychiater“ und „Hausarzt“ – je eigene Liste. „Visite beginnen …“ (Titel nennt die Art),
+in der Visite „Weitere Bewohner …“ → jemand aus R2 kommt dazu. Nach „Visite abschließen“: in der Dokumentation beginnt
+der Bericht fett mit „Visite Psychiater – Dr. …“.
 
 Version 0.33.16: Ausgangsliste bei 1366 × 768: alle 23 Bewohner von R1 ohne Bildlauf in zwei Spalten; bei 1920 × 1080
 in einer Liste. Keine Unterbringung in der Zeile. „raus ▾“ → „raus allein“; Doppelklick auf eine unterwegs-Zeile →

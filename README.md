@@ -79,8 +79,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   (aufklappbar), darunter je Schicht ein farbig umrandeter Abschnitt, die laufende Schicht zuerst.
   Vorgabe „nur ungelesene“. Mit eigenem Kürzel lassen sie sich mit einem Klick als gelesen bestätigen
   oder erledigen, aufgeklappt auch verlängern. „Übergabeliste drucken …“ druckt die offenen Einträge.
-- **Visiten** (links, unter „Übergabe“): was in der Visite besprochen wurde, geänderte Anordnungen
-  und nötige Facharzttermine, je Bewohner; Liste mit Filter nach Bewohner und Zeitraum. Nach dem
+- **Visiten** (links, unter „Übergabe“): oben der Umschalter **Psychiater · Hausarzt**; was in der Visite
+  besprochen wurde, geänderte Anordnungen und nötige Facharzttermine, je Bewohner; Liste mit Filter nach
+  Bewohner und Zeitraum. In der Dokumentation steht jede Visite als Bericht der Art „Visite“, fett beginnend mit
+  „Visite Psychiater – Dr. …“. Nach dem
   Speichern zeigt das Programm sofort die Aufgaben dazu: Medikament anlegen, im Medikamentenplan
   eintragen (das passende Formular mit Arzt und Datum der Visite) oder den Facharzttermin in den
   Kalender eintragen (auf Wunsch mit Fahrt). Die Medikation ändert das Programm nicht selbst.

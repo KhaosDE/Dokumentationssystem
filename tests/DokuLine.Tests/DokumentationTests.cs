@@ -242,6 +242,7 @@ public sealed class DokumentationTests : IDisposable
                 BEGIN SELECT RAISE(ABORT, 'Berichte werden nicht überschrieben – Korrekturen sind Nachträge.'); END;
             ALTER TABLE aufgaben DROP COLUMN bereich;
             ALTER TABLE aufgabe_vorlagen DROP COLUMN bereich;
+            ALTER TABLE visite_entwuerfe DROP COLUMN art;
             PRAGMA user_version = 30;
             """);
         string pfad = s.Pfad;

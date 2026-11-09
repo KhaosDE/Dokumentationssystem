@@ -9,6 +9,7 @@ namespace DokuLine.Kern;
 public sealed class VisitenEntwurf
 {
     public string Bereich { get; set; } = "";
+    public string Art { get; set; } = "";   // Psychiater oder Hausarzt
     public DateOnly Datum { get; set; }
     public string Arzt { get; set; } = "";
     public string Teilnehmer { get; set; } = "";
@@ -75,7 +76,7 @@ public static class VisitenEntwurfRegeln
 
     public static VisiteEingabe AlsVisite(VisitenEntwurf v) => new()
     {
-        Datum = Kern.Datum.Text(v.Datum), Arzt = v.Arzt, Teilnehmer = v.Teilnehmer, Kuerzel = v.Kuerzel,
+        Datum = Kern.Datum.Text(v.Datum), Art = v.Art, Arzt = v.Arzt, Teilnehmer = v.Teilnehmer, Kuerzel = v.Kuerzel,
         Eintraege = [.. v.Eintraege.Where(e => e.HatInhalt).Select(AlsEingabe)],
     };
 }

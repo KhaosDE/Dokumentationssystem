@@ -2,10 +2,9 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Visiten“: alle Visiten (neueste oben) mit Filter nach Bewohner und
-// Zeitraum. „Neue Visite …“ trägt ein, was besprochen wurde, geänderte Anordnungen und nötige
-// Facharzttermine. Nach dem Speichern blendet das Programm sofort die entstandenen Aufgaben ein;
-// in der Akte steht die Visite als Bericht (Lebensbereich 5).
+// Bereich „Visiten“: oben der Umschalter Psychiater · Hausarzt, darunter dessen Visiten (neueste oben) mit Filter nach
+// Bewohner und Zeitraum. „Visite beginnen …“ und „Neue Visite …“ gelten für den gewählten Arzt. Nach dem Speichern blendet
+// das Programm sofort die entstandenen Aufgaben ein; in der Dokumentation steht die Visite als Bericht der Art „Visite“.
 public sealed class VisitenSeite : Panel, IBereichSeite
 {
     string IBereichSeite.Titel => "Visiten";
@@ -21,6 +20,9 @@ public sealed class VisitenSeite : Panel, IBereichSeite
     // Visite mit allen Bewohnern des Bereichs (fortsetzen, wenn ein Entwurf besteht).
     public Button BeginnenKnopf { get; } = Stil.HauptKnopf("Visite beginnen …");
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Visitenliste drucken …");
+    public FilterKnopf PsychiaterKnopf { get; } = new(VisitenRegeln.Psychiater, mitZahl: false) { Aktiv = true };
+    public FilterKnopf HausarztKnopf { get; } = new(VisitenRegeln.Hausarzt, mitZahl: false);
+    public string Art => HausarztKnopf.Aktiv ? VisitenRegeln.Hausarzt : VisitenRegeln.Psychiater;
     public VisitenRundgang? Rundgang { get; private set; }
     public ComboBox BewohnerFilter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
     public TextBox Von { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
@@ -37,11 +39,14 @@ public sealed class VisitenSeite : Panel, IBereichSeite
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        foreach (var c in new Control[] { Beschriftung("Bewohner"), BewohnerFilter, Beschriftung("von"), Von, Beschriftung("bis"), Bis, DruckKnopf, FilterFehler })
+        foreach (var c in new Control[] { PsychiaterKnopf, HausarztKnopf, Beschriftung("Bewohner"), BewohnerFilter, Beschriftung("von"), Von, Beschriftung("bis"), Bis, DruckKnopf, FilterFehler })
         {
             c.Margin = c is Label ? new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0) : new Padding(0, 0, Stil.AbstandMittel, Stil.AbstandKlein);
             leiste.Controls.Add(c);
         }
+        HausarztKnopf.Margin = new Padding(0, 0, Stil.AbstandGross * 2, Stil.AbstandKlein);
+        PsychiaterKnopf.Click += (_, _) => ArtWaehlen(VisitenRegeln.Psychiater);
+        HausarztKnopf.Click += (_, _) => ArtWaehlen(VisitenRegeln.Hausarzt);
         BewohnerFilter.AccessibleName = "Bewohner";
         Von.AccessibleName = "Zeitraum von";
         Bis.AccessibleName = "Zeitraum bis";
@@ -55,6 +60,13 @@ public sealed class VisitenSeite : Panel, IBereichSeite
         AutoScroll = true;
     }
 
+    public void ArtWaehlen(string art)
+    {
+        PsychiaterKnopf.Aktiv = art == VisitenRegeln.Psychiater;
+        HausarztKnopf.Aktiv = art == VisitenRegeln.Hausarzt;
+        Aktualisieren();
+    }
+
     private static Label Beschriftung(string text) => new() { Text = text, AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite };
 
     // Visiten gehören zu einem Wohnbereich: dem in der Übersicht gewählten.
@@ -62,7 +74,7 @@ public sealed class VisitenSeite : Panel, IBereichSeite
     public const string WohnbereichWaehlenText = "Bitte zuerst in der Übersicht einen Wohnbereich wählen.";
     private string? OhneWohnbereich => speicher.AlleBewohner().Any(b => b.Wohnbereich == Bereich) ? null : WohnbereichWaehlenText;
 
-    public string KopfText => Rundgang is not null ? $"Visite läuft · {Rundgang.KopfText}" : (Karten.Count == 1 ? "1 Visite" : $"{Karten.Count} Visiten") +
+    public string KopfText => Rundgang is not null ? $"Visite läuft · {Rundgang.KopfText}" : $"{Art} · " + (Karten.Count == 1 ? "1 Visite" : $"{Karten.Count} Visiten") +
                               (BewohnerFilter.SelectedIndex > 0 ? $" · {bewohner[BewohnerFilter.SelectedIndex - 1].Name}" : "");
 
     // Beim Öffnen des Bereichs: Bewohnerliste neu (Auswahl bleibt), dann die Liste.
@@ -93,7 +105,9 @@ public sealed class VisitenSeite : Panel, IBereichSeite
         if (BewohnerFilter.Items.Count == 0) return;   // noch nicht gezeigt
         Stil.Sperren(NeuKnopf, Recht.Grund(speicher, Funktionen.Visiten));   // Rechte
         Stil.Sperren(BeginnenKnopf, Recht.Grund(speicher, Funktionen.Visiten) ?? OhneWohnbereich);
-        BeginnenKnopf.Text = speicher.VisitenEntwurf(Bereich) is null ? "Visite beginnen …" : "Visite fortsetzen";
+        // Je Bereich gibt es einen Entwurf; er nennt seine Art (Psychiater oder Hausarzt), auch wenn gerade die andere gewählt ist.
+        BeginnenKnopf.Text = speicher.VisitenEntwurf(Bereich) is not VisitenEntwurf e ? "Visite beginnen …"
+            : e.Art.Length > 0 ? $"Visite {e.Art} fortsetzen" : "Visite fortsetzen";
         bool fehler = false;
         DateOnly? Lesen(TextBox feld)
         {
@@ -112,7 +126,7 @@ public sealed class VisitenSeite : Panel, IBereichSeite
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
         inhalt.Clear();
         Karten.Clear();
-        foreach (var v in speicher.Visiten(id, von, bis))
+        foreach (var v in speicher.Visiten(id, von, bis).Where(v => v.Art == Art || v.Art.Length == 0))
         {
             var karte = new VisiteKarte(v, namen, id);
             Karten.Add(karte);
@@ -138,9 +152,14 @@ public sealed class VisitenSeite : Panel, IBereichSeite
         var entwurf = speicher.VisitenEntwurf(Bereich);
         if (entwurf is null)
         {
-            using var fenster = new VisiteBeginnenFenster(speicher, Bereich);
+            using var fenster = new VisiteBeginnenFenster(speicher, Bereich, Art);
             if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK || fenster.Entwurf is null) return false;
             entwurf = fenster.Entwurf;
+        }
+        else if (entwurf.Art.Length == 0)   // Entwurf aus einer Version ohne Psychiater/Hausarzt: die gewählte Art
+        {
+            entwurf.Art = Art;
+            speicher.VisitenEntwurfSpeichern(entwurf);
         }
         RundgangZeigen(entwurf);
         return true;
@@ -189,7 +208,7 @@ public sealed class VisitenSeite : Panel, IBereichSeite
     {
         if (Recht.Grund(speicher, Funktionen.Visiten) is not null) return;
         Speicher.VisiteGespeichert? gespeichert;
-        using (var fenster = new VisiteFenster(speicher, GewaehlterBewohner))
+        using (var fenster = new VisiteFenster(speicher, GewaehlterBewohner, Art))
         {
             if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK) return;
             gespeichert = fenster.Gespeichert;

@@ -797,6 +797,10 @@ public sealed partial class Speicher : IDisposable
         UPDATE aufgabe_vorlagen SET bereich = (SELECT name FROM erster_bereich) WHERE bewohner_id IS NULL AND bereich = '';
         DROP TABLE erster_bereich;
         """,
+        // 33 – Visite: Psychiater oder Hausarzt auch im Entwurf.
+        """
+        ALTER TABLE visite_entwuerfe ADD COLUMN art TEXT NOT NULL DEFAULT '';
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
