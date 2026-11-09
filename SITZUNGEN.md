@@ -87,3 +87,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Schritte 30–32 freigegeben; Dokumente in eigener Ablage von DokuLine (Entscheidung Tobi) (Chat „Programme/Apps“).
 - 09.11.2026 — Schritte 33–36 freigegeben: Überleitungsbogen, Abgängigkeitsmeldung, Schweigepflichtentbindungen, Vitalwerte (Chat „Programme/Apps“).
 - 09.11.2026 — Neu 29a Personenverzeichnis und 30a Zuständigkeit Forensik/FOSA mit Bestellweg; 30 Reiter heißt „Betreuung“; 35 Auskunftsleiste im Akte-Kopf; 36 ohne Bauchumfang, mit allgemeinen Richtwerten (Chat „Programme/Apps“).
+- 09.11.2026 — Schritt 30: eigene Reiter „Angehörige“ und „Ärzte“ (Hausarzt, Psychiater, weitere); 29a: Bereich „Verzeichnisse“ mit eigener Liste je Gruppe (Chat „Programme/Apps“).

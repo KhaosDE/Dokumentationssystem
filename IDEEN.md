@@ -70,7 +70,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
 | 29a | Personenverzeichnis (Ärzte, Betreuer, Angehörige, Forensik, FOSA) | 0.33.3 |
-| 30 | Akte: Reiter Betreuung, Krankenkasse, Kostenträger | 0.34.0 |
+| 30 | Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger | 0.34.0 |
 | 30a | Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente | 0.34.1 |
 | 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine | 0.35.0 |
 | 32 | Vorhandene digitale Akte übernehmen | 0.36.0 |
@@ -1478,7 +1478,7 @@ Umsetzung (Vorschlag von Claude Code, von Tobi bestätigt):
   Assistenzkraft Pflichtfeld „in Absprache mit“ (Fachkraft aus der Liste); erscheint als Bericht in der Akte.
 
 
-## Akte: Reiter Betreuer, Krankenkasse, Kostenträger
+## Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger
 Status: freigegeben (Bauplan Schritt 30; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Bewohnerakte bekommt drei neue Reiter für die Verwaltungsangaben.
@@ -1486,7 +1486,8 @@ Warum: Vorgabe Tobi (09.11.2026): Das Bewohnerstammblatt muss weiter ausgebaut w
 Daten, die auch durch die Biografie ergänzt werden, gehören Reiter für Krankenkasse,
 Kostenträger, Betreuer und Dokumente hinein.
 Umfang (Vorschlag):
-- **Reihenfolge der Reiter:** Stammdaten · Betreuung · Krankenkasse · Kostenträger · Dokumente ·
+- **Reihenfolge der Reiter** (Ergänzung 09.11.2026): Stammdaten · Betreuung · Angehörige · Ärzte ·
+  Krankenkasse · Kostenträger · Schweigepflicht (Schritt 35) · Dokumente ·
   Berichte · Medikamentenplan · Wochenplan · Biografie · Reflexion · HEB (Modul-Reiter wie
   „Ausgang“ danach). Die Stammdaten zeigen je eine Kurzzeile („Betreuer: …“, „Krankenkasse: …“,
   „Kostenträger: … bis …“), ein Klick springt in den Reiter.
@@ -1494,9 +1495,9 @@ Umfang (Vorschlag):
   gesetzliche Betreuung) · „nicht erfasst“ (in Achtung-Farbe).
 - **Jede Änderung ist eine neue Fassung** mit Kürzel und Datum, der Verlauf bleibt sichtbar
   („ab Datum …“). Bearbeiten mit dem Recht „Bewohner anlegen und bearbeiten“.
-- **Reiter „Betreuung“** (Ergänzung 09.11.2026: heißt „Betreuung“, weil darin auch Angehörige
-  und die Zuständigen aus Forensik bzw. FOSA stehen, Schritt 30a). Abschnitt **Betreuer** (die
-  bisherige Zeile aus den Stammdaten zieht hierher um):
+- **Reiter „Betreuung“** (heißt so, weil darin auch die Zuständigen aus Forensik bzw. FOSA
+  stehen, Schritt 30a). Abschnitt **Betreuer** (die bisherige Zeile aus den Stammdaten zieht
+  hierher um):
   - Art: Berufsbetreuer · ehrenamtlich · Angehörige · Vorsorgebevollmächtigte.
   - Person aus dem **Personenverzeichnis** (Schritt 29a), dort Name, Büro, Telefon, E-Mail,
     Anschrift. Fehlt sie: „Person anlegen …“ direkt aus der Auswahl.
@@ -1504,10 +1505,25 @@ Umfang (Vorschlag):
     Vermögenssorge, Behörden und Ämter, Wohnungsangelegenheiten, Post, Unterbringung) plus
     Freitext. Liste in den Einstellungen änderbar.
   - Bestellt am, **Überprüfung bis** → Marke „Betreuung endet …“ 8 Wochen vorher.
-  - Weitere Personen: Ersatzbetreuer. Abschnitt **Angehörige und Kontakte** darunter: Personen
-    aus dem Personenverzeichnis mit Beziehung (Mutter, Bruder …), je mit Schweigepflicht-Zustand
-    (Schritt 35).
+  - Weitere Personen: Ersatzbetreuer.
   - Knöpfe „E-Mail an Betreuer …“ (wie bisher) und „Betreuerausweis öffnen“ (aus „Dokumente“).
+- **Reiter „Angehörige“** (Vorgabe Tobi, 09.11.2026: eigener Reiter):
+  - Liste der Angehörigen aus dem Verzeichnis „Angehörige“ (Schritt 29a): Name, **Beziehung**
+    (Mutter, Bruder, Partnerin …), Telefon, Mobil, E-Mail, Anschrift.
+  - Kennzeichen „Hauptkontakt“ und „im Notfall benachrichtigen“ (je ja/nein).
+  - Je Person der **Schweigepflicht-Zustand** als Marke mit Wort und Farbe (Schritt 35), ein
+    Klick öffnet den Eintrag im Reiter „Schweigepflicht“.
+  - Hinweis je Person (Freitext, z. B. „Besuch nur nach Absprache“).
+  - „Angehörigen hinzufügen …“: aus dem Verzeichnis wählen oder neu anlegen. Drei Zustände für
+    den Reiter: Angehörige eingetragen · „keine Angehörigen bekannt“ · „nicht erfasst“.
+- **Reiter „Ärzte“** (Vorgabe Tobi, 09.11.2026): Zuteilung der Ärzte zum Bewohner.
+  - Feste Zeilen **Hausarzt** und **Psychiater**, je mit drei Zuständen: Arzt aus dem
+    Verzeichnis „Ärzte“ · „keiner“ · „nicht erfasst“ (Achtung-Farbe).
+  - **Weitere Ärzte** frei ergänzbar: Arzt aus dem Verzeichnis und Rolle (Fachrichtung des Arztes
+    vorbelegt, z. B. Zahnarzt, Neurologe, Gynäkologin), Hinweis.
+  - Je Zeile Praxis, Telefon und „seit“; Wechsel als neue Fassung mit Datum.
+  - Die zugeteilten Ärzte stehen in Visite, Medikamentenplan („verordnet von“), Kalender und
+    Überleitungsbogen **oben in der Auswahl**, alle übrigen Ärzte darunter.
 - **Krankenkasse:**
   - Kasse (Auswahl aus einer Liste in den Einstellungen, Demo: ausgedachte Kassen wie
     „Musterkasse Süd“), Versichertennummer (Demo: ausgedacht), Status (Mitglied,
@@ -1599,7 +1615,7 @@ Umfang:
   „Hinweise für den Notfall“ (Ärztliche Informationen); **aktueller Medikamentenplan** mit Stand
   heute, auch Bedarf und Pausen; Betreuer mit Aufgabenbereichen und Telefon (bei Forensik:
   „nicht zuständig“, dafür die Zuständigen der Forensik bzw. FOSA, Schritt 30a); Krankenkasse und
-  Versichertennummer; Haus- und Fachärzte (Ärzteverzeichnis); Unterbringung bzw. Beschluss;
+  Versichertennummer; Hausarzt, Psychiater und weitere Ärzte (Reiter „Ärzte“); Unterbringung bzw. Beschluss;
   Schweigepflichtentbindung gegenüber der Klinik (Schritt 35); letzte Vitalwerte (Schritt 36);
   Freitext „Besonderheiten“ (Kommunikation, Hilfsmittel, was beruhigt).
 - Fehlende Angaben stehen als „nicht erfasst“ auf dem Blatt, nie als leeres Feld.
@@ -1720,8 +1736,21 @@ Warum: Vorgabe Tobi (09.11.2026): Die Personendatenbank, in der aktuell nur Ärz
 um Angehörige und Betreuer erweitert werden. Für Forensik und FOSA gibt es immer Kontaktdaten zu
 den Zuständigen, auch wegen der Medikamentenbestellung.
 Umfang:
-- Einstellungen → Verwaltung: „Ärzteverzeichnis“ heißt „Personenverzeichnis“. Filter nach
-  **Art:** Arzt/Ärztin · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stelle.
+- **Ein eigenes Verzeichnis je Gruppe** (Vorgabe Tobi, 09.11.2026: „Seitenmenü links, ich klicke
+  auf Ärzte und sehe eine Liste von allen Ärzten“): neuer Bereich **„Verzeichnisse“** in der
+  Seitenleiste des Programms (nicht in den Einstellungen versteckt, weil man dort im Alltag
+  Telefonnummern nachschlägt). Darin links ein eigenes Seitenmenü mit den Gruppen und Zähler:
+  **Ärzte · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stellen**. Ein Klick zeigt rechts
+  die Liste dieser Gruppe mit eigenen Spalten, Suchfeld und „Neu …“ in der Aktionsleiste:
+  - Ärzte: Name, Fachrichtung, Praxis, Telefon, E-Mail, zugeordnete Bewohner (Anzahl).
+  - Betreuer: Name, Art (Berufsbetreuer, ehrenamtlich …), Büro, Telefon, E-Mail, Bewohner.
+  - Angehörige: Name, Telefon, Mobil, zugeordnet zu (Bewohner mit Beziehung).
+  - Forensik und FOSA: Name, Funktion, Klinik bzw. Ambulanz, Telefon, E-Mail, Bewohner.
+  - Sonstige Stellen: Name, Stelle, Telefon, E-Mail.
+  Doppelklick öffnet die Person; dort „zugeordnet zu …“ mit Sprung in die Akte.
+- Technisch darf es eine gemeinsame Tabelle mit dem Feld „Gruppe“ bleiben (einfacher); für den
+  Nutzer sind es getrennte Verzeichnisse. Das bisherige „Ärzteverzeichnis“ in den Einstellungen
+  führt nur noch dorthin.
 - Felder: Name, Art, Stelle (Praxis, Büro, Klinik, Ambulanz), **Funktion** (bei Forensik und
   FOSA: Psychologe/Psychologin, Arzt/Ärztin, Pflege, Sozialdienst; bei Ärzten die Fachrichtung),
   Telefon, Mobil, E-Mail (Demo nur `@example.org`), Anschrift, Erreichbarkeit, Hinweis,
