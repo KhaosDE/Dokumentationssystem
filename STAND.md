@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 08.11.2026. Version: **0.33.0** (Assistenzkraft und Fachkraft, „Bedarf gegeben …“).
+Stand: 09.11.2026. Version: **0.33.1** (Korrektur: Startabbruch nach dem Update auf 0.33.0).
 
 ## Aktuell
 
@@ -191,7 +191,14 @@ Bedarfsverordnung – Uhrzeit, Menge, Anlass; man sieht, was heute schon gegeben
 erlaubt ist. Eine Assistenzkraft muss die Fachkraft angeben, mit der die Gabe abgesprochen ist. Jede Gabe
 steht als Bericht in der Akte.
 
-**Nächster Schritt:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
+Neu in 0.33.1: Korrektur. War eine der vorgegebenen Positionen (z. B. „Mitarbeiter Wohnbereich“) umbenannt oder
+gelöscht, brach der erste Start nach dem Update auf 0.33.0 mit „Die Datenbank lässt sich nicht öffnen“ ab. Jetzt
+wird eine fehlende Position beim Vorbelegen neuer Rechte übersprungen.
+
+**Nächster Schritt:** Die übrigen Funde der Fehlersuche vom 08.11.2026 beheben (0.33.2, 0.33.3); Liste unter
+„Offene Punkte“.
+
+**Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
 ## Fertig
 
@@ -974,8 +981,25 @@ steht als Bericht in der Akte.
     gegeben um 14:30: Lorazepam … 1 Stück. Anlass: … In Absprache mit Anna Bachstelze (AB).“
   - Datenbank-Schritt 28: Tabelle `bedarfsgaben` (wird nie überschrieben). Demo: sieben Gaben in R1–R3, vier
     davon von Assistenzkräften mit Absprache.
+- 0.33.1 — Korrektur aus der Fehlersuche vom 08.11.2026: Neue Rechte werden beim Start nur noch für Positionen
+  vorbelegt, die es gibt. Vorher brach der Start ab, wenn eine vorgegebene Position umbenannt oder gelöscht war
+  (Fremdschlüssel). Test: `Vorbelegen_neuer_Rechte_uebersteht_umbenannte_und_geloeschte_Positionen`.
 
 ## Offene Punkte
+
+- Fehlersuche vom 08.11.2026 (Auftrag Tobi: „behebe alles“); 0.33.1 hat den Startabbruch behoben, der Rest
+  folgt in 0.33.2 und 0.33.3:
+  - Übersicht: Dienst wechselt nicht mit der Schicht (nur beim Datumswechsel neu); Standardaufgaben des Tages
+    fehlen, bis man „Aufgaben“ öffnet; schneller Doppelklick auf einen Haken trifft die nächste Aufgabe;
+    Nachrichtenzähler; Bereichswahl kann „Drucken …“ verdecken.
+  - Therapie-Tafel: Doppelklick auf „gegangen“/„abgesagt“ trifft den Nächsten; Bildlauf springt nach oben;
+    Klick auf einen Balken bei gefiltertem Anbieter; zwei Termine eines Angebots am selben Tag.
+  - Bewohner: Berichte im Bereich „Bewohner“ nicht rollbar; Rücksprung wählt den falschen Bewohner.
+  - Bedarf: um Mitternacht; Höchstmenge zählt Gaben statt Menge; Absprache-Kürzel; Administrator-Ausnahme.
+  - Visite: Abschließen prüft das Recht nicht.
+  - Betreuer: „keine Betreuung“ als dritter Zustand; .ics und E-Mail: Fehlerfälle beim Import/Export.
+  - Einstellungen: Modul-Haken, Schichtzeiten, Rechte in einzelnen Handlern; Dialoge ohne Programmsymbol.
+  - Demo: Bedarf-Berichte beim Nachholen der Medikation; Sicherungskopie vor dem Nachholen der Therapie-Demo.
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
   den Bildschirmfotos `109_…` und den Zeiten des Testlaufs von 0.29.10):
@@ -1718,6 +1742,12 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.1:
+
+1. Einstellungen → Verwaltung → „Bereiche und Positionen …“: „Mitarbeiter Wohnbereich“ umbenennen (z. B. „Betreuung“). Programm
+   schließen und neu starten → es startet normal (unter 0.33.0 konnte hier ein Fehler kommen). Die Rechte der
+   umbenannten Position bleiben, wie sie waren.
 
 Version 0.33.0:
 

@@ -295,11 +295,14 @@ public sealed partial class Speicher
         transaktion.Commit();
     }
 
+    // Nur Positionen, die es noch gibt: Eine umbenannte oder gelöschte Position der Vorgabe wird übersprungen
+    // (sonst bricht der Fremdschlüssel den Start ab; Fehler in 0.33.0, behoben in 0.33.1).
     private void FunktionVorbelegen(string funktion, SqliteTransaction transaktion)
     {
         foreach (var p in RechteRegeln.Positionen)
             if (RechteRegeln.Vorbelegt(p, funktion))
-                Ausfuehren("INSERT OR IGNORE INTO rechte (funktion, position) VALUES ($f, $p)", transaktion, ("$f", funktion), ("$p", p));
+                Ausfuehren("INSERT OR IGNORE INTO rechte (funktion, position) SELECT $f, name FROM positionen WHERE name = $p",
+                    transaktion, ("$f", funktion), ("$p", p));
         if (RechteRegeln.NurFachkraftVorgabe.Contains(funktion))
             Ausfuehren("INSERT OR IGNORE INTO rechte_fachkraft (funktion) VALUES ($f)", transaktion, ("$f", funktion));
         SetzeMeta(NachtraeglichSchluessel(funktion), "1", transaktion);
