@@ -11,7 +11,12 @@ public static class Hilfe
 {
     static Hilfe() => Application.EnableVisualStyles();
 
-    // Windows Forms erwartet einen STA-Thread; xUnit liefert keinen. Also: eigener Thread.
+    // Kein Oberflächentest braucht annähernd so lange; wer länger läuft, wartet fast immer auf ein Dialogfenster.
+    public static readonly TimeSpan Hoechstdauer = TimeSpan.FromMinutes(3);
+
+    // Windows Forms erwartet einen STA-Thread; xUnit liefert keinen. Also: eigener Thread. Hängt er (offenes Dialogfenster,
+    // das niemand schließt), schlägt der Test fehl, statt den ganzen Lauf aufzuhalten; als Hintergrund-Thread hält er das
+    // Testprogramm am Ende nicht auf.
     public static void Sta(Action aktion)
     {
         Exception? fehler = null;
@@ -19,10 +24,13 @@ public static class Hilfe
         {
             try { aktion(); }
             catch (Exception e) { fehler = e; }
-        });
+        })
+        { IsBackground = true };
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
-        thread.Join();
+        if (!thread.Join(Hoechstdauer))
+            throw new TimeoutException($"Der Test hängt seit {Hoechstdauer.TotalMinutes:0} Minuten – vermutlich wartet ein Dialogfenster auf eine Eingabe " +
+                                       "(im Test mit DialogErsatz beantworten).");
         if (fehler is not null) ExceptionDispatchInfo.Capture(fehler).Throw();
     }
 

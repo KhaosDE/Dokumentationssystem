@@ -112,7 +112,11 @@ public class AkteUebernahmeOberflaechenTests
         Assert.Equal(AkteUebernahmeFenster.NichtUebernehmen, muster.Cells["bewohner"].Value);
         Assert.Contains("3 von 4 Ordnern zugeordnet", fenster.Zusammenfassung.Text);
         Hilfe.Foto(fenster, "140_akte_uebernehmen");
-        Assert.True(fenster.Uebernehmen());
+        using (var ersatz = new DialogErsatz(_ => DialogResult.OK))   // das Fenster ist sichtbar: der Bericht danach käme als Dialog
+        {
+            Assert.True(fenster.Uebernehmen());
+            Assert.Single(ersatz.Titel);
+        }
         Assert.Equal(9, fenster.Ergebnis!.Uebernommen);
     });
 }
