@@ -84,3 +84,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: „Assistenzkraft und Fachkraft“ nach Freigabe durch Tobi gebaut: Qualifikation, Visiten nur Fachkräfte, „Bedarf gegeben …“ mit Absprache (0.33.0).
 - 09.11.2026 — Claude Code: Fehlersuche 0.29.10–0.33.0; Startabbruch nach Update auf 0.33.0 behoben (0.33.1).
 - 09.11.2026 — Vorschläge 30–32 (offen): Akte-Reiter Betreuer, Krankenkasse, Kostenträger; Reiter „Dokumente“ als digitale Akte; Übernahme der vorhandenen Ordner-Akte (Chat „Programme/Apps“).
+- 09.11.2026 — Schritte 30–32 freigegeben; Dokumente in eigener Ablage von DokuLine (Entscheidung Tobi) (Chat „Programme/Apps“).

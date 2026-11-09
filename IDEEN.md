@@ -69,9 +69,9 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
-| 30 | Akte: Reiter Betreuer, Krankenkasse, Kostenträger (offen) | 0.34.0 |
-| 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine (offen) | 0.35.0 |
-| 32 | Vorhandene digitale Akte übernehmen (offen) | 0.36.0 |
+| 30 | Akte: Reiter Betreuer, Krankenkasse, Kostenträger | 0.34.0 |
+| 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine | 0.35.0 |
+| 32 | Vorhandene digitale Akte übernehmen | 0.36.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -1473,7 +1473,7 @@ Umsetzung (Vorschlag von Claude Code, von Tobi bestätigt):
 
 
 ## Akte: Reiter Betreuer, Krankenkasse, Kostenträger
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Bauplan Schritt 30; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Bewohnerakte bekommt drei neue Reiter für die Verwaltungsangaben.
 Warum: Vorgabe Tobi (09.11.2026): Das Bewohnerstammblatt muss weiter ausgebaut werden. Neben den
@@ -1516,7 +1516,7 @@ Umfang (Vorschlag):
 - Demo-Daten: alle drei Reiter für alle Bewohner, gemischt mit „keine“ und „nicht erfasst“.
 
 ## Akte: Reiter „Dokumente“ – digitale Akte in DokuLine
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Bauplan Schritt 31; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Jeder Bewohner bekommt eine Dokumentenablage in DokuLine, sauber nach Bereichen sortiert,
 direkt aus der Akte zu öffnen.
@@ -1525,6 +1525,9 @@ digitale Akte). Man muss das Programm verlassen und den Explorer öffnen, um wic
 aufzurufen. Sinnvoller ist, wenn alle Dokumente sauber sortiert in DokuLine hinterlegt sind und
 ohne Umschweife zugänglich.
 Umfang (Vorschlag):
+- **Eigene Ablage** (Entscheidung Tobi, 09.11.2026): DokuLine kopiert die Dokumente in seine
+  Ablage und verwaltet sie dort, mit Rechten und Protokoll; kein bloßes Anzeigen eines fremden
+  Ordners.
 - **Ablage:** Die Dateien liegen im Datenordner (`%APPDATA%\DokuLine\Dokumente\<Bewohner-Nr>\`,
   im Mehrplatzbetrieb neben der gemeinsamen Datenbank), nie im Repository. Die Datenbank kennt
   zu jeder Datei: Kategorie, Titel, Datum des Dokuments, **gültig bis** (optional), Hinweis,
@@ -1553,7 +1556,7 @@ Umfang (Vorschlag):
   echte Logos, Behörden- oder Einrichtungsnamen (`CLAUDE.md`, Regeln 1 und 7).
 
 ## Vorhandene digitale Akte übernehmen
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Bauplan Schritt 32; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ein Assistent, der einen vorhandenen Ordner „ein Unterordner je Bewohner“ in die
 Dokumentenablage übernimmt.
