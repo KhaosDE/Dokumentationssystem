@@ -99,3 +99,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Schritt 29r freigegeben: Überschriften der Kästen in der Übersicht als eingerahmte Kopfleiste (Chat „Programme/Apps“).
 - 09.11.2026 — Code-Regeln in docs/code-regeln.md, Verweis in CLAUDE.md, Schritt 29s „Aufräumen nach den Code-Regeln“ freigegeben (Chat „Programme/Apps“).
 - 09.11.2026 — Claude Code: Bauplan 29a Personenverzeichnis (0.33.4).
+- 09.11.2026 — Claude Code: Bauplan 29b Bereich Dokumentation mit Berichtsart, Filtern und gespeicherten Filtern (0.33.5).

@@ -46,6 +46,14 @@ public static class Stil
     public static readonly Marke Offen = new(Color.FromArgb(227, 244, 230), Color.FromArgb(30, 107, 46));
     public static readonly Marke Unterwegs = new(Color.FromArgb(221, 244, 241), Color.FromArgb(14, 102, 94));   // hier: Übergabe
     public static readonly Marke Abwesend = new(Color.FromArgb(236, 237, 240), Color.FromArgb(70, 76, 90), Color.FromArgb(200, 204, 212));
+    // Dokumentation: kräftig, weil eine Medikamentenänderung nicht übersehen werden darf.
+    public static readonly Marke MedikationGeaendert = new(Color.FromArgb(196, 43, 28), Color.White);
+    public static readonly Color MedikationZeile = Color.FromArgb(253, 240, 238);
+    public static readonly Color TagKopfFlaeche = Color.FromArgb(238, 242, 251);
+    // Schichtfarben (Rand der Berichte, Übergabe): Früh Orange, Spät Blau, Nacht Violett.
+    public static readonly Color SchichtFrueh = Color.FromArgb(238, 166, 60);
+    public static readonly Color SchichtSpaet = Color.FromArgb(45, 84, 156);
+    public static readonly Color SchichtNacht = Color.FromArgb(91, 58, 153);
 
     // ----- Abstandsraster: jeder Abstand ist eines dieser Maße -----
     public const int AbstandMini = 4;     // innerhalb zusammengehöriger Texte
@@ -66,6 +74,7 @@ public static class Stil
     public static readonly Font Klein = new("Segoe UI", 9F);
     public static readonly Font MarkeSchrift = new("Segoe UI Semibold", 9F);
     public static readonly Font Abschnitt = new("Segoe UI Semibold", 8.5F);   // „STAMMDATEN“
+    public static readonly Font TagKopf = new("Segoe UI Semibold", 11.5F);
 
     // Symbole: „Segoe Fluent Icons“ (Windows 11), sonst „Segoe MDL2 Assets“ (Windows 10, gleiche Zeichen).
     public static readonly Font Symbolschrift = new(SymbolFamilie(), 12F);

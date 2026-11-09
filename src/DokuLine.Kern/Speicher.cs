@@ -761,6 +761,25 @@ public sealed partial class Speicher : IDisposable
         );
         CREATE INDEX person_zuordnungen_bewohner ON person_zuordnungen (bewohner_id);
         """,
+        // 31 – Berichtsart: Inhalt eines Berichts bleibt unveränderlich, nur die Art lässt sich setzen (Einordnen
+        // vorhandener Berichte, Umbenennen einer Art in den Einstellungen).
+        """
+        ALTER TABLE berichte ADD COLUMN art TEXT NOT NULL DEFAULT 'Alltag';
+        DROP TRIGGER berichte_bleiben;
+        CREATE TRIGGER berichte_bleiben
+            BEFORE UPDATE OF id, bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst ON berichte
+            BEGIN SELECT RAISE(ABORT, 'Berichte werden nicht überschrieben – Korrekturen sind Nachträge.'); END;
+        CREATE TABLE berichtsarten (
+            name  TEXT PRIMARY KEY,
+            aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)),
+            nr    INTEGER NOT NULL DEFAULT 0
+        );
+        INSERT INTO berichtsarten (name, nr) VALUES ('Alltag', 1), ('Krise', 2), ('Arztkontakt', 3), ('Visite', 4),
+            ('Medikation', 5), ('Konflikt', 6), ('Ausgang/Abgängigkeit', 7), ('Angehörigenkontakt', 8),
+            ('Betreuer/Behörde', 9), ('Besonderes Vorkommnis', 10);
+        UPDATE berichte SET art = 'Visite' WHERE text LIKE 'Visite %';
+        UPDATE berichte SET art = 'Medikation' WHERE id IN (SELECT bericht_id FROM bedarfsgaben WHERE bericht_id IS NOT NULL);
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1041,7 +1060,7 @@ public sealed partial class Speicher : IDisposable
         var demo = Demodaten.Berichte(bewohner, Uhr());
         foreach (var d in demo.Berichte)
         {
-            long id = BerichtEinfuegen(d.Bericht, transaktion);
+            long id = BerichtEinfuegen(d.Bericht with { Art = DokuRegeln.ArtFuerDemo(d.Bericht.Text) }, transaktion);
             if (d.Uebergabe is UebergabeWunsch wunsch)
                 DemoUebergabe(d.Bericht.BewohnerId, id, wunsch, d.Bericht.Erfasst, d.Bericht.Verfasser, d, transaktion);
         }
@@ -1083,10 +1102,11 @@ public sealed partial class Speicher : IDisposable
 
     private long BerichtEinfuegen(Bericht b, SqliteTransaction transaktion)
     {
-        Ausfuehren("INSERT INTO berichte (bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst) " +
-                   "VALUES ($b, $z, $s, $v, $bereiche, $t, $w, $e)", transaktion,
+        Ausfuehren("INSERT INTO berichte (bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst, art) " +
+                   "VALUES ($b, $z, $s, $v, $bereiche, $t, $w, $e, $art)", transaktion,
             ("$b", b.BewohnerId), ("$z", Zeit(b.Zeitpunkt)), ("$s", BerichtRegeln.Kuerzel(b.Schicht)), ("$v", b.Verfasser),
-            ("$bereiche", string.Join(",", b.Bereiche)), ("$t", b.Text), ("$w", b.Wichtig ? 1 : 0), ("$e", Zeit(b.Erfasst)));
+            ("$bereiche", string.Join(",", b.Bereiche)), ("$t", b.Text), ("$w", b.Wichtig ? 1 : 0), ("$e", Zeit(b.Erfasst)),
+            ("$art", b.Art));
         long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
         foreach (var n in b.Nachtraege)
             NachtragEinfuegen(id, n.Verfasser, n.Text, n.Erfasst, transaktion);
@@ -1122,6 +1142,35 @@ public sealed partial class Speicher : IDisposable
             .OrderByDescending(b => b.Zeitpunkt).ThenByDescending(b => b.Id)
             .ToList();
     }
+
+    // Bereich „Dokumentation“: die Berichte eines Bewohners nach dem Filter, neueste zuerst.
+    public List<Bericht> Berichte(long bewohnerId, DokuFilter filter, DateOnly heute) =>
+        BerichteLesen("WHERE bewohner_id = $b", ("$b", bewohnerId))
+            .Where(b => DokuRegeln.Passt(b, filter, heute))
+            .OrderByDescending(b => b.Zeitpunkt).ThenByDescending(b => b.Id)
+            .ToList();
+
+    // Gespeicherte Filter je Mitarbeiter (in „meta“, damit sie an jedem Arbeitsplatz gelten).
+    public List<GespeicherterFilter> GespeicherteFilter(string kuerzel) =>
+        DokuRegeln.AusJson(Meta(FilterSchluessel(kuerzel)));
+
+    public void FilterSpeichern(string kuerzel, string name, DokuFilter filter)
+    {
+        if (string.IsNullOrWhiteSpace(kuerzel)) throw new Eingabefehler([RechteRegeln.NichtAngemeldetText]);
+        name = name.Trim();
+        if (name.Length is 0 or > 40) throw new Eingabefehler(["Name des Filters: 1 bis 40 Zeichen."]);
+        var liste = GespeicherteFilter(kuerzel).Where(f => !f.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase)).ToList();
+        liste.Add(new GespeicherterFilter(name, filter));
+        SetzeMeta(FilterSchluessel(kuerzel), DokuRegeln.AlsJson(liste));
+    }
+
+    public void FilterLoeschen(string kuerzel, string name) =>
+        SetzeMeta(FilterSchluessel(kuerzel), DokuRegeln.AlsJson(GespeicherteFilter(kuerzel).Where(f => f.Name != name)));
+
+    private static string FilterSchluessel(string kuerzel) => $"doku_filter:{kuerzel.Trim().ToUpperInvariant()}";
+
+    // Die aktiven Berichtsarten in ihrer Reihenfolge (Auswahl beim Schreiben, Filter).
+    public List<string> Berichtsarten() => [.. Liste_(Liste.Berichtsarten).Where(e => e.Aktiv).Select(e => e.Name)];
 
     public int WichtigeBerichteSeit(long bewohnerId, DateTime seit) => Convert.ToInt32(
         Wert("SELECT COUNT(*) FROM berichte WHERE bewohner_id = $b AND wichtig = 1 AND zeitpunkt >= $s", ("$b", bewohnerId), ("$s", Zeit(seit))),
@@ -1253,7 +1302,9 @@ public sealed partial class Speicher : IDisposable
     {
         var berichte = new List<Bericht>();
         using (var befehl = Befehl("SELECT id, bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst, " +
-                                   $"EXISTS (SELECT 1 FROM uebergaben u WHERE u.bericht_id = berichte.id) FROM berichte {bedingung}", null, parameter))
+                                   "EXISTS (SELECT 1 FROM uebergaben u WHERE u.bericht_id = berichte.id), art, " +
+                                   $"EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id) FROM berichte {bedingung}",
+                                   null, parameter))
         using (var leser = befehl.ExecuteReader())
         {
             while (leser.Read())
@@ -1271,6 +1322,8 @@ public sealed partial class Speicher : IDisposable
                     Wichtig = leser.GetInt64(7) != 0,
                     Erfasst = AusZeit(leser.GetString(8)),
                     Uebergabe = leser.GetInt64(9) != 0,
+                    Art = leser.GetString(10),
+                    Bedarfsgabe = leser.GetInt64(11) != 0,
                 });
             }
         }

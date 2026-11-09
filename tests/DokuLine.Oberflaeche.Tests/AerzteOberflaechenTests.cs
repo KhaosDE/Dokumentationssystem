@@ -92,7 +92,7 @@ public class AerzteOberflaechenTests
             return DialogResult.Cancel;
         }))
             v.AendernKnopf.PerformClick();
-        Assert.Equal("Bewohner", f.AktiverBereich);
+        Assert.Equal("Dokumentation", f.AktiverBereich);
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Ahorn", f.Bewohner.Akte.Bewohner!.Nachname);
 

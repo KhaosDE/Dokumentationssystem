@@ -112,15 +112,15 @@ public class FehlersucheOberflaechenTests
     });
 
     [Fact]
-    public void Bewohner_Berichte_rollbar_Ruecksprung_und_Bereichswahl() => Hilfe.Sta(() =>
+    public void Dokumentation_rollbar_Ruecksprung_und_Bereichswahl() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         using var f = Fenster(u, "EF");
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         var b = f.Bewohner;
 
-        // Berichte rechts: wachsen mit dem Inhalt, der Rahmen rollt (30 Berichte reichen über jede Bildschirmhöhe).
-        var erster = b.Gewaehlt!.Bewohner;
+        // Berichte rechts: die Liste rollt (30 Berichte reichen über jede Bildschirmhöhe).
+        var erster = b.Gewaehlt!;
         var jetzt = DateTime.Now;
         for (int i = 0; i < 30; i++)
             u.Speicher.BerichtSpeichern(new Bericht
@@ -130,16 +130,17 @@ public class FehlersucheOberflaechenTests
             });
         b.UebersichtZeigen();
         Application.DoEvents();
-        Assert.Same(b.BerichteRahmen, b.Berichte.Parent);
-        Assert.True(b.Berichte.Height > b.BerichteRahmen.ClientSize.Height, $"Berichte {b.Berichte.Height} px, Rahmen {b.BerichteRahmen.ClientSize.Height} px");
-        Assert.True(b.BerichteRahmen.VerticalScroll.Visible);
+        var liste = (ScrollableControl)b.Dokumentation.Zeilen[0].Parent!;
+        Assert.True(liste.DisplayRectangle.Height > liste.ClientSize.Height,
+            $"Inhalt {liste.DisplayRectangle.Height} px, Fläche {liste.ClientSize.Height} px");
+        Assert.True(liste.VerticalScroll.Visible);
 
         // Zurück aus der Akte: deren Bewohner bleibt gewählt.
-        var anderer = b.Zeilen[5].Bewohner;
-        Assert.NotEqual(anderer.Id, b.Gewaehlt!.Bewohner.Id);
+        var anderer = b.Zeilen[5];
+        Assert.NotEqual(anderer.Id, b.Gewaehlt!.Id);
         b.AkteZeigen(anderer.Id!.Value);
         b.UebersichtZeigen();
-        Assert.Equal(anderer.Id, b.Gewaehlt!.Bewohner.Id);
+        Assert.Equal(anderer.Id, b.Gewaehlt!.Id);
 
         // Bereich umbenannt: die Bereichswahlen zeigen den neuen Namen.
         u.Speicher.ListeneintragUmbenennen(Liste.Bereiche, "R2", "Nord");
@@ -148,7 +149,7 @@ public class FehlersucheOberflaechenTests
         Assert.DoesNotContain("R2", b.BereichWahl.Items.Cast<string>());
         b.BereichWahl.SelectedItem = "Nord";
         Assert.NotEmpty(b.Zeilen);
-        Assert.All(b.Zeilen, z => Assert.Equal("Nord", z.Bewohner.Wohnbereich));
+        Assert.All(b.Zeilen, z => Assert.Equal("Nord", z.Wohnbereich));
         var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
         s.Aktualisieren();
         Assert.Contains("Nord", s.BereichWahl.Items.Cast<string>());

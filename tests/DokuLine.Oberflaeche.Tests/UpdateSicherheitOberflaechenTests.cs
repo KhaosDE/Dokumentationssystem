@@ -35,7 +35,7 @@ public class UpdateSicherheitOberflaechenTests
                 f.BereichWaehlen(name);
                 Application.DoEvents();
             }
-            f.BereichWaehlen("Bewohner");
+            f.BereichWaehlen("Dokumentation");
             f.Bewohner.AkteZeigen(bewohner.Id!.Value);
             foreach (var reiter in Bauplan.AktenReiter)
             {

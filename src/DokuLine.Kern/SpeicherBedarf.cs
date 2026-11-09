@@ -57,7 +57,7 @@ public sealed partial class Speicher
         long berichtId = BerichtEinfuegen(new Bericht
         {
             BewohnerId = v.BewohnerId, Zeitpunkt = g.Zeit, Schicht = BerichtRegeln.SchichtZu(g.Zeit), Verfasser = g.Kuerzel,
-            Bereiche = [5], Text = BedarfRegeln.BerichtText(v, g, abspracheName), Erfasst = g.Erstellt,
+            Bereiche = [5], Text = BedarfRegeln.BerichtText(v, g, abspracheName), Erfasst = g.Erstellt, Art = DokuRegeln.ArtMedikation,
         }, transaktion);
         Ausfuehren("""
             INSERT INTO bedarfsgaben (verordnung_id, bewohner_id, zeit, menge, anlass, kuerzel, absprache, erstellt, bericht_id)

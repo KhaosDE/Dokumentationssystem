@@ -15,7 +15,7 @@ public class MedikationOberflaechenTests
         if (kuerzel.Length > 0) Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
         var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(u.Demo(nachname).Id!.Value);
         f.Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
         return (u, f, f.Bewohner.Akte.Medikation);
@@ -32,7 +32,7 @@ public class MedikationOberflaechenTests
         using (u)
         using (f)
         {
-            Assert.Equal(["Stammdaten", "Berichte", "Medikamentenplan"], f.Bewohner.Akte.Reiter.Namen.Take(3));
+            Assert.Equal(["Stammdaten", "Medikamentenplan", "Wochenplan"], f.Bewohner.Akte.Reiter.Namen.Take(3));
             Assert.Equal(Heute(), m.TagFeld.Text);
             Assert.Equal("Demo — nicht zum Stellen verwenden", m.Hinweis.Text);
             Assert.Equal(["Medikament", "morgens", "mittags", "abends", "nachts", "verordnet von", "seit", "Status", "Hinweis"],

@@ -2,37 +2,35 @@ using DokuLine.Kern;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Tägliche Dokumentation: Reiter „Berichte“, „Neuer Bericht …“ und der Bereich „Übergabe“.
+// Tägliche Dokumentation: Berichte im Bereich „Dokumentation“, „Neuer Bericht …“ und der Bereich „Übergabe“.
 [Collection("Oberflaeche")]
 public class BerichteOberflaechenTests
 {
     [Fact]
-    public void Reiter_Berichte_neueste_oben_mit_Filtern() => Hilfe.Sta(() =>
+    public void Berichte_neueste_oben_mit_Filtern() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
-        f.Bewohner.Akte.Reiter.Waehlen("Berichte");
-        var ansicht = f.Bewohner.Akte.Berichte;
-        ansicht.Zeitraum.SelectedIndex = 1;   // letzte 4 Wochen
-        var karten = ansicht.Liste.Karten;
-        Assert.True(karten.Count >= 28);
-        Assert.Equal(karten.Select(k => k.Bericht.Zeitpunkt).OrderDescending(), karten.Select(k => k.Bericht.Zeitpunkt));
-        int alle = karten.Count;
+        f.BereichWaehlen("Dokumentation");
+        f.Bewohner.DokumentationZeigen(u.Demo("Ahorn").Id!.Value);
+        var d = f.Bewohner.Dokumentation;
+        d.Zeitraum.SelectedIndex = (int)Zeitraum.DreissigTage;
+        Assert.Equal(Zeitraum.DreissigTage, d.Filter.Zeitraum);
+        var zeilen = d.Zeilen;
+        Assert.True(zeilen.Count >= 28);
+        Assert.Equal(zeilen.Select(z => z.Bericht.Zeitpunkt).OrderDescending(),
+            zeilen.Select(z => z.Bericht.Zeitpunkt));
+        int alle = zeilen.Count;
 
-        ansicht.NurWichtige.Checked = true;
-        Assert.NotEmpty(ansicht.Liste.Karten);
-        Assert.True(ansicht.Liste.Karten.Count < alle);
-        Assert.All(ansicht.Liste.Karten, k => Assert.Contains("Wichtig", k.MarkenTexte));
-        ansicht.NurWichtige.Checked = false;
-
-        ansicht.Bereich.SelectedIndex = 1;   // Lebensbereich 1
-        Assert.All(ansicht.Liste.Karten, k => Assert.Contains(1, k.Bericht.Bereiche));
-        ansicht.Bereich.SelectedIndex = 0;
-        ansicht.Suche.Text = "kommt-in-keinem-bericht-vor";
-        Assert.Empty(ansicht.Liste.Karten);
-        Assert.Equal("0 Berichte", ansicht.Anzahl.Text);
+        d.Bereich.SelectedIndex = 1;   // Lebensbereich 1
+        Assert.NotEmpty(d.Zeilen);
+        Assert.True(d.Zeilen.Count < alle);
+        Assert.All(d.Zeilen, z => Assert.Contains(1, z.Bericht.Bereiche));
+        d.Bereich.SelectedIndex = 0;
+        d.Suche.Text = "kommt-in-keinem-bericht-vor";
+        Assert.Empty(d.Zeilen);
+        Assert.Empty(d.Tage);
     });
 
     [Fact]
@@ -55,27 +53,28 @@ public class BerichteOberflaechenTests
             formular.Rueckfrage = woerter => { rueckfrage = woerter; return DialogResult.Yes; };
             return formular.Speichern() ? DialogResult.OK : DialogResult.Cancel;
         });
-        Assert.DoesNotContain(f.Navigation, n => n.Text == "Neuer Bericht …");   // kein Menüpunkt mehr (Schritt 18)
+        Assert.DoesNotContain(f.Navigation, n => n.Text == "Neuer Bericht …");
         f.Bewohner.AkteZeigen(u.Demo("Distel").Id!.Value);
         f.Kopf.Knoepfe.Single(k => k.Text == "Neuer Bericht …").PerformClick();
 
         Assert.NotNull(rueckfrage);
         Assert.Contains("Arzt", rueckfrage);
-        Assert.True(f.Bewohner.AkteSichtbar);
-        Assert.Equal("Bewohnerakte", f.Kopf.TitelText);   // Schritt 26d: Name nur auf der Karte
-        Assert.Equal("Dieter Distel", f.Bewohner.Akte.Bewohner!.Name);
-        Assert.Equal("Berichte", f.Bewohner.Akte.Reiter.Aktiv);
-        var karte = f.Bewohner.Akte.Berichte.Liste.Karten.Single(k => k.Bericht.Text.StartsWith("Hat den Tisch gedeckt"));
-        Assert.True(karte.Bericht.Uebergabe);
-        Assert.Contains("Übergabe", karte.MarkenTexte);
-        Assert.Contains(u.Speicher.Uebergaben(DateTime.Now), x => x.BerichtId == karte.Bericht.Id);
+        // Danach die Berichte des Bewohners in der Dokumentation.
+        Assert.False(f.Bewohner.AkteSichtbar);
+        Assert.Equal("Dokumentation", f.Kopf.TitelText);
+        Assert.Equal("Dieter Distel", f.Bewohner.Gewaehlt!.Name);
+        var zeile = f.Bewohner.Dokumentation.Zeilen.Single(z => z.Bericht.Text.StartsWith("Hat den Tisch gedeckt"));
+        Assert.True(zeile.Bericht.Uebergabe);
+        Assert.True(zeile.UebergabeZeichen.Visible);
+        Assert.Equal(DokuRegeln.ArtAlltag, zeile.Bericht.Art);
+        Assert.Contains(u.Speicher.Uebergaben(DateTime.Now), x => x.BerichtId == zeile.Bericht.Id);
     });
 
     [Fact]
     public void Ohne_Pflichtangaben_wird_nicht_gespeichert() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        Einstellungen.Aendern(w => w with { Kuerzel = "" });   // nicht angemeldet: kein Verfasser (Schritt 26a)
+        Einstellungen.Aendern(w => w with { Kuerzel = "" });   // nicht angemeldet: kein Verfasser
         using var formular = new BerichtFormular(u.Speicher, u.Demo("Ahorn"));
         Assert.Equal(Recht.NichtAngemeldetAnzeige, formular.Verfasser.Text);
         formular.Rueckfrage = _ => DialogResult.No;
@@ -93,10 +92,11 @@ public class BerichteOberflaechenTests
         Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        f.Bewohner.AkteZeigen(u.Demo("Clematis").Id!.Value);
-        f.Bewohner.Akte.Reiter.Waehlen("Berichte");
-        var ansicht = f.Bewohner.Akte.Berichte;
-        var erste = ansicht.Liste.Karten[0].Bericht;
+        f.BereichWaehlen("Dokumentation");
+        f.Bewohner.DokumentationZeigen(u.Demo("Clematis").Id!.Value);
+        var d = f.Bewohner.Dokumentation;
+        var erste = d.Zeilen[0].Bericht;
+        Assert.True(d.Zeilen[0].ContextMenuStrip!.Items[0].Enabled);   // „Nachtrag schreiben …“
         using var ersatz = new DialogErsatz(fenster =>
         {
             var formular = Assert.IsType<NachtragFormular>(fenster);
@@ -104,10 +104,15 @@ public class BerichteOberflaechenTests
             formular.Inhalt.Text = "Uhrzeit korrigiert: es war eine halbe Stunde später.";
             return formular.Speichern() ? DialogResult.OK : DialogResult.Cancel;
         });
-        ansicht.Liste.Karten[0].NachtragKnopf.PerformClick();
-        var karte = ansicht.Liste.Karten.Single(k => k.Bericht.Id == erste.Id);
-        Assert.Equal(erste.Text, karte.Bericht.Text);
-        Assert.Contains("Uhrzeit korrigiert: es war eine halbe Stunde später.", karte.NachtragTexte);
+        d.NachtragSchreiben(erste);
+        var zeile = d.Zeilen.Single(z => z.Bericht.Id == erste.Id);
+        Assert.Equal(erste.Text, zeile.Bericht.Text);
+        Assert.Contains(zeile.Bericht.Nachtraege,
+            n => n.Text == "Uhrzeit korrigiert: es war eine halbe Stunde später.");
+        Assert.True(d.MitNachtrag.Text.Length > 0);
+        d.MitNachtrag.Checked = true;
+        Assert.Contains(d.Zeilen, z => z.Bericht.Id == erste.Id);
+        Assert.All(d.Zeilen, z => Assert.NotEmpty(z.Bericht.Nachtraege));
     });
 }
 
@@ -148,7 +153,7 @@ public class UebergabeOberflaechenTests
             Assert.False(seite.KuerzelHinweis.Visible);
 
             // Zweiter Besuch: Was vorher da war, ist nicht mehr neu.
-            f.BereichWaehlen("Bewohner");
+            f.BereichWaehlen("Dokumentation");
             f.BereichWaehlen("Übergabe");
             Assert.Equal(0, seite.Neu);
             Assert.DoesNotContain(seite.Karten, k => k.MarkenTexte.Contains("neu seit deiner letzten Schicht"));
@@ -193,7 +198,8 @@ public class UebergabeOberflaechenTests
             Assert.StartsWith("erledigt ", erledigt.MarkenTexte.Last());
             Assert.EndsWith("· CD", erledigt.MarkenTexte.Last());
             Assert.False(erledigt.Erledigt.Visible);
-            Assert.Contains(seite.Karten, k => k.MarkenTexte.Last().StartsWith("abgelaufen "));   // Demo: ein abgelaufener Eintrag
+            Assert.Contains(seite.Karten,
+                k => k.MarkenTexte.Last().StartsWith("abgelaufen "));   // Demo: ein abgelaufener Eintrag
         }
     });
 
@@ -234,7 +240,8 @@ public class UebergabeOberflaechenTests
             var seite = f.Uebergabe;
             Assert.True(seite.KuerzelHinweis.Visible);
             Assert.Equal(0, seite.Neu);
-            Assert.All(seite.Karten, k => Assert.False(k.Gelesen.Enabled || k.Erledigt.Enabled || k.Verlaengern.Enabled));
+            Assert.All(seite.Karten,
+                k => Assert.False(k.Gelesen.Enabled || k.Erledigt.Enabled || k.Verlaengern.Enabled));
         }
     });
 
@@ -255,7 +262,8 @@ public class UebergabeOberflaechenTests
             var namen = u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
             using var bild = new Bitmap(800, 1130);
             using var g = Graphics.FromImage(bild);
-            Assert.Equal(offen.Count, new UebergabeDruck(offen, namen, jetzt).SeiteZeichnen(g, 0));   // passt auf eine Seite
+            Assert.Equal(offen.Count, new UebergabeDruck(offen, namen, jetzt).SeiteZeichnen(g,
+                0));   // passt auf eine Seite
         }
     });
 }

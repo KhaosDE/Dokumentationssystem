@@ -129,11 +129,10 @@ public class MehrplatzOberflaechenTests
         s.Aktualisieren();
         Assert.Equal(69, s.Zeilen.Count);
         Assert.True(s.BereichHinweis.Visible);
-        // Auf der Seite „Bewohner“ zeigen Karten fremder Wohnbereiche ihren Bereich.
-        f.BereichWaehlen("Bewohner");
-        var karten = f.Bewohner.Zeilen;   // Bereich ohne eigene Bewohner: alle (Schritt 26j)
-        Assert.Equal(69, karten.Count);
-        Assert.Equal("R1", karten.Single(k => k.Bewohner.Nachname == "Birke").Marken[^1].Text);
+        // In der Dokumentation: ein Bereich ohne eigene Bewohner sieht ebenfalls alle.
+        f.BereichWaehlen("Dokumentation");
+        Assert.Equal(69, f.Bewohner.Zeilen.Count);
+        Assert.Contains("R1", s.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Marken.Select(m => m.Text));
     });
 
     [Fact]

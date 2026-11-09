@@ -23,7 +23,7 @@ public class BezugOberflaechenTests
         Assert.Equal("DBT · PR", f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Trainer!.Value.Text);
         Assert.Contains(Statusleiste.BezugText, f.Statusleiste.AccessibleName);
 
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
         var akte = f.Bewohner.Akte;
         Assert.StartsWith("Anna Bachstelze (AB) · seit ", akte.Bezugspflege.Text);

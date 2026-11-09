@@ -24,6 +24,8 @@ public sealed record Bericht
     public DateTime Erfasst { get; init; }               // wann eingetragen
     public bool Uebergabe { get; init; }                 // hat einen Übergabe-Eintrag (nur lesend)
     public IReadOnlyList<Nachtrag> Nachtraege { get; init; } = [];
+    public string Art { get; init; } = DokuRegeln.ArtAlltag;   // Berichtsart (Liste in den Einstellungen)
+    public bool Bedarfsgabe { get; init; }                  // entstanden über „Bedarf gegeben …“ (nur lesend)
 
     public bool Allgemein => Bereiche.Count == 0;
 }
@@ -44,6 +46,7 @@ public sealed class BerichtEingabe
     public UebergabeDauer UebergabeDauer { get; set; }
     public string UebergabeBis { get; set; } = "";
     public string UebergabeText { get; set; } = "";
+    public string Art { get; set; } = DokuRegeln.ArtAlltag;
 }
 
 // Filter für die Liste der Berichte eines Bewohners.
@@ -180,6 +183,7 @@ public static partial class BerichtRegeln
             Text = text,
             Wichtig = e.Wichtig,
             Erfasst = jetzt,
+            Art = string.IsNullOrWhiteSpace(e.Art) ? DokuRegeln.ArtAlltag : e.Art.Trim(),
         };
     }
 

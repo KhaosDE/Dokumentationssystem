@@ -11,7 +11,7 @@ public class UebersichtlichkeitTests
 {
     private static readonly (string Bereich, string Datei)[] Ansichten =
     [
-        ("Übersicht", "uebersicht"), ("Tagesplan", "tagesplan"), ("Bewohner", "bewohner"), ("Übergabe", "uebergabe"),
+        ("Übersicht", "uebersicht"), ("Tagesplan", "tagesplan"), ("Dokumentation", "dokumentation"), ("Übergabe", "uebergabe"),
         ("Visiten", "visiten"), ("Aufgaben", "aufgaben"), ("Kalender", "kalender"), ("Therapie", "therapie"), ("Ausgangsliste", "ausgangsliste"),
     ];
 

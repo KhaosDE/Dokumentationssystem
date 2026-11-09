@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-public enum Liste { Bereiche, Positionen }
+public enum Liste { Bereiche, Positionen, Berichtsarten }
 
 // Mitarbeiter, Bereiche, Positionen und Rechte im Speicher. Die Mitarbeiter stehen in der Tabelle
 // „kollegen“ (seit den Nachrichten), ihre Bereiche in „team_mitglieder“ – so gehen Nachrichten an
@@ -102,16 +102,28 @@ public sealed partial class Speicher
             Ausfuehren("INSERT INTO mitarbeiter_positionen (kuerzel, position) VALUES ($k, $p)", transaktion, ("$k", kuerzel), ("$p", p));
     }
 
-    // ------------------------------------------------------------------ Bereiche und Positionen
+    // ------------------------------------------------------------------ Bereiche, Positionen, Berichtsarten
 
     public List<Listeneintrag> Bereichsliste() => Liste_(Liste.Bereiche);
     public List<Listeneintrag> Positionsliste() => Liste_(Liste.Positionen);
+    public List<Listeneintrag> Listeneintraege(Liste art) => Liste_(art);
+
+    // Alltag, Visite und Medikation vergibt das Programm selbst; sie bleiben, wie sie sind.
+    private static void FesteArtPruefen(Liste art, string name)
+    {
+        if (art == Liste.Berichtsarten && DokuRegeln.FesteArten.Contains(name))
+            throw new Eingabefehler([$"„{name}“ vergibt das Programm selbst – bitte nicht ändern."]);
+    }
 
     private List<Listeneintrag> Liste_(Liste art)
     {
-        string sql = art == Liste.Bereiche
-            ? "SELECT name, aktiv, (SELECT COUNT(*) FROM team_mitglieder t WHERE t.team = b.name) FROM bereiche b ORDER BY nr, name"
-            : "SELECT name, aktiv, (SELECT COUNT(*) FROM mitarbeiter_positionen m WHERE m.position = p.name) FROM positionen p ORDER BY nr, name";
+        string sql = art switch
+        {
+            Liste.Bereiche => "SELECT name, aktiv, (SELECT COUNT(*) FROM team_mitglieder t WHERE t.team = b.name) FROM bereiche b ORDER BY nr, name",
+            Liste.Positionen =>
+                "SELECT name, aktiv, (SELECT COUNT(*) FROM mitarbeiter_positionen m WHERE m.position = p.name) FROM positionen p ORDER BY nr, name",
+            _ => "SELECT name, aktiv, (SELECT COUNT(*) FROM berichte r WHERE r.art = a.name) FROM berichtsarten a ORDER BY nr, name",
+        };
         var liste = new List<Listeneintrag>();
         using var befehl = Befehl(sql, null, []);
         using var leser = befehl.ExecuteReader();
@@ -119,7 +131,7 @@ public sealed partial class Speicher
         return liste;
     }
 
-    private static string Tabelle(Liste art) => art == Liste.Bereiche ? "bereiche" : "positionen";
+    private static string Tabelle(Liste art) => art switch { Liste.Bereiche => "bereiche", Liste.Positionen => "positionen", _ => "berichtsarten" };
 
     private static string NamePruefen(string name)
     {
@@ -143,10 +155,13 @@ public sealed partial class Speicher
         neu = NamePruefen(neu);
         if (art == Liste.Positionen && alt == RechteRegeln.Administrator && neu != alt) throw new Eingabefehler([RechteRegeln.AdminPositionText]);
         if (alt == neu) return;
+        FesteArtPruefen(art, alt);
         if (Liste_(art).Any(x => x.Name.Equals(neu, StringComparison.OrdinalIgnoreCase) && x.Name != alt)) throw new Eingabefehler([$"„{neu}“ gibt es schon."]);
         using (var transaktion = db.BeginTransaction())
         {
             Ausfuehren($"UPDATE {Tabelle(art)} SET name = $neu WHERE name = $alt", transaktion, ("$neu", neu), ("$alt", alt));
+            if (art == Liste.Berichtsarten)
+                Ausfuehren("UPDATE berichte SET art = $neu WHERE art = $alt", transaktion, ("$neu", neu), ("$alt", alt));
             if (art == Liste.Bereiche)
                 Ausfuehren("UPDATE team_mitglieder SET team = $neu WHERE team = $alt; " +
                            "UPDATE bewohner SET wohnbereich = $neu WHERE wohnbereich = $alt; " +
@@ -159,6 +174,7 @@ public sealed partial class Speicher
     public void ListeneintragAktivSetzen(Liste art, string name, bool aktiv)
     {
         if (art == Liste.Positionen && name == RechteRegeln.Administrator && !aktiv) throw new Eingabefehler([RechteRegeln.AdminPositionText]);
+        if (!aktiv) FesteArtPruefen(art, name);
         Ausfuehren($"UPDATE {Tabelle(art)} SET aktiv = $a WHERE name = $n", null, ("$a", aktiv ? 1 : 0), ("$n", name));
         MitarbeiterGeaendert?.Invoke();
     }
@@ -167,6 +183,7 @@ public sealed partial class Speicher
     public void ListeneintragLoeschen(Liste art, string name)
     {
         if (art == Liste.Positionen && name == RechteRegeln.Administrator) throw new Eingabefehler([RechteRegeln.AdminPositionText]);
+        FesteArtPruefen(art, name);
         var eintrag = Liste_(art).FirstOrDefault(x => x.Name == name) ?? throw new Eingabefehler([$"„{name}“ gibt es nicht."]);
         bool bewohner = art == Liste.Bereiche && AlleBewohner().Any(b => b.Wohnbereich == name);
         if (eintrag.Zugeordnet > 0 || bewohner)
