@@ -984,6 +984,18 @@ wird eine fehlende Position beim Vorbelegen neuer Rechte übersprungen.
 - 0.33.1 — Korrektur aus der Fehlersuche vom 08.11.2026: Neue Rechte werden beim Start nur noch für Positionen
   vorbelegt, die es gibt. Vorher brach der Start ab, wenn eine vorgegebene Position umbenannt oder gelöscht war
   (Fremdschlüssel). Test: `Vorbelegen_neuer_Rechte_uebersteht_umbenannte_und_geloeschte_Positionen`.
+  - **Sicherheitsnetz für Updates** (Wunsch Tobi, 09.11.2026: „sichere Testungen für die Zukunft“):
+    - Kern (`UpdateSicherheitTests`): Eine Demo-Datenbank wird verändert wie von einem Nutzer (alle Positionen
+      und Bereiche umbenannt, eigene Einträge, AB und KL ausgeschieden, drei Bewohner entfernt). Dann wird
+      jeder Merker eines einmaligen Schritts (Tabelle `meta`: Rechte vorbelegen, Demo-Daten nachholen …)
+      einzeln und alle zusammen entfernt und neu gestartet. Der Start darf nicht abbrechen, der Merker muss
+      danach wieder gesetzt sein, ein zweiter Start holt nichts mehr nach. Die Merker liest der Test aus der
+      Datenbank – jeder künftige Schritt ist automatisch dabei (heute 35). Gegenprobe: Ohne die Korrektur
+      meldet der Test 5 von 35 Schritten mit „FOREIGN KEY constraint failed“.
+    - Oberfläche (`UpdateSicherheitOberflaechenTests`, nur in GitHub Actions): Mit so einer Datenbank öffnet
+      sich jeder Bereich der Seitenleiste und jeder Reiter der Akte, als TST und als EF. Die Bereiche kommen
+      aus der Seitenleiste – neue Bereiche sind automatisch dabei.
+    - Die Änderungen des Nutzers stehen einmal in `tests/DokuLine.Tests/NutzerStand.cs` (beide Testprojekte).
 
 ## Offene Punkte
 
@@ -1069,6 +1081,11 @@ wird eine fehlende Position beim Vorbelegen neuer Rechte übersprungen.
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.1): Jede Korrektur bekommt einen Test, der vor der Korrektur rot ist (Gegenprobe). Neue
+  einmalige Schritte beim Start (Rechte vorbelegen, Demo nachholen) brauchen keinen eigenen Update-Test mehr:
+  Der Sicherheitstest findet sie über ihren Merker in `meta`. Er prüft nur, dass der Start nicht abbricht –
+  nicht, ob der Schritt inhaltlich richtig ist; dafür bleibt der Test des Schritts selbst.
 
 - 08.11.2026 (0.33.0): Die Qualifikation bleibt in der Datenbank das bisherige Feld „Fachkraft“ (ja/nein) und
   heißt in der Oberfläche „Assistenzkraft“ oder „Fachkraft“ – keine Umstellung der Daten nötig.
@@ -1748,6 +1765,8 @@ Version 0.33.1:
 1. Einstellungen → Verwaltung → „Bereiche und Positionen …“: „Mitarbeiter Wohnbereich“ umbenennen (z. B. „Betreuung“). Programm
    schließen und neu starten → es startet normal (unter 0.33.0 konnte hier ein Fehler kommen). Die Rechte der
    umbenannten Position bleiben, wie sie waren.
+2. Nichts zu tun für die Sicherheitstests: Sie laufen bei jedem Update in GitHub Actions; ein Update kommt nur,
+   wenn sie grün sind.
 
 Version 0.33.0:
 

@@ -20,6 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Gemeinsame Hilfe der Update-Sicherheitstests (0.33.1), eine Quelle für beide Testprojekte. -->
+    <Compile Include="..\DokuLine.Tests\NutzerStand.cs" Link="NutzerStand.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 </Project>
