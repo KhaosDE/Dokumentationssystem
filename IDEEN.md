@@ -69,7 +69,9 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 27 | Ausgangsliste als übersichtliche Liste | 0.30.0 |
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
-| 30 | Akte: Reiter Betreuer, Krankenkasse, Kostenträger | 0.34.0 |
+| 29a | Personenverzeichnis (Ärzte, Betreuer, Angehörige, Forensik, FOSA) | 0.33.3 |
+| 30 | Akte: Reiter Betreuung, Krankenkasse, Kostenträger | 0.34.0 |
+| 30a | Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente | 0.34.1 |
 | 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine | 0.35.0 |
 | 32 | Vorhandene digitale Akte übernehmen | 0.36.0 |
 | 33 | Überleitungsbogen auf Knopfdruck | 0.37.0 |
@@ -1484,7 +1486,7 @@ Warum: Vorgabe Tobi (09.11.2026): Das Bewohnerstammblatt muss weiter ausgebaut w
 Daten, die auch durch die Biografie ergänzt werden, gehören Reiter für Krankenkasse,
 Kostenträger, Betreuer und Dokumente hinein.
 Umfang (Vorschlag):
-- **Reihenfolge der Reiter:** Stammdaten · Betreuer · Krankenkasse · Kostenträger · Dokumente ·
+- **Reihenfolge der Reiter:** Stammdaten · Betreuung · Krankenkasse · Kostenträger · Dokumente ·
   Berichte · Medikamentenplan · Wochenplan · Biografie · Reflexion · HEB (Modul-Reiter wie
   „Ausgang“ danach). Die Stammdaten zeigen je eine Kurzzeile („Betreuer: …“, „Krankenkasse: …“,
   „Kostenträger: … bis …“), ein Klick springt in den Reiter.
@@ -1492,14 +1494,19 @@ Umfang (Vorschlag):
   gesetzliche Betreuung) · „nicht erfasst“ (in Achtung-Farbe).
 - **Jede Änderung ist eine neue Fassung** mit Kürzel und Datum, der Verlauf bleibt sichtbar
   („ab Datum …“). Bearbeiten mit dem Recht „Bewohner anlegen und bearbeiten“.
-- **Betreuer** (die bisherige Zeile aus den Stammdaten zieht hierher um):
+- **Reiter „Betreuung“** (Ergänzung 09.11.2026: heißt „Betreuung“, weil darin auch Angehörige
+  und die Zuständigen aus Forensik bzw. FOSA stehen, Schritt 30a). Abschnitt **Betreuer** (die
+  bisherige Zeile aus den Stammdaten zieht hierher um):
   - Art: Berufsbetreuer · ehrenamtlich · Angehörige · Vorsorgebevollmächtigte.
-  - Name, Stelle bzw. Büro, Telefon, E-Mail (Demo: nur `@example.org`), Anschrift.
+  - Person aus dem **Personenverzeichnis** (Schritt 29a), dort Name, Büro, Telefon, E-Mail,
+    Anschrift. Fehlt sie: „Person anlegen …“ direkt aus der Auswahl.
   - **Aufgabenbereiche** zum Ankreuzen (z. B. Gesundheitssorge, Aufenthaltsbestimmung,
     Vermögenssorge, Behörden und Ämter, Wohnungsangelegenheiten, Post, Unterbringung) plus
     Freitext. Liste in den Einstellungen änderbar.
   - Bestellt am, **Überprüfung bis** → Marke „Betreuung endet …“ 8 Wochen vorher.
-  - Weitere Personen: Ersatzbetreuer, Angehörige als Kontakt (je mit eigener Zeile).
+  - Weitere Personen: Ersatzbetreuer. Abschnitt **Angehörige und Kontakte** darunter: Personen
+    aus dem Personenverzeichnis mit Beziehung (Mutter, Bruder …), je mit Schweigepflicht-Zustand
+    (Schritt 35).
   - Knöpfe „E-Mail an Betreuer …“ (wie bisher) und „Betreuerausweis öffnen“ (aus „Dokumente“).
 - **Krankenkasse:**
   - Kasse (Auswahl aus einer Liste in den Einstellungen, Demo: ausgedachte Kassen wie
@@ -1590,7 +1597,8 @@ Umfang:
 - **Inhalt:** Einrichtung, Bereich und Telefon des Dienstzimmers (aus den Einstellungen);
   Name, Geburtsdatum, Zimmer; **Allergien** (drei Zustände, `CLAUDE.md` Regel 5); Diagnosen und
   „Hinweise für den Notfall“ (Ärztliche Informationen); **aktueller Medikamentenplan** mit Stand
-  heute, auch Bedarf und Pausen; Betreuer mit Aufgabenbereichen und Telefon; Krankenkasse und
+  heute, auch Bedarf und Pausen; Betreuer mit Aufgabenbereichen und Telefon (bei Forensik:
+  „nicht zuständig“, dafür die Zuständigen der Forensik bzw. FOSA, Schritt 30a); Krankenkasse und
   Versichertennummer; Haus- und Fachärzte (Ärzteverzeichnis); Unterbringung bzw. Beschluss;
   Schweigepflichtentbindung gegenüber der Klinik (Schritt 35); letzte Vitalwerte (Schritt 36);
   Freitext „Besonderheiten“ (Kommunikation, Hilfsmittel, was beruhigt).
@@ -1619,7 +1627,7 @@ Umfang:
   als 12 Monate). Bild aus der Akte; in der Demo nur der Platzhalter (`CLAUDE.md`, Regel 2).
 - **Liste „Wer wurde informiert“** zum Abhaken, je mit Uhrzeit und Kürzel: Leitung bzw.
   Rufbereitschaft, Polizei (dazu Name und Vorgangsnummer), Betreuer, Angehörige, ggf. Klinik
-  bzw. Gericht. Die Liste und die Telefonnummern sind in den Einstellungen änderbar, weil jede
+  bzw. Gericht; bei Forensik bzw. FOSA deren Zuständige als feste Zeile (Schritt 30a). Die Liste und die Telefonnummern sind in den Einstellungen änderbar, weil jede
   Einrichtung ihren eigenen Ablauf hat.
 - **Meldeblatt drucken** (für die Polizei): Personenbeschreibung, Bild, Kleidung, zuletzt
   gesehen, Gefährdung, Kontakt der Einrichtung.
@@ -1637,12 +1645,23 @@ schnelle Abfrage beantwortet „Darf ich hier Auskunft geben?“.
 Warum: Auswahl Tobi (09.11.2026). Am Telefon muss jeder sofort sehen, ob er Auskunft geben darf.
 Umfang:
 - Neuer Reiter **„Schweigepflicht“** nach „Kostenträger“.
-- Liste je Person oder Stelle: Auswahl aus Betreuer, Angehörigen, Ärzteverzeichnis,
-  Kostenträger oder Freitext; **Zustand:** entbunden · **ausdrücklich keine Auskunft** · nicht
+- Liste je Person oder Stelle: Auswahl aus dem Personenverzeichnis (Betreuer, Angehörige, Ärzte,
+  Forensik, FOSA, Schritt 29a), Kostenträger oder Freitext; **Zustand:** entbunden · **ausdrücklich keine Auskunft** · nicht
   erfasst; Umfang (alle Angaben, nur Gesundheit, nur Organisatorisches, Freitext); Richtung
   (Auskunft geben, einholen, beides); erteilt am; gültig bis oder unbefristet; widerrufen am;
   Form (schriftlich, mündlich mit Zeuge); Dokument aus „Dokumente“ verknüpft.
-- **„Keine Auskunft an …“** erscheint als Marke im Akte-Kopf, in Gefahr-Farbe mit Wort.
+- **Auskunftsleiste bei jedem Bewohner** (Vorgabe Tobi, 09.11.2026: „Man muss mit einem Blick
+  sehen, ob man etwas weitergeben darf oder nicht.“): im Akte-Kopf direkt unter dem
+  Allergiehinweis, immer sichtbar, über allen Reitern. Je Person eine Marke mit Zeichen, Wort
+  und Farbe:
+  - „✓ Mutter · Erika Ahornblatt — entbunden (alle Angaben)“ in Offen-Farbe (Grün),
+  - „✕ Bruder · … — keine Auskunft“ in Gefahr-Farbe (Rot),
+  - am Ende immer: „Alle anderen: keine Auskunft“.
+  Ist nichts eingetragen: „Schweigepflicht: nicht erfasst — keine Auskunft geben“ in
+  Achtung-Farbe. Abgelaufene oder widerrufene Entbindungen zählen nicht als entbunden.
+  Eingeschränkter Umfang steht in Klammern („nur Organisatorisches“).
+- Dieselbe Kurzform als Spalte **„Auskunft“** in der Bewohnerliste der Übersicht und im Bereich
+  „Bewohner“ (z. B. „2 entbunden · 1 keine Auskunft“, Tooltip mit den Namen).
 - **Schnellabfrage** „Auskunft prüfen …“ (Akte und Aktionsleiste): Name eintippen → Antwort mit
   Wort und Farbe: „entbunden für …“, „keine Auskunft“, „nicht erfasst — keine Auskunft geben,
   bis geklärt“.
@@ -1659,16 +1678,30 @@ Warum: Wunsch Tobi (09.11.2026).
 Umfang:
 - Neuer Reiter **„Vitalwerte“** in der Akte (nach „Medikamentenplan“).
 - **Werte** (Liste in den Einstellungen erweiterbar): Blutdruck (systolisch/diastolisch), Puls,
-  Temperatur, Gewicht, Blutzucker, Sauerstoffsättigung, Bauchumfang. BMI wird aus Gewicht und
-  Größe (Personenbeschreibung) berechnet.
+  Temperatur, Gewicht, Blutzucker, Sauerstoffsättigung. BMI wird aus Gewicht und Größe
+  (Personenbeschreibung) berechnet. Kein Bauchumfang (Tobi, 09.11.2026: wird nicht benötigt).
 - **Erfassen** über „Vitalwerte erfassen …“: Datum und Uhrzeit (vorbelegt), mehrere Werte in
   einem Schritt, Bemerkung (z. B. „nüchtern“), Kürzel automatisch. Korrektur nur als neue
   Fassung mit Grund.
 - **Ansicht:** Tabelle (neueste oben) und Verlaufslinie je Wert für einen wählbaren Zeitraum.
 - **Grenzen nur nach ärztlicher Anordnung:** Eine Fachkraft kann je Bewohner und Wert einen
   Bereich eintragen (mit anordnendem Arzt aus dem Ärzteverzeichnis und Datum). Nur dann zeigt
-  das Programm „außerhalb des angeordneten Bereichs“ als Marke mit Wort. Eigene medizinische
-  Grenzwerte setzt das Programm nicht.
+  das Programm „außerhalb des angeordneten Bereichs“ als Marke mit Wort in Gefahr-Farbe.
+- **Allgemeine Richtwerte als Hinweis** (Entscheidung Tobi, 09.11.2026): Gilt für einen Wert keine
+  ärztliche Anordnung, zeigt das Programm einen leisen Hinweis in Achtung-Farbe: „über dem
+  allgemeinen Richtwert“ bzw. „unter dem allgemeinen Richtwert“, mit Tooltip „Allgemeiner
+  Richtwert für Erwachsene, kein ärztlicher Grenzwert. Bei Unsicherheit Rücksprache halten.“
+  Eine ärztliche Anordnung geht immer vor. Die Richtwerte stehen in den Einstellungen (änderbar
+  mit Recht „Grenzen und Messaufträge festlegen“). **Vorbelegung** (allgemeine Lehrbuchwerte aus
+  dem Chat, **nicht ärztlich geprüft** — so in `STAND.md` und in den Einstellungen vermerken):
+  - Blutdruck: Hinweis ab 140 systolisch oder 90 diastolisch, unter 90 systolisch oder 60
+    diastolisch (mmHg).
+  - Puls in Ruhe: unter 60 oder über 100 pro Minute.
+  - Temperatur: unter 36,0 °C; ab 37,5 °C „erhöht“, ab 38,0 °C „Fieber“.
+  - Blutzucker: unter 70 mg/dl immer; mit Bemerkung „nüchtern“ ab 100 mg/dl, sonst ab 140 mg/dl.
+    Einheit in den Einstellungen umschaltbar (mg/dl oder mmol/l).
+  - Sauerstoffsättigung: unter 94 %.
+  - BMI: unter 18,5; ab 25 „Übergewicht“; ab 30 „Adipositas“.
 - **Messaufträge** je Bewohner (z. B. „Gewicht monatlich“, „Blutdruck wöchentlich“) erscheinen
   als Aufgabe im passenden Dienst (Aufgaben nach Schichten).
 - Die letzten Werte erscheinen in der Visitenansicht und im Überleitungsbogen.
@@ -1677,3 +1710,68 @@ Umfang:
   festlegen“ (nur Fachkräfte).
 - Demo-Daten: ausgedachte Werte über einige Monate mit leichten Schwankungen, bei einigen
   Bewohnern Messaufträge und angeordnete Bereiche.
+
+## Personenverzeichnis (Ärzte, Betreuer, Angehörige, Forensik, FOSA)
+Status: freigegeben (Bauplan Schritt 29a; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Das Ärzteverzeichnis wird zum **Personenverzeichnis** und nimmt auch Betreuer, Angehörige
+und die Zuständigen aus Forensik und FOSA auf.
+Warum: Vorgabe Tobi (09.11.2026): Die Personendatenbank, in der aktuell nur Ärzte stehen, muss
+um Angehörige und Betreuer erweitert werden. Für Forensik und FOSA gibt es immer Kontaktdaten zu
+den Zuständigen, auch wegen der Medikamentenbestellung.
+Umfang:
+- Einstellungen → Verwaltung: „Ärzteverzeichnis“ heißt „Personenverzeichnis“. Filter nach
+  **Art:** Arzt/Ärztin · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stelle.
+- Felder: Name, Art, Stelle (Praxis, Büro, Klinik, Ambulanz), **Funktion** (bei Forensik und
+  FOSA: Psychologe/Psychologin, Arzt/Ärztin, Pflege, Sozialdienst; bei Ärzten die Fachrichtung),
+  Telefon, Mobil, E-Mail (Demo nur `@example.org`), Anschrift, Erreichbarkeit, Hinweis,
+  aktiv/inaktiv. Nicht löschen, solange die Person irgendwo eingetragen ist.
+- **Zuordnung zu Bewohnern mit Rolle** (eine Person, viele Bewohner — z. B. ein Berufsbetreuer
+  für mehrere Bewohner): Rolle je Bewohner, z. B. „Mutter“, „Betreuer“, „zuständige
+  Psychologin Forensik“. Im Verzeichnis steht bei jeder Person „zugeordnet zu …“.
+- Überall Auswahl statt Freitext, wie bisher bei den Ärzten; „Person anlegen …“ direkt aus der
+  Auswahl. Angehörige darf anlegen, wer „Bewohner anlegen und bearbeiten“ hat; das übrige
+  Verzeichnis, wer „Personenverzeichnis verwalten“ hat (bisher „Ärzteverzeichnis verwalten“,
+  gleiche Vorbelegung).
+- Vorhandene Daten übernehmen: Ärzte bleiben, die Betreuer aus den Stammdaten (seit 0.31.0)
+  werden Personen der Art „Betreuer“ mit Zuordnung.
+- Demo: ausgedachte Betreuer (einige betreuen mehrere Bewohner), Angehörige für etwa die Hälfte
+  der Bewohner, je eine ausgedachte Forensik-Klinik und FOSA mit Zuständigen.
+
+## Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente
+Status: freigegeben (Bauplan Schritt 30a; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: In der Akte steht, wer für einen Bewohner zuständig ist: der Betreuer, die Forensik oder
+die FOSA (Forensische Ambulanz). Danach richtet sich auch, über wen die Medikamente bestellt
+werden.
+Warum: Vorgabe Tobi (09.11.2026): Bewohner aus der Forensik haben zwar einen Betreuer, solange sie
+noch über die Forensik laufen, ist der Betreuer aber nicht zuständig. Zuständig sind aus der
+Forensik ein Psychologe, ein Arzt und Pflegepersonal; es gibt immer Kontaktdaten, auch wegen der
+Medikamentenbestellung. Forensiker und andere Bewohner werden zum Teil durch die FOSA
+nachbetreut; dann laufen auch die Medikamentenbestellungen über die FOSA.
+Umfang:
+- Reiter „Betreuung“ (Schritt 30), oben der Abschnitt **Zuständigkeit** mit zwei Angaben:
+  - **Forensik:** ja · nein · nicht erfasst. Bei „ja“: Klinik, seit, Status (Freitext, z. B.
+    „Langzeitbeurlaubung“), optional „nächste Überprüfung“ (Marke 8 Wochen vorher), und die
+    **Zuständigen** aus dem Personenverzeichnis: Psychologe/Psychologin, Arzt/Ärztin, Pflege
+    (mehrere möglich), je mit Telefon und E-Mail sichtbar.
+  - **FOSA-Nachsorge:** ja · nein · nicht erfasst. Bei „ja“: Ambulanz, seit, bis (optional) und
+    die Zuständigen der FOSA. Gilt auch für Bewohner, die nicht (mehr) in der Forensik sind.
+- **Betreuer bei Forensik:** Der Betreuer bleibt eingetragen, ist aber mit Wort gekennzeichnet:
+  „nicht zuständig, solange Forensik“ (ausgegraut). Als erste Ansprechpartner stehen dann die
+  Zuständigen der Forensik. Bei FOSA ohne Forensik bleibt der Betreuer zuständig (einfachere
+  Annahme; Tobi kann sie ändern).
+- **Marken** „Forensik“ bzw. „FOSA“ (Hinweis-Farbe, mit Wort) im Akte-Kopf und in den
+  Bewohnerlisten.
+- **Bestellweg der Medikamente** je Bewohner: Forensik · FOSA · Hausarzt/Apotheke · nicht
+  erfasst. Vorschlag nach Zuständigkeit (Forensik → Forensik, sonst FOSA → FOSA, sonst
+  Hausarzt/Apotheke), änderbar, mit Ansprechperson aus dem Personenverzeichnis.
+  - Im Medikamentenplan oben: „Bestellung über: FOSA · <Name>, <Telefon>“.
+  - Knopf **„Bestellung per E-Mail …“**: öffnet das E-Mail-Programm (`mailto:`, `CLAUDE.md`
+    Regel 6) mit Empfänger, Betreff „Medikamentenbestellung <Name>, geb. <Datum>“ und den im
+    Dialog angekreuzten Medikamenten aus dem Plan (Name, Stärke, Form).
+- Überleitungsbogen (Schritt 33) und Abgängigkeitsmeldung (Schritt 34) nehmen Zuständigkeit und
+  Zuständige auf.
+- Demo-Daten: je Bereich zwei Bewohner mit Forensik, drei mit FOSA-Nachsorge (davon einer
+  zusätzlich Forensik); ausgedachte Klinik „Forensische Klinik Musterstadt“ und „FOSA
+  Musterstadt“.

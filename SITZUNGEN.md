@@ -86,3 +86,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Vorschläge 30–32 (offen): Akte-Reiter Betreuer, Krankenkasse, Kostenträger; Reiter „Dokumente“ als digitale Akte; Übernahme der vorhandenen Ordner-Akte (Chat „Programme/Apps“).
 - 09.11.2026 — Schritte 30–32 freigegeben; Dokumente in eigener Ablage von DokuLine (Entscheidung Tobi) (Chat „Programme/Apps“).
 - 09.11.2026 — Schritte 33–36 freigegeben: Überleitungsbogen, Abgängigkeitsmeldung, Schweigepflichtentbindungen, Vitalwerte (Chat „Programme/Apps“).
+- 09.11.2026 — Neu 29a Personenverzeichnis und 30a Zuständigkeit Forensik/FOSA mit Bestellweg; 30 Reiter heißt „Betreuung“; 35 Auskunftsleiste im Akte-Kopf; 36 ohne Bauchumfang, mit allgemeinen Richtwerten (Chat „Programme/Apps“).
