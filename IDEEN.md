@@ -70,6 +70,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
 | 29a | Personenverzeichnis (Ärzte, Betreuer, Angehörige, Forensik, FOSA) | 0.33.3 |
+| 29b | Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter | 0.33.4 |
 | 30 | Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger | 0.34.0 |
 | 30a | Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente | 0.34.1 |
 | 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine | 0.35.0 |
@@ -1488,7 +1489,7 @@ Kostenträger, Betreuer und Dokumente hinein.
 Umfang (Vorschlag):
 - **Reihenfolge der Reiter** (Ergänzung 09.11.2026): Stammdaten · Betreuung · Angehörige · Ärzte ·
   Krankenkasse · Kostenträger · Schweigepflicht (Schritt 35) · Dokumente ·
-  Berichte · Medikamentenplan · Wochenplan · Biografie · Reflexion · HEB (Modul-Reiter wie
+  Medikamentenplan · Wochenplan · Biografie · Reflexion · HEB (Modul-Reiter wie
   „Ausgang“ danach). Die Stammdaten zeigen je eine Kurzzeile („Betreuer: …“, „Krankenkasse: …“,
   „Kostenträger: … bis …“), ein Klick springt in den Reiter.
 - **Drei Zustände** für jede Angabe (`CLAUDE.md`, Regel 5): eingetragen · „keine“ (z. B. keine
@@ -1804,3 +1805,56 @@ Umfang:
 - Demo-Daten: je Bereich zwei Bewohner mit Forensik, drei mit FOSA-Nachsorge (davon einer
   zusätzlich Forensik); ausgedachte Klinik „Forensische Klinik Musterstadt“ und „FOSA
   Musterstadt“.
+
+## Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter
+Status: freigegeben (Bauplan Schritt 29b; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Alle Berichte stehen im Bereich **„Dokumentation“**. Links eine Seitenleiste mit den
+Bewohnern, rechts die Berichte: viele auf einmal, trotzdem übersichtlich, mit Filter. Der Reiter
+„Berichte“ in der Akte entfällt.
+Warum: Vorgabe Tobi (09.11.2026): Den Reiter „Berichte“ braucht es nicht bei jedem Bewohner extra.
+Unter „Dokumentation“ sollen alle Berichte stehen; in einer Seitenleiste kann man jeden Bewohner
+anklicken und sieht alle Berichte zu ihm. Es sollen viele Berichte auf einmal zu sehen sein,
+ohne dass es unübersichtlich wird, und es braucht eine Filterfunktion für besondere Berichte.
+Umfang:
+- **Seitenleiste des Programms:** „Bewohner“ heißt künftig **„Dokumentation“** (gleiche Stelle).
+  Sonst gäbe es wieder zwei fast gleiche Bereiche (Rückmeldung Tobi zu Übersicht/Bewohner,
+  08.11.2026). Die Akte öffnet man weiter per Doppelklick in Übersicht und Dokumentation oder
+  über „Akte öffnen“.
+- **Links die Bewohner-Seitenleiste** (schmal, etwa 260 px, einklappbar): ganz oben **„Alle
+  Bewohner“**, darunter Zimmer und Name je Bewohner, Bereichswahl und Suchfeld darüber. Hinter
+  jedem Namen die **Zahl der Berichte, die zum aktuellen Filter passen**, und eine kleine Marke,
+  wenn darunter „Wichtig“ oder „Übergabe“ offen ist. Pfeiltasten blättern.
+- **Rechts die Berichte als dichte Liste statt Karten:**
+  - Gruppiert nach Tag mit Tagesüberschrift („Montag, 09.11.2026 · 6 Berichte“), neueste oben.
+  - Ein Bericht = eine Zeile mit fester Spaltenfolge: Uhrzeit · Schicht · (bei „Alle
+    Bewohner“: Zimmer und Name) · Marken (Wichtig, Übergabe, Berichtsart, Lebensbereiche als
+    Kurzwort) · Text · Kürzel. Haarlinie zwischen den Berichten, keine Kästen.
+  - Der Text zeigt **höchstens zwei Zeilen**, dann „… mehr“. Ein Klick klappt den Bericht in
+    der Liste auf (kein neues Fenster). Umschalter in der Aktionsleiste: **„kompakt“** (zwei
+    Zeilen, Vorgabe) · **„vollständig“** (ganzer Text).
+  - Nachträge stehen eingerückt direkt unter ihrem Bericht.
+  - „Wichtig“ bekommt am Zeilenanfang ein Wort-Zeichen in Gefahr-Farbe, „Übergabe“ in
+    Hinweis-Farbe; der übrige Bericht bleibt neutral (Farbe sparsam, `docs/gestaltung.md`).
+  - Richtwert: Bei 1920 × 1080 mindestens 15 Berichte im Kompaktmodus ohne Bildlauf.
+- **Filterleiste über der Liste** (gilt für einen Bewohner und für „Alle Bewohner“):
+  - Zeitraum: Heute · 7 Tage (Vorgabe) · 30 Tage · frei wählbar.
+  - Kennzeichen: Wichtig · Übergabe · mit Nachtrag.
+  - **Berichtsart** (neu, siehe unten), Lebensbereich, Schicht, Verfasser (Kürzel).
+  - Suche im Text mit Hervorhebung der Fundstellen.
+  - Gesetzte Filter stehen als kleine Marken mit „×“ über der Liste, dazu „Filter zurücksetzen“.
+  - **Gespeicherte Filter** mit eigenem Namen (z. B. „Krisen der letzten 30 Tage“), als Knöpfe
+    oben in der Filterleiste.
+- **Berichtsart (neu)** beim Schreiben, eine Auswahl, Vorgabe „Alltag“: Alltag · Krise ·
+  Arztkontakt · Visite · Medikation · Konflikt · Ausgang/Abgängigkeit · Angehörigenkontakt ·
+  Betreuer/Behörde · Besonderes Vorkommnis. Liste in den Einstellungen änderbar. Berichte aus
+  Visite und Abgängigkeitsmeldung bekommen ihre Art automatisch. Vorhandene Demo-Berichte
+  erhalten passende Arten.
+- **Aktionsleiste:** „Neuer Bericht …“ (Hauptaktion; für den gewählten Bewohner, bei „Alle
+  Bewohner“ mit Auswahl), „Akte öffnen“, kompakt/vollständig, „Drucken …“ (druckt, was der
+  Filter zeigt).
+- **Akte:** Der Reiter „Berichte“ entfällt. Im Akte-Kopf ein Knopf „Berichte ansehen“, der die
+  Dokumentation mit diesem Bewohner öffnet. HEB, Reflexion, Visite und Übergabe lesen die
+  Berichte weiter wie bisher.
+- Gilt anstelle der rechten Seite aus Schritt 26j (Bewohnerliste mit Berichten); die Liste links
+  wird zur schmalen Seitenleiste.

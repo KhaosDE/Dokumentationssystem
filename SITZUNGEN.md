@@ -88,3 +88,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Schritte 33–36 freigegeben: Überleitungsbogen, Abgängigkeitsmeldung, Schweigepflichtentbindungen, Vitalwerte (Chat „Programme/Apps“).
 - 09.11.2026 — Neu 29a Personenverzeichnis und 30a Zuständigkeit Forensik/FOSA mit Bestellweg; 30 Reiter heißt „Betreuung“; 35 Auskunftsleiste im Akte-Kopf; 36 ohne Bauchumfang, mit allgemeinen Richtwerten (Chat „Programme/Apps“).
 - 09.11.2026 — Schritt 30: eigene Reiter „Angehörige“ und „Ärzte“ (Hausarzt, Psychiater, weitere); 29a: Bereich „Verzeichnisse“ mit eigener Liste je Gruppe (Chat „Programme/Apps“).
+- 09.11.2026 — Schritt 29b freigegeben: Bereich „Dokumentation“ mit Bewohner-Seitenleiste, kompakter Berichtsliste und Filter; Reiter „Berichte“ in der Akte entfällt (Chat „Programme/Apps“).
