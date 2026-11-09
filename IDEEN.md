@@ -1752,7 +1752,7 @@ Umfang:
   Bewohnern Messaufträge und angeordnete Bereiche.
 
 ## Personenverzeichnis (Ärzte, Betreuer, Angehörige, Forensik, FOSA)
-Status: freigegeben (Bauplan Schritt 29a; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.4)
 Datum: 09.11.2026
 Was: Das Ärzteverzeichnis wird zum **Personenverzeichnis** und nimmt auch Betreuer, Angehörige
 und die Zuständigen aus Forensik und FOSA auf.

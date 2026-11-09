@@ -111,7 +111,13 @@ public sealed class Hauptfenster : Form
         Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
         Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Einstellungen"] = Einstellungsseite;
-        Einstellungsseite.Geaendert += () => { if (AktiverBereich == "Einstellungen") Kopf.TexteSetzen(Einstellungsseite.KopfText, "Einstellungen"); };
+        Einstellungsseite.Geaendert += () =>
+        {
+            if (AktiverBereich != "Einstellungen") return;
+            Kopf.TexteSetzen(Einstellungsseite.KopfText, "Einstellungen");
+            Kopf.KnoepfeSetzen(Einstellungsseite.Knoepfe);   // Schritt 29a: „Verzeichnisse“ hat eine Aktionsleiste
+        };
+        Einstellungsseite.AkteGewuenscht += id => { BereichWaehlen("Bewohner"); Bewohner.AkteZeigen(id); };
         Einstellungsseite.LogoGeaendert += () => Kopf.LogoSetzen(Einstellungen.LogoPfad());
         Einstellungsseite.BereichGeaendert += () => { ArbeitsplatzAnzeigen(); AufgabenZaehlen(); };
         Einstellungsseite.SchichtzeitenGeaendert += AufgabenZaehlen;
@@ -390,7 +396,7 @@ public sealed class Hauptfenster : Form
         {
             Einstellungsseite.Zeigen();
             Kopf.TexteSetzen(Einstellungsseite.KopfText, "Einstellungen");
-            Kopf.KnoepfeSetzen();
+            Kopf.KnoepfeSetzen(Einstellungsseite.Knoepfe);
             return;
         }
         if (schluessel == "Visiten")

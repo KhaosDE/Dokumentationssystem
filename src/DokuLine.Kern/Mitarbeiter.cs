@@ -68,7 +68,7 @@ public static class Funktionen
         (RechteVerwalten, "Rechte verwalten"),
         (Module, "Module ein- und ausschalten"),
         (EinstellungenBereich, "Einstellungen des Bereichs"),
-        (Aerzte, "Ärzteverzeichnis verwalten"),
+        (Aerzte, "Personenverzeichnis verwalten"),
         (DemoZuruecksetzen, "Demo-Daten zurücksetzen"),
     ];
 

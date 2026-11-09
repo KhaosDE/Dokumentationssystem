@@ -1,0 +1,604 @@
+{
+ "hinweis": "Ausgedachte Personen für das Personenverzeichnis (Schritt 29a): Angehörige für etwa die Hälfte der Bewohner (Nachname wie der Bewohner), je eine ausgedachte Forensik-Klinik und FOSA mit Zuständigen, sonstige Stellen. Die Betreuer kommen aus betreuer.json (werden beim Laden übernommen). E-Mail-Adressen nur mit @example.org, Telefonnummern erkennbar ausgedacht.",
+ "personen": [
+  {
+   "gruppe": "angehoerige",
+   "name": "Hanna Ahorn",
+   "telefon": "0000 800 100",
+   "mobil": "0000 900 200",
+   "email": "hanna.ahorn@example.org",
+   "anschrift": "Musterweg 1, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "Besuch nur nach Absprache",
+   "zuordnungen": [
+    {
+     "bewohner": "Ahorn",
+     "rolle": "Mutter"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Otto Clematis",
+   "telefon": "0000 802 102",
+   "mobil": "0000 902 202",
+   "email": "",
+   "anschrift": "Musterweg 3, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Clematis",
+     "rolle": "Bruder"
+    },
+    {
+     "bewohner": "Birke",
+     "rolle": "Bekannte"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Lotte Eiche",
+   "telefon": "0000 804 104",
+   "mobil": "0000 904 204",
+   "email": "lotte.eiche@example.org",
+   "anschrift": "Musterweg 5, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Eiche",
+     "rolle": "Tochter"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Fritz Ginster",
+   "telefon": "0000 806 106",
+   "mobil": "0000 906 206",
+   "email": "",
+   "anschrift": "Musterweg 7, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Ginster",
+     "rolle": "Onkel"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Marta Immergrün",
+   "telefon": "0000 808 108",
+   "mobil": "0000 908 208",
+   "email": "marta.immergruen@example.org",
+   "anschrift": "Musterweg 9, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Immergrün",
+     "rolle": "Partnerin"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Max Tagetes",
+   "telefon": "0000 810 110",
+   "mobil": "0000 910 210",
+   "email": "",
+   "anschrift": "Musterweg 11, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "Besuch nur nach Absprache",
+   "zuordnungen": [
+    {
+     "bewohner": "Tagetes",
+     "rolle": "Vater"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Paula Löwenzahn",
+   "telefon": "0000 812 112",
+   "mobil": "0000 912 212",
+   "email": "paula.loewenzahn@example.org",
+   "anschrift": "Musterweg 13, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Löwenzahn",
+     "rolle": "Schwester"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Emil Oregano",
+   "telefon": "0000 814 114",
+   "mobil": "0000 914 214",
+   "email": "",
+   "anschrift": "Musterweg 15, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Oregano",
+     "rolle": "Sohn"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Thea Pflaume",
+   "telefon": "0000 816 116",
+   "mobil": "0000 916 216",
+   "email": "thea.pflaume@example.org",
+   "anschrift": "Musterweg 17, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Pflaume",
+     "rolle": "Tante"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Konrad Tamariske",
+   "telefon": "0000 818 118",
+   "mobil": "0000 918 218",
+   "email": "",
+   "anschrift": "Musterweg 19, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Tamariske",
+     "rolle": "Partner"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Erna Tanne",
+   "telefon": "0000 820 120",
+   "mobil": "0000 920 220",
+   "email": "erna.tanne@example.org",
+   "anschrift": "Musterweg 21, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "Besuch nur nach Absprache",
+   "zuordnungen": [
+    {
+     "bewohner": "Tanne",
+     "rolle": "Mutter"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Willi Rettich",
+   "telefon": "0000 822 122",
+   "mobil": "0000 922 222",
+   "email": "",
+   "anschrift": "Musterweg 23, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Rettich",
+     "rolle": "Bruder"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Hanna Petersilie",
+   "telefon": "0000 824 124",
+   "mobil": "0000 924 224",
+   "email": "hanna.petersilie@example.org",
+   "anschrift": "Musterweg 25, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Petersilie",
+     "rolle": "Tochter"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Otto Pfingstrose",
+   "telefon": "0000 826 126",
+   "mobil": "0000 926 226",
+   "email": "",
+   "anschrift": "Musterweg 27, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Pfingstrose",
+     "rolle": "Onkel"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Lotte Nussbaum",
+   "telefon": "0000 828 128",
+   "mobil": "0000 928 228",
+   "email": "lotte.nussbaum@example.org",
+   "anschrift": "Musterweg 29, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Nussbaum",
+     "rolle": "Partnerin"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Fritz Primel",
+   "telefon": "0000 830 130",
+   "mobil": "0000 930 230",
+   "email": "",
+   "anschrift": "Musterweg 31, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "Besuch nur nach Absprache",
+   "zuordnungen": [
+    {
+     "bewohner": "Primel",
+     "rolle": "Vater"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Marta Waldmeister",
+   "telefon": "0000 832 132",
+   "mobil": "0000 932 232",
+   "email": "marta.waldmeister@example.org",
+   "anschrift": "Musterweg 33, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Waldmeister",
+     "rolle": "Schwester"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Max Lavendel",
+   "telefon": "0000 834 134",
+   "mobil": "0000 934 234",
+   "email": "",
+   "anschrift": "Musterweg 35, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Lavendel",
+     "rolle": "Sohn"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Paula Mohn",
+   "telefon": "0000 836 136",
+   "mobil": "0000 936 236",
+   "email": "paula.mohn@example.org",
+   "anschrift": "Musterweg 37, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Mohn",
+     "rolle": "Tante"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Emil Sanddorn",
+   "telefon": "0000 838 138",
+   "mobil": "0000 938 238",
+   "email": "",
+   "anschrift": "Musterweg 39, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Sanddorn",
+     "rolle": "Partner"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Thea Wermut",
+   "telefon": "0000 840 140",
+   "mobil": "0000 940 240",
+   "email": "thea.wermut@example.org",
+   "anschrift": "Musterweg 41, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "Besuch nur nach Absprache",
+   "zuordnungen": [
+    {
+     "bewohner": "Wermut",
+     "rolle": "Mutter"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Konrad Zeder",
+   "telefon": "0000 842 142",
+   "mobil": "0000 942 242",
+   "email": "",
+   "anschrift": "Musterweg 43, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Zeder",
+     "rolle": "Bruder"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Erna Mistel",
+   "telefon": "0000 844 144",
+   "mobil": "0000 944 244",
+   "email": "erna.mistel@example.org",
+   "anschrift": "Musterweg 45, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Mistel",
+     "rolle": "Tochter"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Willi Lilie",
+   "telefon": "0000 846 146",
+   "mobil": "0000 946 246",
+   "email": "",
+   "anschrift": "Musterweg 47, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Lilie",
+     "rolle": "Onkel"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Hanna Paprika",
+   "telefon": "0000 848 148",
+   "mobil": "0000 948 248",
+   "email": "hanna.paprika@example.org",
+   "anschrift": "Musterweg 49, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Paprika",
+     "rolle": "Partnerin"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Otto Ysop",
+   "telefon": "0000 850 150",
+   "mobil": "0000 950 250",
+   "email": "",
+   "anschrift": "Musterweg 51, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "Besuch nur nach Absprache",
+   "zuordnungen": [
+    {
+     "bewohner": "Ysop",
+     "rolle": "Vater"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Lotte Magnolie",
+   "telefon": "0000 852 152",
+   "mobil": "0000 952 252",
+   "email": "lotte.magnolie@example.org",
+   "anschrift": "Musterweg 53, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Magnolie",
+     "rolle": "Schwester"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Fritz Seerose",
+   "telefon": "0000 854 154",
+   "mobil": "0000 954 254",
+   "email": "",
+   "anschrift": "Musterweg 55, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Seerose",
+     "rolle": "Sohn"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Marta Lupine",
+   "telefon": "0000 856 156",
+   "mobil": "0000 956 256",
+   "email": "marta.lupine@example.org",
+   "anschrift": "Musterweg 57, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Lupine",
+     "rolle": "Tante"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Max Vanille",
+   "telefon": "0000 858 158",
+   "mobil": "0000 958 258",
+   "email": "",
+   "anschrift": "Musterweg 59, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Vanille",
+     "rolle": "Partner"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Paula Minze",
+   "telefon": "0000 860 160",
+   "mobil": "0000 960 260",
+   "email": "paula.minze@example.org",
+   "anschrift": "Musterweg 61, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "Besuch nur nach Absprache",
+   "zuordnungen": [
+    {
+     "bewohner": "Minze",
+     "rolle": "Mutter"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Emil Reseda",
+   "telefon": "0000 862 162",
+   "mobil": "0000 962 262",
+   "email": "",
+   "anschrift": "Musterweg 63, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Reseda",
+     "rolle": "Bruder"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Thea Quitte",
+   "telefon": "0000 864 164",
+   "mobil": "0000 964 264",
+   "email": "thea.quitte@example.org",
+   "anschrift": "Musterweg 65, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Quitte",
+     "rolle": "Tochter"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Konrad Tulpe",
+   "telefon": "0000 866 166",
+   "mobil": "0000 966 266",
+   "email": "",
+   "anschrift": "Musterweg 67, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Tulpe",
+     "rolle": "Onkel"
+    }
+   ]
+  },
+  {
+   "gruppe": "angehoerige",
+   "name": "Erna Vogelbeere",
+   "telefon": "0000 868 168",
+   "mobil": "0000 968 268",
+   "email": "erna.vogelbeere@example.org",
+   "anschrift": "Musterweg 69, 00000 Musterstadt (ausgedacht)",
+   "hinweis": "",
+   "zuordnungen": [
+    {
+     "bewohner": "Vogelbeere",
+     "rolle": "Partnerin"
+    }
+   ]
+  },
+  {
+   "gruppe": "forensik",
+   "name": "Dipl.-Psych. Hering (ausgedacht)",
+   "fachrichtung": "Psychologe/Psychologin",
+   "praxis": "Forensische Klinik Musterstadt (ausgedacht)",
+   "telefon": "0000 610 100",
+   "email": "hering@example.org",
+   "erreichbarkeit": "Mo–Fr 8–15 Uhr"
+  },
+  {
+   "gruppe": "forensik",
+   "name": "Dr. Stint (ausgedacht)",
+   "fachrichtung": "Arzt/Ärztin",
+   "praxis": "Forensische Klinik Musterstadt (ausgedacht)",
+   "telefon": "0000 610 200",
+   "email": "stint@example.org",
+   "hinweis": "Medikamentenbestellung über die Klinikapotheke"
+  },
+  {
+   "gruppe": "forensik",
+   "name": "Pfleger Zander (ausgedacht)",
+   "fachrichtung": "Pflege",
+   "praxis": "Forensische Klinik Musterstadt (ausgedacht)",
+   "telefon": "0000 610 300"
+  },
+  {
+   "gruppe": "fosa",
+   "name": "Dipl.-Psych. Karausche (ausgedacht)",
+   "fachrichtung": "Psychologe/Psychologin",
+   "praxis": "FOSA Musterstadt (ausgedacht)",
+   "telefon": "0000 620 100",
+   "email": "karausche@example.org"
+  },
+  {
+   "gruppe": "fosa",
+   "name": "Dr. Barbe (ausgedacht)",
+   "fachrichtung": "Arzt/Ärztin",
+   "praxis": "FOSA Musterstadt (ausgedacht)",
+   "telefon": "0000 620 200",
+   "email": "barbe@example.org",
+   "erreichbarkeit": "Di und Do 9–12 Uhr"
+  },
+  {
+   "gruppe": "fosa",
+   "name": "Frau Rotauge (ausgedacht)",
+   "fachrichtung": "Sozialdienst",
+   "praxis": "FOSA Musterstadt (ausgedacht)",
+   "telefon": "0000 620 300"
+  },
+  {
+   "gruppe": "sonstige",
+   "name": "Sozialamt Musterstadt (ausgedacht)",
+   "praxis": "Abteilung Eingliederungshilfe",
+   "telefon": "0000 630 100",
+   "email": "eingliederung@example.org"
+  },
+  {
+   "gruppe": "sonstige",
+   "name": "Werkstatt am Fluss (ausgedacht)",
+   "praxis": "Werkstatt für Menschen mit Behinderung",
+   "telefon": "0000 630 200",
+   "erreichbarkeit": "Mo–Fr 7:30–15 Uhr"
+  },
+  {
+   "gruppe": "sonstige",
+   "name": "Apotheke am Markt (ausgedacht)",
+   "praxis": "Apotheke",
+   "telefon": "0000 630 300",
+   "email": "apotheke-markt@example.org"
+  }
+ ]
+}

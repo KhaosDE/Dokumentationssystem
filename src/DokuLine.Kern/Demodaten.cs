@@ -593,11 +593,47 @@ public static class Demodaten
         public bool Aktiv { get; set; } = true;
     }
 
-    public static List<Arzt> Aerzte() =>
-        Lesen<AerzteDatei>("aerzte.json").Aerzte.Select(a => new Arzt
+    public static List<Person> Aerzte() =>
+        Lesen<AerzteDatei>("aerzte.json").Aerzte.Select(a => new Person
         {
             Name = a.Name, Fachrichtung = a.Fachrichtung, Praxis = a.Praxis, Telefon = a.Telefon, Email = a.Email, Aktiv = a.Aktiv,
         }).ToList();
+
+    // ----- Personenverzeichnis (Schritt 29a) -----
+
+    private sealed class PersonenDatei
+    {
+        public List<PersonDaten> Personen { get; set; } = [];
+    }
+
+    public sealed class PersonDaten
+    {
+        public string Gruppe { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Art { get; set; } = "";
+        public string Fachrichtung { get; set; } = "";
+        public string Praxis { get; set; } = "";
+        public string Telefon { get; set; } = "";
+        public string Mobil { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Anschrift { get; set; } = "";
+        public string Erreichbarkeit { get; set; } = "";
+        public string Hinweis { get; set; } = "";
+        public List<ZuordnungDaten> Zuordnungen { get; set; } = [];
+    }
+
+    public sealed class ZuordnungDaten
+    {
+        public string Bewohner { get; set; } = "";   // Nachname
+        public string Rolle { get; set; } = "";
+    }
+
+    public static List<(Person Person, List<(string Nachname, string Rolle)> Zuordnungen)> Personen() =>
+        Lesen<PersonenDatei>("personen.json").Personen.Select(p => (new Person
+        {
+            Gruppe = PersonRegeln.AusSchluessel(p.Gruppe), Name = p.Name, Art = p.Art, Fachrichtung = p.Fachrichtung, Praxis = p.Praxis,
+            Telefon = p.Telefon, Mobil = p.Mobil, Email = p.Email, Anschrift = p.Anschrift, Erreichbarkeit = p.Erreichbarkeit, Hinweis = p.Hinweis,
+        }, p.Zuordnungen.Select(z => (z.Bewohner, z.Rolle)).ToList())).ToList();
 
     // ----- Betreuer (Schritt 28) -----
 

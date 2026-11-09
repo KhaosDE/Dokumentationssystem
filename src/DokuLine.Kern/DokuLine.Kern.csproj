@@ -21,6 +21,7 @@
     <EmbeddedResource Include="..\..\daten\demo\bewohner.json" LogicalName="DokuLine.Kern.Demo.bewohner.json" />
     <EmbeddedResource Include="..\..\daten\demo\zimmer.json" LogicalName="DokuLine.Kern.Demo.zimmer.json" />
     <EmbeddedResource Include="..\..\daten\demo\aerztlich.json" LogicalName="DokuLine.Kern.Demo.aerztlich.json" />
+    <EmbeddedResource Include="..\..\daten\demo\personen.json" LogicalName="DokuLine.Kern.Demo.personen.json" />
     <EmbeddedResource Include="..\..\daten\demo\berichte.json" LogicalName="DokuLine.Kern.Demo.berichte.json" />
     <EmbeddedResource Include="..\..\daten\demo\aufgaben.json" LogicalName="DokuLine.Kern.Demo.aufgaben.json" />
     <EmbeddedResource Include="..\..\daten\demo\nachrichten.json" LogicalName="DokuLine.Kern.Demo.nachrichten.json" />

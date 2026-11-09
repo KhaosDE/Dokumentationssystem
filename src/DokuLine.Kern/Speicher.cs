@@ -738,6 +738,29 @@ public sealed partial class Speicher : IDisposable
         """
         ALTER TABLE betreuer ADD COLUMN keine INTEGER NOT NULL DEFAULT 0;
         """,
+        // 30 – Personenverzeichnis (Schritt 29a): Das Ärzteverzeichnis nimmt auch Betreuer, Angehörige, Forensik, FOSA und
+        // sonstige Stellen auf (Feld „gruppe“); Namen je Verzeichnis eindeutig; Zuordnung zu Bewohnern mit Rolle.
+        """
+        ALTER TABLE aerzte ADD COLUMN gruppe TEXT NOT NULL DEFAULT 'arzt'
+            CHECK (gruppe IN ('arzt', 'betreuer', 'angehoerige', 'forensik', 'fosa', 'sonstige'));
+        ALTER TABLE aerzte ADD COLUMN art TEXT NOT NULL DEFAULT '';
+        ALTER TABLE aerzte ADD COLUMN mobil TEXT NOT NULL DEFAULT '';
+        ALTER TABLE aerzte ADD COLUMN anschrift TEXT NOT NULL DEFAULT '';
+        ALTER TABLE aerzte ADD COLUMN erreichbarkeit TEXT NOT NULL DEFAULT '';
+        ALTER TABLE aerzte ADD COLUMN hinweis TEXT NOT NULL DEFAULT '';
+        DROP INDEX aerzte_name;
+        CREATE UNIQUE INDEX personen_name ON aerzte (gruppe, name COLLATE NOCASE);
+        CREATE TABLE person_zuordnungen (
+            id          INTEGER PRIMARY KEY,
+            person_id   INTEGER NOT NULL REFERENCES aerzte(id) ON DELETE CASCADE,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            rolle       TEXT NOT NULL DEFAULT '',
+            geaendert   TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            UNIQUE (person_id, bewohner_id, rolle)
+        );
+        CREATE INDEX person_zuordnungen_bewohner ON person_zuordnungen (bewohner_id);
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -760,6 +783,7 @@ public sealed partial class Speicher : IDisposable
             Ausfuehren("PRAGMA foreign_keys = ON");
             Aufbauen();
             GrundbestandPruefen();
+            PersonenPruefen();
         }
         catch (SqliteException e)
         {
@@ -907,12 +931,12 @@ public sealed partial class Speicher : IDisposable
              therapie = Meta(DemoTherapie) is null || Meta(DemoTherapieAnbieter) is null || Meta(DemoTherapieTag) is null, wochenplan = Meta(DemoWochenplan) is null,
              kalender = Meta(DemoKalender) is null || Meta(DemoKalenderHaus) is null, fahrten = Meta(DemoFahrten) is null,
              standard = Meta(DemoStandardaufgaben) is null, visiten = Meta(DemoVisiten) is null, aerzte = Meta(DemoAerzte) is null,
-             aerztlich = Meta(DemoAerztlich) is null, betreuer = Meta(DemoBetreuer) is null, bedarf = Meta(DemoBedarf) is null,
+             aerztlich = Meta(DemoAerztlich) is null, betreuer = Meta(DemoBetreuer) is null, personen = Meta(DemoPersonen) is null, bedarf = Meta(DemoBedarf) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !bedarf && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !modulNeu)
             return false;
         // Vorher eine Kopie (0.33.2): Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote in
         // 0.29.15). Bisher gab es die Kopie nur bei den großen Umstellungen oben.
@@ -934,6 +958,7 @@ public sealed partial class Speicher : IDisposable
         if (aerztlich) DemoAerztlichEinfuegen(transaktion);
         if (visiten) DemoVisitenEinfuegen(transaktion);
         if (betreuer) DemoBetreuerEinfuegen(transaktion);
+        if (personen || betreuer) DemoPersonenEinfuegen(transaktion);   // übernimmt auch die Betreuer
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
@@ -985,6 +1010,7 @@ public sealed partial class Speicher : IDisposable
             DemoAerztlichEinfuegen(transaktion);
             DemoVisitenEinfuegen(transaktion);
             DemoBetreuerEinfuegen(transaktion);
+            DemoPersonenEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);

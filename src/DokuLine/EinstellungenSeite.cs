@@ -14,7 +14,7 @@ public sealed class EinstellungenSeite : Panel
     public static readonly (string Name, string Symbol)[] GruppenListe =
     [
         ("Persönlich", ""), ("Wohnbereich", ""), ("Module", ""), ("Aufgaben", ""), ("Fahrzeuge", ""),
-        ("Vorlagen", ""), ("Medikamente", ""), ("Verwaltung", ""), ("System", ""), ("Über", ""),
+        ("Vorlagen", ""), ("Medikamente", ""), ("Verzeichnisse", ""), ("Verwaltung", ""), ("System", ""), ("Über", ""),
     ];
     private const int LogoBreite = 160, LogoHoehe = 64;
 
@@ -32,7 +32,12 @@ public sealed class EinstellungenSeite : Panel
     public List<SeitenleistenEintrag> Gruppen { get; } = [];
     public List<EinstellungKarte> Karten { get; } = [];
     public string AktiveGruppe { get; private set; } = "Persönlich";
-    public string KopfText => $"{AktiveGruppe} · Änderungen gelten sofort";
+    public string KopfText => AktiveGruppe == VerzeichnisGruppe ? Verzeichnis.KopfText : $"{AktiveGruppe} · Änderungen gelten sofort";
+    // Schritt 29a: „Verzeichnisse“ zeigt statt Karten das Personenverzeichnis; dessen Knöpfe stehen in der Aktionsleiste.
+    public const string VerzeichnisGruppe = "Verzeichnisse";
+    public VerzeichnisAnsicht Verzeichnis { get; }
+    public Button[] Knoepfe => AktiveGruppe == VerzeichnisGruppe ? Verzeichnis.Knoepfe : [];
+    public event Action<long>? AkteGewuenscht;
 
     // Persönlich
     public Label Angemeldet { get; } = new() { AutoSize = true, Font = Stil.Fett, UseMnemonic = false };
@@ -71,7 +76,6 @@ public sealed class EinstellungenSeite : Panel
     public Button MitarbeiterKnopf { get; } = Stil.NebenKnopf("Mitarbeiter …");
     public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche und Positionen …");
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
-    public Button AerzteKnopf { get; } = Stil.NebenKnopf("Ärzteverzeichnis …");   // Schritt 26b
     // System, Über
     public Label DatenbankOrt { get; } = new() { AutoSize = true, MaximumSize = new Size(360, 0), UseMnemonic = false };
     public Button OrdnerKnopf { get; } = Stil.NebenKnopf("Gemeinsamen Ordner wählen …");
@@ -118,6 +122,10 @@ public sealed class EinstellungenSeite : Panel
         Treffer.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter && Treffer.SelectedItem is string t) Springen(t.Split(" · ")[0]); };
         links.Layout += (_, _) => LinksAnordnen();
         rechts.Controls.Add(titel);
+        Verzeichnis = new VerzeichnisAnsicht(speicher) { Visible = false };
+        Verzeichnis.AkteGewuenscht += id => AkteGewuenscht?.Invoke(id);
+        Verzeichnis.Geaendert += () => { if (AktiveGruppe == VerzeichnisGruppe) Geaendert?.Invoke(); };
+        rechts.Controls.Add(Verzeichnis);
         rechts.Layout += (_, _) => RechtsAnordnen();
         Controls.AddRange([rechts, links]);
 
@@ -256,11 +264,9 @@ public sealed class EinstellungenSeite : Panel
         MitarbeiterKnopf.Click += (_, _) => FensterZeigen(new MitarbeiterFenster(speicher));
         ListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher));
         RechteKnopf.Click += (_, _) => FensterZeigen(new RechteFenster(speicher));
-        AerzteKnopf.Click += (_, _) => { using var f = new AerzteFenster(speicher); Dialog.Zeigen(f, FindForm()); };
         Karte("Verwaltung", "Mitarbeiter", "Mitarbeiter mit Bereichen, Positionen und Qualifikation (Assistenzkraft oder Fachkraft). Die Bereichsleitung verwaltet ihren Bereich.", MitarbeiterKnopf);
         Karte("Verwaltung", "Bereiche und Positionen", "Listen zum Zuordnen; stilllegen statt löschen, solange jemand zugeordnet ist.", ListenKnopf);
         Karte("Verwaltung", "Rechte", "Tabelle: welche Position was darf, je Funktion „nur Fachkräfte“. Ohne Recht nur ansehen.", RechteKnopf);
-        Karte("Verwaltung", "Ärzteverzeichnis", "Ausgedachte Ärztinnen und Ärzte (Name, Fachrichtung, Praxis, Telefon, E-Mail), aus denen bei Verordnung, Visite und Termin gewählt wird. Nie löschen, nur inaktiv. Ohne Recht nur ansehen.", AerzteKnopf);
 
         // System (folgenreich: fragt vorher)
         OrdnerKnopf.Click += (_, _) => { if (OrdnerWaehlen() is string ordner) OrdnerSetzen(ordner); };
@@ -343,6 +349,8 @@ public sealed class EinstellungenSeite : Panel
         foreach (var g in Gruppen) g.Aktiv = g.Text == gruppe;
         titel.Text = gruppe;
         foreach (var k in Karten) k.Visible = k.Gruppe == gruppe;
+        Verzeichnis.Visible = gruppe == VerzeichnisGruppe;
+        if (Verzeichnis.Visible) Verzeichnis.Aktualisieren();
         rechts.AutoScrollPosition = Point.Empty;
         rechts.PerformLayout();
         Geaendert?.Invoke();
@@ -608,6 +616,13 @@ public sealed class EinstellungenSeite : Panel
             k.SetBounds(rand, y, breite, k.Height);
             k.PerformLayout();
             y = k.Bottom + S(Stil.AbstandKlein);
+        }
+        if (Verzeichnis.Visible)
+        {
+            // Füllt die Fläche (ohne Bildlauf der Seite; die Liste rollt selbst).
+            int breiteVoll = Math.Max(100, rechts.ClientSize.Width - 2 * rand);
+            Verzeichnis.SetBounds(rand, y, breiteVoll, Math.Max(S(240), rechts.ClientSize.Height - y - rand));
+            y = Verzeichnis.Bottom;
         }
         rechts.AutoScrollMinSize = new Size(0, y - rechts.AutoScrollPosition.Y + rand);
     }
