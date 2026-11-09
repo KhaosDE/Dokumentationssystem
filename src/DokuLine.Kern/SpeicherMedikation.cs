@@ -22,6 +22,8 @@ public sealed partial class Speicher
         if (v.Id != 0) throw new InvalidOperationException("Verordnungen werden nicht überschrieben – Änderungen sind eigene Einträge.");
         using var transaktion = db.BeginTransaction();
         long id = VerordnungEinfuegen(v, transaktion);
+        var neu = MedikationsAenderungen.Alle(v with { Id = id, Medikament = m.Anzeige }).First();
+        AenderungUebergeben(neu, v.Kuerzel, v.Erstellt, transaktion);
         transaktion.Commit();
         MedikationGeaendert?.Invoke();
         return Verordnung(id)!;
@@ -33,10 +35,28 @@ public sealed partial class Speicher
         MedikationRegeln.Pruefen(v, a);
         using var transaktion = db.BeginTransaction();
         AenderungEinfuegen(verordnungId, a, transaktion);
+        var ab = a.Art == AenderungArt.Stufenplan && a.Stufen.Count > 0 ? a.Stufen[0].Ab : a.Von;
+        AenderungUebergeben(new Medikamentenaenderung(v.BewohnerId, v.Id, v.Medikament, MedikationsAenderungen.Text(v, a), ab,
+            a.Anordnung.Arzt, a.Erstellt), a.Kuerzel, a.Erstellt, transaktion);
         transaktion.Commit();
         MedikationGeaendert?.Invoke();
         return Verordnung(verordnungId)!;
     }
+
+    // Jede Änderung wird ein wichtiger Bericht (Art „Medikation“) mit Übergabe – bis alle drei Schichten sie gelesen
+    // haben, höchstens 7 Tage.
+    private void AenderungUebergeben(Medikamentenaenderung a, string kuerzel, DateTime zeit, SqliteTransaction transaktion)
+    {
+        long berichtId = BerichtEinfuegen(new Bericht
+        {
+            BewohnerId = a.BewohnerId, Zeitpunkt = zeit, Schicht = BerichtRegeln.SchichtZu(zeit), Verfasser = kuerzel, Bereiche = [5],
+            Text = a.UebergabeText, Erfasst = zeit, Art = DokuRegeln.ArtMedikation, Wichtig = true,
+        }, transaktion);
+        UebergabeEinfuegen(a.BewohnerId, berichtId, "", zeit, kuerzel, zeit.AddDays(MedikationsAenderungen.Tage), transaktion);
+    }
+
+    // Die Änderungen der letzten sieben Tage aller Bewohner (Marken, Übersicht).
+    public List<Medikamentenaenderung> Medikamentenaenderungen(DateOnly heute) => MedikationsAenderungen.Liste(VerordnungenLesen(""), heute);
 
     private long VerordnungEinfuegen(Verordnung v, SqliteTransaction transaktion)
     {

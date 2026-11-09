@@ -59,7 +59,13 @@ public static class UebergabeRegeln
         }
     }
 
-    public static bool Offen(Uebergabe u, DateTime jetzt) => u.Erledigt is null && (u.GiltBis is null || u.GiltBis >= jetzt);
+    public static bool Offen(Uebergabe u, DateTime jetzt) =>
+        u.Erledigt is null && (u.GiltBis is null || u.GiltBis >= jetzt) && !(Medikation(u) && AlleSchichtenGelesen(u));
+
+    // Medikamentenänderungen bleiben stehen, bis jede der drei Schichten sie gelesen hat (höchstens 7 Tage: GiltBis).
+    public static bool Medikation(Uebergabe u) => u.Bericht is Bericht b && DokuRegeln.Marken(b).Contains(DokuMarke.MedikationGeaendert);
+
+    public static bool AlleSchichtenGelesen(Uebergabe u) => u.Gelesen.Select(g => BerichtRegeln.SchichtZu(g.Zeit)).Distinct().Count() >= 3;
 
     public static bool LaeuftHeuteAb(Uebergabe u, DateTime jetzt) => Offen(u, jetzt) && u.GiltBis?.Date == jetzt.Date;
 

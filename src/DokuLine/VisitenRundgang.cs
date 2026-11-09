@@ -46,6 +46,12 @@ public sealed class VisitenRundgang : Panel
     public Button AbschliessenKnopf { get; } = Stil.HauptKnopf("Visite abschließen …");
     public Label Name_ { get; } = new() { AutoSize = true, Font = Stil.Ueberschrift, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false };
     public Label Allergie { get; } = new() { AutoSize = true, Font = Stil.Fett, BackColor = Stil.Seite, UseMnemonic = false };
+    // „Medikation geändert: …“ (sieben Tage), leer, wenn nichts geändert wurde.
+    public Label MedikationGeaendert { get; } = new()
+    {
+        AutoSize = true, Font = Stil.Fett, BackColor = Stil.MedikationGeaendert.Flaeche, ForeColor = Stil.MedikationGeaendert.Text,
+        Padding = new Padding(Stil.AbstandMini), UseMnemonic = false,
+    };
     private bool diagnosenZeigen;
     public Label Diagnosen { get; } = new() { AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite, UseMnemonic = false };
     public DataGridView Tabelle { get; } = MedikationAnsicht.RegelTabelleBauen();
@@ -99,7 +105,7 @@ public sealed class VisitenRundgang : Panel
         Liste.SelectedIndexChanged += (_, _) => { if (!fuellt && Liste.SelectedIndices.Count == 1 && Liste.SelectedIndices[0] != Aktuell) Waehlen(Liste.SelectedIndices[0]); };
         Tabelle.AccessibleName = "Aktuelle Medikation";
         BedarfTabelle.AccessibleName = "Medikation bei Bedarf";
-        rechts.Controls.AddRange([Name_, Allergie, Diagnosen, Fehler, medikationTitel, Tabelle, KeineMedikation, bedarfTitel, BedarfTabelle, LetzteVisite, OffeneAufgaben, eingabeTitel, weiter]);
+        rechts.Controls.AddRange([Name_, Allergie, MedikationGeaendert, Diagnosen, Fehler, medikationTitel, Tabelle, KeineMedikation, bedarfTitel, BedarfTabelle, LetzteVisite, OffeneAufgaben, eingabeTitel, weiter]);
         rechts.Layout += (_, _) => RechtsAnordnen();
         Controls.AddRange([kopfleiste, Liste, rechts]);
         ListeFuellen();
@@ -188,7 +194,11 @@ public sealed class VisitenRundgang : Panel
         Diagnosen.Visible = diagnosenZeigen;
         Diagnosen.Text = diagnosenZeigen ? $"Diagnosen: {DiagnoseRegeln.Kurz(speicher.Diagnosen(id))}" : "";
         var heute = DateOnly.FromDateTime(Jetzt());
-        MedikationAnsicht.TabellenFuellen(Tabelle, BedarfTabelle, speicher.Verordnungen(id).Select(v => MedikationRegeln.Stand(v, heute)), abgesetzteZeigen: false);
+        var verordnungen = speicher.Verordnungen(id);
+        var geaendert = MedikationsAenderungen.Liste(verordnungen, heute);
+        MedikationGeaendert.Text = geaendert.Count == 0 ? ""
+            : $"{MedikationsAenderungen.MarkeText}: " + string.Join("; ", geaendert.Select(a => $"{a.Medikament}: {a.Was} (ab {Datum.Text(a.Ab)})"));
+        MedikationAnsicht.TabellenFuellen(Tabelle, BedarfTabelle, verordnungen.Select(v => MedikationRegeln.Stand(v, heute)), abgesetzteZeigen: false);
         Tabelle.Visible = Tabelle.Rows.Count > 0;
         BedarfTabelle.Visible = bedarfTitel.Visible = BedarfTabelle.Rows.Count > 0;
         KeineMedikation.Visible = Tabelle.Rows.Count == 0 && BedarfTabelle.Rows.Count == 0;
@@ -334,6 +344,8 @@ public sealed class VisitenRundgang : Panel
         }
         Setzen(Name_, Stil.AbstandMini);
         Setzen(Allergie);
+        MedikationGeaendert.Visible = MedikationGeaendert.Text.Length > 0;
+        if (MedikationGeaendert.Text.Length > 0) Setzen(MedikationGeaendert);
         if (diagnosenZeigen) Setzen(Diagnosen);
         if (Fehler.Text.Length > 0 && Fehler.Visible) Setzen(Fehler);
         Setzen(medikationTitel, Stil.AbstandMini);

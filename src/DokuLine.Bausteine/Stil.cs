@@ -148,6 +148,7 @@ public static class Stil
         Kern.MarkenArt.Termin => Zimmer,
         Kern.MarkenArt.Angabe => Zimmer,
         Kern.MarkenArt.Status => Unterwegs,
+        Kern.MarkenArt.Medikation => MedikationGeaendert,
         _ => Achtung,
     };
 

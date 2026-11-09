@@ -2081,7 +2081,7 @@ Umfang:
 - Medikamentenänderungen aus der Visite lösen Schritt 29l aus.
 
 ## Medikamentenänderung auffällig markieren und in die Übergabe
-Status: freigegeben (Bauplan Schritt 29l; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.18; Bauplan Schritt 29l; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Jede Änderung am Medikamentenplan ist sofort und auffällig sichtbar und geht automatisch in
 die Übergabe.

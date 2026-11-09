@@ -121,7 +121,9 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Medikamentenplan** (Reiter in der Akte): „Was gilt am …“ als Tabelle – Medikament,
   morgens bis nachts, verordnet von, seit, Status; Bedarfsmedikation darunter; sortierbar. Ein
   Klick auf eine Zeile zeigt Einzelheiten und Verlauf; dort Pause, Stufenplan, Absetzen. Die
-  Grundverordnung wird nie überschrieben. **Demo — nicht zum Stellen verwenden.**
+  Grundverordnung wird nie überschrieben. Jede Änderung (neu, Dosis, Pause, Stufe, abgesetzt, neuer Bedarf) ist
+  sieben Tage lang rot markiert („Medikation geändert“ in Akte, Übersicht, Visite, Zeile im Plan) und kommt als
+  wichtiger Eintrag in die Übergabe, bis alle drei Schichten ihn gelesen haben. **Demo — nicht zum Stellen verwenden.**
 - **Therapie** (links): Angebote mit Terminen, Teilnehmern und freien Plätzen; Bewohner
   zuteilen (mit Warnung bei Überschneidung), Teilnahme beenden, Änderungen „ab Datum“. Jedes
   Angebot gehört der Therapie oder einem Wohnbereich (Filter „Anbieter“); alle sehen alles,

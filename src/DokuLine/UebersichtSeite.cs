@@ -21,7 +21,10 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     private readonly KartenFlaeche rechts = new();
     public KastenKopf ListenKopf { get; } = new("BEWOHNER") { Cursor = Cursors.Default };
 
-    // „Heute wichtig“
+    // „Heute wichtig“; „Medikamentenänderungen“ nur, wenn es welche gibt (dann ganz oben).
+    public HeuteKasten Medikation { get; } = new("MEDIKAMENTENÄNDERUNGEN");
+    public bool MedikationZeigen { get; private set; }
+    private HeuteKasten[] Kaesten => MedikationZeigen ? [Medikation, Uebergaben, Termine, Dienst, Nachrichten] : [Uebergaben, Termine, Dienst, Nachrichten];
     public HeuteKasten Uebergaben { get; } = new("ÜBERGABEN OFFEN");
     public HeuteKasten Termine { get; } = new("TERMINE HEUTE");
     public HeuteKasten Dienst { get; } = new("LAUFENDER DIENST · NOCH OFFEN");
@@ -87,7 +90,9 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         Termine.KopfGeklickt += () => StelleGewuenscht?.Invoke("Tagesplan");
         Dienst.KopfGeklickt += () => StelleGewuenscht?.Invoke("Aufgaben");
         Nachrichten.KopfGeklickt += () => StelleGewuenscht?.Invoke("Nachrichten");
-        links.Controls.AddRange([Uebergaben, Termine, Dienst, Nachrichten]);
+        Medikation.KopfGeklickt += () => StelleGewuenscht?.Invoke("Übergabe");
+        Medikation.Visible = false;
+        links.Controls.AddRange([Medikation, Uebergaben, Termine, Dienst, Nachrichten]);
 
         foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Hinweise", 300) }) Liste.Columns.Add(titel, breite);
         Liste.DoubleClick += (_, _) => AkteOeffnen();
@@ -154,6 +159,8 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         gezeigt = alle;
         var ids = alle.Select(h => h.Bewohner.Id!.Value).ToHashSet();
         var offeneUebergaben = speicher.Uebergaben(jetzt).Where(u => u.BewohnerId is null || ids.Contains(u.BewohnerId.Value)).ToList();
+        var medikation = speicher.Medikamentenaenderungen(heute).Where(a => ids.Contains(a.BewohnerId)).ToList();
+        var medikationGeaendert = medikation.Select(a => a.BewohnerId).ToHashSet();
 
         // Bewohnerliste: Marken wie bisher auf den Karten, dazu Übergabe und Geburtstag; „Wo“ eigene Spalte.
         var status = speicher.GeltendeStatusmeldungen(jetzt);
@@ -174,6 +181,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
             marken.AddRange(modul.Where(m => m.Art != MarkenArt.Abwesend));
             if (status.TryGetValue(id, out var s)) marken.Insert(0, StatusmeldungRegeln.Marke(s, jetzt));
             if (inTherapie.TryGetValue(id, out var wo)) marken.Insert(0, wo);
+            if (medikationGeaendert.Contains(id)) marken.Insert(0, new Marke(MarkenArt.Medikation, MedikationsAenderungen.MarkeText));
             int uebergaben = offeneUebergaben.Count(u => u.BewohnerId == id);
             if (uebergaben > 0) marken.Add(new Marke(MarkenArt.Uebergabe, uebergaben == 1 ? "Übergabe" : $"{uebergaben} Übergaben"));
             if (allesZeigen) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
@@ -191,6 +199,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         ListeFuellen();
 
         HeuteFuellen(jetzt, alle, offeneUebergaben, werte.Kuerzel);
+        MedikationFuellen(medikation, alle);
 
         // Kopf: „R2 · 23 Bewohner · 3 Betten frei · Stand 14:32 Uhr“ (freie Betten der gezeigten Wohnbereiche).
         var bereiche = meineBp || meineEt ? [] : allesZeigen ? speicher.Wohnbereiche().Select(w => w.Name).ToList() : meine;
@@ -221,6 +230,19 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     }
 
     // Die vier Kästen links.
+    // Kasten „Medikamentenänderungen“: je Änderung eine Zeile, rot umrandet; Klick öffnet die Akte.
+    private void MedikationFuellen(List<Medikamentenaenderung> liste, List<HeuteFuer> alle)
+    {
+        var bewohner = alle.ToDictionary(h => h.Bewohner.Id!.Value, h => h.Bewohner);
+        Medikation.Setzen(liste.Count, liste.Select(a =>
+        {
+            string name = bewohner.TryGetValue(a.BewohnerId, out var b) ? $"{b.Name}, Zi. {b.Zimmer}" : "?";
+            return Eintrag($"{name}: {a.Medikament}: {a.Was}", $"ab {Datum.Text(a.Ab)} · {a.Arzt}", null,
+                () => AkteGewuenscht?.Invoke(a.BewohnerId), Stil.Gefahr);
+        }));
+        MedikationZeigen = Medikation.Visible = liste.Count > 0;
+    }
+
     private void HeuteFuellen(DateTime jetzt, List<HeuteFuer> alle, List<Uebergabe> offen, string kuerzel)
     {
         var bewohner = alle.ToDictionary(h => h.Bewohner.Id!.Value, h => h.Bewohner);
@@ -340,7 +362,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
 
     public void Drucken()
     {
-        var druck = new UebersichtDruck(ListenKopfText, KopfText, [Uebergaben, Termine, Dienst, Nachrichten], Zeilen, Jetzt());
+        var druck = new UebersichtDruck(ListenKopfText, KopfText, Kaesten, Zeilen, Jetzt());
         Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, "Übersicht");
     }
 
@@ -358,7 +380,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         // Die Kästen untereinander; im schmalen Fenster über der Liste (höchstens 40 % der Höhe, dann Bildlauf).
         int kastenBreite = linksBreite - SystemInformation.VerticalScrollBarWidth;   // Platz für den Bildlauf
         int y = links.AutoScrollPosition.Y;
-        foreach (var k in new[] { Uebergaben, Termine, Dienst, Nachrichten })
+        foreach (var k in Kaesten)
         {
             k.SetBounds(0, y, kastenBreite, k.Height);
             k.PerformLayout();

@@ -35,23 +35,35 @@ public sealed class MedikationAnsicht : Panel
         ("medikament", "Medikament", 30), ("anlass", "Anlass", 18), ("einzeldosis", "Einzeldosis", 9), ("hoechstens", "höchstens", 11),
         ("arzt", "verordnet von", 13), ("seit", "seit", 9), ("status", "Status", 14), ("hinweis", "Hinweis", 16));
 
-    // Füllt beide Tabellen mit dem, was am Tag gilt (Abgesetztes nur auf Wunsch).
+    // Füllt beide Tabellen mit dem, was am Tag gilt (Abgesetztes nur auf Wunsch). Was sich in den letzten sieben Tagen
+    // geändert hat, ist hervorgehoben und sagt im Status, was („neu seit 09.11.“, „Dosis geändert: … → …“).
     public static void TabellenFuellen(DataGridView regel, DataGridView bedarf, IEnumerable<Tagesstand> staende, bool abgesetzteZeigen)
     {
         var liste = staende.ToList();
+        var heute = DateOnly.FromDateTime(DateTime.Now);
         bool Gezeigt(Tagesstand s) => s.Sichtbar || s.Zustand == Zustand.NochNicht || (abgesetzteZeigen && s.Zustand == Zustand.Abgesetzt);
+        string Status(Tagesstand s) => MedikationsAenderungen.ZeilenText(s.Verordnung, heute) is string neu ? $"{neu} · {StatusText(s)}" : StatusText(s);
         PlanTabelle.Fuellen(regel, liste.Where(s => Gezeigt(s) && !s.Verordnung.Bedarf), s =>
         {
             var v = s.Verordnung;
             var d = s.Dosis.Werte.Select(w => Menge(w, v.Einheit)).ToArray();
-            return [MedikamentText(v), d[0], d[1], d[2], d[3], v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), StatusText(s), v.Hinweis];
+            return [MedikamentText(v), d[0], d[1], d[2], d[3], v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), Status(s), v.Hinweis];
         });
         PlanTabelle.Fuellen(bedarf, liste.Where(s => Gezeigt(s) && s.Verordnung.Bedarf), s =>
         {
             var v = s.Verordnung;
             return [MedikamentText(v), v.BedarfAnlass, Menge(v.Dosis.Morgens, v.Einheit), v.BedarfHoechstens.Length > 0 ? v.BedarfHoechstens : "keine Angabe",
-                    v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), StatusText(s), v.Hinweis];
+                    v.Anordnung.Arzt, v.Beginn.ToDateTime(TimeOnly.MinValue), Status(s), v.Hinweis];
         });
+        foreach (var t in new[] { regel, bedarf })
+            foreach (DataGridViewRow zeile in t.Rows)
+            {
+                if (zeile.Tag is not Tagesstand s || MedikationsAenderungen.ZeilenText(s.Verordnung, heute) is null) continue;
+                zeile.DefaultCellStyle.BackColor = Stil.MedikationZeile;
+                var status = zeile.Cells["status"].Style;
+                status.BackColor = status.SelectionBackColor = Stil.MedikationGeaendert.Flaeche;
+                status.ForeColor = status.SelectionForeColor = Stil.MedikationGeaendert.Text;
+            }
     }
     public Label RegelLeer { get; } = Leer("Keine regelmäßige Medikation an diesem Tag.");
     public Label BedarfLeer { get; } = Leer("Keine Bedarfsmedikation.");

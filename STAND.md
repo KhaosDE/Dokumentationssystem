@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.17** (Bauplan Schritt 29k: Visite Psychiater und Hausarzt).
+Stand: 09.11.2026. Version: **0.33.18** (Bauplan Schritt 29l: Medikamentenänderungen auffällig und in der Übergabe).
 
 ## Aktuell
 
@@ -280,8 +280,15 @@ gewählten Arztes; „Visite beginnen …“ und „Neue Visite …“ gelten f�
 jemanden aus einem anderen Bereich dazu. Jeder Visitenbericht steht in der Dokumentation als Bericht der Art „Visite“ und
 beginnt fett mit „Visite Psychiater – Dr. …, Datum“ (bzw. Hausarzt); Filter „Visite“ wie bisher.
 
+Neu in 0.33.18: **Medikamentenänderungen** (neu, abgesetzt, Dosis geändert, Pause, Stufe eines Stufenplans, neue
+Bedarfsmedikation) tragen sieben Tage lang die rote Marke **„Medikation geändert“** – im Akte-Kopf, in der Bewohnerliste
+der Übersicht, in der Visite und im Medikamentenplan, wo die Zeile selbst hervorgehoben ist („neu seit 09.11.“, „Dosis
+geändert: 1–0–0–0 → 2–0–0–0“). Jede eingetragene Änderung wird automatisch ein wichtiger Bericht mit Übergabe
+„Medikamentenänderung: … ab …, angeordnet von …“; der Eintrag bleibt, bis Früh-, Spät- und Nachtdienst ihn gelesen haben
+(höchstens 7 Tage). In der Übersicht steht oben der Kasten „Medikamentenänderungen“, wenn es welche gibt.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29l „Medikamentenänderung auffällig markieren und in die Übergabe“ (0.33.18).
+als Nächstes 29m „Schnellerer Wechsel zwischen den Bereichen“ (0.33.19).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1274,6 +1281,14 @@ als Nächstes 29l „Medikamentenänderung auffällig markieren und in die Über
   - Oberfläche: Umschalter auf der Visitenseite, Art in „Visite beginnen“ und „Neue Visite“, „Weitere Bewohner …“ im
     Rundgang (bleibt im Entwurf).
 
+- 0.33.18 — Bauplan Schritt 29l:
+  - Kern: `MedikationsAenderungen` (Liste der Änderungen, sieben Tage frisch, Text je Änderung, Zeilentext),
+    `Speicher.Medikamentenaenderungen`; beim Speichern einer Verordnung oder Änderung ein wichtiger Bericht (Art
+    „Medikation“) mit Übergabe (gilt 7 Tage); `UebergabeRegeln.Offen`: Medikationsübergaben bleiben, bis drei
+    verschiedene Schichten gelesen haben. `MarkenArt.Medikation`.
+  - Oberfläche: Marke in Akte-Kopf und Bewohnerliste, Hinweis im Visitenrundgang, hervorgehobene Zeilen im
+    Medikamentenplan (auch in der Visite), Kasten „Medikamentenänderungen“ in der Übersicht.
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1355,6 +1370,13 @@ als Nächstes 29l „Medikamentenänderung auffällig markieren und in die Über
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.18): „Sieben Tage auffällig“ zählt ab dem Tag, an dem die Änderung gilt (auch die nächste Stufe eines
+  Stufenplans); eine für später eingetragene Änderung ist schon ab dem Eintragen markiert. Nachträglich für die
+  Vergangenheit eingetragene Änderungen zählen nur, wenn ihr Datum in den letzten sieben Tagen liegt. „Gelesen von allen
+  drei Schichten“ heißt: drei Bestätigungen, deren Uhrzeiten in drei verschiedenen Schichten liegen. Die Übergabe
+  entsteht beim Speichern im Programm; Demo-Verordnungen bekommen keine (sie sind keine Änderung, die jemand
+  eingetragen hat), die Marken zeigen sie aber.
 
 - 09.11.2026 (0.33.17): Visite: Die Liste der Bewohner bleibt bis Schritt 30 (Ärzte je Bewohner) „alle Bewohner des
   Bereichs“; „Weitere Bewohner …“ nimmt Bewohner anderer Bereiche dazu. Je Bereich bleibt es bei einem Entwurf: Läuft
@@ -2153,6 +2175,14 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.18:
+
+1. Übersicht: oben der Kasten „Medikamentenänderungen“; in der Liste bei diesen Bewohnern die rote Marke.
+2. Akte eines solchen Bewohners: Marke im Kopf; Medikamentenplan: die Zeile rot hinterlegt mit „Dosis geändert …“
+   bzw. „pausiert …“.
+3. Eine Dosis ändern (Stufenplan mit einer Stufe ab heute) → Übergabe: „Medikamentenänderung: …“ als wichtig. Als AB,
+   CD und EF zu Zeiten in drei Schichten „Gelesen“ → erst dann verschwindet der Eintrag.
 
 Version 0.33.17: Visiten: oben „Psychiater“ und „Hausarzt“ – je eigene Liste. „Visite beginnen …“ (Titel nennt die Art),
 in der Visite „Weitere Bewohner …“ → jemand aus R2 kommt dazu. Nach „Visite abschließen“: in der Dokumentation beginnt
