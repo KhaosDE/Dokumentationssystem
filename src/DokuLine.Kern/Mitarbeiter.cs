@@ -47,6 +47,7 @@ public static class Funktionen
     public const string BereicheWohnbereiche = "bereiche_wohnbereiche";   // Übersicht: Knöpfe der Wohnbereiche
     public const string BereichTherapie = "bereich_therapie";             // Übersicht: Knopf „Therapie“
     public const string BereicheAlle = "bereiche_alle";                   // Übersicht: Knopf „Alle“
+    public const string AnzeigeVerwalten = "anzeige_verwalten";           // Therapie-Anzeige für den Fernseher
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -74,6 +75,7 @@ public static class Funktionen
         (Aerzte, "Personenverzeichnis verwalten"),
         (BereicheWohnbereiche, "Wohnbereiche wählen (Übersicht)"),
         (BereichTherapie, "Bereich Therapie wählen (Übersicht)"),
+        (AnzeigeVerwalten, "Anzeige für den Fernseher verwalten"),
         (BereicheAlle, "Alle Bereiche zusammen ansehen (Übersicht)"),
         (DemoZuruecksetzen, "Demo-Daten zurücksetzen"),
     ];
@@ -126,7 +128,7 @@ public static partial class RechteRegeln
             Funktionen.MedikamentAnlegen, Funktionen.TeilnahmeBestaetigen, Funktionen.KalenderHaus, Funktionen.Fahrzeuge,
             Funktionen.BedarfGeben, Funktionen.AufgabenVorlagen, Funktionen.Heb, Funktionen.MitarbeiterBereich, Funktionen.EinstellungenBereich,
             Funktionen.DemoZuruecksetzen, Funktionen.TherapienBereich, Funktionen.Aerzte,
-            Funktionen.BereicheWohnbereiche,
+            Funktionen.BereicheWohnbereiche, Funktionen.AnzeigeVerwalten,
         ],
         ["Mitarbeiter Wohnbereich"] =
         [
@@ -155,7 +157,8 @@ public static partial class RechteRegeln
     // Funktionen, die nach der ersten Vorbelegung dazukamen: werden in bestehenden
     // Datenbanken einmal nachträglich vorbelegt.
     public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten,
-        Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle];
+        Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
+        Funktionen.AnzeigeVerwalten];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.

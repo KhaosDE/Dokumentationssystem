@@ -46,6 +46,7 @@ public sealed partial class Hauptfenster : Form
     public TagesplanSeite Tagesplan { get; }
     public VisitenSeite Visiten { get; }
     public EinstellungenSeite Einstellungsseite { get; }
+    public AnzeigeDienst Anzeige { get; }
 
     // Damit öffnet das Programm (Program.cs). Tests beginnen bei „Bewohner“ (Konstruktor).
     public const string Startbereich = "Übersicht";
@@ -121,7 +122,8 @@ public sealed partial class Hauptfenster : Form
         Visiten.Geaendert += () => { if (AktiverBereich == "Visiten") Kopf.TexteSetzen(Visiten.KopfText, "Visiten"); };
         Visiten.AufgabeGewuenscht += a => VisitenAufgabe(a);
         Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
-        Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        Anzeige = new AnzeigeDienst(speicher);
+        Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false, Anzeige = Anzeige };
         seiten["Einstellungen"] = Einstellungsseite;
         Einstellungsseite.Geaendert += () =>
         {
@@ -256,6 +258,7 @@ public sealed partial class Hauptfenster : Form
         // Erst „Dokumentation“ (baut die Liste); das Programm wechselt danach zur Übersicht (Startbereich).
         BereichWaehlen("Dokumentation");
         datenstand = Datenstand();
+        Anzeige.Anwenden();   // nur wenn auf diesem Rechner eingeschaltet (Vorgabe: aus)
         // Alle 30 Sekunden: Änderungen anderer Rechner; der Tagesplan zusätzlich wegen der Uhrzeit
         // („noch offen“ nach Beginn, „in Therapie“ bis zum Ende).
         abgleich.Tick += (_, _) =>
@@ -337,6 +340,7 @@ public sealed partial class Hauptfenster : Form
             speicher.MitarbeiterGeaendert -= RechteNeu;
             speicher.BezugGeaendert -= StatusNeu;
             abgleich.Dispose();
+            Anzeige.Dispose();
             hinweis.Dispose();
             Application.RemoveMessageFilter(F12);
             speicher.EntwuerfeGeaendert -= EntwuerfeZaehlen;

@@ -77,6 +77,16 @@ public sealed partial class EinstellungenSeite
         Karte("Wohnbereich", "Zimmer und Betten", "Wohnbereiche (offen oder beschützend) mit ihren Zimmern: Einzelzimmer oder „Bett Fenster“ und „Bett Tür“. Die Aufnahme zeigt nur freie Betten.",
             ZimmerKnopf);
 
+        // Anzeige für den Fernseher
+        AnzeigeKnopf.Click += (_, _) => { using var f = new AnzeigeFenster(speicher, Anzeige); Dialog.Zeigen(f, FindForm()); Geaendert?.Invoke(); };
+        Karte("Wohnbereich", "Anzeige für den Fernseher", "Laufende Therapien je Wohnbereich als nur lesende Seite im lokalen Netz, mit Zugangscode. " +
+            "Standardmäßig aus; gilt für diesen Rechner.", AnzeigeKnopf, Funktionen.AnzeigeVerwalten);
+        VollbildBereich.Items.AddRange([.. speicher.Wohnbereiche().Select(w => (object)w.Name)]);
+        if (VollbildBereich.Items.Count > 0) VollbildBereich.SelectedIndex = 0;
+        VollbildKnopf.Click += (_, _) => VollbildZeigen();
+        Karte("Wohnbereich", "Anzeige im Vollbild", "Dieselbe Anzeige auf einem zweiten Bildschirm (z. B. Fernseher über HDMI). Esc oder Doppelklick schließt.",
+            Reihe(VollbildBereich, VollbildKnopf));
+
         // Module (Recht „Module ein- und ausschalten“): ein Modul je Karte, Untermodule darin (eine Ebene).
         foreach (var m in Modulverwaltung.Alle)
         {

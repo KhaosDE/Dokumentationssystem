@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.20** (Bauplan Schritt 29n: Therapie als eigener Bereich).
+Stand: 09.11.2026. Version: **0.33.21** (Bauplan Schritt 29o: Therapie-Anzeige für den Fernseher).
 
 ## Aktuell
 
@@ -301,8 +301,15 @@ gruppiert („R1“, „R2“, „R3“), mit dem Schalter „alle Bewohner des 
 Schicht, mit Fälligkeit. Die laufenden Therapien zeigen dort nur Bereich, Name und Teilnahme. Demo: Theo Hänfling (TH)
 als zweiter Therapeut, Aufgaben und eine Nachricht für das Team Therapie, Therapie-Berichte bei drei Bewohnern.
 
+Neu in 0.33.21: **Anzeige der laufenden Therapien für den Fernseher.** In den Einstellungen (Wohnbereich) lässt sich
+eine nur lesende Seite je Wohnbereich einschalten (Vorgabe: aus; Recht „Anzeige für den Fernseher verwalten“). Der
+Fernseher öffnet sie im Browser über eine Adresse mit Zugangscode; gezeigt werden „Jetzt“ und „Gleich“ (nächste Stunde)
+mit Uhrzeit, Ort und den Namen der Teilnehmer aus diesem Bereich (Vorname und erster Buchstabe des Nachnamens,
+umschaltbar), ohne Zimmer, Marken, Bezugspflege und Teilnahmestatus; die Seite lädt sich jede Minute neu. Nur Anfragen
+aus dem eigenen Netz, nur lesend. Ohne Netzwerk-Fernseher: „Anzeige im Vollbild“ auf einem zweiten Bildschirm.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33.21).
+als Nächstes 29p „Nachschlagen beim BfArM absichern“ (0.33.22).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1335,8 +1342,21 @@ als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33
   - Demo: TH, zwei Aufgaben und eine Nachricht des Teams Therapie, drei Therapie-Berichte.
   - Behoben beim Bauen: Die Demo-Berichte bekamen ihre Art immer aus dem Text geraten (auch wenn sie feststand).
 
+- 0.33.21 — Bauplan Schritt 29o:
+  - Kern: `AnzeigeRegeln` (Inhalt je Bereich, Namen, Jetzt/Gleich, Seite als HTML mit Zeichenschutz, Zugangscode mit
+    zeitgleichem Vergleich), `AnzeigeStand` (für den Server-Thread), `AnzeigeEinstellungen` (`anzeige.json` im
+    Datenordner), `AnzeigeServer` (eigener kleiner Server auf `TcpListener`, keine neue Abhängigkeit).
+  - Oberfläche: `AnzeigeDienst` (Stand jede Minute und nach Änderungen der Therapie), `AnzeigeFenster`,
+    `AnzeigeVollbild`; zwei Karten in den Einstellungen (Wohnbereich); Recht „Anzeige für den Fernseher verwalten“
+    (Vorbelegung Bereichsleitung und Leitungen).
+  - Schutztest: Nur `AnzeigeServer.cs` darf annehmen, nur aus dem LAN, nie verbinden; kein anderes Projekt startet einen
+    Server. README: Abschnitt „Anzeige für den Fernseher“ mit Firewall-Hinweis.
+
 ## Offene Punkte
 
+- 09.11.2026 (0.33.21), für den Echtbetrieb: Namen von Bewohnern auf einem Bildschirm im Gemeinschaftsbereich zeigen,
+  wer an welcher Therapie teilnimmt. Vor einem Einsatz mit Leitung und Datenschutz klären; die Demo zeigt nur
+  ausgedachte Namen.
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
   Zeilen sind länger als 120 Zeichen, 87 Methoden länger als 40 Zeilen (vor allem Aufbau von Fenstern) und 14
   Dateien länger als 400 Zeilen (am größten `Speicher.cs` und `Demodaten.cs`). Sie werden nach der Pfadfinderregel
@@ -1417,6 +1437,14 @@ als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.33.21): Anzeige für den Fernseher – eigener kleiner Server auf `TcpListener` statt `HttpListener`:
+  `HttpListener` bräuchte für Adressen im Netz unter Windows Administratorrechte (URL-Reservierung). Die Daten liest der
+  Server nicht selbst aus der Datenbank, sondern aus einem Stand, den das Programm jede Minute setzt (die Datenbank ist
+  nicht für mehrere Threads gebaut); die Uhrzeit, „Jetzt“ und „Gleich“ rechnet er beim Abruf. Wer abgesagt hat oder
+  wessen Termin ausfällt, steht nicht auf dem Fernseher (ohne Status zu zeigen). Die Einstellungen gelten je Rechner
+  (`anzeige.json`), weil der Server auf dem Rechner läuft, an dem sie eingeschaltet wurde. Codes: 6 Zeichen ohne
+  verwechselbare Zeichen, je Wohnbereich, im Fenster neu erzeugbar. Das Vollbild braucht kein Recht (es zeigt nur, was
+  alle sehen).
 - 09.11.2026 (0.33.20): Bereich Therapie – der Wechsel in den Bereich Therapie und zurück behält die Seite, wenn es sie in
   der anderen Seitenleiste gibt (Dokumentation, Aufgaben, Nachrichten, Einstellungen, Therapie ↔ Laufende
   Therapien/Angebote), sonst beginnt er auf der Startseite. Aufgaben der Therapie: „Für wen?“ steht fest auf „wer Zeit
@@ -2234,6 +2262,14 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.21:
+
+1. Einstellungen → Wohnbereich → „Anzeige einrichten …“: einschalten, Speichern; Windows-Firewall „Private Netzwerke“
+   erlauben.
+2. Am selben Rechner im Browser die Adresse für R1 öffnen (statt des Rechnernamens geht `localhost`); mit falschem
+   Code kommt „Zugangscode fehlt oder stimmt nicht“.
+3. „Anzeige im Vollbild“ für R1: Esc schließt.
 
 Version 0.33.20:
 

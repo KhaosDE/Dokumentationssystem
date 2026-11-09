@@ -69,6 +69,11 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public Dictionary<string, CheckBox> Module { get; } = [];
     public Button VorlagenKnopf { get; } = Stil.NebenKnopf("Standardaufgaben …");
     public Button FahrzeugeKnopf { get; } = Stil.NebenKnopf("Fahrzeuge …");
+    // Anzeige der laufenden Therapien für den Fernseher (Bauplan 29o); das Hauptfenster gibt den Dienst.
+    public AnzeigeDienst? Anzeige { get; set; }
+    public Button AnzeigeKnopf { get; } = Stil.NebenKnopf("Anzeige einrichten …");
+    public ComboBox VollbildBereich { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 120, AccessibleName = "Wohnbereich für das Vollbild" };
+    public Button VollbildKnopf { get; } = Stil.NebenKnopf("Im Vollbild zeigen");
     public Dictionary<Bogenart, Label> Vorlagen { get; } = [];
     public Func<string?> PdfWaehlen { get; set; } = () =>
     {

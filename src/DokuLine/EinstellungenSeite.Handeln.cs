@@ -56,6 +56,16 @@ public sealed partial class EinstellungenSeite
 
     // Ein Fenster der Einstellungen (Mitarbeiter, Rechte …): danach Werte und Sperren neu – die Rechte des Angemeldeten
     // können sich geändert haben.
+    // Nicht modal: Das Vollbild bleibt auf dem zweiten Bildschirm offen, während man weiterarbeitet.
+    public AnzeigeVollbild? VollbildZeigen()
+    {
+        if (VollbildBereich.SelectedItem is not string bereich || FindForm() is not Form programm) return null;
+        var fenster = new AnzeigeVollbild(speicher, bereich, AnzeigeEinstellungen.Laden().VollerName, AnzeigeVollbild.Bildschirm(programm));
+        fenster.FormClosed += (_, _) => fenster.Dispose();
+        fenster.Show(programm);
+        return fenster;
+    }
+
     private void FensterZeigen(Form fenster)
     {
         using (fenster) Dialog.Zeigen(fenster, FindForm());

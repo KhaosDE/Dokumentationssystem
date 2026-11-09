@@ -115,3 +115,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.33.18 Medikamentenänderungen sieben Tage rot markiert, automatisch wichtig in der Übergabe bis drei Schichten gelesen haben, Kasten in der Übersicht (Bauplan 29l).
 - 09.11.2026 — Claude Code: 0.33.19 ruhigerer und schnellerer Wechsel zwischen den Bereichen, Messung mit --messen (Bauplan 29m).
 - 09.11.2026 — Claude Code: 0.33.20 Therapie als eigener Bereich mit eigener Seitenleiste, Seite „Wochenpläne“, Bewohner nach Wohnbereich gruppiert, Berichtsart „Therapie“ mit Angebot (Bauplan 29n).
+- 09.11.2026 — Claude Code: 0.33.21 Anzeige der laufenden Therapien für den Fernseher im Wohnbereich (nur LAN, Zugangscode, standardmäßig aus) und als Vollbild (Bauplan 29o).

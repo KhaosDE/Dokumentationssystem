@@ -2166,7 +2166,7 @@ Umfang:
   Team Therapie, Therapie-Berichte bei mehreren Bewohnern.
 
 ## Therapie-Anzeige für den Fernseher im Wohnbereich
-Status: freigegeben (Bauplan Schritt 29o; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.21; Bauplan Schritt 29o; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die laufenden Therapien lassen sich über das Netzwerk auf einem Fernseher im Wohnbereich
 zeigen, damit die Bewohner sehen, was gerade läuft.
