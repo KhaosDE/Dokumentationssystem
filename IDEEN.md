@@ -94,7 +94,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 34 | Abgängigkeitsmeldung | 0.38.0 |
 | 35 | Schweigepflichtentbindungen | 0.39.0 |
 | 36 | Vitalwerte | 0.40.0 |
-| 37 | Betriebsmodus für den Terminalserver (offen) | 0.41.0 |
+| 37 | Betriebsmodus für den Terminalserver | 0.41.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -1926,9 +1926,15 @@ damit Kollegen auf einem anderen Bereich einspringen können. „Stelle ich hier
 alles, was die R1 betrifft.“ Die Auswahl in den einzelnen Fenstern wird dadurch überflüssig.
 Umfang:
 - In der Übersicht gut sichtbar oben: **„Wohnbereich: R1 · R2 · R3“** als drei große
-  Umschaltknöpfe (kein Klappmenü). Für Positionen, die alle Bereiche sehen (Therapie, Leitung):
-  zusätzlich „Alle“. Wer das Recht für die Therapie hat, sieht außerdem den Knopf **„Therapie“**
-  (eigener Bereich, Schritt 29n).
+  Umschaltknöpfe (kein Klappmenü). **Wer welche Knöpfe sieht** (Ergänzung Tobi, 09.11.2026):
+  - **Personal der Wohnbereiche:** R1 · R2 · R3 — alle Wohnbereiche, damit man einspringen kann.
+    **Kein Knopf „Therapie“**, damit vom Wohnbereich aus keine Therapien geändert werden.
+  - **Therapie:** R1 · R2 · R3 · **Therapie** — die Therapie kann auf den Wohnbereichen
+    einspringen. Dort arbeitet sie mit den Rechten ihrer Position; Therapieangebote ändert sie nur
+    im Bereich Therapie.
+  - **Leitung und Administrator:** alle Knöpfe und zusätzlich „Alle“.
+  - Die Knöpfe hängen am Recht (Rechte-Tabelle: „Wohnbereiche“, „Bereich Therapie“, „Alle
+    Bereiche“), Vorbelegung wie oben; ohne Recht ist ein Knopf ausgeblendet (Schritt 29c).
 - Die Wahl gilt für **alle Bereiche**: Dokumentation, Übergabe, Tagesplan, Visiten, Aufgaben,
   Kalender (Bereichskalender), Therapie (Laufende Therapien), Ausgangsliste, Nachrichten an Teams.
 - Die **Bereichswahl in den einzelnen Fenstern entfällt** (z. B. Dokumentation, Übersicht-Liste,
@@ -2127,8 +2133,8 @@ den Bereich Dokumentation, Nachrichten, Aufgaben und eine extra Seite, in der si
 Bewohnerliste haben; mit Klick auf den Bewohner sieht man den Wochenplan.“
 Umfang:
 - **Bereich „Therapie“** in der Bereichswahl der Übersicht (Schritt 29d): R1 · R2 · R3 ·
-  **Therapie**. Der Knopf erscheint nur mit dem Recht für die Therapie (Vorbelegung: Position
-  Therapie, Leitungen, Administrator). Rechner der Therapie haben „Therapie“ als
+  **Therapie**. Der Knopf erscheint nur mit dem Recht „Bereich Therapie“ (Vorbelegung: Position
+  Therapie, Leitungen, Administrator); das Personal der Wohnbereiche sieht ihn nicht (Schritt 29d). Rechner der Therapie haben „Therapie“ als
   Bereichskennung und starten dort.
 - **Seitenleiste im Bereich Therapie** (nur diese Einträge, in dieser Reihenfolge):
   1. **Laufende Therapien** (Startseite, wie Schritt 26m)
@@ -2225,7 +2231,7 @@ Umfang:
 - Demo-Daten: Bereichsaufgaben für jeden Bereich getrennt.
 
 ## Betriebsmodus für den Terminalserver
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK; dazu Änderung von `CLAUDE.md` Regel 4)
+Status: freigegeben (Bauplan Schritt 37; OK Tobi 09.11.2026; `CLAUDE.md` Regel 4 ist geändert)
 Datum: 09.11.2026
 Was: Neben der Demo eine Betriebsfassung desselben Programms für den echten Einsatz auf dem Server
 der Einrichtung. Gebaut und getestet wird nur mit ausgedachten Daten.
@@ -2275,7 +2281,7 @@ Umfang (Vorschlag):
 - Tests: alles im Betriebsmodus mit ausgedachten Daten; eine „Betriebsprobe“ auf einem
   Test-Rechner, bevor der echte Server berührt wird.
 
-Vorgeschlagene Änderung von `CLAUDE.md`, Regel 4 (erst nach Tobis OK eintragen): „**Kein
+Änderung von `CLAUDE.md`, Regel 4 (eingetragen 09.11.2026 nach Tobis OK): „**Kein
 Echtbetrieb ohne Freigabe.** Die Demo zeigt dauerhaft ‚Demo — ausgedachte Daten‘. Echte Daten nur
 im Betriebsmodus und erst nach schriftlicher Freigabe durch Einrichtung, Datenschutz und
 Mitarbeitervertretung. Im Repository, in Tests und Commits nie echte Daten — auch nicht aus dem

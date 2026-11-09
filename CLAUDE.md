@@ -11,7 +11,8 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
   Dokumentation.
 - **Später dazu** (eigene Einträge in `IDEEN.md`, erst bauen, wenn freigegeben):
   Ausgang, Medikation, Wochenplan, Biografie, Monatsreflexion, HEB-Bogen.
-- **Nutzer:** Tobi zum Vorführen. Kein Echtbetrieb.
+- **Nutzer:** Tobi zum Vorführen. Daneben ein Betriebsmodus für den Terminalserver des Hauses
+  (Schritt 37); echter Einsatz erst nach den Freigaben aus Regel 4.
 
 ## Unverhandelbar
 
@@ -24,9 +25,12 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 2. **Bewohnerbilder:** In den Demo-Daten nur Platzhalter (Initialen oder Silhouette),
    keine Fotos von Menschen und keine KI-Gesichter.
 3. **Keine Geheimnisse** im Repository (Passwörter, Tokens, Schlüssel).
-4. **Kein Echtbetrieb.** Die Oberfläche zeigt dauerhaft sichtbar „Demo — ausgedachte
-   Daten“. Echte Daten wären Gesundheitsdaten (Art. 9 DSGVO) und bräuchten Freigaben,
-   die es nicht gibt.
+4. **Kein Echtbetrieb ohne Freigabe** (geändert 09.11.2026, Entscheidung Tobi). Die Demo zeigt
+   dauerhaft sichtbar „Demo — ausgedachte Daten“. Echte Daten nur im **Betriebsmodus**
+   (`IDEEN.md`, Schritt 37) und erst nach schriftlicher Freigabe durch Einrichtung,
+   Datenschutz und Mitarbeitervertretung — echte Daten sind Gesundheitsdaten (Art. 9 DSGVO).
+   Im Repository, in Tests und Commits nie echte Daten, auch nicht aus dem Betrieb. Gebaut und
+   getestet wird der Betriebsmodus nur mit ausgedachten Daten.
 5. **Leere Felder sind nicht „nichts“.** Bei Sicherheitsangaben (z. B. Allergien) gibt es
    drei Zustände: *eingetragen*, *keine bekannt*, *nicht erfasst*. Ein leeres Feld darf nie
    wie „keine Allergie“ aussehen.
