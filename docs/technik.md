@@ -23,6 +23,13 @@ Jeder Schritt und jeder Fehler steht in `update.log` im Datenordner. Bei einem F
 normal in der alten Version. Abschalten: Häkchen „Beim Start nach Updates suchen“ (`einstellungen.json`) oder
 `--kein-update`.
 
+## Betriebsmodus (`src/DokuLine.Kern/Betrieb.cs`)
+
+Eine Datei `betrieb.json` im Programmordner schaltet den Betrieb ein (Schlüssel `datenordner`, `sicherungsordner`,
+`sperre_minuten`, `protokoll_monate`, `sicherung_um`; Anleitung in `docs/betrieb.md`). Im Betrieb liegt die Datenbank im
+gemeinsamen Datenordner (WAL), die Einstellungsdatei je Benutzer in `%APPDATA%\DokuLine`. Kommandozeile für die
+Aufgabenplanung: `--sicherung`, `--update-einspielen` (nur im Betrieb).
+
 ## Einstellungsdatei (`src/DokuLine.Kern/Einstellungen.cs`)
 
 Lesbare Datei `einstellungen.json` im Datenordner:

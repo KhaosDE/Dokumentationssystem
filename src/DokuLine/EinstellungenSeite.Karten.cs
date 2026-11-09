@@ -174,20 +174,40 @@ public sealed partial class EinstellungenSeite
         var ort = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0), BackColor = Stil.Flaeche };
         ort.Controls.AddRange([DatenbankOrt, Reihe(OrdnerKnopf, LokalKnopf)]);
         DatenbankOrt.BackColor = Stil.Flaeche;
-        Karte("System", "Ort der Datenbank", "Mehrere Rechner mit demselben Ordner arbeiten gemeinsam. Gilt nach dem Neustart; ist der Ordner leer, entstehen dort die Demo-Daten. Auch dort nur ausgedachte Daten.",
-            ort, Funktionen.EinstellungenBereich, darunter: true);
-        Karte("System", "Sicherung", "Noch nicht gebaut (siehe STAND.md, offene Punkte). Die Datenbank ist eine Datei im Datenordner bzw. im gemeinsamen Ordner.",
-            new Label { Text = "–", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche }, Funktionen.EinstellungenBereich);
+        if (!Betrieb.Aktiv)
+            Karte("System", "Ort der Datenbank", "Mehrere Rechner mit demselben Ordner arbeiten gemeinsam. Gilt nach dem Neustart; ist der Ordner leer, entstehen dort die Demo-Daten. Auch dort nur ausgedachte Daten.",
+                ort, Funktionen.EinstellungenBereich, darunter: true);
+        SicherungKnopf.Click += (_, _) => FensterZeigen(new SicherungFenster(speicher));
+        Karte("System", "Sicherung", "Jetzt sichern, Stände prüfen, zurücksichern. Im Betrieb jede Nacht automatisch (30 tägliche, 12 monatliche Stände).",
+            SicherungKnopf, Funktionen.BetriebVerwalten);
         AutoUpdate.CheckedChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { AutoUpdate = AutoUpdate.Checked }); };
-        Karte("System", "Update", "Beim Start nach einer neuen Version suchen (nur die Releases dieses Programms). Abschaltbar auch mit „--kein-update“.",
-            AutoUpdate, Funktionen.EinstellungenBereich);
+        if (!Betrieb.Aktiv)
+            Karte("System", "Update", "Beim Start nach einer neuen Version suchen (nur die Releases dieses Programms). Abschaltbar auch mit „--kein-update“.",
+                AutoUpdate, Funktionen.EinstellungenBereich);
+        else
+        {
+            UpdateKnopf.Click += (_, _) => FensterZeigen(new UpdateFenster(speicher));
+            Karte("System", "Update vorbereiten", "Im Betrieb kein Selbst-Update: herunterladen oder vom USB-Stick, Prüfsumme prüfen, nachts einspielen.",
+                UpdateKnopf, Funktionen.BetriebVerwalten);
+        }
+        // Betrieb (Bauplan 37): Passwörter, Zugriffsprotokoll, Häuser.
+        PasswortKnopf.Click += (_, _) => FensterZeigen(new PasswortAendernFenster(speicher, Recht.Kuerzel));
+        if (Betrieb.Aktiv) Karte("Persönlich", "Passwort ändern", "Das eigene Passwort (mindestens 10 Zeichen). Gespeichert wird nur ein Hash.", PasswortKnopf);
+        PasswoerterKnopf.Click += (_, _) => FensterZeigen(new PasswoerterFenster(speicher));
+        if (Betrieb.Aktiv)
+            Karte("Verwaltung", "Passwörter der Mitarbeiter", "Einmalpasswort vergeben – auch zum Entsperren nach 5 Fehlversuchen.", PasswoerterKnopf, Funktionen.MitarbeiterBereich);
+        ProtokollKnopf.Click += (_, _) => FensterZeigen(new ZugriffsprotokollFenster(speicher));
+        Karte("Verwaltung", "Zugriffsprotokoll", "Wer wann welche Akte geöffnet, gedruckt oder geändert hat. Nur mit eigenem Recht.", ProtokollKnopf, Funktionen.Zugriffsprotokoll);
+        HaeuserKnopf.Click += (_, _) => FensterZeigen(new HaeuserFenster(speicher));
+        Karte("Verwaltung", "Häuser", "Bereiche gehören zu einem Haus; die Bereichswahl zeigt das eigene Haus, andere nur mit Recht.", HaeuserKnopf, Funktionen.BetriebVerwalten);
         DemoKnopf.Click += (_, _) => DemoGewuenscht?.Invoke();
         var achtung = new Label
         {
             Text = "Achtung: löscht alle Änderungen und hinterlegten Bilder und lädt die ausgedachten Demo-Daten neu (fragt vorher).",
             AutoSize = true, MaximumSize = new Size(360, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandMini),
         };
-        Karte("System", "Demo-Daten zurücksetzen", "Für die Vorführung: alles auf den Anfang.", Reihe(DemoKnopf, achtung), Funktionen.DemoZuruecksetzen, darunter: true);
+        if (!Betrieb.Aktiv)
+            Karte("System", "Demo-Daten zurücksetzen", "Für die Vorführung: alles auf den Anfang.", Reihe(DemoKnopf, achtung), Funktionen.DemoZuruecksetzen, darunter: true);
 
         // Über
         Karte("Über", "Programm", "Bis Version 0.29.1 hieß das Programm „Dokumentationssystem“.",

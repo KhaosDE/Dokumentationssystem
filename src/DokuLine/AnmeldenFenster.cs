@@ -10,6 +10,9 @@ public sealed class AnmeldenFenster : Form
     private readonly Speicher speicher;
 
     public TextBox Kuerzel { get; } = new() { Width = 120, MaxLength = 6, CharacterCasing = CharacterCasing.Upper, Font = Stil.KarteName };
+    // Betrieb (Bauplan 37): mit eigenem Passwort; ein Einmalpasswort muss gleich geändert werden.
+    public TextBox Passwort { get; } = new() { Width = 220, UseSystemPasswordChar = true, AccessibleName = "Passwort" };
+    internal Func<string, bool> PasswortAendernFragen { get; set; }
     public ListBox DemoListe { get; } = new() { Width = 440, Height = 150, IntegralHeight = false, Font = Stil.Standard };
     public Label Fehler { get; } = new()
     {
@@ -41,23 +44,35 @@ public sealed class AnmeldenFenster : Form
         zeile(null, new Label { Text = Programmversion.Leittext, AutoSize = true, ForeColor = Stil.TextMittel, Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, new Label
         {
-            Text = "Mit dem eigenen Kürzel anmelden. In der Demo ohne Passwort – alles, was du tust, steht mit deinem Kürzel im Programm. " +
-                   "Abmelden: Taste F12 oder „Abmelden (F12)“ oben rechts.",
+            Text = Betrieb.Aktiv
+                ? "Mit dem eigenen Kürzel und Passwort anmelden. Alles, was du tust, steht mit deinem Kürzel im Programm. " +
+                  "Sperren: Taste F12; nach einiger Zeit ohne Eingabe sperrt DokuLine von selbst."
+                : "Mit dem eigenen Kürzel anmelden. In der Demo ohne Passwort – alles, was du tust, steht mit deinem Kürzel im Programm. " +
+                  "Abmelden: Taste F12 oder „Abmelden (F12)“ oben rechts.",
             AutoSize = true, MaximumSize = new Size(440, 0), ForeColor = Stil.TextMittel,
         });
         Kuerzel.Text = vorschlag;
         zeile("Kürzel", Kuerzel);
+        if (Betrieb.Aktiv) zeile("Passwort", Passwort);
         zeile(null, Fehler);
-        zeile(null, new Label { Text = "DEMO: AUSGEDACHTE MITARBEITER (KLICK ÜBERNIMMT DAS KÜRZEL)", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, Margin = new Padding(0, Stil.AbstandMittel, 0, 0) });
-        var aktive = speicher.AlleMitarbeiter().Where(m => m.Aktiv).ToList();
-        foreach (var m in aktive)
-            DemoListe.Items.Add($"{m.Kuerzel} – {m.Name} · {string.Join(", ", m.Positionen)} · {m.Qualifikation}");
-        DemoListe.SelectedIndexChanged += (_, _) =>
+        PasswortAendernFragen = kuerzel =>
         {
-            if (DemoListe.SelectedIndex >= 0) Kuerzel.Text = aktive[DemoListe.SelectedIndex].Kuerzel;
+            using var f = new PasswortAendernFenster(speicher, kuerzel, Passwort.Text, pflicht: true);
+            return Dialog.Zeigen(f, this) == DialogResult.OK;
         };
-        DemoListe.DoubleClick += (_, _) => Anmelden();
-        zeile(null, DemoListe);
+        if (!Betrieb.Aktiv)
+        {
+            zeile(null, new Label { Text = "DEMO: AUSGEDACHTE MITARBEITER (KLICK ÜBERNIMMT DAS KÜRZEL)", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, Margin = new Padding(0, Stil.AbstandMittel, 0, 0) });
+            var aktive = speicher.AlleMitarbeiter().Where(m => m.Aktiv).ToList();
+            foreach (var m in aktive)
+                DemoListe.Items.Add($"{m.Kuerzel} – {m.Name} · {string.Join(", ", m.Positionen)} · {m.Qualifikation}");
+            DemoListe.SelectedIndexChanged += (_, _) =>
+            {
+                if (DemoListe.SelectedIndex >= 0) Kuerzel.Text = aktive[DemoListe.SelectedIndex].Kuerzel;
+            };
+            DemoListe.DoubleClick += (_, _) => Anmelden();
+            zeile(null, DemoListe);
+        }
 
         AnmeldenKnopf.Click += (_, _) => Anmelden();
         BeendenKnopf.DialogResult = DialogResult.Cancel;
@@ -75,7 +90,20 @@ public sealed class AnmeldenFenster : Form
     {
         try
         {
-            Angemeldet = speicher.Anmelden(Kuerzel.Text);
+            if (!Betrieb.Aktiv) Angemeldet = speicher.Anmelden(Kuerzel.Text);
+            else
+            {
+                var (ergebnis, m) = speicher.PasswortAnmelden(Kuerzel.Text, Passwort.Text);
+                Passwort.Text = ergebnis == AnmeldeErgebnis.AendernPflicht ? Passwort.Text : "";
+                Angemeldet = ergebnis switch
+                {
+                    AnmeldeErgebnis.Ok => m,
+                    AnmeldeErgebnis.AendernPflicht => PasswortAendernFragen(m!.Kuerzel) ? m : throw new Eingabefehler(["Bitte zuerst ein eigenes Passwort festlegen."]),
+                    AnmeldeErgebnis.Gesperrt => throw new Eingabefehler([PasswortRegeln.GesperrtText]),
+                    AnmeldeErgebnis.OhnePasswort => throw new Eingabefehler(["Für dieses Kürzel ist noch kein Passwort festgelegt. Bitte an die Leitung oder den Verwalter wenden."]),
+                    _ => throw new Eingabefehler(["Kürzel oder Passwort stimmt nicht."]),
+                };
+            }
         }
         catch (Eingabefehler e)
         {

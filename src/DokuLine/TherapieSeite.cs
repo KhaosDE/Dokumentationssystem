@@ -156,7 +156,7 @@ public sealed class TherapieSeite : Panel, IBereichSeite
         if (therapie)
         {
             string rechner = Einstellungen.Laden().Bereich;
-            Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.Wohnbereiche().Select(w => w.Name), f => Recht.Darf(speicher, f)),
+            Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.SichtbareWohnbereiche(Recht.Kuerzel), f => Recht.Darf(speicher, f)),
                 Arbeitsbereich.Gewaehlt, BereichswahlRegeln.Eingesprungen(Arbeitsbereich.Gewaehlt, rechner));
         }
         string heute = Datum.Text(DateOnly.FromDateTime(Jetzt()));

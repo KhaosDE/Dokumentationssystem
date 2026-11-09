@@ -56,6 +56,7 @@ public sealed partial class Speicher
         }
         AngabenGeaendert?.Invoke();
         if (art == Angabe.Betreuung) BetreuerGeaendertMelden();
+        Zugriff(kuerzel, bewohnerId, ZugriffRegeln.Geaendert, $"Akte: {AngabenRegeln.Name(art)}");
         return FassungenIn(null, bewohnerId, art).Single(f => f.Id == id);
     }
 

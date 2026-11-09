@@ -16,11 +16,21 @@ internal static class Program
         if (args.Contains("--selbsttest")) return Selbsttest.Ausfuehren();
         Messung.An = args.Contains("--messen");
 
+        // Betriebsmodus (Bauplan 37): betrieb.json im Programmordner. Fehlerhaft → nicht starten (nie still in die Demo).
+        try { Betrieb.Setzen(Betrieb.Laden(AppContext.BaseDirectory)); }
+        catch (SpeicherFehler e)
+        {
+            MessageBox.Show(e.Message, Programmversion.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return 1;
+        }
+        if (Betrieb.Aktiv && args.Contains("--sicherung")) return Betriebsaufgaben.Sichern();
+        if (Betrieb.Aktiv && args.Contains("--update-einspielen")) return Betriebsaufgaben.UpdateEinspielen();
+
         // Übergang: Daten aus %APPDATA%\Dokumentationssystem einmal nach %APPDATA%\DokuLine
         // kopieren – vor allem anderen, was in den Datenordner schreibt.
         try
         {
-            if (Pfade.AltenOrdnerUebernehmen() is string kopiert) Aktualisierung.Protokoll(kopiert);
+            if (!Betrieb.Aktiv && Pfade.AltenOrdnerUebernehmen() is string kopiert) Aktualisierung.Protokoll(kopiert);
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
@@ -30,7 +40,8 @@ internal static class Program
         }
 
         // Zuerst das Selbst-Update: Ist eine neue Version geladen und gestartet, endet dieses Programm.
-        if (Aktualisierung.BeimStart(args, Programmversion.Build, () => new Fortschrittsfenster())) return 0;
+        // Im Betrieb nie: Updates spielt der Verwalter nachts ein („Update vorbereiten …“, --update-einspielen).
+        if (!Betrieb.Aktiv && Aktualisierung.BeimStart(args, Programmversion.Build, () => new Fortschrittsfenster())) return 0;
 
         // Auffangnetz: Ein unerwarteter Fehler zeigt eine verständliche Meldung statt des
         // technischen Fehlerfensters von Windows.
@@ -47,7 +58,8 @@ internal static class Program
             // Mehrplatz: Datenbank am eingestellten Ort (lokal oder gemeinsamer Ordner).
             (speicher, hinweis) = Speicher.Oeffnen(Einstellungen.Laden());
             Modulverwaltung.Anmelden(speicher);
-            speicher.DemoBeimErstenStart();
+            if (Betrieb.Werte is BetriebWerte betrieb) speicher.ZugriffeAufraeumen(DateTime.Now, betrieb.ProtokollMonate);
+            else speicher.DemoBeimErstenStart();
             foreach (string zeile in speicher.Startprotokoll) Aktualisierung.Protokoll(zeile);   // z. B. TST ergänzt
             string bereich = Einstellungen.Laden().Bereich;
             if (Kern.Bereiche.Umbenannt(bereich) != bereich) Einstellungen.Aendern(w => w with { Bereich = Kern.Bereiche.Umbenannt(bereich) });
@@ -61,7 +73,15 @@ internal static class Program
             MessageBox.Show(hinweis, Programmversion.Name, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         _ = Nachschlageansicht.Laufzeit;
         BerichtRegeln.Zeiten = speicher.Schichtzeiten(Einstellungen.Laden().Bereich);   // Schichtzeiten des Bereichs // WebView2 vorhanden? Steht in den Einstellungen.
-        // Anmelden mit dem Kürzel, ohne Passwort; „Beenden“ schließt das Programm.
+        // Erster Start im Betrieb: den Verwalter anlegen (mit Passwort).
+        if (Betrieb.Aktiv && speicher.AlleMitarbeiter().Count == 0)
+            using (var einrichten = new ErsteinrichtungFenster(speicher))
+                if (einrichten.ShowDialog() != DialogResult.OK)
+                {
+                    speicher.Dispose();
+                    return 0;
+                }
+        // Anmelden mit dem Kürzel (Demo ohne Passwort, Betrieb mit); „Beenden“ schließt das Programm.
         using (var anmelden = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel))
         {
             Stil.SymbolSetzen(anmelden);

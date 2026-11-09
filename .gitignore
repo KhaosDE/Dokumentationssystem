@@ -5,3 +5,6 @@ publish/
 *.user
 .vs/
 TestResults/
+
+# Betriebsmodus: legt nur der Verwalter auf dem Server an (Pfade der Einrichtung), nie im Repository
+betrieb.json

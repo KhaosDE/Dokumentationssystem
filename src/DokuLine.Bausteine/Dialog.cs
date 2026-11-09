@@ -57,7 +57,7 @@ public static class Druckvorschau
     }
 
     // Fußzeile auf jeder Seite: Programmname und Demo-Hinweis, klein im unteren Rand.
-    public const string FusszeileText = Stil.ProgrammName + " · " + Stil.DemoHinweis;
+    public static string FusszeileText => Stil.ProgrammName + " · " + Stil.DemoHinweis;
 
     public static Func<PrintDocument> MitFusszeile(Func<PrintDocument> dokumentBauen) => () =>
     {

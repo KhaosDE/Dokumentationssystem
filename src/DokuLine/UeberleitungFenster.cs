@@ -115,6 +115,7 @@ public sealed class UeberleitungFenster : Form
             Fehlerhaft(() => speicher.UeberleitungBericht(bewohner.Id!.Value, e.Anlass, Recht.Kuerzel, jetzt));
         if (MitStatus.Checked && Recht.Angemeldet)
             Fehlerhaft(() => speicher.UeberleitungStatus(bewohner.Id!.Value, Recht.Kuerzel, Einstellungen.Laden().Bereich, jetzt));
+        speicher.Zugriff(Recht.Kuerzel, bewohner.Id, ZugriffRegeln.Gedruckt, "Überleitungsbogen");
         Vorschau(() => new UeberleitungDruck(UeberleitungRegeln.Titel(bewohner), inhalt).DokumentBauen(), UeberleitungRegeln.Titel(bewohner));
         DialogResult = DialogResult.OK;
         Close();

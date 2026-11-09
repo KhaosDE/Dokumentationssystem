@@ -26,7 +26,7 @@ public static partial class Einstellungen
 
     public static EinstellungsWerte Laden()
     {
-        string pfad = Pfade.ImDatenordner(Datei);
+        string pfad = Pfade.ImBenutzerordner(Datei);
         var info = new FileInfo(pfad);
         var stempel = info.Exists ? (info.LastWriteTimeUtc, info.Length) : (DateTime.MinValue, -1L);
         lock (Sperre)
@@ -77,7 +77,7 @@ public static partial class Einstellungen
         if (HebFristPruefen(werte.HebFristMonate) is string hebFehler) throw new Eingabefehler([hebFehler]);
         if (Bereiche.Pruefen(werte.Bereich) is string bereichFehler) throw new Eingabefehler([bereichFehler]);
         if (AbgaengigkeitRegeln.WartezeitPruefen(werte.WartezeitMinuten) is string wartezeitFehler) throw new Eingabefehler([wartezeitFehler]);
-        string ziel = Pfade.ImDatenordner(Datei);
+        string ziel = Pfade.ImBenutzerordner(Datei);
         Directory.CreateDirectory(Path.GetDirectoryName(ziel)!);
         string zwischen = ziel + ".neu";
         var inhalt = new JsonObject

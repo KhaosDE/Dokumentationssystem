@@ -136,6 +136,14 @@ public sealed partial class Speicher
     // lokale – mit Hinweis, damit das Programm trotzdem startet.
     public static (Speicher Speicher, string? Hinweis) Oeffnen(EinstellungsWerte werte)
     {
+        // Betrieb: ein Rechner, lokaler gemeinsamer Ordner (kein Netzlaufwerk) – WAL; nie ersatzweise eine andere Datenbank.
+        if (Betrieb.Aktiv)
+        {
+            if (OrdnerPruefen(Pfade.Datenordner) is string fehlt) throw new SpeicherFehler(fehlt);
+            var betrieb = new Speicher();
+            betrieb.WalEinschalten();
+            return (betrieb, null);
+        }
         if (!Einstellungen.Gemeinsam(werte)) return (new Speicher(), null);
         try
         {

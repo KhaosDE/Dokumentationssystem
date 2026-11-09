@@ -53,6 +53,9 @@ public static class Funktionen
     public const string DokumenteLoeschen = "dokumente_loeschen";
     public const string VitalwerteErfassen = "vitalwerte_erfassen";
     public const string VitalGrenzen = "vital_grenzen";   // angeordnete Bereiche, Messaufträge, Richtwerte
+    public const string Zugriffsprotokoll = "zugriffsprotokoll";   // Betrieb: wer hat welche Akte geöffnet, gedruckt, geändert
+    public const string BetriebVerwalten = "betrieb_verwalten";   // Sicherung, Rücksicherung, Update, Häuser
+    public const string AndereHaeuser = "andere_haeuser";         // Bereiche anderer Häuser wählen
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -86,6 +89,9 @@ public static class Funktionen
         (DokumenteLoeschen, "Dokumente endgültig löschen"),
         (VitalwerteErfassen, "Vitalwerte erfassen"),
         (VitalGrenzen, "Grenzen und Messaufträge festlegen"),
+        (Zugriffsprotokoll, "Zugriffsprotokoll ansehen"),
+        (BetriebVerwalten, "Betrieb verwalten (Sicherung, Update, Häuser)"),
+        (AndereHaeuser, "Bereiche anderer Häuser wählen"),
         (BereicheAlle, "Alle Bereiche zusammen ansehen (Übersicht)"),
         (DemoZuruecksetzen, "Demo-Daten zurücksetzen"),
     ];
@@ -171,7 +177,7 @@ public static partial class RechteRegeln
     public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten,
         Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
         Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
-        Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen];
+        Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen, Funktionen.Zugriffsprotokoll, Funktionen.BetriebVerwalten, Funktionen.AndereHaeuser];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
@@ -180,6 +186,7 @@ public static partial class RechteRegeln
         funktion is Funktionen.AerztlicheAnsehen or Funktionen.AerztlicheBearbeiten ? position != "Verwaltung" :
         funktion == Funktionen.VitalwerteErfassen ? true :
         funktion == Funktionen.VitalGrenzen ? position is not ("Therapie" or "Verwaltung") :
+        funktion == Funktionen.Zugriffsprotokoll ? position is Administrator or "Geschäftsführung" or "Hausleitung" :
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||
         (Vorgabe.TryGetValue(position, out var f) && f.Contains(funktion));
 

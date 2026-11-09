@@ -144,7 +144,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         gezeigtSchicht = SchichtTermin.Zu(jetzt);
         var werte = Einstellungen.Laden();
         string gewaehlt = Arbeitsbereich.Gewaehlt.Length > 0 ? Arbeitsbereich.Gewaehlt : werte.Bereich;
-        Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.Wohnbereiche().Select(w => w.Name), f => Recht.Darf(speicher, f)), gewaehlt,
+        Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.SichtbareWohnbereiche(Recht.Kuerzel), f => Recht.Darf(speicher, f)), gewaehlt,
             BereichswahlRegeln.Eingesprungen(gewaehlt, werte.Bereich));
         var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
         // Der gewählte Bereich; „Alle“ und Bereiche ohne eigene Bewohner (z. B. „Therapie“) zeigen alle, mit Hinweis.

@@ -294,6 +294,13 @@ Alles andere (E-Mail, Links) übergibt das Programm an die Programme auf dem Rec
 Ausnahme in die andere Richtung ist die **Anzeige für den Fernseher** (nächster Abschnitt): Sie nimmt,
 wenn eingeschaltet, nur Anfragen aus dem eigenen Netz an.
 
+## Betriebsmodus für den Terminalserver
+
+Neben der Demo gibt es einen Betriebsmodus für den echten Einsatz auf dem Server der Einrichtung: gemeinsamer
+Datenordner, Anmeldung mit Passwort, Sperre nach Leerlauf, Zugriffsprotokoll, nächtliche Sicherung, Update nur durch
+den Verwalter. Eingeschaltet wird er mit einer Datei `betrieb.json` im Programmordner. **Echte Daten erst nach den
+Freigaben** (Einrichtung, Datenschutz, Mitarbeitervertretung). Anleitung: [`docs/betrieb.md`](docs/betrieb.md).
+
 ## Anzeige für den Fernseher (nur im lokalen Netz)
 
 Unter Einstellungen → Wohnbereich → „Anzeige für den Fernseher“ lässt sich eine schlichte, nur

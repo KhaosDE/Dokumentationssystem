@@ -11,7 +11,9 @@ namespace DokuLine;
 public static class Stil
 {
     // Dauerhaft sichtbarer Hinweis (Regel 4 in CLAUDE.md): im Kopf, in Fenstertiteln und auf Ausdrucken.
-    public const string DemoHinweis = "Demo — ausgedachte Daten";
+    // Im Betriebsmodus (Bauplan 37) steht statt des Demo-Hinweises „Betrieb“.
+    public const string DemoText = "Demo — ausgedachte Daten";
+    public static string DemoHinweis => Kern.Betrieb.Aktiv ? Kern.Betrieb.StatusText : DemoText;
     public const string ProgrammName = "DokuLine";
     public const string Leittext = "Betreuung auf Augenhöhe";
 

@@ -2233,7 +2233,7 @@ Umfang:
 - Demo-Daten: Bereichsaufgaben für jeden Bereich getrennt.
 
 ## Betriebsmodus für den Terminalserver
-Status: freigegeben (Bauplan Schritt 37; OK Tobi 09.11.2026; `CLAUDE.md` Regel 4 ist geändert)
+Status: erledigt (09.11.2026, 0.41.0; Bauplan Schritt 37, OK Tobi 09.11.2026; `CLAUDE.md` Regel 4 ist geändert)
 Datum: 09.11.2026
 Was: Neben der Demo eine Betriebsfassung desselben Programms für den echten Einsatz auf dem Server
 der Einrichtung. Gebaut und getestet wird nur mit ausgedachten Daten.

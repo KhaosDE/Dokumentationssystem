@@ -143,6 +143,9 @@ public sealed class KalenderFenster : Form
                 Haus = HausWahl.Checked, Kuerzel = Einstellungen.Laden().Kuerzel,
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.KalenderAnlegen(f) : speicher.KalenderAendern(bisher.Id, f, ohnePruefung ? null : bisher.Fassungen.Count);
+            // Häuser (Bauplan 37): ein neuer Haus-Termin gilt für das Haus des gewählten Bereichs.
+            if (bisher is null && f.Haus && speicher.HausVonBereich().TryGetValue(Arbeitsbereich.Gewaehlt, out var haus))
+                speicher.KalenderHausSetzen(Gespeichert.Id, haus);
         }
         catch (Konflikt k)
         {

@@ -145,7 +145,12 @@ public sealed class KalenderSeite : Panel, IBereichSeite
         var ids = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt)
             .Select(b => b.Id!.Value).ToHashSet();
         bool ImBereich(KalenderTermin k) => k.Aktuell.Bewohner.Count == 0 || k.Aktuell.Bewohner.Any(ids.Contains);
-        return speicher.Kalender(von, bis, BewohnerFilter).Where(k => KalenderRegeln.Passt(k.Aktuell, Wahl) && ImBereich(k)).ToList();
+        // Haus-Termine eines anderen Hauses nur, wenn man dessen Bereiche wählen darf (ohne Haus: für alle).
+        var hausVon = speicher.HausVonBereich();
+        var sichtbar = speicher.SichtbareWohnbereiche(Recht.Kuerzel).Select(w => hausVon.GetValueOrDefault(w)).OfType<string>().ToHashSet();
+        var terminHaus = speicher.KalenderHaeuser();
+        bool ImHaus(KalenderTermin k) => !k.Aktuell.Haus || !terminHaus.TryGetValue(k.Id, out var h) || sichtbar.Count == 0 || sichtbar.Contains(h);
+        return speicher.Kalender(von, bis, BewohnerFilter).Where(k => KalenderRegeln.Passt(k.Aktuell, Wahl) && ImBereich(k) && ImHaus(k)).ToList();
     }
 
     private Dictionary<long, string> Namen() => speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);

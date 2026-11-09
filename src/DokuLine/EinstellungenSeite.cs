@@ -90,6 +90,12 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public Button EinrichtungKnopf { get; } = Stil.NebenKnopf("Angaben der Einrichtung …");
     public Button MeldestellenKnopf { get; } = Stil.NebenKnopf("Stellen bearbeiten …");
     public Button RichtwerteKnopf { get; } = Stil.NebenKnopf("Richtwerte …");
+    public Button SicherungKnopf { get; } = Stil.NebenKnopf("Sicherung …");
+    public Button UpdateKnopf { get; } = Stil.NebenKnopf("Update vorbereiten …");
+    public Button PasswortKnopf { get; } = Stil.NebenKnopf("Passwort ändern …");
+    public Button PasswoerterKnopf { get; } = Stil.NebenKnopf("Passwörter …");
+    public Button ProtokollKnopf { get; } = Stil.NebenKnopf("Zugriffsprotokoll …");
+    public Button HaeuserKnopf { get; } = Stil.NebenKnopf("Häuser …");
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     // System, Über
     public Label DatenbankOrt { get; } = new() { AutoSize = true, MaximumSize = new Size(360, 0), UseMnemonic = false };

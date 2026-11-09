@@ -232,6 +232,7 @@ public sealed class AkteAnsicht : Panel
 
     public void Zeigen(Bewohner b)
     {
+        if (Bewohner?.Id != b.Id) speicher.Zugriff(Recht.Kuerzel, b.Id, ZugriffRegeln.Geoeffnet, "Akte");   // Zugriffsprotokoll (Bauplan 37)
         Bewohner = b;
         Reiter.Waehlen("Stammdaten");
         Fuellen(b);

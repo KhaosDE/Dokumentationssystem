@@ -963,6 +963,40 @@ public sealed partial class Speicher : IDisposable
             PRIMARY KEY (messauftrag_id, schicht_tag, schicht)
         );
         """,
+        // 40 – Betriebsmodus: Passwörter (nur Hash), Zugriffsprotokoll, Häuser mit ihren Bereichen, Haus der Haus-Termine.
+        """
+        CREATE TABLE IF NOT EXISTS passwoerter (
+            kuerzel       TEXT PRIMARY KEY COLLATE NOCASE,
+            hash          TEXT NOT NULL,
+            salz          TEXT NOT NULL,
+            iterationen   INTEGER NOT NULL,
+            einmal        INTEGER NOT NULL DEFAULT 1 CHECK (einmal IN (0, 1)),
+            fehlversuche  INTEGER NOT NULL DEFAULT 0,
+            gesperrt      INTEGER NOT NULL DEFAULT 0 CHECK (gesperrt IN (0, 1)),
+            geaendert     TEXT NOT NULL,
+            geaendert_von TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS zugriffe (
+            id          INTEGER PRIMARY KEY,
+            zeit        TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            bewohner_id INTEGER,
+            aktion      TEXT NOT NULL,
+            was         TEXT NOT NULL DEFAULT ''
+        );
+        CREATE INDEX IF NOT EXISTS zugriffe_zeit ON zugriffe (zeit);
+        CREATE TRIGGER IF NOT EXISTS zugriffe_bleiben BEFORE UPDATE ON zugriffe
+            BEGIN SELECT RAISE(ABORT, 'Das Zugriffsprotokoll wird nicht geändert.'); END;
+        CREATE TABLE IF NOT EXISTS haeuser (name TEXT PRIMARY KEY, nr INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS bereich_haeuser (
+            bereich TEXT PRIMARY KEY REFERENCES bereiche(name) ON UPDATE CASCADE ON DELETE CASCADE,
+            haus    TEXT NOT NULL REFERENCES haeuser(name) ON UPDATE CASCADE ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS kalender_haeuser (
+            termin_id INTEGER PRIMARY KEY REFERENCES kalender(id) ON DELETE CASCADE,
+            haus      TEXT NOT NULL REFERENCES haeuser(name) ON UPDATE CASCADE ON DELETE CASCADE
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1291,6 +1325,7 @@ public sealed partial class Speicher : IDisposable
             UebergabeEinfuegen(b.BewohnerId, id, uebergabe.Text, b.Erfasst, b.Verfasser,
                 UebergabeRegeln.GiltBis(uebergabe.Dauer, b.Erfasst, uebergabe.Bis), transaktion);
         transaktion.Commit();
+        Zugriff(b.Verfasser, b.BewohnerId, ZugriffRegeln.Geaendert, $"Bericht ({b.Art})");
         return BerichtLesen(id)!;
     }
 

@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.40.0** (Bauplan Schritt 36: Vitalwerte).
+Stand: 09.11.2026. Version: **0.41.0** (Bauplan Schritt 37: Betriebsmodus für den Terminalserver).
 
 ## Aktuell
 
@@ -391,8 +391,19 @@ den Arztbesuch. Einstellungen: Richtwerte (Lehrbuchwerte, **nicht ärztlich gepr
 (mg/dl oder mmol/l), Liste der Werte erweiterbar. Rechte: „Vitalwerte erfassen“ (alle), „Grenzen und Messaufträge
 festlegen“ (nur Fachkräfte).
 
-**Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 37 „Betriebsmodus Terminalserver“ (0.41.0).
+Neu in 0.41.0: **Betriebsmodus** für den Terminalserver – dasselbe Programm, eingeschaltet durch `betrieb.json` im
+Programmordner (legt nur der Verwalter an, nie im Repository). Im Betrieb: gemeinsamer Datenordner (Datenbank im
+WAL-Modus), Einstellungen je Benutzer, keine Demo-Daten, **Anmeldung mit Passwort** (nur als Hash, PBKDF2),
+Ersteinrichtung des Verwalters, Einmalpasswörter mit Pflicht zum Ändern, Sperre nach 5 Fehlversuchen,
+**automatische Sperre** nach Leerlauf (Vorgabe 10 Minuten) und F12, **Zugriffsprotokoll** (geöffnet, gedruckt,
+geändert; nur mit eigenem Recht; Aufbewahrung einstellbar), **nächtliche Sicherung** mit Prüfung (30 tägliche,
+12 monatliche Stände; Aufgabenplanung oder nächster Start) und Rücksicherung mit Kopie vorher, Warnung für den
+Verwalter bei alter Sicherung, **kein Selbst-Update** – „Update vorbereiten …“ (herunterladen oder USB, Prüfsumme)
+und nächtliches Einspielen mit Rückweg, **Häuser** mit ihren Bereichen (Bereichswahl und Haus-Termine je Haus),
+unten „Betrieb“ statt des Demo-Hinweises. Anleitung, Ordnerrechte, Windows-Server-Versionen und die Liste der
+Freigaben: `docs/betrieb.md`. Sicherung, Zugriffsprotokoll und Häuser gibt es auch in der Demo.
+
+**Nächster Schritt:** Der Bauplan ist abgearbeitet; abschließende Fehlersuche (Auftrag Tobi, 09.11.2026).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1483,6 +1494,12 @@ als Nächstes 37 „Betriebsmodus Terminalserver“ (0.41.0).
   `VerlaufBild`, `VitalwertFenster`, `VitalGrenzenFenster`, `RichtwerteFenster`, Rechte `vitalwerte_erfassen` und
   `vital_grenzen`.
 
+- 0.41.0 — Bauplan Schritt 37: `Betrieb.cs` (`BetriebWerte`, `PasswortRegeln`, `SicherungRegeln`, `HaeuserRegeln`),
+  `SpeicherBetrieb.cs` (Passwörter, Zugriffsprotokoll, Sicherung mit der Sicherungsfunktion von SQLite, Rücksicherung,
+  Häuser), Datenbank-Schritt 40, `Pfade.Benutzerordner`, `Betriebsaufgaben` (`--sicherung`, `--update-einspielen`),
+  `BetriebFenster.cs` (Ersteinrichtung, Passwort ändern, Passwörter, Zugriffsprotokoll, Sicherung, Update, Häuser),
+  `Leerlauf`, Anmeldung mit Passwort, `docs/betrieb.md`.
+
 ## Offene Punkte
 
 - 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
@@ -1577,6 +1594,24 @@ als Nächstes 37 „Betriebsmodus Terminalserver“ (0.41.0).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.41.0): Betriebsmodus – Einstellungen (Kürzel, Menü, Bereich des Rechners) bleiben je Benutzer in
+  `%APPDATA%\DokuLine`, weil auf dem Terminalserver alle Sitzungen auf einem Rechner laufen; alles Gemeinsame (Datenbank,
+  Bilder, Ablage, Vorlagen, Protokolle) liegt im Datenordner aus `betrieb.json`. Ist `betrieb.json` fehlerhaft, startet
+  das Programm nicht (nie still in die Demo mit falschem Ort). Passwörter: PBKDF2-SHA256 mit 210 000 Durchläufen aus .NET,
+  keine neue Abhängigkeit; mindestens 10 Zeichen, nicht das Kürzel; Einmalpasswort (12 Zeichen ohne Verwechsler) vergibt,
+  wer Mitarbeiter verwalten darf – das entsperrt auch. Die Sperre nach Leerlauf nutzt die Abmeldung (angefangene Eingaben
+  werden ohne Frage Entwurf). Die nächtliche Sicherung macht die Aufgabenplanung (`--sicherung`); fehlt sie, holt die
+  nächste offene Sitzung sie nach. Rücksicherung spielt die Sicherung mit der Sicherungsfunktion von SQLite in die offene
+  Datenbank zurück (vorher eine Kopie); andere Sitzungen sollten vorher abgemeldet sein – das sagt das Fenster. Das Update
+  spielt nur `--update-einspielen` ein, wenn kein DokuLine mehr läuft; die alte Fassung bleibt als `.alt`. Das
+  Zugriffsprotokoll schreibt das Öffnen der Akte, die Drucke von Überleitungsbogen, Meldeblatt und Vitalwerten und
+  Änderungen an Berichten, Angaben der Akte und Vitalwerten – nie Inhalte; weitere Stellen (z. B. Medikation,
+  Dokumente mit eigenem Protokoll) folgen bei Bedarf. Es läuft auch in der Demo (zum Vorführen). Häuser: ohne Häuser
+  sieht jeder alles; Haus-Termine ohne Haus gelten für alle. Eine Verschlüsselung der Datenbank selbst (SQLCipher) ist
+  nicht eingebaut – BitLocker und Ordnerrechte zuerst, Begründung in `docs/betrieb.md`. Das „Zugriffsprotokoll ansehen“
+  ist vorbelegt nur für Geschäftsführung und Hausleitung (nicht Verwaltung); „Betrieb verwalten“ und „Bereiche anderer
+  Häuser wählen“ wie die übrigen Leitungsrechte.
 
 - 09.11.2026 (0.40.0): Vitalwerte – die Richtwerte stehen in der Datenbank (gelten auf allen Rechnern), nicht in der Datei
   der Einstellungen. Blutzucker wird in mg/dl gespeichert und nur in der Anzeige umgerechnet (Faktor 18), damit ein
@@ -2465,6 +2500,12 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.41.0 (Betriebsprobe nur auf einem Test-Rechner, nur ausgedachte Daten): Ordner nach `docs/betrieb.md`
+anlegen, `betrieb.json` neben die `.exe`, starten → Ersteinrichtung, Mitarbeiter anlegen, Einmalpasswort vergeben,
+mit dem anderen Kürzel anmelden (Passwort ändern), 5-mal falsch → gesperrt, entsperren. 10 Minuten nichts tun → Sperre.
+Einstellungen → System → Sicherung … („Jetzt sichern“, „Zurücksichern …“), Update vorbereiten …, Verwaltung →
+Zugriffsprotokoll …, Häuser …. In der Demo: Sicherung, Zugriffsprotokoll und Häuser ausprobieren.
 
 Version 0.40.0: Akte (z. B. des ersten Bewohners) → oben die Marke „Blutdruck …: außerhalb des angeordneten Bereichs“;
 Reiter „Vitalwerte“: Verlauf und Tabelle ansehen, Zeitraum wechseln, „Vitalwerte erfassen …“, eine Zeile doppelklicken

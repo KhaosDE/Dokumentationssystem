@@ -289,6 +289,7 @@ public sealed class AbgaengigkeitFenster : Form
     {
         if (Meldung is null) return false;
         var inhalt = Meldeblatt();
+        speicher.Zugriff(Recht.Kuerzel, bewohner.Id, ZugriffRegeln.Gedruckt, "Meldeblatt Abgängigkeit");
         Vorschau(() => new UeberleitungDruck(AbgaengigkeitRegeln.Titel(bewohner), inhalt).DokumentBauen(), AbgaengigkeitRegeln.Titel(bewohner));
         return true;
     }

@@ -57,6 +57,7 @@ public sealed partial class Speicher
             transaktion.Commit();
         }
         VitalwerteGeaendert?.Invoke();
+        Zugriff(kuerzel, bewohnerId, ZugriffRegeln.Geaendert, "Vitalwerte erfasst");
         return [.. Vitalwerte(bewohnerId).Where(w => neu.Contains(w.Id))];
     }
 
@@ -77,6 +78,7 @@ public sealed partial class Speicher
             transaktion.Commit();
         }
         VitalwerteGeaendert?.Invoke();
+        Zugriff(kuerzel, alt.BewohnerId, ZugriffRegeln.Geaendert, "Vitalwert korrigiert");
         return Vitalwerte(alt.BewohnerId).Single(w => w.Id == neu);
     }
 

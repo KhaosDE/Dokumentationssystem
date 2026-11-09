@@ -42,7 +42,7 @@ public sealed partial class Hauptfenster
 
     // Die Knöpfe der Bereichswahl in der Übersicht, je nach Recht.
     public List<string> BereichKnoepfe() =>
-        BereichswahlRegeln.Knoepfe(speicher.Wohnbereiche().Select(w => w.Name), f => Recht.Darf(speicher, f));
+        BereichswahlRegeln.Knoepfe(speicher.SichtbareWohnbereiche(Recht.Kuerzel), f => Recht.Darf(speicher, f));
 
     // Den Bereich wählen, der überall gilt (Übersicht); die gezeigte Ansicht und die Zähler folgen sofort.
     public void ArbeitsbereichWaehlen(string bereich)
@@ -135,15 +135,20 @@ public sealed partial class Hauptfenster
 
     // Abmelden: offene Fenster schließen (vorher fragen, angefangene Eingaben als Entwurf), dann liegt die
     // Sperrfläche über allem und das Anmeldefenster darüber. false = abgebrochen.
-    public bool Abmelden()
+    // automatisch: Sperre nach Leerlauf im Betrieb – ohne Frage, angefangene Eingaben werden Entwurf.
+    public bool Abmelden(bool automatisch = false)
     {
         if (Gesperrt) return false;
         var offen = OffeneFenster();
         if (offen.Count > 0)
         {
             var mitEingaben = offen.OfType<IEntwurfFenster>().Where(e => e.HatEingaben).ToList();
-            using var frage = new AbmeldenFrage(offen.Select(f => f.Text.Replace($" ({Stil.DemoHinweis})", "")).ToList(), mitEingaben.Count > 0);
-            var antwort = Dialog.Zeigen(frage, offen[^1]);
+            var antwort = DialogResult.Yes;
+            if (!automatisch)
+            {
+                using var frage = new AbmeldenFrage(offen.Select(f => f.Text.Replace($" ({Stil.DemoHinweis})", "")).ToList(), mitEingaben.Count > 0);
+                antwort = Dialog.Zeigen(frage, offen[^1]);
+            }
             if (antwort != DialogResult.Yes && antwort != DialogResult.No) return false;
             if (antwort == DialogResult.Yes) foreach (var e in mitEingaben) e.AlsEntwurfSpeichern();
             Abmeldung.SchliesstFenster = true;

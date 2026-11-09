@@ -165,6 +165,7 @@ public sealed class VitalwerteAnsicht : KartenFlaeche
         if (Bewohner is null) return false;
         var inhalt = DruckInhalt();
         string titel = $"Vitalwerte {Bewohner.Name}";
+        speicher.Zugriff(Recht.Kuerzel, Bewohner.Id, ZugriffRegeln.Gedruckt, "Vitalwerte");
         Vorschau(() => new UeberleitungDruck(titel, inhalt).DokumentBauen(), titel);
         return true;
     }
