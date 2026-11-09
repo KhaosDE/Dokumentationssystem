@@ -4,6 +4,7 @@ namespace DokuLine;
 
 // Akte, Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger: die geltende Fassung als Tabelle, „nicht erfasst“
 // in Achtung-Farbe (Regel 5), darunter „ab … · wer“; „Ändern …“ legt eine neue Fassung an, „Verlauf …“ zeigt alle.
+// Im Reiter „Betreuung“ steht oben die Zuständigkeit (Forensik, FOSA); solange Forensik, ist der Betreuer nicht zuständig.
 public sealed class AngabenAnsicht : KartenFlaeche
 {
     private readonly Speicher speicher;
@@ -12,6 +13,7 @@ public sealed class AngabenAnsicht : KartenFlaeche
     public Label Stand { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, UseMnemonic = false };
     public Button AendernKnopf { get; } = Stil.HauptKnopf("Ändern …");
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
+    public Button ZustaendigkeitKnopf { get; } = Stil.NebenKnopf("Zuständigkeit ändern …");
     public Angabe Art { get; private set; }
     public Bewohner? Bewohner { get; private set; }
     public List<(string Beschriftung, string Wert, bool Achtung)> Zeilen { get; private set; } = [];
@@ -23,8 +25,9 @@ public sealed class AngabenAnsicht : KartenFlaeche
         this.speicher = speicher;
         AendernKnopf.Click += (_, _) => Aendern();
         VerlaufKnopf.Click += (_, _) => VerlaufZeigen();
-        foreach (var k in new[] { AendernKnopf, VerlaufKnopf }) k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
-        knoepfe.Controls.AddRange([AendernKnopf, VerlaufKnopf]);
+        ZustaendigkeitKnopf.Click += (_, _) => Aendern(Angabe.Zustaendigkeit);
+        foreach (var k in new[] { AendernKnopf, ZustaendigkeitKnopf, VerlaufKnopf }) k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
+        knoepfe.Controls.AddRange([AendernKnopf, ZustaendigkeitKnopf, VerlaufKnopf]);
         Controls.AddRange([tabelle, Stand, knoepfe]);
     }
 
@@ -44,7 +47,18 @@ public sealed class AngabenAnsicht : KartenFlaeche
         Bewohner = b;
         Art = art;
         var fassung = AngabenRegeln.Aktuell(speicher.Fassungen(b.Id!.Value, art), Heute);
-        Zeilen = AngabenRegeln.Zeilen(art, fassung, PersonText(speicher), Heute);
+        var person = PersonText(speicher);
+        Zeilen = AngabenRegeln.Zeilen(art, fassung, person, Heute);
+        bool betreuung = art == Angabe.Betreuung;
+        if (betreuung)
+        {
+            var zust = AngabenRegeln.Aktuell(speicher.Fassungen(b.Id!.Value, Angabe.Zustaendigkeit), Heute);
+            bool forensik = ZustaendigkeitRegeln.InForensik(zust?.Lesen<Zustaendigkeit>());
+            if (forensik)
+                Zeilen = [.. Zeilen.Select(z => z.Beschriftung == "Betreuer" ? (z.Beschriftung, $"{z.Wert} – {ZustaendigkeitRegeln.BetreuerNichtZustaendig}", false) : z)];
+            Zeilen = [.. ZustaendigkeitRegeln.Zeilen(zust, person), .. Zeilen];
+        }
+        ZustaendigkeitKnopf.Visible = betreuung;
         SuspendLayout();
         tabelle.SuspendLayout();
         foreach (Control c in tabelle.Controls.Cast<Control>().ToList()) { tabelle.Controls.Remove(c); c.Dispose(); }
@@ -55,25 +69,29 @@ public sealed class AngabenAnsicht : KartenFlaeche
                 Text = beschriftung, AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Flaeche, UseMnemonic = false,
                 Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandGross, Stil.AbstandMini),
             });
+            bool nichtZustaendig = wert.EndsWith(ZustaendigkeitRegeln.BetreuerNichtZustaendig, StringComparison.Ordinal);
             tabelle.Controls.Add(new Label
             {
                 Text = wert, AutoSize = true, MaximumSize = new Size(Stil.Px(this, 620), 0), UseMnemonic = false, BackColor = Stil.Flaeche,
-                ForeColor = achtung ? Stil.Achtung.Text : Stil.TextNormal, Font = achtung ? Stil.FettKursiv : Stil.Fett,
+                ForeColor = achtung ? Stil.Achtung.Text : nichtZustaendig ? Stil.TextLeise : Stil.TextNormal, Font = achtung ? Stil.FettKursiv : Stil.Fett,
                 Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini),
             });
         }
         tabelle.ResumeLayout();
         Stand.Text = fassung is null ? "Noch keine Angabe." : $"gilt ab {Datum.Text(fassung.Ab)} · eingetragen von {fassung.Kuerzel} am {fassung.Geaendert:dd.MM.yyyy}";
         Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, AendernKnopf);
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, ZustaendigkeitKnopf);
         Stil.Sperren(VerlaufKnopf, speicher.Fassungen(b.Id!.Value, art).Count == 0 ? "Noch kein Verlauf." : null);
         ResumeLayout();
         PerformLayout();
     }
 
-    public void Aendern()
+    public void Aendern() => Aendern(Art);
+
+    public void Aendern(Angabe art)
     {
         if (Bewohner is null || Stil.Sperrgrund(AendernKnopf) is not null) return;
-        using var fenster = new AngabeFenster(speicher, Bewohner, Art);
+        using var fenster = new AngabeFenster(speicher, Bewohner, art);
         if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK) return;
         Zeigen(Bewohner, Art);
         Geaendert?.Invoke();

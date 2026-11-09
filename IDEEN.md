@@ -1794,7 +1794,7 @@ Umfang:
   der Bewohner, je eine ausgedachte Forensik-Klinik und FOSA mit Zuständigen.
 
 ## Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente
-Status: freigegeben (Bauplan Schritt 30a; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.34.1; Bauplan Schritt 30a; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: In der Akte steht, wer für einen Bewohner zuständig ist: der Betreuer, die Forensik oder
 die FOSA (Forensische Ambulanz). Danach richtet sich auch, über wen die Medikamente bestellt

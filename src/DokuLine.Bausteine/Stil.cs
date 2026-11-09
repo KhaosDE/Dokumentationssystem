@@ -149,6 +149,7 @@ public static class Stil
         Kern.MarkenArt.Angabe => Zimmer,
         Kern.MarkenArt.Status => Unterwegs,
         Kern.MarkenArt.Medikation => MedikationGeaendert,
+        Kern.MarkenArt.Zustaendig => Hinweis,   // Forensik, FOSA
         _ => Achtung,
     };
 

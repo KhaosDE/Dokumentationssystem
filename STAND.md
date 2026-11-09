@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.34.0** (Bauplan Schritt 30: Akte mit Betreuung, Angehörigen, Ärzten, Krankenkasse, Kostenträger).
+Stand: 09.11.2026. Version: **0.34.1** (Bauplan Schritt 30a: Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente).
 
 ## Aktuell
 
@@ -325,8 +325,16 @@ Bewohnerliste und im neuen Kasten „Fristen“ der Übersicht. Bei der Aufnahme
 (Arzt, „keiner“ oder „noch nicht bekannt“); zugeteilte Ärzte stehen in den Arztauswahlen oben. Der HEB-Bogen übernimmt
 Kostenträger und Aktenzeichen. Neue Listen in den Einstellungen: Krankenkassen, Kostenträger, Aufgabenbereiche.
 
+Neu in 0.34.1: Im Reiter **Betreuung** steht oben die **Zuständigkeit**: Forensik (Klinik, seit, Status, nächste
+Überprüfung mit Marke 8 Wochen vorher, Zuständige aus dem Verzeichnis) und FOSA-Nachsorge (Ambulanz, seit, bis,
+Zuständige). Solange Forensik, steht beim Betreuer „nicht zuständig, solange Forensik“ (grau). Die Marken **„Forensik“**
+und **„FOSA“** stehen im Kopf der Akte und in der Bewohnerliste der Übersicht. Im **Medikamentenplan** steht oben
+„Bestellung über: … · Name, Telefon“ (Vorschlag nach der Zuständigkeit, mit „Bestellweg …“ änderbar) und der Knopf
+**„Bestellung per E-Mail …“**: Medikamente ankreuzen, Hinweis zum Datenschutz bestätigen, dann öffnet sich das
+E-Mail-Programm mit Empfänger, Betreff und Liste. Demo: je Bereich zwei Bewohner mit Forensik, drei mit FOSA.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 30a „Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente“ (0.34.1).
+als Nächstes 31 „Akte: Reiter Dokumente“ (0.35.0).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1382,8 +1390,18 @@ als Nächstes 30a „Zuständigkeit Forensik und FOSA, Bestellweg der Medikament
     der Ärzte in der Aufnahme, `ArztWahl` mit Bewohner, Reiterleiste mit Zeilenumbruch, `ListenFenster` für beliebige
     Listen.
 
+- 0.34.1 — Bauplan Schritt 30a: `Zustaendigkeit.cs` (Modelle und `ZustaendigkeitRegeln`: Marken, Vorschlag, Bestelltext,
+  `mailto:`), zwei weitere Angaben im Fassungsmodell (`zustaendigkeit`, `bestellweg`), `MarkenArt.Zustaendig`
+  (Hinweis-Farbe), `AngabeFensterZustaendigkeit.cs`, Bestellzeile im Medikamentenplan, `MehrfachWahl`.
+- Beim Ausliefern von 0.33.9–0.33.20 behoben: Der Visiten-Rundgang stand beim Öffnen in Namensreihenfolge statt nach
+  Zimmer (Doppelzimmer: erst Fenster, dann Tür); Oberflächentests an die neuen Versionen angepasst.
+
 ## Offene Punkte
 
+- 09.11.2026 (0.34.1), **Bedenken Datenschutz:** „Bestellung per E-Mail …“ legt Name, Geburtsdatum und Medikamente in
+  eine E-Mail – Gesundheitsdaten. Das Programm sendet nichts selbst (`mailto:`, Regel 6) und zeigt vorher einen Hinweis;
+  ob eine E-Mail an Forensik/FOSA zulässig ist (Verschlüsselung, Einwilligung), müssen Leitung und Datenschutz vor dem
+  Echtbetrieb klären. Bis dahin: lieber Telefon oder Fax.
 - 09.11.2026 (0.34.0): Im Reiter „Angehörige“ fehlt noch die Marke des Schweigepflicht-Zustands (kommt mit Schritt 35);
   „Betreuerausweis öffnen“ und „Dokument öffnen“ kommen mit dem Reiter „Dokumente“ (Schritt 31). Der Überleitungsbogen
   (Schritt 33) nutzt die Ärzte, sobald es ihn gibt.
@@ -1470,6 +1488,11 @@ als Nächstes 30a „Zuständigkeit Forensik und FOSA, Bestellweg der Medikament
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.34.1): Zuständigkeit und Bestellweg sind zwei weitere Angaben im selben Fassungsmodell wie die Reiter
+  (Datenbank-Schritt 35 kennt sie, er ist noch nicht ausgeliefert). Bei FOSA ohne Forensik bleibt der Betreuer zuständig
+  (Vorgabe). Der Bestellweg schlägt nach der Zuständigkeit vor; ohne eigene Angabe steht „nicht erfasst“ (der Vorschlag
+  wird nicht still gespeichert). In die E-Mail kommen nur Name mit Form und Stärke der angekreuzten Medikamente, keine
+  Dosis. Die Überprüfung der Forensik steht als Frist-Marke in der Bewohnerliste.
 - 09.11.2026 (0.34.0): Akte, fünf Reiter – gespeichert wird je Reiter eine Fassung mit dem Inhalt als JSON (eine
   Tabelle statt fünf); so bleiben Verlauf, Schutz gegen Überschreiben und „ab Datum“ für alle gleich. Es gilt die neueste
   Fassung, die schon begonnen hat. Die Zeile „Betreuer“ bleibt in den Stammdaten mit „Betreuer …“ für schnelle
@@ -2308,6 +2331,12 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.34.1:
+
+1. Akte eines Bewohners mit Marke „Forensik“: Reiter Betreuung – oben die Zuständigkeit, beim Betreuer „nicht zuständig“.
+2. Medikamentenplan: „Bestellung über: …“; „Bestellung per E-Mail …“ – Hinweis lesen, das E-Mail-Programm öffnet sich.
+3. „Bestellweg …“ ändern.
 
 Version 0.34.0:
 

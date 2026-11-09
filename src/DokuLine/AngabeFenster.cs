@@ -40,6 +40,8 @@ public sealed partial class AngabeFenster : Form
             case Angabe.Angehoerige: AngehoerigeBauen(Feld, bisher?.Lesen<Angehoerige>()); break;
             case Angabe.Aerzte: AerzteBauen(Feld, bisher?.Lesen<AerzteAngabe>()); break;
             case Angabe.Krankenkasse: KrankenkasseBauen(Feld, bisher?.Lesen<Krankenkasse>()); break;
+            case Angabe.Zustaendigkeit: ZustaendigkeitBauen(Feld, bisher?.Lesen<Zustaendigkeit>()); break;
+            case Angabe.Bestellweg: BestellwegBauen(Feld, bisher?.Lesen<BestellwegAngabe>(), heute); break;
             default: KostentraegerBauen(Feld, bisher?.Lesen<Kostentraeger>()); break;
         }
         Keine.CheckedChanged += (_, _) => FelderSperren();

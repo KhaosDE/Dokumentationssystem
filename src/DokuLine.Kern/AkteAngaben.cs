@@ -6,7 +6,7 @@ namespace DokuLine.Kern;
 // Akte, Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger (Bauplan 30). Je Reiter eine Folge von
 // Fassungen („ab Datum …“, wer, wann); es gilt die neueste, die schon begonnen hat. Drei Zustände (Regel 5):
 // eingetragen · „keine“ · ohne Fassung „nicht erfasst“.
-public enum Angabe { Betreuung, Angehoerige, Aerzte, Krankenkasse, Kostentraeger }
+public enum Angabe { Betreuung, Angehoerige, Aerzte, Krankenkasse, Kostentraeger, Zustaendigkeit, Bestellweg }
 
 public enum AngabeZustand { Eingetragen, Keine }
 
@@ -96,7 +96,9 @@ public static class AngabenRegeln
         Angabe.Angehoerige => "Angehörige",
         Angabe.Aerzte => "Ärzte",
         Angabe.Krankenkasse => "Krankenkasse",
-        _ => "Kostenträger",
+        Angabe.Kostentraeger => "Kostenträger",
+        Angabe.Zustaendigkeit => "Zuständigkeit",
+        _ => "Bestellweg",
     };
 
     public static string KeineText(Angabe a) => a switch
@@ -105,7 +107,9 @@ public static class AngabenRegeln
         Angabe.Angehoerige => "keine Angehörigen bekannt",
         Angabe.Aerzte => "keine Ärzte",
         Angabe.Krankenkasse => "keine Krankenkasse",
-        _ => "kein Kostenträger",
+        Angabe.Kostentraeger => "kein Kostenträger",
+        Angabe.Zustaendigkeit => "weder Forensik noch FOSA",
+        _ => "kein Bestellweg",
     };
 
     public static string Schluessel(Angabe a) => a.ToString().ToLowerInvariant();
@@ -152,6 +156,10 @@ public static class AngabenRegeln
             Angabe.Aerzte when f.Lesen<AerzteAngabe>() is AerzteAngabe a =>
                 $"Hausarzt: {ArztText(a.Hausarzt, personName)} · Psychiater: {ArztText(a.Psychiater, personName)}",
             Angabe.Krankenkasse when f.Lesen<Krankenkasse>() is Krankenkasse k => string.Join(" · ", new[] { k.Kasse, k.Status }.Where(x => x.Length > 0)),
+            Angabe.Zustaendigkeit when f.Lesen<Zustaendigkeit>() is Zustaendigkeit z =>
+                string.Join(" · ", new[] { ZustaendigkeitRegeln.InForensik(z) ? "Forensik" : "", ZustaendigkeitRegeln.InFosa(z, heute) ? "FOSA" : "" }
+                    .Where(x => x.Length > 0).DefaultIfEmpty("weder Forensik noch FOSA")),
+            Angabe.Bestellweg when f.Lesen<BestellwegAngabe>() is BestellwegAngabe w => ZustaendigkeitRegeln.WegText(w.Weg),
             Angabe.Kostentraeger when f.Lesen<Kostentraeger>() is Kostentraeger k =>
                 AktuelleBewilligung(k, heute) is Bewilligung b ? $"{k.Name} bis {Datum.Text(b.Bis)}" : k.Name,
             _ => NichtErfasst,
@@ -193,6 +201,12 @@ public static class AngabenRegeln
                 Z("Zuzahlungsbefreiung", BefreiungText(k), k.Befreiung == JaNein.NichtErfasst);
                 Z("Pflegegrad", PflegegradText(k.Pflegegrad), k.Pflegegrad is null);
                 Z("Ansprechpartner", string.Join(" · ", new[] { k.Ansprechpartner, k.Telefon }.Where(x => x.Length > 0)));
+                break;
+            case Angabe.Zustaendigkeit:
+                return ZustaendigkeitRegeln.Zeilen(f, person);
+            case Angabe.Bestellweg when f.Lesen<BestellwegAngabe>() is BestellwegAngabe w:
+                Z("Bestellweg", ZustaendigkeitRegeln.WegText(w.Weg), w.Weg == Bestellweg.NichtErfasst);
+                Z("Ansprechperson", w.PersonId is null ? "" : person(w.PersonId));
                 break;
             case Angabe.Kostentraeger when f.Lesen<Kostentraeger>() is Kostentraeger k:
                 Z("Kostenträger", k.Name);
@@ -269,6 +283,13 @@ public static class AngabenRegeln
                 if (k.Bewilligungen.Any(b => b.Bis < b.Von)) fehler.Add("Bewilligung: „bis“ liegt vor „von“.");
                 if (k.Bewilligungen.Any(b => b.Leistung.Trim().Length == 0)) fehler.Add("Bewilligung: Leistung fehlt.");
                 if (k.Email.Trim().Length > 0 && !BetreuerRegeln.EmailGueltig(k.Email.Trim())) fehler.Add("E-Mail-Adresse bitte so: name@beispiel.de.");
+                break;
+            case Zustaendigkeit z:
+                if (z.Forensik == JaNein.Ja && z.Klinik.Trim().Length == 0) fehler.Add("Forensik: bitte die Klinik eintragen.");
+                if (z.Fosa == JaNein.Ja && z.Ambulanz.Trim().Length == 0) fehler.Add("FOSA: bitte die Ambulanz eintragen.");
+                if (z.FosaSeit is DateOnly seit && z.FosaBis is DateOnly ende && ende < seit) fehler.Add("FOSA: „bis“ liegt vor „seit“.");
+                break;
+            case BestellwegAngabe:
                 break;
             default:
                 fehler.Add($"{Name(art)}: unbekannter Inhalt.");

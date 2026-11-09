@@ -21,6 +21,8 @@ public sealed partial class Speicher
             {
                 HebFaellig = HebRegeln.Faellig(b, HebBoegen(id), heute, hebFristMonate),
                 Fristen = angaben.TryGetValue(id, out var a) ? AngabenRegeln.Fristen(a, heute) : [],
+                Zustaendig = a?.GetValueOrDefault(Angabe.Zustaendigkeit)?.Lesen<Zustaendigkeit>() is Zustaendigkeit z
+                    ? ZustaendigkeitRegeln.Marken(z, heute) : [],
             };
         }).ToList();
     }

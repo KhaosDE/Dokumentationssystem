@@ -8,7 +8,7 @@ namespace DokuLine.Kern;
 // Abwesend und Ausgang melden Module (z. B. die Ausgangsliste) über die Modulverwaltung.
 // Termin: Termine des Tages auf der Startseite.
 // Angabe: neutrale Angabe aus der Akte (z. B. „offen geführt“).
-public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig, Abwesend, Ausgang, Termin, Angabe, Status, Medikation }
+public enum MarkenArt { Beschluss, Allergie, NichtErfasst, Uebergabe, Wichtig, Abwesend, Ausgang, Termin, Angabe, Status, Medikation, Zustaendig }
 
 public sealed record Marke(MarkenArt Art, string Text);
 

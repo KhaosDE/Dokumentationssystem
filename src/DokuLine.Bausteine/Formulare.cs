@@ -176,3 +176,26 @@ public static class Eingabe
         return fenster.ShowDialog(besitzer) == DialogResult.OK && wahl.SelectedIndex >= 0 ? wahl.SelectedIndex : null;
     }
 }
+
+// Mehrere Einträge ankreuzen (alle vorbelegt); die Indizes der angekreuzten oder null = abgebrochen.
+public static class MehrfachWahl
+{
+    public static List<int>? Zeigen(IWin32Window? besitzer, string titel, string frage, IReadOnlyList<string> eintraege)
+    {
+        using var fenster = new Form
+        {
+            Text = $"{titel} ({Stil.DemoHinweis})", FormBorderStyle = FormBorderStyle.FixedDialog, MaximizeBox = false, MinimizeBox = false,
+            ShowInTaskbar = false, StartPosition = FormStartPosition.CenterParent, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            BackColor = Stil.Fensterhintergrund, Font = Stil.Standard,
+        };
+        var liste = new CheckedListBox { Width = 420, Height = 200, CheckOnClick = true, IntegralHeight = false, AccessibleName = frage };
+        foreach (var e in eintraege) liste.Items.Add(e, true);
+        var raster = Formular.Raster(out var zeile);
+        zeile(null, new Label { Text = frage, AutoSize = true, MaximumSize = new Size(420, 0), UseMnemonic = false });
+        zeile(null, liste);
+        zeile(null, Formular.Knoepfe(fenster, "OK", () => { fenster.DialogResult = DialogResult.OK; fenster.Close(); }));
+        fenster.Controls.Add(raster);
+        Stil.SymbolSetzen(fenster);
+        return fenster.ShowDialog(besitzer) == DialogResult.OK ? [.. liste.CheckedIndices.Cast<int>()] : null;
+    }
+}

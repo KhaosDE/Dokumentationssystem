@@ -334,6 +334,10 @@ public sealed class AkteAnsicht : Panel
             kopfMarken.Controls.Add(feld);
             kopfMarken.Controls.SetChildIndex(feld, 0);
         }
+        // Forensik, FOSA (Bauplan 30a): als Wort in Hinweis-Farbe; die Überprüfung steht im Reiter „Betreuung“.
+        var zust = speicher.Angaben(b.Id!.Value, DateOnly.FromDateTime(DateTime.Now)).GetValueOrDefault(Angabe.Zustaendigkeit)?.Lesen<Zustaendigkeit>();
+        foreach (var m in ZustaendigkeitRegeln.Marken(zust, DateOnly.FromDateTime(DateTime.Now)).Where(m => m.Art == MarkenArt.Zustaendig))
+            kopfMarken.Controls.Add(new MarkenFeld(m.Text, Stil.MarkeFuer(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
         AccessibleName = $"Akte von {b.Name}";
 
         // Allergiehinweis: drei klar verschiedene Darstellungen (Regel 5), immer mit Wort.

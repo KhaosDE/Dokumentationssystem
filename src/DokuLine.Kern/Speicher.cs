@@ -812,7 +812,7 @@ public sealed partial class Speicher : IDisposable
         CREATE TABLE IF NOT EXISTS akte_angaben (
             id          INTEGER PRIMARY KEY,
             bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
-            art         TEXT NOT NULL CHECK (art IN ('betreuung', 'angehoerige', 'aerzte', 'krankenkasse', 'kostentraeger')),
+            art         TEXT NOT NULL CHECK (art IN ('betreuung', 'angehoerige', 'aerzte', 'krankenkasse', 'kostentraeger', 'zustaendigkeit', 'bestellweg')),
             zustand     TEXT NOT NULL CHECK (zustand IN ('eingetragen', 'keine')),
             inhalt      TEXT NOT NULL DEFAULT '',
             ab          TEXT NOT NULL,

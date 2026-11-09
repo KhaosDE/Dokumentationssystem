@@ -7,6 +7,7 @@ public static partial class Demodaten
     public static readonly string[] Krankenkassen = ["Musterkasse Süd", "Beispiel-BKK Nord", "Ersatzkasse Musterland"];
     public static readonly string[] Kostentraeger = ["Bezirk Musterland", "Landkreis Beispielstadt"];
     private const string Leistung = "Besondere Wohnform (Eingliederungshilfe)";
+    public const string Klinik = "Forensische Klinik Musterstadt", Ambulanz = "FOSA Musterstadt";
 
     // inhalt null: „keine“; fehlt ein Reiter in der Folge: „nicht erfasst“.
     public static IEnumerable<(Angabe Art, long BewohnerId, object? Inhalt)> AkteAngaben(IReadOnlyList<Bewohner> bewohner, IReadOnlyList<Person> personen,
@@ -16,9 +17,31 @@ public static partial class Demodaten
         var hausaerzte = aerzte.Where(a => a.Fachrichtung.Contains("Allgemein", StringComparison.OrdinalIgnoreCase) || a.Fachrichtung.Contains("Hausarzt", StringComparison.OrdinalIgnoreCase)).ToList();
         var psychiater = aerzte.Where(a => a.Fachrichtung.Contains("Psychiatr", StringComparison.OrdinalIgnoreCase)).ToList();
         var andere = aerzte.Except(hausaerzte).Except(psychiater).ToList();
+        var forensik = personen.Where(p => p.Gruppe == PersonGruppe.Forensik).Select(p => p.Id).ToList();
+        var fosa = personen.Where(p => p.Gruppe == PersonGruppe.Fosa).Select(p => p.Id).ToList();
+        var jeBereich = new Dictionary<string, int>();
         for (int i = 0; i < bewohner.Count; i++)
         {
             long id = bewohner[i].Id!.Value;
+            // Zuständigkeit: je Bereich zwei mit Forensik, drei mit FOSA (einer davon auch Forensik); jeder fünfte übrige
+            // nicht erfasst. Bestellweg folgt der Zuständigkeit, bei jedem achten nicht erfasst.
+            int n = jeBereich[bewohner[i].Wohnbereich] = jeBereich.GetValueOrDefault(bewohner[i].Wohnbereich) + 1;
+            bool inForensik = n is 2 or 9, inFosa = n is 9 or 13 or 17;
+            var zust = new Zustaendigkeit
+            {
+                Forensik = inForensik ? JaNein.Ja : JaNein.Nein, Fosa = inFosa ? JaNein.Ja : JaNein.Nein,
+                Klinik = inForensik ? Klinik : "", ForensikSeit = inForensik ? heute.AddDays(-900 - 31 * n) : null,
+                Status = inForensik ? (n == 2 ? "Langzeitbeurlaubung" : "Probewohnen") : "",
+                Ueberpruefung = inForensik ? heute.AddDays(n == 2 ? 40 : 200) : null, ForensikPersonen = inForensik ? forensik : [],
+                Ambulanz = inFosa ? Ambulanz : "", FosaSeit = inFosa ? heute.AddDays(-400 - 7 * n) : null, FosaPersonen = inFosa ? fosa : [],
+            };
+            if (inForensik || inFosa || n % 5 != 0) yield return (Angabe.Zustaendigkeit, id, zust);
+            if (n % 8 != 0)
+            {
+                var weg = ZustaendigkeitRegeln.Vorschlag(zust, heute);
+                long? person = weg switch { Bestellweg.Forensik => forensik.FirstOrDefault(), Bestellweg.Fosa => fosa.FirstOrDefault(), _ => null };
+                yield return (Angabe.Bestellweg, id, new BestellwegAngabe { Weg = weg, PersonId = person == 0 ? null : person });
+            }
             // Betreuung: wie in der bisherigen Demo (Betreuer, „keine“ oder nicht erfasst), dazu Art, Aufgaben, Fristen.
             if (betreuer.TryGetValue(id, out var bt))
             {

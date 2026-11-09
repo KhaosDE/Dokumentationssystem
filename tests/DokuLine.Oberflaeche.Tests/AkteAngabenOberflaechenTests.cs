@@ -98,3 +98,65 @@ public class AkteAngabenOberflaechenTests
         Assert.Equal(hausarzt.Anzeige, wahl.Liste.Items[0]);
     });
 }
+
+// Bauplan 30a: Zuständigkeit Forensik und FOSA im Reiter „Betreuung“, Marken, Bestellweg im Medikamentenplan.
+[Collection("Oberflaeche")]
+public class ZustaendigkeitOberflaechenTests
+{
+    private static DateOnly Heute => DateOnly.FromDateTime(DateTime.Today);
+
+    [Fact]
+    public void Forensik_FOSA_und_Bestellung_per_EMail() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        var forensik = u.Speicher.AlleBewohner().First(b => b.Wohnbereich == "R1" &&
+            ZustaendigkeitRegeln.InForensik(u.Speicher.Angaben(b.Id!.Value, Heute).GetValueOrDefault(Angabe.Zustaendigkeit)?.Lesen<Zustaendigkeit>()));
+        f.BereichWaehlen("Dokumentation");
+        f.Bewohner.AkteZeigen(forensik.Id!.Value);
+        var akte = f.Bewohner.Akte;
+        Assert.Contains("Forensik", akte.KopfMarken);
+        akte.Reiter.Waehlen("Betreuung");
+        Assert.Equal(("Forensik", "ja"), (akte.Angaben.Zeilen[0].Beschriftung, akte.Angaben.Zeilen[0].Wert));
+        Assert.Contains(akte.Angaben.Zeilen, z => z.Beschriftung == "Klinik" && z.Wert.StartsWith(Demodaten.Klinik));
+        if (akte.Angaben.Zeilen.FirstOrDefault(z => z.Beschriftung == "Betreuer") is { Wert: not null } betreuer && betreuer.Wert != AngabenRegeln.NichtErfasst)
+            Assert.EndsWith(ZustaendigkeitRegeln.BetreuerNichtZustaendig, betreuer.Wert);
+        Assert.True(akte.Angaben.ZustaendigkeitKnopf.Visible);
+        Hilfe.Foto(f, "138_betreuung_forensik");
+
+        // Medikamentenplan: „Bestellung über: Forensik · …“; per E-Mail nur nach dem Hinweis, mit den angekreuzten Medikamenten.
+        akte.Reiter.Waehlen("Medikamentenplan");
+        var m = akte.Medikation;
+        Assert.StartsWith("Bestellung über: Forensik", m.BestellungText.Text);
+        string? geoeffnet = null;
+        var vorher = Extern.Oeffnen;
+        Extern.Oeffnen = a => geoeffnet = a;
+        try
+        {
+            m.MedikamenteWaehlen = namen => [0];
+            m.EmailBestaetigen = text => { Assert.Contains("Gesundheitsdaten", text); return false; };
+            if (Stil.Sperrgrund(m.BestellenKnopf) is null)
+            {
+                Assert.False(m.Bestellen());   // abgebrochen: nichts geöffnet
+                Assert.Null(geoeffnet);
+                m.EmailBestaetigen = _ => true;
+                Assert.True(m.Bestellen());
+                Assert.StartsWith("mailto:", geoeffnet);
+                Assert.Contains(Uri.EscapeDataString(ZustaendigkeitRegeln.Betreff(forensik)), geoeffnet);
+            }
+        }
+        finally { Extern.Oeffnen = vorher; }
+
+        // Zuständigkeit ändern: FOSA aus, Forensik bleibt.
+        using (var fenster = new AngabeFenster(u.Speicher, forensik, Angabe.Zustaendigkeit))
+        {
+            Assert.Equal((int)JaNein.Ja, fenster.ForensikWahl.SelectedIndex);
+            fenster.FosaWahl.SelectedIndex = (int)JaNein.Nein;
+            Assert.True(fenster.Speichern());
+        }
+        var neu = u.Speicher.Angaben(forensik.Id!.Value, Heute)[Angabe.Zustaendigkeit].Lesen<Zustaendigkeit>()!;
+        Assert.Equal((JaNein.Ja, JaNein.Nein), (neu.Forensik, neu.Fosa));
+    });
+}
