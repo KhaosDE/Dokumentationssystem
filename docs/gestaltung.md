@@ -22,6 +22,16 @@ Code, **kein Logo und kein Name der Einrichtung**.
    Einstellungen (Datei bleibt im Datenordner, nie im Repository).
 8. **Hell als Vorgabe**, Dunkel umschaltbar (wirksam nach Neustart).
 9. Symbole aus „Segoe Fluent Icons“ (Windows-11-Symbolschrift), wo vorhanden.
+10. **Auf Anhieb zu finden** (Vorgabe Tobi, 09.11.2026: viele Kollegen sind technisch wenig
+    bewandert, das Programm muss übersichtlich bleiben):
+    - Jeder sieht nur, was er darf und braucht (fehlende Rechte blenden aus, nicht ausgrauen).
+    - Gleiche Dinge stehen immer an derselben Stelle: Ort oben links in der Kopfzeile, Aktionen
+      in der Leiste darunter, Hauptaktion links, Drucken rechts.
+    - Knöpfe immer mit Wort, nie nur Symbol (Ausnahme: Kuvert und Einklappen mit Tooltip).
+    - Keine versteckten Klappmenüs für Wichtiges; Umschalter statt Auswahllisten, wo es wenige
+      Möglichkeiten gibt (z. B. Wohnbereich R1 · R2 · R3).
+    - Einfache Wörter aus dem Alltag des Wohnbereichs, keine Fachbegriffe aus der Technik.
+    - Der Wohnbereich wird einmal gewählt (Übersicht) und gilt überall.
 
 ## Farben, helle Darstellung (RGB)
 
