@@ -5,8 +5,23 @@ namespace DokuLine;
 // Bereich „Dokumentation“: links die Bewohner als schmale, einklappbare Liste („Nachname, Vorname“, Bereichswahl und
 // Suche darüber), rechts ihre Berichte mit Filter. Pfeiltasten blättern; Doppelklick oder „Akte öffnen“ öffnet die
 // Akte. Pro Ansicht genau eine Hauptaktion in Akzentfarbe.
-public sealed class BewohnerBereich : Panel
+public sealed class BewohnerBereich : Panel, IBereichSeite
 {
+    // Kopfzeile und Aktionsleiste je nach Ansicht (Liste oder Akte); das Hauptfenster übernimmt sie beim Wechsel.
+    public string Titel { get; private set; } = "Dokumentation";
+    public string KopfText { get; private set; } = "";
+    public IReadOnlyList<Button> Knoepfe { get; private set; } = [];
+    void IBereichSeite.Zeigen(bool filterBehalten) => UebersichtZeigen();
+
+    private void KopfSetzen(string klein, string titel, IReadOnlyList<Button>? knoepfe = null)
+    {
+        (KopfText, Titel) = (klein, titel);
+        kopf.TexteSetzen(klein, titel);
+        if (knoepfe is null) return;
+        Knoepfe = knoepfe;
+        kopf.KnoepfeSetzen([.. knoepfe]);
+    }
+
     public const int LinksBreite = 240, LinksEingeklappt = 36;
     private readonly Speicher speicher;
     private readonly KopfBereich kopf;
@@ -208,14 +223,14 @@ public sealed class BewohnerBereich : Panel
             Namen.SelectedIndex = index;
             string anzahl = imBereich.Count == 1 ? "1 Bewohner" : $"{imBereich.Count} Bewohner";
             string zahl = Zeilen.Count == imBereich.Count ? anzahl : $"{Zeilen.Count} von {anzahl}";
-            kopf.TexteSetzen($"{bereich} · {zahl}", "Dokumentation");
+            KopfSetzen($"{bereich} · {zahl}", "Dokumentation");
         }
         finally { abgleichen = false; }
         BerichteZeigen();
         Akte.Visible = false;
         listenFlaeche.Visible = aufgabenRahmen.Visible = true;
         AkteSichtbar = false;
-        kopf.KnoepfeSetzen(BerichtNeuKnopf, BedarfKnopf, AkteKnopf, AnsichtKnopf, DruckKnopf);
+        KopfSetzen(KopfText, "Dokumentation", [BerichtNeuKnopf, BedarfKnopf, AkteKnopf, AnsichtKnopf, DruckKnopf]);
     }
 
     public bool Waehlen(long bewohnerId)
@@ -311,7 +326,7 @@ public sealed class BewohnerBereich : Panel
         if (!AkteSichtbar) { UebersichtZeigen(); return; }
         if (Akte.Bewohner?.Id is not long id || speicher.Bewohner(id) is not Bewohner b) { UebersichtZeigen(); return; }
         Akte.NeuLaden();
-        kopf.TexteSetzen("Dokumentation", "Bewohnerakte");   // der Name steht nur einmal, auf der Karte darunter
+        KopfSetzen("Dokumentation", "Bewohnerakte");   // der Name steht nur einmal, auf der Karte darunter
         AkteKnoepfeSperren();
     }
 
@@ -326,10 +341,10 @@ public sealed class BewohnerBereich : Panel
         listenFlaeche.Visible = aufgabenRahmen.Visible = false;
         Akte.Visible = true;
         AkteSichtbar = true;
-        kopf.TexteSetzen("Dokumentation", "Bewohnerakte");   // der Name steht nur einmal, auf der Karte darunter
         AkteKnoepfeSperren();
-        kopf.KnoepfeSetzen(zurueckKnopf, berichteKnopf, nachrichtenKnopf, statusKnopf, AerztlichKnopf, berichtKnopf,
-            bearbeitenKnopf);
+        // Der Name steht nur einmal, auf der Karte darunter.
+        KopfSetzen("Dokumentation", "Bewohnerakte",
+            [zurueckKnopf, berichteKnopf, nachrichtenKnopf, statusKnopf, AerztlichKnopf, berichtKnopf, bearbeitenKnopf]);
     }
 
     // Statusmeldung setzen oder aufheben (Mehrplatzbetrieb); danach die Akte neu lesen.

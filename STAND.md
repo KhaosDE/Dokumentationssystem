@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.9** (Bauplan Schritt 29s, Teil 2: Kommentare ohne Verlauf).
+Stand: 09.11.2026. Version: **0.33.10** (Bauplan Schritt 29s, Teil 3: Bereichsseiten und große Dateien).
 
 ## Aktuell
 
@@ -239,8 +239,11 @@ Leerzeichen und Einrückung nach `.editorconfig` und listet Dateien, Methoden un
 Neu in 0.33.9 (Aufräumen, das Programm verhält sich wie vorher): Die Kommentare im Code erzählen keinen Verlauf mehr
 („Schritt …“, „0.33.2: vorher …“); lange Erklärungen stehen in `docs/technik.md`.
 
+Neu in 0.33.10 (Aufräumen, das Programm verhält sich wie vorher): Alle Bereiche der Seitenleiste folgen einer
+gemeinsamen Schnittstelle; die größten Dateien sind geteilt. Damit ist Schritt 29s abgeschlossen.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29s Teil 3 „Bereichsseiten und große Dateien“ (0.33.10).
+als Nächstes 29e „Nachrichten: Kuvert in der Kopfzeile“ (0.33.11).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1175,10 +1178,22 @@ als Nächstes 29s Teil 3 „Bereichsseiten und große Dateien“ (0.33.10).
     `docs/technik.md`.
   - Code-Maße nachher: 33.442 Zeilen, 2.000 Kommentarzeilen (12 mit Verlauf).
 
+- 0.33.10 — Bauplan Schritt 29s, Teil 3 (Aufräumen, ohne neue Funktion):
+  - `IBereichSeite` (Titel, Kopftext, Knöpfe, Zeigen): alle Seiten der Seitenleiste, Platzhalter und Module;
+    `Hauptfenster.BereichWaehlen` ruft jede Seite gleich auf, statt einer `if`-Kette je Bereich.
+  - Große Dateien geteilt: `Hauptfenster` (Aufbau, Anmeldung, Abläufe, Seitenleiste) und `EinstellungenSeite`
+    (Aufbau, Karten, Handeln) als Teil-Klassen; Nebenklassen von Kalender, Medikation, Visiten, Aufgaben, Übersicht,
+    Nachrichten und Therapie in eigene Dateien.
+  - Code-Maße nachher (vorher in Klammern): 33.574 Zeilen (33.480), 2.010 Kommentarzeilen (2.038), davon 12 mit
+    Verlauf (301), 14 Dateien über 400 Zeilen (21), 87 Methoden über 40 Zeilen (88), rund 2.050 Zeilen über 120
+    Zeichen (2.057).
+
 ## Offene Punkte
 
-- Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; sie werden
-  nach der Pfadfinderregel gekürzt, sobald die Datei geändert wird.
+- Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
+  Zeilen sind länger als 120 Zeichen, 87 Methoden länger als 40 Zeilen (vor allem Aufbau von Fenstern) und 14
+  Dateien länger als 400 Zeilen (am größten `Speicher.cs` und `Demodaten.cs`). Sie werden nach der Pfadfinderregel
+  kleiner, sobald die Datei geändert wird; das Skript im Build zeigt den Stand.
 
 - Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
   Termine des Tages für den Kasten „Termine heute“ ein zweites Mal (der Kasten braucht auch abgesagte Termine, die
@@ -1254,6 +1269,10 @@ als Nächstes 29s Teil 3 „Bereichsseiten und große Dateien“ (0.33.10).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.10): Lange Zeilen und lange Methoden werden nicht auf einmal umgebrochen: Ein maschineller Umbruch
+  macht den Code schlechter lesbar (bei 29b ausprobiert), ein Umbau von Hand aller 2.000 Stellen wäre ein großes
+  Risiko ohne Nutzen für die Vorführung. Geteilt wurden die Dateien, die der Eintrag zuerst nennt.
 
 - 09.11.2026 (0.33.8): Geprüft wird zunächst nur die Formatierung (Leerzeichen, Einrückung), nicht der ganze
   Stil: Stilregeln als Fehler hätten bei „Warnungen sind Fehler“ den Build sofort angehalten. Die Größen meldet das
@@ -2010,6 +2029,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.10: Jeden Bereich der Seitenleiste einmal öffnen – Kopfzeile und Aktionsleiste sind wie vorher
+(Aufräumen, keine neue Funktion).
 
 Version 0.33.9: nichts Neues zum Ansehen im Programm (Aufräumen).
 

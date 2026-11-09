@@ -6,8 +6,12 @@ namespace DokuLine;
 // Bereich „Übergabe“: nur die Übergabe-Einträge, keine übrigen Berichte. Oben „Wohnbereich
 // allgemein“, darunter nach Bewohner gruppiert. Einträge bleiben stehen, bis sie ablaufen oder
 // erledigt sind; gelöscht wird nichts (erledigte und abgelaufene lassen sich einblenden).
-public sealed class UebergabeSeite : Panel
+public sealed class UebergabeSeite : Panel, IBereichSeite
 {
+    string IBereichSeite.Titel => "Übergabe";
+    IReadOnlyList<Button> IBereichSeite.Knoepfe => [];
+    void IBereichSeite.Zeigen(bool filterBehalten) => Besuch();
+
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
     private readonly List<Control> inhalt = [];

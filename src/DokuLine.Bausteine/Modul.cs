@@ -22,13 +22,15 @@ public interface IModul
 public sealed record Untermodul(string Schluessel, string Name, string Beschreibung);
 
 // Die Seite eines Moduls rechts neben der Seitenleiste.
-public abstract class ModulSeite : Panel
+public abstract class ModulSeite : Panel, IBereichSeite
 {
+    public string Titel { get; set; } = "";   // der Name in der Seitenleiste
     public abstract string KopfText { get; }
     public virtual IReadOnlyList<Button> Knoepfe => [];
 
     // Beim Wechsel in den Bereich: frisch laden.
     public abstract void Zeigen();
+    void IBereichSeite.Zeigen(bool filterBehalten) => Zeigen();
 
     // Etwas hat sich geändert (Kopftext und Marken neu).
     public event Action? Geaendert;

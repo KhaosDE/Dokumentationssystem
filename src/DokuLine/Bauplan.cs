@@ -61,12 +61,19 @@ public sealed class PlatzhalterKarte : KartenFlaeche
 }
 
 // Eine ganze Seite für einen noch nicht gebauten Bereich.
-public sealed class PlatzhalterSeite : Panel
+public sealed class PlatzhalterSeite : Panel, IBereichSeite
 {
+    private readonly Bauplan.Vorhaben vorhaben;
+    public string Titel { get; set; } = "";
+    public string KopfText => $"Kommt in Version {vorhaben.Version}";
+    IReadOnlyList<Button> IBereichSeite.Knoepfe => [];
+    void IBereichSeite.Zeigen(bool filterBehalten) { }
+
     public PlatzhalterKarte Karte { get; } = new();
 
     public PlatzhalterSeite(Bauplan.Vorhaben vorhaben)
     {
+        this.vorhaben = vorhaben;
         BackColor = Stil.Seite;
         Karte.Setzen(vorhaben.Version, vorhaben.Beschreibung);
         Controls.Add(Karte);

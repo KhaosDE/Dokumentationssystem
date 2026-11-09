@@ -2307,7 +2307,7 @@ Umfang:
   damit es im Programm einheitlich bleibt (`docs/gestaltung.md` ergänzen).
 
 ## Aufräumen nach den Code-Regeln (ohne neue Funktionen)
-Status: freigegeben (Bauplan Schritt 29s; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.8–0.33.10; Bauplan Schritt 29s, Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der vorhandene Code wird nach `docs/code-regeln.md` aufgeräumt. Das Programm verhält sich
 danach genau wie vorher.
