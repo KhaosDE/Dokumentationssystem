@@ -110,3 +110,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.33.13 Tagesplan hell im normalen Programmstil, Statusfarben an einer Stelle (Bauplan 29g).
 - 09.11.2026 — Claude Code: 0.33.14 Übergabe nach Schichten in kompakten Zeilen, „nur ungelesene“, Übergabeliste auf einer Seite (Bauplan 29h).
 - 09.11.2026 — Claude Code: 0.33.15 Wochenplan als fester Plan ohne Datum, „gültig seit“, Teilnahme nur im Tagesplan (Bauplan 29i).
+- 09.11.2026 — Claude Code: 0.33.16 Ausgangsliste einzeilig ohne Unterbringung, alle Bewohner des Bereichs ohne Bildlauf (zwei Spalten bei knapper Höhe); kleine Knöpfe passen in kompakte Zeilen (Bauplan 29j).

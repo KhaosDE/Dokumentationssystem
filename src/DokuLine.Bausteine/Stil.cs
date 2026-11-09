@@ -281,6 +281,19 @@ public static class Stil
 
     public static string? Sperrgrund(Button knopf) => (knopf as Knopf)?.Sperrgrund;
 
+    // Kleiner Knopf für kompakte Zeilen (Übergabe, Tagesplan, Ausgangsliste): kleine Schrift, ohne Mindesthöhe,
+    // damit er in eine Zeile von rund 30 px passt.
+    public static Button KleinerKnopf(string text, bool haupt = false)
+    {
+        var knopf = haupt ? HauptKnopf(text) : NebenKnopf(text);
+        knopf.Font = haupt ? Abschnitt : Klein;
+        knopf.MinimumSize = Size.Empty;
+        knopf.Padding = new Padding(AbstandMini, 0, AbstandMini, 0);
+        knopf.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        knopf.Height = 24;
+        return knopf;
+    }
+
     private static Button Grundknopf(string text)
     {
         var knopf = new Knopf

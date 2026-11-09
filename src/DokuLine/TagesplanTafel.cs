@@ -242,8 +242,7 @@ public sealed class TafelZeileAnzeige : Control
         AccessibleName = $"{t.ZeitText}, {daten.Bewohner.Name}, Zimmer {daten.Bewohner.Zimmer}, {t.Titel}" + (t.Ort.Length > 0 ? $", {t.Ort}" : "") +
                          (t.Begleitung.Length > 0 ? $", {t.Begleitung}" : "") + $", {StatusWort}" + (Detail.Length > 0 ? $" {Detail}" : "");
         if (!daten.Zeile.Therapie) return;
-        BestaetigenKnopf = Stil.NebenKnopf("bestätigen ▾");
-        BestaetigenKnopf.Font = Stil.Klein;
+        BestaetigenKnopf = Stil.KleinerKnopf("bestätigen ▾");
         BestaetigenKnopf.AccessibleName = $"Teilnahme bestätigen: {daten.Bewohner.Name}, {t.Titel}";
         BestaetigenKnopf.Click += (_, _) => menueZeigen(this);
         Stil.Sperren(BestaetigenKnopf, grund);

@@ -154,10 +154,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   zurück geplant …“ mit „losgefahren“ und „zurück“; „Neue Fahrt …“ mit Warnung bei Doppelbuchung.
   Mitfahrende stehen im Tagesplan und sind während der Fahrt abwesend. Die Fahrzeugliste steht in
   den Einstellungen.
-- **Ausgangsliste** (links, Modul): eine Liste wie die Tagesliste – je Bewohner eine Zeile mit
-  Zimmer, Name, Ausgang, Unterbringung, Ausgängen von heute (von–bis, Hz.) und „Stand jetzt“. Wer
-  unterwegs ist, steht oben (Überfällige rot und zuerst); „raus“ und „zurück“ direkt in der Zeile,
-  alles andere über „…“ oder Rechtsklick. Filter „nur unterwegs“ und „nur mit Beschränkung“.
+- **Ausgangsliste** (links, Modul): alle Bewohner des gewählten Bereichs auf einen Blick, je eine
+  Zeile mit Zimmer, Name, Status und Rückkehrzeit (bei wenig Höhe in zwei Spalten). Wer unterwegs
+  ist, steht oben (Überfällige rot und zuerst); „raus ▾“ und „zurück“ direkt in der Zeile (auch per
+  Doppelklick), alles andere über „…“ oder Rechtsklick. Filter „nur unterwegs“ und „nur mit Beschränkung“.
   Je Bewohner Ausgangszeiten (allein / mit Bewohner),
   Anwesenheit und Abwesenheit mit Grund und Frist, Unterbringung mit Fristen (eine
   Ausgangsbeschränkung geht nur mit Beschluss oder Forensik), Verlauf je Person und die

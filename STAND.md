@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.15** (Bauplan Schritt 29i: Wochenplan ohne Datum).
+Stand: 09.11.2026. Version: **0.33.16** (Bauplan Schritt 29j: Ausgangsliste auf einen Blick).
 
 ## Aktuell
 
@@ -269,8 +269,14 @@ Spaltenköpfen, kein Blättern, kein „Diese Woche“. Angezeigt wird der heute
 und „Verlauf …“. Die Teilnahme an Therapien steht nur noch im Tagesplan; einzelne Termine aus dem Kalender stehen nicht
 mehr im Wochenplan. Der Ausdruck ist ebenfalls ohne Datum.
 
+Neu in 0.33.16: Die **Ausgangsliste** zeigt alle Bewohner des gewählten Bereichs ohne Bildlauf: je eine Zeile mit
+Zimmer · Name · Status · Rückkehr, ohne Unterbringung, Beschluss und Fristen (die stehen in der Akte und im Fenster
+„Unterbringung …“). Reicht die Höhe nicht (z. B. 1366 × 768), stehen die Zeilen in zwei Spalten. In der Zeile „raus ▾“
+(allein, mit Bewohner) bzw. „zurück“ und „…“; Doppelklick macht dasselbe. Außerdem passen die kleinen Knöpfe in der
+Übergabe und im Tagesplan jetzt in ihre Zeile.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29j „Ausgangsliste: alle Bewohner auf einen Blick“ (0.33.16).
+als Nächstes 29k „Visite: Psychiater und Hausarzt getrennt“ (0.33.17).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1249,6 +1255,13 @@ als Nächstes 29j „Ausgangsliste: alle Bewohner auf einen Blick“ (0.33.16).
     `PlanGueltigSeit`.
   - Akte → Wochenplan: Blättern, „Diese Woche“ und Teilnahme-Menü entfernt; „gültig seit …“; Ausdruck ohne Datum.
 
+- 0.33.16 — Bauplan Schritt 29j:
+  - Modul Ausgangsliste: `ListenZeile` einzeilig (Zimmer, Bewohner, Status, Rückkehr), „raus ▾“-Menü, Doppelklick;
+    `AusgangslisteSeite` ohne Zwischenüberschriften, zwei Spalten bei knapper Höhe (`Spalten`); vermerkt in
+    `src/DokuLine.Modul.Ausgangsliste/AENDERUNGEN.md`.
+  - `Stil.KleinerKnopf`: kleiner Knopf ohne Mindesthöhe für kompakte Zeilen. Korrektur: Die Knöpfe in Übergabe-Zeilen
+    (0.33.14) und „bestätigen ▾“ im Tagesplan (0.33.13) hatten noch die Mindesthöhe 36 px und ragten über die Zeile.
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1264,9 +1277,9 @@ als Nächstes 29j „Ausgangsliste: alle Bewohner auf einen Blick“ (0.33.16).
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
   den Bildschirmfotos `109_…` und den Zeiten des Testlaufs von 0.29.10):
-  - **Ausgangsliste** zeigt alle 69 Bewohner aller Bereiche; einen Filter nach Wohnbereich hat sie nicht.
-    Ihr Aufbau dauert im Testlauf **6–9 Sekunden** (alle anderen Ansichten unter 0,25 Sekunden); bei
-    1366 × 768 passen zwei Bewohner auf den Bildschirm.
+  - ~~**Ausgangsliste** zeigt alle 69 Bewohner aller Bereiche; einen Filter nach Wohnbereich hat sie nicht.~~ Mit
+    0.33.7 nur der gewählte Bereich, mit 0.33.16 alle 23 ohne Bildlauf. Offen: Ihr Aufbau dauerte im Testlauf
+    **6–9 Sekunden** (alle anderen Ansichten unter 0,25 Sekunden); mit einem Drittel der Zeilen neu messen.
   - **Küchendienst** geht reihum über alle belegten Zimmer aller drei Bereiche (42); je Wohnbereich
     getrennt wäre näher an der Wirklichkeit.
   - ~~**Übersicht:** Bei 1920 × 1080 sind 12 der 23 Karten ohne Bildlauf zu sehen; „Termine heute“ zählt bei
@@ -1330,6 +1343,12 @@ als Nächstes 29j „Ausgangsliste: alle Bewohner auf einen Blick“ (0.33.16).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.16): In der Ausgangsliste fallen auch die Spalten „Ausgang“ (Stunden) und „Heute“ weg: Sonst passen
+  nicht alle 23 Bewohner und zwei Spalten nicht nebeneinander. Die Ausgangsstunden stehen im Hinweis am Namen und im
+  Fenster „Ausgang ändern …“, die Ausgänge des Tages im Nachtbericht und in der Tagesliste. Doppelklick auf eine Zeile:
+  „zurück“, wenn jemand unterwegs ist, sonst das Menü „raus“ – ein Klick weniger, ohne etwas ungefragt zu beginnen.
+  Zwei Spalten erst ab 2 × 520 px Breite, sonst lieber Bildlauf als abgeschnittene Namen.
 
 - 09.11.2026 (0.33.15): Einzelne Termine aus dem Kalender (Arzttermine, Heimfahrten, Fahrten) stehen nicht mehr im
   Wochenplan: Ein Plan ohne Datum kann keinen Termin an einem bestimmten Tag zeigen. Sie stehen im Kalender und am
@@ -2116,6 +2135,10 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.16: Ausgangsliste bei 1366 × 768: alle 23 Bewohner von R1 ohne Bildlauf in zwei Spalten; bei 1920 × 1080
+in einer Liste. Keine Unterbringung in der Zeile. „raus ▾“ → „raus allein“; Doppelklick auf eine unterwegs-Zeile →
+zurück. Übergabe und Tagesplan: die kleinen Knöpfe sitzen in ihrer Zeile.
 
 Version 0.33.15: Akte → Wochenplan: Spalten nur „Montag“ … „Sonntag“, kein Blättern, darüber „gültig seit …“ und
 „Verlauf …“. Klick auf eine Therapie öffnet nichts mehr (Teilnahme im Tagesplan). „Drucken …“ ohne Datum.

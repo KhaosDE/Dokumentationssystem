@@ -19,9 +19,9 @@ public sealed class UebergabeZeile : Control
     public Label Kuerzel { get; } = Beschriftung(Stil.Klein, Stil.TextMittel);
     public Label Herkunft { get; } = Beschriftung(Stil.Klein, Stil.TextLeise);
     public Label GelesenText { get; } = Beschriftung(Stil.Klein, Stil.TextMittel);
-    public Button Gelesen { get; } = KleinKnopf("Gelesen");
-    public Button Erledigt { get; } = KleinKnopf("Erledigt");
-    public Button Verlaengern { get; } = KleinKnopf("Verlängern …");
+    public Button Gelesen { get; } = Stil.KleinerKnopf("Gelesen");
+    public Button Erledigt { get; } = Stil.KleinerKnopf("Erledigt");
+    public Button Verlaengern { get; } = Stil.KleinerKnopf("Verlängern …");
     public List<MarkenFeld> Marken { get; } = [];
     public IReadOnlyList<string> MarkenTexte { get; }
     public bool Aufgeklappt { get; private set; }
@@ -75,13 +75,6 @@ public sealed class UebergabeZeile : Control
 
     private static Label Beschriftung(Font schrift, Color farbe) =>
         new() { AutoSize = false, Font = schrift, ForeColor = farbe, BackColor = Stil.Flaeche, UseMnemonic = false };
-
-    private static Button KleinKnopf(string text)
-    {
-        var k = Stil.NebenKnopf(text);
-        k.Font = Stil.Klein;
-        return k;
-    }
 
     public void Umschalten()
     {
@@ -168,7 +161,7 @@ public sealed class UebergabeAbschnitt : Control
     public string Titel { get; }
     public Color Farbe { get; }
     public List<UebergabeZeile> Zeilen { get; }
-    public Button AlleGelesen { get; } = Stil.NebenKnopf("Alle in diesem Abschnitt gelesen");
+    public Button AlleGelesen { get; } = Stil.KleinerKnopf("Alle in diesem Abschnitt gelesen");
     public bool Eingeklappt { get; private set; }
     public string KopfText => $"{Titel} · {Zeilen.Count}";
 
@@ -184,7 +177,6 @@ public sealed class UebergabeAbschnitt : Control
         BackColor = Stil.Flaeche;
         kopf.ForeColor = farbe == Stil.KarteRand ? Stil.TextMittel : farbe;
         zaehler.Text = $"· {zeilen.Count}";
-        AlleGelesen.Font = Stil.Klein;
         AlleGelesen.Visible = AlleGelesen.Enabled = mitAlleGelesen;
         leer.Visible = zeilen.Count == 0;
         Controls.AddRange([kopf, zaehler, AlleGelesen, leer, .. zeilen]);

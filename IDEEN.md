@@ -2046,7 +2046,7 @@ Umfang:
 - Ausdruck ebenfalls ohne Datum.
 
 ## Ausgangsliste: alle Bewohner auf einen Blick, ohne Unterbringung
-Status: freigegeben (Bauplan Schritt 29j; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.16; Bauplan Schritt 29j; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Ausgangsliste zeigt alle Bewohner des Bereichs auf einmal, ohne Angaben zur Unterbringung.
 Warum: Vorgabe Tobi (09.11.2026): Die Anzeige der Unterbringung ist hier überflüssig; man muss alle
