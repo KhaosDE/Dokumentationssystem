@@ -1220,7 +1220,9 @@ als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33
     Darüberfahren kräftiger) für die vier Kästen und die Bewohnerliste der Übersicht und die Spalten der Laufenden
     Therapien; `docs/gestaltung.md` ergänzt.
 
-- 0.33.8 — Bauplan Schritt 29s, Teil 1 (Aufräumen, ohne neue Funktion):
+- 0.33.8 — Bauplan Schritt 29s, Teil 1 (Aufräumen, ohne neue Funktion). Der Commit auf `main` (607245b) trägt
+  versehentlich den Titel „Übergabe nach Schichten (Bauplan 29h)“; sein Inhalt ist dieser Schritt. Die Übergabe nach
+  Schichten kam mit 0.33.14.
   - `.editorconfig` (UTF-8, Einrückung 4, Zeilenende ohne Leerzeichen, Schreibweise des Projekts für kurze Blöcke)
     und im Windows-Build „Format prüfen“ (`dotnet format whitespace --folder --verify-no-changes`); die Abweichungen
     sind einmal angeglichen.
