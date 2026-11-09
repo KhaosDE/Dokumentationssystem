@@ -40,7 +40,7 @@ public class MehrplatzOberflaechenTests
 
         // Aufgaben zwischen den Fenstern: der Zähler des anderen stimmt nach dem Abgleich.
         int vorher = f2.Navigation.Single(n => n.Text == "Aufgaben").Anzahl ?? 0;
-        u.Speicher.AufgabeSpeichern(AufgabenRegeln.AusEingabe(new AufgabeEingabe { Text = "Fenster putzen", Verfasser = "AB" }, DateTime.Now));
+        u.Speicher.AufgabeSpeichern(AufgabenRegeln.AusEingabe(new AufgabeEingabe { Text = "Fenster putzen", Verfasser = "AB", Bereich = "R1" }, DateTime.Now));
         f2.AenderungenVonAnderen();
         Assert.Equal(vorher + 1, f2.Navigation.Single(n => n.Text == "Aufgaben").Anzahl);
     });

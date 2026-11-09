@@ -236,12 +236,12 @@ public sealed class Hauptfenster : Form
         speicher.StatusGeaendert += StatusNeu;
         speicher.MitarbeiterGeaendert += RechteNeu;
         speicher.BezugGeaendert += StatusNeu;
+        ArbeitsbereichPruefen(zuruecksetzen: true);   // vor den Zählern: Sie zählen nur den gewählten Bereich
         AufgabenZaehlen();
         BenutzerAnzeigen();
         ArbeitsplatzAnzeigen();
         MenueSetzen(Einstellungen.Laden().MenueEingeklappt, merken: false);
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
-        ArbeitsbereichPruefen(zuruecksetzen: true);
         // Erst „Dokumentation“ (baut die Liste); das Programm wechselt danach zur Übersicht (Startbereich).
         BereichWaehlen("Dokumentation");
         datenstand = Datenstand();
@@ -475,9 +475,9 @@ public sealed class Hauptfenster : Form
     {
         if (IsDisposed) return;
         BenutzerAnzeigen();
+        ArbeitsbereichPruefen(zuruecksetzen: !Recht.Angemeldet);
         AufgabenZaehlen();
         NavigationRechte();
-        ArbeitsbereichPruefen(zuruecksetzen: !Recht.Angemeldet);
         if (OhneRechtAusgeblendet.Contains(AktiverBereich)) { BereichWaehlen(Startbereich); return; }
         if (AktiverBereich == "Dokumentation")
         {
