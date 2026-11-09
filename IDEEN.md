@@ -72,6 +72,10 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 30 | Akte: Reiter Betreuer, Krankenkasse, Kostenträger | 0.34.0 |
 | 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine | 0.35.0 |
 | 32 | Vorhandene digitale Akte übernehmen | 0.36.0 |
+| 33 | Überleitungsbogen auf Knopfdruck | 0.37.0 |
+| 34 | Abgängigkeitsmeldung | 0.38.0 |
+| 35 | Schweigepflichtentbindungen | 0.39.0 |
+| 36 | Vitalwerte | 0.40.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -1570,3 +1574,106 @@ Umfang (Vorschlag):
   Ordner und Dateien. Übernehmen **kopiert**, der alte Ordner bleibt unverändert.
 - Bericht danach (übernommen, übersprungen, doppelt) und Eintrag im Protokoll.
 - In der Demo nur mit ausgedachten Ordnern zum Vorführen (Testordner aus den Demo-Daten).
+
+## Überleitungsbogen auf Knopfdruck
+Status: freigegeben (Bauplan Schritt 33; Auswahl Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Ein Blatt für Klinik, Notarzt oder Rettungsdienst, das das Programm aus vorhandenen Angaben
+zusammenstellt.
+Warum: Auswahl Tobi (09.11.2026). Bei einer Einweisung muss es schnell gehen; fast alle Angaben
+stehen schon im Programm.
+Umfang:
+- Knopf „Überleitungsbogen …“ in der Akte (Aktionsleiste), dazu per Rechtsklick in Übersicht und
+  Bewohnerliste.
+- Kurzer Dialog: Anlass (Freitext), Datum und Uhrzeit (vorbelegt: jetzt), Begleitung, Häkchen
+  je Abschnitt (alle vorbelegt), damit nur Nötiges weitergegeben wird.
+- **Inhalt:** Einrichtung, Bereich und Telefon des Dienstzimmers (aus den Einstellungen);
+  Name, Geburtsdatum, Zimmer; **Allergien** (drei Zustände, `CLAUDE.md` Regel 5); Diagnosen und
+  „Hinweise für den Notfall“ (Ärztliche Informationen); **aktueller Medikamentenplan** mit Stand
+  heute, auch Bedarf und Pausen; Betreuer mit Aufgabenbereichen und Telefon; Krankenkasse und
+  Versichertennummer; Haus- und Fachärzte (Ärzteverzeichnis); Unterbringung bzw. Beschluss;
+  Schweigepflichtentbindung gegenüber der Klinik (Schritt 35); letzte Vitalwerte (Schritt 36);
+  Freitext „Besonderheiten“ (Kommunikation, Hilfsmittel, was beruhigt).
+- Fehlende Angaben stehen als „nicht erfasst“ auf dem Blatt, nie als leeres Feld.
+- Druckvorschau, Drucken, als PDF speichern. Eine Kopie mit Datum geht in die Dokumente des
+  Bewohners (Kategorie „Ärztliches und Befunde“).
+- Danach Angebot: Bericht „Überleitungsbogen erstellt: <Anlass>“ (Wichtig, Übergabe) und
+  Abwesenheit „Klinik seit …“ im Modul Ausgangsliste eintragen (je ein Häkchen).
+- Protokoll: wer wann einen Bogen erstellt hat. Demo: ausgedachte Einrichtungsangaben.
+
+## Abgängigkeitsmeldung
+Status: freigegeben (Bauplan Schritt 34; Auswahl Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Ein geführter Ablauf, wenn ein Bewohner vermisst wird: Meldeblatt, wer informiert wurde,
+Rückkehr.
+Warum: Auswahl Tobi (09.11.2026).
+Umfang:
+- Knopf „Abgängigkeit melden …“ in Akte und Übersicht. Im Modul Ausgangsliste zusätzlich ein
+  Hinweis, wenn eine Rückkehrzeit überschritten ist (Wartezeit in den Einstellungen,
+  Vorgabe 30 Minuten): „Rückkehrzeit überschritten seit … — Abgängigkeit melden?“
+- **Formular:** vermisst seit, zuletzt gesehen (wo, wann, von wem), Kleidung heute (Pflicht),
+  Gefährdung (Freitext, dazu Hinweis auf benötigte Medikamente laut Plan), mögliche
+  Aufenthaltsorte, Kontakte (Angehörige, Betreuer).
+- **Personenbeschreibung** als neuer Abschnitt in den Stammdaten: Größe, Statur, Haarfarbe,
+  Augenfarbe, Brille, besondere Merkmale, Datum der letzten Aktualisierung (Marke, wenn älter
+  als 12 Monate). Bild aus der Akte; in der Demo nur der Platzhalter (`CLAUDE.md`, Regel 2).
+- **Liste „Wer wurde informiert“** zum Abhaken, je mit Uhrzeit und Kürzel: Leitung bzw.
+  Rufbereitschaft, Polizei (dazu Name und Vorgangsnummer), Betreuer, Angehörige, ggf. Klinik
+  bzw. Gericht. Die Liste und die Telefonnummern sind in den Einstellungen änderbar, weil jede
+  Einrichtung ihren eigenen Ablauf hat.
+- **Meldeblatt drucken** (für die Polizei): Personenbeschreibung, Bild, Kleidung, zuletzt
+  gesehen, Gefährdung, Kontakt der Einrichtung.
+- Ab der Meldung: Status „abgängig seit …“ in Übersicht, Bewohnerliste und Ausgangsliste (Marke
+  in Gefahr-Farbe mit Wort) und ein Bericht (Wichtig, Übergabe).
+- **„Zurück“** mit Uhrzeit, Zustand (Freitext) und zweiter Liste „Wer wurde entwarnt“ (vor allem
+  Polizei); schließt die Meldung und ergänzt den Bericht.
+- Alle Meldungen bleiben in der Akte nachlesbar (Reiter „Berichte“, Filter „Abgängigkeit“).
+
+## Schweigepflichtentbindungen
+Status: freigegeben (Bauplan Schritt 35; Auswahl Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: In der Akte steht, wem gegenüber die Schweigepflicht aufgehoben ist und wem nicht. Eine
+schnelle Abfrage beantwortet „Darf ich hier Auskunft geben?“.
+Warum: Auswahl Tobi (09.11.2026). Am Telefon muss jeder sofort sehen, ob er Auskunft geben darf.
+Umfang:
+- Neuer Reiter **„Schweigepflicht“** nach „Kostenträger“.
+- Liste je Person oder Stelle: Auswahl aus Betreuer, Angehörigen, Ärzteverzeichnis,
+  Kostenträger oder Freitext; **Zustand:** entbunden · **ausdrücklich keine Auskunft** · nicht
+  erfasst; Umfang (alle Angaben, nur Gesundheit, nur Organisatorisches, Freitext); Richtung
+  (Auskunft geben, einholen, beides); erteilt am; gültig bis oder unbefristet; widerrufen am;
+  Form (schriftlich, mündlich mit Zeuge); Dokument aus „Dokumente“ verknüpft.
+- **„Keine Auskunft an …“** erscheint als Marke im Akte-Kopf, in Gefahr-Farbe mit Wort.
+- **Schnellabfrage** „Auskunft prüfen …“ (Akte und Aktionsleiste): Name eintippen → Antwort mit
+  Wort und Farbe: „entbunden für …“, „keine Auskunft“, „nicht erfasst — keine Auskunft geben,
+  bis geklärt“.
+- Fristen und Widerruf: Marke „Entbindung endet …“ 4 Wochen vorher; widerrufene Einträge
+  bleiben sichtbar (durchgestrichen, mit Datum).
+- Das Programm bewertet nichts rechtlich; es zeigt, was eingetragen ist.
+- Der Überleitungsbogen (Schritt 33) zeigt den Eintrag zur jeweiligen Klinik.
+
+## Vitalwerte
+Status: freigegeben (Bauplan Schritt 36; Auswahl Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Vitalwerte je Bewohner erfassen, als Tabelle und Verlauf ansehen und ausdrucken.
+Warum: Wunsch Tobi (09.11.2026).
+Umfang:
+- Neuer Reiter **„Vitalwerte“** in der Akte (nach „Medikamentenplan“).
+- **Werte** (Liste in den Einstellungen erweiterbar): Blutdruck (systolisch/diastolisch), Puls,
+  Temperatur, Gewicht, Blutzucker, Sauerstoffsättigung, Bauchumfang. BMI wird aus Gewicht und
+  Größe (Personenbeschreibung) berechnet.
+- **Erfassen** über „Vitalwerte erfassen …“: Datum und Uhrzeit (vorbelegt), mehrere Werte in
+  einem Schritt, Bemerkung (z. B. „nüchtern“), Kürzel automatisch. Korrektur nur als neue
+  Fassung mit Grund.
+- **Ansicht:** Tabelle (neueste oben) und Verlaufslinie je Wert für einen wählbaren Zeitraum.
+- **Grenzen nur nach ärztlicher Anordnung:** Eine Fachkraft kann je Bewohner und Wert einen
+  Bereich eintragen (mit anordnendem Arzt aus dem Ärzteverzeichnis und Datum). Nur dann zeigt
+  das Programm „außerhalb des angeordneten Bereichs“ als Marke mit Wort. Eigene medizinische
+  Grenzwerte setzt das Programm nicht.
+- **Messaufträge** je Bewohner (z. B. „Gewicht monatlich“, „Blutdruck wöchentlich“) erscheinen
+  als Aufgabe im passenden Dienst (Aufgaben nach Schichten).
+- Die letzten Werte erscheinen in der Visitenansicht und im Überleitungsbogen.
+- Drucken: Verlauf eines Zeitraums für den Arztbesuch.
+- Rechte: „Vitalwerte erfassen“ (Vorbelegung alle Mitarbeitenden), „Grenzen und Messaufträge
+  festlegen“ (nur Fachkräfte).
+- Demo-Daten: ausgedachte Werte über einige Monate mit leichten Schwankungen, bei einigen
+  Bewohnern Messaufträge und angeordnete Bereiche.
