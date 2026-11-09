@@ -103,10 +103,11 @@ public class FehlersucheOberflaechenTests
 
         // Bildlauf der Spalten bleibt beim Neuaufbau (jede Minute und nach jedem Klick).
         var spalte = l.Spalten[^1];
+        string titel = spalte.Titel;   // vor dem Neuaufbau lesen: danach ist die alte Spalte freigegeben
         spalte.Bildlauf = 60;
         int gesetzt = spalte.Bildlauf;
         l.Aktualisieren();
-        Assert.Equal(gesetzt, l.Spalten.Single(s => s.Titel == spalte.Titel).Bildlauf);
+        Assert.Equal(gesetzt, l.Spalten.Single(s => s.Titel == titel).Bildlauf);
     });
 
     [Fact]
