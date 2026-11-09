@@ -74,7 +74,7 @@ public sealed class EinstellungenSeite : Panel
     public Button MedikamenteKnopf { get; } = Stil.NebenKnopf("Medikamentendatenbank …");
     public CheckBox NachschlageAnsicht { get; } = new() { Text = "anzeigen", AutoSize = true };
     public Button MitarbeiterKnopf { get; } = Stil.NebenKnopf("Mitarbeiter …");
-    public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche und Positionen …");
+    public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche, Positionen, Berichtsarten …");
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     // System, Über
     public Label DatenbankOrt { get; } = new() { AutoSize = true, MaximumSize = new Size(360, 0), UseMnemonic = false };
@@ -265,7 +265,8 @@ public sealed class EinstellungenSeite : Panel
         ListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher));
         RechteKnopf.Click += (_, _) => FensterZeigen(new RechteFenster(speicher));
         Karte("Verwaltung", "Mitarbeiter", "Mitarbeiter mit Bereichen, Positionen und Qualifikation (Assistenzkraft oder Fachkraft). Die Bereichsleitung verwaltet ihren Bereich.", MitarbeiterKnopf);
-        Karte("Verwaltung", "Bereiche und Positionen", "Listen zum Zuordnen; stilllegen statt löschen, solange jemand zugeordnet ist.", ListenKnopf);
+        Karte("Verwaltung", "Bereiche, Positionen und Berichtsarten",
+            "Listen zum Zuordnen; stilllegen statt löschen, solange etwas zugeordnet ist.", ListenKnopf);
         Karte("Verwaltung", "Rechte", "Tabelle: welche Position was darf, je Funktion „nur Fachkräfte“. Ohne Recht nur ansehen.", RechteKnopf);
 
         // System (folgenreich: fragt vorher)

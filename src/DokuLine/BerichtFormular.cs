@@ -14,6 +14,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     public TextBox Datum { get; } = new DatumFeld() { Width = 100 };
     public TextBox Uhrzeit { get; } = new UhrzeitFeld() { Width = 80 };
     public ComboBox Schichtwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 210 };
+    public ComboBox Art { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 260, AccessibleName = "Berichtsart" };
     public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // Schritt 26a: aus der Anmeldung
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
     {
@@ -94,6 +95,9 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         wann.Controls.AddRange([Datum, Uhrzeit, Schichtwahl]);
         Zeile("Datum, Uhrzeit, Schicht", wann);
         Zeile("Eingetragen von", Verfasser);
+        Art.Items.AddRange([.. speicher.Berichtsarten()]);
+        Art.SelectedIndex = Art.Items.IndexOf(DokuRegeln.ArtAlltag) is int alltag && alltag >= 0 ? alltag : Art.Items.Count > 0 ? 0 : -1;
+        Zeile("Berichtsart", Art);
 
         // Zwei Spalten mit den kurzen Namen; der volle Name steht im Hinweis unter der Maus.
         var bereiche = new TableLayoutPanel { AutoSize = true, ColumnCount = 2, Margin = new Padding(0) };
@@ -192,6 +196,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         UebergabeDauer.SelectedIndex = Math.Clamp((int)e.UebergabeDauer, 0, UebergabeDauer.Items.Count - 1);
         UebergabeBis.Text = e.UebergabeBis;
         UebergabeText.Text = e.UebergabeText;
+        if (Art.Items.IndexOf(e.Art) is int i && i >= 0) Art.SelectedIndex = i;
     }
 
     public void EntwurfVerwerfen()
@@ -224,6 +229,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         UebergabeDauer = (Kern.UebergabeDauer)UebergabeDauer.SelectedIndex,
         UebergabeBis = UebergabeBis.Text,
         UebergabeText = UebergabeText.Text,
+        Art = Art.SelectedItem as string ?? DokuRegeln.ArtAlltag,
     };
 
     public bool Speichern()

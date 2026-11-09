@@ -14,10 +14,10 @@ public sealed class Hauptfenster : Form
 
     // Reihenfolge der Seitenleiste. „Einstellungen“ steht fest ganz unten (Schritt 29: eine Seite wie die
     // übrigen). Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
-    // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Akte, Reiter „Berichte“, Rechtsklick auf eine Karte).
+    // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Dokumentation, Akte, Rechtsklick in der Übersicht).
     public static readonly string[] Bereiche =
-        ["Übersicht", "Tagesplan", "Bewohner", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
-         "Einstellungen"];   // die Medikamentendatenbank steht seit Schritt 21 in den Einstellungen
+        ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+         "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
 
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
@@ -75,7 +75,7 @@ public sealed class Hauptfenster : Form
         Size = new Size(1180, 800);
 
         Bewohner = new BewohnerBereich(speicher, Kopf) { Dock = DockStyle.Fill };
-        seiten["Bewohner"] = Bewohner;
+        seiten["Dokumentation"] = Bewohner;
         Uebergabe = new UebergabeSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Übergabe"] = Uebergabe;
         Uebergabe.Geaendert += () => { if (AktiverBereich == "Übergabe") Kopf.TexteSetzen(Uebergabe.KopfText, "Übergabe"); };
@@ -117,7 +117,7 @@ public sealed class Hauptfenster : Form
             Kopf.TexteSetzen(Einstellungsseite.KopfText, "Einstellungen");
             Kopf.KnoepfeSetzen(Einstellungsseite.Knoepfe);   // „Verzeichnisse“ hat eine Aktionsleiste
         };
-        Einstellungsseite.AkteGewuenscht += id => { BereichWaehlen("Bewohner"); Bewohner.AkteZeigen(id); };
+        Einstellungsseite.AkteGewuenscht += id => { BereichWaehlen("Dokumentation"); Bewohner.AkteZeigen(id); };
         Einstellungsseite.LogoGeaendert += () => Kopf.LogoSetzen(Einstellungen.LogoPfad());
         Einstellungsseite.BereichGeaendert += () => { ArbeitsplatzAnzeigen(); AufgabenZaehlen(); };
         Einstellungsseite.SchichtzeitenGeaendert += AufgabenZaehlen;
@@ -145,12 +145,12 @@ public sealed class Hauptfenster : Form
         Uebersicht.BewohnerNeuGewuenscht += () =>
         {
             if (Bewohner.NeuerBewohner() is not Kern.Bewohner neu) return;
-            BereichWaehlen("Bewohner");
+            BereichWaehlen("Dokumentation");
             Bewohner.AkteZeigen(neu.Id!.Value);
         };
         Uebersicht.AkteGewuenscht += id =>
         {
-            BereichWaehlen("Bewohner");
+            BereichWaehlen("Dokumentation");
             Bewohner.AkteZeigen(id);
         };
         Uebersicht.BerichtGewuenscht += id => NeuerBericht(id);
@@ -234,8 +234,8 @@ public sealed class Hauptfenster : Form
         ArbeitsplatzAnzeigen();
         MenueSetzen(Einstellungen.Laden().MenueEingeklappt, merken: false);
         Kopf.LogoSetzen(Einstellungen.LogoPfad());
-        // Erst „Bewohner“ (baut die Karten); das Programm wechselt danach zur Übersicht (Startbereich).
-        BereichWaehlen("Bewohner");
+        // Erst „Dokumentation“ (baut die Liste); das Programm wechselt danach zur Übersicht (Startbereich).
+        BereichWaehlen("Dokumentation");
         datenstand = Datenstand();
         // Alle 30 Sekunden: Änderungen anderer Rechner; der Tagesplan zusätzlich wegen der Uhrzeit
         // („noch offen“ nach Beginn, „in Therapie“ bis zum Ende).
@@ -289,7 +289,7 @@ public sealed class Hauptfenster : Form
         }
         switch (schluessel)
         {
-            case "Bewohner": Bewohner.NeuLesen(); break;
+            case "Dokumentation": Bewohner.NeuLesen(); break;
             case "Übersicht": Uebersicht.Aktualisieren(); break;
             case "Tagesplan": Tagesplan.Aktualisieren(); break;
             case "Übergabe": Uebergabe.Aktualisieren(); break;
@@ -306,7 +306,7 @@ public sealed class Hauptfenster : Form
     {
         if (IsDisposed) return;
         if (AktiverBereich == "Übersicht") Uebersicht.Aktualisieren();
-        else if (AktiverBereich == "Bewohner") Bewohner.NeuLesen();
+        else if (AktiverBereich == "Dokumentation") Bewohner.NeuLesen();
     }
 
     private int S(int wert) => Stil.Px(this, wert);
@@ -321,7 +321,12 @@ public sealed class Hauptfenster : Form
         Statusleiste.StatusText = HeuteWichtigRegeln.StatusText(jetzt, gelesen);
     }
 
-    private static string Schluessel(string eintrag) => eintrag.Replace(" …", "");
+    // „Bewohner“ ist der frühere Name von „Dokumentation“ (Module und Aufrufe von außen).
+    private static string Schluessel(string eintrag)
+    {
+        string schluessel = eintrag.Replace(" …", "");
+        return schluessel == "Bewohner" ? "Dokumentation" : schluessel;
+    }
 
     public Control Seite(string bereich) => seiten[Schluessel(bereich)];
 
@@ -331,6 +336,7 @@ public sealed class Hauptfenster : Form
 
     public void BereichWaehlen(string name, bool filterBehalten)
     {
+        name = Schluessel(name) == "Dokumentation" ? "Dokumentation" : name;
         string schluessel = Schluessel(name);
         AktiverBereich = name;
         StatuszeileSetzen(neuGelesen: true);
@@ -343,7 +349,7 @@ public sealed class Hauptfenster : Form
             Kopf.KnoepfeSetzen([.. modulSeite.Knoepfe]);
             return;
         }
-        if (schluessel == "Bewohner")
+        if (schluessel == "Dokumentation")
         {
             Bewohner.UebersichtZeigen();
             return;
@@ -463,7 +469,7 @@ public sealed class Hauptfenster : Form
         if (IsDisposed) return;
         BenutzerAnzeigen();
         AufgabenZaehlen();
-        if (AktiverBereich == "Bewohner")
+        if (AktiverBereich == "Dokumentation")
         {
             Bewohner.NeuLesen();
             if (Bewohner.AkteSichtbar) Bewohner.Akte.AnsichtNeu();
@@ -567,15 +573,14 @@ public sealed class Hauptfenster : Form
         return entwurf is null ? null : NeuerBericht(entwurf.BewohnerId);
     }
 
-    // Neuer Bericht für einen Bewohner (aus Akte oder Karte); danach seine Akte beim Reiter „Berichte“.
+    // Neuer Bericht für einen Bewohner (aus Akte oder Liste); danach seine Berichte in der Dokumentation.
     public Bericht? NeuerBericht(long bewohnerId)
     {
         if (speicher.Bewohner(bewohnerId) is not Kern.Bewohner b) return null;
         using var formular = new BerichtFormular(speicher, b);
         if (Dialog.Zeigen(formular, this) != DialogResult.OK || formular.Gespeichert is not Bericht bericht) return null;
-        BereichWaehlen("Bewohner");
-        Bewohner.AkteZeigen(bericht.BewohnerId);
-        Bewohner.Akte.Reiter.Waehlen("Berichte");
+        BereichWaehlen("Dokumentation");
+        Bewohner.DokumentationZeigen(bericht.BewohnerId);
         return bericht;
     }
 
@@ -608,7 +613,7 @@ public sealed class Hauptfenster : Form
                 if (Dialog.Zeigen(anlegen, this) != DialogResult.OK || anlegen.Gespeichert is not Medikament neu) return false;
                 medikament = neu;
             }
-            BereichWaehlen("Bewohner");
+            BereichWaehlen("Dokumentation");
             Bewohner.AkteZeigen(info.Eintrag.BewohnerId);
             Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
             erledigt = Bewohner.Akte.Medikation.AusVisite(info.Visite, anordnung, medikament);
@@ -668,8 +673,8 @@ public sealed class Hauptfenster : Form
         Bewohner.Akte.ModuleAktualisieren();
         leiste.PerformLayout();
         if (AktiverBereich.Length == 0) return;
-        if (!seiten.ContainsKey(Schluessel(AktiverBereich))) BereichWaehlen("Bewohner");
-        else if (AktiverBereich == "Bewohner" && !Bewohner.AkteSichtbar) Bewohner.UebersichtZeigen();   // Marken der Module
+        if (!seiten.ContainsKey(Schluessel(AktiverBereich))) BereichWaehlen("Dokumentation");
+        else if (AktiverBereich == "Dokumentation" && !Bewohner.AkteSichtbar) Bewohner.UebersichtZeigen();   // Marken der Module
         else if (modulSeiten.ContainsKey(AktiverBereich) || AktiverBereich == "Übersicht") BereichWaehlen(AktiverBereich);
     }
 
@@ -777,7 +782,7 @@ public sealed class Hauptfenster : Form
             != DialogResult.Yes)
             return false;
         speicher.DemoZuruecksetzen();
-        BereichWaehlen("Bewohner");
+        BereichWaehlen("Dokumentation");
         return true;
     }
 }

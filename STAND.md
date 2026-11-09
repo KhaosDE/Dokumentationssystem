@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.4** (Bauplan Schritt 29a: Personenverzeichnis).
+Stand: 09.11.2026. Version: **0.33.5** (Bauplan Schritt 29b: Bereich Dokumentation).
 
 ## Aktuell
 
@@ -213,8 +213,16 @@ Neu in 0.33.4: Das Ärzteverzeichnis ist jetzt das **Personenverzeichnis** – E
 Person kann mehreren Bewohnern zugeordnet sein, je mit Rolle (z. B. „Mutter“, „Betreuer“); aus der Person springt
 „Akte öffnen“ in die Akte. Die Betreuer aus den Stammdaten stehen jetzt auch im Verzeichnis.
 
+Neu in 0.33.5: Der Bereich „Bewohner“ heißt **„Dokumentation“**. Links eine schmale, einklappbare Liste nur mit
+„Nachname, Vorname“ (Bereichswahl, Suche, Pfeiltasten), rechts **alle Berichte** des gewählten Bewohners nach Tagen,
+jeder in der Farbe seiner Schicht umrandet, kompakt mit „… mehr“ oder vollständig. Nur noch drei Marken: „Wichtig“,
+„Medikation geändert“, „Bedarfsgabe“. **Filter** (Zeitraum, Wichtig, Medikation geändert, Bedarfsgabe, Visite, Übergabe,
+mit Nachtrag, Berichtsart, Lebensbereich, Schicht, Verfasser, Suche mit Hervorhebung) lassen sich unter eigenem Namen
+**speichern**. Neu ist die **Berichtsart** beim Schreiben (Vorgabe „Alltag“, Liste in den Einstellungen). Der Reiter
+„Berichte“ in der Akte entfällt; dort führt „Berichte ansehen“ zur Dokumentation.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29b „Bereich Dokumentation“ (0.33.5).
+als Nächstes 29c „Rechte: Fehlendes ausblenden statt ausgrauen“ (0.33.6).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1069,6 +1077,34 @@ als Nächstes 29b „Bereich Dokumentation“ (0.33.5).
     `betreuer.json` (Heike Hecht und Bernd Barsch je für zwei Bewohner).
   - Die Karte „Ärzteverzeichnis“ unter „Verwaltung“ entfällt; „Arzt anlegen …“ an jeder Arztauswahl bleibt.
 
+- 0.33.5 — Bauplan Schritt 29b „Bereich Dokumentation“:
+  - Seitenleiste: „Bewohner“ heißt „Dokumentation“ (gleiche Stelle). Links die Bewohner (240 px, einklappbar auf
+    36 px) nur mit „Nachname, Vorname“, alphabetisch, ohne „Alle Bewohner“; Bereichswahl und Suche darüber; die Wahl
+    bleibt beim Zurückkehren. Doppelklick oder Enter öffnet die Akte.
+  - Rechts `DokumentationAnsicht`: Tagesbalken („Montag, 09.11.2026 · 3 Berichte“), je Bericht eine Zeile
+    (`BerichtZeile`) mit Uhrzeit und Schichtwort, Marken, Text (kompakt höchstens zwei Zeilen, Klick klappt auf),
+    Kürzel und eingerückten Nachträgen; Rand 1,5 px in der Schichtfarbe, Farbschlüssel in der Filterleiste.
+    Rechtsklick: „Nachtrag schreiben …“, „Aufgabe daraus machen …“.
+  - Marken: „Wichtig“, „Medikation geändert“ (Berichtsart „Medikation“ ohne Bedarfsgabe; Zeile leicht rot),
+    „Bedarfsgabe“ (Bericht aus „Bedarf gegeben …“); „Übergabe“ als Wort-Zeichen. Visiten mit fettem Anfang.
+  - Filter (`DokuFilter`, Prüfung in `DokuRegeln.Passt`): Zeitraum Heute · 7 Tage (Vorgabe) · 30 Tage · frei, Knöpfe
+    Wichtig · Medikation geändert · Bedarfsgabe · Visite, weitere Filter Übergabe, mit Nachtrag, Berichtsart,
+    Lebensbereich, Schicht, Verfasser, Suche mit Hervorhebung. Gesetzte Filter als Marken mit „×“, „Filter
+    zurücksetzen“. Der Filter bleibt beim Wechsel des Bewohners.
+  - Gespeicherte Filter mit eigenem Namen je Kürzel (in `meta`, gelten an jedem Arbeitsplatz); Rechtsklick löscht.
+  - Aktionsleiste: „Neuer Bericht …“ (Hauptaktion), „Bedarf gegeben …“ (bei mehreren Bedarfsverordnungen erst
+    wählen), „Akte öffnen“, „Ansicht: kompakt/vollständig“, „Drucken …“ (druckt, was der Filter zeigt).
+  - Berichtsart: Datenbank-Schritt 31 (Spalte `art`, Tabelle `berichtsarten` mit Alltag · Krise · Arztkontakt ·
+    Visite · Medikation · Konflikt · Ausgang/Abgängigkeit · Angehörigenkontakt · Betreuer/Behörde · Besonderes
+    Vorkommnis). Auswahl im Formular „Neuer Bericht“, Vorgabe „Alltag“. Visiten bekommen „Visite“, Bedarfsgaben
+    „Medikation“. Vorhandene Berichte: Visiten und Bedarfsgaben werden eingeordnet, alles andere „Alltag“; die Demo
+    ordnet ihre Berichte nach Stichworten ein.
+  - Einstellungen → „Bereiche, Positionen, Berichtsarten …“: Berichtsarten anlegen, umbenennen (die Berichte gehen
+    mit), stilllegen, löschen (nur ungenutzt). Alltag, Visite und Medikation bleiben fest.
+  - Akte: Reiter „Berichte“ entfällt; im Kopf „← Dokumentation“ und „Berichte ansehen“. Nach „Neuer Bericht …“ aus
+    Akte oder Übersicht zeigt die Dokumentation den Bewohner mit dem neuen Bericht.
+  - Die Akte steht in einer eigenen Datei (`AkteAnsicht.cs`); `BerichteAnsicht.cs` (Karten, Liste) entfällt.
+
 ## Offene Punkte
 
 - Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
@@ -1145,6 +1181,23 @@ als Nächstes 29b „Bereich Dokumentation“ (0.33.5).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.5): „Medikation geändert“ ist ein Bericht der Art „Medikation“, der keine Bedarfsgabe ist. Das
+  Programm erkennt Änderungen nicht selbst aus dem Text (Regel 6); wer eine Änderung dokumentiert, wählt die Art.
+- 09.11.2026 (0.33.5): Marken der Bewohner (Beschluss, Allergie, nicht erfasst, Übergabe, abwesend …) stehen nur noch in
+  der Übersicht; die Dokumentation zeigt links nur Namen (Vorgabe Tobi). Die Filterknöpfe nach Beschluss/Allergie der
+  alten Bewohnerliste entfallen damit.
+- 09.11.2026 (0.33.5): Die Berichtsart darf sich nachträglich ändern (Einordnen vorhandener Berichte, Umbenennen einer
+  Art); der Datenbankschutz gilt weiter für alle übrigen Spalten eines Berichts. Alltag, Visite und Medikation vergibt
+  das Programm selbst und bleiben fest.
+- 09.11.2026 (0.33.5): Vorhandene echte Berichte ordnet das Programm nicht nach Stichworten ein (nur Visiten und
+  Bedarfsgaben, die es sicher erkennt); die Stichwort-Zuordnung gilt nur für die ausgedachten Demo-Berichte.
+- 09.11.2026 (0.33.5): Gespeicherte Filter liegen in `meta` je Kürzel statt in einer eigenen Tabelle – einfacher, und
+  sie gelten an jedem Arbeitsplatz.
+- 09.11.2026 (0.33.5): „Neuer Bewohner …“ steht nur in der Übersicht; die Aktionsleiste der Dokumentation hat genau die
+  fünf Knöpfe aus dem Eintrag.
+- 09.11.2026 (0.33.5): Jede Berichtszeile ist ein Textfeld (RichTextBox) für Fettdruck und Hervorhebung; der Richtwert
+  „15 Berichte ohne Bildlauf bei 1920 × 1080“ ist nur im Windows-Test sichtbar (Foto `122_dokumentation`).
 
 - 09.11.2026 (0.33.4): Versionsnummern werden fortlaufend vergeben (jede Auslieferung die nächste: 29a = 0.33.4,
   29b = 0.33.5 …), weil 0.33.3 schon die Korrekturen der Fehlersuche trägt und 29s in mehreren Pull Requests kommt; die
@@ -1858,6 +1911,23 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.5:
+
+1. Seitenleiste → „Dokumentation“: links nur „Nachname, Vorname“, alphabetisch; rechts die Berichte des ersten
+   Bewohners der letzten 7 Tage, nach Tagen, jeder Bericht in der Farbe seiner Schicht umrandet.
+2. Pfeil nach unten in der Namensliste → die Berichte wechseln mit. „◀“ klappt die Liste ein.
+3. Ein langer Bericht zeigt zwei Zeilen und „… mehr“; Klick klappt ihn auf. „Ansicht: kompakt“ → „vollständig“.
+4. „Wichtig“ drücken → nur wichtige Berichte, oben die Marke „Wichtig ×“; „30 Tage“, Berichtsart „Krise“ →
+   „Filter speichern …“ → Name eingeben → der Knopf steht oben; nach Neustart noch da.
+5. Suche „Arzt“ → die Fundstellen sind gelb hinterlegt.
+6. „Neuer Bericht …“ → Feld „Berichtsart“ (Vorgabe „Alltag“) → speichern → der Bericht steht oben, man bleibt in der
+   Dokumentation.
+7. Als „AB“ bei Tagetes „Bedarf gegeben …“ → der neue Bericht trägt die Marke „Bedarfsgabe“.
+8. „Akte öffnen“ → kein Reiter „Berichte“ mehr; „Berichte ansehen“ führt zurück.
+9. Einstellungen → „Bereiche, Positionen, Berichtsarten …“ → „Krise“ umbenennen; „Visite“ umbenennen → Hinweis, dass
+   das Programm sie selbst vergibt.
+10. Bei 1920 × 1080 im Kompaktmodus: mindestens 15 Berichte ohne Bildlauf (hier nicht prüfbar, bitte ansehen).
 
 Version 0.33.4:
 

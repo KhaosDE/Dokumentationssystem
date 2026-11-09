@@ -13,11 +13,11 @@ public class HauptfensterTests
         Assert.Contains("Demo — ausgedachte Daten", fenster.Text);
         Assert.Equal("Demo — ausgedachte Daten", KopfBereich.DemoHinweis);
         Assert.Equal(KopfBereich.DemoHinweis, fenster.Kopf.AccessibleName);
-        Assert.Equal(["Übersicht", "Tagesplan", "Bewohner", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+        Assert.Equal(["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
                       "Ausgangsliste", "Einstellungen"],
             fenster.Navigation.Select(n => n.Text));
-        Assert.Equal("Bewohner", fenster.AktiverBereich);
-        Assert.True(fenster.Navigation.Single(n => n.Text == "Bewohner").Aktiv);
+        Assert.Equal("Dokumentation", fenster.AktiverBereich);
+        Assert.True(fenster.Navigation.Single(n => n.Text == "Dokumentation").Aktiv);
         Assert.Matches(@"^Version \d+\.\d+\.\d+ · ", fenster.VersionText.Text);
     });
 
@@ -91,75 +91,28 @@ public class HauptfensterTests
 [Collection("Oberflaeche")]
 public class BewohnerOberflaechenTests
 {
-    private static List<BewohnerZeile> Karten(Hauptfenster f) => f.Bewohner.Zeilen;   // seit Schritt 26j eine Liste
-
-    [Fact]
-    public void Uebersicht_zeigt_alle_mit_Name_und_Zimmer() => Hilfe.Sta(() =>
+    // Marken, Aufenthalt und Doppelklick zur Akte stehen in der Übersicht.
+    private static List<BewohnerZeile> Karten(Hauptfenster f)
     {
-        using var u = new Umgebung();
-        using var f = new Hauptfenster(u.Speicher);
-        var karten = Karten(f);
-        Assert.Equal(u.Speicher.AlleBewohner().Count(b => b.Wohnbereich == "R1"), karten.Count);   // eigener Bereich (Schritt 26j)
-        // Ohne eigenes Kürzel zählt „Übergabe“ alle offenen Einträge; „Wichtig“: wichtiger Bericht der letzten 7 Tage.
-        // Vorne die Statusmeldung aus der Demo (Mehrplatz, gesetzt von der Therapie).
-        Assert.StartsWith("Anton Ahorn, Zimmer 101, Status: in der Holzwerkstatt, bis ", karten[0].Beschreibung);
-        Assert.EndsWith(", Übergabe 1, Wichtig, Beschluss bis 30.06.2027, Allergie: Haselnüsse, Bezugspflege AB. Akte öffnen", karten[0].Beschreibung);
-        Assert.Equal("Bewohner", f.Kopf.TitelText);
-        Assert.Equal(["Neuer Bericht …", "Akte öffnen", "Neuer Bewohner …"], f.Kopf.Knoepfe.Select(k => k.Text));
-    });
+        f.BereichWaehlen("Übersicht");
+        return f.Uebersicht.Zeilen;
+    }
 
     [Fact]
     public void Karten_zeigen_Marken_und_Aufenthalt() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
-        f.Bewohner.Heute = () => new DateOnly(2026, 11, 7);
-        f.Bewohner.BereichWahl.SelectedItem = BewohnerBereich.AlleBereiche;   // Ginster wohnt in R2
-        var birke = Karten(f).Single(k => k.Bewohner.Nachname == "Birke");
-        // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu; ihre Übergabe ist erledigt
-        Assert.DoesNotContain(birke.Marken, m => m.Art is MarkenArt.Beschluss or MarkenArt.Allergie or MarkenArt.NichtErfasst or MarkenArt.Uebergabe);
+        f.Uebersicht.Jetzt = () => new DateTime(2026, 11, 7, 12, 0, 0);
+        f.BereichWaehlen("Übersicht");
+        f.Uebersicht.BereichWahl.SelectedItem = UebersichtSeite.AlleBereiche;   // Ginster wohnt in R2
+        var birke = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Birke");
+        // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu
+        Assert.DoesNotContain(birke.Marken, m => m.Art is MarkenArt.Beschluss or MarkenArt.Allergie or MarkenArt.NichtErfasst);
         Assert.Equal("seit 15.02.2016 · 10 Jahre, 8 Monate", birke.AufenthaltText);
-        var ginster = Karten(f).Single(k => k.Bewohner.Nachname == "Ginster");
+        var ginster = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Ginster");
         Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst"],
-            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst && !m.Text.StartsWith("überfällig")).Select(m => m.Text));   // ohne Marke des Moduls
-        Assert.Equal("Übergabe 1", ginster.Marken[0].Text);
-    });
-
-    [Fact]
-    public void Uebergabe_Marke_zaehlt_nur_was_das_eigene_Kuerzel_noch_nicht_gelesen_hat() => Hilfe.Sta(() =>
-    {
-        using var u = new Umgebung();
-        using var f = new Hauptfenster(u.Speicher);
-        Assert.Contains(Karten(f)[0].Marken, m => m.Text == "Übergabe 1");
-        Einstellungen.Aendern(w => w with { Kuerzel = "AB" });   // AB hat Ahorns Übergabe schon gelesen
-        f.Bewohner.UebersichtZeigen();
-        Assert.DoesNotContain(Karten(f)[0].Marken, m => m.Art == MarkenArt.Uebergabe);
-        Assert.Contains(Karten(f)[0].Marken, m => m.Text == "Wichtig");
-    });
-
-    [Fact]
-    public void Filterknoepfe_mit_Zaehlern() => Hilfe.Sta(() =>
-    {
-        using var u = new Umgebung();
-        using var f = new Hauptfenster(u.Speicher);
-        var knoepfe = f.Bewohner.FilterKnoepfe;
-        Assert.Equal([("Alle", 23), ("Beschluss", 12), ("Allergie", 8), ("Nicht erfasst", 4)],   // im eigenen Bereich R1 (Schritt 26j)
-            knoepfe.Values.Select(k => (k.Text, k.Anzahl)));
-        Assert.True(knoepfe[BewohnerFilter.Alle].Aktiv);
-        knoepfe[BewohnerFilter.Allergie].Ausloesen();
-        Assert.Equal(8, Karten(f).Count);
-        Assert.All(Karten(f), k => Assert.Equal(AllergieZustand.Eingetragen, k.Bewohner.Allergie));
-        Assert.Equal("R1 · 8 von 23 Bewohner", f.Kopf.KleinText);
-        Assert.True(knoepfe[BewohnerFilter.Allergie].Aktiv);
-        Assert.False(knoepfe[BewohnerFilter.Alle].Aktiv);
-        Karten(f)[0].Waehlen();
-        Assert.False(f.Bewohner.FilterLeiste.Visible);   // in der Akte keine Filter
-        f.Bewohner.UebersichtZeigen();
-        Assert.Equal(8, Karten(f).Count);                // Filter bleibt beim Zurückkehren
-        knoepfe[BewohnerFilter.Alle].Ausloesen();
-        Assert.Equal(23, Karten(f).Count);
-        f.Bewohner.BereichWahl.SelectedItem = BewohnerBereich.AlleBereiche;
-        Assert.Equal([("Alle", 69), ("Beschluss", 51), ("Allergie", 14), ("Nicht erfasst", 14)], knoepfe.Values.Select(k => (k.Text, k.Anzahl)));
+            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst && !m.Text.StartsWith("überfällig")).Select(m => m.Text));
     });
 
     [Fact]
@@ -172,23 +125,27 @@ public class BewohnerOberflaechenTests
     });
 
     [Fact]
-    public void Karte_oeffnet_Akte_und_zurueck() => Hilfe.Sta(() =>
+    public void Akte_oeffnen_und_zurueck_zur_Dokumentation() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         Karten(f).Single(k => k.Bewohner.Nachname == "Birke").Waehlen();
+        Assert.Equal("Dokumentation", f.AktiverBereich);
         Assert.True(f.Bewohner.AkteSichtbar);
-        Assert.Equal("Bewohnerakte", f.Kopf.TitelText);   // Schritt 26d
+        Assert.Equal("Bewohnerakte", f.Kopf.TitelText);
         Assert.DoesNotContain("Berta Birke", f.Kopf.KleinText);
         Assert.Equal("Berta Birke", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal("22.11.1958", f.Bewohner.Akte.Geburtsdatum.Text);
-        Assert.Equal(["← Alle Bewohner", "Nachrichten …", "Status …", "Ärztliche Informationen …", "Neuer Bericht …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
+        Assert.Equal(["← Dokumentation", "Berichte ansehen", "Nachrichten …", "Status …", "Ärztliche Informationen …", "Neuer Bericht …",
+            "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
         f.Kopf.Knoepfe[0].PerformClick();
         Assert.False(f.Bewohner.AkteSichtbar);
-        Karten(f)[0].Waehlen();
-        f.Navigation.Single(n => n.Text == "Bewohner").Ausloesen();
-        Assert.False(f.Bewohner.AkteSichtbar);   // Klick auf „Bewohner“ führt zur Übersicht
+        Assert.Equal("Berta Birke", f.Bewohner.Gewaehlt!.Name);   // die Wahl bleibt
+        f.Bewohner.AkteOeffnen();
+        Assert.True(f.Bewohner.AkteSichtbar);
+        f.Navigation.Single(n => n.Text == "Dokumentation").Ausloesen();
+        Assert.False(f.Bewohner.AkteSichtbar);   // Klick auf „Dokumentation“ führt zur Liste
     });
 
     [Fact]
@@ -354,12 +311,12 @@ public class BildschirmfotoTests
             formular.Speichern();
             Hilfe.Foto(formular, "6_formular_fehler");
         }
-        f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
-        f.Bewohner.Akte.Reiter.Waehlen("Berichte");
-        Hilfe.Foto(f, "8_akte_reiter_berichte");
-        f.Bewohner.Akte.Berichte.NurWichtige.Checked = true;
-        Hilfe.Foto(f, "13_akte_nur_wichtige");
-        f.Bewohner.Akte.Berichte.NurWichtige.Checked = false;
+        f.BereichWaehlen("Dokumentation");
+        f.Bewohner.DokumentationZeigen(u.Demo("Ahorn").Id!.Value);
+        Hilfe.Foto(f, "8_dokumentation_berichte");
+        f.Bewohner.Dokumentation.FilterSetzen(new DokuFilter { Wichtig = true });
+        Hilfe.Foto(f, "13_dokumentation_nur_wichtige");
+        f.Bewohner.Dokumentation.FilterSetzen(new DokuFilter());
         using (var formular = new BerichtFormular(u.Speicher, null))
         {
             formular.BewohnerWaehlen(u.Demo("Eiche").Id!.Value);
@@ -406,7 +363,7 @@ public class BildschirmfotoTests
             Hilfe.Foto(termin, "39_kalender_termin");
         f.Navigation.Single(n => n.Text == "Ausgangsliste").Ausloesen();
         Hilfe.Foto(f, "40_ausgangsliste");
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(u.Demo("Eiche").Id!.Value);
         f.Bewohner.Akte.Reiter.Waehlen("Ausgang");
         Hilfe.Foto(f, "41_akte_ausgang");
@@ -442,7 +399,7 @@ public class BildschirmfotoTests
         Einstellungen.LogoSetzen(logo);
         f.Kopf.LogoSetzen(Einstellungen.LogoPfad());
         f.BenutzerWaehlen("AB");
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         Hilfe.Foto(f, "10_kopf_mit_bild");
         f.Bewohner.AkteZeigen(u.Demo("Birke").Id!.Value);
         f.Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
@@ -473,7 +430,7 @@ public class BildschirmfotoTests
             string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
             if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "29_medikation_druck.png"), System.Drawing.Imaging.ImageFormat.Png);
         }
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         f.Bewohner.Akte.Reiter.Waehlen("Wochenplan");
         Hilfe.Foto(f, "32_wochenplan");
@@ -509,13 +466,9 @@ public class BildschirmfotoTests
             neu.Inhalt.Text = "Dieter möchte beim Gartenprojekt mitmachen. Gibt es noch freie Plätze?";
             Hilfe.Foto(neu, "22_neue_nachricht");
         }
-        f.BereichWaehlen("Bewohner");
-        f.Bewohner.FilterSetzen(BewohnerFilter.NichtErfasst);
-        Hilfe.Foto(f, "12_filter_nicht_erfasst");
-        f.Bewohner.FilterSetzen(BewohnerFilter.Alle);
         f.EinstellungenOeffnen("Persönlich");
         Hilfe.Foto(f, "11_einstellungen");
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         using (var fortschritt = new Fortschrittsfenster())
         {
             fortschritt.Zeige("Neue Version wird geladen (Build 4 → Build 5) …", 0.42);

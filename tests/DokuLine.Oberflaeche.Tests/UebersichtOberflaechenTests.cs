@@ -100,7 +100,7 @@ public class UebersichtOberflaechenTests
         }))
             s.BerichtNeuKnopf.PerformClick();
         s.AkteOeffnen();
-        Assert.Equal("Bewohner", f.AktiverBereich);
+        Assert.Equal("Dokumentation", f.AktiverBereich);
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Birke", f.Bewohner.Akte.Bewohner!.Nachname);
 

@@ -14,7 +14,7 @@ public class BetreuerIcsOberflaechenTests
         Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         var akte = f.Bewohner.Akte;
         Assert.Equal("Heike Hecht (Betreuungsverein Lindenhof (ausgedacht)) · Tel. 0000 111 222 · h.hecht@example.org", akte.BetreuerText.Text);

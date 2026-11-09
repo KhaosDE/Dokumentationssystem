@@ -112,7 +112,7 @@ public class VisitenOberflaechenTests
         Assert.Equal(3, einblendungen);
         Assert.StartsWith($"laut Visite {Heute()} (Dr. Test (ausgedacht))", verlaufHinweis);
         // Der Medikamentenplan des Bewohners ist offen; die Stufe steht dort.
-        Assert.Equal("Bewohner", f.AktiverBereich);
+        Assert.Equal("Dokumentation", f.AktiverBereich);
         Assert.Equal("Medikamentenplan", f.Bewohner.Akte.Reiter.Aktiv);
         Assert.Equal(ahorn.Id, f.Bewohner.Akte.Bewohner!.Id);
         var aufgaben = u.Speicher.Aufgaben(DateTime.Now, auchErledigte: true).Where(x => x.Text.Contains("Dr. Test")).ToList();

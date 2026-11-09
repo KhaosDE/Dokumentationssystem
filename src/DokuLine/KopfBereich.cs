@@ -292,7 +292,7 @@ public sealed class KopfBereich : Panel
 
 // Aktionsleiste direkt unter der Kopfzeile (Bauplan Schritt 26i): gleiche Breite und gleiche Seitenränder
 // wie die Kopfzeile, Knöpfe im bestehenden Stil. In allen Bereichen gleich angeordnet: links ein
-// Rücksprung („← Alle Bewohner“), dann die Hauptaktion (farbig), dann die übrigen Aktionen; rechts
+// Rücksprung („← Dokumentation“), dann die Hauptaktion (farbig), dann die übrigen Aktionen; rechts
 // „… drucken …“ und ganz außen „Entwurf fortsetzen“. Ohne Aktion entfällt die Leiste.
 public sealed class AktionsLeiste : Panel
 {

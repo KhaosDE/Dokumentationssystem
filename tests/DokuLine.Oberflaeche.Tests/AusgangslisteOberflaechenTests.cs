@@ -146,9 +146,9 @@ public class AusgangslisteOberflaechenTests
             }))
                 Karte(s, "Distel").AnwesenheitEintrag.PerformClick();
 
-            f.BereichWaehlen("Bewohner");
-            var birke = f.Bewohner.Zeilen.Single(k => k.Bewohner.Nachname == "Birke");
-            Assert.Contains(birke.Marken, m => m.Art == MarkenArt.Abwesend && m.Text == "abwesend: Heimfahrt bis 20.11.");   // schmal: ohne Jahr
+            f.BereichWaehlen("Übersicht");
+            var birke = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Birke");
+            Assert.Contains(birke.Marken, m => m.Art == MarkenArt.Abwesend && m.Text.StartsWith("abwesend: Heimfahrt bis 20.11."));
         }
     });
 
@@ -259,7 +259,7 @@ public class AusgangslisteOberflaechenTests
         using (u)
         using (f)
         {
-            f.BereichWaehlen("Bewohner");
+            f.BereichWaehlen("Dokumentation");
             f.Bewohner.AkteZeigen(u.Demo("Holunder").Id!.Value);
             f.Bewohner.Akte.Reiter.Waehlen("Ausgang");
             var reiter = Assert.IsType<AusgangReiter>(Assert.Single(f.Bewohner.Akte.ModulAnsichten));
@@ -284,12 +284,12 @@ public class AusgangslisteOberflaechenTests
             einstellungen.Module["ausgangsliste"].Checked = false;   // gilt sofort
             Assert.False(einstellungen.Module[Kuechendienst.Schluessel].Enabled);
             Assert.Equal("Einstellungen", f.AktiverBereich);
-            f.BereichWaehlen("Bewohner");
+            f.BereichWaehlen("Übersicht");
             Assert.DoesNotContain(f.Navigation, n => n.Text == "Ausgangsliste");
             Assert.DoesNotContain("Ausgang", f.Bewohner.Akte.Reiter.Namen);
             Assert.Empty(f.Bewohner.Akte.ModulAnsichten);
-            // „abwesend: unterwegs mit …“ kommt von den Fahrten des Kerns (Schritt 24), nicht vom Modul.
-            Assert.DoesNotContain(f.Bewohner.Zeilen.SelectMany(k => k.Marken),
+            // „abwesend: unterwegs mit …“ kommt von den Fahrten des Kerns, nicht vom Modul.
+            Assert.DoesNotContain(f.Uebersicht.Zeilen.SelectMany(k => k.Marken),
                 m => m.Art is MarkenArt.Ausgang || m.Art == MarkenArt.Abwesend && !m.Text.StartsWith("abwesend: unterwegs mit ", StringComparison.Ordinal));
 
             f.EinstellungenOeffnen("Module");

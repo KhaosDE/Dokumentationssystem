@@ -32,9 +32,10 @@ public class AktionsleisteTests
         Assert.False(leiste.Visible);                                                  // kein leerer Streifen
 
         // Akte: Rücksprung, Hauptaktion („Bearbeiten …“), dann die übrigen in ihrer Reihenfolge.
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
-        Assert.Equal(["← Alle Bewohner", "Bearbeiten …", "Nachrichten …", "Status …", "Ärztliche Informationen …", "Neuer Bericht …"],
+        Assert.Equal(["← Dokumentation", "Bearbeiten …", "Berichte ansehen", "Nachrichten …", "Status …", "Ärztliche Informationen …",
+            "Neuer Bericht …"],
             f.Kopf.Knoepfe.OrderBy(k => k.Left).Select(k => k.Text));
         Hilfe.Foto(f, "111_aktionsleiste_akte");
 
@@ -47,7 +48,7 @@ public class AktionsleisteTests
     [Fact]
     public void Reihenfolge_nach_Art_des_Knopfs() => Hilfe.Sta(() =>
     {
-        using var zurueck = Stil.NebenKnopf("← Alle Bewohner");
+        using var zurueck = Stil.NebenKnopf("← Dokumentation");
         using var neben = Stil.NebenKnopf("Status …");
         using var haupt = Stil.HauptKnopf("Neue Aufgabe …");
         using var drucken = Stil.NebenKnopf("Tagesliste drucken …");

@@ -63,7 +63,7 @@ public sealed partial class Speicher
             long berichtId = BerichtEinfuegen(new Bericht
             {
                 BewohnerId = e.BewohnerId, Zeitpunkt = zeitpunkt, Schicht = BerichtRegeln.SchichtZu(zeitpunkt), Verfasser = v.Kuerzel,
-                Bereiche = [5], Text = VisitenRegeln.BerichtText(gespeichert, eintrag), Erfasst = v.Erstellt,
+                Bereiche = [5], Text = VisitenRegeln.BerichtText(gespeichert, eintrag), Erfasst = v.Erstellt, Art = DokuRegeln.ArtVisite,
             }, transaktion);
             if (aenderung && !erledigt)
                 UebergabeEinfuegen(e.BewohnerId, berichtId, $"Visite: {(anordnungen.Count > 0 ? "Anordnungen geändert" : "Facharzttermin nötig")}",

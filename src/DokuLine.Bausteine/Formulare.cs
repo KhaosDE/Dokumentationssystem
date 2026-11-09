@@ -116,3 +116,46 @@ public sealed class DatumFenster : Form
         return true;
     }
 }
+
+// Ein kurzer Text in einem kleinen Fenster (z. B. der Name eines gespeicherten Filters); null = abgebrochen.
+public static class Eingabe
+{
+    public static string? Fragen(IWin32Window? besitzer, string titel, string frage)
+    {
+        using var fenster = new Form
+        {
+            Text = titel, FormBorderStyle = FormBorderStyle.FixedDialog, MaximizeBox = false, MinimizeBox = false, ShowInTaskbar = false,
+            StartPosition = FormStartPosition.CenterParent, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            BackColor = Stil.Fensterhintergrund, Font = Stil.Standard,
+        };
+        var feld = new TextBox { Width = 320, AccessibleName = frage };
+        var raster = Formular.Raster(out var zeile);
+        zeile(null, new Label { Text = frage, AutoSize = true, MaximumSize = new Size(360, 0), UseMnemonic = false });
+        zeile(null, feld);
+        zeile(null, Formular.Knoepfe(fenster, "OK", () => { fenster.DialogResult = DialogResult.OK; fenster.Close(); }));
+        fenster.Controls.Add(raster);
+        Stil.SymbolSetzen(fenster);
+        return fenster.ShowDialog(besitzer) == DialogResult.OK ? feld.Text.Trim() : null;
+    }
+
+    // Einen von mehreren Einträgen wählen; Index oder null = abgebrochen.
+    public static int? Waehlen(IWin32Window? besitzer, string titel, string frage, IReadOnlyList<string> eintraege)
+    {
+        using var fenster = new Form
+        {
+            Text = titel, FormBorderStyle = FormBorderStyle.FixedDialog, MaximizeBox = false, MinimizeBox = false, ShowInTaskbar = false,
+            StartPosition = FormStartPosition.CenterParent, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            BackColor = Stil.Fensterhintergrund, Font = Stil.Standard,
+        };
+        var wahl = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 360, AccessibleName = frage };
+        wahl.Items.AddRange([.. eintraege]);
+        if (eintraege.Count > 0) wahl.SelectedIndex = 0;
+        var raster = Formular.Raster(out var zeile);
+        zeile(null, new Label { Text = frage, AutoSize = true, MaximumSize = new Size(380, 0), UseMnemonic = false });
+        zeile(null, wahl);
+        zeile(null, Formular.Knoepfe(fenster, "OK", () => { fenster.DialogResult = DialogResult.OK; fenster.Close(); }));
+        fenster.Controls.Add(raster);
+        Stil.SymbolSetzen(fenster);
+        return fenster.ShowDialog(besitzer) == DialogResult.OK && wahl.SelectedIndex >= 0 ? wahl.SelectedIndex : null;
+    }
+}

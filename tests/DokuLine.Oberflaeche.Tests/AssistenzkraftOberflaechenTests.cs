@@ -51,7 +51,7 @@ public class AssistenzkraftOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         var tagetes = u.Demo("Tagetes");
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(tagetes.Id!.Value);
         f.Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
         var m = f.Bewohner.Akte.Medikation;
@@ -96,7 +96,7 @@ public class AssistenzkraftOberflaechenTests
 
         // Fachkraft AB: ohne Absprache; die Höchstmenge (2 in 24 Stunden) ist erreicht → erst nach Rückfrage.
         f.BenutzerWaehlen("AB");
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(tagetes.Id!.Value);
         f.Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
         m = f.Bewohner.Akte.Medikation;

@@ -15,7 +15,7 @@ public class MedikationOberflaechenTests
         if (kuerzel.Length > 0) Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
         var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
-        f.BereichWaehlen("Bewohner");
+        f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(u.Demo(nachname).Id!.Value);
         f.Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
         return (u, f, f.Bewohner.Akte.Medikation);

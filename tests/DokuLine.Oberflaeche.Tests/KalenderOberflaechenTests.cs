@@ -115,7 +115,7 @@ public class KalenderOberflaechenTests
         using (u)
         using (f)
         {
-            f.BereichWaehlen("Bewohner");
+            f.BereichWaehlen("Dokumentation");
             f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
             f.Bewohner.Akte.Reiter.Waehlen("Wochenplan");
             var w = f.Bewohner.Akte.Wochenplan;

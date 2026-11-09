@@ -1832,7 +1832,7 @@ Umfang:
   Musterstadt“.
 
 ## Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter
-Status: freigegeben (Bauplan Schritt 29b; Entwurf 1 „Zeilen nach Tagen“ mit Änderungen, Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.5; Bauplan Schritt 29b, Entwurf 1 „Zeilen nach Tagen“ mit Änderungen, Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Alle Berichte stehen im Bereich **„Dokumentation“**. Links eine Seitenleiste mit den
 Bewohnern, rechts die Berichte: viele auf einmal, trotzdem übersichtlich, mit Filter. Der Reiter

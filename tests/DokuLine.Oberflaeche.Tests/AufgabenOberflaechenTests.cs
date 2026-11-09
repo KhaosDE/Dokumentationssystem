@@ -151,9 +151,9 @@ public class AufgabenOberflaechenTests
         using (f)
         {
             var ahorn = u.Demo("Ahorn");
-            f.Bewohner.AkteZeigen(ahorn.Id!.Value);
-            f.Bewohner.Akte.Reiter.Waehlen("Berichte");
-            var karte = f.Bewohner.Akte.Berichte.Liste.Karten[0];
+            f.BereichWaehlen("Dokumentation");
+            f.Bewohner.DokumentationZeigen(ahorn.Id!.Value);
+            var bericht = f.Bewohner.Dokumentation.Zeilen[0].Bericht;
             using (new DialogErsatz(fenster =>
             {
                 var neu = Assert.IsType<AufgabeFenster>(fenster);
@@ -161,10 +161,10 @@ public class AufgabenOberflaechenTests
                 neu.Inhalt.Text = "Mit Anton den neuen Termin in den Kalender eintragen";
                 return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
-                karte.AufgabeKnopf.PerformClick();
+                f.Bewohner.Dokumentation.AufgabeDaraus(bericht);
             var aufgabe = u.Speicher.Aufgaben(DateTime.Now).Single(a => a.Text.StartsWith("Mit Anton"));
             Assert.Equal(ahorn.Id, aufgabe.BewohnerId);
-            Assert.Equal(karte.Bericht.Id, aufgabe.BerichtId);
+            Assert.Equal(bericht.Id, aufgabe.BerichtId);
             Assert.Equal(6, Eintrag(f).Anzahl);   // Zähler folgt sofort
         }
     });

@@ -101,20 +101,20 @@ public class FlaecheUndMenueTests
             return formular.Speichern() ? DialogResult.OK : DialogResult.Cancel;
         }))
             menue.Items[1].PerformClick();
-        Assert.True(f.Bewohner.AkteSichtbar);
-        Assert.Equal("Berichte", f.Bewohner.Akte.Reiter.Aktiv);
-        Assert.Contains(f.Bewohner.Akte.Berichte.Liste.Karten, k => k.Bericht.Text == "Hat beim Kochen geholfen.");
+        // Danach die Berichte des Bewohners in der Dokumentation.
+        Assert.Equal("Dokumentation", f.AktiverBereich);
+        Assert.False(f.Bewohner.AkteSichtbar);
+        Assert.Contains(f.Bewohner.Dokumentation.Zeilen, z => z.Bericht.Text == "Hat beim Kochen geholfen.");
 
-        // Auf der Seite „Bewohner“ genauso.
-        f.BereichWaehlen("Bewohner");
-        Assert.True(f.Bewohner.Waehlen(u.Demo("Eiche").Id!.Value));   // Liste (Schritt 26j): Zeile wählen, „Neuer Bericht …“
+        // In der Dokumentation genauso: Name wählen, „Neuer Bericht …“.
+        Assert.True(f.Bewohner.Waehlen(u.Demo("Eiche").Id!.Value));
         using (var ersatz = new DialogErsatz(fenster =>
         {
             Assert.StartsWith("Eiche, Emil", Assert.IsType<BerichtFormular>(fenster).BewohnerWahl.Text);
             return DialogResult.Cancel;
         }))
         {
-            Assert.True(f.Bewohner.NeuerBericht());
+            Assert.False(f.Bewohner.NeuerBericht());   // abgebrochen
             Assert.Single(ersatz.Titel);
         }
     });

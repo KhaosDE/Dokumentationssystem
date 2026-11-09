@@ -209,7 +209,7 @@ public sealed class MitarbeiterFormular : Form
     }
 }
 
-// Bereiche und Positionen: anlegen, umbenennen, stilllegen, löschen (nur ohne Zuordnung).
+// Bereiche, Positionen und Berichtsarten: anlegen, umbenennen, stilllegen, löschen (nur ohne Zuordnung).
 public sealed class ListenFenster : Form
 {
     private readonly Speicher speicher;
@@ -222,7 +222,7 @@ public sealed class ListenFenster : Form
     public ListenFenster(Speicher speicher)
     {
         this.speicher = speicher;
-        Fenster.Grundform(this, "Bereiche und Positionen");
+        Fenster.Grundform(this, "Bereiche, Positionen und Berichtsarten");
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, Fenster.Hinweis("Ausgedachte Namen. Umbenennen nimmt alle Zuordnungen mit. Löschen geht nur, solange niemand zugeordnet ist – sonst stilllegen."));
@@ -230,7 +230,7 @@ public sealed class ListenFenster : Form
         string? grund = Recht.Grund(speicher, Funktionen.MitarbeiterAlle);
         foreach (var art in Enum.GetValues<Liste>())
         {
-            var liste = new ListBox { Width = 300, Height = 170, IntegralHeight = false, Font = Stil.Standard };
+            var liste = new ListBox { Width = 300, Height = 140, IntegralHeight = false, Font = Stil.Standard };
             liste.SelectedIndexChanged += (_, _) => { if (Gewaehlt(art) is string n) Name_.Text = n; };
             Listen[art] = liste;
             Button Knopf(string text, Action<string> aktion)
@@ -250,7 +250,7 @@ public sealed class ListenFenster : Form
                 Knopf("Umbenennen", n => speicher.ListeneintragUmbenennen(art, n, Name_.Text)),
                 Knopf("Stilllegen / wieder aktiv", n => speicher.ListeneintragAktivSetzen(art, n, !Eintrag(art, n).Aktiv)),
                 Knopf("Löschen", n => speicher.ListeneintragLoeschen(art, n)))]);
-            zeile(art == Liste.Bereiche ? "Bereiche" : "Positionen", spalte);
+            zeile(art switch { Liste.Bereiche => "Bereiche", Liste.Positionen => "Positionen", _ => "Berichtsarten" }, spalte);
         }
         zeile(null, Fehler);
         var schliessen = Stil.NebenKnopf("Schließen");
@@ -262,18 +262,17 @@ public sealed class ListenFenster : Form
         Stil.DpiSkalierungEinschalten(this);
     }
 
-    private Listeneintrag Eintrag(Liste art, string name) =>
-        (art == Liste.Bereiche ? speicher.Bereichsliste() : speicher.Positionsliste()).Single(e => e.Name == name);
+    private Listeneintrag Eintrag(Liste art, string name) => speicher.Listeneintraege(art).Single(e => e.Name == name);
 
     private string? Gewaehlt(Liste art) => Listen[art].SelectedIndex >= 0
-        ? (art == Liste.Bereiche ? speicher.Bereichsliste() : speicher.Positionsliste())[Listen[art].SelectedIndex].Name : null;
+        ? speicher.Listeneintraege(art)[Listen[art].SelectedIndex].Name : null;
 
     public void Laden()
     {
         foreach (var (art, liste) in Listen)
         {
             liste.Items.Clear();
-            foreach (var e in art == Liste.Bereiche ? speicher.Bereichsliste() : speicher.Positionsliste())
+            foreach (var e in speicher.Listeneintraege(art))
                 liste.Items.Add($"{e.Name}{(e.Aktiv ? "" : " (stillgelegt)")} · {e.Zugeordnet} zugeordnet");
         }
     }
