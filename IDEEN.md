@@ -1650,7 +1650,7 @@ Umfang:
 - Protokoll: wer wann einen Bogen erstellt hat. Demo: ausgedachte Einrichtungsangaben.
 
 ## Abgängigkeitsmeldung
-Status: freigegeben (Bauplan Schritt 34; Auswahl Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.38.0; Bauplan Schritt 34, Auswahl Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ein geführter Ablauf, wenn ein Bewohner vermisst wird: Meldeblatt, wer informiert wurde,
 Rückkehr.

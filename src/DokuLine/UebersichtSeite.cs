@@ -68,6 +68,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     public event Action<long>? AkteGewuenscht;
     public event Action<long>? BerichtGewuenscht;
     public event Action<Bewohner>? UeberleitungGewuenscht;
+    public event Action<Bewohner>? AbgaengigkeitGewuenscht;
     public event Action<string>? StelleGewuenscht;          // „Übergabe“, „Tagesplan“, „Aufgaben“
     public event Action<Verlauf>? VerlaufGewuenscht;        // Nachricht öffnen
     public event Action<Aufgabe>? VisitenAufgabeGewuenscht;
@@ -109,6 +110,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         menue.Items.Add("Akte öffnen", null, (_, _) => AkteOeffnen());
         menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
         menue.Items.Add("Überleitungsbogen …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) UeberleitungGewuenscht?.Invoke(z.Bewohner); });
+        menue.Items.Add("Abgängigkeit melden …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) AbgaengigkeitGewuenscht?.Invoke(z.Bewohner); });
         Liste.ContextMenuStrip = menue;
         rechts.Controls.AddRange([ListenKopf, Suche, MeineBezugsbewohner, MeineEinzeltrainings, BereichHinweis, Liste]);
 
@@ -175,6 +177,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan
         var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten: abwesend während der Fahrt
         var farben = BezugAnzeige.Farben(speicher);
+        var abgaengig = speicher.OffeneAbgaengigkeiten();
         int frist = werte.BeschlussFristTage;
         alleZeilen = [];
         foreach (var h in alle)
@@ -190,6 +193,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
             if (status.TryGetValue(id, out var s)) marken.Insert(0, StatusmeldungRegeln.Marke(s, jetzt));
             if (inTherapie.TryGetValue(id, out var wo)) marken.Insert(0, wo);
             if (medikationGeaendert.Contains(id)) marken.Insert(0, new Marke(MarkenArt.Medikation, MedikationsAenderungen.MarkeText));
+            if (abgaengig.TryGetValue(id, out var ab) && !marken.Any(m => m.Art == MarkenArt.Abgaengig)) marken.Insert(0, AbgaengigkeitRegeln.Marke(ab));
             int uebergaben = offeneUebergaben.Count(u => u.BewohnerId == id);
             if (uebergaben > 0) marken.Add(new Marke(MarkenArt.Uebergabe, uebergaben == 1 ? "Übergabe" : $"{uebergaben} Übergaben"));
             if (allesZeigen) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));

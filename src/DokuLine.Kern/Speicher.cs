@@ -812,7 +812,8 @@ public sealed partial class Speicher : IDisposable
         CREATE TABLE IF NOT EXISTS akte_angaben (
             id          INTEGER PRIMARY KEY,
             bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
-            art         TEXT NOT NULL CHECK (art IN ('betreuung', 'angehoerige', 'aerzte', 'krankenkasse', 'kostentraeger', 'zustaendigkeit', 'bestellweg')),
+            art         TEXT NOT NULL CHECK (art IN ('betreuung', 'angehoerige', 'aerzte', 'krankenkasse', 'kostentraeger', 'zustaendigkeit', 'bestellweg',
+                                             'personenbeschreibung')),
             zustand     TEXT NOT NULL CHECK (zustand IN ('eingetragen', 'keine')),
             inhalt      TEXT NOT NULL DEFAULT '',
             ab          TEXT NOT NULL,
@@ -863,6 +864,31 @@ public sealed partial class Speicher : IDisposable
         INSERT OR IGNORE INTO dokumentkategorien (name, nr) VALUES ('Aufnahme und Verträge', 1), ('Betreuung und Gericht', 2),
             ('Kostenträger und Bescheide', 3), ('Krankenkasse', 4), ('Ärztliches und Befunde', 5), ('Ausweise und Behörden', 6),
             ('Schriftverkehr', 7), ('Sonstiges', 8);
+        """,
+        // 37 – Abgängigkeitsmeldung: Meldung (Inhalt als JSON), danach nur Ereignisse (informiert, zurück, entwarnt); Stellen als
+        // Liste. Die Berichte bekommen die Art „Ausgang/Abgängigkeit“ (gibt es seit Schritt 19 in der Liste).
+        """
+        CREATE TABLE IF NOT EXISTS abgaengigkeiten (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            meldung     TEXT NOT NULL,
+            gemeldet    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS abgaengigkeiten_bleiben BEFORE UPDATE ON abgaengigkeiten
+            BEGIN SELECT RAISE(ABORT, 'Abgängigkeitsmeldungen werden nicht überschrieben.'); END;
+        CREATE TABLE IF NOT EXISTS abgaengigkeit_ereignisse (
+            id                INTEGER PRIMARY KEY,
+            abgaengigkeit_id  INTEGER NOT NULL REFERENCES abgaengigkeiten(id) ON DELETE CASCADE,
+            art               TEXT NOT NULL CHECK (art IN ('informiert', 'zurueck', 'entwarnt')),
+            stelle            TEXT NOT NULL DEFAULT '',
+            zeit              TEXT NOT NULL,
+            kuerzel           TEXT NOT NULL,
+            hinweis           TEXT NOT NULL DEFAULT ''
+        );
+        CREATE TABLE IF NOT EXISTS meldestellen (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO meldestellen (name, nr) VALUES ('Leitung bzw. Rufbereitschaft', 1), ('Polizei (110)', 2), ('Betreuer', 3),
+            ('Angehörige', 4), ('Klinik', 5), ('Gericht', 6);
         """,
     ];
 

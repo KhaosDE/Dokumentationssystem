@@ -31,13 +31,14 @@ public sealed record GespeicherterFilter(string Name, DokuFilter Filter);
 
 public static class DokuRegeln
 {
-    public const string ArtAlltag = "Alltag", ArtVisite = "Visite", ArtMedikation = "Medikation", ArtTherapie = "Therapie";
+    public const string ArtAlltag = "Alltag", ArtVisite = "Visite", ArtMedikation = "Medikation", ArtTherapie = "Therapie",
+        ArtAbgaengigkeit = "Ausgang/Abgängigkeit";
 
-    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie];
+    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie, ArtAbgaengigkeit];
 
     public static readonly string[] Berichtsarten =
     [
-        ArtAlltag, "Krise", "Arztkontakt", ArtVisite, ArtMedikation, "Konflikt", "Ausgang/Abgängigkeit",
+        ArtAlltag, "Krise", "Arztkontakt", ArtVisite, ArtMedikation, "Konflikt", ArtAbgaengigkeit,
         "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis", ArtTherapie,
     ];
 

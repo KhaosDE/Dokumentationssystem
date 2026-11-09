@@ -67,6 +67,11 @@ public sealed partial class EinstellungenSeite
         Karte("Wohnbereich", "Beschluss endet bald", "So viele Tage vorher zeigt die Übersicht „Beschluss endet in …“.", BeschlussFrist, Funktionen.EinstellungenBereich);
         HebFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { HebFristMonate = (int)HebFrist.Value }); };
         Karte("Wohnbereich", "HEB fällig", "So viele Monate nach dem letzten Bogen gilt der HEB-Bogen als fällig.", HebFrist, Funktionen.EinstellungenBereich);
+        Wartezeit.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { WartezeitMinuten = (int)Wartezeit.Value }); };
+        Karte("Wohnbereich", "Abgängigkeit: Wartezeit", "So viele Minuten nach der Rückkehrzeit fragt die Ausgangsliste „Abgängigkeit melden?“.", Wartezeit, Funktionen.EinstellungenBereich);
+        MeldestellenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Meldestellen]));
+        Karte("Wohnbereich", "Abgängigkeit: wer wird informiert", "Die Liste zum Abhaken bei einer Abgängigkeitsmeldung; Telefonnummern gehören mit in den Namen, z. B. „Rufbereitschaft (0000 000000)“.",
+            MeldestellenKnopf, Funktionen.EinstellungenBereich);
         logoVorschau.Paint += (_, e) => LogoZeichnen(e.Graphics);
         LogoKnopf.Click += (_, _) => LogoWaehlen();
         LogoWeg.Click += (_, _) => LogoEntfernen();

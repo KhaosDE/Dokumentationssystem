@@ -106,6 +106,8 @@ public sealed partial class Speicher
         var ab = heute.AddDays(-30);
         foreach (var (art, bewohnerId, inhalt) in Demodaten.AkteAngaben(bewohner, personen, zuordnungen, betreuer, heute))
             AngabeEinfuegen(bewohnerId, art, inhalt, ab, "EF", jetzt.AddDays(-30), transaktion);
+        foreach (var (bewohnerId, beschreibung, tage) in Demodaten.Personenbeschreibungen(bewohner))
+            AngabeEinfuegen(bewohnerId, Angabe.Personenbeschreibung, beschreibung, heute.AddDays(-tage), "EF", jetzt.AddDays(-tage), transaktion);
         SetzeMeta(DemoAkte, "1", transaktion);
     }
 }

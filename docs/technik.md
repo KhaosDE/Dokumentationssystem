@@ -38,6 +38,7 @@ Lesbare Datei `einstellungen.json` im Datenordner:
 | `datenbank_ordner` | Mehrplatz: gemeinsamer Ordner der Datenbank; leer = lokal im Datenordner | leer |
 | `menue_eingeklappt` | Seitenmenü nur mit Symbolen | nein |
 | `nachschlage_ansicht` | Formular „Medikament“: eingebettete Nachschlage-Ansicht des BfArM | ja |
+| `wartezeit_minuten` | Ausgangsliste: so viele Minuten nach der Rückkehrzeit „Abgängigkeit melden?“ (5–240) | 30 |
 
 Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben. Dieselbe Datei hat schon die
 Python-Version (bis 0.2.0) benutzt.

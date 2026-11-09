@@ -101,6 +101,27 @@ public static partial class Demodaten
 
 // Demo-Dokumente: je Wohnbereich bei den ersten vier Bewohnern Betreuerausweis, Kostenzusage und Arztbrief als kleine PDF
 // mit großem „DEMO — ausgedachte Daten“; eine Kostenzusage ist abgelaufen.
+// Personenbeschreibung (Bauplan 34): ausgedacht; jeder vierte nicht erfasst, jeder siebte älter als 12 Monate (Marke).
+public static partial class Demodaten
+{
+    private static readonly string[] Staturen = ["schlank", "mittel", "kräftig"], Haare = ["dunkelblond", "braun", "grau", "schwarz", "rotbraun"],
+        Augen = ["blau", "braun", "grün", "grau"], Brillen = ["keine", "Lesebrille", "immer, dunkler Rahmen"],
+        Merkmale = ["", "geht leicht vornübergebeugt", "trägt meist eine Schirmmütze", "kleine Narbe an der linken Augenbraue"];
+
+    public static IEnumerable<(long BewohnerId, Personenbeschreibung Beschreibung, int TageAlt)> Personenbeschreibungen(IReadOnlyList<Bewohner> bewohner)
+    {
+        for (int i = 0; i < bewohner.Count; i++)
+        {
+            if (i % 4 == 3) continue;
+            yield return (bewohner[i].Id!.Value, new Personenbeschreibung
+            {
+                Groesse = $"1,{60 + i * 7 % 30} m", Statur = Staturen[i % 3], Haarfarbe = Haare[i % 5], Augenfarbe = Augen[i % 4],
+                Brille = Brillen[i % 3], Merkmale = Merkmale[i % 4],
+            }, i % 7 == 1 ? 400 + i : 60 + i);
+        }
+    }
+}
+
 public static partial class Demodaten
 {
     public static IEnumerable<(Bewohner Bewohner, string Kategorie, string Titel, DateOnly Datum, DateOnly? GueltigBis, string[] Zeilen)> Dokumente(

@@ -7,7 +7,8 @@ namespace DokuLine.Kern;
 // Einstellungen als lesbare Datei einstellungen.json im Datenordner (Schlüssel und Vorgaben: docs/technik.md).
 // Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben.
 public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90, int HebFristMonate = 12,
-    string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false, bool NachschlageAnsicht = true);
+    string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false, bool NachschlageAnsicht = true,
+    int WartezeitMinuten = AbgaengigkeitRegeln.WartezeitVorgabe);
 
 public static partial class Einstellungen
 {
@@ -59,6 +60,8 @@ public static partial class Einstellungen
                 werte = werte with { MenueEingeklappt = eingeklappt };
             if (knoten["nachschlage_ansicht"] is JsonValue n && n.TryGetValue(out bool ansicht))
                 werte = werte with { NachschlageAnsicht = ansicht };
+            if (knoten["wartezeit_minuten"] is JsonValue wz && wz.TryGetValue(out int wartezeit) && AbgaengigkeitRegeln.WartezeitPruefen(wartezeit) is null)
+                werte = werte with { WartezeitMinuten = wartezeit };
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
@@ -73,6 +76,7 @@ public static partial class Einstellungen
         if (FristPruefen(werte.BeschlussFristTage) is string fristFehler) throw new Eingabefehler([fristFehler]);
         if (HebFristPruefen(werte.HebFristMonate) is string hebFehler) throw new Eingabefehler([hebFehler]);
         if (Bereiche.Pruefen(werte.Bereich) is string bereichFehler) throw new Eingabefehler([bereichFehler]);
+        if (AbgaengigkeitRegeln.WartezeitPruefen(werte.WartezeitMinuten) is string wartezeitFehler) throw new Eingabefehler([wartezeitFehler]);
         string ziel = Pfade.ImDatenordner(Datei);
         Directory.CreateDirectory(Path.GetDirectoryName(ziel)!);
         string zwischen = ziel + ".neu";
@@ -87,6 +91,7 @@ public static partial class Einstellungen
             ["datenbank_ordner"] = string.IsNullOrWhiteSpace(werte.DatenbankOrdner) ? null : werte.DatenbankOrdner.Trim(),
             ["menue_eingeklappt"] = werte.MenueEingeklappt,
             ["nachschlage_ansicht"] = werte.NachschlageAnsicht,
+            ["wartezeit_minuten"] = werte.WartezeitMinuten,
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen

@@ -88,7 +88,7 @@ public static class UeberleitungRegeln
         return z;
     }
 
-    private static List<string> BetreuungZeilen(UeberleitungDaten d)
+    public static List<string> BetreuungZeilen(UeberleitungDaten d)
     {
         var z = new List<string>();
         var zust = d.Angaben.GetValueOrDefault(Angabe.Zustaendigkeit)?.Lesen<Zustaendigkeit>();

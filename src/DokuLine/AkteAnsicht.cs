@@ -30,6 +30,9 @@ public sealed class AkteAnsicht : Panel
     public DokumenteAnsicht Dokumente { get; }
     public Label KrankenkasseText { get; } = new() { Cursor = Cursors.Hand };
     public Label KostentraegerText { get; } = new() { Cursor = Cursors.Hand };
+    // Personenbeschreibung (Bauplan 34): für das Meldeblatt; Marke, wenn älter als 12 Monate.
+    public Label BeschreibungText { get; } = new() { Cursor = Cursors.Hand };
+    public Button BeschreibungKnopf { get; } = Stil.NebenKnopf("Personenbeschreibung …");
     public List<ModulReiter> ModulAnsichten { get; } = [];
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
@@ -75,6 +78,8 @@ public sealed class AkteAnsicht : Panel
         Angaben.Geaendert += () => { if (Bewohner is not null) BetreuerZeigen(Bewohner); };
         KrankenkasseText.Click += (_, _) => Reiter.Waehlen("Krankenkasse");
         KostentraegerText.Click += (_, _) => Reiter.Waehlen("Kostenträger");
+        BeschreibungText.Click += (_, _) => BeschreibungBearbeiten();
+        BeschreibungKnopf.Click += (_, _) => BeschreibungBearbeiten();
         AutoScroll = true;
         BackColor = Stil.Seite;
         DoubleBuffered = true;
@@ -104,7 +109,7 @@ public sealed class AkteAnsicht : Panel
                      ("Geburtsdatum", Geburtsdatum), ("Aufnahmedatum", Aufnahmedatum), ("Beschlussende", Beschlussende),
                      ("Offen geführt", OffenGefuehrt), ("Wohnbereich", Wohnbereich),
                      ("Bezugspflege", Bezugspflege), ("Einzeltrainer", Einzeltrainer), ("Betreuer", BetreuerText),
-                     ("Krankenkasse", KrankenkasseText), ("Kostenträger", KostentraegerText),
+                     ("Krankenkasse", KrankenkasseText), ("Kostenträger", KostentraegerText), ("Personenbeschreibung", BeschreibungText),
                  })
         {
             tabelle.Controls.Add(new Label
@@ -141,8 +146,8 @@ public sealed class AkteAnsicht : Panel
             tabelle.Controls.Add(zelle);
         }
         stammdaten.Controls.Add(tabelle);
-        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini); }
-        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf]);
+        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf, BeschreibungKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini); }
+        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf, BeschreibungKnopf]);
         BetreuerKnopf.Click += (_, _) => BetreuerBearbeiten();
         EmailKnopf.Click += (_, _) => EmailSchreiben();
         EmailBestaetigen = text => MessageBox.Show(FindForm(), text, "E-Mail an Betreuer", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
@@ -262,6 +267,22 @@ public sealed class AkteAnsicht : Panel
             feld.Font = f is null ? Stil.FettKursiv : Stil.Fett;
             feld.AccessibleName = $"{AngabenRegeln.Name(art)}: {feld.Text} (öffnet den Reiter)";
         }
+        var beschreibung = angaben.GetValueOrDefault(Angabe.Personenbeschreibung);
+        var marke = AbgaengigkeitRegeln.BeschreibungMarke(beschreibung, heute);
+        BeschreibungText.Text = AbgaengigkeitRegeln.BeschreibungKurz(beschreibung) + (beschreibung is not null && marke is not null ? " – älter als 12 Monate, bitte prüfen" : "");
+        BeschreibungText.ForeColor = marke is not null ? Stil.Achtung.Text : Stil.TextNormal;
+        BeschreibungText.Font = marke is not null ? Stil.FettKursiv : Stil.Fett;
+        BeschreibungText.MaximumSize = new Size(S(560), 0);
+        BeschreibungText.AccessibleName = $"Personenbeschreibung: {BeschreibungText.Text} (öffnet das Formular)";
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BeschreibungKnopf);
+    }
+
+    public void BeschreibungBearbeiten()
+    {
+        if (Bewohner is null || Recht.Grund(speicher, Funktionen.BewohnerBearbeiten) is not null) return;
+        using var fenster = new AngabeFenster(speicher, Bewohner, Angabe.Personenbeschreibung);
+        if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) KurzzeilenZeigen(Bewohner);
+        PerformLayout();
     }
 
     // Betreuer: „nicht erfasst“ in Achtung-Farbe (leer heißt nicht „keiner“, Regel 5).
@@ -323,6 +344,8 @@ public sealed class AkteAnsicht : Panel
             marken.Add(new Marke(MarkenArt.Medikation, MedikationsAenderungen.MarkeText));
         if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offenMarke) marken.Add(offenMarke);
         marken.AddRange(Modulverwaltung.Marken(speicher, b, jetzt));
+        if (speicher.OffeneAbgaengigkeit(b.Id!.Value) is Abgaengigkeit ab && !marken.Any(m => m.Art == MarkenArt.Abgaengig))
+            marken.Insert(0, AbgaengigkeitRegeln.Marke(ab));
         foreach (var m in marken)
             kopfMarken.Controls.Add(new MarkenFeld(m.Text, Stil.MarkeFuer(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
         StatusText = speicher.Statusmeldung(b.Id!.Value, jetzt) is Statusmeldung status ? "Status: " + StatusmeldungRegeln.Langtext(status, jetzt) : null;

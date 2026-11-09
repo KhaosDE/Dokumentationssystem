@@ -106,15 +106,17 @@ public sealed class AusgangslisteSeite : ModulSeite
         // Gezeigt wird der in der Übersicht gewählte Bereich (geplant wird der Küchendienst weiter für alle).
         var imBereich = BereichswahlRegeln.Bewohner(db.Speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt)
             .Select(b => b.Id!.Value).ToHashSet();
+        var abgaengig = db.Speicher.OffeneAbgaengigkeiten();
+        int wartezeit = Einstellungen.Laden().WartezeitMinuten;
         var alle = plaetze.Where(p => imBereich.Contains(p.BewohnerId))
             .Select(p => new ListenZeile(p, jetzt, DigitalAn ? DigitalerAusgang.StandFuer(p, ausgaenge, jetzt.TimeOfDay) : null,
-                kuecheZimmer.Contains(p.Zimmernummer) && p.Anwesend)).ToList();
+                kuecheZimmer.Contains(p.Zimmernummer) && p.Anwesend, wartezeit, abgaengig.GetValueOrDefault(p.BewohnerId))).ToList();
         bool nurUnterwegs = DigitalAn && NurUnterwegs.Checked;
         var gezeigt = alle.Where(z => (!nurUnterwegs || z.Unterwegs) && (!NurBeschraenkung.Checked || z.Platz.Status == AnwesenheitsStatus.Ausgangsbeschraenkung)).ToList();
         foreach (var z in alle.Except(gezeigt)) z.Dispose();
         // Oben, wer unterwegs ist (Überfällige zuerst, dann nach Beginn); darunter alle anderen nach Zimmer.
-        var unterwegs = gezeigt.Where(z => z.Unterwegs).OrderByDescending(z => z.Ueberfaellig).ThenBy(z => z.HeuteText.Split(" · ")[^1]).ToList();
-        foreach (var z in unterwegs.Concat(gezeigt.Where(z => !z.Unterwegs)))
+        var unterwegs = gezeigt.Where(z => z.Unterwegs || z.Abgaengig).OrderByDescending(z => z.Abgaengig).ThenByDescending(z => z.Ueberfaellig).ThenBy(z => z.HeuteText.Split(" · ")[^1]).ToList();
+        foreach (var z in unterwegs.Concat(gezeigt.Where(z => !z.Unterwegs && !z.Abgaengig)))
         {
             Aktionen.Verbinden(z, db, this, Zeigen);
             z.Hinweise(hinweis);
@@ -202,6 +204,9 @@ public static class Aktionen
     public static Action<IWin32Window?, string> Melden { get; set; } =
         (besitzer, text) => MessageBox.Show(besitzer, text, "Ausgangsliste", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+    // Das Fenster „Abgängigkeit“ gehört dem Hauptprogramm, das Modul kennt es nicht: Das Hauptprogramm setzt den Ablauf.
+    public static Action<long>? AbgaengigkeitMelden { get; set; }
+
     public static void Verbinden(PlatzKarte karte, Datenbank db, Control besitzer, Action danach)
     {
         var p = karte.Platz;
@@ -225,6 +230,8 @@ public static class Aktionen
         zeile.AlleinKnopf.Click += (_, _) => Beginnen(db, p, "allein", besitzer, danach);
         zeile.MitBewohnerKnopf.Click += (_, _) => Beginnen(db, p, "mit Bewohner", besitzer, danach);
         zeile.ZurueckKnopf.Click += (_, _) => Zurueck(db, p, besitzer, danach);
+        zeile.AbgaengigkeitKnopf.Click += (_, _) => { AbgaengigkeitMelden?.Invoke(p.BewohnerId); danach(); };
+        zeile.AbgaengigkeitEintrag.Click += (_, _) => { AbgaengigkeitMelden?.Invoke(p.BewohnerId); danach(); };
     }
 
     private static void Fenster(Form f, Control besitzer, Action danach)

@@ -6,7 +6,7 @@ namespace DokuLine.Kern;
 // Akte, Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger (Bauplan 30). Je Reiter eine Folge von
 // Fassungen („ab Datum …“, wer, wann); es gilt die neueste, die schon begonnen hat. Drei Zustände (Regel 5):
 // eingetragen · „keine“ · ohne Fassung „nicht erfasst“.
-public enum Angabe { Betreuung, Angehoerige, Aerzte, Krankenkasse, Kostentraeger, Zustaendigkeit, Bestellweg }
+public enum Angabe { Betreuung, Angehoerige, Aerzte, Krankenkasse, Kostentraeger, Zustaendigkeit, Bestellweg, Personenbeschreibung }
 
 public enum AngabeZustand { Eingetragen, Keine }
 
@@ -98,7 +98,8 @@ public static class AngabenRegeln
         Angabe.Krankenkasse => "Krankenkasse",
         Angabe.Kostentraeger => "Kostenträger",
         Angabe.Zustaendigkeit => "Zuständigkeit",
-        _ => "Bestellweg",
+        Angabe.Bestellweg => "Bestellweg",
+        _ => "Personenbeschreibung",
     };
 
     public static string KeineText(Angabe a) => a switch
@@ -109,7 +110,8 @@ public static class AngabenRegeln
         Angabe.Krankenkasse => "keine Krankenkasse",
         Angabe.Kostentraeger => "kein Kostenträger",
         Angabe.Zustaendigkeit => "weder Forensik noch FOSA",
-        _ => "kein Bestellweg",
+        Angabe.Bestellweg => "kein Bestellweg",
+        _ => "keine Personenbeschreibung",
     };
 
     public static string Schluessel(Angabe a) => a.ToString().ToLowerInvariant();
@@ -208,6 +210,14 @@ public static class AngabenRegeln
                 Z("Bestellweg", ZustaendigkeitRegeln.WegText(w.Weg), w.Weg == Bestellweg.NichtErfasst);
                 Z("Ansprechperson", w.PersonId is null ? "" : person(w.PersonId));
                 break;
+            case Angabe.Personenbeschreibung when f.Lesen<Personenbeschreibung>() is Personenbeschreibung p:
+                Z("Größe", p.Groesse);
+                Z("Statur", p.Statur);
+                Z("Haarfarbe", p.Haarfarbe);
+                Z("Augenfarbe", p.Augenfarbe);
+                Z("Brille", p.Brille);
+                Z("Besondere Merkmale", p.Merkmale);
+                break;
             case Angabe.Kostentraeger when f.Lesen<Kostentraeger>() is Kostentraeger k:
                 Z("Kostenträger", k.Name);
                 Z("Aktenzeichen", k.Aktenzeichen);
@@ -290,6 +300,7 @@ public static class AngabenRegeln
                 if (z.FosaSeit is DateOnly seit && z.FosaBis is DateOnly ende && ende < seit) fehler.Add("FOSA: „bis“ liegt vor „seit“.");
                 break;
             case BestellwegAngabe:
+            case Personenbeschreibung:
                 break;
             default:
                 fehler.Add($"{Name(art)}: unbekannter Inhalt.");

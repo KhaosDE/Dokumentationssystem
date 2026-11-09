@@ -62,6 +62,7 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public TextBox Nacht { get; } = new UhrzeitFeld() { Width = 60 };
     public Button ZimmerKnopf { get; } = Stil.NebenKnopf("Zimmer und Betten …");
     public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
+    public NumericUpDown Wartezeit { get; } = new() { Minimum = 5, Maximum = 240, Width = 80 };
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");
@@ -87,6 +88,7 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public Button AkteListenKnopf { get; } = Stil.NebenKnopf("Krankenkassen, Kostenträger, Aufgaben, Kategorien …");
     public Button UebernahmeKnopf { get; } = Stil.NebenKnopf("Digitale Akte übernehmen …");
     public Button EinrichtungKnopf { get; } = Stil.NebenKnopf("Angaben der Einrichtung …");
+    public Button MeldestellenKnopf { get; } = Stil.NebenKnopf("Stellen bearbeiten …");
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     // System, Über
     public Label DatenbankOrt { get; } = new() { AutoSize = true, MaximumSize = new Size(360, 0), UseMnemonic = false };
@@ -165,6 +167,7 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
             var zeiten = speicher.Schichtzeiten(werte.Bereich);
             (Frueh.Text, Spaet.Text, Nacht.Text) = (zeiten.Frueh.ToString("HH:mm"), zeiten.Spaet.ToString("HH:mm"), zeiten.Nacht.ToString("HH:mm"));
             BeschlussFrist.Value = Math.Clamp(werte.BeschlussFristTage, (int)BeschlussFrist.Minimum, (int)BeschlussFrist.Maximum);
+            Wartezeit.Value = Math.Clamp(werte.WartezeitMinuten, (int)Wartezeit.Minimum, (int)Wartezeit.Maximum);
             HebFrist.Value = Math.Clamp(werte.HebFristMonate, (int)HebFrist.Minimum, (int)HebFrist.Maximum);
             LogoLaden(Einstellungen.LogoPfad());
             foreach (var (schluessel, haken) in Module) haken.Checked = speicher.ModulAn(schluessel);

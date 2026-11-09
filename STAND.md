@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.37.0** (Bauplan Schritt 33: Überleitungsbogen auf Knopfdruck).
+Stand: 09.11.2026. Version: **0.38.0** (Bauplan Schritt 34: Abgängigkeitsmeldung).
 
 ## Aktuell
 
@@ -357,8 +357,20 @@ Allergien, Diagnosen und Notfallhinweise, Medikamentenplan von heute (mit Bedarf
 (wichtig, Übergabe) und die Statusmeldung „in der Klinik seit …“, dann die Druckvorschau; „Als PDF speichern …“ geht
 auch. Die Angaben der Einrichtung stehen in den Einstellungen (Datenordner, Vorgabe ausgedacht).
 
+Neu in 0.38.0: **„Abgängigkeit …“** in der Akte, per Rechtsklick in Übersicht und Bewohnerliste und in der
+Ausgangsliste. Das Formular fragt vermisst seit, zuletzt gesehen (wo, wann, von wem), **Kleidung heute (Pflicht)**,
+Gefährdung (darunter, was laut Plan regelmäßig gebraucht wird), mögliche Aufenthaltsorte und Kontakte (aus der Akte
+vorbelegt). Nach „Melden“: Marke **„abgängig seit …“** in Gefahr-Farbe in Übersicht, Bewohnerliste, Akte und
+Ausgangsliste (dort ganz oben) und ein wichtiger Bericht mit Übergabe (Art „Ausgang/Abgängigkeit“). Im selben Fenster die
+Liste **„Wer wurde informiert“** zum Abhaken (Uhrzeit und Kürzel von selbst, Hinweis z. B. Vorgangsnummer der Polizei;
+bei Forensik/FOSA deren Zuständige als feste Zeilen), **„Meldeblatt drucken …“** und „Als PDF speichern …“, dann
+**„Zurück“** mit Zustand und der Liste **„Wer wurde entwarnt“**. In den Stammdaten neu die **Personenbeschreibung**
+(Größe, Statur, Haare, Augen, Brille, Merkmale; „älter als 12 Monate, bitte prüfen“). Die Ausgangsliste fragt nach der
+Wartezeit (Vorgabe 30 Minuten) „Rückkehrzeit überschritten seit … – Abgängigkeit melden?“ mit Knopf „melden …“.
+Einstellungen: Wartezeit und die Liste der Stellen.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 34 „Abgängigkeitsmeldung“ (0.38.0).
+als Nächstes 35 „Schweigepflichtentbindungen“ (0.39.0).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1433,6 +1445,11 @@ als Nächstes 34 „Abgängigkeitsmeldung“ (0.38.0).
   `TextPdf` mit mehreren Seiten ohne Schriftdateien), `Speicher.UeberleitungDaten/Ablegen/Bericht/Status`,
   `UeberleitungFenster` mit `UeberleitungDruck`, `EinrichtungFenster`, Einstiege in Akte, Bewohnerliste und Übersicht.
 
+- 0.38.0 — Bauplan Schritt 34: `Abgaengigkeit.cs` (`AbgaengigkeitRegeln`: Prüfen, Stellen, Marke, Wartezeit, Meldeblatt),
+  `SpeicherAbgaengigkeit.cs` (Meldung unveränderlich, danach Ereignisse „informiert“, „zurück“, „entwarnt“; Tabelle
+  `meldestellen` als Liste), `MarkenArt.Abgaengig`, `Angabe.Personenbeschreibung`, Einstellung `wartezeit_minuten`,
+  `AbgaengigkeitFenster`, `AngabeFenster` für die Personenbeschreibung, Hinweis und Knopf in der Ausgangsliste.
+
 ## Offene Punkte
 
 - 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
@@ -1527,6 +1544,16 @@ als Nächstes 34 „Abgängigkeitsmeldung“ (0.38.0).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.38.0): Abgängigkeitsmeldung – die Berichte bekommen die vorhandene Art **„Ausgang/Abgängigkeit“** (laut
+  Eintrag „Berichtsart“ in `IDEEN.md` bekommt die Abgängigkeitsmeldung ihre Art automatisch); der Filter heißt deshalb
+  so und nicht nur „Abgängigkeit“. Die Art ist jetzt fest (nicht umbenennbar), sonst fände der Filter die Meldungen
+  nicht. Telefonnummern der Stellen stehen im Namen der Stelle („Rufbereitschaft (0000 000000)“) statt in einer eigenen
+  Spalte – eine Liste wie die übrigen. Die Personenbeschreibung ist eine Fassung wie die Reiter der Akte (Verlauf
+  bleibt); „älter als 12 Monate“ zählt ab dem Speichern. Nach „Zurück“ bleibt die Meldung 24 Stunden zum Entwarnen im
+  Fenster, danach beginnt es wieder mit dem Formular. Der Knopf „melden …“ in der Ausgangsliste öffnet das Fenster des
+  Hauptprogramms über `Aktionen.AbgaengigkeitMelden`, weil das Modul die Oberfläche des Hauptprogramms nicht kennt.
+  Ein Bild auf dem Meldeblatt gibt es nicht: In der Demo nur Platzhalter (Regel 2), das Blatt verweist auf die Akte.
 
 - 09.11.2026 (0.37.0): Überleitungsbogen – die Abwesenheit wird als **Statusmeldung** „in der Klinik seit …“ (7 Tage,
 alle Bereiche sehen sie) eingetragen statt im Modul Ausgangsliste: Das Modul hat dafür keine Schnittstelle nach außen,
@@ -2386,6 +2413,11 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.38.0: Akte → „Abgängigkeit …“ → Kleidung eintragen, „Melden“: Marke „abgängig seit …“ in Akte und Übersicht;
+„Polizei“ abhaken, „Meldeblatt drucken …“ ansehen; „Zurück“, dann „Polizei“ entwarnen. In den Stammdaten
+„Personenbeschreibung …“ ändern. Ausgangsliste: Ausgang beginnen, Rückkehrzeit überschreiten lassen (oder Wartezeit in
+den Einstellungen kürzer stellen) – Frage „Abgängigkeit melden?“ mit Knopf „melden …“.
 
 Version 0.37.0: Akte → „Überleitungsbogen …“ → Anlass eintragen, „Erstellen“: Druckvorschau ansehen; danach unter
 „Dokumente“ die Kopie, unter Berichte den wichtigen Bericht und oben die Statusmeldung „in der Klinik seit …“.
