@@ -1997,8 +1997,8 @@ Umfang:
 - Uhrzeit und Datum oben rechts in normaler Größe.
 
 ## Übergabe nach Schichten mit eigener Umrandung
-Status: freigegeben (Bauplan Schritt 29h; Vorgabe Tobi 09.11.2026; ergänzt: „Die Übergabeseite muss
-effektiver gestaltet werden“)
+Status: erledigt (09.11.2026, 0.33.14; Bauplan Schritt 29h; Vorgabe Tobi 09.11.2026; ergänzt: „Die Übergabeseite
+muss effektiver gestaltet werden“)
 Datum: 09.11.2026
 Was: Die Übergabe ist nach Schichten unterteilt; jede Schicht hat eine eigene farbige Umrandung.
 Warum: Vorgabe Tobi (09.11.2026).

@@ -1,49 +1,56 @@
-using System.Drawing.Printing;
 using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Übergabe“: nur die Übergabe-Einträge, keine übrigen Berichte. Oben „Wohnbereich
-// allgemein“, darunter nach Bewohner gruppiert. Einträge bleiben stehen, bis sie ablaufen oder
-// erledigt sind; gelöscht wird nichts (erledigte und abgelaufene lassen sich einblenden).
+// Bereich „Übergabe“: nur die Übergabe-Einträge, in kompakten Zeilen. Oben „Wohnbereich allgemein“ (eingeklappt),
+// darunter je Schicht ein Abschnitt in ihrer Farbe, die laufende Schicht zuerst. Vorgabe: nur, was ich noch nicht als
+// gelesen bestätigt habe. Einträge bleiben stehen, bis sie ablaufen oder erledigt sind; gelöscht wird nichts.
 public sealed class UebergabeSeite : Panel, IBereichSeite
 {
     string IBereichSeite.Titel => "Übergabe";
-    IReadOnlyList<Button> IBereichSeite.Knoepfe => [];
+    IReadOnlyList<Button> IBereichSeite.Knoepfe => [NotizKnopf, DruckKnopf];
     void IBereichSeite.Zeigen(bool filterBehalten) => Besuch();
 
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
-    private readonly List<Control> inhalt = [];
+    private readonly List<UebergabeAbschnitt> inhalt = [];
     private DateTime? vergleich;   // letzter Besuch vor diesem (für „neu“)
 
     public Button NotizKnopf { get; } = Stil.NebenKnopf("Notiz für den Wohnbereich …");
-    public Button DruckKnopf { get; } = Stil.NebenKnopf("Übergabeblatt drucken …");
+    public Button DruckKnopf { get; } = Stil.NebenKnopf("Übergabeliste drucken …");
+    public RadioButton NurUngelesene { get; } = new() { AutoSize = true, Checked = true, BackColor = Stil.Seite };
+    public RadioButton AlleOffenen { get; } = new() { AutoSize = true, BackColor = Stil.Seite };
     public CheckBox ErledigteZeigen { get; } = new() { Text = "Erledigte und abgelaufene zeigen", AutoSize = true, BackColor = Stil.Seite };
     public Label KuerzelHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini) };
-    public List<UebergabeKarte> Karten { get; } = [];
-    public List<string> Abschnitte { get; } = [];
+    public IReadOnlyList<UebergabeAbschnitt> Abschnitte => inhalt;
+    public List<UebergabeZeile> Zeilen { get; } = [];
     public int Offen { get; private set; }
+    public int Ungelesen { get; private set; }
     public int Neu { get; private set; }
     public event Action? Geaendert;   // nach jedem Neuaufbau (z. B. für den Kopftext)
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
+    // „9 Einträge als gelesen bestätigen?“; zum Testen ersetzbar.
+    public Func<string, bool> Rueckfrage { get; set; }
 
     public UebergabeSeite(Speicher speicher)
     {
         this.speicher = speicher;
         AutoScroll = true;
         BackColor = Stil.Seite;
-        foreach (var c in new Control[] { NotizKnopf, DruckKnopf, ErledigteZeigen, KuerzelHinweis })
+        Rueckfrage = text => MessageBox.Show(FindForm(), text, "Übergabe", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+        var zeigen = new Label { Text = "Zeigen:", AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite };
+        foreach (var c in new Control[] { zeigen, NurUngelesene, AlleOffenen, ErledigteZeigen, KuerzelHinweis })
         {
-            c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
+            c.Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandMittel, Stil.AbstandMini);
             leiste.Controls.Add(c);
         }
-        ErledigteZeigen.Margin = new Padding(Stil.AbstandKlein, Stil.AbstandKlein, Stil.AbstandKlein, 0);
-        KuerzelHinweis.Margin = new Padding(0, Stil.AbstandKlein, 0, 0);
         KuerzelHinweis.Text = "Für Notizen, „gelesen“ und „erledigt“ bitte zuerst oben rechts anmelden.";
         NotizKnopf.Click += (_, _) => NotizSchreiben();
         DruckKnopf.Click += (_, _) => Drucken();
+        NurUngelesene.CheckedChanged += (_, _) => { if (NurUngelesene.Checked) Aktualisieren(); };
+        AlleOffenen.CheckedChanged += (_, _) => { if (AlleOffenen.Checked) Aktualisieren(); };
         ErledigteZeigen.CheckedChanged += (_, _) => Aktualisieren();
         Controls.Add(leiste);
     }
@@ -58,68 +65,88 @@ public sealed class UebergabeSeite : Panel, IBereichSeite
         Aktualisieren();
     }
 
-    public string KopfText => $"{(Offen == 1 ? "1 offener Eintrag" : $"{Offen} offene Einträge")}{(Neu > 0 ? $" · {Neu} neu" : "")}";
+    public string KopfText => $"{(Offen == 1 ? "1 offener Eintrag" : $"{Offen} offene Einträge")} · {Ungelesen} ungelesen" +
+                              (Neu > 0 ? $" · {Neu} neu" : "");
 
     public void Aktualisieren()
     {
         var jetzt = Jetzt();
         string kuerzel = Kuerzel;
         // Nur der gewählte Bereich; allgemeine Einträge des Wohnbereichs stehen immer da.
-        var ids = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt).Select(b => b.Id!.Value).ToHashSet();
-        var alle = speicher.Uebergaben(jetzt, auchErledigte: true).Where(u => u.BewohnerId is not long b || ids.Contains(b)).ToList();
+        var bewohner = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt).ToDictionary(b => b.Id!.Value);
+        var alle = speicher.Uebergaben(jetzt, auchErledigte: true).Where(u => u.BewohnerId is not long b || bewohner.ContainsKey(b)).ToList();
         var offen = alle.Where(u => UebergabeRegeln.Offen(u, jetzt)).ToList();
-        var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Nachname.ToUpperInvariant()}, {b.Vorname.ToUpperInvariant()} · ZI. {b.Zimmer}");
-        Offen = offen.Count;
+        var ungelesen = offen.Where(u => !UebergabeRegeln.GelesenVon(u, kuerzel)).ToList();
+        (Offen, Ungelesen) = (offen.Count, ungelesen.Count);
         Neu = offen.Count(u => UebergabeRegeln.Neu(u, kuerzel, vergleich));
+        NurUngelesene.Text = $"nur ungelesene ({Ungelesen})";
+        AlleOffenen.Text = $"alle offenen ({Offen})";
         KuerzelHinweis.Visible = kuerzel.Length == 0;
         Recht.NurAngemeldet(NotizKnopf);   // ohne Anmeldung nur ansehen
+        var gezeigt = NurUngelesene.Checked ? ungelesen : offen;
 
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
         inhalt.Clear();
-        Karten.Clear();
-        Abschnitte.Clear();
-
-        void Abschnitt(string text)
+        Zeilen.Clear();
+        inhalt.Add(new UebergabeAbschnitt("Wohnbereich allgemein", Stil.KarteRand,
+            ZeilenFuer(gezeigt.Where(u => u.Allgemein), bewohner, jetzt, kuerzel), einklappbar: true));
+        foreach (var schicht in UebergabeRegeln.SchichtFolge(jetzt))
         {
-            Abschnitte.Add(text);
-            inhalt.Add(new Label { Text = text, AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite, UseMnemonic = false });
+            var zeilen = ZeilenFuer(gezeigt.Where(u => !u.Allgemein && UebergabeRegeln.SchichtVon(u) == schicht), bewohner, jetzt, kuerzel);
+            var abschnitt = new UebergabeAbschnitt(BerichtRegeln.SchichtText(schicht), BerichtZeile.Schichtfarbe(schicht), zeilen, einklappbar: false);
+            AlleGelesenVorbereiten(abschnitt, kuerzel);
+            inhalt.Add(abschnitt);
         }
-        void Karte(Uebergabe u)
-        {
-            var karte = new UebergabeKarte(u, jetzt, kuerzel, vergleich);
-            karte.GelesenGeklickt += x => Ausfuehren(() => speicher.UebergabeGelesen(x.Id, Kuerzel, Jetzt()));
-            karte.ErledigtGeklickt += x => Ausfuehren(() => speicher.UebergabeErledigt(x.Id, Kuerzel, Jetzt()));
-            karte.VerlaengernGeklickt += Verlaengern;
-            Karten.Add(karte);
-            inhalt.Add(karte);
-        }
-
-        var allgemein = offen.Where(u => u.Allgemein).ToList();
-        if (allgemein.Count > 0)
-        {
-            Abschnitt("WOHNBEREICH ALLGEMEIN");
-            allgemein.ForEach(Karte);
-        }
-        foreach (var gruppe in offen.Where(u => !u.Allgemein).GroupBy(u => u.BewohnerId!.Value)
-                     .OrderBy(g => namen.GetValueOrDefault(g.Key, "?"), StringComparer.CurrentCulture))
-        {
-            Abschnitt(namen.GetValueOrDefault(gruppe.Key, "?"));
-            foreach (var u in gruppe) Karte(u);
-        }
-        if (offen.Count == 0)
-            inhalt.Add(new Label { Text = "Keine offenen Übergabe-Einträge.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite });
         if (ErledigteZeigen.Checked)
         {
-            var rest = alle.Where(u => !UebergabeRegeln.Offen(u, jetzt)).ToList();
-            Abschnitt($"ERLEDIGT / ABGELAUFEN ({rest.Count})");
-            rest.ForEach(Karte);
+            var rest = ZeilenFuer(alle.Where(u => !UebergabeRegeln.Offen(u, jetzt)), bewohner, jetzt, kuerzel);
+            inhalt.Add(new UebergabeAbschnitt("Erledigt / abgelaufen", Stil.KarteRand, rest, einklappbar: false, alleGelesen: false));
         }
-        foreach (var c in inhalt) Controls.Add(c);
+        foreach (var a in inhalt) a.Umgeschaltet += PerformLayout;
+        Controls.AddRange([.. inhalt]);
         ResumeLayout(false);
         AutoScrollPosition = Point.Empty;
         PerformLayout();
         Geaendert?.Invoke();
+    }
+
+    // Die Zeilen eines Abschnitts; der Name steht nur beim ersten Eintrag eines Bewohners.
+    private List<UebergabeZeile> ZeilenFuer(IEnumerable<Uebergabe> liste, Dictionary<long, Bewohner> bewohner, DateTime jetzt, string kuerzel)
+    {
+        var zeilen = new List<UebergabeZeile>();
+        long? vorher = -1;
+        foreach (var u in UebergabeRegeln.Ordnen(liste, id => bewohner.TryGetValue(id, out var b) ? b.Zimmer : ""))
+        {
+            string? name = u.BewohnerId != vorher && u.BewohnerId is long id && bewohner.TryGetValue(id, out var b)
+                ? $"{b.Nachname}, {b.Vorname} · {b.Zimmer}" : null;
+            vorher = u.BewohnerId;
+            var zeile = new UebergabeZeile(u, name, jetzt, kuerzel, vergleich);
+            zeile.GelesenGeklickt += x => Ausfuehren(() => speicher.UebergabeGelesen(x.Id, Kuerzel, Jetzt()));
+            zeile.ErledigtGeklickt += x => Ausfuehren(() => speicher.UebergabeErledigt(x.Id, Kuerzel, Jetzt()));
+            zeile.VerlaengernGeklickt += Verlaengern;
+            zeile.Umgeschaltet += _ => PerformLayout();
+            zeilen.Add(zeile);
+        }
+        Zeilen.AddRange(zeilen);
+        return zeilen;
+    }
+
+    private void AlleGelesenVorbereiten(UebergabeAbschnitt abschnitt, string kuerzel)
+    {
+        var offen = abschnitt.Zeilen.Select(z => z.Uebergabe).Where(u => !UebergabeRegeln.GelesenVon(u, kuerzel)).ToList();
+        abschnitt.AlleGelesen.Enabled = kuerzel.Length > 0 && offen.Count > 0;
+        abschnitt.AlleGelesen.Click += (_, _) => AlleGelesen(offen);
+    }
+
+    // „Alle in diesem Abschnitt gelesen“: nach einer Rückfrage jeden Eintrag einzeln als gelesen bestätigen.
+    public bool AlleGelesen(IReadOnlyList<Uebergabe> eintraege)
+    {
+        if (eintraege.Count == 0) return false;
+        string frage = eintraege.Count == 1 ? "1 Eintrag als gelesen bestätigen?" : $"{eintraege.Count} Einträge als gelesen bestätigen?";
+        if (!Rueckfrage(frage)) return false;
+        Ausfuehren(() => { foreach (var u in eintraege) speicher.UebergabeGelesen(u.Id, Kuerzel, Jetzt()); });
+        return true;
     }
 
     private void Ausfuehren(Action aktion)
@@ -146,9 +173,8 @@ public sealed class UebergabeSeite : Panel, IBereichSeite
     public void Drucken()
     {
         var jetzt = Jetzt();
-        var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}");
-        var druck = new UebergabeDruck(speicher.Uebergaben(jetzt), namen, jetzt);
-        Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, "Übergabeblatt");
+        var druck = new UebergabeDruck(speicher.Uebergaben(jetzt), speicher.AlleBewohner().ToDictionary(b => b.Id!.Value), jetzt);
+        Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, "Übergabeliste");
     }
 
     protected override void OnLayout(LayoutEventArgs levent)
@@ -156,267 +182,17 @@ public sealed class UebergabeSeite : Panel, IBereichSeite
         base.OnLayout(levent);
         int rand = Stil.Px(this, Stil.AbstandGross);
         int breite = Math.Max(100, ClientSize.Width - 2 * rand);
-        int y = rand + AutoScrollPosition.Y;
+        int y = Stil.Px(this, Stil.AbstandKlein) + AutoScrollPosition.Y;
         leiste.MaximumSize = new Size(breite, 0);
         leiste.Location = new Point(rand, y);
-        y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
-        foreach (var c in inhalt)
+        y = leiste.Bottom + Stil.Px(this, Stil.AbstandMini);
+        foreach (var a in inhalt)
         {
-            if (c is UebergabeKarte karte)
-            {
-                karte.SetBounds(rand, y, breite, karte.Height);
-                karte.PerformLayout();
-                y += karte.Height + Stil.Px(this, Stil.AbstandKlein);
-            }
-            else
-            {
-                y += Stil.Px(this, Stil.AbstandMittel);
-                c.Location = new Point(rand + Stil.Px(this, Stil.AbstandMini), y);
-                y += c.Height + Stil.Px(this, Stil.AbstandMini);
-            }
+            int hoehe = a.Anordnen(breite);
+            a.SetBounds(rand, y, breite, hoehe);
+            a.Invalidate();
+            y += hoehe + Stil.Px(this, Stil.AbstandKlein);
         }
         AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y + rand);
-    }
-}
-
-// Ein Übergabe-Eintrag: Marken (neu, läuft heute ab, Gültigkeit), der Übergabe-Text (kurzer Satz
-// oder der Bericht), Herkunft, wer gelesen hat, und die Knöpfe „Gelesen“, „Verlängern …“, „Erledigt“.
-public sealed class UebergabeKarte : KartenFlaeche
-{
-    private readonly FlowLayoutPanel marken = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Flaeche, Margin = new Padding(0) };
-    private readonly Label text = new();
-    private readonly Label herkunft = new();
-    private readonly FlowLayoutPanel knoepfe = new() { AutoSize = true, WrapContents = false, BackColor = Stil.Flaeche, Margin = new Padding(0) };
-
-    public Uebergabe Uebergabe { get; }
-    public Label GelesenText { get; } = new();
-    public Button Gelesen { get; } = Stil.NebenKnopf("Gelesen");
-    public Button Verlaengern { get; } = Stil.NebenKnopf("Verlängern …");
-    public Button Erledigt { get; } = Stil.NebenKnopf("Erledigt");
-    public Button BerichtLesen { get; } = Stil.NebenKnopf("Bericht lesen …");
-    public IReadOnlyList<string> MarkenTexte { get; }
-    private readonly bool hatKnoepfe;
-
-    public event Action<Uebergabe>? GelesenGeklickt;
-    public event Action<Uebergabe>? VerlaengernGeklickt;
-    public event Action<Uebergabe>? ErledigtGeklickt;
-
-    public UebergabeKarte(Uebergabe u, DateTime jetzt, string kuerzel, DateTime? letzterBesuch)
-    {
-        Uebergabe = u;
-        bool offen = UebergabeRegeln.Offen(u, jetzt);
-        var liste = new List<(string, Stil.Marke)>();
-        if (offen && UebergabeRegeln.Neu(u, kuerzel, letzterBesuch)) liste.Add(("neu seit deiner letzten Schicht", Stil.Unterwegs));
-        if (UebergabeRegeln.LaeuftHeuteAb(u, jetzt)) liste.Add(("läuft heute ab", Stil.Achtung));
-        liste.Add((UebergabeRegeln.GueltigText(u, jetzt) + (offen && u.Verlaengert > 0 ? " (verlängert)" : ""), Stil.Zimmer));
-        MarkenTexte = liste.Select(m => m.Item1).ToList();
-        foreach (var (t, m) in liste) marken.Controls.Add(new MarkenFeld(t, m) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
-
-        text.Text = u.Anzeige;
-        text.Font = u.Text.Length > 0 ? Stil.KarteName : Stil.Standard;
-        text.ForeColor = offen ? Stil.TextNormal : Stil.TextLeise;
-        herkunft.Text = u.Bericht is Bericht b
-            ? $"aus dem Bericht vom {BerichtRegeln.ZeitText(b.Zeitpunkt)} · {BerichtRegeln.SchichtText(b.Schicht)} · {b.Verfasser}"
-            : $"Notiz von {u.Verfasser}, {BerichtRegeln.ZeitText(u.Erstellt)}";
-        herkunft.Font = Stil.Klein;
-        herkunft.ForeColor = Stil.TextLeise;
-        GelesenText.Text = u.Gelesen.Count == 0 ? "noch von niemandem als gelesen bestätigt"
-            : "gelesen: " + string.Join(", ", u.Gelesen.Select(g => $"{g.Kuerzel} ({g.Zeit:dd.MM., HH:mm})"));
-        GelesenText.Font = Stil.Klein;
-        GelesenText.ForeColor = Stil.TextMittel;
-        foreach (var label in new[] { text, herkunft, GelesenText })
-        {
-            label.AutoSize = true;
-            label.BackColor = Stil.Flaeche;
-            label.UseMnemonic = false;
-            Controls.Add(label);
-        }
-
-        bool schonGelesen = UebergabeRegeln.GelesenVon(u, kuerzel);
-        Gelesen.Text = schonGelesen ? "Gelesen ✓" : "Gelesen";
-        Gelesen.Enabled = offen && kuerzel.Length > 0 && !schonGelesen;
-        Verlaengern.Enabled = offen && kuerzel.Length > 0;
-        Erledigt.Enabled = offen && kuerzel.Length > 0;
-        Gelesen.Click += (_, _) => GelesenGeklickt?.Invoke(u);
-        Verlaengern.Click += (_, _) => VerlaengernGeklickt?.Invoke(u);
-        Erledigt.Click += (_, _) => ErledigtGeklickt?.Invoke(u);
-        bool lesen = u.Bericht is not null && u.Text.Length > 0;   // Bericht per Klick lesbar, wenn ein kurzer Satz davorsteht
-        BerichtLesen.Visible = lesen;
-        hatKnoepfe = offen || lesen;
-        BerichtLesen.Click += (_, _) => MessageBox.Show(FindForm(),
-            $"{herkunft.Text}\n\n{u.Bericht?.Text}", "Bericht", MessageBoxButtons.OK, MessageBoxIcon.None);
-        foreach (var k in new[] { Gelesen, Verlaengern, Erledigt, BerichtLesen })
-        {
-            k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
-            if (k != BerichtLesen) k.Visible = offen;   // erledigt oder abgelaufen: nur noch lesen
-            knoepfe.Controls.Add(k);
-        }
-        Controls.Add(marken);
-        Controls.Add(knoepfe);
-        AccessibleName = $"Übergabe: {u.Anzeige}";
-    }
-
-    protected override void OnLayout(LayoutEventArgs levent)
-    {
-        base.OnLayout(levent);
-        int innen = Stil.Px(this, Stil.AbstandGross), breite = Math.Max(100, Width - 2 * innen);
-        int y = innen;
-        marken.MaximumSize = new Size(breite, 0);
-        marken.Bounds = new Rectangle(new Point(innen, y), marken.GetPreferredSize(new Size(breite, 0)));
-        y = marken.Bottom + Stil.Px(this, Stil.AbstandMini);
-        text.MaximumSize = new Size(breite, 0);
-        text.Location = new Point(innen, y);
-        y = text.Bottom + Stil.Px(this, Stil.AbstandMini);
-        herkunft.MaximumSize = new Size(breite, 0);
-        herkunft.Location = new Point(innen, y);
-        y = herkunft.Bottom + Stil.Px(this, 2);
-        GelesenText.MaximumSize = new Size(breite, 0);
-        GelesenText.Location = new Point(innen, y);
-        y = GelesenText.Bottom;
-        if (hatKnoepfe)
-        {
-            knoepfe.Bounds = new Rectangle(new Point(innen, y + Stil.Px(this, Stil.AbstandKlein)), knoepfe.GetPreferredSize(new Size(breite, 0)));
-            y = knoepfe.Bottom;
-        }
-        int hoehe = y + innen;
-        if (Height != hoehe) Height = hoehe;
-    }
-}
-
-// Kleines Fenster: „Wie lange?“ (nächste Schicht, 3 Tage, 1 Woche, bis Datum, bis erledigt) –
-// zum Verlängern, oder mit Textfeld für eine Notiz an den Wohnbereich.
-public sealed class DauerFenster : Form
-{
-    private readonly Func<string, UebergabeWunsch, Uebergabe>? notizSpeichern;
-    public ComboBox Dauer { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160 };
-    public TextBox Bis { get; } = new DatumFeld() { Width = 110, PlaceholderText = "TT.MM.JJJJ", Enabled = false };
-    public TextBox Inhalt { get; } = new() { Multiline = true, Width = 440, Height = 70 };
-    public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(440, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
-    public UebergabeWunsch? Wunsch { get; private set; }
-
-    // notizSpeichern == null: nur die Dauer wählen (Verlängern). Sonst mit Textfeld (Notiz).
-    public DauerFenster(string titel, string frage, Func<string, UebergabeWunsch, Uebergabe>? notizSpeichern)
-    {
-        this.notizSpeichern = notizSpeichern;
-        Text = $"{titel} ({KopfBereich.DemoHinweis})";
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = MinimizeBox = false;
-        ShowInTaskbar = false;
-        StartPosition = FormStartPosition.CenterParent;
-        BackColor = Stil.Fensterhintergrund;
-        Font = Stil.Standard;
-        AutoSize = true;
-        AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        var stapel = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new Padding(Stil.AbstandGross), Dock = DockStyle.Fill };
-        if (notizSpeichern is not null)
-        {
-            stapel.Controls.Add(new Label { Text = "Notiz für alle (betrifft keinen einzelnen Bewohner):", AutoSize = true, ForeColor = Stil.TextMittel });
-            stapel.Controls.Add(Inhalt);
-        }
-        Dauer.Items.AddRange(UebergabeRegeln.DauerTexte);
-        Dauer.SelectedIndex = notizSpeichern is null ? (int)UebergabeDauer.DreiTage : (int)UebergabeDauer.NaechsteSchicht;
-        Dauer.SelectedIndexChanged += (_, _) => Bis.Enabled = Dauer.SelectedIndex == (int)UebergabeDauer.BisDatum;
-        var zeile = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) };
-        zeile.Controls.Add(new Label { Text = frage, AutoSize = true, ForeColor = Stil.TextMittel, Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0) });
-        Dauer.Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandKlein, 0);
-        Bis.Margin = new Padding(0, Stil.AbstandMini, 0, 0);
-        zeile.Controls.AddRange([Dauer, Bis]);
-        stapel.Controls.Add(zeile);
-        stapel.Controls.Add(Fehler);
-        var ok = Stil.HauptKnopf(notizSpeichern is null ? "Verlängern" : "Notiz speichern");
-        ok.Click += (_, _) => Uebernehmen();
-        var abbrechen = Stil.NebenKnopf("Abbrechen");
-        abbrechen.DialogResult = DialogResult.Cancel;
-        var knoepfe = new FlowLayoutPanel { AutoSize = true, Margin = new Padding(0, Stil.AbstandGross, 0, 0) };
-        knoepfe.Controls.AddRange([ok, abbrechen]);
-        stapel.Controls.Add(knoepfe);
-        Controls.Add(stapel);
-        CancelButton = abbrechen;
-        Stil.DpiSkalierungEinschalten(this);
-    }
-
-    public bool Uebernehmen()
-    {
-        try
-        {
-            var dauer = (UebergabeDauer)Dauer.SelectedIndex;
-            DateOnly? bis = dauer == UebergabeDauer.BisDatum ? Datum.Lesen(Bis.Text, "Bis") : null;
-            Wunsch = new UebergabeWunsch(dauer, bis);
-            notizSpeichern?.Invoke(Inhalt.Text, Wunsch);
-        }
-        catch (Exception e) when (e is Eingabefehler or FormatException)
-        {
-            Fehler.Text = e is Eingabefehler f ? string.Join("\n", f.Fehler) : e.Message;
-            Fehler.Visible = true;
-            return false;
-        }
-        DialogResult = DialogResult.OK;
-        Close();
-        return true;
-    }
-}
-
-// Übergabeblatt (A4 hoch): nur die offenen Einträge, Wohnbereich allgemein zuerst, dann nach Bewohner.
-public sealed class UebergabeDruck(IReadOnlyList<Uebergabe> offen, IReadOnlyDictionary<long, string> namen, DateTime jetzt)
-{
-    private int naechster;
-    private List<(string? Abschnitt, Uebergabe U)> Zeilen => [
-        .. offen.Where(u => u.Allgemein).Select(u => ((string?)"Wohnbereich allgemein", u)),
-        .. offen.Where(u => !u.Allgemein).OrderBy(u => namen.GetValueOrDefault(u.BewohnerId!.Value, "?"), StringComparer.CurrentCulture)
-                .Select(u => ((string?)namen.GetValueOrDefault(u.BewohnerId!.Value, "?"), u)),
-    ];
-
-    public PrintDocument DokumentBauen()
-    {
-        var dokument = new PrintDocument { DocumentName = "Übergabeblatt" };
-        dokument.BeginPrint += (_, _) => naechster = 0;
-        dokument.PrintPage += (_, e) =>
-        {
-            naechster = SeiteZeichnen(e.Graphics!, naechster);
-            e.HasMorePages = naechster < Zeilen.Count;
-        };
-        return dokument;
-    }
-
-    public int SeiteZeichnen(Graphics g, int start)
-    {
-        g.PageUnit = GraphicsUnit.Millimeter;
-        const float links = 20f, rechts = 190f, unten = 280f;
-        float breite = rechts - links, y = 15f;
-        using var titel = new Font("Segoe UI Semibold", 14F);
-        using var fett = new Font("Segoe UI Semibold", 10F);
-        using var normal = new Font("Segoe UI", 10F);
-        using var klein = new Font("Segoe UI", 8F);
-        using var linie = new Pen(Color.Gray, 0.2f);
-        var zeilen = Zeilen;
-        g.DrawString("Übergabeblatt – offene Einträge", titel, Brushes.Black, links, y);
-        y += 8f;
-        g.DrawString($"Stand {BerichtRegeln.ZeitText(jetzt)} · {zeilen.Count} offen · {KopfBereich.DemoHinweis}", klein, Brushes.DimGray, links, y);
-        y += 6f;
-        g.DrawLine(linie, links, y, rechts, y);
-        y += 3f;
-        string? letzterAbschnitt = null;
-        int i = start;
-        for (; i < zeilen.Count; i++)
-        {
-            var (abschnitt, u) = zeilen[i];
-            string meta = $"{UebergabeRegeln.GueltigText(u, jetzt)} · von {u.Verfasser}" +
-                          (u.Gelesen.Count > 0 ? $" · gelesen: {string.Join(", ", u.Gelesen.Select(x => x.Kuerzel))}" : "");
-            float hoehe = g.MeasureString(u.Anzeige, normal, new SizeF(breite, 1000f)).Height + 9f + (abschnitt != letzterAbschnitt ? 7f : 0f);
-            if (y + hoehe > unten && i > start) break;
-            if (abschnitt != letzterAbschnitt)
-            {
-                g.DrawString(abschnitt, fett, Brushes.Black, links, y);
-                y += 6f;
-                letzterAbschnitt = abschnitt;
-            }
-            g.DrawString("☐", normal, Brushes.Black, links, y);
-            g.DrawString(u.Anzeige, normal, Brushes.Black, new RectangleF(links + 6f, y, breite - 6f, 1000f));
-            y += g.MeasureString(u.Anzeige, normal, new SizeF(breite - 6f, 1000f)).Height;
-            g.DrawString(meta, klein, Brushes.DimGray, links + 6f, y);
-            y += 6f;
-        }
-        if (zeilen.Count == 0) g.DrawString("Keine offenen Übergabe-Einträge.", normal, Brushes.Black, links, y);
-        return i;
     }
 }

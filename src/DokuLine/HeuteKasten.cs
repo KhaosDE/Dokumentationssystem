@@ -1,4 +1,3 @@
-using System.Drawing.Printing;
 using DokuLine.Kern;
 
 namespace DokuLine;
@@ -79,12 +78,15 @@ public sealed class HeuteEintrag : Panel
     public Label Text1 { get; } = new() { AutoSize = true, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
     public Label? Text2 { get; }
     public MarkenFeld? Status { get; }
+    // Rand in der Farbe einer Schicht (Übergaben); ohne Rand null.
+    public Color? Rahmen { get; init; }
     public event Action? Geklickt;
 
     public HeuteEintrag(string text, string? unten, (string Text, Stil.Marke Marke)? status)
     {
         BackColor = Stil.Flaeche;
         Cursor = Cursors.Hand;
+        ResizeRedraw = true;
         Text1.Text = text;
         Controls.Add(Text1);
         if (unten is not null)
@@ -108,13 +110,25 @@ public sealed class HeuteEintrag : Panel
     protected override void OnLayout(LayoutEventArgs levent)
     {
         base.OnLayout(levent);
+        int innen = Rahmen is null ? 0 : Stil.Px(this, Stil.AbstandKlein), oben = Rahmen is null ? 0 : Stil.Px(this, Stil.AbstandMini);
         int statusBreite = Status is null ? 0 : Status.PreferredSize.Width + Stil.Px(this, Stil.AbstandKlein);
-        Text1.MaximumSize = new Size(Math.Max(60, Width - statusBreite), 0);
-        Text1.Location = Point.Empty;
+        Text1.MaximumSize = new Size(Math.Max(60, Width - statusBreite - 2 * innen), 0);
+        Text1.Location = new Point(innen, oben);
         int y = Text1.Bottom;
-        if (Text2 is not null) { Text2.Location = new Point(0, y); y = Text2.Bottom; }
-        if (Status is not null) Status.Bounds = new Rectangle(Width - Status.PreferredSize.Width, 0, Status.PreferredSize.Width, Status.PreferredSize.Height);
-        int hoehe = Math.Max(y, Status?.Bottom ?? 0) + Stil.Px(this, 2);
+        if (Text2 is not null) { Text2.Location = new Point(innen, y); y = Text2.Bottom; }
+        if (Status is not null) Status.Bounds = new Rectangle(Width - innen - Status.PreferredSize.Width, oben, Status.PreferredSize.Width, Status.PreferredSize.Height);
+        int hoehe = Math.Max(y, Status?.Bottom ?? 0) + Stil.Px(this, 2) + oben;
         if (Height != hoehe) Height = hoehe;
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+        if (Rahmen is not Color farbe) return;
+        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        float stark = 1.5f * DeviceDpi / 96f;
+        using var pfad = Stil.Abgerundet(new RectangleF(stark / 2, stark / 2, Width - stark - 1, Height - stark - 1), Stil.Px(this, Stil.RadiusKarte));
+        using var stift = new Pen(farbe, stark);
+        e.Graphics.DrawPath(stift, pfad);
     }
 }

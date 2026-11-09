@@ -75,9 +75,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   selbst weiter. Bei Therapien „bestätigen ▾“ → „gegangen“, „abgesagt“, „ausgefallen“ (wie im
   Wochenplan). Nach „gegangen“ zeigen Karte und Akte bis zum Ende „in Therapie: … bis …“.
   **Vollbild** (Knopf oder F11) zeigt nur die Tafel, z. B. auf einem Bildschirm im Dienstzimmer; Esc beendet.
-- **Übergabe** (links): nur die Übergabe-Einträge, oben „Wohnbereich allgemein“, darunter je
-  Bewohner. Mit eigenem Kürzel (Einstellungen) lassen sie sich als gelesen bestätigen,
-  verlängern oder erledigen. „Übergabeblatt drucken …“ druckt die offenen Einträge.
+- **Übergabe** (links): nur die Übergabe-Einträge in kompakten Zeilen, oben „Wohnbereich allgemein“
+  (aufklappbar), darunter je Schicht ein farbig umrandeter Abschnitt, die laufende Schicht zuerst.
+  Vorgabe „nur ungelesene“. Mit eigenem Kürzel lassen sie sich mit einem Klick als gelesen bestätigen
+  oder erledigen, aufgeklappt auch verlängern. „Übergabeliste drucken …“ druckt die offenen Einträge.
 - **Visiten** (links, unter „Übergabe“): was in der Visite besprochen wurde, geänderte Anordnungen
   und nötige Facharzttermine, je Bewohner; Liste mit Filter nach Bewohner und Zeitraum. Nach dem
   Speichern zeigt das Programm sofort die Aufgaben dazu: Medikament anlegen, im Medikamentenplan

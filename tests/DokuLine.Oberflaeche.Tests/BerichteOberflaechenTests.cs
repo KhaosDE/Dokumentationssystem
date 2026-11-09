@@ -130,7 +130,7 @@ public class UebergabeOberflaechenTests
     }
 
     [Fact]
-    public void Nur_offene_Eintraege_allgemein_oben_dann_nach_Bewohner() => Hilfe.Sta(() =>
+    public void Abschnitte_nach_Schicht_laufende_oben_nur_ungelesene() => Hilfe.Sta(() =>
     {
         var (u, f) = Oeffnen();
         using (u)
@@ -140,23 +140,44 @@ public class UebergabeOberflaechenTests
             Assert.Same(seite, f.Seite("Übergabe"));
             Assert.Equal("Übergabe", f.Kopf.TitelText);
             Assert.Equal($"R1 · {seite.KopfText}", f.Kopf.KleinText);   // vorn der gewählte Bereich
-            Assert.Equal("WOHNBEREICH ALLGEMEIN", seite.Abschnitte[0]);
-            Assert.Contains(seite.Abschnitte, a => a.StartsWith("AHORN, ANTON"));
-            Assert.DoesNotContain(seite.Abschnitte, a => a.StartsWith("ERLEDIGT"));
-            Assert.Equal(seite.Offen, seite.Karten.Count);
-            Assert.All(seite.Karten, k => Assert.True(UebergabeRegeln.Offen(k.Uebergabe, DateTime.Now)));
-            // Erster Besuch mit diesem Kürzel: alles Ungelesene ist neu.
-            Assert.Equal(seite.Offen, seite.Neu);
-            Assert.All(seite.Karten, k => Assert.Contains("neu seit deiner letzten Schicht", k.MarkenTexte));
-            // Kurzer Übergabe-Satz mit Bericht dahinter: Bericht per Klick lesbar.
-            Assert.Contains(seite.Karten, k => k.Uebergabe.Text.Length > 0 && k.BerichtLesen.Visible);
+            Assert.Contains(f.Kopf.Knoepfe, k => k == seite.NotizKnopf);
+            Assert.Contains(f.Kopf.Knoepfe, k => k == seite.DruckKnopf);
+            Assert.Equal("Wohnbereich allgemein", seite.Abschnitte[0].Titel);
+            Assert.True(seite.Abschnitte[0].Eingeklappt);
+            Assert.Equal(UebergabeRegeln.SchichtFolge(DateTime.Now).Select(BerichtRegeln.SchichtText),
+                seite.Abschnitte.Skip(1).Select(a => a.Titel));
+            foreach (var a in seite.Abschnitte.Skip(1))
+            {
+                Assert.All(a.Zeilen, z => Assert.Equal(a.Titel, BerichtRegeln.SchichtText(UebergabeRegeln.SchichtVon(z.Uebergabe))));
+                Assert.All(a.Zeilen, z => Assert.Equal(a.Farbe, z.Farbe));   // jede Zeile in der Farbe ihrer Schicht
+                for (int i = 1; i < a.Zeilen.Count; i++)   // ein Bewohner: Name nur beim ersten Eintrag
+                    if (a.Zeilen[i].Uebergabe.BewohnerId == a.Zeilen[i - 1].Uebergabe.BewohnerId) Assert.Equal("", a.Zeilen[i].NameText.Text);
+            }
+            // Vorgabe „nur ungelesene“; CD hat noch nichts gelesen, also alles.
+            Assert.True(seite.NurUngelesene.Checked);
+            Assert.Equal(seite.Offen, seite.Ungelesen);
+            Assert.Equal(seite.Ungelesen, seite.Zeilen.Count);
+            Assert.Equal($"nur ungelesene ({seite.Ungelesen})", seite.NurUngelesene.Text);
+            Assert.Equal(seite.Offen, seite.Neu);   // erster Besuch mit diesem Kürzel: alles neu
+            Assert.All(seite.Zeilen, z => Assert.Contains("neu", z.MarkenTexte));
+            Assert.All(seite.Zeilen.Where(z => !z.Aufgeklappt && !z.Uebergabe.Allgemein), z => Assert.True(z.Height <= Stil.Px(z, 32)));   // kompakt
             Assert.False(seite.KuerzelHinweis.Visible);
+            Hilfe.Foto(f, "15b_uebergabe_schichten");
+
+            // Kurzer Übergabe-Satz mit Bericht dahinter: Klick klappt den Bericht in der Zeile auf.
+            var satz = seite.Zeilen.First(z => z.Uebergabe.Text.Length > 0 && z.Uebergabe.Bericht is not null);
+            satz.Umschalten();
+            Assert.True(satz.Aufgeklappt);
+            Assert.Contains("Bericht: ", satz.TextFeld.Text);
+            Assert.True(satz.Verlaengern.Visible);
+            seite.Abschnitte[0].Umschalten();
+            Assert.False(seite.Abschnitte[0].Eingeklappt);
 
             // Zweiter Besuch: Was vorher da war, ist nicht mehr neu.
             f.BereichWaehlen("Dokumentation");
             f.BereichWaehlen("Übergabe");
             Assert.Equal(0, seite.Neu);
-            Assert.DoesNotContain(seite.Karten, k => k.MarkenTexte.Contains("neu seit deiner letzten Schicht"));
+            Assert.DoesNotContain(seite.Zeilen, z => z.MarkenTexte.Contains("neu"));
         }
     });
 
@@ -168,38 +189,71 @@ public class UebergabeOberflaechenTests
         using (f)
         {
             var seite = f.Uebergabe;
-            long id = seite.Karten.First(k => !k.Uebergabe.Allgemein && k.Uebergabe.GiltBis is not null).Uebergabe.Id;
-            UebergabeKarte Karte() => seite.Karten.Single(k => k.Uebergabe.Id == id);
+            seite.AlleOffenen.Checked = true;
+            Assert.Equal(seite.Offen, seite.Zeilen.Count);
+            long id = seite.Zeilen.First(z => !z.Uebergabe.Allgemein && z.Uebergabe.GiltBis is not null).Uebergabe.Id;
+            UebergabeZeile Zeile() => seite.Zeilen.Single(z => z.Uebergabe.Id == id);
 
-            Karte().Gelesen.PerformClick();
-            Assert.Contains("CD (", Karte().GelesenText.Text);
-            Assert.Equal("Gelesen ✓", Karte().Gelesen.Text);
-            Assert.False(Karte().Gelesen.Enabled);
+            int ungelesen = seite.Ungelesen;
+            Zeile().Gelesen.PerformClick();
+            Assert.Equal(ungelesen - 1, seite.Ungelesen);
+            Assert.Contains("CD (", Zeile().GelesenText.Text);
+            Assert.Equal("Gelesen ✓", Zeile().Gelesen.Text);
+            Assert.False(Zeile().Gelesen.Enabled);
+            seite.NurUngelesene.Checked = true;
+            Assert.DoesNotContain(seite.Zeilen, z => z.Uebergabe.Id == id);   // gelesen: weg aus „nur ungelesene“
+            seite.AlleOffenen.Checked = true;
 
+            Zeile().Umschalten();
             using (new DialogErsatz(fenster =>
             {
                 var dauer = Assert.IsType<DauerFenster>(fenster);
                 dauer.Dauer.SelectedIndex = (int)UebergabeDauer.BisErledigt;
                 return dauer.Uebernehmen() ? DialogResult.OK : DialogResult.Cancel;
             }))
-                Karte().Verlaengern.PerformClick();
-            Assert.Null(Karte().Uebergabe.GiltBis);
-            Assert.Contains("bis erledigt (verlängert)", Karte().MarkenTexte);
+                Zeile().Verlaengern.PerformClick();
+            Assert.Null(Zeile().Uebergabe.GiltBis);
+            Assert.StartsWith("seit ", Zeile().Gueltig.Text);
+            Assert.EndsWith("(verlängert)", Zeile().Gueltig.Text);
 
             int offen = seite.Offen;
-            Karte().Erledigt.PerformClick();
+            Zeile().Erledigt.PerformClick();
             Assert.Equal(offen - 1, seite.Offen);
-            Assert.DoesNotContain(seite.Karten, k => k.Uebergabe.Id == id);
+            Assert.DoesNotContain(seite.Zeilen, z => z.Uebergabe.Id == id);
             Assert.Equal($"R1 · {seite.KopfText}", f.Kopf.KleinText);   // Kopf zählt mit
 
             seite.ErledigteZeigen.Checked = true;
-            Assert.Contains(seite.Abschnitte, a => a.StartsWith("ERLEDIGT / ABGELAUFEN"));
-            var erledigt = Karte();
-            Assert.StartsWith("erledigt ", erledigt.MarkenTexte.Last());
-            Assert.EndsWith("· CD", erledigt.MarkenTexte.Last());
+            Assert.Equal("Erledigt / abgelaufen", seite.Abschnitte[^1].Titel);
+            var erledigt = Zeile();
+            Assert.StartsWith("erledigt ", erledigt.Gueltig.Text);
+            Assert.EndsWith("· CD", erledigt.Gueltig.Text);
             Assert.False(erledigt.Erledigt.Visible);
-            Assert.Contains(seite.Karten,
-                k => k.MarkenTexte.Last().StartsWith("abgelaufen "));   // Demo: ein abgelaufener Eintrag
+            Assert.Contains(seite.Zeilen, z => z.Gueltig.Text.StartsWith("abgelaufen "));   // Demo: ein abgelaufener Eintrag
+        }
+    });
+
+    [Fact]
+    public void Alle_in_einem_Abschnitt_gelesen_mit_Rueckfrage() => Hilfe.Sta(() =>
+    {
+        var (u, f) = Oeffnen();
+        using (u)
+        using (f)
+        {
+            var seite = f.Uebergabe;
+            var abschnitt = seite.Abschnitte.Skip(1).First(a => a.Zeilen.Count > 0);
+            int n = abschnitt.Zeilen.Count, ungelesen = seite.Ungelesen;
+            string? frage = null;
+            seite.Rueckfrage = t => { frage = t; return false; };
+            abschnitt.AlleGelesen.PerformClick();
+            Assert.Equal(n == 1 ? "1 Eintrag als gelesen bestätigen?" : $"{n} Einträge als gelesen bestätigen?", frage);
+            Assert.Equal(ungelesen, seite.Ungelesen);   // „Nein“: nichts geändert
+
+            seite.Rueckfrage = _ => true;
+            abschnitt.AlleGelesen.PerformClick();
+            Assert.Equal(ungelesen - n, seite.Ungelesen);
+            Assert.Empty(seite.Abschnitte.Single(a => a.Titel == abschnitt.Titel).Zeilen);
+            Assert.All(u.Speicher.Uebergaben(DateTime.Now).Where(x => abschnitt.Zeilen.Any(z => z.Uebergabe.Id == x.Id)),
+                x => Assert.True(UebergabeRegeln.GelesenVon(x, "CD")));
         }
     });
 
@@ -223,10 +277,10 @@ public class UebergabeOberflaechenTests
             }))
                 seite.NotizKnopf.PerformClick();
             Assert.Contains("Text der Notiz fehlt", fehler);
-            var karte = seite.Karten.Single(k => k.Uebergabe.Text == "Heizungsableser kommt morgen zwischen 8 und 12 Uhr.");
-            Assert.True(karte.Uebergabe.Allgemein);
-            Assert.Equal("CD", karte.Uebergabe.Verfasser);
-            Assert.False(karte.BerichtLesen.Visible);
+            var zeile = seite.Abschnitte[0].Zeilen.Single(z => z.Uebergabe.Text == "Heizungsableser kommt morgen zwischen 8 und 12 Uhr.");
+            Assert.True(zeile.Uebergabe.Allgemein);
+            Assert.Equal("CD", zeile.Uebergabe.Verfasser);
+            Assert.Equal("CD", zeile.Kuerzel.Text);
         }
     });
 
@@ -240,13 +294,13 @@ public class UebergabeOberflaechenTests
             var seite = f.Uebergabe;
             Assert.True(seite.KuerzelHinweis.Visible);
             Assert.Equal(0, seite.Neu);
-            Assert.All(seite.Karten,
-                k => Assert.False(k.Gelesen.Enabled || k.Erledigt.Enabled || k.Verlaengern.Enabled));
+            Assert.All(seite.Zeilen, z => Assert.False(z.Gelesen.Enabled || z.Erledigt.Enabled || z.Verlaengern.Enabled));
+            Assert.All(seite.Abschnitte, a => Assert.False(a.AlleGelesen.Enabled));
         }
     });
 
     [Fact]
-    public void Uebergabeblatt_nur_offene_Eintraege() => Hilfe.Sta(() =>
+    public void Uebergabeliste_nach_Schicht_auf_einer_Seite() => Hilfe.Sta(() =>
     {
         var (u, f) = Oeffnen();
         using (u)
@@ -255,15 +309,17 @@ public class UebergabeOberflaechenTests
             using (var ersatz = new DialogErsatz(_ => DialogResult.Cancel))
             {
                 f.Uebergabe.DruckKnopf.PerformClick();
-                Assert.StartsWith("Übergabeblatt", Assert.Single(ersatz.Titel));
+                Assert.StartsWith("Übergabeliste", Assert.Single(ersatz.Titel));
             }
             var jetzt = DateTime.Now;
             var offen = u.Speicher.Uebergaben(jetzt);
-            var namen = u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
+            var druck = new UebergabeDruck(offen, u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value), jetzt);
+            var abschnitte = druck.Zeilen.Select(z => z.Abschnitt).Distinct().ToList();
+            Assert.Equal("Wohnbereich allgemein", abschnitte[0]);
+            Assert.Equal(UebergabeRegeln.SchichtFolge(jetzt).Select(BerichtRegeln.SchichtText).Where(abschnitte.Contains), abschnitte.Skip(1));
             using var bild = new Bitmap(800, 1130);
             using var g = Graphics.FromImage(bild);
-            Assert.Equal(offen.Count, new UebergabeDruck(offen, namen, jetzt).SeiteZeichnen(g,
-                0));   // passt auf eine Seite
+            Assert.Equal(offen.Count, druck.SeiteZeichnen(g, 0));   // passt auf eine Seite
         }
     });
 }

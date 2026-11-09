@@ -108,3 +108,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.33.11 Kuvert für ungelesene Nachrichten in der Kopfzeile, Hinweis in der Dokumentation entfernt (Bauplan 29e).
 - 09.11.2026 — Claude Code: 0.33.12 kleine Korrekturen – Demo-Übergaben mit Inhalt, Angebot „Teilnehmer“, Dokumentation ohne Aufgabenliste mit abgerundeter Bewohnerleiste (Bauplan 29f).
 - 09.11.2026 — Claude Code: 0.33.13 Tagesplan hell im normalen Programmstil, Statusfarben an einer Stelle (Bauplan 29g).
+- 09.11.2026 — Claude Code: 0.33.14 Übergabe nach Schichten in kompakten Zeilen, „nur ungelesene“, Übergabeliste auf einer Seite (Bauplan 29h).

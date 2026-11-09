@@ -343,7 +343,7 @@ public class BildschirmfotoTests
             g.Clear(Color.White);
             g.ScaleTransform(1240f / 210f / 3.7795f, 1240f / 210f / 3.7795f);
             new UebergabeDruck(u.Speicher.Uebergaben(DateTime.Now),
-                u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}"), DateTime.Now).SeiteZeichnen(g, 0);
+                u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value), DateTime.Now).SeiteZeichnen(g, 0);
             string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
             if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "17_uebergabeblatt.png"), System.Drawing.Imaging.ImageFormat.Png);
         }

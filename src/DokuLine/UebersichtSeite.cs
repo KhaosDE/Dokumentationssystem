@@ -230,7 +230,8 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         Uebergaben.Setzen(offen.Count, offen.Select(u =>
         {
             var b = u.BewohnerId is long id ? bewohner.GetValueOrDefault(id) : null;
-            return Eintrag(HeuteWichtigRegeln.UebergabeText(u, b), HeuteWichtigRegeln.SeitText(u), null, () => StelleGewuenscht?.Invoke("Übergabe"));
+            return Eintrag(HeuteWichtigRegeln.UebergabeText(u, b), HeuteWichtigRegeln.SeitText(u), null, () => StelleGewuenscht?.Invoke("Übergabe"),
+                BerichtZeile.Schichtfarbe(UebergabeRegeln.SchichtVon(u)));
         }));
 
         // 2. Termine heute aus dem Tagesplan, mit dem Status der Tafel.
@@ -294,9 +295,9 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         Aktualisieren();
     }
 
-    private static HeuteEintrag Eintrag(string text, string? unten, (string Text, Stil.Marke Marke)? status, Action klick)
+    private static HeuteEintrag Eintrag(string text, string? unten, (string Text, Stil.Marke Marke)? status, Action klick, Color? rahmen = null)
     {
-        var e = new HeuteEintrag(text, unten, status);
+        var e = new HeuteEintrag(text, unten, status) { Rahmen = rahmen };
         e.Geklickt += klick;
         return e;
     }

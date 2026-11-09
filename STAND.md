@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.13** (Bauplan Schritt 29g: Tagesplan im normalen Programmstil).
+Stand: 09.11.2026. Version: **0.33.14** (Bauplan Schritt 29h: Übergabe nach Schichten, kompakt).
 
 ## Aktuell
 
@@ -256,8 +256,16 @@ Neu in 0.33.13: Der **Tagesplan** sieht aus wie das übrige Programm: helle Flä
 Uhrzeit und Datum oben rechts in normaler Größe, der Status als Marke in denselben Farben wie in der Übersicht. Die
 Blöcke „Jetzt und gleich“, „Später heute“, „Erledigt“ und die Knöpfe „gegangen“, „abgesagt“, „ausgefallen“ bleiben.
 
+Neu in 0.33.14: Die **Übergabe** ist nach Schichten geteilt: Frühdienst, Spätdienst, Nachtdienst, die laufende Schicht
+oben, jede in einer Fläche mit Rand in ihrer Farbe (Orange, Blau, Violett) und dem farbigen Wort darüber. Jeder Eintrag
+ist eine kompakte Zeile (Bewohner · Text · gültig bis · Kürzel · „Gelesen“ · „Erledigt“), umrandet in der Farbe seiner
+Schicht; ein Klick auf den Text klappt den ganzen Bericht auf, dort steht „Verlängern …“. Vorgabe ist **„nur ungelesene“**
+(umschaltbar auf „alle offenen“, beide mit Zähler); je Schicht „Alle in diesem Abschnitt gelesen“ mit Rückfrage.
+„Wohnbereich allgemein“ ist eine aufklappbare Zeile oben. „Übergabeliste drucken …“ druckt alles auf eine A4-Seite, nach
+Schicht. In der Übersicht sind die Übergaben ebenfalls in der Farbe ihrer Schicht umrandet.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29h „Übergabe nach Schichten“ (0.33.14).
+als Nächstes 29i „Wochenplan ohne Datum“ (0.33.15).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1222,6 +1230,14 @@ als Nächstes 29h „Übergabe nach Schichten“ (0.33.14).
   - Die Statusfarben stehen einmal in `TafelStil.Status` (vorher doppelt in Übersicht und laufenden Therapien).
   - Schmalere Spalten für Zeit, Status und Knopf: Bei 900 px passen alle vier Textspalten.
 
+- 0.33.14 — Bauplan Schritt 29h:
+  - Kern: `UebergabeRegeln.SchichtVon`, `SchichtFolge` (laufende Schicht zuerst), `Rang` und `Ordnen`
+    (Medikamentenänderung, dann „wichtig“, dann nach Zimmer; ein Bewohner zusammen), `SeitText` („seit Mo 09.11.“).
+  - Oberfläche: `UebergabeZeile` (kompakte Zeile, aufklappbar) und `UebergabeAbschnitt` (Rand 2 px in der Schichtfarbe,
+    Zähler, „Alle in diesem Abschnitt gelesen“); `UebergabeSeite` neu; „Notiz …“ und „Übergabeliste drucken …“ stehen
+    jetzt in der Aktionsleiste wie in den anderen Bereichen. `DauerFenster` und `UebergabeDruck` in eigenen Dateien.
+  - Übersicht: `HeuteEintrag.Rahmen` (Übergaben in der Schichtfarbe umrandet).
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1245,8 +1261,8 @@ als Nächstes 29h „Übergabe nach Schichten“ (0.33.14).
   - ~~**Übersicht:** Bei 1920 × 1080 sind 12 der 23 Karten ohne Bildlauf zu sehen; „Termine heute“ zählt bei
     Gruppenterminen alle Namen auf (Spaziergang: 23 Namen).~~ Erledigt mit 0.29.14 (Liste, höchstens drei
     Namen je Termin).
-  - **Übergabe:** Jeder Eintrag ist eine große Karte; bei 1366 × 768 passen zwei der neun offenen Einträge
-    auf den Bildschirm.
+  - ~~**Übergabe:** Jeder Eintrag ist eine große Karte; bei 1366 × 768 passen zwei der neun offenen Einträge
+    auf den Bildschirm.~~ Erledigt mit 0.33.14 (kompakte Zeilen, rund 30 px hoch).
   - **Tagesplan:** Ein Gruppentermin („Spaziergang mit der Wohngruppe“) steht je Bewohner in einer eigenen
     Zeile (23 Zeilen).
 - **Teil 2: Repository umbenennen — sobald dieses Release erschienen ist** (`KhaosDE/Dokumentationssystem`
@@ -1303,6 +1319,15 @@ als Nächstes 29h „Übergabe nach Schichten“ (0.33.14).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.14): Eingeklappt zeigt jede Übergabe-Zeile **eine** Textzeile (mit „…“), nicht zwei: Mit zwei Zeilen
+  wären bei 1366 × 768 nur etwa neun Einträge ohne Bildlauf zu sehen, das Ziel waren zwölf. Ein Klick zeigt den ganzen
+  Text. Rechnerisch passen jetzt rund 14 Einträge (Zeile etwa 30 px); am echten Bildschirm nicht gemessen.
+- 09.11.2026 (0.33.14): „läuft heute ab“ steht als Wort in der Spalte „gültig“ (Farbe „bitte klären“), nicht als Marke –
+  so bleibt die Zeile einzeilig. „Neu“ bleibt eine Marke neben dem Namen.
+- 09.11.2026 (0.33.14): Die Schicht eines Eintrags ist die seines Berichts, bei Notizen die Uhrzeit der Notiz.
+  „Alle in diesem Abschnitt gelesen“ bestätigt jeden Eintrag einzeln (wie der Knopf in der Zeile), damit Kürzel und
+  Uhrzeit bei jedem Eintrag stehen.
 
 - 09.11.2026 (0.33.13): Die Status-Wörter bleiben in Großbuchstaben („JETZT“, „NOCH OFFEN“): Sie stehen genauso in der
   Übersicht und bei den laufenden Therapien; „keine Großschrift“ im Auftrag meint die Schriftgröße. Das Vollbild (F11)
@@ -2075,6 +2100,15 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.14:
+
+1. Übergabe öffnen: oben „Wohnbereich allgemein“ (Klick klappt auf), darunter drei Abschnitte Früh, Spät, Nacht mit
+   farbigem Rand, die laufende Schicht oben. Jeder Eintrag eine Zeile, umrandet in seiner Schichtfarbe.
+2. „Gelesen“ in einer Zeile → die Zeile verschwindet (Vorgabe „nur ungelesene“); „alle offenen“ zeigt sie wieder.
+3. Klick auf einen Text → ganzer Bericht, Herkunft, wer gelesen hat und „Verlängern …“.
+4. „Alle in diesem Abschnitt gelesen“ → Rückfrage „… Einträge als gelesen bestätigen?“.
+5. „Übergabeliste drucken …“ → eine A4-Seite, nach Schicht. Übersicht: Übergaben in der Schichtfarbe umrandet.
 
 Version 0.33.13: Tagesplan öffnen – hell wie das übrige Programm, Uhrzeit und Datum klein oben rechts, Zeilen in
 normaler Höhe, Status als farbige Marke. „bestätigen ▾“ → „gegangen“ wirkt wie vorher; „Vollbild (F11)“ ebenfalls hell.
