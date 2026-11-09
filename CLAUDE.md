@@ -40,6 +40,10 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
    **Einzige eingebettete Webansicht:** im Formular „Medikament anlegen/ändern“ zum
    Nachschlagen beim BfArM (Entscheidung Tobi, 08.11.2026). Nur dessen Adressen, gesucht wird
    nur mit dem Medikamentennamen — nie mit Angaben zu Bewohnern. Abschaltbar.
+   **Anzeige im lokalen Netzwerk** (Entscheidung Tobi, 09.11.2026): DokuLine darf eine nur lesende
+   Seite mit den laufenden Therapien für einen Fernseher im Wohnbereich bereitstellen — nur für
+   Adressen im LAN, mit Zugangscode, standardmäßig aus, ohne Verbindung ins Internet (Eintrag
+   „Therapie-Anzeige für den Fernseher im Wohnbereich“ in `IDEEN.md`).
 7. **Fremde Vorlagen bleiben draußen.** PDF-Bögen des Kostenträgers, Logos und Namen der
    Einrichtung kommen nie ins Repository; das Programm lässt sie in den Einstellungen
    zuteilen und speichert sie im Datenordner.
