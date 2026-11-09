@@ -2,8 +2,8 @@ using DokuLine.Kern;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Mitarbeiter, Anmeldung und Rechte (Bauplan Schritt 19): Anmelden mit Kürzel, gesperrte Knöpfe
-// (sichtbar, mit Grund), Rechte-Tabelle, Mitarbeiter im eigenen Bereich verwalten.
+// Mitarbeiter, Anmeldung und Rechte: Anmelden mit Kürzel, Knöpfe ohne Recht (ausgeblendet, Sperrgrund bleibt
+// lesbar), Rechte-Tabelle, Mitarbeiter im eigenen Bereich verwalten.
 [Collection("Oberflaeche")]
 public class RechteOberflaechenTests
 {
@@ -51,7 +51,7 @@ public class RechteOberflaechenTests
     });
 
     [Fact]
-    public void Ohne_Recht_gesperrt_aber_sichtbar() => Hilfe.Sta(() =>
+    public void Ohne_Recht_ausgeblendet_ohne_Anmeldung_grau() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
         using var f = new Hauptfenster(u.Speicher);

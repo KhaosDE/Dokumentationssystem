@@ -200,7 +200,9 @@ public sealed class DokumentationAnsicht : Panel
     {
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
         var nachtrag = menue.Items.Add("Nachtrag schreiben …", null, (_, _) => NachtragSchreiben(b));
-        nachtrag.Enabled = Recht.Grund(speicher, Funktionen.BerichteSchreiben) is null;
+        string? grund = Recht.Grund(speicher, Funktionen.BerichteSchreiben);
+        nachtrag.Enabled = grund is null;
+        nachtrag.Visible = !RechteRegeln.FehltRecht(grund);
         menue.Items.Add("Aufgabe daraus machen …", null, (_, _) => AufgabeDaraus(b));
         return menue;
     }

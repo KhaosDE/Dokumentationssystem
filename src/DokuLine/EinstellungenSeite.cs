@@ -278,7 +278,7 @@ public sealed class EinstellungenSeite : Panel
         Karte("System", "Ort der Datenbank", "Mehrere Rechner mit demselben Ordner arbeiten gemeinsam. Gilt nach dem Neustart; ist der Ordner leer, entstehen dort die Demo-Daten. Auch dort nur ausgedachte Daten.",
             ort, Funktionen.EinstellungenBereich, darunter: true);
         Karte("System", "Sicherung", "Noch nicht gebaut (siehe STAND.md, offene Punkte). Die Datenbank ist eine Datei im Datenordner bzw. im gemeinsamen Ordner.",
-            new Label { Text = "–", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche });
+            new Label { Text = "–", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche }, Funktionen.EinstellungenBereich);
         AutoUpdate.CheckedChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { AutoUpdate = AutoUpdate.Checked }); };
         Karte("System", "Update", "Beim Start nach einer neuen Version suchen (nur die Releases dieses Programms). Abschaltbar auch mit „--kein-update“.",
             AutoUpdate, Funktionen.EinstellungenBereich);
@@ -334,7 +334,7 @@ public sealed class EinstellungenSeite : Panel
             AutoUpdate.Checked = werte.AutoUpdate;
             WebAnsichtStand.Text = $"WebView2 {Nachschlageansicht.Laufzeit}";
             foreach (var k in Karten) k.Sperren(k.Funktion is string r ? Recht.Grund(speicher, r) : null);
-            ModulHakenAbgleichen();   // 0.33.3: nach den Karten – deren Sperre gab die Untermodule sonst wieder frei
+            ModulHakenAbgleichen();   // nach den Karten – deren Sperre gäbe die Untermodule sonst wieder frei
             // Erst nach den Karten: Deren Sperre setzt die Knöpfe sonst wieder frei. Die eigene Farbe braucht eine Anmeldung.
             foreach (var k in new[] { FarbeKnopf, FarbeVorgabeKnopf }) Stil.Sperren(k, ich is null ? RechteRegeln.NichtAngemeldetText : null);
             Stil.Sperren(MitarbeiterKnopf, Recht.Darf(speicher, Funktionen.MitarbeiterAlle) ? null : Recht.Grund(speicher, Funktionen.MitarbeiterBereich));
@@ -344,12 +344,18 @@ public sealed class EinstellungenSeite : Panel
         GruppeWaehlen(AktiveGruppe);
     }
 
+    // Eine Gruppe ohne eine einzige erlaubte Karte verschwindet; die Verzeichnisse darf jeder ansehen.
+    public bool GruppeSichtbar(string gruppe) => gruppe == VerzeichnisGruppe || Karten.Any(k => k.Gruppe == gruppe && !k.OhneRecht);
+
     public void GruppeWaehlen(string gruppe)
     {
+        if (!GruppeSichtbar(gruppe)) gruppe = "Persönlich";
         AktiveGruppe = gruppe;
+        foreach (var g in Gruppen) g.Visible = GruppeSichtbar(g.Text);
+        LinksAnordnen();
         foreach (var g in Gruppen) g.Aktiv = g.Text == gruppe;
         titel.Text = gruppe;
-        foreach (var k in Karten) k.Visible = k.Gruppe == gruppe;
+        foreach (var k in Karten) k.Visible = k.Gruppe == gruppe && !k.OhneRecht;
         Verzeichnis.Visible = gruppe == VerzeichnisGruppe;
         if (Verzeichnis.Visible) Verzeichnis.Aktualisieren();
         rechts.AutoScrollPosition = Point.Empty;
@@ -359,7 +365,7 @@ public sealed class EinstellungenSeite : Panel
 
     // Suche über Name und Erklärung; Treffer als Liste links.
     public List<EinstellungKarte> Suchen(string text) =>
-        text.Trim().Length == 0 ? [] : Karten.Where(k => k.Passt(text.Trim())).ToList();
+        text.Trim().Length == 0 ? [] : Karten.Where(k => !k.OhneRecht && k.Passt(text.Trim())).ToList();
 
     private void SucheZeigen()
     {
@@ -376,7 +382,8 @@ public sealed class EinstellungenSeite : Panel
     // Zum ersten Treffer springen: Gruppe wählen, Karte zeigen und kurz hervorheben.
     public bool Springen(string text)
     {
-        var k = Karten.FirstOrDefault(x => x.Titel.Equals(text.Trim(), StringComparison.CurrentCultureIgnoreCase)) ?? Suchen(text).FirstOrDefault();
+        var k = Karten.FirstOrDefault(x => !x.OhneRecht && x.Titel.Equals(text.Trim(), StringComparison.CurrentCultureIgnoreCase))
+            ?? Suchen(text).FirstOrDefault();
         if (k is null) return false;
         GruppeWaehlen(k.Gruppe);
         foreach (var x in Karten) x.Hervorgehoben = x == k;
@@ -593,7 +600,7 @@ public sealed class EinstellungenSeite : Panel
             Treffer.SetBounds(rand, y, breite, Math.Min(S(240), Math.Max(1, Treffer.Items.Count) * Treffer.ItemHeight + S(6)));
             y = Treffer.Bottom + S(Stil.AbstandKlein);
         }
-        foreach (var g in Gruppen)
+        foreach (var g in Gruppen.Where(g => GruppeSichtbar(g.Text)))
         {
             g.SetBounds(rand, y, breite, S(36));
             y += S(36) + S(Stil.AbstandMini);
@@ -612,7 +619,7 @@ public sealed class EinstellungenSeite : Panel
             Fehler.Location = new Point(rand, y);
             y = Fehler.Bottom + S(Stil.AbstandKlein);
         }
-        foreach (var k in Karten.Where(k => k.Gruppe == AktiveGruppe))
+        foreach (var k in Karten.Where(k => k.Gruppe == AktiveGruppe && !k.OhneRecht))
         {
             k.SetBounds(rand, y, breite, k.Height);
             k.PerformLayout();
@@ -649,8 +656,11 @@ public sealed class EinstellungKarte : KartenFlaeche
     public string Titel { get; }
     public string Erklaerung { get; }
     public Control Bedienung { get; }
-    public string? Funktion { get; init; }   // Recht, ohne das die Karte gesperrt ist
+    public string? Funktion { get; init; }   // Recht, ohne das die Karte ausgeblendet ist
     public string? Sperrgrund { get; private set; }
+
+    // Ohne Recht ausgeblendet: das Recht der Karte fehlt, oder ihr einziger Knopf ist ohne Recht.
+    public bool OhneRecht => RechteRegeln.FehltRecht(Sperrgrund) || Bedienung is Knopf { OhneRecht: true };
 
     public EinstellungKarte(string gruppe, string name, string erklaerung, Control bedienung, bool darunter)
     {
@@ -677,7 +687,7 @@ public sealed class EinstellungKarte : KartenFlaeche
         Titel.Contains(text, StringComparison.CurrentCultureIgnoreCase) || Erklaerung.Contains(text, StringComparison.CurrentCultureIgnoreCase) ||
         Gruppe.Contains(text, StringComparison.CurrentCultureIgnoreCase);
 
-    // Gesperrt: Knöpfe bleiben sichtbar und nennen den Grund, alles andere ist nicht änderbar.
+    // Gesperrt (z. B. ohne Anmeldung): Knöpfe nennen den Grund, alles andere ist nicht änderbar.
     public void Sperren(string? grund)
     {
         Sperrgrund = grund;

@@ -290,7 +290,7 @@ public sealed class KopfBereich : Panel
     }
 }
 
-// Aktionsleiste direkt unter der Kopfzeile (Bauplan Schritt 26i): gleiche Breite und gleiche Seitenränder
+// Aktionsleiste direkt unter der Kopfzeile: gleiche Breite und gleiche Seitenränder
 // wie die Kopfzeile, Knöpfe im bestehenden Stil. In allen Bereichen gleich angeordnet: links ein
 // Rücksprung („← Dokumentation“), dann die Hauptaktion (farbig), dann die übrigen Aktionen; rechts
 // „… drucken …“ und ganz außen „Entwurf fortsetzen“. Ohne Aktion entfällt die Leiste.
@@ -351,6 +351,9 @@ public sealed class AktionsLeiste : Panel
         Anordnen();
     }
 
+    // Ohne Recht ausgeblendet: nimmt keinen Platz (Visible meldet false, solange die Leiste verborgen ist).
+    private static bool Sichtbar(Button k) => k is not Knopf { OhneRecht: true };
+
     // Gruppe in der Leiste: 0 Rücksprung, 1 Hauptaktion, 2 übrige Aktionen, 3 rechts (Drucken).
     public static int Gruppe(Button knopf) =>
         knopf.Text.StartsWith('←') ? 0
@@ -378,7 +381,7 @@ public sealed class AktionsLeiste : Panel
 
     public void Anordnen()
     {
-        Visible = knoepfe.Count > 0 || entwurfSichtbar || Zusatz is not null;
+        Visible = knoepfe.Any(Sichtbar) || entwurfSichtbar || Zusatz is not null;
         Height = S(Stil.KnopfHoehe + RandUnten);
         PerformLayout();
     }
@@ -388,7 +391,7 @@ public sealed class AktionsLeiste : Panel
         base.OnLayout(levent);
         int hoehe = S(Stil.KnopfHoehe);
         int Breite(Button k) => Math.Max(k.PreferredSize.Width, TextRenderer.MeasureText(k.Text, k.Font).Width + S(32));
-        var (links, rechts) = Reihenfolge(knoepfe);
+        var (links, rechts) = Reihenfolge(knoepfe.Where(Sichtbar));
         int x = S(Rand);
         foreach (var k in links)
         {
@@ -413,8 +416,7 @@ public sealed class AktionsLeiste : Panel
         }
         if (Zusatz is not null)
         {
-            // Reicht der Platz nicht, wird die Auswahl schmaler, notfalls ausgeblendet – sie verdeckt nie „Drucken …“
-            // (0.33.3: vorher rückte sie über die Knöpfe rechts).
+            // Reicht der Platz nicht, wird die Auswahl schmaler, notfalls ausgeblendet – sie verdeckt nie „Drucken …“.
             r -= S(Stil.AbstandKlein);
             zusatzBreite ??= Zusatz.Width;
             int platz = r - x;

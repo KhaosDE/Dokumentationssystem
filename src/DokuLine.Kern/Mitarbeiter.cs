@@ -81,6 +81,10 @@ public static partial class RechteRegeln
     public const string NichtAngemeldetText = "Bitte zuerst anmelden.";
     public const string NurFachkraftText = "Nur für Fachkräfte.";
 
+    // Fehlt das Recht, wird das Element ausgeblendet; ohne Anmeldung oder „geht gerade nicht“ bleibt es grau.
+    // Fachregel: IDEEN.md „Rechte: Fehlendes ausblenden statt ausgrauen“.
+    public static bool FehltRecht(string? grund) => grund is FehltText or NurFachkraftText;
+
     // Die zwei Stufen (Tobi, 08.11.2026): die kleinste ist die Assistenzkraft, darüber die Fachkraft.
     public const string Assistenzkraft = "Assistenzkraft", Fachkraft = "Fachkraft";
     public static string Qualifikation(bool fachkraft) => fachkraft ? Fachkraft : Assistenzkraft;

@@ -202,6 +202,7 @@ public sealed class Hauptfenster : Form
         leiste.Controls.AddRange([AbmeldenEintrag, Arbeitsplatz, VersionText, InfoSymbol]);
         leiste.Layout += (_, _) => LeisteAnordnen();
         ModuleAnzeigen();
+        NavigationRechte();
         speicher.ModuleGeaendert += ModuleAnzeigen;
 
         // ----- Inhalt rechts: Kopf oben, Bereich darunter -----
@@ -463,12 +464,14 @@ public sealed class Hauptfenster : Form
         RechteNeu();
     }
 
-    // Anmeldung oder Rechte geändert: Kopf, Zähler und die gezeigte Ansicht (gesperrte Knöpfe) neu.
+    // Anmeldung oder Rechte geändert: Kopf, Zähler, Seitenleiste und die gezeigte Ansicht neu.
     private void RechteNeu()
     {
         if (IsDisposed) return;
         BenutzerAnzeigen();
         AufgabenZaehlen();
+        NavigationRechte();
+        if (OhneRechtAusgeblendet.Contains(AktiverBereich)) { BereichWaehlen(Startbereich); return; }
         if (AktiverBereich == "Dokumentation")
         {
             Bewohner.NeuLesen();
@@ -477,7 +480,21 @@ public sealed class Hauptfenster : Form
         else if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
     }
 
-    // ----- Abmelden (Schritt 26a3) -----
+    // Bereiche mit eigenem Recht; ohne dieses Recht verschwinden sie aus der Seitenleiste.
+    private static readonly (string Bereich, string Funktion)[] BereichsRechte = [("Visiten", Funktionen.Visiten)];
+
+    public HashSet<string> OhneRechtAusgeblendet { get; } = [];
+
+    private void NavigationRechte()
+    {
+        OhneRechtAusgeblendet.Clear();
+        foreach (var (bereich, funktion) in BereichsRechte)
+            if (RechteRegeln.FehltRecht(Recht.Grund(speicher, funktion))) OhneRechtAusgeblendet.Add(bereich);
+        foreach (var eintrag in Navigation) eintrag.Visible = !OhneRechtAusgeblendet.Contains(eintrag.Text);
+        leiste.PerformLayout();
+    }
+
+    // ----- Abmelden -----
 
     private void AbmeldenOderAnmelden()
     {
@@ -745,7 +762,7 @@ public sealed class Hauptfenster : Form
         programmName.Location = new Point(MenueKnopf.Right + S(Stil.AbstandKlein), y + Math.Max(0, (S(36) - namensblock) / 2));
         LeittextAnzeige.Location = new Point(programmName.Left, programmName.Bottom);
         y = MenueKnopf.Bottom + S(Stil.AbstandGross);
-        foreach (var eintrag in Navigation.Where(e => e.Text != "Einstellungen"))
+        foreach (var eintrag in Navigation.Where(e => e.Text != "Einstellungen" && !OhneRechtAusgeblendet.Contains(e.Text)))
         {
             eintrag.Bounds = new Rectangle(x, y, breite, S(36));
             y += eintrag.Height + S(Stil.AbstandMini);
