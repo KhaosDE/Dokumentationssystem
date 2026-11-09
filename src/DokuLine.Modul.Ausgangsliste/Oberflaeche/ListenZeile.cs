@@ -27,6 +27,8 @@ public sealed class ListenZeile : Panel
     public string RueckkehrText { get; }
     public bool Unterwegs { get; }
     public bool Ueberfaellig { get; }
+    public bool Abgaengig { get; }
+    public bool AbgaengigkeitFrage { get; }   // Rückkehrzeit länger als die Wartezeit überschritten
     public Button ZurueckKnopf { get; } = Stil.KleinerKnopf("zurück", haupt: true);
     public Button RausKnopf { get; } = Stil.KleinerKnopf("raus ▾");
     public Button MehrKnopf { get; } = Stil.KleinerKnopf("…");
@@ -36,6 +38,8 @@ public sealed class ListenZeile : Panel
     public ToolStripMenuItem AnwesenheitEintrag { get; } = new("Anwesenheit …");
     public ToolStripMenuItem UnterbringungEintrag { get; } = new("Unterbringung …");
     public ToolStripMenuItem VerlaufEintrag { get; } = new("Verlauf …");
+    public ToolStripMenuItem AbgaengigkeitEintrag { get; } = new("Abgängigkeit melden …");
+    public Button AbgaengigkeitKnopf { get; } = Stil.KleinerKnopf("melden …");
 
     // Gemeinsame Breite des Knopfbereichs aller Zeilen (setzt die Seite), damit die Spalten fluchten.
     public int KnopfBreite { get; set; }
@@ -43,15 +47,17 @@ public sealed class ListenZeile : Panel
     public static int Hoehe(Control bezug) => Stil.Px(bezug, 32);
 
     // digital: null = Untermodul „Digitaler Ausgang“ ausgeschaltet.
-    public ListenZeile(Platz p, DateTime jetzt, DigitalStand? digital, bool kueche)
+    public ListenZeile(Platz p, DateTime jetzt, DigitalStand? digital, bool kueche, int wartezeit = AbgaengigkeitRegeln.WartezeitVorgabe, Abgaengigkeit? abgaengig = null)
     {
         Platz = p;
         DoubleBuffered = true;
         ResizeRedraw = true;
-        var marken = AusgangsMarken.Fuer(p, jetzt, digital, alle: true, kueche: kueche);
+        var marken = AusgangsMarken.Fuer(p, jetzt, digital, alle: true, kueche: kueche, wartezeit: wartezeit, abgaengig: abgaengig);
         MarkenTexte = marken.Select(m => m.Text).ToList();
         Unterwegs = digital?.Laufend is not null;
         Ueberfaellig = Unterwegs && digital!.Ueberfaellig;
+        Abgaengig = abgaengig is not null;
+        AbgaengigkeitFrage = !Abgaengig && Ueberfaellig && digital!.ZurueckBis is TimeSpan grenze && AbgaengigkeitRegeln.WartezeitVorbei(grenze, jetzt.TimeOfDay, wartezeit);
         AusgangZeile = PlatzTexte.Ausgang(p, jetzt);
         UnterbringungZeile = PlatzTexte.Unterbringung(p, jetzt);
         var heute = new List<string>();
@@ -61,9 +67,10 @@ public sealed class ListenZeile : Panel
             if (digital.Laufend is AusgangEintrag l) heute.Add($"{DigitalerAusgang.Uhrzeit(l.Beginn)}– Hz. {l.HdzBeginn}");
         }
         HeuteText = heute.Count > 0 ? string.Join(" · ", heute) : "–";
-        StandText = digital?.Laufend is AusgangEintrag e
+        StandText = abgaengig is not null ? AbgaengigkeitRegeln.MarkeText(abgaengig)
+            : digital?.Laufend is AusgangEintrag e
             ? Ueberfaellig && digital.ZurueckBis is TimeSpan bis
-                ? $"überfällig seit {DigitalerAusgang.Uhrzeit(bis)} ({e.Art})"
+                ? AbgaengigkeitFrage ? AbgaengigkeitRegeln.UeberschrittenText(bis) : $"überfällig seit {DigitalerAusgang.Uhrzeit(bis)} ({e.Art})"
                 : $"unterwegs seit {DigitalerAusgang.Uhrzeit(e.Beginn)} ({e.Art})"
             : p.Status switch
             {
@@ -73,8 +80,9 @@ public sealed class ListenZeile : Panel
             };
         RueckkehrText = Unterwegs && digital!.ZurueckBis is TimeSpan z ? $"bis {DigitalerAusgang.Uhrzeit(z)}" : "";
 
-        var hinter = Ueberfaellig ? Stil.Beschluss.Flaeche : Unterwegs ? Stil.Zimmer.Flaeche : Stil.Flaeche;
-        balken = Ueberfaellig ? Stil.Beschluss.Text : Stil.Zimmer.Text;
+        bool rot = Ueberfaellig || Abgaengig;
+        var hinter = rot ? Stil.Beschluss.Flaeche : Unterwegs ? Stil.Zimmer.Flaeche : Stil.Flaeche;
+        balken = rot ? Stil.Beschluss.Text : Stil.Zimmer.Text;
         BackColor = hinter;
         string name = p.Bewohnername + (kueche ? " · Küche" : "");
         string[] texte = [p.Zimmernummer, name, StandText, RueckkehrText];
@@ -82,7 +90,7 @@ public sealed class ListenZeile : Panel
         {
             Text = t, AutoSize = false, AutoEllipsis = true, UseMnemonic = false, BackColor = hinter, TextAlign = ContentAlignment.MiddleLeft,
             Font = i == 1 || i == 2 && (Unterwegs || p.HatStatus) ? Stil.Fett : Stil.Standard,
-            ForeColor = i == 2 && Ueberfaellig ? Stil.Beschluss.Text : i is 0 or 3 ? Stil.TextMittel : Stil.TextNormal,
+            ForeColor = i == 2 && rot ? Stil.Beschluss.Text : i is 0 or 3 ? Stil.TextMittel : Stil.TextNormal,
         }).ToArray();
         Controls.AddRange(zellen);
 
@@ -100,7 +108,10 @@ public sealed class ListenZeile : Panel
         MitBewohnerKnopf.Available = frei && DigitalerAusgang.Anspruch(p, "mit Bewohner") > 0;
         RausKnopf.Visible = AlleinKnopf.Available || MitBewohnerKnopf.Available;
         ZurueckKnopf.Visible = Unterwegs;
-        foreach (var k in new[] { ZurueckKnopf, RausKnopf, MehrKnopf })
+        AbgaengigkeitKnopf.Visible = AbgaengigkeitFrage;
+        AbgaengigkeitKnopf.AccessibleName = $"Abgängigkeit melden: {p.Bewohnername}";
+        AbgaengigkeitEintrag.Available = !Abgaengig;
+        foreach (var k in new[] { AbgaengigkeitKnopf, ZurueckKnopf, RausKnopf, MehrKnopf })
         {
             k.Margin = new Padding(Stil.AbstandMini, 0, 0, 0);
             knoepfe.Controls.Add(k);   // unsichtbare zählen bei der Breite nicht mit
@@ -114,7 +125,7 @@ public sealed class ListenZeile : Panel
     {
         if (menue is not null) return menue;
         menue = new ContextMenuStrip();
-        menue.Items.AddRange([AusgangEintrag, AnwesenheitEintrag, UnterbringungEintrag, VerlaufEintrag]);
+        menue.Items.AddRange([AusgangEintrag, AnwesenheitEintrag, UnterbringungEintrag, VerlaufEintrag, new ToolStripSeparator(), AbgaengigkeitEintrag]);
         return menue;
     }
 

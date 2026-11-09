@@ -24,7 +24,12 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     // „Heute wichtig“; „Medikamentenänderungen“ nur, wenn es welche gibt (dann ganz oben).
     public HeuteKasten Medikation { get; } = new("MEDIKAMENTENÄNDERUNGEN");
     public bool MedikationZeigen { get; private set; }
-    private HeuteKasten[] Kaesten => MedikationZeigen ? [Medikation, Uebergaben, Termine, Dienst, Nachrichten] : [Uebergaben, Termine, Dienst, Nachrichten];
+    // „Fristen“ (Betreuung, Befreiung, Kostenzusage) nur, wenn eine bald endet.
+    public HeuteKasten Fristen { get; } = new("FRISTEN");
+    public bool FristenZeigen { get; private set; }
+    private HeuteKasten[] Kaesten =>
+        [.. MedikationZeigen ? [Medikation] : Array.Empty<HeuteKasten>(), .. FristenZeigen ? [Fristen] : Array.Empty<HeuteKasten>(),
+         Uebergaben, Termine, Dienst, Nachrichten];
     public HeuteKasten Uebergaben { get; } = new("ÜBERGABEN OFFEN");
     public HeuteKasten Termine { get; } = new("TERMINE HEUTE");
     public HeuteKasten Dienst { get; } = new("LAUFENDER DIENST · NOCH OFFEN");
@@ -62,6 +67,9 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
 
     public event Action<long>? AkteGewuenscht;
     public event Action<long>? BerichtGewuenscht;
+    public event Action<Bewohner>? UeberleitungGewuenscht;
+    public event Action<Bewohner>? AbgaengigkeitGewuenscht;
+    public event Action<Bewohner>? AuskunftGewuenscht;
     public event Action<string>? StelleGewuenscht;          // „Übergabe“, „Tagesplan“, „Aufgaben“
     public event Action<Verlauf>? VerlaufGewuenscht;        // Nachricht öffnen
     public event Action<Aufgabe>? VisitenAufgabeGewuenscht;
@@ -92,15 +100,19 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         Nachrichten.KopfGeklickt += () => StelleGewuenscht?.Invoke("Nachrichten");
         Medikation.KopfGeklickt += () => StelleGewuenscht?.Invoke("Übergabe");
         Medikation.Visible = false;
-        links.Controls.AddRange([Medikation, Uebergaben, Termine, Dienst, Nachrichten]);
+        Fristen.Visible = false;
+        links.Controls.AddRange([Medikation, Fristen, Uebergaben, Termine, Dienst, Nachrichten]);
 
-        foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Hinweise", 300) }) Liste.Columns.Add(titel, breite);
+        foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Auskunft", 170), ("Hinweise", 300) }) Liste.Columns.Add(titel, breite);
         Liste.DoubleClick += (_, _) => AkteOeffnen();
         Liste.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.Handled = true; AkteOeffnen(); } };
         Liste.SelectedIndexChanged += (_, _) => KnoepfeSperren();
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
         menue.Items.Add("Akte öffnen", null, (_, _) => AkteOeffnen());
         menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
+        menue.Items.Add("Überleitungsbogen …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) UeberleitungGewuenscht?.Invoke(z.Bewohner); });
+        menue.Items.Add("Abgängigkeit melden …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) AbgaengigkeitGewuenscht?.Invoke(z.Bewohner); });
+        menue.Items.Add("Auskunft prüfen …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) AuskunftGewuenscht?.Invoke(z.Bewohner); });
         Liste.ContextMenuStrip = menue;
         rechts.Controls.AddRange([ListenKopf, Suche, MeineBezugsbewohner, MeineEinzeltrainings, BereichHinweis, Liste]);
 
@@ -132,7 +144,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         gezeigtSchicht = SchichtTermin.Zu(jetzt);
         var werte = Einstellungen.Laden();
         string gewaehlt = Arbeitsbereich.Gewaehlt.Length > 0 ? Arbeitsbereich.Gewaehlt : werte.Bereich;
-        Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.Wohnbereiche().Select(w => w.Name), f => Recht.Darf(speicher, f)), gewaehlt,
+        Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.SichtbareWohnbereiche(Recht.Kuerzel), f => Recht.Darf(speicher, f)), gewaehlt,
             BereichswahlRegeln.Eingesprungen(gewaehlt, werte.Bereich));
         var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
         // Der gewählte Bereich; „Alle“ und Bereiche ohne eigene Bewohner (z. B. „Therapie“) zeigen alle, mit Hinweis.
@@ -167,6 +179,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan
         var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten: abwesend während der Fahrt
         var farben = BezugAnzeige.Farben(speicher);
+        var abgaengig = speicher.OffeneAbgaengigkeiten();
         int frist = werte.BeschlussFristTage;
         alleZeilen = [];
         foreach (var h in alle)
@@ -182,6 +195,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
             if (status.TryGetValue(id, out var s)) marken.Insert(0, StatusmeldungRegeln.Marke(s, jetzt));
             if (inTherapie.TryGetValue(id, out var wo)) marken.Insert(0, wo);
             if (medikationGeaendert.Contains(id)) marken.Insert(0, new Marke(MarkenArt.Medikation, MedikationsAenderungen.MarkeText));
+            if (abgaengig.TryGetValue(id, out var ab) && !marken.Any(m => m.Art == MarkenArt.Abgaengig)) marken.Insert(0, AbgaengigkeitRegeln.Marke(ab));
             int uebergaben = offeneUebergaben.Count(u => u.BewohnerId == id);
             if (uebergaben > 0) marken.Add(new Marke(MarkenArt.Uebergabe, uebergaben == 1 ? "Übergabe" : $"{uebergaben} Übergaben"));
             if (allesZeigen) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
@@ -189,7 +203,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
             var zeile = new BewohnerZeile(h.Bewohner, heute, marken,
                 bezug?.Bezugspflege is { } bp ? (bp.Kuerzel, BezugAnzeige.Farbe(farben, bp.Kuerzel)) : null,
                 bezug?.Einzeltrainer is { } tr ? (BezugRegeln.TrainerText(tr), BezugAnzeige.Farbe(farben, tr.Kuerzel)) : null,
-                HeuteWichtigRegeln.Wo(marken, h.Termine, jetzt));
+                HeuteWichtigRegeln.Wo(marken, h.Termine, jetzt), h.Auskunft);
             zeile.Gewaehlt += b => AkteGewuenscht?.Invoke(b.Id!.Value);
             alleZeilen.Add(zeile);
         }
@@ -200,6 +214,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
 
         HeuteFuellen(jetzt, alle, offeneUebergaben, werte.Kuerzel);
         MedikationFuellen(medikation, alle);
+        FristenFuellen(alle);
 
         // Kopf: „R2 · 23 Bewohner · 3 Betten frei · Stand 14:32 Uhr“ (freie Betten der gezeigten Wohnbereiche).
         var bereiche = meineBp || meineEt ? [] : allesZeigen ? speicher.Wohnbereiche().Select(w => w.Name).ToList() : meine;
@@ -241,6 +256,15 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
                 () => AkteGewuenscht?.Invoke(a.BewohnerId), Stil.Gefahr);
         }));
         MedikationZeigen = Medikation.Visible = liste.Count > 0;
+    }
+
+    // Kasten „Fristen“: je Frist eine Zeile; Klick öffnet die Akte.
+    private void FristenFuellen(List<HeuteFuer> alle)
+    {
+        var zeilen = alle.SelectMany(h => h.Fristen.Select(m => (h.Bewohner, m))).ToList();
+        Fristen.Setzen(zeilen.Count, zeilen.Select(x =>
+            Eintrag($"{x.Bewohner.Name}, Zi. {x.Bewohner.Zimmer}: {x.m.Text}", null, null, () => AkteGewuenscht?.Invoke(x.Bewohner.Id!.Value))));
+        FristenZeigen = Fristen.Visible = zeilen.Count > 0;
     }
 
     private void HeuteFuellen(DateTime jetzt, List<HeuteFuer> alle, List<Uebergabe> offen, string kuerzel)

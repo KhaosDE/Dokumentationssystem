@@ -12,9 +12,11 @@ public static partial class AusgangsMarken
     [GeneratedRegex(@"(\d{2}\.\d{2}\.)\d{4}")]
     private static partial Regex Jahr();
 
-    public static List<Marke> Fuer(Platz p, DateTime jetzt, DigitalStand? digital, bool alle = false, bool kueche = false)
+    public static List<Marke> Fuer(Platz p, DateTime jetzt, DigitalStand? digital, bool alle = false, bool kueche = false,
+        int wartezeit = AbgaengigkeitRegeln.WartezeitVorgabe, Abgaengigkeit? abgaengig = null)
     {
         var marken = new List<Marke>();
+        if (abgaengig is not null) marken.Add(AbgaengigkeitRegeln.Marke(abgaengig));
         if (alle) marken.Add(new Marke(MarkenArt.Ausgang, $"Zimmer {p.Zimmernummer}"));
         switch (p.Status)
         {
@@ -36,7 +38,9 @@ public static partial class AusgangsMarken
         }
         if (digital?.Laufend is AusgangEintrag e)
             marken.Add(digital.Ueberfaellig && digital.ZurueckBis is TimeSpan bis
-                ? new Marke(MarkenArt.NichtErfasst, $"überfällig seit {DigitalerAusgang.Uhrzeit(bis)}")
+                ? abgaengig is null && AbgaengigkeitRegeln.WartezeitVorbei(bis, jetzt.TimeOfDay, wartezeit)
+                    ? new Marke(MarkenArt.NichtErfasst, AbgaengigkeitRegeln.UeberschrittenText(bis))
+                    : new Marke(MarkenArt.NichtErfasst, $"überfällig seit {DigitalerAusgang.Uhrzeit(bis)}")
                 : new Marke(MarkenArt.Ausgang, $"unterwegs seit {DigitalerAusgang.Uhrzeit(e.Beginn)} ({e.Art})"));
         if (alle && p.Unterbringung != Unterbringung.NichtErfasst)
             marken.Add(new Marke(MarkenArt.Ausgang, Verlauf.Unterbringung(p.Unterbringung)));

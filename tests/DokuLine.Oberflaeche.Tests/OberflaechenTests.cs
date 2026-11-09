@@ -111,12 +111,12 @@ public class BewohnerOberflaechenTests
         f.BereichWaehlen("Übersicht");
         f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);   // Ginster wohnt in R2
         var birke = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Birke");
-        // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu
-        Assert.DoesNotContain(birke.Marken, m => m.Art is MarkenArt.Beschluss or MarkenArt.Allergie or MarkenArt.NichtErfasst);
+        // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu (Fristen der Akte wie „Forensik: Überprüfung …“ zählen nicht)
+        Assert.DoesNotContain(birke.Marken, m => m.Text.StartsWith("Allergie", StringComparison.Ordinal) || m.Text.StartsWith("Beschluss", StringComparison.Ordinal));
         Assert.Equal("seit 15.02.2016 · 10 Jahre, 8 Monate", birke.AufenthaltText);
         var ginster = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Ginster");
         Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst"],
-            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst && !m.Text.StartsWith("überfällig")).Select(m => m.Text));
+            ginster.Marken.Where(m => m.Text.StartsWith("Allergie", StringComparison.Ordinal) || m.Text.StartsWith("Beschluss", StringComparison.Ordinal)).Select(m => m.Text));
     });
 
     [Fact]
@@ -141,8 +141,8 @@ public class BewohnerOberflaechenTests
         Assert.DoesNotContain("Berta Birke", f.Kopf.KleinText);
         Assert.Equal("Berta Birke", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal("22.11.1958", f.Bewohner.Akte.Geburtsdatum.Text);
-        Assert.Equal(["← Dokumentation", "Berichte ansehen", "Nachrichten …", "Status …", "Ärztliche Informationen …", "Neuer Bericht …",
-            "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
+        Assert.Equal(["← Dokumentation", "Berichte ansehen", "Nachrichten …", "Status …", "Auskunft prüfen …", "Ärztliche Informationen …", "Überleitungsbogen …",
+            "Abgängigkeit …", "Neuer Bericht …", "Bearbeiten …"], f.Kopf.Knoepfe.Select(k => k.Text));
         f.Kopf.Knoepfe[0].PerformClick();
         Assert.False(f.Bewohner.AkteSichtbar);
         Assert.Equal("Berta Birke", f.Bewohner.Gewaehlt!.Name);   // die Wahl bleibt
@@ -176,7 +176,7 @@ public class BewohnerOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         var akte = f.Bewohner.Akte;
-        Assert.Equal(["Stammdaten", "Medikamentenplan", "Wochenplan", "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
+        Assert.Equal([.. Bauplan.AktenReiter.Take(Array.IndexOf(Bauplan.AktenReiter, "Wochenplan") + 1), "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
         Assert.Empty(Bauplan.Reiter);   // alle Reiter sind gebaut
@@ -219,6 +219,11 @@ public class BewohnerOberflaechenTests
             Assert.Contains("Aufnahmedatum liegt vor dem Geburtsdatum", formular.Fehler.Text);
             Assert.Equal(69, u.Speicher.AlleBewohner().Count);
             formular.Aufnahmedatum.Text = "1.2.2026";
+            // Bauplan 30: Hausarzt und Psychiater brauchen einen Zustand.
+            Assert.False(formular.Speichern());
+            Assert.Contains("Hausarzt: bitte einen Arzt", formular.Fehler.Text);
+            formular.Hausarzt.SelectedIndex = 3;   // der erste Arzt im Verzeichnis
+            formular.Psychiater.SelectedItem = BewohnerFormular.NochNichtBekannt;
             Assert.True(formular.Speichern());
             return formular.Gespeichert;
         };
@@ -229,6 +234,9 @@ public class BewohnerOberflaechenTests
         Assert.Equal("Paul Pappel", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal(("106", ZimmerRegeln.Tuer, OffenGefuehrtZustand.Nein), (f.Bewohner.Akte.Bewohner.Zimmer, f.Bewohner.Akte.Bewohner.Bett, f.Bewohner.Akte.Bewohner.OffenGefuehrt));
         Assert.Equal("Allergien: nicht erfasst – bitte klären", f.Bewohner.Akte.Allergie.Text);
+        var aerzte = u.Speicher.Angaben(f.Bewohner.Akte.Bewohner.Id!.Value, DateOnly.FromDateTime(DateTime.Today))[Angabe.Aerzte].Lesen<AerzteAngabe>()!;
+        Assert.Equal(ArztStand.Arzt, aerzte.Hausarzt.Stand);
+        Assert.Equal(ArztStand.NichtErfasst, aerzte.Psychiater.Stand);
         f.Bewohner.UebersichtZeigen();
         Assert.Contains(Karten(f), k => k.Bewohner.Name == "Paul Pappel");
     });

@@ -311,11 +311,33 @@ public class NetzNurImUpdateTests
         var verboten = new Regex(@"\b(HttpClient|WebClient|WebRequest|Socket|TcpClient|System\.Net\.Http)");
         var adresse = new Regex("https?://[^\\s\"')]+");
         var funde = Quelltexte(projekt)
+            .Where(d => !(projekt == "DokuLine.Kern" && Path.GetFileName(d) == AnzeigeDatei))   // eigene Prüfung unten
             .SelectMany(d => verboten.Matches(File.ReadAllText(d)).Select(m => $"{Path.GetFileName(d)}: {m.Value}")
                 // Adressen nur zum Übergeben an den Browser, und nur in ExterneAdressen.cs (Regel 6).
                 .Concat(Path.GetFileName(d) == "ExterneAdressen.cs" ? [] : adresse.Matches(File.ReadAllText(d)).Select(m => $"{Path.GetFileName(d)}: {m.Value}")))
             .ToList();
         Assert.Empty(funde);
+    }
+
+    // Ausnahme (Regel 6, Ergänzung 09.11.2026): die Anzeige der laufenden Therapien im LAN – nur in dieser Datei, nur
+    // annehmend (kein Verbindungsaufbau nach außen), nur Anfragen aus dem eigenen Netz, nur die eigene Adresse.
+    private const string AnzeigeDatei = "AnzeigeServer.cs";
+
+    [Fact]
+    public void Anzeige_nimmt_nur_an_und_nur_aus_dem_LAN()
+    {
+        string text = File.ReadAllText(Path.Combine(Repo.Wurzel, "src", "DokuLine.Kern", AnzeigeDatei));
+        Assert.Contains("new TcpListener(", text);
+        Assert.Contains("!ImLan(von.Address)", text);
+        Assert.DoesNotMatch(new Regex(@"\b(HttpClient|WebClient|WebRequest|UdpClient|Dns\.|Connect\w*\(|new\s+TcpClient|new\s+Socket)"), text);
+        var adressen = new Regex("https?://[^\\s\"]+").Matches(text).Select(m => m.Value).ToList();
+        Assert.Single(adressen);
+        Assert.StartsWith("http://{rechner}:{port}", adressen[0]);   // nur die eigene Adresse für den Fernseher
+        // Kein anderes Projekt startet einen Server.
+        var andere = new[] { "DokuLine.Kern", "DokuLine", "DokuLine.Bausteine", "DokuLine.Modul.Ausgangsliste" }.SelectMany(Quelltexte)
+            .Where(d => Path.GetFileName(d) != AnzeigeDatei && Regex.IsMatch(File.ReadAllText(d), @"\b(TcpListener|HttpListener)\b"))
+            .Select(Path.GetFileName);
+        Assert.Empty(andere);
     }
 
     // Einzige eingebettete Webansicht: das Nachschlagen im Formular „Medikament“ (Regel 6, Schritt 21).
@@ -332,6 +354,13 @@ public class NetzNurImUpdateTests
         Assert.Equal(["Nachschlageansicht.cs"], funde);
         string ansicht = File.ReadAllText(Path.Combine(Repo.Wurzel, "src", "DokuLine", "Nachschlageansicht.cs"));
         Assert.Contains("Nachschlagen.Zulaessig", ansicht);   // jede Navigation wird geprüft
+        // Bauplan 29p: alle Anfragen gefiltert, privates Fenster, keine SmartScreen-Prüfung, kein Ausfüllen.
+        Assert.Contains("AddWebResourceRequestedFilter(\"*\", CoreWebView2WebResourceContext.All)", ansicht);
+        Assert.Contains("Nachschlagen.RessourceZulaessig(e.Request.Uri)", ansicht);
+        Assert.Contains("IsInPrivateModeEnabled = true", ansicht);
+        Assert.Contains("IsReputationCheckingRequired = false", ansicht);
+        Assert.Contains("IsPasswordAutosaveEnabled = false", ansicht);
+        Assert.Contains("IsGeneralAutofillEnabled = false", ansicht);
         var projekte = Directory.EnumerateFiles(Path.Combine(Repo.Wurzel, "src"), "*.csproj", SearchOption.AllDirectories)
             .Where(d => File.ReadAllText(d).Contains("Microsoft.Web.WebView2"))
             .Select(Path.GetFileName);

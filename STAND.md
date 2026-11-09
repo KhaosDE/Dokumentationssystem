@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.20** (Bauplan Schritt 29n: Therapie als eigener Bereich).
+Stand: 09.11.2026. Version: **0.41.0** (Bauplan Schritt 37: Betriebsmodus für den Terminalserver).
 
 ## Aktuell
 
@@ -301,8 +301,109 @@ gruppiert („R1“, „R2“, „R3“), mit dem Schalter „alle Bewohner des 
 Schicht, mit Fälligkeit. Die laufenden Therapien zeigen dort nur Bereich, Name und Teilnahme. Demo: Theo Hänfling (TH)
 als zweiter Therapeut, Aufgaben und eine Nachricht für das Team Therapie, Therapie-Berichte bei drei Bewohnern.
 
-**Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33.21).
+Neu in 0.33.21: **Anzeige der laufenden Therapien für den Fernseher.** In den Einstellungen (Wohnbereich) lässt sich
+eine nur lesende Seite je Wohnbereich einschalten (Vorgabe: aus; Recht „Anzeige für den Fernseher verwalten“). Der
+Fernseher öffnet sie im Browser über eine Adresse mit Zugangscode; gezeigt werden „Jetzt“ und „Gleich“ (nächste Stunde)
+mit Uhrzeit, Ort und den Namen der Teilnehmer aus diesem Bereich (Vorname und erster Buchstabe des Nachnamens,
+umschaltbar), ohne Zimmer, Marken, Bezugspflege und Teilnahmestatus; die Seite lädt sich jede Minute neu. Nur Anfragen
+aus dem eigenen Netz, nur lesend. Ohne Netzwerk-Fernseher: „Anzeige im Vollbild“ auf einem zweiten Bildschirm.
+
+Neu in 0.33.22: Das **Nachschlagen beim BfArM** gibt so wenig wie möglich nach außen: Die Ansicht lädt nur Adressen des
+BfArM – Anfragen an andere (fremde Schriften, Statistik, Werbung) werden blockiert und beim Schließen im Protokoll
+`nachschlagen.log` gezählt (nur Rechnernamen). Sie läuft als privates Fenster (Cookies und Verlauf nur bis zum
+Schließen), ohne SmartScreen-Prüfung (sonst gingen die Adressen an Microsoft), ohne automatisches Ausfüllen. In den
+Einstellungen steht, was das BfArM dabei erhält: Suchbegriff, IP-Adresse der Einrichtung, Uhrzeit.
+
+Neu in 0.34.0: Die **Akte** hat fünf neue Reiter – **Betreuung** (Art, Betreuer aus dem Verzeichnis, Aufgabenbereiche,
+bestellt am, Überprüfung bis, Ersatzbetreuer), **Angehörige** (Beziehung, Hauptkontakt, im Notfall benachrichtigen,
+Hinweis), **Ärzte** (Hausarzt und Psychiater mit drei Zuständen, weitere Ärzte), **Krankenkasse** (Kasse,
+Versichertennummer, Status, Zuzahlungsbefreiung, Pflegegrad) und **Kostenträger** (Aktenzeichen, Sachbearbeitung,
+Bewilligungen von–bis). Jede Änderung ist eine neue Fassung „ab Datum …“ mit Verlauf; „nicht erfasst“ steht in
+Achtung-Farbe, „keine …“ ist ein eigener Zustand. Die Stammdaten zeigen Krankenkasse und Kostenträger als Kurzzeile
+(Klick öffnet den Reiter). Fristen – Betreuung 8, Befreiung 4, Kostenzusage 12 Wochen vorher – stehen als Marke in der
+Bewohnerliste und im neuen Kasten „Fristen“ der Übersicht. Bei der Aufnahme sind Hausarzt und Psychiater Pflicht
+(Arzt, „keiner“ oder „noch nicht bekannt“); zugeteilte Ärzte stehen in den Arztauswahlen oben. Der HEB-Bogen übernimmt
+Kostenträger und Aktenzeichen. Neue Listen in den Einstellungen: Krankenkassen, Kostenträger, Aufgabenbereiche.
+
+Neu in 0.34.1: Im Reiter **Betreuung** steht oben die **Zuständigkeit**: Forensik (Klinik, seit, Status, nächste
+Überprüfung mit Marke 8 Wochen vorher, Zuständige aus dem Verzeichnis) und FOSA-Nachsorge (Ambulanz, seit, bis,
+Zuständige). Solange Forensik, steht beim Betreuer „nicht zuständig, solange Forensik“ (grau). Die Marken **„Forensik“**
+und **„FOSA“** stehen im Kopf der Akte und in der Bewohnerliste der Übersicht. Im **Medikamentenplan** steht oben
+„Bestellung über: … · Name, Telefon“ (Vorschlag nach der Zuständigkeit, mit „Bestellweg …“ änderbar) und der Knopf
+**„Bestellung per E-Mail …“**: Medikamente ankreuzen, Hinweis zum Datenschutz bestätigen, dann öffnet sich das
+E-Mail-Programm mit Empfänger, Betreff und Liste. Demo: je Bereich zwei Bewohner mit Forensik, drei mit FOSA.
+
+Neu in 0.35.0: Die Akte hat den Reiter **„Dokumente“** – eine eigene Ablage je Bewohner in DokuLine. Links die Kategorien
+mit Zähler (dazu „Alle“ und „Papierkorb“), rechts die Dokumente (Titel, Kategorie, Datum, gültig bis mit „abgelaufen“,
+wer hat sie hinzugefügt), Suche über alle Kategorien. Doppelklick öffnet im Standardprogramm des Rechners. „Dokument
+hinzufügen …“ oder Dateien in die Liste ziehen: Die Datei wird **kopiert** (das Original bleibt), die Kategorie nach dem
+Dateinamen vorgeschlagen. „Ersetzen …“ legt eine neue Fassung an, „In den Papierkorb …“ verlangt einen Grund, endgültig
+löschen geht nur aus dem Papierkorb und nur mit eigenem Recht. Jedes Öffnen, Hinzufügen und Entfernen steht im
+Protokoll; eine außerhalb veränderte Datei erkennt DokuLine an der Prüfsumme. In den Reitern Betreuung, Ärzte,
+Krankenkasse und Kostenträger führt „Dokumente (…) …“ zur passenden Kategorie. Demo: Betreuerausweis, Kostenzusage
+und Arztbrief als kleine PDF mit großem „DEMO — ausgedachte Daten“ bei je vier Bewohnern jedes Bereichs.
+
+Neu in 0.36.0: **„Digitale Akte übernehmen …“** (Einstellungen → Verwaltung): Hauptordner wählen – je Bewohner ein
+Unterordner, darin Unterordner je Kategorie. Die Vorschau schlägt je Ordner den Bewohner vor (nach Name, in der Liste
+änderbar) und zeigt Dateien und Kategorien; „Übernehmen“ kopiert in die Ablage „Dokumente“ (der alte Ordner bleibt),
+überspringt Dateien, die schon da sind (gleiche Prüfsumme), und zeigt danach einen Bericht. Jede übernommene Datei steht
+im Protokoll mit „übernommen aus der digitalen Akte“. Zum Vorführen legt „Demo-Ordner anlegen“ einen ausgedachten Ordner an.
+
+Neu in 0.37.0: **„Überleitungsbogen …“** in der Akte und per Rechtsklick in Übersicht und Bewohnerliste. Anlass,
+Zeitpunkt (jetzt), Begleitung, Abschnitte zum Abhaken und Besonderheiten; das Blatt stellt Einrichtung, Person,
+Allergien, Diagnosen und Notfallhinweise, Medikamentenplan von heute (mit Bedarf und Pausen), Betreuung und Zuständige
+(bei Forensik: Betreuer „nicht zuständig“), Krankenkasse, Ärzte und Beschluss zusammen – Fehlendes als „nicht erfasst“.
+„Erstellen“ legt eine Kopie mit Datum in die Dokumente, schreibt auf Wunsch den Bericht „Überleitungsbogen erstellt: …“
+(wichtig, Übergabe) und die Statusmeldung „in der Klinik seit …“, dann die Druckvorschau; „Als PDF speichern …“ geht
+auch. Die Angaben der Einrichtung stehen in den Einstellungen (Datenordner, Vorgabe ausgedacht).
+
+Neu in 0.38.0: **„Abgängigkeit …“** in der Akte, per Rechtsklick in Übersicht und Bewohnerliste und in der
+Ausgangsliste. Das Formular fragt vermisst seit, zuletzt gesehen (wo, wann, von wem), **Kleidung heute (Pflicht)**,
+Gefährdung (darunter, was laut Plan regelmäßig gebraucht wird), mögliche Aufenthaltsorte und Kontakte (aus der Akte
+vorbelegt). Nach „Melden“: Marke **„abgängig seit …“** in Gefahr-Farbe in Übersicht, Bewohnerliste, Akte und
+Ausgangsliste (dort ganz oben) und ein wichtiger Bericht mit Übergabe (Art „Ausgang/Abgängigkeit“). Im selben Fenster die
+Liste **„Wer wurde informiert“** zum Abhaken (Uhrzeit und Kürzel von selbst, Hinweis z. B. Vorgangsnummer der Polizei;
+bei Forensik/FOSA deren Zuständige als feste Zeilen), **„Meldeblatt drucken …“** und „Als PDF speichern …“, dann
+**„Zurück“** mit Zustand und der Liste **„Wer wurde entwarnt“**. In den Stammdaten neu die **Personenbeschreibung**
+(Größe, Statur, Haare, Augen, Brille, Merkmale; „älter als 12 Monate, bitte prüfen“). Die Ausgangsliste fragt nach der
+Wartezeit (Vorgabe 30 Minuten) „Rückkehrzeit überschritten seit … – Abgängigkeit melden?“ mit Knopf „melden …“.
+Einstellungen: Wartezeit und die Liste der Stellen.
+
+Neu in 0.39.0: **Auskunftsleiste** in jeder Akte direkt unter dem Allergiehinweis, über allen Reitern: je Person eine
+Marke mit Zeichen, Wort und Farbe („✓ Mutter · … – entbunden (nur Organisatorisches)“ grün, „✕ … – keine Auskunft“ rot),
+am Ende immer „Alle anderen: keine Auskunft“; ohne Eintrag „Schweigepflicht: nicht erfasst – keine Auskunft geben“.
+Abgelaufene und widerrufene Entbindungen zählen nicht (widerrufene bleiben durchgestrichen sichtbar). Neuer Reiter
+**„Schweigepflicht“** nach „Kostenträger“: Person aus dem Verzeichnis oder Stelle (Kostenträger, Freitext), Zustand,
+Umfang, Richtung, erteilt am, gültig bis, widerrufen am, Form, verknüpftes Dokument. **„Auskunft prüfen …“** in Akte,
+Aktionsleiste und per Rechtsklick: Name eintippen, Antwort mit Wort und Farbe. In der Übersicht die Spalte **„Auskunft“**
+(„2 entbunden · 1 keine Auskunft“, Namen im Hinweis) und die Frist „Entbindung endet …“ 4 Wochen vorher. Der
+Überleitungsbogen zeigt den Abschnitt „Schweigepflicht“ mit allen Einträgen.
+
+Neu in 0.40.0: Reiter **„Vitalwerte“** nach „Medikamentenplan“: Verlaufslinie je Wert (Blutdruck mit zwei Linien,
+angeordneter Bereich als grünes Band) und Tabelle (neueste oben) für 30 Tage, 3 Monate, 12 Monate oder alle.
+**„Vitalwerte erfassen …“**: Datum und Uhrzeit vorbelegt, mehrere Werte in einem Schritt, Bemerkung, Kürzel von selbst;
+Doppelklick auf eine Zeile korrigiert – nur mit Grund, der alte Wert bleibt gespeichert. **Grenzen nur nach ärztlicher
+Anordnung** (Arzt und Datum Pflicht): dann „außerhalb des angeordneten Bereichs“ in Gefahr-Farbe, auch als Marke im
+Akte-Kopf; ohne Anordnung ein leiser Hinweis „über/unter dem allgemeinen Richtwert“ (Tooltip: kein ärztlicher Grenzwert).
+BMI aus Gewicht und Größe (Personenbeschreibung). **Messaufträge** (täglich, wöchentlich, monatlich, je Schicht)
+erscheinen als Aufgabe im Dienst. Die letzten Werte stehen im Visiten-Rundgang und im Überleitungsbogen; „Drucken …“ für
+den Arztbesuch. Einstellungen: Richtwerte (Lehrbuchwerte, **nicht ärztlich geprüft**) mit Einheit des Blutzuckers
+(mg/dl oder mmol/l), Liste der Werte erweiterbar. Rechte: „Vitalwerte erfassen“ (alle), „Grenzen und Messaufträge
+festlegen“ (nur Fachkräfte).
+
+Neu in 0.41.0: **Betriebsmodus** für den Terminalserver – dasselbe Programm, eingeschaltet durch `betrieb.json` im
+Programmordner (legt nur der Verwalter an, nie im Repository). Im Betrieb: gemeinsamer Datenordner (Datenbank im
+WAL-Modus), Einstellungen je Benutzer, keine Demo-Daten, **Anmeldung mit Passwort** (nur als Hash, PBKDF2),
+Ersteinrichtung des Verwalters, Einmalpasswörter mit Pflicht zum Ändern, Sperre nach 5 Fehlversuchen,
+**automatische Sperre** nach Leerlauf (Vorgabe 10 Minuten) und F12, **Zugriffsprotokoll** (geöffnet, gedruckt,
+geändert; nur mit eigenem Recht; Aufbewahrung einstellbar), **nächtliche Sicherung** mit Prüfung (30 tägliche,
+12 monatliche Stände; Aufgabenplanung oder nächster Start) und Rücksicherung mit Kopie vorher, Warnung für den
+Verwalter bei alter Sicherung, **kein Selbst-Update** – „Update vorbereiten …“ (herunterladen oder USB, Prüfsumme)
+und nächtliches Einspielen mit Rückweg, **Häuser** mit ihren Bereichen (Bereichswahl und Haus-Termine je Haus),
+unten „Betrieb“ statt des Demo-Hinweises. Anleitung, Ordnerrechte, Windows-Server-Versionen und die Liste der
+Freigaben: `docs/betrieb.md`. Sicherung, Zugriffsprotokoll und Häuser gibt es auch in der Demo.
+
+**Nächster Schritt:** Der Bauplan ist abgearbeitet; abschließende Fehlersuche (Auftrag Tobi, 09.11.2026).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1335,8 +1436,85 @@ als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33
   - Demo: TH, zwei Aufgaben und eine Nachricht des Teams Therapie, drei Therapie-Berichte.
   - Behoben beim Bauen: Die Demo-Berichte bekamen ihre Art immer aus dem Text geraten (auch wenn sie feststand).
 
+- 0.33.21 — Bauplan Schritt 29o:
+  - Kern: `AnzeigeRegeln` (Inhalt je Bereich, Namen, Jetzt/Gleich, Seite als HTML mit Zeichenschutz, Zugangscode mit
+    zeitgleichem Vergleich), `AnzeigeStand` (für den Server-Thread), `AnzeigeEinstellungen` (`anzeige.json` im
+    Datenordner), `AnzeigeServer` (eigener kleiner Server auf `TcpListener`, keine neue Abhängigkeit).
+  - Oberfläche: `AnzeigeDienst` (Stand jede Minute und nach Änderungen der Therapie), `AnzeigeFenster`,
+    `AnzeigeVollbild`; zwei Karten in den Einstellungen (Wohnbereich); Recht „Anzeige für den Fernseher verwalten“
+    (Vorbelegung Bereichsleitung und Leitungen).
+  - Schutztest: Nur `AnzeigeServer.cs` darf annehmen, nur aus dem LAN, nie verbinden; kein anderes Projekt startet einen
+    Server. README: Abschnitt „Anzeige für den Fernseher“ mit Firewall-Hinweis.
+
+- 0.33.22 — Bauplan Schritt 29p: `Nachschlagen.RessourceZulaessig` und `ProtokollZeile`; in der Ansicht Filter für alle
+  Anfragen (`WebResourceRequested`), privates Fenster, `IsReputationCheckingRequired = false`; Hinweis in den
+  Einstellungen; Schutztest prüft die Einstellungen der Ansicht.
+
+- 0.34.0 — Bauplan Schritt 30:
+  - Kern: `AkteAngaben.cs` (Modelle, `AngabenRegeln`: geltende Fassung, Fristen, Kurzzeilen, Zeilen, Prüfungen,
+    Ärzte sortiert), `SpeicherAkteAngaben.cs`, Datenbank-Schritt 35 (`akte_angaben` mit Inhalt als JSON und Schutz
+    gegen Überschreiben; Listen `krankenkassen`, `kostentraeger`, `betreuungsaufgaben`), `DemodatenAkte.cs`.
+  - Oberfläche: `AngabenAnsicht` (eine Ansicht für alle fünf Reiter), `AngabeFenster` (neue Fassung, „keine …“,
+    „… anlegen“ direkt aus der Auswahl), Kurzzeilen in den Stammdaten, Kasten „Fristen“ in der Übersicht, Pflichtwahl
+    der Ärzte in der Aufnahme, `ArztWahl` mit Bewohner, Reiterleiste mit Zeilenumbruch, `ListenFenster` für beliebige
+    Listen.
+
+- 0.34.1 — Bauplan Schritt 30a: `Zustaendigkeit.cs` (Modelle und `ZustaendigkeitRegeln`: Marken, Vorschlag, Bestelltext,
+  `mailto:`), zwei weitere Angaben im Fassungsmodell (`zustaendigkeit`, `bestellweg`), `MarkenArt.Zustaendig`
+  (Hinweis-Farbe), `AngabeFensterZustaendigkeit.cs`, Bestellzeile im Medikamentenplan, `MehrfachWahl`.
+- Beim Ausliefern von 0.33.9–0.33.20 behoben: Der Visiten-Rundgang stand beim Öffnen in Namensreihenfolge statt nach
+  Zimmer (Doppelzimmer: erst Fenster, dann Tür); Oberflächentests an die neuen Versionen angepasst.
+
+- 0.35.0 — Bauplan Schritt 31: `Dokumente.cs` (Modell, `DokumentRegeln`, `DemoPdf` ohne Schriftdateien),
+  `SpeicherDokumente.cs` (Ablage `Dokumente\<Nr>` neben der Datenbank, SHA-256, Ereignisse), Datenbank-Schritt 36
+  (`dokumente`, `dokument_ereignisse`, Liste `dokumentkategorien`), Rechte „Dokumente ansehen“, „… hinzufügen und in den
+  Papierkorb legen“, „… endgültig löschen“; `DokumenteAnsicht`, `DokumentFenster`, Knopf „Dokumente (…) …“ in den
+  Reitern.
+
+- 0.36.0 — Bauplan Schritt 32: `AkteUebernahme.cs` (Zuordnung nach Name, Kategorie nach Ordnername, Vorschau, Bericht,
+  Demo-Ordner), `Speicher.AkteUebernehmen`, `AkteUebernahmeFenster`, Karte in den Einstellungen.
+
+- 0.37.0 — Bauplan Schritt 33: `Ueberleitung.cs` (`UeberleitungRegeln`, `Einrichtung` in `einrichtung.json`,
+  `TextPdf` mit mehreren Seiten ohne Schriftdateien), `Speicher.UeberleitungDaten/Ablegen/Bericht/Status`,
+  `UeberleitungFenster` mit `UeberleitungDruck`, `EinrichtungFenster`, Einstiege in Akte, Bewohnerliste und Übersicht.
+
+- 0.38.0 — Bauplan Schritt 34: `Abgaengigkeit.cs` (`AbgaengigkeitRegeln`: Prüfen, Stellen, Marke, Wartezeit, Meldeblatt),
+  `SpeicherAbgaengigkeit.cs` (Meldung unveränderlich, danach Ereignisse „informiert“, „zurück“, „entwarnt“; Tabelle
+  `meldestellen` als Liste), `MarkenArt.Abgaengig`, `Angabe.Personenbeschreibung`, Einstellung `wartezeit_minuten`,
+  `AbgaengigkeitFenster`, `AngabeFenster` für die Personenbeschreibung, Hinweis und Knopf in der Ausgangsliste.
+
+- 0.39.0 — Bauplan Schritt 35: `Schweigepflicht.cs` (`SchweigepflichtRegeln`: Leiste, Kurzform, Schnellabfrage, Fristen,
+  Zeilen, Prüfen), `Angabe.Schweigepflicht` als Fassung, Datenbank-Schritt 38 (Tabelle `akte_angaben` ohne feste Liste der
+  Arten, umkopiert), Demo mit eigenem Nachhol-Schlüssel, Auskunftsleiste in `AkteAnsicht`, `AngabeFenster` mit
+  Eintragsliste, `AuskunftFenster`, Spalte „Auskunft“ in der Übersicht, durchgestrichene Marken (`MarkenFeld`).
+
+- 0.40.0 — Bauplan Schritt 36: `Vitalwerte.cs` (`VitalRegeln`: Einheiten, Bewerten, BMI, Letzte, Fällig), Datenbank-Schritt
+  39 (`vitalwerte` unveränderlich, `vital_grenzen`, `messauftraege`, `messauftrag_aufgaben`, `vitalarten`),
+  `SpeicherVitalwerte.cs`, Richtwerte in der Datenbank (alle Rechner), Demo über vier Monate, `VitalwerteAnsicht` mit
+  `VerlaufBild`, `VitalwertFenster`, `VitalGrenzenFenster`, `RichtwerteFenster`, Rechte `vitalwerte_erfassen` und
+  `vital_grenzen`.
+
+- 0.41.0 — Bauplan Schritt 37: `Betrieb.cs` (`BetriebWerte`, `PasswortRegeln`, `SicherungRegeln`, `HaeuserRegeln`),
+  `SpeicherBetrieb.cs` (Passwörter, Zugriffsprotokoll, Sicherung mit der Sicherungsfunktion von SQLite, Rücksicherung,
+  Häuser), Datenbank-Schritt 40, `Pfade.Benutzerordner`, `Betriebsaufgaben` (`--sicherung`, `--update-einspielen`),
+  `BetriebFenster.cs` (Ersteinrichtung, Passwort ändern, Passwörter, Zugriffsprotokoll, Sicherung, Update, Häuser),
+  `Leerlauf`, Anmeldung mit Passwort, `docs/betrieb.md`.
+
 ## Offene Punkte
 
+- 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
+  muss den Ordner „Dokumente“ mitnehmen (Sicherung ist noch nicht gebaut, siehe oben). Die Dateien sind nicht
+  verschlüsselt – für den Echtbetrieb mit der IT klären (Zugriffsrechte auf den Ordner).
+- 09.11.2026 (0.34.1), **Bedenken Datenschutz:** „Bestellung per E-Mail …“ legt Name, Geburtsdatum und Medikamente in
+  eine E-Mail – Gesundheitsdaten. Das Programm sendet nichts selbst (`mailto:`, Regel 6) und zeigt vorher einen Hinweis;
+  ob eine E-Mail an Forensik/FOSA zulässig ist (Verschlüsselung, Einwilligung), müssen Leitung und Datenschutz vor dem
+  Echtbetrieb klären. Bis dahin: lieber Telefon oder Fax.
+- 09.11.2026 (0.34.0): Im Reiter „Angehörige“ fehlt noch die Marke des Schweigepflicht-Zustands (kommt mit Schritt 35);
+  „Betreuerausweis öffnen“ und „Dokument öffnen“ kommen mit dem Reiter „Dokumente“ (Schritt 31). Der Überleitungsbogen
+  (Schritt 33) nutzt die Ärzte, sobald es ihn gibt.
+- 09.11.2026 (0.33.21), für den Echtbetrieb: Namen von Bewohnern auf einem Bildschirm im Gemeinschaftsbereich zeigen,
+  wer an welcher Therapie teilnimmt. Vor einem Einsatz mit Leitung und Datenschutz klären; die Demo zeigt nur
+  ausgedachte Namen.
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
   Zeilen sind länger als 120 Zeichen, 87 Methoden länger als 40 Zeilen (vor allem Aufbau von Fenstern) und 14
   Dateien länger als 400 Zeilen (am größten `Speicher.cs` und `Demodaten.cs`). Sie werden nach der Pfadfinderregel
@@ -1417,6 +1595,94 @@ als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.41.0): Betriebsmodus – Einstellungen (Kürzel, Menü, Bereich des Rechners) bleiben je Benutzer in
+  `%APPDATA%\DokuLine`, weil auf dem Terminalserver alle Sitzungen auf einem Rechner laufen; alles Gemeinsame (Datenbank,
+  Bilder, Ablage, Vorlagen, Protokolle) liegt im Datenordner aus `betrieb.json`. Ist `betrieb.json` fehlerhaft, startet
+  das Programm nicht (nie still in die Demo mit falschem Ort). Passwörter: PBKDF2-SHA256 mit 210 000 Durchläufen aus .NET,
+  keine neue Abhängigkeit; mindestens 10 Zeichen, nicht das Kürzel; Einmalpasswort (12 Zeichen ohne Verwechsler) vergibt,
+  wer Mitarbeiter verwalten darf – das entsperrt auch. Die Sperre nach Leerlauf nutzt die Abmeldung (angefangene Eingaben
+  werden ohne Frage Entwurf). Die nächtliche Sicherung macht die Aufgabenplanung (`--sicherung`); fehlt sie, holt die
+  nächste offene Sitzung sie nach. Rücksicherung spielt die Sicherung mit der Sicherungsfunktion von SQLite in die offene
+  Datenbank zurück (vorher eine Kopie); andere Sitzungen sollten vorher abgemeldet sein – das sagt das Fenster. Das Update
+  spielt nur `--update-einspielen` ein, wenn kein DokuLine mehr läuft; die alte Fassung bleibt als `.alt`. Das
+  Zugriffsprotokoll schreibt das Öffnen der Akte, die Drucke von Überleitungsbogen, Meldeblatt und Vitalwerten und
+  Änderungen an Berichten, Angaben der Akte und Vitalwerten – nie Inhalte; weitere Stellen (z. B. Medikation,
+  Dokumente mit eigenem Protokoll) folgen bei Bedarf. Es läuft auch in der Demo (zum Vorführen). Häuser: ohne Häuser
+  sieht jeder alles; Haus-Termine ohne Haus gelten für alle. Eine Verschlüsselung der Datenbank selbst (SQLCipher) ist
+  nicht eingebaut – BitLocker und Ordnerrechte zuerst, Begründung in `docs/betrieb.md`. Das „Zugriffsprotokoll ansehen“
+  ist vorbelegt nur für Geschäftsführung und Hausleitung (nicht Verwaltung); „Betrieb verwalten“ und „Bereiche anderer
+  Häuser wählen“ wie die übrigen Leitungsrechte.
+
+- 09.11.2026 (0.40.0): Vitalwerte – die Richtwerte stehen in der Datenbank (gelten auf allen Rechnern), nicht in der Datei
+  der Einstellungen. Blutzucker wird in mg/dl gespeichert und nur in der Anzeige umgerechnet (Faktor 18), damit ein
+  Umschalten keine Werte verfälscht. Ein Messauftrag erzeugt je Schicht höchstens eine Aufgabe (eigene Tabelle statt einer
+  neuen Spalte an den Aufgaben, weil die Datenbank-Schritte wiederholbar bleiben müssen); er wird nicht von selbst erledigt,
+  wenn ein Wert erfasst wird – das bleibt ein Handgriff. Ein angeordneter Bereich hebt sich durch eine neue Anordnung ohne
+  Werte auf (Verlauf bleibt). Neue Werte aus der Liste haben keine Einheit und keine Richtwerte; die sechs festen lassen
+  sich stilllegen, nicht umbenennen. „Grenzen und Messaufträge festlegen“ ist vorbelegt für alle Positionen außer Therapie
+  und Verwaltung, dazu „nur Fachkräfte“. Die Marke im Akte-Kopf erscheint nur bei ärztlich angeordneten Bereichen und nur
+  für den neuesten Wert je Art; allgemeine Richtwerte bleiben leise in der Tabelle.
+
+- 09.11.2026 (0.39.0): Schweigepflicht – gespeichert als Fassung der ganzen Liste (wie Angehörige); ein Widerruf ist eine
+  neue Fassung mit „widerrufen am“, die alte bleibt im Verlauf. Die Datenbank-Regel mit der festen Liste der Reiter-Arten
+  wird dafür aufgehoben (Schritt 38 kopiert die Tabelle um, weil SQLite keine Prüfregel ändern kann); so brauchen spätere
+  Reiter keinen Umbau mehr. Die Spalte „Auskunft“ gibt es in der Übersicht; die schmale Namensliste der Dokumentation (früher
+  Bereich „Bewohner“) hat keine Spalten – dort zeigt die Akte die Leiste sofort. Die Schnellabfrage sucht im Namen und in
+  der Bezeichnung; bei mehreren Treffern gilt die vorsichtigste Antwort. Der Überleitungsbogen zeigt alle Einträge statt nur
+  „der Klinik“: Der Bogen kennt die Zielklinik nicht als Feld (nur den Anlass), und so steht die Klinik dabei, wenn sie
+  eingetragen ist.
+
+- 09.11.2026 (0.38.0): Abgängigkeitsmeldung – die Berichte bekommen die vorhandene Art **„Ausgang/Abgängigkeit“** (laut
+  Eintrag „Berichtsart“ in `IDEEN.md` bekommt die Abgängigkeitsmeldung ihre Art automatisch); der Filter heißt deshalb
+  so und nicht nur „Abgängigkeit“. Die Art ist jetzt fest (nicht umbenennbar), sonst fände der Filter die Meldungen
+  nicht. Telefonnummern der Stellen stehen im Namen der Stelle („Rufbereitschaft (0000 000000)“) statt in einer eigenen
+  Spalte – eine Liste wie die übrigen. Die Personenbeschreibung ist eine Fassung wie die Reiter der Akte (Verlauf
+  bleibt); „älter als 12 Monate“ zählt ab dem Speichern. Nach „Zurück“ bleibt die Meldung 24 Stunden zum Entwarnen im
+  Fenster, danach beginnt es wieder mit dem Formular. Der Knopf „melden …“ in der Ausgangsliste öffnet das Fenster des
+  Hauptprogramms über `Aktionen.AbgaengigkeitMelden`, weil das Modul die Oberfläche des Hauptprogramms nicht kennt.
+  Ein Bild auf dem Meldeblatt gibt es nicht: In der Demo nur Platzhalter (Regel 2), das Blatt verweist auf die Akte.
+
+- 09.11.2026 (0.37.0): Überleitungsbogen – die Abwesenheit wird als **Statusmeldung** „in der Klinik seit …“ (7 Tage,
+alle Bereiche sehen sie) eingetragen statt im Modul Ausgangsliste: Das Modul hat dafür keine Schnittstelle nach außen,
+die Statusmeldung erscheint aber überall (Akte, Übersicht). Das Protokoll „wer hat wann einen Bogen erstellt“ ist das
+Protokoll der Dokumente (Grund „Überleitungsbogen: Anlass“). Schweigepflicht und Vitalwerte stehen bis zu den Schritten
+35 und 36 als „nicht erfasst“ auf dem Blatt. Ein Telefon für alle Bereiche (Dienstzimmer); je Bereich wäre eine Liste
+mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lässt sich trotzdem drucken.
+- 09.11.2026 (0.36.0): Übernahme – der Bewohner wird nur vorgeschlagen, wenn Vor- und Nachname im Ordnernamen stehen
+  oder der Nachname eindeutig ist; sonst „nicht übernehmen“ zum Bestätigen. Die Kategorie kommt aus dem Namen des
+  Unterordners (gleicher Name oder Stichwort), Dateien direkt im Ordner des Bewohners nach ihrem Dateinamen; eine eigene
+  Zuordnungstabelle der Ordnernamen gibt es nicht (einfachere Lösung). Als Datum gilt das Änderungsdatum der Datei.
+- 09.11.2026 (0.35.0): Dokumente – der Papierkorb ist ein Vermerk (Ereignis), die Datei bleibt an ihrem Platz, bis sie
+  endgültig gelöscht wird; so bleibt die Zeile der Datenbank unverändert. Der Dateiname in der Ablage bekommt eine
+  zufällige Kennung davor (kein Überschreiben, keine Pfadangaben aus dem Original). Umbenannte Kategorien: Dokumente
+  behalten die Kategorie, unter der sie abgelegt wurden; sie steht dann zusätzlich in der Liste links. Höchstens 50 MB je
+  Datei. „Im Ordner zeigen“ öffnet den Ordner des Bewohners im Explorer.
+- 09.11.2026 (0.34.1): Zuständigkeit und Bestellweg sind zwei weitere Angaben im selben Fassungsmodell wie die Reiter
+  (Datenbank-Schritt 35 kennt sie, er ist noch nicht ausgeliefert). Bei FOSA ohne Forensik bleibt der Betreuer zuständig
+  (Vorgabe). Der Bestellweg schlägt nach der Zuständigkeit vor; ohne eigene Angabe steht „nicht erfasst“ (der Vorschlag
+  wird nicht still gespeichert). In die E-Mail kommen nur Name mit Form und Stärke der angekreuzten Medikamente, keine
+  Dosis. Die Überprüfung der Forensik steht als Frist-Marke in der Bewohnerliste.
+- 09.11.2026 (0.34.0): Akte, fünf Reiter – gespeichert wird je Reiter eine Fassung mit dem Inhalt als JSON (eine
+  Tabelle statt fünf); so bleiben Verlauf, Schutz gegen Überschreiben und „ab Datum“ für alle gleich. Es gilt die neueste
+  Fassung, die schon begonnen hat. Die Zeile „Betreuer“ bleibt in den Stammdaten mit „Betreuer …“ für schnelle
+  Kontaktänderungen und „E-Mail an Betreuer …“; speichert man den Reiter „Betreuung“, bekommt sie eine passende Fassung.
+  Fristen stehen als Marke in der Bewohnerliste der Übersicht und im Kasten „Fristen“, nicht im Kopf der Akte (dort
+  stehen sie im Reiter). Die Listen für die Akte haben ein eigenes Fenster („Listen für die Akte“), damit das bisherige
+  nicht zu hoch wird. Arztauswahlen mit bekanntem Bewohner (Verordnung, Diagnose, Kalender, Visite eines Bewohners)
+  zeigen dessen Ärzte oben; in der Visite eines ganzen Bereichs bleibt die Reihenfolge des Verzeichnisses.
+- 09.11.2026 (0.33.22): BfArM-Ansicht – statt „Cookies und Verlauf beim Schließen löschen“ läuft sie als privates
+  Fenster (`IsInPrivateModeEnabled`): Dann wird gar nichts davon auf die Platte geschrieben, auch nicht bei einem
+  Absturz. Erlaubt bleiben neben dem BfArM (https) nur `data:`, `blob:` und `about:blank` (bleiben im Rechner).
+  Blockierte Anfragen landen gesammelt beim Schließen der Ansicht als eine Zeile im Protokoll, mit Rechnernamen ohne
+  Pfad und Suchbegriff.
+- 09.11.2026 (0.33.21): Anzeige für den Fernseher – eigener kleiner Server auf `TcpListener` statt `HttpListener`:
+  `HttpListener` bräuchte für Adressen im Netz unter Windows Administratorrechte (URL-Reservierung). Die Daten liest der
+  Server nicht selbst aus der Datenbank, sondern aus einem Stand, den das Programm jede Minute setzt (die Datenbank ist
+  nicht für mehrere Threads gebaut); die Uhrzeit, „Jetzt“ und „Gleich“ rechnet er beim Abruf. Wer abgesagt hat oder
+  wessen Termin ausfällt, steht nicht auf dem Fernseher (ohne Status zu zeigen). Die Einstellungen gelten je Rechner
+  (`anzeige.json`), weil der Server auf dem Rechner läuft, an dem sie eingeschaltet wurde. Codes: 6 Zeichen ohne
+  verwechselbare Zeichen, je Wohnbereich, im Fenster neu erzeugbar. Das Vollbild braucht kein Recht (es zeigt nur, was
+  alle sehen).
 - 09.11.2026 (0.33.20): Bereich Therapie – der Wechsel in den Bereich Therapie und zurück behält die Seite, wenn es sie in
   der anderen Seitenleiste gibt (Dokumentation, Aufgaben, Nachrichten, Einstellungen, Therapie ↔ Laufende
   Therapien/Angebote), sonst beginnt er auf der Startseite. Aufgaben der Therapie: „Für wen?“ steht fest auf „wer Zeit
@@ -2234,6 +2500,64 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.41.0 (Betriebsprobe nur auf einem Test-Rechner, nur ausgedachte Daten): Ordner nach `docs/betrieb.md`
+anlegen, `betrieb.json` neben die `.exe`, starten → Ersteinrichtung, Mitarbeiter anlegen, Einmalpasswort vergeben,
+mit dem anderen Kürzel anmelden (Passwort ändern), 5-mal falsch → gesperrt, entsperren. 10 Minuten nichts tun → Sperre.
+Einstellungen → System → Sicherung … („Jetzt sichern“, „Zurücksichern …“), Update vorbereiten …, Verwaltung →
+Zugriffsprotokoll …, Häuser …. In der Demo: Sicherung, Zugriffsprotokoll und Häuser ausprobieren.
+
+Version 0.40.0: Akte (z. B. des ersten Bewohners) → oben die Marke „Blutdruck …: außerhalb des angeordneten Bereichs“;
+Reiter „Vitalwerte“: Verlauf und Tabelle ansehen, Zeitraum wechseln, „Vitalwerte erfassen …“, eine Zeile doppelklicken
+und mit Grund korrigieren, „Grenzen und Messaufträge …“ (nur als Fachkraft), „Drucken …“. Aufgaben: Messaufträge im
+Frühdienst. Einstellungen → „Vitalwerte: allgemeine Richtwerte“.
+
+Version 0.39.0: Akte öffnen – unter dem Allergiehinweis die Auskunftsleiste ansehen; „Auskunft prüfen …“ → einen Namen
+eintippen. Reiter „Schweigepflicht“ → „Ändern …“: Eintrag hinzufügen, einen anderen widerrufen (Datum), speichern – er
+bleibt durchgestrichen sichtbar. Übersicht: Spalte „Auskunft“.
+
+Version 0.38.0: Akte → „Abgängigkeit …“ → Kleidung eintragen, „Melden“: Marke „abgängig seit …“ in Akte und Übersicht;
+„Polizei“ abhaken, „Meldeblatt drucken …“ ansehen; „Zurück“, dann „Polizei“ entwarnen. In den Stammdaten
+„Personenbeschreibung …“ ändern. Ausgangsliste: Ausgang beginnen, Rückkehrzeit überschreiten lassen (oder Wartezeit in
+den Einstellungen kürzer stellen) – Frage „Abgängigkeit melden?“ mit Knopf „melden …“.
+
+Version 0.37.0: Akte → „Überleitungsbogen …“ → Anlass eintragen, „Erstellen“: Druckvorschau ansehen; danach unter
+„Dokumente“ die Kopie, unter Berichte den wichtigen Bericht und oben die Statusmeldung „in der Klinik seit …“.
+
+Version 0.36.0: Einstellungen → Verwaltung → „Digitale Akte übernehmen …“ → „Demo-Ordner anlegen“, Zuordnung ansehen,
+„Übernehmen“; danach in der Akte unter „Dokumente“ nachsehen.
+
+Version 0.35.0:
+
+1. Akte → Reiter „Dokumente“: einen Demo-Brief doppelklicken (öffnet im PDF-Programm).
+2. Eine eigene Datei in die Liste ziehen, Angaben prüfen, hinzufügen; danach „In den Papierkorb …“ und im Papierkorb
+   „Endgültig löschen …“.
+3. Reiter „Kostenträger“ → „Dokumente (…) …“.
+
+Version 0.34.1:
+
+1. Akte eines Bewohners mit Marke „Forensik“: Reiter Betreuung – oben die Zuständigkeit, beim Betreuer „nicht zuständig“.
+2. Medikamentenplan: „Bestellung über: …“; „Bestellung per E-Mail …“ – Hinweis lesen, das E-Mail-Programm öffnet sich.
+3. „Bestellweg …“ ändern.
+
+Version 0.34.0:
+
+1. Akte eines Bewohners: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger ansehen; „Ändern …“ und
+   „Verlauf …“ ausprobieren, einmal „keine …“ ankreuzen.
+2. Stammdaten: Krankenkasse und Kostenträger anklicken – der Reiter öffnet sich.
+3. Übersicht (Bereich „Alle“): Kasten „Fristen“ und die Marken „Kostenzusage endet …“.
+4. „Neuer Bewohner …“: ohne Hausarzt/Psychiater kommt ein Hinweis.
+
+Version 0.33.22: Medikament anlegen → „Nachschlagen“: Die BfArM-Suche erscheint wie bisher; unten steht ggf. „… Anfragen
+an andere Adressen blockiert“. Nach dem Schließen liegt `%APPDATA%\DokuLine\nachschlagen.log` mit der Zahl.
+
+Version 0.33.21:
+
+1. Einstellungen → Wohnbereich → „Anzeige einrichten …“: einschalten, Speichern; Windows-Firewall „Private Netzwerke“
+   erlauben.
+2. Am selben Rechner im Browser die Adresse für R1 öffnen (statt des Rechnernamens geht `localhost`); mit falschem
+   Code kommt „Zugangscode fehlt oder stimmt nicht“.
+3. „Anzeige im Vollbild“ für R1: Esc schließt.
 
 Version 0.33.20:
 

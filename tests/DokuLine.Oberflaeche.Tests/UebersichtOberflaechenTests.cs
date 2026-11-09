@@ -41,7 +41,7 @@ public class UebersichtOberflaechenTests
         Assert.Contains("dienst · Stand ", f.Statusleiste.StatusText);
 
         // Rechts die Liste: eine Zeile je Bewohner, nach Zimmer; Kopf „Bewohner R1 · 23 · … im Haus“.
-        Assert.Equal(["Zimmer", "Name", "Bezug", "Wo", "Hinweise"], s.Liste.Columns.Cast<ColumnHeader>().Select(c => c.Text));
+        Assert.Equal(["Zimmer", "Name", "Bezug", "Wo", "Auskunft", "Hinweise"], s.Liste.Columns.Cast<ColumnHeader>().Select(c => c.Text));
         Assert.Equal(23, s.Zeilen.Count);
         Assert.Equal(s.Zeilen.Select(z => z.Bewohner.Zimmer.PadLeft(8)).Order(StringComparer.Ordinal), s.Zeilen.Select(z => z.Bewohner.Zimmer.PadLeft(8)));
         int imHaus = s.Zeilen.Count(z => z.Wo == HeuteWichtigRegeln.ImHaus);
@@ -51,7 +51,7 @@ public class UebersichtOberflaechenTests
         Assert.NotEqual(HeuteWichtigRegeln.ImHaus, holunder.Wo);
         Assert.DoesNotContain("abwesend:", holunder.HinweisText);             // steht nicht noch einmal bei den Hinweisen
         Assert.Contains(s.Zeilen.Single(z => z.Bewohner.Nachname == "Fichte").Marken, m => m.Text == "Medikation: Pause beginnt");
-        Assert.Equal(5, s.Zeilen[0].Eintrag.SubItems.Count);
+        Assert.Equal(s.Liste.Columns.Count, s.Zeilen[0].Eintrag.SubItems.Count);
         // Bei 1920 × 1080 passen alle 23 Zeilen ohne Bildlauf.
         if (Screen.PrimaryScreen!.Bounds.Height >= 1080 && !s.Schmal)
             Assert.True(s.Liste.Items[22].Bounds.Bottom <= s.Liste.ClientSize.Height, $"Liste {s.Liste.ClientSize.Height} px hoch");

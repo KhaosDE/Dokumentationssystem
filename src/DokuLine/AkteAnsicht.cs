@@ -18,6 +18,11 @@ public sealed class AkteAnsicht : Panel
     private readonly TableLayoutPanel tabelle = new();
 
     public HinweisFeld Allergie { get; } = new();
+    // Auskunftsleiste (Bauplan 35): unter dem Allergiehinweis, über allen Reitern – mit einem Blick, wem man Auskunft geben darf.
+    public FlowLayoutPanel Auskunft { get; } = new() { AutoSize = false, WrapContents = true, BackColor = Stil.Seite, Margin = new Padding(0) };
+    public Button AuskunftKnopf { get; } = Stil.KleinerKnopf("Auskunft prüfen …");
+    public IReadOnlyList<AuskunftMarke> AuskunftMarken { get; private set; } = [];
+    public event Action<Bewohner>? AuskunftGewuenscht;
     public Reiterleiste Reiter { get; } = new(Bauplan.AktenReiter);
     public PlatzhalterKarte ReiterPlatzhalter { get; } = new() { Visible = false };
     public MedikationAnsicht Medikation { get; }
@@ -25,6 +30,15 @@ public sealed class AkteAnsicht : Panel
     public BiografieAnsicht Biografie { get; }
     public ReflexionAnsicht Reflexion { get; }
     public HebAnsicht Heb { get; }
+    // Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger (Bauplan 30): eine Ansicht für alle fünf Reiter.
+    public AngabenAnsicht Angaben { get; }
+    public DokumenteAnsicht Dokumente { get; }
+    public VitalwerteAnsicht Vital { get; }
+    public Label KrankenkasseText { get; } = new() { Cursor = Cursors.Hand };
+    public Label KostentraegerText { get; } = new() { Cursor = Cursors.Hand };
+    // Personenbeschreibung (Bauplan 34): für das Meldeblatt; Marke, wenn älter als 12 Monate.
+    public Label BeschreibungText { get; } = new() { Cursor = Cursors.Hand };
+    public Button BeschreibungKnopf { get; } = Stil.NebenKnopf("Personenbeschreibung …");
     public List<ModulReiter> ModulAnsichten { get; } = [];
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
@@ -64,6 +78,16 @@ public sealed class AkteAnsicht : Panel
         Biografie = new BiografieAnsicht(speicher) { Visible = false };
         Reflexion = new ReflexionAnsicht(speicher) { Visible = false };
         Heb = new HebAnsicht(speicher) { Visible = false };
+        Angaben = new AngabenAnsicht(speicher) { Visible = false };
+        Dokumente = new DokumenteAnsicht(speicher) { Visible = false };
+        Vital = new VitalwerteAnsicht(speicher) { Visible = false };
+        Vital.Geaendert += () => { if (Bewohner is not null) Fuellen(Bewohner); };
+        Angaben.DokumenteGewuenscht += kategorie => { Reiter.Waehlen("Dokumente"); if (Bewohner is not null) Dokumente.Zeigen(Bewohner, kategorie); };
+        Angaben.Geaendert += () => { if (Bewohner is not null) BetreuerZeigen(Bewohner); };
+        KrankenkasseText.Click += (_, _) => Reiter.Waehlen("Krankenkasse");
+        KostentraegerText.Click += (_, _) => Reiter.Waehlen("Kostenträger");
+        BeschreibungText.Click += (_, _) => BeschreibungBearbeiten();
+        BeschreibungKnopf.Click += (_, _) => BeschreibungBearbeiten();
         AutoScroll = true;
         BackColor = Stil.Seite;
         DoubleBuffered = true;
@@ -93,6 +117,7 @@ public sealed class AkteAnsicht : Panel
                      ("Geburtsdatum", Geburtsdatum), ("Aufnahmedatum", Aufnahmedatum), ("Beschlussende", Beschlussende),
                      ("Offen geführt", OffenGefuehrt), ("Wohnbereich", Wohnbereich),
                      ("Bezugspflege", Bezugspflege), ("Einzeltrainer", Einzeltrainer), ("Betreuer", BetreuerText),
+                     ("Krankenkasse", KrankenkasseText), ("Kostenträger", KostentraegerText), ("Personenbeschreibung", BeschreibungText),
                  })
         {
             tabelle.Controls.Add(new Label
@@ -129,8 +154,8 @@ public sealed class AkteAnsicht : Panel
             tabelle.Controls.Add(zelle);
         }
         stammdaten.Controls.Add(tabelle);
-        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini); }
-        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf]);
+        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf, BeschreibungKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini); }
+        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf, BeschreibungKnopf]);
         BetreuerKnopf.Click += (_, _) => BetreuerBearbeiten();
         EmailKnopf.Click += (_, _) => EmailSchreiben();
         EmailBestaetigen = text => MessageBox.Show(FindForm(), text, "E-Mail an Betreuer", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
@@ -139,7 +164,8 @@ public sealed class AkteAnsicht : Panel
         BezugVerlaufKnopf.Click += (_, _) => BezugVerlaufZeigen();
 
         Reiter.Gewechselt += _ => ReiterZeigen();
-        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb]);
+        AuskunftKnopf.Click += (_, _) => { if (Bewohner is not null) AuskunftGewuenscht?.Invoke(Bewohner); };
+        Controls.AddRange([kopfKarte, Allergie, Auskunft, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital]);
         ModuleAktualisieren();
     }
 
@@ -172,6 +198,15 @@ public sealed class AkteAnsicht : Panel
         bool biografie = Reiter.Aktiv == "Biografie";
         bool reflexion = Reiter.Aktiv == "Reflexion";
         bool heb = Reiter.Aktiv == "HEB";
+        bool dokumente = Reiter.Aktiv == "Dokumente";
+        bool vital = Reiter.Aktiv == "Vitalwerte";
+        Dokumente.Visible = dokumente;
+        Vital.Visible = vital;
+        if (vital && Bewohner is not null) Vital.Zeigen(Bewohner);
+        if (dokumente && Bewohner is not null) Dokumente.Zeigen(Bewohner);
+        Angabe? angabe = Enum.GetValues<Angabe>().Cast<Angabe?>().FirstOrDefault(a => AngabenRegeln.Name(a!.Value) == Reiter.Aktiv);
+        Angaben.Visible = angabe is not null;
+        if (angabe is Angabe art && Bewohner is not null) Angaben.Zeigen(Bewohner, art);
         var modul = ModulAnsichten.FirstOrDefault(r => r.Titel == Reiter.Aktiv);
         foreach (var r in ModulAnsichten) r.Visible = r == modul;
         if (modul is not null && Bewohner is not null) modul.Zeigen(Bewohner);
@@ -186,7 +221,7 @@ public sealed class AkteAnsicht : Panel
         if (biografie && Bewohner is not null) Biografie.Zeigen(Bewohner);
         if (reflexion && Bewohner is not null) Reflexion.Zeigen(Bewohner);
         if (heb && Bewohner is not null) Heb.Zeigen(Bewohner);
-        ReiterPlatzhalter.Visible = !stamm && !medikation && !wochenplan && !biografie && !reflexion && !heb && modul is null;
+        ReiterPlatzhalter.Visible = !stamm && !medikation && !wochenplan && !biografie && !reflexion && !heb && modul is null && angabe is null && !dokumente && !vital;
         if (!stamm && Bauplan.Reiter.TryGetValue(Reiter.Aktiv, out var vorhaben))
             ReiterPlatzhalter.Setzen(vorhaben.Version, vorhaben.Beschreibung);
         PerformLayout();
@@ -197,6 +232,7 @@ public sealed class AkteAnsicht : Panel
 
     public void Zeigen(Bewohner b)
     {
+        if (Bewohner?.Id != b.Id) speicher.Zugriff(Recht.Kuerzel, b.Id, ZugriffRegeln.Geoeffnet, "Akte");   // Zugriffsprotokoll (Bauplan 37)
         Bewohner = b;
         Reiter.Waehlen("Stammdaten");
         Fuellen(b);
@@ -228,6 +264,68 @@ public sealed class AkteAnsicht : Panel
         Zeile(Bezugspflege, bezugPunkt, bezug.Bezugspflege, "keine", "");
         Zeile(Einzeltrainer, trainerPunkt, bezug.Einzeltrainer, "keiner", bezug.Einzeltrainer is { } t ? $"{t.Art} · " : "");
         Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BezugKnopf);
+    }
+
+    // Krankenkasse und Kostenträger als Kurzzeile; ein Klick öffnet den Reiter. „nicht erfasst“ in Achtung-Farbe.
+    private void KurzzeilenZeigen(Bewohner b)
+    {
+        var heute = DateOnly.FromDateTime(DateTime.Now);
+        var angaben = speicher.Angaben(b.Id!.Value, heute);
+        var person = AngabenAnsicht.PersonText(speicher);
+        foreach (var (feld, art) in new[] { (KrankenkasseText, Angabe.Krankenkasse), (KostentraegerText, Angabe.Kostentraeger) })
+        {
+            var f = angaben.GetValueOrDefault(art);
+            feld.Text = AngabenRegeln.Kurz(art, f, person, heute);
+            feld.ForeColor = f is null ? Stil.Achtung.Text : Stil.Akzent;
+            feld.Font = f is null ? Stil.FettKursiv : Stil.Fett;
+            feld.AccessibleName = $"{AngabenRegeln.Name(art)}: {feld.Text} (öffnet den Reiter)";
+        }
+        var beschreibung = angaben.GetValueOrDefault(Angabe.Personenbeschreibung);
+        var marke = AbgaengigkeitRegeln.BeschreibungMarke(beschreibung, heute);
+        BeschreibungText.Text = AbgaengigkeitRegeln.BeschreibungKurz(beschreibung) + (beschreibung is not null && marke is not null ? " – älter als 12 Monate, bitte prüfen" : "");
+        BeschreibungText.ForeColor = marke is not null ? Stil.Achtung.Text : Stil.TextNormal;
+        BeschreibungText.Font = marke is not null ? Stil.FettKursiv : Stil.Fett;
+        BeschreibungText.MaximumSize = new Size(S(560), 0);
+        BeschreibungText.AccessibleName = $"Personenbeschreibung: {BeschreibungText.Text} (öffnet das Formular)";
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BeschreibungKnopf);
+    }
+
+    // Je Eintrag eine Marke mit Zeichen, Wort und Farbe; widerrufene durchgestrichen. Am Ende „Auskunft prüfen …“.
+    public void AuskunftZeigen(Bewohner b)
+    {
+        var heute = DateOnly.FromDateTime(DateTime.Now);
+        AuskunftMarken = SchweigepflichtRegeln.Leiste(speicher.Angaben(b.Id!.Value, heute).GetValueOrDefault(Angabe.Schweigepflicht), speicher.PersonenNamen(), heute);
+        Auskunft.SuspendLayout();
+        foreach (var alt in Auskunft.Controls.OfType<MarkenFeld>().ToList()) { Auskunft.Controls.Remove(alt); alt.Dispose(); }
+        Auskunft.Controls.Remove(AuskunftKnopf);
+        foreach (var m in AuskunftMarken)
+        {
+            var feld = new MarkenFeld(m.Text, Stil.AuskunftFarbe(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini), Durchgestrichen = m.Widerrufen };
+            Auskunft.Controls.Add(feld);
+        }
+        AuskunftKnopf.Margin = new Padding(Stil.AbstandKlein, 0, 0, Stil.AbstandMini);
+        Auskunft.Controls.Add(AuskunftKnopf);
+        Auskunft.AccessibleName = "Auskunft: " + string.Join("; ", AuskunftMarken.Select(m => m.Text));
+        Auskunft.ResumeLayout();
+    }
+
+    // Nur nach ärztlicher Anordnung: der neueste Wert je Art außerhalb des angeordneten Bereichs (Gefahr-Farbe, mit Wort).
+    private IEnumerable<Marke> VitalMarken(long id)
+    {
+        var grenzen = speicher.Grenzen(id);
+        if (grenzen.Count == 0) yield break;
+        var r = speicher.Richtwerte();
+        foreach (var w in speicher.Vitalwerte(id).GroupBy(w => w.Art).Select(g => g.First()))
+            if (VitalRegeln.Bewerten(w, grenzen.GetValueOrDefault(w.Art), r) is { Angeordnet: true })
+                yield return new Marke(MarkenArt.Vital, $"{w.Art} {VitalRegeln.WertText(w, r)}: {VitalRegeln.Ausserhalb}");
+    }
+
+    public void BeschreibungBearbeiten()
+    {
+        if (Bewohner is null || Recht.Grund(speicher, Funktionen.BewohnerBearbeiten) is not null) return;
+        using var fenster = new AngabeFenster(speicher, Bewohner, Angabe.Personenbeschreibung);
+        if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) KurzzeilenZeigen(Bewohner);
+        PerformLayout();
     }
 
     // Betreuer: „nicht erfasst“ in Achtung-Farbe (leer heißt nicht „keiner“, Regel 5).
@@ -289,6 +387,9 @@ public sealed class AkteAnsicht : Panel
             marken.Add(new Marke(MarkenArt.Medikation, MedikationsAenderungen.MarkeText));
         if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offenMarke) marken.Add(offenMarke);
         marken.AddRange(Modulverwaltung.Marken(speicher, b, jetzt));
+        if (speicher.OffeneAbgaengigkeit(b.Id!.Value) is Abgaengigkeit ab && !marken.Any(m => m.Art == MarkenArt.Abgaengig))
+            marken.Insert(0, AbgaengigkeitRegeln.Marke(ab));
+        marken.AddRange(VitalMarken(b.Id!.Value));
         foreach (var m in marken)
             kopfMarken.Controls.Add(new MarkenFeld(m.Text, Stil.MarkeFuer(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
         StatusText = speicher.Statusmeldung(b.Id!.Value, jetzt) is Statusmeldung status ? "Status: " + StatusmeldungRegeln.Langtext(status, jetzt) : null;
@@ -306,6 +407,10 @@ public sealed class AkteAnsicht : Panel
             kopfMarken.Controls.Add(feld);
             kopfMarken.Controls.SetChildIndex(feld, 0);
         }
+        // Forensik, FOSA (Bauplan 30a): als Wort in Hinweis-Farbe; die Überprüfung steht im Reiter „Betreuung“.
+        var zust = speicher.Angaben(b.Id!.Value, DateOnly.FromDateTime(DateTime.Now)).GetValueOrDefault(Angabe.Zustaendigkeit)?.Lesen<Zustaendigkeit>();
+        foreach (var m in ZustaendigkeitRegeln.Marken(zust, DateOnly.FromDateTime(DateTime.Now)).Where(m => m.Art == MarkenArt.Zustaendig))
+            kopfMarken.Controls.Add(new MarkenFeld(m.Text, Stil.MarkeFuer(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
         AccessibleName = $"Akte von {b.Name}";
 
         // Allergiehinweis: drei klar verschiedene Darstellungen (Regel 5), immer mit Wort.
@@ -316,6 +421,7 @@ public sealed class AkteAnsicht : Panel
             _ => (Stil.Achtung, true),
         };
         Allergie.Setzen(BewohnerRegeln.AllergieText(b), marke, gestrichelt);
+        AuskunftZeigen(b);
 
         Geburtsdatum.Text = Datum.Text(b.Geburtsdatum);
         Aufnahmedatum.Text = Datum.Text(b.Aufnahmedatum);
@@ -331,6 +437,7 @@ public sealed class AkteAnsicht : Panel
         Wohnbereich.Text = b.Wohnbereich;
         BezugZeigen(b);
         BetreuerZeigen(b);
+        KurzzeilenZeigen(b);
         AutoScrollPosition = Point.Empty;
         PerformLayout();
         Invalidate(true);
@@ -358,12 +465,15 @@ public sealed class AkteAnsicht : Panel
         y += kopfHoehe + S(Stil.AbstandMittel);
 
         Allergie.Bounds = new Rectangle(x, y, breite, S(52));
-        y += Allergie.Height + S(Stil.AbstandMittel);
+        y += Allergie.Height + S(Stil.AbstandKlein);
+        var auskunftGroesse = Auskunft.GetPreferredSize(new Size(breite, 0));
+        Auskunft.Bounds = new Rectangle(x, y, breite, auskunftGroesse.Height);
+        y += Auskunft.Height + S(Stil.AbstandMittel);
 
-        Reiter.Bounds = new Rectangle(x, y, breite, S(40));
+        Reiter.Bounds = new Rectangle(x, y, breite, Reiter.HoeheFuer(breite));
         y += Reiter.Height + S(Stil.AbstandGross);
 
-        foreach (Control ansicht in new Control[] { Medikation, Wochenplan, Biografie, Reflexion, Heb }.Concat(ModulAnsichten))
+        foreach (Control ansicht in new Control[] { Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital }.Concat(ModulAnsichten))
         {
             if (!ansicht.Visible) continue;
             // Der Wochenplan füllt die Höhe bis zum unteren Rand.

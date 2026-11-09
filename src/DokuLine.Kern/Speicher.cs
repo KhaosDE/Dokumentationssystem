@@ -806,6 +806,197 @@ public sealed partial class Speicher : IDisposable
         INSERT INTO berichtsarten (name, nr) SELECT 'Therapie', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
             WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Therapie');
         """,
+        // 35 – Akte: Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger als Fassungen (Inhalt als JSON, nie
+        // überschrieben); Auswahllisten für Krankenkassen, Kostenträger und Aufgabenbereiche der Betreuung.
+        """
+        CREATE TABLE IF NOT EXISTS akte_angaben (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('betreuung', 'angehoerige', 'aerzte', 'krankenkasse', 'kostentraeger', 'zustaendigkeit', 'bestellweg',
+                                             'personenbeschreibung')),
+            zustand     TEXT NOT NULL CHECK (zustand IN ('eingetragen', 'keine')),
+            inhalt      TEXT NOT NULL DEFAULT '',
+            ab          TEXT NOT NULL,
+            geaendert   TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS akte_angaben_bewohner ON akte_angaben (bewohner_id, art);
+        CREATE TRIGGER IF NOT EXISTS akte_angaben_bleiben BEFORE UPDATE ON akte_angaben
+            BEGIN SELECT RAISE(ABORT, 'Angaben der Akte werden nicht überschrieben – jede Änderung ist eine neue Fassung.'); END;
+        CREATE TABLE IF NOT EXISTS krankenkassen (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS kostentraeger (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS betreuungsaufgaben (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO betreuungsaufgaben (name, nr) VALUES ('Gesundheitssorge', 1), ('Aufenthaltsbestimmung', 2), ('Vermögenssorge', 3),
+            ('Behörden und Ämter', 4), ('Wohnungsangelegenheiten', 5), ('Post', 6), ('Unterbringung', 7);
+        """,
+        // 36 – Akte, Reiter „Dokumente“: Angaben je Datei (die Datei liegt in der Ablage neben der Datenbank), Ereignisse
+        // (hinzugefügt, geöffnet, Papierkorb …) statt Änderungen; Kategorien als Liste.
+        """
+        CREATE TABLE IF NOT EXISTS dokumente (
+            id           INTEGER PRIMARY KEY,
+            bewohner_id  INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            kategorie    TEXT NOT NULL,
+            titel        TEXT NOT NULL,
+            datum        TEXT NOT NULL,
+            gueltig_bis  TEXT,
+            hinweis      TEXT NOT NULL DEFAULT '',
+            datei        TEXT NOT NULL,
+            original     TEXT NOT NULL,
+            groesse      INTEGER NOT NULL,
+            pruefsumme   TEXT NOT NULL,
+            hinzugefuegt TEXT NOT NULL,
+            kuerzel      TEXT NOT NULL,
+            vorgaenger   INTEGER REFERENCES dokumente(id)
+        );
+        CREATE INDEX IF NOT EXISTS dokumente_bewohner ON dokumente (bewohner_id);
+        CREATE TRIGGER IF NOT EXISTS dokumente_bleiben BEFORE UPDATE ON dokumente
+            BEGIN SELECT RAISE(ABORT, 'Dokumente werden nicht überschrieben – Änderungen sind Ereignisse.'); END;
+        CREATE TABLE IF NOT EXISTS dokument_ereignisse (
+            id          INTEGER PRIMARY KEY,
+            dokument_id INTEGER NOT NULL REFERENCES dokumente(id) ON DELETE CASCADE,
+            aktion      TEXT NOT NULL,
+            zeit        TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            grund       TEXT NOT NULL DEFAULT ''
+        );
+        CREATE INDEX IF NOT EXISTS dokument_ereignisse_dokument ON dokument_ereignisse (dokument_id);
+        CREATE TABLE IF NOT EXISTS dokumentkategorien (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO dokumentkategorien (name, nr) VALUES ('Aufnahme und Verträge', 1), ('Betreuung und Gericht', 2),
+            ('Kostenträger und Bescheide', 3), ('Krankenkasse', 4), ('Ärztliches und Befunde', 5), ('Ausweise und Behörden', 6),
+            ('Schriftverkehr', 7), ('Sonstiges', 8);
+        """,
+        // 37 – Abgängigkeitsmeldung: Meldung (Inhalt als JSON), danach nur Ereignisse (informiert, zurück, entwarnt); Stellen als
+        // Liste. Die Berichte bekommen die Art „Ausgang/Abgängigkeit“ (gibt es seit Schritt 19 in der Liste).
+        """
+        CREATE TABLE IF NOT EXISTS abgaengigkeiten (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            meldung     TEXT NOT NULL,
+            gemeldet    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS abgaengigkeiten_bleiben BEFORE UPDATE ON abgaengigkeiten
+            BEGIN SELECT RAISE(ABORT, 'Abgängigkeitsmeldungen werden nicht überschrieben.'); END;
+        CREATE TABLE IF NOT EXISTS abgaengigkeit_ereignisse (
+            id                INTEGER PRIMARY KEY,
+            abgaengigkeit_id  INTEGER NOT NULL REFERENCES abgaengigkeiten(id) ON DELETE CASCADE,
+            art               TEXT NOT NULL CHECK (art IN ('informiert', 'zurueck', 'entwarnt')),
+            stelle            TEXT NOT NULL DEFAULT '',
+            zeit              TEXT NOT NULL,
+            kuerzel           TEXT NOT NULL,
+            hinweis           TEXT NOT NULL DEFAULT ''
+        );
+        CREATE TABLE IF NOT EXISTS meldestellen (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO meldestellen (name, nr) VALUES ('Leitung bzw. Rufbereitschaft', 1), ('Polizei (110)', 2), ('Betreuer', 3),
+            ('Angehörige', 4), ('Klinik', 5), ('Gericht', 6);
+        """,
+        // 38 – Angaben der Akte für weitere Reiter (Schweigepflicht und später): die Liste der Arten nicht mehr in der Tabelle
+        // festschreiben (SQLite ändert keine CHECK-Regel – die Tabelle wird neu angelegt und umkopiert, Fassungen bleiben).
+        """
+        DROP TABLE IF EXISTS akte_angaben_neu;
+        CREATE TABLE akte_angaben_neu (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (length(art) > 0),
+            zustand     TEXT NOT NULL CHECK (zustand IN ('eingetragen', 'keine')),
+            inhalt      TEXT NOT NULL DEFAULT '',
+            ab          TEXT NOT NULL,
+            geaendert   TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        INSERT INTO akte_angaben_neu (id, bewohner_id, art, zustand, inhalt, ab, geaendert, kuerzel)
+            SELECT id, bewohner_id, art, zustand, inhalt, ab, geaendert, kuerzel FROM akte_angaben;
+        DROP TABLE akte_angaben;
+        ALTER TABLE akte_angaben_neu RENAME TO akte_angaben;
+        CREATE INDEX IF NOT EXISTS akte_angaben_bewohner ON akte_angaben (bewohner_id, art);
+        CREATE TRIGGER IF NOT EXISTS akte_angaben_bleiben BEFORE UPDATE ON akte_angaben
+            BEGIN SELECT RAISE(ABORT, 'Angaben der Akte werden nicht überschrieben – jede Änderung ist eine neue Fassung.'); END;
+        """,
+        // 39 – Vitalwerte: Werte (nie überschrieben; Korrektur = neuer Eintrag mit Vorgänger und Grund), angeordnete Bereiche,
+        // Messaufträge (je Auftrag und Schicht höchstens eine Aufgabe), die Liste der Werte.
+        """
+        CREATE TABLE IF NOT EXISTS vitalarten (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO vitalarten (name, nr) VALUES ('Blutdruck', 1), ('Puls', 2), ('Temperatur', 3), ('Gewicht', 4), ('Blutzucker', 5),
+            ('Sauerstoffsättigung', 6);
+        CREATE TABLE IF NOT EXISTS vitalwerte (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            zeit        TEXT NOT NULL,
+            art         TEXT NOT NULL,
+            wert        REAL NOT NULL,
+            wert2       REAL,
+            bemerkung   TEXT NOT NULL DEFAULT '',
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL,
+            vorgaenger  INTEGER REFERENCES vitalwerte(id),
+            grund       TEXT NOT NULL DEFAULT ''
+        );
+        CREATE INDEX IF NOT EXISTS vitalwerte_bewohner ON vitalwerte (bewohner_id, zeit);
+        CREATE TRIGGER IF NOT EXISTS vitalwerte_bleiben BEFORE UPDATE ON vitalwerte
+            BEGIN SELECT RAISE(ABORT, 'Vitalwerte werden nicht überschrieben – eine Korrektur ist ein neuer Eintrag mit Grund.'); END;
+        CREATE TABLE IF NOT EXISTS vital_grenzen (
+            id            INTEGER PRIMARY KEY,
+            bewohner_id   INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art           TEXT NOT NULL,
+            von REAL, bis REAL, von2 REAL, bis2 REAL,
+            arzt_id       INTEGER REFERENCES aerzte(id) ON DELETE SET NULL,
+            angeordnet_am TEXT NOT NULL,
+            kuerzel       TEXT NOT NULL,
+            erfasst       TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS messauftraege (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL,
+            rhythmus    TEXT NOT NULL CHECK (rhythmus IN ('taeglich', 'woechentlich', 'monatlich')),
+            tag         INTEGER NOT NULL DEFAULT 0,
+            schicht     TEXT NOT NULL CHECK (schicht IN ('frueh', 'spaet', 'nacht')),
+            ab          TEXT NOT NULL,
+            beendet     TEXT,
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS messauftrag_aufgaben (
+            messauftrag_id INTEGER NOT NULL REFERENCES messauftraege(id) ON DELETE CASCADE,
+            schicht_tag    TEXT NOT NULL,
+            schicht        TEXT NOT NULL,
+            PRIMARY KEY (messauftrag_id, schicht_tag, schicht)
+        );
+        """,
+        // 40 – Betriebsmodus: Passwörter (nur Hash), Zugriffsprotokoll, Häuser mit ihren Bereichen, Haus der Haus-Termine.
+        """
+        CREATE TABLE IF NOT EXISTS passwoerter (
+            kuerzel       TEXT PRIMARY KEY COLLATE NOCASE,
+            hash          TEXT NOT NULL,
+            salz          TEXT NOT NULL,
+            iterationen   INTEGER NOT NULL,
+            einmal        INTEGER NOT NULL DEFAULT 1 CHECK (einmal IN (0, 1)),
+            fehlversuche  INTEGER NOT NULL DEFAULT 0,
+            gesperrt      INTEGER NOT NULL DEFAULT 0 CHECK (gesperrt IN (0, 1)),
+            geaendert     TEXT NOT NULL,
+            geaendert_von TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS zugriffe (
+            id          INTEGER PRIMARY KEY,
+            zeit        TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            bewohner_id INTEGER,
+            aktion      TEXT NOT NULL,
+            was         TEXT NOT NULL DEFAULT ''
+        );
+        CREATE INDEX IF NOT EXISTS zugriffe_zeit ON zugriffe (zeit);
+        CREATE TRIGGER IF NOT EXISTS zugriffe_bleiben BEFORE UPDATE ON zugriffe
+            BEGIN SELECT RAISE(ABORT, 'Das Zugriffsprotokoll wird nicht geändert.'); END;
+        CREATE TABLE IF NOT EXISTS haeuser (name TEXT PRIMARY KEY, nr INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS bereich_haeuser (
+            bereich TEXT PRIMARY KEY REFERENCES bereiche(name) ON UPDATE CASCADE ON DELETE CASCADE,
+            haus    TEXT NOT NULL REFERENCES haeuser(name) ON UPDATE CASCADE ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS kalender_haeuser (
+            termin_id INTEGER PRIMARY KEY REFERENCES kalender(id) ON DELETE CASCADE,
+            haus      TEXT NOT NULL REFERENCES haeuser(name) ON UPDATE CASCADE ON DELETE CASCADE
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -978,10 +1169,12 @@ public sealed partial class Speicher : IDisposable
              standard = Meta(DemoStandardaufgaben) is null, visiten = Meta(DemoVisiten) is null, aerzte = Meta(DemoAerzte) is null,
              aerztlich = Meta(DemoAerztlich) is null, betreuer = Meta(DemoBetreuer) is null, personen = Meta(DemoPersonen) is null, bedarf = Meta(DemoBedarf) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
-             status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
+             status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
+             akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
+             vital = Meta(DemoVital) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1003,6 +1196,10 @@ public sealed partial class Speicher : IDisposable
         if (visiten) DemoVisitenEinfuegen(transaktion);
         if (betreuer) DemoBetreuerEinfuegen(transaktion);
         if (personen || betreuer) DemoPersonenEinfuegen(transaktion);   // übernimmt auch die Betreuer
+        if (akte || personen || betreuer || aerzte) DemoAkteAngabenEinfuegen(transaktion);   // hängt an Personen und Betreuern
+        if (schweigepflicht || akte || personen || betreuer || aerzte) DemoSchweigepflichtEinfuegen(transaktion);   // hängt an den Angaben der Akte
+        if (vital || aerzte) DemoVitalEinfuegen(transaktion);   // die Grenzen nennen einen Arzt
+        if (dokumente) DemoDokumenteEinfuegen(transaktion);
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
@@ -1055,6 +1252,10 @@ public sealed partial class Speicher : IDisposable
             DemoVisitenEinfuegen(transaktion);
             DemoBetreuerEinfuegen(transaktion);
             DemoPersonenEinfuegen(transaktion);
+            DemoAkteAngabenEinfuegen(transaktion);
+            DemoSchweigepflichtEinfuegen(transaktion);
+            DemoVitalEinfuegen(transaktion);
+            DemoDokumenteEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);
@@ -1124,6 +1325,7 @@ public sealed partial class Speicher : IDisposable
             UebergabeEinfuegen(b.BewohnerId, id, uebergabe.Text, b.Erfasst, b.Verfasser,
                 UebergabeRegeln.GiltBis(uebergabe.Dauer, b.Erfasst, uebergabe.Bis), transaktion);
         transaktion.Commit();
+        Zugriff(b.Verfasser, b.BewohnerId, ZugriffRegeln.Geaendert, $"Bericht ({b.Art})");
         return BerichtLesen(id)!;
     }
 

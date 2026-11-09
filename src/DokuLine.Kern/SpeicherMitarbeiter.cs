@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-public enum Liste { Bereiche, Positionen, Berichtsarten }
+public enum Liste { Bereiche, Positionen, Berichtsarten, Krankenkassen, Kostentraeger, Betreuungsaufgaben, Dokumentkategorien, Meldestellen, Vitalarten }
 
 // Mitarbeiter, Bereiche, Positionen und Rechte im Speicher. Die Mitarbeiter stehen in der Tabelle
 // „kollegen“ (seit den Nachrichten), ihre Bereiche in „team_mitglieder“ – so gehen Nachrichten an
@@ -117,6 +117,8 @@ public sealed partial class Speicher
     {
         if (art == Liste.Berichtsarten && DokuRegeln.FesteArten.Contains(name))
             throw new Eingabefehler([$"„{name}“ vergibt das Programm selbst – bitte nicht ändern."]);
+        if (art == Liste.Vitalarten && VitalRegeln.Feste.Contains(name))
+            throw new Eingabefehler([$"„{name}“ hat feste Einheiten und Richtwerte – bitte nicht umbenennen (stilllegen geht)."]);
     }
 
     private List<Listeneintrag> Liste_(Liste art)
@@ -126,7 +128,15 @@ public sealed partial class Speicher
             Liste.Bereiche => "SELECT name, aktiv, (SELECT COUNT(*) FROM team_mitglieder t WHERE t.team = b.name) FROM bereiche b ORDER BY nr, name",
             Liste.Positionen =>
                 "SELECT name, aktiv, (SELECT COUNT(*) FROM mitarbeiter_positionen m WHERE m.position = p.name) FROM positionen p ORDER BY nr, name",
-            _ => "SELECT name, aktiv, (SELECT COUNT(*) FROM berichte r WHERE r.art = a.name) FROM berichtsarten a ORDER BY nr, name",
+            Liste.Berichtsarten => "SELECT name, aktiv, (SELECT COUNT(*) FROM berichte r WHERE r.art = a.name) FROM berichtsarten a ORDER BY nr, name",
+            Liste.Krankenkassen => "SELECT name, aktiv, (SELECT COUNT(*) FROM akte_angaben x WHERE x.art = 'krankenkasse' AND x.zustand = 'eingetragen' " +
+                                   "AND json_extract(x.inhalt, '$.Kasse') = k.name) FROM krankenkassen k ORDER BY nr, name",
+            Liste.Kostentraeger => "SELECT name, aktiv, (SELECT COUNT(*) FROM akte_angaben x WHERE x.art = 'kostentraeger' AND x.zustand = 'eingetragen' " +
+                                   "AND json_extract(x.inhalt, '$.Name') = k.name) FROM kostentraeger k ORDER BY nr, name",
+            Liste.Dokumentkategorien => "SELECT name, aktiv, (SELECT COUNT(*) FROM dokumente d WHERE d.kategorie = k.name) FROM dokumentkategorien k ORDER BY nr, name",
+            Liste.Meldestellen => "SELECT name, aktiv, 0 FROM meldestellen ORDER BY nr, name",
+            Liste.Vitalarten => "SELECT name, aktiv, (SELECT COUNT(*) FROM vitalwerte w WHERE w.art = a.name) FROM vitalarten a ORDER BY nr, name",
+            _ => "SELECT name, aktiv, 0 FROM betreuungsaufgaben ORDER BY nr, name",
         };
         var liste = new List<Listeneintrag>();
         using var befehl = Befehl(sql, null, []);
@@ -135,7 +145,31 @@ public sealed partial class Speicher
         return liste;
     }
 
-    private static string Tabelle(Liste art) => art switch { Liste.Bereiche => "bereiche", Liste.Positionen => "positionen", _ => "berichtsarten" };
+    private static string Tabelle(Liste art) => art switch
+    {
+        Liste.Bereiche => "bereiche",
+        Liste.Positionen => "positionen",
+        Liste.Krankenkassen => "krankenkassen",
+        Liste.Kostentraeger => "kostentraeger",
+        Liste.Betreuungsaufgaben => "betreuungsaufgaben",
+        Liste.Dokumentkategorien => "dokumentkategorien",
+        Liste.Meldestellen => "meldestellen",
+        Liste.Vitalarten => "vitalarten",
+        _ => "berichtsarten",
+    };
+
+    public static string ListenName(Liste art) => art switch
+    {
+        Liste.Bereiche => "Bereiche",
+        Liste.Positionen => "Positionen",
+        Liste.Berichtsarten => "Berichtsarten",
+        Liste.Krankenkassen => "Krankenkassen",
+        Liste.Kostentraeger => "Kostenträger",
+        Liste.Dokumentkategorien => "Kategorien der Dokumente",
+        Liste.Meldestellen => "Stellen bei Abgängigkeit",
+        Liste.Vitalarten => "Vitalwerte",
+        _ => "Aufgabenbereiche der Betreuung",
+    };
 
     private static string NamePruefen(string name)
     {

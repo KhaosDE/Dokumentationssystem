@@ -100,8 +100,9 @@ public static class HebPdf
     public static string? PdfFeld(string programmfeld, IReadOnlyDictionary<string, string> zuordnung, IReadOnlyCollection<string> pdfFelder) =>
         zuordnung.TryGetValue(programmfeld, out var z) && z.Length > 0 ? z : pdfFelder.Contains(programmfeld) ? programmfeld : null;
 
-    // Die Werte aller Programmfelder eines Bogens (Kopf, Texte, Hilfebedarf).
-    public static Dictionary<string, string> Werte(HebBogen h, Bewohner b, HebFassung f)
+    // Die Werte aller Programmfelder eines Bogens (Kopf, Texte, Hilfebedarf); Kostenträger und Aktenzeichen aus dem
+    // Reiter „Kostenträger“ der Akte (Bauplan 30).
+    public static Dictionary<string, string> Werte(HebBogen h, Bewohner b, HebFassung f, Kostentraeger? kosten = null)
     {
         var w = new Dictionary<string, string>
         {
@@ -110,6 +111,7 @@ public static class HebPdf
             ["nummer"] = h.Nummer?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "",
             ["planung"] = HebRegeln.Planungsmonate(b, h.Erstellt)?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "",
             ["erstellt"] = Datum.Text(h.Erstellt),
+            ["kostentraeger"] = kosten?.Name ?? "", ["aktenzeichen"] = kosten?.Aktenzeichen ?? "",
         };
         foreach (var feld in HebRegeln.AlleTextfelder(h.Art)) w[feld.Schluessel] = f.Text(feld.Schluessel);
         for (int i = 1; i <= 5; i++) w[$"hilfe{i}"] = f.Hilfebedarf.GetValueOrDefault(i)?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "";

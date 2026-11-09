@@ -81,10 +81,12 @@ public static class HeuteWichtigRegeln
     // nicht noch einmal bei den Hinweisen).
     public static (string Text, MarkenArt Art, Marke? Quelle) Wo(IReadOnlyList<Marke> marken, IEnumerable<Termin> termine, DateTime jetzt)
     {
+        if (marken.FirstOrDefault(m => m.Art == MarkenArt.Abgaengig) is Marke abgaengig) return (abgaengig.Text, MarkenArt.Abgaengig, abgaengig);
         if (marken.FirstOrDefault(m => m.Art == MarkenArt.Abwesend) is Marke weg)
             return (weg.Text.StartsWith(Abwesend, StringComparison.Ordinal) ? weg.Text[Abwesend.Length..] : weg.Text, MarkenArt.Abwesend, weg);
         if (marken.FirstOrDefault(m => m.Text.StartsWith("unterwegs seit", StringComparison.Ordinal) ||
-                                       m.Text.StartsWith("überfällig seit", StringComparison.Ordinal)) is Marke aus)
+                                       m.Text.StartsWith("überfällig seit", StringComparison.Ordinal) ||
+                                       m.Text.StartsWith("Rückkehrzeit überschritten", StringComparison.Ordinal)) is Marke aus)
             return (aus.Text, aus.Art, aus);
         if (marken.FirstOrDefault(m => m.Text.StartsWith("in Therapie", StringComparison.Ordinal)) is Marke therapie)
             return (therapie.Text, MarkenArt.Status, therapie);

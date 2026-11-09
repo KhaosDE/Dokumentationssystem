@@ -5,7 +5,7 @@ namespace DokuLine.Kern;
 // Demo-Daten aus daten/demo/*.json (lesbare Dateien im Repository, in die .exe eingebaut).
 // Alle Angaben dort sind ausgedacht. Datumsangaben der Bereiche entstehen relativ zum heutigen
 // Tag, damit die Demo an jedem Tag etwas zeigt (Bauplan in IDEEN.md).
-public static class Demodaten
+public static partial class Demodaten
 {
     private static readonly JsonSerializerOptions Optionen = new() { PropertyNameCaseInsensitive = true };
 

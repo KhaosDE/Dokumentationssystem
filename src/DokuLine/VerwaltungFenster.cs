@@ -220,16 +220,21 @@ public sealed class ListenFenster : Form
     public Label Fehler { get; } = Fenster.Fehlerfeld();
     public List<Button> Knoepfe { get; } = [];
 
-    public ListenFenster(Speicher speicher)
+    public static readonly Liste[] Verwaltung = [Liste.Bereiche, Liste.Positionen, Liste.Berichtsarten];
+    public static readonly Liste[] Akte = [Liste.Krankenkassen, Liste.Kostentraeger, Liste.Betreuungsaufgaben, Liste.Dokumentkategorien, Liste.Vitalarten];
+
+    // arten: welche Listen das Fenster zeigt (Vorgabe: Bereiche, Positionen, Berichtsarten).
+    public ListenFenster(Speicher speicher, Liste[]? arten = null)
     {
         this.speicher = speicher;
-        Fenster.Grundform(this, "Bereiche, Positionen und Berichtsarten");
+        arten ??= Verwaltung;
+        Fenster.Grundform(this, string.Join(", ", arten.Select(Speicher.ListenName)));
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, Fenster.Hinweis("Ausgedachte Namen. Umbenennen nimmt alle Zuordnungen mit. Löschen geht nur, solange niemand zugeordnet ist – sonst stilllegen."));
         zeile("Name", Name_);
         string? grund = Recht.Grund(speicher, Funktionen.MitarbeiterAlle);
-        foreach (var art in Enum.GetValues<Liste>())
+        foreach (var art in arten)
         {
             var liste = new ListBox { Width = 300, Height = 140, IntegralHeight = false, Font = Stil.Standard };
             liste.SelectedIndexChanged += (_, _) => { if (Gewaehlt(art) is string n) Name_.Text = n; };
@@ -251,7 +256,7 @@ public sealed class ListenFenster : Form
                 Knopf("Umbenennen", n => speicher.ListeneintragUmbenennen(art, n, Name_.Text)),
                 Knopf("Stilllegen / wieder aktiv", n => speicher.ListeneintragAktivSetzen(art, n, !Eintrag(art, n).Aktiv)),
                 Knopf("Löschen", n => speicher.ListeneintragLoeschen(art, n)))]);
-            zeile(art switch { Liste.Bereiche => "Bereiche", Liste.Positionen => "Positionen", _ => "Berichtsarten" }, spalte);
+            zeile(Speicher.ListenName(art), spalte);
         }
         zeile(null, Fehler);
         var schliessen = Stil.NebenKnopf("Schließen");

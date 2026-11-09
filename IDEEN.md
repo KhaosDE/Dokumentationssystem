@@ -1498,7 +1498,7 @@ Umsetzung (Vorschlag von Claude Code, von Tobi bestätigt):
 
 
 ## Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger
-Status: freigegeben (Bauplan Schritt 30; OK Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.34.0; Bauplan Schritt 30; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Bewohnerakte bekommt drei neue Reiter für die Verwaltungsangaben.
 Warum: Vorgabe Tobi (09.11.2026): Das Bewohnerstammblatt muss weiter ausgebaut werden. Neben den
@@ -1567,7 +1567,7 @@ Umfang (Vorschlag):
 - Demo-Daten: alle drei Reiter für alle Bewohner, gemischt mit „keine“ und „nicht erfasst“.
 
 ## Akte: Reiter „Dokumente“ – digitale Akte in DokuLine
-Status: freigegeben (Bauplan Schritt 31; OK Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.35.0; Bauplan Schritt 31; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Jeder Bewohner bekommt eine Dokumentenablage in DokuLine, sauber nach Bereichen sortiert,
 direkt aus der Akte zu öffnen.
@@ -1607,7 +1607,7 @@ Umfang (Vorschlag):
   echte Logos, Behörden- oder Einrichtungsnamen (`CLAUDE.md`, Regeln 1 und 7).
 
 ## Vorhandene digitale Akte übernehmen
-Status: freigegeben (Bauplan Schritt 32; OK Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.36.0; Bauplan Schritt 32; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ein Assistent, der einen vorhandenen Ordner „ein Unterordner je Bewohner“ in die
 Dokumentenablage übernimmt.
@@ -1623,7 +1623,7 @@ Umfang (Vorschlag):
 - In der Demo nur mit ausgedachten Ordnern zum Vorführen (Testordner aus den Demo-Daten).
 
 ## Überleitungsbogen auf Knopfdruck
-Status: freigegeben (Bauplan Schritt 33; Auswahl Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.37.0; Bauplan Schritt 33; Auswahl Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ein Blatt für Klinik, Notarzt oder Rettungsdienst, das das Programm aus vorhandenen Angaben
 zusammenstellt.
@@ -1650,7 +1650,7 @@ Umfang:
 - Protokoll: wer wann einen Bogen erstellt hat. Demo: ausgedachte Einrichtungsangaben.
 
 ## Abgängigkeitsmeldung
-Status: freigegeben (Bauplan Schritt 34; Auswahl Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.38.0; Bauplan Schritt 34, Auswahl Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ein geführter Ablauf, wenn ein Bewohner vermisst wird: Meldeblatt, wer informiert wurde,
 Rückkehr.
@@ -1678,7 +1678,7 @@ Umfang:
 - Alle Meldungen bleiben in der Akte nachlesbar (Reiter „Berichte“, Filter „Abgängigkeit“).
 
 ## Schweigepflichtentbindungen
-Status: freigegeben (Bauplan Schritt 35; Auswahl Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.39.0; Bauplan Schritt 35, Auswahl Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: In der Akte steht, wem gegenüber die Schweigepflicht aufgehoben ist und wem nicht. Eine
 schnelle Abfrage beantwortet „Darf ich hier Auskunft geben?“.
@@ -1711,7 +1711,7 @@ Umfang:
 - Der Überleitungsbogen (Schritt 33) zeigt den Eintrag zur jeweiligen Klinik.
 
 ## Vitalwerte
-Status: freigegeben (Bauplan Schritt 36; Auswahl Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.40.0; Bauplan Schritt 36, Auswahl Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Vitalwerte je Bewohner erfassen, als Tabelle und Verlauf ansehen und ausdrucken.
 Warum: Wunsch Tobi (09.11.2026).
@@ -1794,7 +1794,7 @@ Umfang:
   der Bewohner, je eine ausgedachte Forensik-Klinik und FOSA mit Zuständigen.
 
 ## Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente
-Status: freigegeben (Bauplan Schritt 30a; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.34.1; Bauplan Schritt 30a; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: In der Akte steht, wer für einen Bewohner zuständig ist: der Betreuer, die Forensik oder
 die FOSA (Forensische Ambulanz). Danach richtet sich auch, über wen die Medikamente bestellt
@@ -2166,7 +2166,7 @@ Umfang:
   Team Therapie, Therapie-Berichte bei mehreren Bewohnern.
 
 ## Therapie-Anzeige für den Fernseher im Wohnbereich
-Status: freigegeben (Bauplan Schritt 29o; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.21; Bauplan Schritt 29o; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die laufenden Therapien lassen sich über das Netzwerk auf einem Fernseher im Wohnbereich
 zeigen, damit die Bewohner sehen, was gerade läuft.
@@ -2197,7 +2197,7 @@ Umfang:
   vorher mit Leitung und Datenschutz klären.
 
 ## Nachschlagen beim BfArM absichern
-Status: freigegeben (Bauplan Schritt 29p; „Alles freigeben“, Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.22; Bauplan Schritt 29p; „Alles freigeben“, Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die eingebettete BfArM-Ansicht (WebView2) gibt so wenig wie möglich nach außen.
 Warum: Frage Tobi (09.11.2026): Kann die Medikamentenschnittstelle ins Internet ein
@@ -2233,7 +2233,7 @@ Umfang:
 - Demo-Daten: Bereichsaufgaben für jeden Bereich getrennt.
 
 ## Betriebsmodus für den Terminalserver
-Status: freigegeben (Bauplan Schritt 37; OK Tobi 09.11.2026; `CLAUDE.md` Regel 4 ist geändert)
+Status: erledigt (09.11.2026, 0.41.0; Bauplan Schritt 37, OK Tobi 09.11.2026; `CLAUDE.md` Regel 4 ist geändert)
 Datum: 09.11.2026
 Was: Neben der Demo eine Betriebsfassung desselben Programms für den echten Einsatz auf dem Server
 der Einrichtung. Gebaut und getestet wird nur mit ausgedachten Daten.

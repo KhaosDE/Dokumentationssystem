@@ -28,6 +28,12 @@ public sealed class BewohnerFormular : Form
                                              ["endet am", "kein Beschluss", "nicht erfasst"], "TT.MM.JJJJ");
     public Dreiwahl OffenGefuehrt { get; } = new(["ja", "nein", "nicht_erfasst"], ["ja", "nein", "nicht erfasst"], null);
     public Label Fehler { get; } = new();
+    // Aufnahme (Bauplan 30): Hausarzt und Psychiater mit Zustand – Arzt, „keiner“ oder „noch nicht bekannt“; ohne Wahl
+    // lässt sich die Aufnahme nicht abschließen. Die Angaben landen im Reiter „Ärzte“.
+    public const string BitteWaehlen = "(bitte wählen)", Keiner = "keiner", NochNichtBekannt = "noch nicht bekannt";
+    public ComboBox Hausarzt { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = Stil.Standard, AccessibleName = "Hausarzt" };
+    public ComboBox Psychiater { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = Stil.Standard, AccessibleName = "Psychiater" };
+    private List<Person> aerzte = [];
     public Button SpeichernKnopf { get; } = Stil.HauptKnopf("Speichern");
 
     public Bewohner? Gespeichert { get; private set; }
@@ -92,6 +98,17 @@ public sealed class BewohnerFormular : Form
         Zeile("Beschluss", Beschluss);
         OffenGefuehrt.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
         if (bewohner is not null) Zeile("Offen geführt", OffenGefuehrt);   // in der Aufnahme nicht (immer „nein“)
+        if (bewohner is null)
+        {
+            aerzte = speicher.Aerzte(nurAktive: true);
+            foreach (var box in new[] { Hausarzt, Psychiater })
+            {
+                box.Items.AddRange([BitteWaehlen, Keiner, NochNichtBekannt, .. aerzte.Select(a => a.Anzeige)]);
+                box.SelectedIndex = 0;
+            }
+            Zeile("Hausarzt", Hausarzt);
+            Zeile("Psychiater", Psychiater);
+        }
         // Allergien bearbeitet man nur noch in „Ärztliche Informationen“ (Akte); neu: „nicht erfasst“.
         Zeile("Allergien", new Label
         {
@@ -273,12 +290,34 @@ public sealed class BewohnerFormular : Form
     // geändert, kommt der Konflikt-Hinweis (beide Fassungen) statt stillem Überschreiben.
     private Bewohner? ausgangsfassung;
 
+    private ZugeteilterArzt Wahl(ComboBox box) => box.SelectedIndex switch
+    {
+        1 => new ZugeteilterArzt(ArztStand.Keiner),
+        >= 3 => new ZugeteilterArzt(ArztStand.Arzt, aerzte[box.SelectedIndex - 3].Id),
+        _ => new ZugeteilterArzt(),
+    };
+
+    // Nur wenn mindestens einer bekannt ist; sonst bleibt der Reiter „nicht erfasst“.
+    private void AerzteSpeichern(long id)
+    {
+        var angabe = new AerzteAngabe { Hausarzt = Wahl(Hausarzt), Psychiater = Wahl(Psychiater) };
+        if (angabe.Hausarzt.Stand == ArztStand.NichtErfasst && angabe.Psychiater.Stand == ArztStand.NichtErfasst) return;
+        speicher.AngabeSpeichern(id, Angabe.Aerzte, angabe, DateOnly.FromDateTime(DateTime.Today), Recht.Kuerzel, DateTime.Now);
+    }
+
     public bool Speichern()
     {
         try
         {
             var b = BewohnerRegeln.AusEingabe(Eingabe(), bewohner?.Id);
+            if (bewohner is null)
+            {
+                var fehlt = new[] { (Hausarzt, "Hausarzt"), (Psychiater, "Psychiater") }.Where(x => x.Item1.SelectedIndex <= 0)
+                    .Select(x => $"{x.Item2}: bitte einen Arzt, „keiner“ oder „noch nicht bekannt“ wählen.").ToList();
+                if (fehlt.Count > 0) throw new Eingabefehler(fehlt);
+            }
             Gespeichert = speicher.BewohnerSpeichern(b, NeuesBild, BildEntfernen, ausgangsfassung);
+            if (bewohner is null && Gespeichert?.Id is long id) AerzteSpeichern(id);
         }
         catch (Konflikt k)
         {

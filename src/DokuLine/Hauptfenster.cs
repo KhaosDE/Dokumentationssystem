@@ -46,6 +46,7 @@ public sealed partial class Hauptfenster : Form
     public TagesplanSeite Tagesplan { get; }
     public VisitenSeite Visiten { get; }
     public EinstellungenSeite Einstellungsseite { get; }
+    public AnzeigeDienst Anzeige { get; }
 
     // Damit öffnet das Programm (Program.cs). Tests beginnen bei „Bewohner“ (Konstruktor).
     public const string Startbereich = "Übersicht";
@@ -121,7 +122,8 @@ public sealed partial class Hauptfenster : Form
         Visiten.Geaendert += () => { if (AktiverBereich == "Visiten") Kopf.TexteSetzen(Visiten.KopfText, "Visiten"); };
         Visiten.AufgabeGewuenscht += a => VisitenAufgabe(a);
         Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
-        Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        Anzeige = new AnzeigeDienst(speicher);
+        Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false, Anzeige = Anzeige };
         seiten["Einstellungen"] = Einstellungsseite;
         Einstellungsseite.Geaendert += () =>
         {
@@ -171,6 +173,10 @@ public sealed partial class Hauptfenster : Form
             Bewohner.AkteZeigen(id);
         };
         Uebersicht.BerichtGewuenscht += id => NeuerBericht(id);
+        Uebersicht.UeberleitungGewuenscht += b => Bewohner.UeberleitungOeffnen(b);
+        Uebersicht.AbgaengigkeitGewuenscht += b => { Bewohner.AbgaengigkeitOeffnen(b); Uebersicht.Aktualisieren(); };
+        Uebersicht.AuskunftGewuenscht += b => Bewohner.AuskunftOeffnen(b);
+        Modul.Ausgangsliste.Aktionen.AbgaengigkeitMelden = id => { if (speicher.Bewohner(id) is Kern.Bewohner b) Bewohner.AbgaengigkeitOeffnen(b); };
         Uebersicht.BereichGewechselt += ArbeitsbereichWaehlen;
         Bewohner.BerichtGewuenscht += id => NeuerBericht(id);
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
@@ -256,6 +262,7 @@ public sealed partial class Hauptfenster : Form
         // Erst „Dokumentation“ (baut die Liste); das Programm wechselt danach zur Übersicht (Startbereich).
         BereichWaehlen("Dokumentation");
         datenstand = Datenstand();
+        Anzeige.Anwenden();   // nur wenn auf diesem Rechner eingeschaltet (Vorgabe: aus)
         // Alle 30 Sekunden: Änderungen anderer Rechner; der Tagesplan zusätzlich wegen der Uhrzeit
         // („noch offen“ nach Beginn, „in Therapie“ bis zum Ende).
         abgleich.Tick += (_, _) =>
@@ -263,6 +270,7 @@ public sealed partial class Hauptfenster : Form
             bool neu = AenderungenVonAnderen();
             if (!neu && AktiverBereich == "Tagesplan") Tagesplan.Aktualisieren();
             StatuszeileSetzen(neu);
+            BetriebPruefen(DateTime.Now);
         };
         abgleich.Start();
     }
@@ -276,7 +284,26 @@ public sealed partial class Hauptfenster : Form
     {
         var jetzt = DateTime.Now;
         if (neuGelesen) gelesen = jetzt;
-        Statusleiste.StatusText = HeuteWichtigRegeln.StatusText(jetzt, gelesen);
+        Statusleiste.StatusText = HeuteWichtigRegeln.StatusText(jetzt, gelesen) + SicherungWarnung(jetzt);
+    }
+
+    // Betrieb: für den Verwalter eine Warnung, wenn die letzte Sicherung älter als 2 Tage ist.
+    public string SicherungWarnung(DateTime jetzt) =>
+        Betrieb.Aktiv && Recht.Darf(speicher, Funktionen.BetriebVerwalten) && SicherungRegeln.Warnen(speicher.LetzteSicherungZeit, jetzt)
+            ? $" · Achtung: letzte Sicherung {(speicher.LetzteSicherungZeit is DateTime l ? $"vom {l:dd.MM.yyyy}" : "fehlt")}" : "";
+
+    // Betrieb (alle 30 Sekunden): nach der eingestellten Zeit ohne Eingabe sperren; die nächtliche Sicherung nachholen,
+    // falls die Aufgabenplanung sie nicht gemacht hat.
+    public void BetriebPruefen(DateTime jetzt)
+    {
+        if (Betrieb.Werte is not BetriebWerte b) return;
+        if (Recht.Angemeldet && !Gesperrt && Leerlauf.Dauer() >= TimeSpan.FromMinutes(b.SperreMinuten)) Abmelden(automatisch: true);
+        if (!SicherungRegeln.Faellig(speicher.LetzteSicherungZeit, jetzt, b.SicherungUm)) return;
+        try { speicher.SicherungErstellen(Betrieb.Sicherungsordner, jetzt); }
+        catch (Exception e) when (e is SpeicherFehler or IOException or UnauthorizedAccessException)
+        {
+            DokuLine.Update.Aktualisierung.Protokoll($"Sicherung fehlgeschlagen: {e.Message}");
+        }
     }
 
     // „Bewohner“ ist der frühere Name von „Dokumentation“ (Module und Aufrufe von außen). „Laufende Therapien“ und
@@ -337,6 +364,7 @@ public sealed partial class Hauptfenster : Form
             speicher.MitarbeiterGeaendert -= RechteNeu;
             speicher.BezugGeaendert -= StatusNeu;
             abgleich.Dispose();
+            Anzeige.Dispose();
             hinweis.Dispose();
             Application.RemoveMessageFilter(F12);
             speicher.EntwuerfeGeaendert -= EntwuerfeZaehlen;

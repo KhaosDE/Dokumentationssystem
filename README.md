@@ -290,7 +290,33 @@ Formular nur ein Hinweis; alles andere funktioniert.
   – nur in der Nachschlage-Ansicht und erst, wenn jemand „Nachschlagen“ drückt. Gesucht wird nur
   mit dem Namen eines Medikaments, nie mit Angaben zu Bewohnern.
 
-Alles andere (E-Mail, Links) übergibt das Programm an die Programme auf dem Rechner.
+Alles andere (E-Mail, Links) übergibt das Programm an die Programme auf dem Rechner. Die einzige
+Ausnahme in die andere Richtung ist die **Anzeige für den Fernseher** (nächster Abschnitt): Sie nimmt,
+wenn eingeschaltet, nur Anfragen aus dem eigenen Netz an.
+
+## Betriebsmodus für den Terminalserver
+
+Neben der Demo gibt es einen Betriebsmodus für den echten Einsatz auf dem Server der Einrichtung: gemeinsamer
+Datenordner, Anmeldung mit Passwort, Sperre nach Leerlauf, Zugriffsprotokoll, nächtliche Sicherung, Update nur durch
+den Verwalter. Eingeschaltet wird er mit einer Datei `betrieb.json` im Programmordner. **Echte Daten erst nach den
+Freigaben** (Einrichtung, Datenschutz, Mitarbeitervertretung). Anleitung: [`docs/betrieb.md`](docs/betrieb.md).
+
+## Anzeige für den Fernseher (nur im lokalen Netz)
+
+Unter Einstellungen → Wohnbereich → „Anzeige für den Fernseher“ lässt sich eine schlichte, nur
+lesende Seite mit den laufenden Therapien je Wohnbereich einschalten (Vorgabe: aus; Recht
+„Anzeige für den Fernseher verwalten“). Der Fernseher öffnet sie im eigenen Browser, z. B.
+`http://<Rechnername>:8080/anzeige/R3?code=<Zugangscode>`; die Adressen mit Code stehen im
+Fenster. Gezeigt werden nur Name, Uhrzeit und Ort der Therapie und die Namen der Teilnehmer aus
+diesem Bereich (Vorgabe: Vorname und erster Buchstabe des Nachnamens).
+
+- **Firewall:** Beim ersten Einschalten fragt Windows, ob DokuLine im Netz erreichbar sein darf.
+  „Private Netzwerke“ erlauben, „Öffentliche Netzwerke“ nicht.
+- Das Programm nimmt nur Anfragen aus privaten Adressbereichen an (z. B. 192.168.x.x), nur „GET“,
+  nur mit dem Code des Bereichs; es baut selbst keine Verbindung auf.
+- Ohne Netzwerk-Fernseher: „Anzeige im Vollbild“ zeigt dasselbe auf einem zweiten Bildschirm
+  (HDMI); Esc schließt.
+- Vor dem Echtbetrieb mit Leitung und Datenschutz klären: Auf dem Fernseher lesen auch Besucher mit.
 
 ## Für Entwickler
 

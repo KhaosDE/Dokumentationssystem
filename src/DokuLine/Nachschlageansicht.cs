@@ -12,6 +12,8 @@ namespace DokuLine;
 // Öffnen des Formulars lädt nichts. Ausgelesen wird nichts von selbst: Markierten Text übernimmt erst
 // „In Feld übernehmen“. Fehlen WebView2 oder die Verbindung, steht ein Hinweis da; das Formular bleibt
 // voll nutzbar. In den Einstellungen abschaltbar (dann nur „Im Browser öffnen“).
+// Abgesichert (Bauplan 29p): Anfragen an andere Adressen werden blockiert und im Protokoll gezählt, privates Fenster
+// (Cookies und Verlauf nur bis zum Schließen), SmartScreen-Prüfung aus, kein automatisches Ausfüllen.
 public sealed class Nachschlageansicht : Panel
 {
     public const string StartHinweis =
@@ -34,6 +36,9 @@ public sealed class Nachschlageansicht : Panel
 
     // Die gerade gezeigte Adresse (nur zulässige), sonst null.
     public Uri? Adresse { get; private set; }
+
+    // Blockierte Anfragen dieser Ansicht (für das Protokoll beim Schließen).
+    public List<string> Blockiert { get; } = [];
 
     // Liefert den Namen aus der Maske (Wirkstoff, sonst Handelsname) – sonst nichts.
     public Func<string> Suchname { get; set; } = () => "";
@@ -187,12 +192,23 @@ public sealed class Nachschlageansicht : Panel
         web = neu;
         // Daten der Ansicht (Cookies, Zwischenspeicher) im Datenordner, nicht neben der .exe.
         var umgebung = await CoreWebView2Environment.CreateAsync(null, Pfade.ImDatenordner("webansicht"));
-        await neu.EnsureCoreWebView2Async(umgebung);
+        var optionen = umgebung.CreateCoreWebView2ControllerOptions();
+        optionen.IsInPrivateModeEnabled = true;   // Cookies, Verlauf, Zwischenspeicher nur bis zum Schließen
+        await neu.EnsureCoreWebView2Async(umgebung, optionen);
         var core = neu.CoreWebView2;
+        core.Settings.IsReputationCheckingRequired = false;   // SmartScreen: sonst gingen die Adressen an Microsoft
         core.Settings.AreDevToolsEnabled = false;
         core.Settings.IsPasswordAutosaveEnabled = false;
         core.Settings.IsGeneralAutofillEnabled = false;
         core.Settings.IsStatusBarEnabled = false;
+        core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
+        core.WebResourceRequested += (_, e) =>
+        {
+            if (Nachschlagen.RessourceZulaessig(e.Request.Uri)) return;
+            e.Response = core.Environment.CreateWebResourceResponse(null, 403, "Blockiert", "");
+            Blockiert.Add(e.Request.Uri);
+            Status.Text = $"{Blockiert.Count} Anfragen an andere Adressen blockiert (z. B. Schriften oder Statistik).";
+        };
         core.NavigationStarting += (_, e) =>
         {
             if (Uri.TryCreate(e.Uri, UriKind.Absolute, out var ziel) && Nachschlagen.Zulaessig(ziel)) return;
@@ -221,6 +237,18 @@ public sealed class Nachschlageansicht : Panel
             if (e.IsSuccess || e.WebErrorStatus == CoreWebView2WebErrorStatus.OperationCanceled) return;
             HinweisZeigen("Das BfArM ist gerade nicht erreichbar (keine Verbindung?). Das Formular bleibt voll nutzbar.");
         };
+    }
+
+    // Beim Schließen: die blockierten Anfragen einmal ins Protokoll im Datenordner (nur Rechnernamen).
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && Blockiert.Count > 0)
+        {
+            try { File.AppendAllText(Pfade.ImDatenordner(Nachschlagen.Protokoll), Nachschlagen.ProtokollZeile(DateTime.Now, Blockiert) + Environment.NewLine); }
+            catch (Exception x) when (x is IOException or UnauthorizedAccessException) { }   // ohne Protokoll geht es auch
+            Blockiert.Clear();
+        }
+        base.Dispose(disposing);
     }
 
     private async Task<string> MarkierungLesen(Nachschlageansicht _)

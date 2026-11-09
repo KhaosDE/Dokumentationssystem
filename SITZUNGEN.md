@@ -115,3 +115,14 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.33.18 Medikamentenänderungen sieben Tage rot markiert, automatisch wichtig in der Übergabe bis drei Schichten gelesen haben, Kasten in der Übersicht (Bauplan 29l).
 - 09.11.2026 — Claude Code: 0.33.19 ruhigerer und schnellerer Wechsel zwischen den Bereichen, Messung mit --messen (Bauplan 29m).
 - 09.11.2026 — Claude Code: 0.33.20 Therapie als eigener Bereich mit eigener Seitenleiste, Seite „Wochenpläne“, Bewohner nach Wohnbereich gruppiert, Berichtsart „Therapie“ mit Angebot (Bauplan 29n).
+- 09.11.2026 — Claude Code: 0.33.21 Anzeige der laufenden Therapien für den Fernseher im Wohnbereich (nur LAN, Zugangscode, standardmäßig aus) und als Vollbild (Bauplan 29o).
+- 09.11.2026 — Claude Code: 0.33.22 BfArM-Nachschlagen abgesichert: fremde Anfragen blockiert und gezählt, privates Fenster, ohne SmartScreen und Ausfüllen, Hinweis in den Einstellungen (Bauplan 29p).
+- 09.11.2026 — Claude Code: 0.34.0 Akte mit Reitern Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger (Fassungen, drei Zustände, Fristen in der Übersicht, Ärzte bei der Aufnahme) (Bauplan 30).
+- 09.11.2026 — Claude Code: 0.34.1 Zuständigkeit Forensik/FOSA mit Marken, Bestellweg und „Bestellung per E-Mail …“ im Medikamentenplan (Bauplan 30a); dazu Visite nach Zimmer und Tests für 0.33.9–0.33.20 angepasst.
+- 09.11.2026 — Claude Code: 0.35.0 Akte mit Reiter „Dokumente“: eigene Ablage, kopieren statt verschieben, Prüfsumme, Protokoll, Papierkorb, Demo-PDFs (Bauplan 31).
+- 09.11.2026 — Claude Code: 0.36.0 Vorhandene digitale Akte übernehmen: Vorschau mit Zuordnung, kopieren, Doppelte überspringen, Bericht (Bauplan 32).
+- 09.11.2026 — Claude Code: 0.37.0 Überleitungsbogen auf Knopfdruck: Zusammenstellen, Druck und PDF, Kopie in die Dokumente, Bericht und Statusmeldung (Bauplan 33).
+- 09.11.2026 — Claude Code: 0.38.0 Abgängigkeitsmeldung: Formular, wer informiert/entwarnt wurde, Meldeblatt, Marke „abgängig seit …“, Personenbeschreibung, Wartezeit in der Ausgangsliste (Bauplan 34).
+- 09.11.2026 — Claude Code: 0.39.0 Schweigepflichtentbindungen: Auskunftsleiste in der Akte, Reiter „Schweigepflicht“, „Auskunft prüfen …“, Spalte „Auskunft“, Fristen (Bauplan 35).
+- 09.11.2026 — Claude Code: 0.40.0 Vitalwerte: Reiter mit Verlauf und Tabelle, Erfassen und Korrektur mit Grund, Grenzen nur nach Anordnung, Richtwerte als Hinweis, Messaufträge als Aufgaben, Druck (Bauplan 36).
+- 09.11.2026 — Claude Code: 0.41.0 Betriebsmodus für den Terminalserver: betrieb.json, Passwörter, Sperre, Zugriffsprotokoll, Sicherung, Update durch den Verwalter, Häuser, docs/betrieb.md (Bauplan 37).

@@ -13,7 +13,11 @@ public static class Pfade
     public const string Name = "DokuLine";
     public const string AlterName = "Dokumentationssystem";
 
-    public static string Datenordner
+    // Im Betrieb (Bauplan 37) der gemeinsame Ordner aus betrieb.json; sonst der Ordner des Benutzers.
+    public static string Datenordner => Betrieb.Werte is { } b ? b.Datenordner : Benutzerordner;
+
+    // Je Benutzer (Einstellungen wie Kürzel, eingeklapptes Menü): auf dem Terminalserver hat jede Sitzung ihren eigenen.
+    public static string Benutzerordner
     {
         get
         {
@@ -22,6 +26,8 @@ public static class Pfade
             return Standardordner(Name);
         }
     }
+
+    public static string ImBenutzerordner(string datei) => Path.Combine(Benutzerordner, datei);
 
     // Der Datenordner unter dem alten Namen – null, wenn umgelenkt (Tests, Selbsttest).
     public static string? AlterDatenordner =>

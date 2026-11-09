@@ -23,6 +23,8 @@ jobs:
   tests:
     name: Tests (Windows)
     runs-on: windows-latest
+    # Ein normaler Lauf dauert etwa 20 Minuten; hängt etwas, bricht er ab, statt sechs Stunden zu warten.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -43,7 +45,8 @@ jobs:
       - name: Tests (Kern, Update, Oberfläche)
         env:
           DOKUSYSTEM_BILDSCHIRMFOTOS: ${{ github.workspace }}\bildschirmfotos
-        run: dotnet test DokuLine.sln -c Release --logger "console;verbosity=normal"
+        # Hängt ein einzelner Test länger als 10 Minuten, wird er abgebrochen und mit Namen gemeldet.
+        run: dotnet test DokuLine.sln -c Release --logger "console;verbosity=normal" --blame-hang-timeout 10m --blame-hang-dump-type none
       - name: Bildschirmfotos zur Sichtprüfung bereitstellen
         if: always()
         uses: actions/upload-artifact@v4

@@ -47,6 +47,15 @@ public static class Funktionen
     public const string BereicheWohnbereiche = "bereiche_wohnbereiche";   // Übersicht: Knöpfe der Wohnbereiche
     public const string BereichTherapie = "bereich_therapie";             // Übersicht: Knopf „Therapie“
     public const string BereicheAlle = "bereiche_alle";                   // Übersicht: Knopf „Alle“
+    public const string AnzeigeVerwalten = "anzeige_verwalten";           // Therapie-Anzeige für den Fernseher
+    public const string DokumenteAnsehen = "dokumente_ansehen";           // Akte, Reiter „Dokumente“
+    public const string DokumenteHinzufuegen = "dokumente_hinzufuegen";
+    public const string DokumenteLoeschen = "dokumente_loeschen";
+    public const string VitalwerteErfassen = "vitalwerte_erfassen";
+    public const string VitalGrenzen = "vital_grenzen";   // angeordnete Bereiche, Messaufträge, Richtwerte
+    public const string Zugriffsprotokoll = "zugriffsprotokoll";   // Betrieb: wer hat welche Akte geöffnet, gedruckt, geändert
+    public const string BetriebVerwalten = "betrieb_verwalten";   // Sicherung, Rücksicherung, Update, Häuser
+    public const string AndereHaeuser = "andere_haeuser";         // Bereiche anderer Häuser wählen
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -74,6 +83,15 @@ public static class Funktionen
         (Aerzte, "Personenverzeichnis verwalten"),
         (BereicheWohnbereiche, "Wohnbereiche wählen (Übersicht)"),
         (BereichTherapie, "Bereich Therapie wählen (Übersicht)"),
+        (AnzeigeVerwalten, "Anzeige für den Fernseher verwalten"),
+        (DokumenteAnsehen, "Dokumente ansehen"),
+        (DokumenteHinzufuegen, "Dokumente hinzufügen und in den Papierkorb legen"),
+        (DokumenteLoeschen, "Dokumente endgültig löschen"),
+        (VitalwerteErfassen, "Vitalwerte erfassen"),
+        (VitalGrenzen, "Grenzen und Messaufträge festlegen"),
+        (Zugriffsprotokoll, "Zugriffsprotokoll ansehen"),
+        (BetriebVerwalten, "Betrieb verwalten (Sicherung, Update, Häuser)"),
+        (AndereHaeuser, "Bereiche anderer Häuser wählen"),
         (BereicheAlle, "Alle Bereiche zusammen ansehen (Übersicht)"),
         (DemoZuruecksetzen, "Demo-Daten zurücksetzen"),
     ];
@@ -113,7 +131,8 @@ public static partial class RechteRegeln
          "Psychologischer Fachdienst", "Pädagogischer Fachdienst", "Therapie"];
 
     // Assistenzkräfte machen keine Visiten.
-    public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten];
+    public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten,
+        Funktionen.VitalGrenzen];
 
     // „Nur Fachkräfte“, das nach der ersten Vorbelegung dazukam: in bestehenden Datenbanken einmal setzen.
     public static readonly string[] NurFachkraftNachtraeglich = [Funktionen.Visiten];
@@ -126,24 +145,25 @@ public static partial class RechteRegeln
             Funktionen.MedikamentAnlegen, Funktionen.TeilnahmeBestaetigen, Funktionen.KalenderHaus, Funktionen.Fahrzeuge,
             Funktionen.BedarfGeben, Funktionen.AufgabenVorlagen, Funktionen.Heb, Funktionen.MitarbeiterBereich, Funktionen.EinstellungenBereich,
             Funktionen.DemoZuruecksetzen, Funktionen.TherapienBereich, Funktionen.Aerzte,
-            Funktionen.BereicheWohnbereiche,
+            Funktionen.BereicheWohnbereiche, Funktionen.AnzeigeVerwalten,
+            Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
         ],
         ["Mitarbeiter Wohnbereich"] =
         [
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten,
             Funktionen.MedikamentAnlegen, Funktionen.TeilnahmeBestaetigen, Funktionen.Fahrzeuge, Funktionen.Heb,
-            Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche,
+            Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen,
         ],
         ["Psychologischer Fachdienst"] =
         [
             Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen,
             Funktionen.MedikamenteVerwalten, Funktionen.TeilnahmeBestaetigen, Funktionen.Heb, Funktionen.Aerzte,
-            Funktionen.BereicheWohnbereiche,
+            Funktionen.BereicheWohnbereiche, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen,
         ],
         ["Pädagogischer Fachdienst"] =
         [
             Funktionen.BewohnerBearbeiten, Funktionen.BerichteSchreiben, Funktionen.Visiten, Funktionen.TeilnahmeBestaetigen, Funktionen.Heb,
-            Funktionen.Aerzte, Funktionen.BereicheWohnbereiche,
+            Funktionen.Aerzte, Funktionen.BereicheWohnbereiche, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen,
         ],
         ["Therapie"] =
         [
@@ -155,12 +175,18 @@ public static partial class RechteRegeln
     // Funktionen, die nach der ersten Vorbelegung dazukamen: werden in bestehenden
     // Datenbanken einmal nachträglich vorbelegt.
     public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten,
-        Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle];
+        Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
+        Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
+        Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen, Funktionen.Zugriffsprotokoll, Funktionen.BetriebVerwalten, Funktionen.AndereHaeuser];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
+    // Vitalwerte erfassen alle; Grenzen und Messaufträge alle mit Fachaufgaben (dazu „nur Fachkräfte“), nicht Therapie.
     public static bool Vorbelegt(string position, string funktion) =>
         funktion is Funktionen.AerztlicheAnsehen or Funktionen.AerztlicheBearbeiten ? position != "Verwaltung" :
+        funktion == Funktionen.VitalwerteErfassen ? true :
+        funktion == Funktionen.VitalGrenzen ? position is not ("Therapie" or "Verwaltung") :
+        funktion == Funktionen.Zugriffsprotokoll ? position is Administrator or "Geschäftsführung" or "Hausleitung" :
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||
         (Vorgabe.TryGetValue(position, out var f) && f.Contains(funktion));
 

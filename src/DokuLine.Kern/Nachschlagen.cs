@@ -28,6 +28,26 @@ public static partial class Nachschlagen
             host.Equals(b, StringComparison.OrdinalIgnoreCase) || host.EndsWith("." + b, StringComparison.OrdinalIgnoreCase));
     }
 
+    public const string Protokoll = "nachschlagen.log";
+
+    // Darf die Ansicht diese Anfrage stellen (Bilder, Schriften, Skripte …)? Nur das BfArM über https; data: und blob:
+    // bleiben im Rechner. Alles andere (z. B. fremde Schriften, Statistik, Werbung) wird blockiert.
+    public static bool RessourceZulaessig(string? adresse)
+    {
+        if (!Uri.TryCreate(adresse, UriKind.Absolute, out var uri)) return false;
+        return uri.Scheme is "data" or "blob" || uri.AbsoluteUri == "about:blank" || Zulaessig(uri);
+    }
+
+    // Eine Zeile für das Protokoll im Datenordner: wie viele Anfragen blockiert wurden und an welche Rechner – nur
+    // die Namen der Rechner, nie Pfade oder Suchbegriffe.
+    public static string ProtokollZeile(DateTime wann, IReadOnlyCollection<string> blockiert)
+    {
+        var rechner = blockiert.Select(a => Uri.TryCreate(a, UriKind.Absolute, out var u) && u.Host.Length > 0 ? u.Host : "(ohne Rechnername)")
+            .Distinct(StringComparer.OrdinalIgnoreCase).Order(StringComparer.Ordinal).Take(10).ToList();
+        return $"{wann:yyyy-MM-dd HH:mm} – {blockiert.Count} Anfragen an andere Adressen blockiert" +
+               (rechner.Count > 0 ? $": {string.Join(", ", rechner)}" : "");
+    }
+
     // Markierter Text aus der Ansicht, bereinigt für ein Eingabefeld (eine Zeile, höchstens 300 Zeichen).
     public static string Bereinigen(string markiert)
     {

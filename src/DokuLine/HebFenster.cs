@@ -272,7 +272,8 @@ public sealed class HebFenster : Form, IEntwurfFenster
 
     private Dictionary<string, string> Werte() =>
         HebPdf.Werte(Bogen, bewohner, Bogen.Aktuell is HebFassung f && !Geaendert ? f
-            : new HebFassung { Texte = Texte(), Hilfebedarf = Stufen() });
+            : new HebFassung { Texte = Texte(), Hilfebedarf = Stufen() },
+            speicher.Angaben(bewohner.Id!.Value, DateOnly.FromDateTime(DateTime.Today)).GetValueOrDefault(Angabe.Kostentraeger)?.Lesen<Kostentraeger>());
 
     public bool Geaendert => Bogen.Aktuell is not HebFassung f
         ? Felder.Values.Any(b => b.Text.Trim().Length > 0) || Stufen().Values.Any(s => s is not null)

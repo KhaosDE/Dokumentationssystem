@@ -11,7 +11,9 @@ namespace DokuLine;
 public static class Stil
 {
     // Dauerhaft sichtbarer Hinweis (Regel 4 in CLAUDE.md): im Kopf, in Fenstertiteln und auf Ausdrucken.
-    public const string DemoHinweis = "Demo — ausgedachte Daten";
+    // Im Betriebsmodus (Bauplan 37) steht statt des Demo-Hinweises „Betrieb“.
+    public const string DemoText = "Demo — ausgedachte Daten";
+    public static string DemoHinweis => Kern.Betrieb.Aktiv ? Kern.Betrieb.StatusText : DemoText;
     public const string ProgrammName = "DokuLine";
     public const string Leittext = "Betreuung auf Augenhöhe";
 
@@ -149,6 +151,17 @@ public static class Stil
         Kern.MarkenArt.Angabe => Zimmer,
         Kern.MarkenArt.Status => Unterwegs,
         Kern.MarkenArt.Medikation => MedikationGeaendert,
+        Kern.MarkenArt.Zustaendig => Hinweis,   // Forensik, FOSA
+        Kern.MarkenArt.Abgaengig => MedikationGeaendert,   // Gefahr-Farbe, immer mit Wort
+        Kern.MarkenArt.Vital => MedikationGeaendert,       // außerhalb des angeordneten Bereichs
+        _ => Achtung,
+    };
+
+    // Auskunftsleiste (Schweigepflicht): grün entbunden, rot keine Auskunft, gelb nicht erfasst – immer mit Zeichen und Wort.
+    public static Marke AuskunftFarbe(Kern.Entbindungsstand s) => s switch
+    {
+        Kern.Entbindungsstand.Entbunden => Offen,
+        Kern.Entbindungsstand.KeineAuskunft => MedikationGeaendert,
         _ => Achtung,
     };
 

@@ -20,6 +20,14 @@ public sealed class MedikationAnsicht : Panel
     public Button HeuteKnopf { get; } = Stil.NebenKnopf("Heute");
     public Button NeuKnopf { get; } = Stil.NebenKnopf("Neue Verordnung …");
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Drucken …");
+    // Bestellweg (Bauplan 30a): „Bestellung über: FOSA · Name, Telefon“, ändern und per E-Mail-Programm bestellen.
+    private readonly FlowLayoutPanel bestellung = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
+    public Label BestellungText { get; } = new() { AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false };
+    public Button BestellwegKnopf { get; } = Stil.NebenKnopf("Bestellweg …");
+    public Button BestellenKnopf { get; } = Stil.NebenKnopf("Bestellung per E-Mail …");
+    // Zum Testen ersetzbar: Hinweis vor dem E-Mail-Programm (true = weiter) und Auswahl der Medikamente (null = abgebrochen).
+    internal Func<string, bool> EmailBestaetigen { get; set; }
+    internal Func<IReadOnlyList<string>, List<int>?> MedikamenteWaehlen { get; set; }
     public CheckBox AbgesetzteZeigen { get; } = new() { Text = "Abgesetzte zeigen", AutoSize = true, BackColor = Stil.Seite };
     public MarkenFeld Hinweis { get; } = new(MedikationRegeln.DruckHinweis, Stil.Achtung);
     public Label TagFehler { get; } = new() { AutoSize = true, ForeColor = Stil.Beschluss.Text, BackColor = Stil.Seite, Visible = false };
@@ -88,6 +96,13 @@ public sealed class MedikationAnsicht : Panel
         NeuKnopf.Click += (_, _) => NeueVerordnung();
         DruckKnopf.Click += (_, _) => Drucken();
         AbgesetzteZeigen.CheckedChanged += (_, _) => Aktualisieren();
+        EmailBestaetigen = text => MessageBox.Show(FindForm(), text, "Bestellung per E-Mail", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
+        MedikamenteWaehlen = namen => MehrfachWahl.Zeigen(FindForm(), "Medikamente bestellen", "Welche Medikamente sollen bestellt werden?", namen);
+        BestellungText.Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandGross, 0);
+        foreach (var k in new[] { BestellwegKnopf, BestellenKnopf }) k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
+        bestellung.Controls.AddRange([BestellungText, BestellwegKnopf, BestellenKnopf]);
+        BestellwegKnopf.Click += (_, _) => BestellwegAendern();
+        BestellenKnopf.Click += (_, _) => Bestellen();
         Tabelle.AccessibleName = "Medikamentenplan, regelmäßig";
         BedarfTabelle.AccessibleName = "Medikamentenplan, bei Bedarf";
         foreach (var t in new[] { Tabelle, BedarfTabelle })
@@ -100,7 +115,7 @@ public sealed class MedikationAnsicht : Panel
                 Oeffnen(PlanTabelle.Stand(t.CurrentRow));
             };
         }
-        Controls.AddRange([leiste, regelTitel, Tabelle, RegelLeer, bedarfTitel, BedarfTabelle, BedarfLeer]);
+        Controls.AddRange([leiste, bestellung, regelTitel, Tabelle, RegelLeer, bedarfTitel, BedarfTabelle, BedarfLeer]);
     }
 
     private static Label Titel(string text) => new() { Text = text, AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite };
@@ -145,7 +160,43 @@ public sealed class MedikationAnsicht : Panel
         RegelLeer.Visible = tag is not null && Tabelle.Rows.Count == 0;
         BedarfTabelle.Visible = BedarfTabelle.Rows.Count > 0;
         BedarfLeer.Visible = tag is not null && BedarfTabelle.Rows.Count == 0;
+        BestellungZeigen();
         PerformLayout();
+    }
+
+    private BestellwegAngabe? Bestellweg => bewohner?.Id is long id
+        ? speicher.Angaben(id, DateOnly.FromDateTime(Jetzt())).GetValueOrDefault(Angabe.Bestellweg)?.Lesen<BestellwegAngabe>() : null;
+
+    // Was heute gilt (regelmäßig und bei Bedarf) – das kann bestellt werden.
+    public List<Verordnung> Bestellbar => [.. Staende(DateOnly.FromDateTime(Jetzt())).Where(s => s.Zustand == Zustand.Gilt).Select(s => s.Verordnung)];
+
+    private void BestellungZeigen()
+    {
+        var weg = Bestellweg;
+        var person = weg?.PersonId is long pid ? speicher.PersonNach(pid) : null;
+        BestellungText.Text = ZustaendigkeitRegeln.BestellungText(weg, person);
+        BestellungText.ForeColor = weg is null || weg.Weg == Kern.Bestellweg.NichtErfasst ? Stil.Achtung.Text : Stil.TextNormal;
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BestellwegKnopf);
+        Stil.Sperren(BestellenKnopf, person is null || !BetreuerRegeln.EmailGueltig(person.Email) ? "Für die Ansprechperson ist keine E-Mail-Adresse eingetragen."
+            : Bestellbar.Count == 0 ? "Heute gilt kein Medikament." : null);
+    }
+
+    public void BestellwegAendern()
+    {
+        if (bewohner is null || Stil.Sperrgrund(BestellwegKnopf) is not null) return;
+        using var fenster = new AngabeFenster(speicher, bewohner, Angabe.Bestellweg);
+        if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) BestellungZeigen();
+    }
+
+    // Übergibt Empfänger, Betreff und die angekreuzten Medikamente an das E-Mail-Programm (Regel 6); vorher der Hinweis.
+    public bool Bestellen()
+    {
+        if (bewohner is null || Stil.Sperrgrund(BestellenKnopf) is not null || Bestellweg?.PersonId is not long pid || speicher.PersonNach(pid) is not Person p) return false;
+        var bestellbar = Bestellbar;
+        if (MedikamenteWaehlen([.. bestellbar.Select(v => $"{v.Medikament} {v.Staerke}".Trim())]) is not { Count: > 0 } auswahl) return false;
+        if (!EmailBestaetigen(ZustaendigkeitRegeln.EmailHinweis)) return false;
+        Extern.Oeffnen(ZustaendigkeitRegeln.Mailto(p.Email, ZustaendigkeitRegeln.Betreff(bewohner), ZustaendigkeitRegeln.Bestelltext(auswahl.Select(i => bestellbar[i]))));
+        return true;
     }
 
     public static string MedikamentText(Verordnung v) => v.Medikament + (v.Staerke.Length > 0 ? $" · {v.Staerke}" : " · Stärke: keine Angabe");
@@ -240,6 +291,9 @@ public sealed class MedikationAnsicht : Panel
         leiste.MaximumSize = new Size(Width, 0);
         leiste.Bounds = new Rectangle(Point.Empty, leiste.GetPreferredSize(new Size(Math.Max(100, Width), 0)));   // AutoSize greift hier zu spät
         int y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        bestellung.MaximumSize = new Size(Width, 0);
+        bestellung.Bounds = new Rectangle(new Point(0, y), bestellung.GetPreferredSize(new Size(Math.Max(100, Width), 0)));
+        y = bestellung.Bottom;
         foreach (var (titel, tabelle, leer) in new[] { (regelTitel, Tabelle, RegelLeer), (bedarfTitel, BedarfTabelle, BedarfLeer) })
         {
             titel.Location = new Point(Stil.Px(this, Stil.AbstandMini), y + Stil.Px(this, Stil.AbstandKlein));

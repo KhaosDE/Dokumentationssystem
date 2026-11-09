@@ -89,7 +89,7 @@ public class FlaecheUndMenueTests
         f.BereichWaehlen("Übersicht");
         Assert.True(f.Uebersicht.Waehlen(u.Demo("Birke").Id!.Value));   // Liste (Schritt 26l): Zeile wählen, Rechtsklick
         var menue = f.Uebersicht.Liste.ContextMenuStrip!;
-        Assert.Equal(["Akte öffnen", "Neuer Bericht …"], menue.Items.Cast<ToolStripItem>().Select(i => i.Text));
+        Assert.Equal(["Akte öffnen", "Neuer Bericht …", "Überleitungsbogen …", "Abgängigkeit melden …", "Auskunft prüfen …"], menue.Items.Cast<ToolStripItem>().Select(i => i.Text));
         using (new DialogErsatz(fenster =>
         {
             var formular = Assert.IsType<BerichtFormular>(fenster);
