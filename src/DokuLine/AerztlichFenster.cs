@@ -103,7 +103,8 @@ public sealed class AerztlichFenster : Form
         foreach (var d in diagnosen)
         {
             var item = new ListViewItem([d.Icd, d.Bezeichnung, DiagnoseRegeln.ArtText(d.Art), d.Seit is DateOnly s ? Datum.Text(s) : "",
-                d.Arzt, d.Aktuell ? "aktuell" : $"beendet am {Datum.Text(d.Beendet)}"]) { ToolTipText = d.Hinweis };
+                d.Arzt, d.Aktuell ? "aktuell" : $"beendet am {Datum.Text(d.Beendet)}"])
+            { ToolTipText = d.Hinweis };
             if (!d.Aktuell) item.ForeColor = Stil.TextLeise;
             Diagnosen.Items.Add(item);
         }

@@ -28,11 +28,11 @@ public sealed class DokumentationTests : IDisposable
     private static Bericht B(DateTime zeit, string text = "Hat gekocht.", string art = DokuRegeln.ArtAlltag,
         bool wichtig = false,
         bool bedarf = false, int[]? bereiche = null) => new()
-    {
-        BewohnerId = 1, Zeitpunkt = zeit, Schicht = BerichtRegeln.SchichtZu(zeit), Verfasser = "AB", Text = text,
+        {
+            BewohnerId = 1, Zeitpunkt = zeit, Schicht = BerichtRegeln.SchichtZu(zeit), Verfasser = "AB", Text = text,
             Art = art,
-        Wichtig = wichtig, Bedarfsgabe = bedarf, Bereiche = bereiche ?? [1], Erfasst = zeit,
-    };
+            Wichtig = wichtig, Bedarfsgabe = bedarf, Bereiche = bereiche ?? [1], Erfasst = zeit,
+        };
 
     private void Sql(string text)
     {
@@ -122,8 +122,11 @@ public sealed class DokumentationTests : IDisposable
     public void Gesetzte_Filter_als_Marken_mit_x()
     {
         Assert.Empty(DokuRegeln.Gesetzt(new DokuFilter()));
-        var f = new DokuFilter { Zeitraum = Zeitraum.DreissigTage, Wichtig = true, Art = "Krise", Bereich = 3,
-            Suche = " Garten " };
+        var f = new DokuFilter
+        {
+            Zeitraum = Zeitraum.DreissigTage, Wichtig = true, Art = "Krise", Bereich = 3,
+            Suche = " Garten "
+        };
         var gesetzt = DokuRegeln.Gesetzt(f);
         Assert.Equal(["30 Tage", "Wichtig", "Art: Krise", "Lebensbereich 3", "„Garten“"], gesetzt.Select(g => g.Text));
         Assert.Equal(f with { Wichtig = false }, gesetzt[1].Ohne);
@@ -158,7 +161,7 @@ public sealed class DokumentationTests : IDisposable
         var e = new BerichtEingabe
         {
             BewohnerId = id, Datum = "09.11.2026", Uhrzeit = "14:30", Verfasser = "AB", Bereiche = [2],
-                Text = "Streit beim Essen.", Art = "Konflikt",
+            Text = "Streit beim Essen.", Art = "Konflikt",
         };
         var gespeichert = s.BerichtSpeichern(BerichtRegeln.AusEingabe(e, Jetzt));
         Assert.Equal("Konflikt", s.Berichte(id).Single(b => b.Id == gespeichert.Id).Art);
@@ -172,8 +175,11 @@ public sealed class DokumentationTests : IDisposable
             b => Assert.Equal(DokuRegeln.ArtVisite, b.Art));
         Assert.True(alle.Select(b => b.Art).Distinct().Count() >= 4);   // Demo-Berichte mit passenden Arten
         var bedarf = s.AlleBewohner().SelectMany(b => s.Verordnungen(b.Id!.Value)).First(v => v.Bedarf);
-        var gabe = s.BedarfGeben(new BedarfEingabe { VerordnungId = bedarf.Id, Uhrzeit = "15:00", Menge = "1",
-            Anlass = "unruhig" }, "AB", Jetzt);
+        var gabe = s.BedarfGeben(new BedarfEingabe
+        {
+            VerordnungId = bedarf.Id, Uhrzeit = "15:00", Menge = "1",
+            Anlass = "unruhig"
+        }, "AB", Jetzt);
         var bericht = s.Berichte(bedarf.BewohnerId).Single(b => b.Id == gabe.BerichtId);
         Assert.Equal(DokuRegeln.ArtMedikation, bericht.Art);
         Assert.True(bericht.Bedarfsgabe);
@@ -190,8 +196,11 @@ public sealed class DokumentationTests : IDisposable
         Assert.Equal("Gesundheit", s.Berichtsarten()[^1]);
         // Umbenennen nimmt die Berichte mit; der Text bleibt unverändert.
         long id = s.AlleBewohner().First().Id!.Value;
-        var e = new BerichtEingabe { BewohnerId = id, Datum = "09.11.2026", Uhrzeit = "10:00", Verfasser = "AB",
-            Bereiche = [1], Text = "Krise.", Art = "Krise" };
+        var e = new BerichtEingabe
+        {
+            BewohnerId = id, Datum = "09.11.2026", Uhrzeit = "10:00", Verfasser = "AB",
+            Bereiche = [1], Text = "Krise.", Art = "Krise"
+        };
         var bericht = s.BerichtSpeichern(BerichtRegeln.AusEingabe(e, Jetzt));
         s.ListeneintragUmbenennen(Liste.Berichtsarten, "Krise", "Krisensituation");
         var neu = s.Berichte(id).Single(b => b.Id == bericht.Id);
@@ -220,8 +229,11 @@ public sealed class DokumentationTests : IDisposable
     {
         // Wie vor Schritt 31: keine Spalte „art“, kein Verzeichnis der Arten, der alte Schutz vor Änderungen.
         var bedarf = s.AlleBewohner().SelectMany(b => s.Verordnungen(b.Id!.Value)).First(v => v.Bedarf);
-        var gabe = s.BedarfGeben(new BedarfEingabe { VerordnungId = bedarf.Id, Uhrzeit = "15:00", Menge = "1",
-            Anlass = "unruhig" }, "AB", Jetzt);
+        var gabe = s.BedarfGeben(new BedarfEingabe
+        {
+            VerordnungId = bedarf.Id, Uhrzeit = "15:00", Menge = "1",
+            Anlass = "unruhig"
+        }, "AB", Jetzt);
         Sql("""
             DROP TRIGGER berichte_bleiben;
             DROP TABLE berichtsarten;

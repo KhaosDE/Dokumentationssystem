@@ -90,7 +90,7 @@ public sealed class VisitenTests : IDisposable
 
         // Nach dem Anlegen des Medikaments geht es mit der Verordnung weiter (auch über einen Handelsnamen).
         var neu = s.MedikamentAnlegen(MedikamentRegeln.AusEingabe(new MedikamentEingabe
-            { Wirkstoff = "Beispielwirkstoff (ausgedacht)", Handelsnamen = "Beispielsalbe (ausgedacht)", Kuerzel = "CD" }, Jetzt));
+        { Wirkstoff = "Beispielwirkstoff (ausgedacht)", Handelsnamen = "Beispielsalbe (ausgedacht)", Kuerzel = "CD" }, Jetzt));
         Assert.Equal(VisitenAktion.MedikationAendern, s.VisitenAufgabe(aufgaben[1])!.Value.Aktion);
         Assert.Equal(neu.Id, s.VisitenMedikament(s.VisitenAufgabe(aufgaben[1])!.Value.Anordnung!)!.Id);
 

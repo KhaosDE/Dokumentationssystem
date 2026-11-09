@@ -28,6 +28,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+      - name: Format prüfen (Leerzeichen und Einrückung nach .editorconfig)
+        run: dotnet format whitespace --folder --verify-no-changes -v q
+      - name: Code-Maße nach docs/code-regeln.md (Hinweis, kein Fehler)
+        continue-on-error: true
+        run: python werkzeuge/code-masse.py
       - name: Bildschirm 1920 × 1080 (für Bildschirmfotos in voller Größe; scheitert es, bleibt 1024 × 768)
         shell: pwsh
         continue-on-error: true

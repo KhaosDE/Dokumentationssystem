@@ -90,7 +90,7 @@ public sealed class WochenplanAnsicht : Panel
             foreach (var s in new[] { Teilnahme.Teilgenommen, Teilnahme.Abgesagt, Teilnahme.Ausgefallen, Teilnahme.Offen })
             {
                 var e = new ToolStripMenuItem(s == Teilnahme.Offen ? "zurück auf „offen“" : WochenplanRegeln.TeilnahmeText(s))
-                    { Checked = t.Teilnahme == s, Enabled = grund is null };
+                { Checked = t.Teilnahme == s, Enabled = grund is null };
                 e.Click += (_, _) => TeilnahmeSetzen(t, s);
                 menue.Items.Add(e);
             }
@@ -371,7 +371,8 @@ public sealed class PlanEintragFenster : Form
             {
                 Tag = Wochentag.SelectedIndex >= 0 ? TherapieRegeln.Woche[Wochentag.SelectedIndex] : null, Von = Von.Text, Bis = Bis.Text,
                 Titel = Titel.Text, Ort = Ort.Text, Hinweis = Hinweis.Text, Ab = Ab.Text, Kuerzel = Einstellungen.Laden().Kuerzel,
-            }, bewohner.Id!.Value, Jetzt()) with { Ersetzt = alt?.Id };
+            }, bewohner.Id!.Value, Jetzt()) with
+            { Ersetzt = alt?.Id };
             var konflikte = speicher.PlanUeberschneidungen(neu);
             string auswahl = $"{neu.Termin}|{neu.Ab}";
             if (konflikte.Count > 0 && gewarnt != auswahl)

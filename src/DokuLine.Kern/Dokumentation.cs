@@ -107,8 +107,12 @@ public static class DokuRegeln
         tag.ToString("dddd, dd.MM.yyyy",
             CultureInfo.GetCultureInfo("de-DE")) + $" · {anzahl} {(anzahl == 1 ? "Bericht" : "Berichte")}";
 
-    public static string SchichtWort(Schicht s) => s switch { Schicht.Frueh => "Früh", Schicht.Spaet => "Spät",
-        _ => "Nacht" };
+    public static string SchichtWort(Schicht s) => s switch
+    {
+        Schicht.Frueh => "Früh",
+        Schicht.Spaet => "Spät",
+        _ => "Nacht"
+    };
 
     // Visiten erkennt man am fetten Anfang „Visite Psychiater – Dr. …“ (vor „, dabei:“ bzw. dem ersten Doppelpunkt).
     public static string? FettAnfang(Bericht b)
@@ -136,8 +140,12 @@ public static class DokuRegeln
     public static List<(string Text, DokuFilter Ohne)> Gesetzt(DokuFilter f)
     {
         var liste = new List<(string, DokuFilter)>();
-        if (f.Zeitraum != Zeitraum.SiebenTage) liste.Add((ZeitraumText(f), f with { Zeitraum = Zeitraum.SiebenTage,
-            Von = null, Bis = null }));
+        if (f.Zeitraum != Zeitraum.SiebenTage) liste.Add((ZeitraumText(f), f with
+        {
+            Zeitraum = Zeitraum.SiebenTage,
+            Von = null,
+            Bis = null
+        }));
         if (f.Wichtig) liste.Add(("Wichtig", f with { Wichtig = false }));
         if (f.MedikationGeaendert) liste.Add(("Medikation geändert", f with { MedikationGeaendert = false }));
         if (f.Bedarfsgabe) liste.Add(("Bedarfsgabe", f with { Bedarfsgabe = false }));

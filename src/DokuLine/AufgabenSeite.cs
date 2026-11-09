@@ -322,7 +322,7 @@ public sealed class AufgabeFenster : Form
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
     // Ohne Bewohner gehört die Aufgabe zu einem Bereich (Vorgabe: der in der Übersicht gewählte).
     public ComboBox BereichWahl { get; } = new()
-        { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160, AccessibleName = "Bereich" };
+    { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160, AccessibleName = "Bereich" };
     public const string FuerBereich = "– für einen Bereich –";
     public RadioButton NaechsteSchicht { get; } = new() { AutoSize = true, Checked = true };
     public RadioButton BestimmteSchicht { get; } = new() { Text = "bestimmte Schicht:", AutoSize = true };

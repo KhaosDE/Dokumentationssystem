@@ -556,7 +556,9 @@ public static class Demodaten
             if (v.Aenderung is AenderungVorlage a)
                 fassungen.Add(erste with
                 {
-                    GiltAb = heute.AddDays(-a.GiltAbVorTagen), Termine = Termine(a.Termine), Hinweis = a.Hinweis,
+                    GiltAb = heute.AddDays(-a.GiltAbVorTagen),
+                    Termine = Termine(a.Termine),
+                    Hinweis = a.Hinweis,
                     Erstellt = heute.AddDays(-a.GiltAbVorTagen - 2).ToDateTime(new TimeOnly(9, 0)),
                 });
             var zuteilungen = new List<Zuteilung>();
@@ -876,8 +878,11 @@ public static class Demodaten
                     var neuAb = heute.AddDays(-a.AbVorTagen);
                     ersatz = eintrag with
                     {
-                        Termin = new Wochentermin(Kurztage[a.Tag], Zeit(a.Von), Zeit(a.Bis)), Hinweis = a.Hinweis, Ab = neuAb,
-                        Erstellt = neuAb.AddDays(-1).ToDateTime(new TimeOnly(11, 0)), Kuerzel = "CD",
+                        Termin = new Wochentermin(Kurztage[a.Tag], Zeit(a.Von), Zeit(a.Bis)),
+                        Hinweis = a.Hinweis,
+                        Ab = neuAb,
+                        Erstellt = neuAb.AddDays(-1).ToDateTime(new TimeOnly(11, 0)),
+                        Kuerzel = "CD",
                     };
                 }
                 liste.Add(new DemoPlan(eintrag, ersatz, v.EntferntVorTagen is int e ? heute.AddDays(-e) : null));
@@ -950,8 +955,11 @@ public static class Demodaten
                 var neu = heute.AddDays(a.InTagen);
                 fassungen.Add(erste with
                 {
-                    Beginn = neu.ToDateTime(Zeit(a.Von)), Ende = neu.ToDateTime(Zeit(a.Bis)), Hinweis = a.Hinweis,
-                    Erstellt = jetzt.AddHours(-5), Kuerzel = "CD",
+                    Beginn = neu.ToDateTime(Zeit(a.Von)),
+                    Ende = neu.ToDateTime(Zeit(a.Bis)),
+                    Hinweis = a.Hinweis,
+                    Erstellt = jetzt.AddHours(-5),
+                    Kuerzel = "CD",
                 });
             }
             if (v.Abgesagt) fassungen.Add(fassungen[^1] with { Abgesagt = true, Erstellt = jetzt.AddHours(-3), Kuerzel = "CD" });

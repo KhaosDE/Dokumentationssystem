@@ -8,18 +8,24 @@ namespace DokuLine;
 public sealed class VerzeichnisAnsicht : Panel
 {
     private readonly Speicher speicher;
-    private readonly FlowLayoutPanel gruppenLeiste = new() { AutoSize = true, WrapContents = true,
-        BackColor = Stil.Seite, Margin = new Padding(0) };
+    private readonly FlowLayoutPanel gruppenLeiste = new()
+    {
+        AutoSize = true, WrapContents = true,
+        BackColor = Stil.Seite, Margin = new Padding(0)
+    };
     private List<Person> gezeigt = [];
 
     public Dictionary<PersonGruppe, FilterKnopf> GruppenKnoepfe { get; } = [];
     public PersonGruppe Gruppe { get; private set; } = PersonGruppe.Arzt;
-    public TextBox Suche { get; } = new() { Width = 260, PlaceholderText = "Name, Stelle oder Telefon suchen",
-        Font = Stil.Standard, AccessibleName = "Im Verzeichnis suchen" };
+    public TextBox Suche { get; } = new()
+    {
+        Width = 260, PlaceholderText = "Name, Stelle oder Telefon suchen",
+        Font = Stil.Standard, AccessibleName = "Im Verzeichnis suchen"
+    };
     public ListView Liste { get; } = new()
     {
         View = View.Details, FullRowSelect = true, MultiSelect = false, HideSelection = false, Font = Stil.Standard,
-            AccessibleName = "Personen",
+        AccessibleName = "Personen",
     };
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neu …");
     public Button AendernKnopf { get; } = Stil.NebenKnopf("Öffnen …");
@@ -70,8 +76,14 @@ public sealed class VerzeichnisAnsicht : Panel
         Liste.BeginUpdate();
         Liste.Columns.Clear();
         foreach (var titel in PersonRegeln.Spalten(g))
-            Liste.Columns.Add(titel, titel switch { "Name" => 200, "zugeordnet zu" => 280,
-                "Bewohner" or "Status" => 70, "E-Mail" => 170, _ => 140 });
+            Liste.Columns.Add(titel, titel switch
+            {
+                "Name" => 200,
+                "zugeordnet zu" => 280,
+                "Bewohner" or "Status" => 70,
+                "E-Mail" => 170,
+                _ => 140
+            });
         Liste.EndUpdate();
         Fehler.Visible = false;
         Aktualisieren();
@@ -98,7 +110,8 @@ public sealed class VerzeichnisAnsicht : Panel
         Liste.Items.Clear();
         foreach (var p in gezeigt)
             Liste.Items.Add(new ListViewItem(PersonRegeln.Zeile(p, zuordnungen,
-                namen)) { ForeColor = p.Aktiv ? Stil.TextNormal : Stil.TextLeise });
+                namen))
+            { ForeColor = p.Aktiv ? Stil.TextNormal : Stil.TextLeise });
         Liste.EndUpdate();
         int i = gezeigt.FindIndex(p => p.Id == vorher);
         if (i >= 0) Liste.Items[i].Selected = true;
@@ -153,8 +166,11 @@ public sealed class VerzeichnisAnsicht : Panel
     {
         if (Gewaehlt is not Person p) return false;
         try { speicher.PersonAktiv(p.Id, !p.Aktiv, Recht.Kuerzel, Jetzt()); }
-        catch (Eingabefehler e) { Fehler.Text = string.Join(" ",
-            e.Fehler); Fehler.Visible = true; PerformLayout(); return false; }
+        catch (Eingabefehler e)
+        {
+            Fehler.Text = string.Join(" ",
+            e.Fehler); Fehler.Visible = true; PerformLayout(); return false;
+        }
         Fehler.Visible = false;
         Aktualisieren();
         return true;
@@ -198,8 +214,11 @@ public sealed class PersonFenster : Form
     public TextBox Anschrift { get; } = new() { Width = 320 };
     public TextBox Erreichbarkeit { get; } = new() { Width = 320, PlaceholderText = "z. B. Mo–Fr 8–12 Uhr" };
     public TextBox Hinweis { get; } = new() { Width = 320 };
-    public ListBox Zugeordnet { get; } = new() { Width = 420, Height = 110, IntegralHeight = false,
-        AccessibleName = "zugeordnet zu" };
+    public ListBox Zugeordnet { get; } = new()
+    {
+        Width = 420, Height = 110, IntegralHeight = false,
+        AccessibleName = "zugeordnet zu"
+    };
     public Button ZuordnenKnopf { get; } = Stil.NebenKnopf("Bewohner zuordnen …");
     public Button EntfernenKnopf { get; } = Stil.NebenKnopf("Zuordnung entfernen");
     public Button AkteKnopf { get; } = Stil.NebenKnopf("Akte öffnen");
@@ -231,10 +250,16 @@ public sealed class PersonFenster : Form
                 e.Hinweis);
         }
         var raster = Formular.Raster(out var zeile);
-        zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0,
-            Stil.AbstandKlein) });
-        zeile("Verzeichnis", new Label { Text = PersonRegeln.GruppeText(gruppe), AutoSize = true, Font = Stil.Fett,
-            UseMnemonic = false });
+        zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung)
+        {
+            Margin = new Padding(0, 0, 0,
+            Stil.AbstandKlein)
+        });
+        zeile("Verzeichnis", new Label
+        {
+            Text = PersonRegeln.GruppeText(gruppe), AutoSize = true, Font = Stil.Fett,
+            UseMnemonic = false
+        });
         zeile("Name", NameFeld);
         if (gruppe == PersonGruppe.Betreuer) zeile("Art", Art);
         if (PersonRegeln.FunktionText(gruppe) is string funktion) zeile(funktion, Funktion);
@@ -303,9 +328,9 @@ public sealed class PersonFenster : Form
     public PersonEingabe Eingabe() => new()
     {
         Gruppe = gruppe, Name = NameFeld.Text, Art = Art.Text, Fachrichtung = Funktion.Text, Praxis = Stelle.Text,
-            Telefon = Telefon.Text,
+        Telefon = Telefon.Text,
         Mobil = Mobil.Text, Email = Email.Text, Anschrift = Anschrift.Text, Erreichbarkeit = Erreichbarkeit.Text,
-            Hinweis = Hinweis.Text,
+        Hinweis = Hinweis.Text,
     };
 
     public bool Speichern()
@@ -370,10 +395,16 @@ public sealed class ZuordnungFenster : Form
 {
     private readonly List<Bewohner> bewohner;
 
-    public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 320,
-        AccessibleName = "Bewohner" };
-    public ComboBox Rolle { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 320,
-        AccessibleName = "Rolle" };
+    public ComboBox BewohnerWahl { get; } = new()
+    {
+        DropDownStyle = ComboBoxStyle.DropDownList, Width = 320,
+        AccessibleName = "Bewohner"
+    };
+    public ComboBox Rolle { get; } = new()
+    {
+        DropDownStyle = ComboBoxStyle.DropDown, Width = 320,
+        AccessibleName = "Rolle"
+    };
     public Label Fehler { get; } = Fenster.Fehlerfeld();
     public long? Gewaehlt => BewohnerWahl.SelectedIndex >= 0 ? bewohner[BewohnerWahl.SelectedIndex].Id : null;
 

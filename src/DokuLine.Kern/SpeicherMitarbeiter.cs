@@ -31,7 +31,8 @@ public sealed partial class Speicher
         {
             string k = leser.GetString(0);
             liste.Add(new Mitarbeiter(k, leser.GetString(1), leser.GetString(2), leser.GetInt64(3) == 1, leser.GetInt64(4) == 1,
-                bereiche.GetValueOrDefault(k) ?? [], positionen.GetValueOrDefault(k) ?? []) { Farbe = leser.IsDBNull(5) ? null : leser.GetString(5) });
+                bereiche.GetValueOrDefault(k) ?? [], positionen.GetValueOrDefault(k) ?? [])
+            { Farbe = leser.IsDBNull(5) ? null : leser.GetString(5) });
         }
         return liste;
     }
@@ -58,8 +59,11 @@ public sealed partial class Speicher
     {
         m = m with
         {
-            Kuerzel = m.Kuerzel.Trim(), Vorname = m.Vorname.Trim(), Nachname = m.Nachname.Trim(),
-            Bereiche = m.Bereiche.Distinct().ToList(), Positionen = m.Positionen.Distinct().ToList(),
+            Kuerzel = m.Kuerzel.Trim(),
+            Vorname = m.Vorname.Trim(),
+            Nachname = m.Nachname.Trim(),
+            Bereiche = m.Bereiche.Distinct().ToList(),
+            Positionen = m.Positionen.Distinct().ToList(),
         };
         var alle = AlleMitarbeiter();
         if (!neu && !alle.Any(x => x.Kuerzel.Equals(m.Kuerzel, StringComparison.OrdinalIgnoreCase)))
