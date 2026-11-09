@@ -43,6 +43,7 @@ public sealed partial class AngabeFenster : Form
             case Angabe.Zustaendigkeit: ZustaendigkeitBauen(Feld, bisher?.Lesen<Zustaendigkeit>()); break;
             case Angabe.Bestellweg: BestellwegBauen(Feld, bisher?.Lesen<BestellwegAngabe>(), heute); break;
             case Angabe.Personenbeschreibung: BeschreibungBauen(Feld, bisher?.Lesen<Personenbeschreibung>()); break;
+            case Angabe.Schweigepflicht: SchweigepflichtBauen(Feld, bisher?.Lesen<Schweigepflicht>(), heute); break;
             default: KostentraegerBauen(Feld, bisher?.Lesen<Kostentraeger>()); break;
         }
         Keine.CheckedChanged += (_, _) => FelderSperren();

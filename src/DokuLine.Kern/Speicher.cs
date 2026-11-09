@@ -890,6 +890,28 @@ public sealed partial class Speicher : IDisposable
         INSERT OR IGNORE INTO meldestellen (name, nr) VALUES ('Leitung bzw. Rufbereitschaft', 1), ('Polizei (110)', 2), ('Betreuer', 3),
             ('Angehörige', 4), ('Klinik', 5), ('Gericht', 6);
         """,
+        // 38 – Angaben der Akte für weitere Reiter (Schweigepflicht und später): die Liste der Arten nicht mehr in der Tabelle
+        // festschreiben (SQLite ändert keine CHECK-Regel – die Tabelle wird neu angelegt und umkopiert, Fassungen bleiben).
+        """
+        DROP TABLE IF EXISTS akte_angaben_neu;
+        CREATE TABLE akte_angaben_neu (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (length(art) > 0),
+            zustand     TEXT NOT NULL CHECK (zustand IN ('eingetragen', 'keine')),
+            inhalt      TEXT NOT NULL DEFAULT '',
+            ab          TEXT NOT NULL,
+            geaendert   TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        INSERT INTO akte_angaben_neu (id, bewohner_id, art, zustand, inhalt, ab, geaendert, kuerzel)
+            SELECT id, bewohner_id, art, zustand, inhalt, ab, geaendert, kuerzel FROM akte_angaben;
+        DROP TABLE akte_angaben;
+        ALTER TABLE akte_angaben_neu RENAME TO akte_angaben;
+        CREATE INDEX IF NOT EXISTS akte_angaben_bewohner ON akte_angaben (bewohner_id, art);
+        CREATE TRIGGER IF NOT EXISTS akte_angaben_bleiben BEFORE UPDATE ON akte_angaben
+            BEGIN SELECT RAISE(ABORT, 'Angaben der Akte werden nicht überschrieben – jede Änderung ist eine neue Fassung.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1063,10 +1085,10 @@ public sealed partial class Speicher : IDisposable
              aerztlich = Meta(DemoAerztlich) is null, betreuer = Meta(DemoBetreuer) is null, personen = Meta(DemoPersonen) is null, bedarf = Meta(DemoBedarf) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
-             akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null;
+             akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1089,6 +1111,7 @@ public sealed partial class Speicher : IDisposable
         if (betreuer) DemoBetreuerEinfuegen(transaktion);
         if (personen || betreuer) DemoPersonenEinfuegen(transaktion);   // übernimmt auch die Betreuer
         if (akte || personen || betreuer || aerzte) DemoAkteAngabenEinfuegen(transaktion);   // hängt an Personen und Betreuern
+        if (schweigepflicht || akte || personen || betreuer || aerzte) DemoSchweigepflichtEinfuegen(transaktion);   // hängt an den Angaben der Akte
         if (dokumente) DemoDokumenteEinfuegen(transaktion);
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
@@ -1143,6 +1166,7 @@ public sealed partial class Speicher : IDisposable
             DemoBetreuerEinfuegen(transaktion);
             DemoPersonenEinfuegen(transaktion);
             DemoAkteAngabenEinfuegen(transaktion);
+            DemoSchweigepflichtEinfuegen(transaktion);
             DemoDokumenteEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);

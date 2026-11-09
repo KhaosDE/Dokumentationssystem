@@ -69,6 +69,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     public event Action<long>? BerichtGewuenscht;
     public event Action<Bewohner>? UeberleitungGewuenscht;
     public event Action<Bewohner>? AbgaengigkeitGewuenscht;
+    public event Action<Bewohner>? AuskunftGewuenscht;
     public event Action<string>? StelleGewuenscht;          // „Übergabe“, „Tagesplan“, „Aufgaben“
     public event Action<Verlauf>? VerlaufGewuenscht;        // Nachricht öffnen
     public event Action<Aufgabe>? VisitenAufgabeGewuenscht;
@@ -102,7 +103,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         Fristen.Visible = false;
         links.Controls.AddRange([Medikation, Fristen, Uebergaben, Termine, Dienst, Nachrichten]);
 
-        foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Hinweise", 300) }) Liste.Columns.Add(titel, breite);
+        foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Auskunft", 170), ("Hinweise", 300) }) Liste.Columns.Add(titel, breite);
         Liste.DoubleClick += (_, _) => AkteOeffnen();
         Liste.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.Handled = true; AkteOeffnen(); } };
         Liste.SelectedIndexChanged += (_, _) => KnoepfeSperren();
@@ -111,6 +112,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
         menue.Items.Add("Überleitungsbogen …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) UeberleitungGewuenscht?.Invoke(z.Bewohner); });
         menue.Items.Add("Abgängigkeit melden …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) AbgaengigkeitGewuenscht?.Invoke(z.Bewohner); });
+        menue.Items.Add("Auskunft prüfen …", null, (_, _) => { if (Gewaehlt is BewohnerZeile z) AuskunftGewuenscht?.Invoke(z.Bewohner); });
         Liste.ContextMenuStrip = menue;
         rechts.Controls.AddRange([ListenKopf, Suche, MeineBezugsbewohner, MeineEinzeltrainings, BereichHinweis, Liste]);
 
@@ -201,7 +203,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
             var zeile = new BewohnerZeile(h.Bewohner, heute, marken,
                 bezug?.Bezugspflege is { } bp ? (bp.Kuerzel, BezugAnzeige.Farbe(farben, bp.Kuerzel)) : null,
                 bezug?.Einzeltrainer is { } tr ? (BezugRegeln.TrainerText(tr), BezugAnzeige.Farbe(farben, tr.Kuerzel)) : null,
-                HeuteWichtigRegeln.Wo(marken, h.Termine, jetzt));
+                HeuteWichtigRegeln.Wo(marken, h.Termine, jetzt), h.Auskunft);
             zeile.Gewaehlt += b => AkteGewuenscht?.Invoke(b.Id!.Value);
             alleZeilen.Add(zeile);
         }

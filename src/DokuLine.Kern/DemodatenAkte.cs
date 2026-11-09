@@ -101,6 +101,63 @@ public static partial class Demodaten
 
 // Demo-Dokumente: je Wohnbereich bei den ersten vier Bewohnern Betreuerausweis, Kostenzusage und Arztbrief als kleine PDF
 // mit großem „DEMO — ausgedachte Daten“; eine Kostenzusage ist abgelaufen.
+// Schweigepflicht (Bauplan 35): aus Betreuung, Angehörigen, Hausarzt und Kostenträger abgeleitet; gemischt mit „keine
+// Auskunft“, „nicht erfasst“, abgelaufen, widerrufen und einer Frist in den nächsten 4 Wochen. Alles ausgedacht.
+public static partial class Demodaten
+{
+    public static IEnumerable<(long BewohnerId, Schweigepflicht? Inhalt)> Schweigepflichten(IReadOnlyList<Bewohner> bewohner,
+        IEnumerable<(Angabe Art, long BewohnerId, object? Inhalt)> angaben, DateOnly heute)
+    {
+        var je = angaben.GroupBy(x => x.BewohnerId).ToDictionary(g => g.Key, g => g.GroupBy(x => x.Art).ToDictionary(x => x.Key, x => x.Last().Inhalt));
+        for (int i = 0; i < bewohner.Count; i++)
+        {
+            long id = bewohner[i].Id!.Value;
+            if (i % 6 == 5) continue;                                   // nicht erfasst
+            if (i % 11 == 7) { yield return (id, null); continue; }      // keine Entbindung erteilt
+            var a = je.GetValueOrDefault(id) ?? [];
+            var e = new List<Schweigepflichteintrag>();
+            var erteilt = heute.AddDays(-200 - 13 * i);
+            if (a.GetValueOrDefault(Angabe.Betreuung) is Betreuung b && b.PersonId is long betreuer)
+                e.Add(new() { PersonId = betreuer, Bezeichnung = "Betreuer", Stand = Entbindungsstand.Entbunden, ErteiltAm = erteilt, Form = "schriftlich" });
+            if (a.GetValueOrDefault(Angabe.Angehoerige) is Angehoerige ang)
+                for (int k = 0; k < ang.Personen.Count; k++)
+                {
+                    var p = ang.Personen[k];
+                    e.Add(k switch
+                    {
+                        0 => new()
+                        {
+                            PersonId = p.PersonId, Bezeichnung = p.Beziehung, Stand = Entbindungsstand.Entbunden, ErteiltAm = erteilt,
+                            Umfang = i % 2 == 0 ? SchweigepflichtRegeln.UmfangOrganisatorisch : SchweigepflichtRegeln.UmfangAlle,
+                            Richtung = Auskunftsrichtung.Geben, GueltigBis = i % 5 == 1 ? heute.AddDays(20) : null, Form = "schriftlich"
+                        },
+                        1 => new() { PersonId = p.PersonId, Bezeichnung = p.Beziehung, Stand = Entbindungsstand.KeineAuskunft },
+                        _ => i % 3 == 0
+                            ? new() { PersonId = p.PersonId, Bezeichnung = p.Beziehung }
+                            : new()
+                            {
+                                PersonId = p.PersonId, Bezeichnung = p.Beziehung, Stand = Entbindungsstand.Entbunden, ErteiltAm = erteilt,
+                                WiderrufenAm = heute.AddDays(-30), Form = "mündlich mit Zeuge"
+                            },
+                    });
+                }
+            if (a.GetValueOrDefault(Angabe.Aerzte) is AerzteAngabe aerzte && aerzte.Hausarzt.PersonId is long hausarzt)
+                e.Add(new()
+                {
+                    PersonId = hausarzt, Bezeichnung = "Hausarzt", Stand = Entbindungsstand.Entbunden, Umfang = SchweigepflichtRegeln.UmfangGesundheit,
+                    ErteiltAm = erteilt, GueltigBis = i % 4 == 2 ? heute.AddDays(-5) : null, Form = "schriftlich"
+                });
+            if (i % 2 == 1 && a.GetValueOrDefault(Angabe.Kostentraeger) is Kostentraeger kt)
+                e.Add(new()
+                {
+                    Stelle = kt.Name, Bezeichnung = "Kostenträger", Stand = Entbindungsstand.Entbunden, Umfang = SchweigepflichtRegeln.UmfangOrganisatorisch,
+                    Richtung = Auskunftsrichtung.Geben, ErteiltAm = erteilt, Form = "schriftlich", WiderrufenAm = i % 3 == 0 ? heute.AddDays(-12) : null
+                });
+            yield return (id, new Schweigepflicht { Eintraege = e });
+        }
+    }
+}
+
 // Personenbeschreibung (Bauplan 34): ausgedacht; jeder vierte nicht erfasst, jeder siebte älter als 12 Monate (Marke).
 public static partial class Demodaten
 {

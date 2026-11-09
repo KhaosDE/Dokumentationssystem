@@ -1678,7 +1678,7 @@ Umfang:
 - Alle Meldungen bleiben in der Akte nachlesbar (Reiter „Berichte“, Filter „Abgängigkeit“).
 
 ## Schweigepflichtentbindungen
-Status: freigegeben (Bauplan Schritt 35; Auswahl Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.39.0; Bauplan Schritt 35, Auswahl Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: In der Akte steht, wem gegenüber die Schweigepflicht aufgehoben ist und wem nicht. Eine
 schnelle Abfrage beantwortet „Darf ich hier Auskunft geben?“.

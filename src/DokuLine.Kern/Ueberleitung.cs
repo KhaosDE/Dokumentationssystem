@@ -66,7 +66,8 @@ public static class UeberleitungRegeln
             : [Nicht]);
         Abschnitt(Aerzte, [.. AngabenRegeln.Zeilen(Angabe.Aerzte, d.Angaben.GetValueOrDefault(Angabe.Aerzte), d.Person, d.Heute).Select(z => $"{z.Beschriftung}: {z.Wert}")]);
         Abschnitt(Unterbringung, [$"Beschluss: {BewohnerRegeln.BeschlussText(b)}"]);
-        Abschnitt(Schweigepflicht, zusatz?.GetValueOrDefault(Schweigepflicht) ?? [Nicht]);
+        Abschnitt(Schweigepflicht, zusatz?.GetValueOrDefault(Schweigepflicht)
+            ?? SchweigepflichtRegeln.FuerUeberleitung(d.Angaben.GetValueOrDefault(Angabe.Schweigepflicht), d.Person, d.Heute));
         Abschnitt(Vitalwerte, zusatz?.GetValueOrDefault(Vitalwerte) ?? [Nicht]);
         Abschnitt(Besonderheiten, e.Besonderheiten.Trim().Length > 0 ? [e.Besonderheiten.Trim()] : ["keine eingetragen"]);
         return liste;

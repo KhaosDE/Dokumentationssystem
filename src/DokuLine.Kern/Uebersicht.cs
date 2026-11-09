@@ -12,6 +12,9 @@ public sealed record HeuteFuer(Bewohner Bewohner, IReadOnlyList<Termin> Termine,
     public string? HebFaellig { get; init; }   // z. B. „HEB fällig (letzter 10/2025)“
     public IReadOnlyList<Marke> Fristen { get; init; } = [];   // Betreuung, Befreiung, Kostenzusage (Bauplan 30)
     public IReadOnlyList<Marke> Zustaendig { get; init; } = [];   // Forensik, FOSA (Bauplan 30a)
+    // Spalte „Auskunft“ (Bauplan 35): „2 entbunden · 1 keine Auskunft“, die Namen für den Hinweis.
+    public (string Kurz, string Namen, Entbindungsstand Art) Auskunft { get; init; } =
+        ("nicht erfasst", SchweigepflichtRegeln.NichtErfasstText, Entbindungsstand.NichtErfasst);
 }
 
 public static class UebersichtRegeln

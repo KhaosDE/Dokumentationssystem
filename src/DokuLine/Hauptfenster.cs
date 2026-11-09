@@ -175,6 +175,7 @@ public sealed partial class Hauptfenster : Form
         Uebersicht.BerichtGewuenscht += id => NeuerBericht(id);
         Uebersicht.UeberleitungGewuenscht += b => Bewohner.UeberleitungOeffnen(b);
         Uebersicht.AbgaengigkeitGewuenscht += b => { Bewohner.AbgaengigkeitOeffnen(b); Uebersicht.Aktualisieren(); };
+        Uebersicht.AuskunftGewuenscht += b => Bewohner.AuskunftOeffnen(b);
         Modul.Ausgangsliste.Aktionen.AbgaengigkeitMelden = id => { if (speicher.Bewohner(id) is Kern.Bewohner b) Bewohner.AbgaengigkeitOeffnen(b); };
         Uebersicht.BereichGewechselt += ArbeitsbereichWaehlen;
         Bewohner.BerichtGewuenscht += id => NeuerBericht(id);

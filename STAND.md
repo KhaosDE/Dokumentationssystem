@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.38.0** (Bauplan Schritt 34: Abgängigkeitsmeldung).
+Stand: 09.11.2026. Version: **0.39.0** (Bauplan Schritt 35: Schweigepflichtentbindungen).
 
 ## Aktuell
 
@@ -369,8 +369,18 @@ bei Forensik/FOSA deren Zuständige als feste Zeilen), **„Meldeblatt drucken �
 Wartezeit (Vorgabe 30 Minuten) „Rückkehrzeit überschritten seit … – Abgängigkeit melden?“ mit Knopf „melden …“.
 Einstellungen: Wartezeit und die Liste der Stellen.
 
+Neu in 0.39.0: **Auskunftsleiste** in jeder Akte direkt unter dem Allergiehinweis, über allen Reitern: je Person eine
+Marke mit Zeichen, Wort und Farbe („✓ Mutter · … – entbunden (nur Organisatorisches)“ grün, „✕ … – keine Auskunft“ rot),
+am Ende immer „Alle anderen: keine Auskunft“; ohne Eintrag „Schweigepflicht: nicht erfasst – keine Auskunft geben“.
+Abgelaufene und widerrufene Entbindungen zählen nicht (widerrufene bleiben durchgestrichen sichtbar). Neuer Reiter
+**„Schweigepflicht“** nach „Kostenträger“: Person aus dem Verzeichnis oder Stelle (Kostenträger, Freitext), Zustand,
+Umfang, Richtung, erteilt am, gültig bis, widerrufen am, Form, verknüpftes Dokument. **„Auskunft prüfen …“** in Akte,
+Aktionsleiste und per Rechtsklick: Name eintippen, Antwort mit Wort und Farbe. In der Übersicht die Spalte **„Auskunft“**
+(„2 entbunden · 1 keine Auskunft“, Namen im Hinweis) und die Frist „Entbindung endet …“ 4 Wochen vorher. Der
+Überleitungsbogen zeigt den Abschnitt „Schweigepflicht“ mit allen Einträgen.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 35 „Schweigepflichtentbindungen“ (0.39.0).
+als Nächstes 36 „Vitalwerte“ (0.40.0).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1450,6 +1460,11 @@ als Nächstes 35 „Schweigepflichtentbindungen“ (0.39.0).
   `meldestellen` als Liste), `MarkenArt.Abgaengig`, `Angabe.Personenbeschreibung`, Einstellung `wartezeit_minuten`,
   `AbgaengigkeitFenster`, `AngabeFenster` für die Personenbeschreibung, Hinweis und Knopf in der Ausgangsliste.
 
+- 0.39.0 — Bauplan Schritt 35: `Schweigepflicht.cs` (`SchweigepflichtRegeln`: Leiste, Kurzform, Schnellabfrage, Fristen,
+  Zeilen, Prüfen), `Angabe.Schweigepflicht` als Fassung, Datenbank-Schritt 38 (Tabelle `akte_angaben` ohne feste Liste der
+  Arten, umkopiert), Demo mit eigenem Nachhol-Schlüssel, Auskunftsleiste in `AkteAnsicht`, `AngabeFenster` mit
+  Eintragsliste, `AuskunftFenster`, Spalte „Auskunft“ in der Übersicht, durchgestrichene Marken (`MarkenFeld`).
+
 ## Offene Punkte
 
 - 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
@@ -1544,6 +1559,15 @@ als Nächstes 35 „Schweigepflichtentbindungen“ (0.39.0).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.39.0): Schweigepflicht – gespeichert als Fassung der ganzen Liste (wie Angehörige); ein Widerruf ist eine
+  neue Fassung mit „widerrufen am“, die alte bleibt im Verlauf. Die Datenbank-Regel mit der festen Liste der Reiter-Arten
+  wird dafür aufgehoben (Schritt 38 kopiert die Tabelle um, weil SQLite keine Prüfregel ändern kann); so brauchen spätere
+  Reiter keinen Umbau mehr. Die Spalte „Auskunft“ gibt es in der Übersicht; die schmale Namensliste der Dokumentation (früher
+  Bereich „Bewohner“) hat keine Spalten – dort zeigt die Akte die Leiste sofort. Die Schnellabfrage sucht im Namen und in
+  der Bezeichnung; bei mehreren Treffern gilt die vorsichtigste Antwort. Der Überleitungsbogen zeigt alle Einträge statt nur
+  „der Klinik“: Der Bogen kennt die Zielklinik nicht als Feld (nur den Anlass), und so steht die Klinik dabei, wenn sie
+  eingetragen ist.
 
 - 09.11.2026 (0.38.0): Abgängigkeitsmeldung – die Berichte bekommen die vorhandene Art **„Ausgang/Abgängigkeit“** (laut
   Eintrag „Berichtsart“ in `IDEEN.md` bekommt die Abgängigkeitsmeldung ihre Art automatisch); der Filter heißt deshalb
@@ -2413,6 +2437,10 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.39.0: Akte öffnen – unter dem Allergiehinweis die Auskunftsleiste ansehen; „Auskunft prüfen …“ → einen Namen
+eintippen. Reiter „Schweigepflicht“ → „Ändern …“: Eintrag hinzufügen, einen anderen widerrufen (Datum), speichern – er
+bleibt durchgestrichen sichtbar. Übersicht: Spalte „Auskunft“.
 
 Version 0.38.0: Akte → „Abgängigkeit …“ → Kleidung eintragen, „Melden“: Marke „abgängig seit …“ in Akte und Übersicht;
 „Polizei“ abhaken, „Meldeblatt drucken …“ ansehen; „Zurück“, dann „Polizei“ entwarnen. In den Stammdaten

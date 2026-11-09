@@ -20,7 +20,8 @@ public class AkteAngabenOberflaechenTests
         f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(ahorn.Id!.Value);
         var akte = f.Bewohner.Akte;
-        Assert.Equal(["Stammdaten", "Betreuung", "Angehörige", "Ärzte", "Krankenkasse", "Kostenträger", "Dokumente", "Medikamentenplan"], akte.Reiter.Namen.Take(8));
+        Assert.Equal(["Stammdaten", "Betreuung", "Angehörige", "Ärzte", "Krankenkasse", "Kostenträger", "Schweigepflicht", "Dokumente", "Medikamentenplan"],
+            akte.Reiter.Namen.Take(9));
 
         foreach (var name in new[] { "Betreuung", "Angehörige", "Ärzte", "Krankenkasse", "Kostenträger" })
         {

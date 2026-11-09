@@ -60,6 +60,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     private readonly Button berichtKnopf = Stil.NebenKnopf("Neuer Bericht …");
     public Button UeberleitungKnopf { get; } = Stil.NebenKnopf("Überleitungsbogen …");
     public Button AbgaengigkeitKnopf { get; } = Stil.NebenKnopf("Abgängigkeit …");
+    public Button AuskunftKnopf { get; } = Stil.NebenKnopf("Auskunft prüfen …");
     public Button AerztlichKnopf { get; } = Stil.NebenKnopf("Ärztliche Informationen …");
 
     // „Neuer Bericht …“ aus der Akte; das Hauptfenster öffnet ihn.
@@ -108,6 +109,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
         menue.Items.Add("Überleitungsbogen …", null, (_, _) => { if (Gewaehlt is Bewohner g) UeberleitungOeffnen(g); });
         menue.Items.Add("Abgängigkeit melden …", null, (_, _) => { if (Gewaehlt is Bewohner g) AbgaengigkeitOeffnen(g); });
+        menue.Items.Add("Auskunft prüfen …", null, (_, _) => { if (Gewaehlt is Bewohner g) AuskunftOeffnen(g); });
         Namen.ContextMenuStrip = menue;
         EinklappenKnopf.AccessibleName = "Bewohnerliste ein- oder ausklappen";
         EinklappenKnopf.Click += (_, _) => Einklappen(!Eingeklappt);
@@ -136,6 +138,8 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         AerztlichKnopf.Click += (_, _) => AerztlichOeffnen();
         UeberleitungKnopf.Click += (_, _) => { if (Akte.Bewohner is Bewohner a) UeberleitungOeffnen(a); };
         AbgaengigkeitKnopf.Click += (_, _) => { if (Akte.Bewohner is Bewohner a) AbgaengigkeitOeffnen(a); };
+        AuskunftKnopf.Click += (_, _) => { if (Akte.Bewohner is Bewohner a) AuskunftOeffnen(a); };
+        Akte.AuskunftGewuenscht += AuskunftOeffnen;
         berichtKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) BerichtGewuenscht?.Invoke(id); };
         Controls.Add(listenFlaeche);
         Controls.Add(Akte);
@@ -335,7 +339,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         AkteKnoepfeSperren();
         // Der Name steht nur einmal, auf der Karte darunter.
         KopfSetzen("Dokumentation", "Bewohnerakte",
-            [zurueckKnopf, berichteKnopf, nachrichtenKnopf, statusKnopf, AerztlichKnopf, UeberleitungKnopf, AbgaengigkeitKnopf, berichtKnopf, bearbeitenKnopf]);
+            [zurueckKnopf, berichteKnopf, nachrichtenKnopf, statusKnopf, AuskunftKnopf, AerztlichKnopf, UeberleitungKnopf, AbgaengigkeitKnopf, berichtKnopf, bearbeitenKnopf]);
     }
 
     // Statusmeldung setzen oder aufheben (Mehrplatzbetrieb); danach die Akte neu lesen.
@@ -378,6 +382,13 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     }
 
     public event Action? AbgaengigkeitGeaendert;
+
+    // Schnellabfrage „Darf ich hier Auskunft geben?“ (Bauplan 35).
+    public void AuskunftOeffnen(Bewohner b)
+    {
+        using var fenster = new AuskunftFenster(speicher, b);
+        Dialog.Zeigen(fenster, FindForm());
+    }
 
     // „Neuer Bewohner …“ aus der Übersicht: Formular; der gespeicherte Bewohner oder null.
     public Bewohner? NeuerBewohner()

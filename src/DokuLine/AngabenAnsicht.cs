@@ -8,6 +8,7 @@ namespace DokuLine;
 public sealed class AngabenAnsicht : KartenFlaeche
 {
     private readonly Speicher speicher;
+    private static readonly Font Gestrichen = new(Stil.Fett, FontStyle.Bold | FontStyle.Strikeout);
     private readonly TableLayoutPanel tabelle = new() { ColumnCount = 2, AutoSize = true, BackColor = Stil.Flaeche, Margin = new Padding(0) };
     private readonly FlowLayoutPanel knoepfe = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Flaeche };
     public Label Stand { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, UseMnemonic = false };
@@ -62,6 +63,12 @@ public sealed class AngabenAnsicht : KartenFlaeche
                 Zeilen = [.. Zeilen.Select(z => z.Beschriftung == "Betreuer" ? (z.Beschriftung, $"{z.Wert} – {ZustaendigkeitRegeln.BetreuerNichtZustaendig}", false) : z)];
             Zeilen = [.. ZustaendigkeitRegeln.Zeilen(zust, person), .. Zeilen];
         }
+        // Schweigepflicht: mit den Titeln der verknüpften Dokumente; widerrufene Einträge bleiben durchgestrichen stehen.
+        if (art == Angabe.Schweigepflicht && fassung?.Lesen<Schweigepflicht>() is Schweigepflicht sp && sp.Eintraege.Count > 0)
+        {
+            var titel = speicher.Dokumente(b.Id!.Value, auchEntfernte: true).ToDictionary(d => d.Id, d => d.Titel);
+            Zeilen = SchweigepflichtRegeln.Zeilen(sp, speicher.PersonenNamen(), id => titel.GetValueOrDefault(id), Heute);
+        }
         ZustaendigkeitKnopf.Visible = betreuung;
         DokumenteKnopf.Visible = DokumentRegeln.KategorieFuer(art) is not null;
         if (DokumentRegeln.KategorieFuer(art) is string kategorie)
@@ -77,10 +84,12 @@ public sealed class AngabenAnsicht : KartenFlaeche
                 Margin = new Padding(0, Stil.AbstandMini, Stil.AbstandGross, Stil.AbstandMini),
             });
             bool nichtZustaendig = wert.EndsWith(ZustaendigkeitRegeln.BetreuerNichtZustaendig, StringComparison.Ordinal);
+            bool widerrufen = art == Angabe.Schweigepflicht && wert.Contains("widerrufen am", StringComparison.Ordinal);
             tabelle.Controls.Add(new Label
             {
                 Text = wert, AutoSize = true, MaximumSize = new Size(Stil.Px(this, 620), 0), UseMnemonic = false, BackColor = Stil.Flaeche,
-                ForeColor = achtung ? Stil.Achtung.Text : nichtZustaendig ? Stil.TextLeise : Stil.TextNormal, Font = achtung ? Stil.FettKursiv : Stil.Fett,
+                ForeColor = achtung ? Stil.Achtung.Text : nichtZustaendig || widerrufen ? Stil.TextLeise : Stil.TextNormal,
+                Font = achtung ? Stil.FettKursiv : widerrufen ? Gestrichen : Stil.Fett,
                 Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini),
             });
         }

@@ -6,7 +6,7 @@ namespace DokuLine.Kern;
 // Akte, Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger (Bauplan 30). Je Reiter eine Folge von
 // Fassungen („ab Datum …“, wer, wann); es gilt die neueste, die schon begonnen hat. Drei Zustände (Regel 5):
 // eingetragen · „keine“ · ohne Fassung „nicht erfasst“.
-public enum Angabe { Betreuung, Angehoerige, Aerzte, Krankenkasse, Kostentraeger, Zustaendigkeit, Bestellweg, Personenbeschreibung }
+public enum Angabe { Betreuung, Angehoerige, Aerzte, Krankenkasse, Kostentraeger, Zustaendigkeit, Bestellweg, Personenbeschreibung, Schweigepflicht }
 
 public enum AngabeZustand { Eingetragen, Keine }
 
@@ -99,7 +99,8 @@ public static class AngabenRegeln
         Angabe.Kostentraeger => "Kostenträger",
         Angabe.Zustaendigkeit => "Zuständigkeit",
         Angabe.Bestellweg => "Bestellweg",
-        _ => "Personenbeschreibung",
+        Angabe.Personenbeschreibung => "Personenbeschreibung",
+        _ => "Schweigepflicht",
     };
 
     public static string KeineText(Angabe a) => a switch
@@ -111,7 +112,8 @@ public static class AngabenRegeln
         Angabe.Kostentraeger => "kein Kostenträger",
         Angabe.Zustaendigkeit => "weder Forensik noch FOSA",
         Angabe.Bestellweg => "kein Bestellweg",
-        _ => "keine Personenbeschreibung",
+        Angabe.Personenbeschreibung => "keine Personenbeschreibung",
+        _ => "keine Entbindung erteilt (niemandem Auskunft)",
     };
 
     public static string Schluessel(Angabe a) => a.ToString().ToLowerInvariant();
@@ -210,6 +212,8 @@ public static class AngabenRegeln
                 Z("Bestellweg", ZustaendigkeitRegeln.WegText(w.Weg), w.Weg == Bestellweg.NichtErfasst);
                 Z("Ansprechperson", w.PersonId is null ? "" : person(w.PersonId));
                 break;
+            case Angabe.Schweigepflicht when f.Lesen<Schweigepflicht>() is Schweigepflicht s:
+                return s.Eintraege.Count > 0 ? SchweigepflichtRegeln.Zeilen(s, person, _ => null, heute) : [(Name(art), KeineText(art), false)];
             case Angabe.Personenbeschreibung when f.Lesen<Personenbeschreibung>() is Personenbeschreibung p:
                 Z("Größe", p.Groesse);
                 Z("Statur", p.Statur);
@@ -301,6 +305,9 @@ public static class AngabenRegeln
                 break;
             case BestellwegAngabe:
             case Personenbeschreibung:
+                break;
+            case Schweigepflicht s:
+                fehler.AddRange(SchweigepflichtRegeln.Pruefen(s));
                 break;
             default:
                 fehler.Add($"{Name(art)}: unbekannter Inhalt.");

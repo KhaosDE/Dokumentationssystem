@@ -48,6 +48,9 @@ public sealed class MarkenFeld : Control
         set { marke = value; Invalidate(); }
     }
 
+    // Widerrufenes bleibt sichtbar, aber durchgestrichen (das Wort „widerrufen“ steht trotzdem im Text).
+    public bool Durchgestrichen { get; set; }
+
     protected override void OnTextChanged(EventArgs e)
     {
         base.OnTextChanged(e);
@@ -65,7 +68,11 @@ public sealed class MarkenFeld : Control
         var g = e.Graphics;
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.Clear(Parent?.BackColor ?? Stil.Flaeche);
-        Stil.MarkeZeichnen(g, Text, 0, 0, marke, Stil.Skala(this));
+        int breite = Stil.MarkeZeichnen(g, Text, 0, 0, marke, Stil.Skala(this));
+        if (!Durchgestrichen) return;
+        int rand = Stil.Px(this, 8), mitte = Stil.Px(this, 22) / 2;
+        using var stift = new Pen(marke.Text, Math.Max(1, Stil.Px(this, 1)));
+        g.DrawLine(stift, rand, mitte, breite - rand, mitte);
     }
 }
 

@@ -154,6 +154,14 @@ public static class Stil
         _ => Achtung,
     };
 
+    // Auskunftsleiste (Schweigepflicht): grün entbunden, rot keine Auskunft, gelb nicht erfasst – immer mit Zeichen und Wort.
+    public static Marke AuskunftFarbe(Kern.Entbindungsstand s) => s switch
+    {
+        Kern.Entbindungsstand.Entbunden => Offen,
+        Kern.Entbindungsstand.KeineAuskunft => MedikationGeaendert,
+        _ => Achtung,
+    };
+
     // Der Farbschlüssel der Statusleiste: Farbe und was sie bedeutet.
     public static readonly (Marke Marke, string Text)[] Farbschluessel =
     [

@@ -123,3 +123,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.36.0 Vorhandene digitale Akte übernehmen: Vorschau mit Zuordnung, kopieren, Doppelte überspringen, Bericht (Bauplan 32).
 - 09.11.2026 — Claude Code: 0.37.0 Überleitungsbogen auf Knopfdruck: Zusammenstellen, Druck und PDF, Kopie in die Dokumente, Bericht und Statusmeldung (Bauplan 33).
 - 09.11.2026 — Claude Code: 0.38.0 Abgängigkeitsmeldung: Formular, wer informiert/entwarnt wurde, Meldeblatt, Marke „abgängig seit …“, Personenbeschreibung, Wartezeit in der Ausgangsliste (Bauplan 34).
+- 09.11.2026 — Claude Code: 0.39.0 Schweigepflichtentbindungen: Auskunftsleiste in der Akte, Reiter „Schweigepflicht“, „Auskunft prüfen …“, Spalte „Auskunft“, Fristen (Bauplan 35).

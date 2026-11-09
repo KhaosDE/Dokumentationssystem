@@ -18,6 +18,11 @@ public sealed class AkteAnsicht : Panel
     private readonly TableLayoutPanel tabelle = new();
 
     public HinweisFeld Allergie { get; } = new();
+    // Auskunftsleiste (Bauplan 35): unter dem Allergiehinweis, über allen Reitern – mit einem Blick, wem man Auskunft geben darf.
+    public FlowLayoutPanel Auskunft { get; } = new() { AutoSize = false, WrapContents = true, BackColor = Stil.Seite, Margin = new Padding(0) };
+    public Button AuskunftKnopf { get; } = Stil.KleinerKnopf("Auskunft prüfen …");
+    public IReadOnlyList<AuskunftMarke> AuskunftMarken { get; private set; } = [];
+    public event Action<Bewohner>? AuskunftGewuenscht;
     public Reiterleiste Reiter { get; } = new(Bauplan.AktenReiter);
     public PlatzhalterKarte ReiterPlatzhalter { get; } = new() { Visible = false };
     public MedikationAnsicht Medikation { get; }
@@ -156,7 +161,8 @@ public sealed class AkteAnsicht : Panel
         BezugVerlaufKnopf.Click += (_, _) => BezugVerlaufZeigen();
 
         Reiter.Gewechselt += _ => ReiterZeigen();
-        Controls.AddRange([kopfKarte, Allergie, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente]);
+        AuskunftKnopf.Click += (_, _) => { if (Bewohner is not null) AuskunftGewuenscht?.Invoke(Bewohner); };
+        Controls.AddRange([kopfKarte, Allergie, Auskunft, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente]);
         ModuleAktualisieren();
     }
 
@@ -277,6 +283,25 @@ public sealed class AkteAnsicht : Panel
         Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BeschreibungKnopf);
     }
 
+    // Je Eintrag eine Marke mit Zeichen, Wort und Farbe; widerrufene durchgestrichen. Am Ende „Auskunft prüfen …“.
+    public void AuskunftZeigen(Bewohner b)
+    {
+        var heute = DateOnly.FromDateTime(DateTime.Now);
+        AuskunftMarken = SchweigepflichtRegeln.Leiste(speicher.Angaben(b.Id!.Value, heute).GetValueOrDefault(Angabe.Schweigepflicht), speicher.PersonenNamen(), heute);
+        Auskunft.SuspendLayout();
+        foreach (var alt in Auskunft.Controls.OfType<MarkenFeld>().ToList()) { Auskunft.Controls.Remove(alt); alt.Dispose(); }
+        Auskunft.Controls.Remove(AuskunftKnopf);
+        foreach (var m in AuskunftMarken)
+        {
+            var feld = new MarkenFeld(m.Text, Stil.AuskunftFarbe(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini), Durchgestrichen = m.Widerrufen };
+            Auskunft.Controls.Add(feld);
+        }
+        AuskunftKnopf.Margin = new Padding(Stil.AbstandKlein, 0, 0, Stil.AbstandMini);
+        Auskunft.Controls.Add(AuskunftKnopf);
+        Auskunft.AccessibleName = "Auskunft: " + string.Join("; ", AuskunftMarken.Select(m => m.Text));
+        Auskunft.ResumeLayout();
+    }
+
     public void BeschreibungBearbeiten()
     {
         if (Bewohner is null || Recht.Grund(speicher, Funktionen.BewohnerBearbeiten) is not null) return;
@@ -377,6 +402,7 @@ public sealed class AkteAnsicht : Panel
             _ => (Stil.Achtung, true),
         };
         Allergie.Setzen(BewohnerRegeln.AllergieText(b), marke, gestrichelt);
+        AuskunftZeigen(b);
 
         Geburtsdatum.Text = Datum.Text(b.Geburtsdatum);
         Aufnahmedatum.Text = Datum.Text(b.Aufnahmedatum);
@@ -420,7 +446,10 @@ public sealed class AkteAnsicht : Panel
         y += kopfHoehe + S(Stil.AbstandMittel);
 
         Allergie.Bounds = new Rectangle(x, y, breite, S(52));
-        y += Allergie.Height + S(Stil.AbstandMittel);
+        y += Allergie.Height + S(Stil.AbstandKlein);
+        var auskunftGroesse = Auskunft.GetPreferredSize(new Size(breite, 0));
+        Auskunft.Bounds = new Rectangle(x, y, breite, auskunftGroesse.Height);
+        y += Auskunft.Height + S(Stil.AbstandMittel);
 
         Reiter.Bounds = new Rectangle(x, y, breite, Reiter.HoeheFuer(breite));
         y += Reiter.Height + S(Stil.AbstandGross);

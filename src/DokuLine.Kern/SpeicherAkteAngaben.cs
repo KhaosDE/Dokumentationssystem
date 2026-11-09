@@ -6,7 +6,7 @@ namespace DokuLine.Kern;
 // Akte, Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger: Fassungen lesen und anfügen (nie ändern).
 public sealed partial class Speicher
 {
-    private const string DemoAkte = "demo_akte_angaben";
+    private const string DemoAkte = "demo_akte_angaben", DemoSchweigepflicht = "demo_schweigepflicht";
     public event Action? AngabenGeaendert;
 
     public List<AngabeFassung> Fassungen(long bewohnerId, Angabe art) => FassungenIn(null, bewohnerId, art);
@@ -89,6 +89,18 @@ public sealed partial class Speicher
             Ausfuehren("INSERT OR IGNORE INTO kostentraeger (name, nr) VALUES ($n, (SELECT COALESCE(MAX(nr), 0) + 1 FROM kostentraeger))", transaktion, ("$n", name));
         var jetzt = Uhr();
         var heute = DateOnly.FromDateTime(jetzt);
+        var (bewohner, angaben) = DemoAkteDaten(transaktion, heute);
+        var ab = heute.AddDays(-30);
+        foreach (var (art, bewohnerId, inhalt) in angaben)
+            AngabeEinfuegen(bewohnerId, art, inhalt, ab, "EF", jetzt.AddDays(-30), transaktion);
+        foreach (var (bewohnerId, beschreibung, tage) in Demodaten.Personenbeschreibungen(bewohner))
+            AngabeEinfuegen(bewohnerId, Angabe.Personenbeschreibung, beschreibung, heute.AddDays(-tage), "EF", jetzt.AddDays(-tage), transaktion);
+        SetzeMeta(DemoAkte, "1", transaktion);
+    }
+
+    // Die Demo-Angaben, wie sie aus Personen, Zuordnungen und Betreuern entstehen (immer gleich, daher auch zum Nachholen).
+    private (List<Bewohner> Bewohner, List<(Angabe Art, long BewohnerId, object? Inhalt)> Angaben) DemoAkteDaten(SqliteTransaction transaktion, DateOnly heute)
+    {
         var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
         bewohner.Sort(BewohnerRegeln.NachName);
         var personen = new List<Person>();
@@ -103,11 +115,18 @@ public sealed partial class Speicher
         var betreuer = new Dictionary<long, Betreuer>();
         foreach (var b in bewohner)
             if (BetreuerFassungenIn(transaktion, b.Id!.Value).LastOrDefault() is Betreuer x) betreuer[b.Id!.Value] = x;
-        var ab = heute.AddDays(-30);
-        foreach (var (art, bewohnerId, inhalt) in Demodaten.AkteAngaben(bewohner, personen, zuordnungen, betreuer, heute))
-            AngabeEinfuegen(bewohnerId, art, inhalt, ab, "EF", jetzt.AddDays(-30), transaktion);
-        foreach (var (bewohnerId, beschreibung, tage) in Demodaten.Personenbeschreibungen(bewohner))
-            AngabeEinfuegen(bewohnerId, Angabe.Personenbeschreibung, beschreibung, heute.AddDays(-tage), "EF", jetzt.AddDays(-tage), transaktion);
-        SetzeMeta(DemoAkte, "1", transaktion);
+        return (bewohner, [.. Demodaten.AkteAngaben(bewohner, personen, zuordnungen, betreuer, heute)]);
+    }
+
+    // Demo Schweigepflicht (Bauplan 35): eigener Schlüssel, damit vorhandene Datenbanken sie nach dem Update bekommen.
+    private void DemoSchweigepflichtEinfuegen(SqliteTransaction transaktion)
+    {
+        Ausfuehren("DELETE FROM akte_angaben WHERE art = 'schweigepflicht'", transaktion);
+        var jetzt = Uhr();
+        var heute = DateOnly.FromDateTime(jetzt);
+        var (bewohner, angaben) = DemoAkteDaten(transaktion, heute);
+        foreach (var (bewohnerId, inhalt) in Demodaten.Schweigepflichten(bewohner, angaben, heute))
+            AngabeEinfuegen(bewohnerId, Angabe.Schweigepflicht, inhalt, heute.AddDays(-30), "EF", jetzt.AddDays(-30), transaktion);
+        SetzeMeta(DemoSchweigepflicht, "1", transaktion);
     }
 }
