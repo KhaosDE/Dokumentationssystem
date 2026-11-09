@@ -34,7 +34,7 @@ public sealed partial class Hauptfenster
             seiten[name] = seite;
             modulSeiten[name] = seite;
             bereichsFlaeche.Controls.Add(seite);
-            var eintrag = new SeitenleistenEintrag(name) { Symbol = Symbole.Fuer(name), Eingeklappt = MenueEingeklappt };
+            var eintrag = new SeitenleistenEintrag(name) { Symbol = Symbole.Fuer(name), Eingeklappt = MenueEingeklappt, Visible = !Ausgeblendet(name) };
             eintrag.Click += (_, _) => BereichWaehlen(name);
             hinweis.SetToolTip(eintrag, MenueEingeklappt ? name : null);
             Navigation.Insert(vor++, eintrag);
@@ -90,7 +90,7 @@ public sealed partial class Hauptfenster
         programmName.Location = new Point(MenueKnopf.Right + S(Stil.AbstandKlein), y + Math.Max(0, (S(36) - namensblock) / 2));
         LeittextAnzeige.Location = new Point(programmName.Left, programmName.Bottom);
         y = MenueKnopf.Bottom + S(Stil.AbstandGross);
-        foreach (var eintrag in Navigation.Where(e => e.Text != "Einstellungen" && !OhneRechtAusgeblendet.Contains(e.Text)))
+        foreach (var eintrag in Navigation.Where(e => e.Text != "Einstellungen" && !Ausgeblendet(e.Text)).OrderBy(e => Rang(e.Text)))
         {
             eintrag.Bounds = new Rectangle(x, y, breite, S(36));
             y += eintrag.Height + S(Stil.AbstandMini);

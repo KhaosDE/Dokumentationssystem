@@ -31,8 +31,7 @@ public sealed partial class Hauptfenster
         BenutzerAnzeigen();
         ArbeitsbereichPruefen(zuruecksetzen: !Recht.Angemeldet);
         AufgabenZaehlen();
-        NavigationRechte();
-        if (OhneRechtAusgeblendet.Contains(AktiverBereich)) { BereichWaehlen(Startbereich); return; }
+        if (Ausgeblendet(AktiverBereich)) { BereichWaehlen(StartSeite); return; }
         if (AktiverBereich == "Dokumentation")
         {
             Bewohner.NeuLesen();
@@ -48,10 +47,30 @@ public sealed partial class Hauptfenster
     // Den Bereich wählen, der überall gilt (Übersicht); die gezeigte Ansicht und die Zähler folgen sofort.
     public void ArbeitsbereichWaehlen(string bereich)
     {
+        bool vorher = TherapieListe.Aktiv;
         Arbeitsbereich.Gewaehlt = bereich;
         KopfBereichSetzen();
         AufgabenZaehlen();
-        if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
+        NavigationRechte();
+        if (vorher != TherapieListe.Aktiv) BereichWaehlen(Entsprechung(AktiverBereich), filterBehalten: true);
+        else if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
+    }
+
+    // In den Bereich Therapie und zurück wechselt die Seitenleiste: dieselbe Seite, wenn es sie dort gibt, sonst die
+    // Startseite. Die Therapie-Seite heißt dort nach ihrem Reiter.
+    private string Entsprechung(string bereich)
+    {
+        if (Schluessel(bereich) == "Therapie") return TherapieListe.Aktiv ? Therapie.Reiter.Aktiv : "Therapie";
+        return bereich.Length > 0 && !Ausgeblendet(bereich) ? bereich : StartSeite;
+    }
+
+    // Im Bereich Therapie sind die Reiter Einträge der Seitenleiste: Ein Wechsel (z. B. Klick in die Tagesleiste)
+    // markiert den passenden Eintrag.
+    private void TherapieReiterGewechselt(string reiter)
+    {
+        if (!TherapieListe.Aktiv || Schluessel(AktiverBereich) != "Therapie" || AktiverBereich == reiter) return;
+        AktiverBereich = reiter;
+        foreach (var eintrag in Navigation) eintrag.Aktiv = eintrag.Text == reiter;
     }
 
     // Vorgabe beim Start und nach dem Abmelden: der Bereich des Rechners; sonst bleibt die Wahl, solange sie
@@ -64,6 +83,7 @@ public sealed partial class Hauptfenster
         if (zuruecksetzen || Arbeitsbereich.Gewaehlt.Length == 0 || verboten)
             Arbeitsbereich.Gewaehlt = BereichswahlRegeln.Start(rechner, knoepfe);
         KopfBereichSetzen();
+        NavigationRechte();   // der Bereich Therapie hat eine eigene Seitenleiste
     }
 
     private void KopfBereichSetzen()
@@ -77,12 +97,20 @@ public sealed partial class Hauptfenster
 
     public HashSet<string> OhneRechtAusgeblendet { get; } = [];
 
+    // Damit beginnt das Programm (nach dem Start und dem Anmelden): im Bereich Therapie die laufenden Therapien.
+    public string StartSeite => TherapieListe.Aktiv ? TherapieSeite.LaufendReiter : Startbereich;
+
+    public bool Ausgeblendet(string eintrag) => OhneRechtAusgeblendet.Contains(eintrag)
+        || (TherapieListe.Aktiv ? !TherapieSeitenleiste.Contains(eintrag) : TherapieBereiche.Contains(eintrag));
+
+    private static int Rang(string eintrag) => TherapieListe.Aktiv ? Array.IndexOf(TherapieSeitenleiste, eintrag) : 0;
+
     private void NavigationRechte()
     {
         OhneRechtAusgeblendet.Clear();
         foreach (var (bereich, funktion) in BereichsRechte)
             if (RechteRegeln.FehltRecht(Recht.Grund(speicher, funktion))) OhneRechtAusgeblendet.Add(bereich);
-        foreach (var eintrag in Navigation) eintrag.Visible = !OhneRechtAusgeblendet.Contains(eintrag.Text);
+        foreach (var eintrag in Navigation) eintrag.Visible = !Ausgeblendet(eintrag.Text);
         leiste.PerformLayout();
     }
 
@@ -149,7 +177,7 @@ public sealed partial class Hauptfenster
             if (gesperrt)
             {
                 Sperren(false);
-                BereichWaehlen(Startbereich);
+                BereichWaehlen(StartSeite);
             }
         }
         else if (gesperrt) Close();

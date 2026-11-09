@@ -20,6 +20,15 @@ public sealed class WochenplanAnsicht : Panel
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
     public WochenRaster Raster { get; } = new();
 
+    // Seite „Wochenpläne“ im Bereich Therapie: freie Einträge nur lesen; ein Klick auf eine Therapie bietet ihr
+    // Angebot zum Ändern an (ändern darf nur der Anbieter).
+    public bool NurLesen
+    {
+        get => nurLesen;
+        set { nurLesen = value; NeuKnopf.Visible = !value; }
+    }
+    private bool nurLesen;
+
     // Höhe, die der Wochenplan in der Akte füllen darf (0 = nur so hoch wie nötig). Die Stunden
     // verteilen sich darauf; reicht sie nicht, scrollt die Akte.
     public int VerfuegbareHoehe { get; set; }
@@ -66,6 +75,7 @@ public sealed class WochenplanAnsicht : Panel
     // Kontextmenü beim Klick auf einen freien Eintrag; Therapien ändert der Bereich „Therapie“.
     private void TerminMenue(Termin t, Point wo)
     {
+        if (NurLesen) { AngebotMenue(t, wo); return; }
         if (t.Quelle != TerminQuelle.Plan) return;
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
         var aendern = new ToolStripMenuItem("Ändern ab …");
@@ -75,6 +85,28 @@ public sealed class WochenplanAnsicht : Panel
         menue.Items.AddRange([aendern, entfernen]);
         menue.Closed += (_, _) => BeginInvoke(menue.Dispose);
         menue.Show(Raster, wo);
+    }
+
+    private void AngebotMenue(Termin t, Point wo)
+    {
+        if (AngebotZu(t) is not Angebot a) return;
+        string? grund = speicher.AngebotGrund(Recht.Kuerzel, a.Anbieter);
+        var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
+        var aendern = new ToolStripMenuItem(grund is null ? "Angebot ändern …" : $"Angebot ändern … – {grund}") { Enabled = grund is null };
+        aendern.Click += (_, _) => AngebotAendern(a);
+        menue.Items.Add(aendern);
+        menue.Closed += (_, _) => BeginInvoke(menue.Dispose);
+        menue.Show(Raster, wo);
+    }
+
+    public Angebot? AngebotZu(Termin t) =>
+        t.ZuteilungId is long z ? speicher.Angebote().FirstOrDefault(a => a.Zuteilungen.Any(x => x.Id == z)) : null;
+
+    public void AngebotAendern(Angebot a)
+    {
+        if (speicher.AngebotGrund(Recht.Kuerzel, a.Anbieter) is not null) return;
+        using var fenster = new AngebotFenster(speicher, a);
+        if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
     }
 
     // termin == null: neuer Eintrag; sonst „ändern ab …“ (der bisherige endet, der neue beginnt).

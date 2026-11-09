@@ -123,15 +123,19 @@ public class MehrplatzOberflaechenTests
         Assert.StartsWith("Status: Besuch bei der Familie, bis ", s.Zeilen.Single(k => k.Bewohner.Nachname == "Immergrün").Marken[0].Text);
         Hilfe.Foto(f, "56_uebersicht_alle_bereiche");
 
-        // Ein Bereich ohne eigene Bewohner (z. B. Therapie) sieht alle, mit Hinweis.
+        Assert.Contains("R1", s.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Marken.Select(m => m.Text));
+
+        // Bereich Therapie (Bauplan 29n): eigene Seitenleiste ohne Übersicht; in der Dokumentation die Bewohner mit
+        // einem Angebot der Therapie, nach Wohnbereich gruppiert; der Schalter nimmt alle Bewohner des Hauses dazu.
         Einstellungen.Aendern(w => w with { Bereich = "Therapie" });
         f.ArbeitsbereichWaehlen("Therapie");
-        Assert.Equal(69, s.Zeilen.Count);
-        Assert.True(s.BereichHinweis.Visible);
-        // In der Dokumentation: ein Bereich ohne eigene Bewohner sieht ebenfalls alle.
+        Assert.Equal(TherapieSeite.LaufendReiter, f.AktiverBereich);
         f.BereichWaehlen("Dokumentation");
+        int mitTherapie = TherapieRegeln.MitTherapie(u.Speicher.AlleBewohner(), u.Speicher.Angebote(), DateOnly.FromDateTime(DateTime.Today)).Count;
+        Assert.InRange(mitTherapie, 1, 68);
+        Assert.Equal(mitTherapie, f.Bewohner.Zeilen.Count);
+        f.Bewohner.AlleKnopf.Checked = true;
         Assert.Equal(69, f.Bewohner.Zeilen.Count);
-        Assert.Contains("R1", s.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Marken.Select(m => m.Text));
     });
 
     [Fact]

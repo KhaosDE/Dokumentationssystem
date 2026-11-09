@@ -15,9 +15,15 @@ public sealed partial class Hauptfenster : Form
     // Reihenfolge der Seitenleiste. „Einstellungen“ steht fest ganz unten (eine Seite wie die übrigen).
     // Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
     // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Dokumentation, Akte, Rechtsklick in der Übersicht).
+    // Bereich „Therapie“ (Bereichswahl): nur diese Einträge, in dieser Reihenfolge. Sonst fehlen die ersten drei.
+    // Vor „Bereiche“: Statische Felder werden in der Reihenfolge des Textes belegt.
+    public static readonly string[] TherapieBereiche = [TherapieSeite.LaufendReiter, TherapieSeite.AngeboteReiter, "Wochenpläne"];
+    private static readonly string[] TherapieSeitenleiste = [.. TherapieBereiche, "Dokumentation", "Aufgaben", "Nachrichten", "Einstellungen"];
+
+    // Die Einträge des Bereichs „Therapie“ stehen nur dort in der Seitenleiste, in eigener Reihenfolge.
     public static readonly string[] Bereiche =
         ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
-         "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
+         .. TherapieBereiche, "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
 
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
@@ -34,6 +40,7 @@ public sealed partial class Hauptfenster : Form
     public AufgabenSeite Aufgaben { get; }
     public NachrichtenSeite Nachrichten { get; }
     public TherapieSeite Therapie { get; }
+    public WochenplaeneSeite Wochenplaene { get; }
     public KalenderSeite Kalender { get; }
     public UebersichtSeite Uebersicht { get; }
     public TagesplanSeite Tagesplan { get; }
@@ -97,7 +104,12 @@ public sealed partial class Hauptfenster : Form
         Kopf.LogoGewuenscht += () => EinstellungenOeffnen("Wohnbereich");
         Therapie = new TherapieSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Therapie"] = Therapie;
-        Therapie.Geaendert += () => { if (AktiverBereich == "Therapie") Kopf.TexteSetzen(Therapie.KopfText, "Therapie"); };
+        Therapie.Geaendert += () => { if (Schluessel(AktiverBereich) == "Therapie") Kopf.TexteSetzen(Therapie.KopfText, ((IBereichSeite)Therapie).Titel); };
+        Therapie.BereichGewechselt += ArbeitsbereichWaehlen;
+        Therapie.Reiter.Gewechselt += TherapieReiterGewechselt;
+        Wochenplaene = new WochenplaeneSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Wochenpläne"] = Wochenplaene;
+        Wochenplaene.Geaendert += () => { if (AktiverBereich == "Wochenpläne") Kopf.TexteSetzen(Wochenplaene.KopfText, "Wochenpläne"); };
         Kalender = new KalenderSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Kalender"] = Kalender;
         Kalender.Geaendert += () => { if (AktiverBereich == "Kalender") Kopf.TexteSetzen(Kalender.KopfText, "Kalender"); };
@@ -208,7 +220,6 @@ public sealed partial class Hauptfenster : Form
         leiste.Controls.AddRange([AbmeldenEintrag, Arbeitsplatz, VersionText, InfoSymbol]);
         leiste.Layout += (_, _) => LeisteAnordnen();
         ModuleAnzeigen();
-        NavigationRechte();
         speicher.ModuleGeaendert += ModuleAnzeigen;
 
         // ----- Inhalt rechts: Kopf oben, Bereich darunter -----
@@ -268,11 +279,17 @@ public sealed partial class Hauptfenster : Form
         Statusleiste.StatusText = HeuteWichtigRegeln.StatusText(jetzt, gelesen);
     }
 
-    // „Bewohner“ ist der frühere Name von „Dokumentation“ (Module und Aufrufe von außen).
+    // „Bewohner“ ist der frühere Name von „Dokumentation“ (Module und Aufrufe von außen). „Laufende Therapien“ und
+    // „Angebote“ (Bereich Therapie) sind die beiden Reiter der Seite „Therapie“.
     private static string Schluessel(string eintrag)
     {
         string schluessel = eintrag.Replace(" …", "");
-        return schluessel == "Bewohner" ? "Dokumentation" : schluessel;
+        return schluessel switch
+        {
+            "Bewohner" => "Dokumentation",
+            TherapieSeite.LaufendReiter or TherapieSeite.AngeboteReiter => "Therapie",
+            _ => schluessel,
+        };
     }
 
     public Control Seite(string bereich) => seiten[Schluessel(bereich)];
@@ -297,6 +314,7 @@ public sealed partial class Hauptfenster : Form
         {
             foreach (var (key, s) in seiten) s.Visible = key == schluessel;
             if (neu is not IBereichSeite seite) return;
+            if (schluessel == "Therapie") Therapie.ReiterSetzen(name == "Therapie" ? null : name);
             seite.Zeigen(filterBehalten);
             Kopf.TexteSetzen(seite.KopfText, seite.Titel);
             Kopf.KnoepfeSetzen([.. seite.Knoepfe]);

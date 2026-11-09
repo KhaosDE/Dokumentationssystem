@@ -77,7 +77,7 @@ public sealed class BereichswahlTests : IDisposable
             Text = "Termin bestätigen", Verfasser = "AB", BewohnerId = birke.Id, Bereich = "R3",
         }, Jetzt));
         Assert.Equal(birke.Wohnbereich, mit.Bereich);
-        Assert.Equal(s.OffeneAufgaben(), new[] { "R1", "R2", "R3" }.Sum(b => s.OffeneAufgaben(b)));
+        Assert.Equal(s.OffeneAufgaben(), new[] { "R1", "R2", "R3", "Therapie" }.Sum(b => s.OffeneAufgaben(b)));
         // Umbenennen eines Bereichs nimmt Aufgaben und Standardaufgaben mit.
         s.ListeneintragUmbenennen(Liste.Bereiche, "R2", "Nord");
         Assert.Equal("Nord", s.AufgabeLesen(a.Id)!.Bereich);

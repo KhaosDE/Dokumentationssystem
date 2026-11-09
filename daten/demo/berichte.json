@@ -95,5 +95,31 @@
         "text": "Ist eine Stunde später als vereinbart aus dem Ausgang zurückgekehrt und hat vorher angerufen. Gespräch dazu steht noch aus."
       }
     ]
-  }
+  },
+  "therapie": [
+    {
+      "bewohner": "Ahorn",
+      "angebot": "Holzwerkstatt",
+      "bereich": 3,
+      "vorTagen": 1,
+      "verfasser": "OP",
+      "text": "Hat konzentriert am Vogelhaus weitergearbeitet und um Hilfe gebeten, als ein Teil nicht passte."
+    },
+    {
+      "bewohner": "Clematis",
+      "angebot": "Bewegungsgruppe",
+      "bereich": 4,
+      "vorTagen": 2,
+      "verfasser": "TH",
+      "text": "War die ganze Stunde dabei und hat beim Ballspiel andere zum Mitmachen ermuntert."
+    },
+    {
+      "bewohner": "Birke",
+      "angebot": "Gesprächsgruppe",
+      "bereich": 1,
+      "vorTagen": 3,
+      "verfasser": "OP",
+      "text": "Hat von sich aus von ihrem Wochenende erzählt und anderen zugehört."
+    }
+  ]
 }

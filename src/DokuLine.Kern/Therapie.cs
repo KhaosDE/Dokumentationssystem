@@ -88,6 +88,32 @@ public static class TherapieRegeln
 {
     public const string AnbieterTherapie = "Therapie";
 
+    // Bewohner im Bereich Therapie: wer heute mindestens ein Angebot der Therapie hat.
+    public static List<Bewohner> MitTherapie(IEnumerable<Bewohner> alle, IEnumerable<Angebot> angebote, DateOnly heute)
+    {
+        var ids = angebote.Where(a => a.Anbieter == AnbieterTherapie)
+            .SelectMany(a => a.TeilnehmerAm(heute)).Select(z => z.BewohnerId).ToHashSet();
+        return [.. alle.Where(b => b.Id is long id && ids.Contains(id))];
+    }
+
+    // Bewohnerleiste im Bereich Therapie: je Wohnbereich (in der Reihenfolge der Bereiche) eine Gruppe, darin nach Namen.
+    public static List<(string Bereich, List<Bewohner> Bewohner)> NachBereich(IEnumerable<Bewohner> bewohner, IReadOnlyList<string> reihenfolge)
+    {
+        int Rang(string bereich) => reihenfolge.Contains(bereich) ? reihenfolge.ToList().IndexOf(bereich) : int.MaxValue;
+        return [.. bewohner.GroupBy(b => b.Wohnbereich)
+            .OrderBy(g => Rang(g.Key)).ThenBy(g => g.Key, StringComparer.CurrentCulture)
+            .Select(g => (g.Key, g.OrderBy(b => b.Nachname, StringComparer.CurrentCulture)
+                .ThenBy(b => b.Vorname, StringComparer.CurrentCulture).ToList()))];
+    }
+
+    // Die Angebote der Therapie, an denen ein Bewohner an diesem Tag teilnimmt (für den Bericht der Therapie).
+    public static List<string> AngeboteVon(long bewohnerId, IEnumerable<Angebot> angebote, DateOnly tag) =>
+        [.. angebote.Where(a => a.Anbieter == AnbieterTherapie && a.TeilnehmerAm(tag).Any(z => z.BewohnerId == bewohnerId))
+            .Select(a => a.Am(tag).Name).Distinct().Order(StringComparer.CurrentCulture)];
+
+    // „Therapie Holzwerkstatt: …“ – Bericht aus dem Bereich Therapie mit dem Namen des Angebots am Anfang.
+    public static string BerichtText(string angebot, string text) => angebot.Length > 0 ? $"Therapie {angebot}: {text}" : text;
+
     public static readonly DayOfWeek[] Woche =
         [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday];
 

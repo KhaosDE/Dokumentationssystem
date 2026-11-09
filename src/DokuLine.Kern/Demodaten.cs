@@ -115,6 +115,18 @@ public static class Demodaten
         public Dictionary<string, List<string>> Texte { get; set; } = [];
         public List<string> Nachtraege { get; set; } = [];
         public UebergabeTexte Uebergabe { get; set; } = new();
+        public List<TherapieBericht> Therapie { get; set; } = [];
+    }
+
+    // Ein Bericht aus dem Bereich Therapie (Berichtsart „Therapie“, Angebot am Anfang).
+    public sealed class TherapieBericht
+    {
+        public string Bewohner { get; set; } = "";   // Nachname aus bewohner.json
+        public string Angebot { get; set; } = "";
+        public int Bereich { get; set; }
+        public int VorTagen { get; set; }
+        public string Verfasser { get; set; } = "";
+        public string Text { get; set; } = "";
     }
 
     public sealed class UebergabeTexte
@@ -207,6 +219,17 @@ public static class Demodaten
                 var bericht = Relevant(Erzeugen(b, jetzt.AddHours(-20), zufall, bausteine, jetzt, wichtig: true), 5);
                 berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.Woche, Text: Satz(1))));
             }
+        }
+        foreach (var t in bausteine.Therapie)
+        {
+            if (bewohner.FirstOrDefault(b => b.Nachname == t.Bewohner) is not Bewohner b) continue;
+            var zeit = jetzt.Date.AddDays(-t.VorTagen).AddHours(11);
+            berichte.Add(new DemoBericht(new Bericht
+            {
+                BewohnerId = b.Id ?? 0, Zeitpunkt = zeit, Schicht = BerichtRegeln.SchichtZu(zeit), Verfasser = t.Verfasser,
+                Bereiche = t.Bereich is >= 1 and <= 5 ? [t.Bereich] : [], Text = TherapieRegeln.BerichtText(t.Angebot, t.Text),
+                Erfasst = zeit.AddMinutes(20), Art = DokuRegeln.ArtTherapie,
+            }));
         }
         var notizen = bausteine.Uebergabe.Notizen;
         var allgemein = new List<DemoNotiz>

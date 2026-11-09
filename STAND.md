@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.19** (Bauplan Schritt 29m: schnellerer Wechsel zwischen den Bereichen).
+Stand: 09.11.2026. Version: **0.33.20** (Bauplan Schritt 29n: Therapie als eigener Bereich).
 
 ## Aktuell
 
@@ -292,8 +292,17 @@ Neu in 0.33.19: Der **Wechsel zwischen den Bereichen** ist ruhiger und schneller
 Kopfzeile wird nicht mehr bei jedem Zeichnen neu berechnet, und die Ausgangsliste baut ihre Menüs erst beim Öffnen.
 Mit `DokuLine.exe --messen` schreibt das Programm die Zeit jedes Wechsels in `messung.log` im Datenordner.
 
+Neu in 0.33.20: **Therapie als eigener Bereich.** Wer in der Bereichswahl „Therapie“ wählt (oder an einem Rechner der
+Therapie arbeitet), bekommt eine schlanke Seitenleiste: Laufende Therapien (Startseite), Angebote, **Wochenpläne** (neu:
+links die Bewohner, rechts ihr Wochenplan zum Lesen und Drucken; Angebote ändert nur ihr Anbieter), Dokumentation,
+Aufgaben, Nachrichten, Einstellungen. Die Bewohnerleisten zeigen alle mit einem Angebot der Therapie, nach Wohnbereich
+gruppiert („R1“, „R2“, „R3“), mit dem Schalter „alle Bewohner des Hauses“. Berichte der Therapie haben die Berichtsart
+**„Therapie“** und beginnen mit dem Namen des Angebots („Therapie Holzwerkstatt: …“). Aufgaben der Therapie sind ohne
+Schicht, mit Fälligkeit. Die laufenden Therapien zeigen dort nur Bereich, Name und Teilnahme. Demo: Theo Hänfling (TH)
+als zweiter Therapeut, Aufgaben und eine Nachricht für das Team Therapie, Therapie-Berichte bei drei Bewohnern.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29n „Therapie als eigener Bereich“ (0.33.20).
+als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33.21).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1313,6 +1322,17 @@ als Nächstes 29n „Therapie als eigener Bereich“ (0.33.20).
     | Therapie | 242 ms | |
     | Ausgangsliste | 4188 ms | |
 
+- 0.33.20 — Bauplan Schritt 29n:
+  - Seitenleiste je Bereich: `Hauptfenster.TherapieBereiche`, `Ausgeblendet`, `StartSeite`; beim Wechsel in den Bereich
+    Therapie und zurück bleibt die Seite, wenn es sie dort gibt (`Entsprechung`). „Laufende Therapien“ und „Angebote“
+    sind die Reiter der Therapie-Seite; dort steht oben die Bereichswahl.
+  - `TherapieListe` und `RundeListe` mit Überschriften (`ListenUeberschrift`, nicht wählbar); `TherapieRegeln.MitTherapie`,
+    `NachBereich`, `AngeboteVon`, `BerichtText`.
+  - Neue Seite `WochenplaeneSeite`; `WochenplanAnsicht.NurLesen` mit „Angebot ändern …“.
+  - Berichtsart „Therapie“ (Datenbank-Schritt 34), Auswahl des Angebots im Berichtsformular.
+  - Demo: TH, zwei Aufgaben und eine Nachricht des Teams Therapie, drei Therapie-Berichte.
+  - Behoben beim Bauen: Die Demo-Berichte bekamen ihre Art immer aus dem Text geraten (auch wenn sie feststand).
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1395,6 +1415,13 @@ als Nächstes 29n „Therapie als eigener Bereich“ (0.33.20).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.33.20): Bereich Therapie – der Wechsel in den Bereich Therapie und zurück behält die Seite, wenn es sie in
+  der anderen Seitenleiste gibt (Dokumentation, Aufgaben, Nachrichten, Einstellungen, Therapie ↔ Laufende
+  Therapien/Angebote), sonst beginnt er auf der Startseite. Aufgaben der Therapie: „Für wen?“ steht fest auf „wer Zeit
+  hat“ (ohne Schicht), die Fälligkeit ist mit morgen vorbelegt. Ein Bericht der Therapie bekommt den Namen des Angebots
+  als Anfang des Textes (kein eigenes Feld in der Datenbank); angeboten werden die Angebote der Therapie, an denen der
+  Bewohner heute teilnimmt. Im Wochenplan der Therapie-Seite sind „hervorgehoben“ die Therapien wie bisher farbig
+  abgesetzt; freie Einträge sind dort nur zu lesen.
 - 09.11.2026 (0.33.19): Beim Wechsel liest jede Seite ihre Daten weiter neu. Ein Überspringen „wenn sich nichts geändert
   hat“ bräuchte einen Änderungszähler für Schreibvorgänge im eigenen Programm (`PRAGMA data_version` zählt nur die
   anderer Verbindungen) – das Risiko, veraltete Daten zu zeigen, ist größer als der Gewinn. `WS_EX_COMPOSITED` für die
@@ -2205,6 +2232,14 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.20:
+
+1. Übersicht: Bereich „Therapie“ wählen – links nur noch Laufende Therapien, Angebote, Wochenpläne, Dokumentation,
+   Aufgaben, Nachrichten, Einstellungen.
+2. Dokumentation und Wochenpläne: Bewohner nach R1/R2/R3 gruppiert; „alle Bewohner des Hauses“ ankreuzen.
+3. Neuer Bericht: Art „Therapie“ und das Angebot sind vorgewählt; gespeichert steht „Therapie Holzwerkstatt: …“.
+4. Oben auf „Laufende Therapien“ R1 wählen: wieder die gewohnte Seitenleiste.
 
 Version 0.33.19: Zwischen allen Bereichen hin und her wechseln – ohne Flackern, die Ausgangsliste deutlich schneller.
 Optional: `DokuLine.exe --messen` starten, ein paar Wechsel, dann `%APPDATA%\DokuLine\messung.log` ansehen.

@@ -58,7 +58,10 @@ public sealed class LaufendeTherapienAnsicht : Panel
         var bezuege = speicher.Bezuege();
         var kollegen = speicher.Kollegen();
         string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);   // wie im Tagesplan
+        // Im Bereich Therapie schlanker: ohne Zimmer und Bezugspflege (die braucht nur der Wohnbereich).
+        bool schlank = TherapieListe.Aktiv;
         string? Bezug(Bewohner b) => bezuege.GetValueOrDefault(b.Id!.Value)?.Bezugspflege?.Kuerzel;
+        Kaertchen Karte(TafelTeilnehmer p, string? zusatz) => new(p, Bezug(p.Bewohner), zusatz, schlank);
         string Kuerzel(string name) => kollegen.FirstOrDefault(k => k.Name == name)?.Kuerzel
             ?? string.Concat(name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(t => char.ToUpperInvariant(t[0])));
 
@@ -77,7 +80,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
         foreach (var t in tafel.Laufend)
         {
             var spalte = new TherapieSpalte(t.Name, [$"{t.Fassung.Ort} · {Kuerzel(t.Fassung.Therapeut)}", $"bis {t.Bis:HH\\:mm} · {t.Belegung}"]) { Termin = t };
-            foreach (var p in t.Teilnehmer) spalte.Hinzufuegen(new Kaertchen(p, Bezug(p.Bewohner), null));
+            foreach (var p in t.Teilnehmer) spalte.Hinzufuegen(Karte(p, null));
             if (t.Teilnehmer.Count == 0) spalte.Leer("Niemand aus dem Bereich.");
             Spalten.Add(spalte);
         }
@@ -89,7 +92,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
         var offen = new TherapieSpalte(NochOffenTitel, ["Hat begonnen, Teilnahme nicht bestätigt"]);
         foreach (var (t, p) in tafel.NochOffen)
         {
-            var k = new Kaertchen(p, Bezug(p.Bewohner), $"{t.Von:HH\\:mm} {t.Name}");
+            var k = Karte(p, $"{t.Von:HH\\:mm} {t.Name}");
             k.Knopf("gegangen", grund, () => Setzen(t, p, Teilnahme.Teilgenommen));
             k.Knopf("abgesagt", grund, () => Setzen(t, p, Teilnahme.Abgesagt));
             offen.Hinzufuegen(k);
@@ -234,6 +237,7 @@ public sealed class TherapieSpalte : KartenFlaeche
 
 // Ein Kärtchen: oben klein Bereich und Zimmer, dann der Name, unten die Bezugspflege; rechts der Status
 // als Wort mit Farbe. In „Noch offen“ mit Knöpfen. Ohne Person (Spalte „Gleich“) nur zwei Zeilen.
+// Schlank (Bereich Therapie): nur Bereich, Name und Teilnahme.
 public sealed class Kaertchen : Panel
 {
     private readonly Label oben = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, UseMnemonic = false };
@@ -245,16 +249,16 @@ public sealed class Kaertchen : Panel
     public List<Button> Knoepfe { get; } = [];
     public string NameText => name.Text;
 
-    public Kaertchen(TafelTeilnehmer p, string? bezugspflege, string? zusatz)
+    public Kaertchen(TafelTeilnehmer p, string? bezugspflege, string? zusatz, bool schlank = false)
     {
         Teilnehmer = p;
-        oben.Text = $"{p.Bewohner.Wohnbereich} · {p.Bewohner.Zimmer}" + (zusatz is null ? "" : $" · {zusatz}");
+        oben.Text = (schlank ? p.Bewohner.Wohnbereich : $"{p.Bewohner.Wohnbereich} · {p.Bewohner.Zimmer}") + (zusatz is null ? "" : $" · {zusatz}");
         name.Text = p.Bewohner.Name;
-        unten.Text = bezugspflege is null ? "Bezugspflege: –" : $"Bezugspflege: {bezugspflege}";
+        unten.Text = schlank ? "" : bezugspflege is null ? "Bezugspflege: –" : $"Bezugspflege: {bezugspflege}";
         Status = new MarkenFeld(p.StatusText, TafelStil.Status(p.Status));
         Grundform();
         Controls.Add(Status);
-        AccessibleName = $"{p.Bewohner.Name}, {oben.Text}, {unten.Text}, {p.StatusText}";
+        AccessibleName = string.Join(", ", new[] { p.Bewohner.Name, oben.Text, unten.Text, p.StatusText }.Where(x => x.Length > 0));
     }
 
     public Kaertchen(string zeile1, string zeile2)
@@ -309,9 +313,13 @@ public sealed class Kaertchen : Panel
         name.MaximumSize = new Size(breite - (oben.Visible ? 0 : statusBreite), 0);
         name.Location = new Point(innen, y);
         y = name.Bottom;
-        unten.MaximumSize = new Size(breite, 0);
-        unten.Location = new Point(innen, y);
-        y = unten.Bottom;
+        if (unten.Text.Length > 0)
+        {
+            unten.MaximumSize = new Size(breite, 0);
+            unten.Location = new Point(innen, y);
+            y = unten.Bottom;
+        }
+        else unten.Visible = false;
         if (knoepfe.Visible)
         {
             knoepfe.MaximumSize = new Size(breite, 0);

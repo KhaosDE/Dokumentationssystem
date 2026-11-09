@@ -2125,7 +2125,7 @@ Umfang:
 - Nichts am Verhalten ändern; vorher/nachher messen und in `STAND.md` festhalten.
 
 ## Therapie als eigener Bereich (Dokumentation, Nachrichten, Aufgaben, Wochenpläne)
-Status: freigegeben (Bauplan Schritt 29n; Vorgaben Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.20; Bauplan Schritt 29n; Vorgaben Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Therapie ist ein eigener Bereich neben R1, R2 und R3, mit einer schlanken, eigenen
 Seitenleiste.

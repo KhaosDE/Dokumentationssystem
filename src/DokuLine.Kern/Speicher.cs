@@ -801,6 +801,11 @@ public sealed partial class Speicher : IDisposable
         """
         ALTER TABLE visite_entwuerfe ADD COLUMN art TEXT NOT NULL DEFAULT '';
         """,
+        // 34 – Berichtsart „Therapie“ für Berichte aus dem Bereich Therapie.
+        """
+        INSERT INTO berichtsarten (name, nr) SELECT 'Therapie', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
+            WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Therapie');
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1080,7 +1085,9 @@ public sealed partial class Speicher : IDisposable
         var demo = Demodaten.Berichte(bewohner, Uhr());
         foreach (var d in demo.Berichte)
         {
-            long id = BerichtEinfuegen(d.Bericht with { Art = DokuRegeln.ArtFuerDemo(d.Bericht.Text) }, transaktion);
+            // Die Art aus dem Text raten, außer sie steht schon fest (Berichte der Therapie).
+            string art = d.Bericht.Art == DokuRegeln.ArtTherapie ? d.Bericht.Art : DokuRegeln.ArtFuerDemo(d.Bericht.Text);
+            long id = BerichtEinfuegen(d.Bericht with { Art = art }, transaktion);
             if (d.Uebergabe is UebergabeWunsch wunsch)
                 DemoUebergabe(d.Bericht.BewohnerId, id, wunsch, d.Bericht.Erfasst, d.Bericht.Verfasser, d, transaktion);
         }

@@ -7,9 +7,11 @@ namespace DokuLine;
 // Zugeteilte Therapien erscheinen im Wochenplan des Bewohners . Jedes Angebot gehört
 // der Therapie oder einem Wohnbereich; alle sehen alles, ändern und zuteilen darf nur
 // der Anbieter. Filter nach Anbieter.
+// Im Bereich „Therapie“ (Bereichswahl) sind beide Reiter eigene Einträge der Seitenleiste; oben steht dann die
+// Bereichswahl statt der Reiter.
 public sealed class TherapieSeite : Panel, IBereichSeite
 {
-    string IBereichSeite.Titel => "Therapie";
+    string IBereichSeite.Titel => TherapieListe.Aktiv ? Reiter.Aktiv : "Therapie";
     IReadOnlyList<Button> IBereichSeite.Knoepfe => [NeuKnopf];
     void IBereichSeite.Zeigen(bool filterBehalten) => Zeigen();
 
@@ -29,6 +31,9 @@ public sealed class TherapieSeite : Panel, IBereichSeite
     public Reiterleiste Reiter { get; } = new([LaufendReiter, AngeboteReiter]);
     public LaufendeTherapienAnsicht Laufend { get; }
     public bool LaufendAktiv => Reiter.Aktiv == LaufendReiter;
+    public BereichUmschalter Umschalter { get; } = new() { Visible = false };
+    public event Action<string>? BereichGewechselt;
+    private bool stumm;   // Reiter von außen gesetzt: nur umschalten, gelesen wird danach in Zeigen()
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
 
@@ -59,7 +64,9 @@ public sealed class TherapieSeite : Panel, IBereichSeite
             if (Karten.FirstOrDefault(k => k.Angebot.Id == a.Id) is AngebotKarte karte) ScrollControlIntoView(karte);
         };
         Reiter.Gewechselt += _ => AnsichtWechseln();
+        Umschalter.Gewaehlt += b => BereichGewechselt?.Invoke(b);
         Controls.Add(Reiter);
+        Controls.Add(Umschalter);
         Controls.Add(Laufend);
         SichtbarkeitSetzen();
     }
@@ -78,11 +85,21 @@ public sealed class TherapieSeite : Panel, IBereichSeite
         else Aktualisieren();
     }
 
+    // Aus der Seitenleiste im Bereich Therapie: „Laufende Therapien“ oder „Angebote“ (null: wie zuletzt).
+    public void ReiterSetzen(string? reiter)
+    {
+        if (reiter is null) return;
+        stumm = true;
+        try { Reiter.Waehlen(reiter); }
+        finally { stumm = false; }
+    }
+
     // Reiter gewechselt: nur die eine Ansicht zeigen und neu lesen.
     private void AnsichtWechseln()
     {
         AutoScrollPosition = Point.Empty;
         SichtbarkeitSetzen();
+        if (stumm) return;
         if (LaufendAktiv) Laufend.Zeigen();
         else Aktualisieren();
         PerformLayout();
@@ -133,6 +150,15 @@ public sealed class TherapieSeite : Panel, IBereichSeite
 
     public void Zeigen()
     {
+        bool therapie = TherapieListe.Aktiv;
+        Reiter.Visible = !therapie;
+        Umschalter.Visible = therapie;
+        if (therapie)
+        {
+            string rechner = Einstellungen.Laden().Bereich;
+            Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.Wohnbereiche().Select(w => w.Name), f => Recht.Darf(speicher, f)),
+                Arbeitsbereich.Gewaehlt, BereichswahlRegeln.Eingesprungen(Arbeitsbereich.Gewaehlt, rechner));
+        }
         string heute = Datum.Text(DateOnly.FromDateTime(Jetzt()));
         if (TagFeld.Text != heute) TagFeld.Text = heute;
         else Aktualisieren();
@@ -201,8 +227,17 @@ public sealed class TherapieSeite : Panel, IBereichSeite
         int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int y = rand + AutoScrollPosition.Y;
         if (Laufend is null) return;   // Layout schon im Konstruktor (AutoScroll), bevor die Tafel angelegt ist
-        Reiter.SetBounds(rand, y, breite, Reiter.Height);
-        y = Reiter.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        if (TherapieListe.Aktiv)
+        {
+            Umschalter.MaximumSize = new Size(breite, 0);
+            Umschalter.Bounds = new Rectangle(new Point(rand, y), Umschalter.GetPreferredSize(new Size(breite, 0)));
+            y = Umschalter.Bottom + Stil.Px(this, Stil.AbstandMittel);
+        }
+        else
+        {
+            Reiter.SetBounds(rand, y, breite, Reiter.Height);
+            y = Reiter.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        }
         if (LaufendAktiv)
         {
             AutoScrollMinSize = Size.Empty;

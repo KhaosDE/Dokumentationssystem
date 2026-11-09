@@ -75,7 +75,7 @@ internal static class Program
         using (speicher)
         using (var fenster = new Hauptfenster(speicher))
         {
-            fenster.BereichWaehlen(Hauptfenster.Startbereich);
+            fenster.BereichWaehlen(fenster.StartSeite);
             Application.Run(fenster);
         }
         return 0;

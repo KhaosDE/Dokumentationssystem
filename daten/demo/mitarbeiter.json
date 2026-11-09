@@ -17,6 +17,7 @@
     {"kuerzel": "GH", "farbe": "#7C3AED", "vorname": "Georg", "nachname": "Habicht", "fachkraft": true, "bereiche": ["R2"], "positionen": ["Bereichsleitung", "Mitarbeiter Wohnbereich"]},
     {"kuerzel": "MN", "farbe": "#0F766E", "vorname": "Max", "nachname": "Nachtigall", "fachkraft": false, "bereiche": ["R2"], "positionen": ["Mitarbeiter Wohnbereich"]},
     {"kuerzel": "OP", "vorname": "Olga", "nachname": "Pirol", "fachkraft": true, "bereiche": ["Therapie"], "positionen": ["Therapie"]},
+    {"kuerzel": "TH", "farbe": "#0F766E", "vorname": "Theo", "nachname": "Hänfling", "fachkraft": true, "bereiche": ["Therapie"], "positionen": ["Therapie"]},
     {"kuerzel": "RS", "vorname": "Rudi", "nachname": "Specht", "fachkraft": true, "bereiche": ["Leitung"], "positionen": ["Hausleitung"]},
     {"kuerzel": "UT", "vorname": "Ute", "nachname": "Taube", "fachkraft": false, "bereiche": ["Leitung"], "positionen": ["Geschäftsführung"]},
     {"kuerzel": "WZ", "vorname": "Walter", "nachname": "Zeisig", "fachkraft": false, "bereiche": ["Verwaltung"], "positionen": ["Verwaltung"]},

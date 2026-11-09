@@ -36,8 +36,11 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
 
     public ListBox Namen { get; } = new RundeListe { AccessibleName = "Bewohner" };
     public List<Bewohner> Zeilen { get; private set; } = [];
+    // Je Zeile der Liste der Bewohner; null bei einer Überschrift (Wohnbereich im Bereich Therapie).
+    private List<Bewohner?> eintraege = [];
     public Bewohner? Gewaehlt => Namen.SelectedIndex >= 0
-        && Namen.SelectedIndex < Zeilen.Count ? Zeilen[Namen.SelectedIndex] : null;
+        && Namen.SelectedIndex < eintraege.Count ? eintraege[Namen.SelectedIndex] : null;
+    public CheckBox AlleKnopf { get; } = TherapieListe.AlleSchalter();
     public DokumentationAnsicht Dokumentation { get; }
     // Ein Bewohner aus einem anderen Bereich, dessen Berichte gerade gewünscht sind (z. B. aus dem Verzeichnis).
     private long? zusaetzlich;
@@ -94,6 +97,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         Akte.BezugGewuenscht += id => BezugOeffnen(id);
         BackColor = Stil.Seite;
         Suche.TextChanged += (_, _) => UebersichtZeigen();
+        AlleKnopf.CheckedChanged += (_, _) => UebersichtZeigen();
         Namen.SelectedIndexChanged += (_, _) => { if (!abgleichen) BerichteZeigen(); };
         Namen.DoubleClick += (_, _) => AkteOeffnen();
         Namen.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.Handled = true; AkteOeffnen(); } };
@@ -103,7 +107,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         Namen.ContextMenuStrip = menue;
         EinklappenKnopf.AccessibleName = "Bewohnerliste ein- oder ausklappen";
         EinklappenKnopf.Click += (_, _) => Einklappen(!Eingeklappt);
-        links.Controls.AddRange([EinklappenKnopf, Suche, Namen]);
+        links.Controls.AddRange([EinklappenKnopf, Suche, AlleKnopf, Namen]);
         links.Layout += (_, _) => LinksAnordnen();
         Dokumentation = new DokumentationAnsicht(speicher)
         {
@@ -145,10 +149,16 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         EinklappenKnopf.SetBounds(links.ClientSize.Width - rand - Stil.Px(this, 28), rand, Stil.Px(this, 28),
             Stil.Px(this, 28));
         foreach (var c in new Control[] { Suche, Namen }) c.Visible = !Eingeklappt;
+        AlleKnopf.Visible = !Eingeklappt && TherapieListe.Aktiv;
         if (Eingeklappt) return;
         Suche.SetBounds(rand, rand, breite - Stil.Px(this, 28) - rand, Suche.Height);
-        Namen.SetBounds(rand, Suche.Bottom + rand, breite, Math.Max(40,
-            links.ClientSize.Height - Suche.Bottom - 2 * rand));
+        int oben = Suche.Bottom + rand;
+        if (TherapieListe.Aktiv)
+        {
+            AlleKnopf.Location = new Point(rand, oben);
+            oben = AlleKnopf.Bottom + rand;
+        }
+        Namen.SetBounds(rand, oben, breite, Math.Max(40, links.ClientSize.Height - oben - rand));
     }
 
     public void Einklappen(bool ein)
@@ -169,7 +179,8 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         if (vorher != zusaetzlich) zusaetzlich = null;
         var alle = speicher.AlleBewohner();
         string bereich = Arbeitsbereich.Gewaehlt;
-        var imBereich = BereichswahlRegeln.Bewohner(alle, bereich);
+        bool therapie = TherapieListe.Aktiv;
+        var imBereich = therapie ? TherapieListe.Bewohner(speicher, AlleKnopf.Checked, Heute()) : BereichswahlRegeln.Bewohner(alle, bereich);
         if (zusaetzlich is long z && imBereich.All(b => b.Id != z)
             && alle.FirstOrDefault(b => b.Id == z) is Bewohner extra) imBereich.Add(extra);
         abgleichen = true;
@@ -182,13 +193,19 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
             Zeilen = [.. imBereich.Where(Passt)
                 .OrderBy(b => b.Nachname, StringComparer.CurrentCulture)
                 .ThenBy(b => b.Vorname, StringComparer.CurrentCulture)];
-            Namen.BeginUpdate();
-            Namen.Items.Clear();
-            foreach (var b in Zeilen) Namen.Items.Add($"{b.Nachname}, {b.Vorname}");
-            Namen.EndUpdate();
-            int index = Zeilen.FindIndex(b => b.Id == vorher);
-            if (index < 0 && Zeilen.Count > 0) index = 0;
+            if (therapie) eintraege = TherapieListe.Fuellen(Namen, Zeilen, speicher);
+            else
+            {
+                eintraege = [.. Zeilen];
+                Namen.BeginUpdate();
+                Namen.Items.Clear();
+                foreach (var b in Zeilen) Namen.Items.Add($"{b.Nachname}, {b.Vorname}");
+                Namen.EndUpdate();
+            }
+            int index = eintraege.FindIndex(b => b is not null && b.Id == vorher);
+            if (index < 0) index = eintraege.FindIndex(b => b is not null);
             Namen.SelectedIndex = index;
+            links.PerformLayout();
             string anzahl = imBereich.Count == 1 ? "1 Bewohner" : $"{imBereich.Count} Bewohner";
             string zahl = Zeilen.Count == imBereich.Count ? anzahl : $"{Zeilen.Count} von {anzahl}";
             KopfSetzen($"{bereich} · {zahl}", "Dokumentation");
@@ -203,7 +220,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
 
     public bool Waehlen(long bewohnerId)
     {
-        int index = Zeilen.FindIndex(b => b.Id == bewohnerId);
+        int index = eintraege.FindIndex(b => b is not null && b.Id == bewohnerId);
         if (index < 0) return false;
         Namen.SelectedIndex = index;
         return true;

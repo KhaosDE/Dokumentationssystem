@@ -96,7 +96,15 @@ public sealed class AufgabeFenster : Form
         fuer.Controls.Add(Reihe(BestimmteSchicht, SchichtTag, SchichtArt));
         fuer.Controls.Add(WerZeitHat);
         Zeile("Für wen?", fuer);
-        Zeile("Fällig bis (freiwillig)", Reihe(FaelligDatum, FaelligUhrzeit));
+        // Im Bereich Therapie ohne Schichtbezug (die Therapie arbeitet tagsüber), dafür mit Fälligkeit: morgen.
+        bool therapie = TherapieListe.Aktiv;
+        if (therapie)
+        {
+            WerZeitHat.Checked = true;
+            NaechsteSchicht.Enabled = BestimmteSchicht.Enabled = false;
+            FaelligDatum.Text = Kern.Datum.Text(DateOnly.FromDateTime(jetzt).AddDays(1));
+        }
+        Zeile(therapie ? "Fällig bis" : "Fällig bis (freiwillig)", Reihe(FaelligDatum, FaelligUhrzeit));
         Zeile("Eingetragen von", Verfasser);
         Zeile(null, Fehler);
 
