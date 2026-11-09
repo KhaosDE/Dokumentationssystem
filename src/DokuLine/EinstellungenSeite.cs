@@ -84,6 +84,7 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public CheckBox NachschlageAnsicht { get; } = new() { Text = "anzeigen", AutoSize = true };
     public Button MitarbeiterKnopf { get; } = Stil.NebenKnopf("Mitarbeiter …");
     public Button ListenKnopf { get; } = Stil.NebenKnopf("Bereiche, Positionen, Berichtsarten …");
+    public Button AkteListenKnopf { get; } = Stil.NebenKnopf("Krankenkassen, Kostenträger, Aufgabenbereiche …");
     public Button RechteKnopf { get; } = Stil.NebenKnopf("Rechte …");
     // System, Über
     public Label DatenbankOrt { get; } = new() { AutoSize = true, MaximumSize = new Size(360, 0), UseMnemonic = false };

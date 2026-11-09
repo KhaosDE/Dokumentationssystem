@@ -148,6 +148,9 @@ public sealed partial class EinstellungenSeite
         Karte("Verwaltung", "Mitarbeiter", "Mitarbeiter mit Bereichen, Positionen und Qualifikation (Assistenzkraft oder Fachkraft). Die Bereichsleitung verwaltet ihren Bereich.", MitarbeiterKnopf);
         Karte("Verwaltung", "Bereiche, Positionen und Berichtsarten",
             "Listen zum Zuordnen; stilllegen statt löschen, solange etwas zugeordnet ist.", ListenKnopf);
+        AkteListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, ListenFenster.Akte));
+        Karte("Verwaltung", "Listen für die Akte", "Auswahl in den Reitern Krankenkasse, Kostenträger und Betreuung (Demo: ausgedachte Namen).",
+            AkteListenKnopf);
         Karte("Verwaltung", "Rechte", "Tabelle: welche Position was darf, je Funktion „nur Fachkräfte“. Ohne Recht nur ansehen.", RechteKnopf);
 
         // System (folgenreich: fragt vorher)

@@ -24,7 +24,12 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     // „Heute wichtig“; „Medikamentenänderungen“ nur, wenn es welche gibt (dann ganz oben).
     public HeuteKasten Medikation { get; } = new("MEDIKAMENTENÄNDERUNGEN");
     public bool MedikationZeigen { get; private set; }
-    private HeuteKasten[] Kaesten => MedikationZeigen ? [Medikation, Uebergaben, Termine, Dienst, Nachrichten] : [Uebergaben, Termine, Dienst, Nachrichten];
+    // „Fristen“ (Betreuung, Befreiung, Kostenzusage) nur, wenn eine bald endet.
+    public HeuteKasten Fristen { get; } = new("FRISTEN");
+    public bool FristenZeigen { get; private set; }
+    private HeuteKasten[] Kaesten =>
+        [.. MedikationZeigen ? [Medikation] : Array.Empty<HeuteKasten>(), .. FristenZeigen ? [Fristen] : Array.Empty<HeuteKasten>(),
+         Uebergaben, Termine, Dienst, Nachrichten];
     public HeuteKasten Uebergaben { get; } = new("ÜBERGABEN OFFEN");
     public HeuteKasten Termine { get; } = new("TERMINE HEUTE");
     public HeuteKasten Dienst { get; } = new("LAUFENDER DIENST · NOCH OFFEN");
@@ -92,7 +97,8 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         Nachrichten.KopfGeklickt += () => StelleGewuenscht?.Invoke("Nachrichten");
         Medikation.KopfGeklickt += () => StelleGewuenscht?.Invoke("Übergabe");
         Medikation.Visible = false;
-        links.Controls.AddRange([Medikation, Uebergaben, Termine, Dienst, Nachrichten]);
+        Fristen.Visible = false;
+        links.Controls.AddRange([Medikation, Fristen, Uebergaben, Termine, Dienst, Nachrichten]);
 
         foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Hinweise", 300) }) Liste.Columns.Add(titel, breite);
         Liste.DoubleClick += (_, _) => AkteOeffnen();
@@ -200,6 +206,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
 
         HeuteFuellen(jetzt, alle, offeneUebergaben, werte.Kuerzel);
         MedikationFuellen(medikation, alle);
+        FristenFuellen(alle);
 
         // Kopf: „R2 · 23 Bewohner · 3 Betten frei · Stand 14:32 Uhr“ (freie Betten der gezeigten Wohnbereiche).
         var bereiche = meineBp || meineEt ? [] : allesZeigen ? speicher.Wohnbereiche().Select(w => w.Name).ToList() : meine;
@@ -241,6 +248,15 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
                 () => AkteGewuenscht?.Invoke(a.BewohnerId), Stil.Gefahr);
         }));
         MedikationZeigen = Medikation.Visible = liste.Count > 0;
+    }
+
+    // Kasten „Fristen“: je Frist eine Zeile; Klick öffnet die Akte.
+    private void FristenFuellen(List<HeuteFuer> alle)
+    {
+        var zeilen = alle.SelectMany(h => h.Fristen.Select(m => (h.Bewohner, m))).ToList();
+        Fristen.Setzen(zeilen.Count, zeilen.Select(x =>
+            Eintrag($"{x.Bewohner.Name}, Zi. {x.Bewohner.Zimmer}: {x.m.Text}", null, null, () => AkteGewuenscht?.Invoke(x.Bewohner.Id!.Value))));
+        FristenZeigen = Fristen.Visible = zeilen.Count > 0;
     }
 
     private void HeuteFuellen(DateTime jetzt, List<HeuteFuer> alle, List<Uebergabe> offen, string kuerzel)

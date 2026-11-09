@@ -806,6 +806,28 @@ public sealed partial class Speicher : IDisposable
         INSERT INTO berichtsarten (name, nr) SELECT 'Therapie', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
             WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Therapie');
         """,
+        // 35 – Akte: Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger als Fassungen (Inhalt als JSON, nie
+        // überschrieben); Auswahllisten für Krankenkassen, Kostenträger und Aufgabenbereiche der Betreuung.
+        """
+        CREATE TABLE IF NOT EXISTS akte_angaben (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('betreuung', 'angehoerige', 'aerzte', 'krankenkasse', 'kostentraeger')),
+            zustand     TEXT NOT NULL CHECK (zustand IN ('eingetragen', 'keine')),
+            inhalt      TEXT NOT NULL DEFAULT '',
+            ab          TEXT NOT NULL,
+            geaendert   TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS akte_angaben_bewohner ON akte_angaben (bewohner_id, art);
+        CREATE TRIGGER IF NOT EXISTS akte_angaben_bleiben BEFORE UPDATE ON akte_angaben
+            BEGIN SELECT RAISE(ABORT, 'Angaben der Akte werden nicht überschrieben – jede Änderung ist eine neue Fassung.'); END;
+        CREATE TABLE IF NOT EXISTS krankenkassen (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS kostentraeger (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS betreuungsaufgaben (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO betreuungsaufgaben (name, nr) VALUES ('Gesundheitssorge', 1), ('Aufenthaltsbestimmung', 2), ('Vermögenssorge', 3),
+            ('Behörden und Ämter', 4), ('Wohnungsangelegenheiten', 5), ('Post', 6), ('Unterbringung', 7);
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -978,10 +1000,11 @@ public sealed partial class Speicher : IDisposable
              standard = Meta(DemoStandardaufgaben) is null, visiten = Meta(DemoVisiten) is null, aerzte = Meta(DemoAerzte) is null,
              aerztlich = Meta(DemoAerztlich) is null, betreuer = Meta(DemoBetreuer) is null, personen = Meta(DemoPersonen) is null, bedarf = Meta(DemoBedarf) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
-             status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null;
+             status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
+             akte = Meta(DemoAkte) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1003,6 +1026,7 @@ public sealed partial class Speicher : IDisposable
         if (visiten) DemoVisitenEinfuegen(transaktion);
         if (betreuer) DemoBetreuerEinfuegen(transaktion);
         if (personen || betreuer) DemoPersonenEinfuegen(transaktion);   // übernimmt auch die Betreuer
+        if (akte || personen || betreuer || aerzte) DemoAkteAngabenEinfuegen(transaktion);   // hängt an Personen und Betreuern
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
@@ -1055,6 +1079,7 @@ public sealed partial class Speicher : IDisposable
             DemoVisitenEinfuegen(transaktion);
             DemoBetreuerEinfuegen(transaktion);
             DemoPersonenEinfuegen(transaktion);
+            DemoAkteAngabenEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);

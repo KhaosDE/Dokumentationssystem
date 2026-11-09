@@ -1498,7 +1498,7 @@ Umsetzung (Vorschlag von Claude Code, von Tobi bestätigt):
 
 
 ## Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger
-Status: freigegeben (Bauplan Schritt 30; OK Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.34.0; Bauplan Schritt 30; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Bewohnerakte bekommt drei neue Reiter für die Verwaltungsangaben.
 Warum: Vorgabe Tobi (09.11.2026): Das Bewohnerstammblatt muss weiter ausgebaut werden. Neben den

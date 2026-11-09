@@ -35,7 +35,7 @@ public sealed class VisiteFenster : Form
         this.speicher = speicher;
         Art = art;
         bewohner = speicher.AlleBewohner();
-        Arzt = new ArztWahl(speicher);
+        Arzt = new ArztWahl(speicher, bewohnerId);
         medikamente = speicher.Medikamente().Where(m => !m.Gesperrt).ToList();
         Text = $"Neue Visite {art} ({Stil.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;

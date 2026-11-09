@@ -219,6 +219,11 @@ public class BewohnerOberflaechenTests
             Assert.Contains("Aufnahmedatum liegt vor dem Geburtsdatum", formular.Fehler.Text);
             Assert.Equal(69, u.Speicher.AlleBewohner().Count);
             formular.Aufnahmedatum.Text = "1.2.2026";
+            // Bauplan 30: Hausarzt und Psychiater brauchen einen Zustand.
+            Assert.False(formular.Speichern());
+            Assert.Contains("Hausarzt: bitte einen Arzt", formular.Fehler.Text);
+            formular.Hausarzt.SelectedIndex = 3;   // der erste Arzt im Verzeichnis
+            formular.Psychiater.SelectedItem = BewohnerFormular.NochNichtBekannt;
             Assert.True(formular.Speichern());
             return formular.Gespeichert;
         };
@@ -229,6 +234,9 @@ public class BewohnerOberflaechenTests
         Assert.Equal("Paul Pappel", f.Bewohner.Akte.Bewohner!.Name);
         Assert.Equal(("106", ZimmerRegeln.Tuer, OffenGefuehrtZustand.Nein), (f.Bewohner.Akte.Bewohner.Zimmer, f.Bewohner.Akte.Bewohner.Bett, f.Bewohner.Akte.Bewohner.OffenGefuehrt));
         Assert.Equal("Allergien: nicht erfasst – bitte klären", f.Bewohner.Akte.Allergie.Text);
+        var aerzte = u.Speicher.Angaben(f.Bewohner.Akte.Bewohner.Id!.Value, DateOnly.FromDateTime(DateTime.Today))[Angabe.Aerzte].Lesen<AerzteAngabe>()!;
+        Assert.Equal(ArztStand.Arzt, aerzte.Hausarzt.Stand);
+        Assert.Equal(ArztStand.NichtErfasst, aerzte.Psychiater.Stand);
         f.Bewohner.UebersichtZeigen();
         Assert.Contains(Karten(f), k => k.Bewohner.Name == "Paul Pappel");
     });

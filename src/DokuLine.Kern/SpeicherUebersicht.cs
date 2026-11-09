@@ -7,6 +7,7 @@ public sealed partial class Speicher
     {
         var heute = DateOnly.FromDateTime(jetzt);
         var montag = WochenplanRegeln.Montag(heute);
+        var angaben = AlleAngaben(heute);
         return AlleBewohner().Select(b =>
         {
             long id = b.Id!.Value;
@@ -19,6 +20,7 @@ public sealed partial class Speicher
             return new HeuteFuer(b, termine, medikation, HeimfahrtJetzt(id, jetzt))
             {
                 HebFaellig = HebRegeln.Faellig(b, HebBoegen(id), heute, hebFristMonate),
+                Fristen = angaben.TryGetValue(id, out var a) ? AngabenRegeln.Fristen(a, heute) : [],
             };
         }).ToList();
     }

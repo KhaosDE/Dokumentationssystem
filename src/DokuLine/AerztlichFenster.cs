@@ -199,7 +199,7 @@ public sealed class DiagnoseFenster : Form
     {
         this.speicher = speicher;
         this.bewohner = bewohner;
-        Arzt = new ArztWahl(speicher);
+        Arzt = new ArztWahl(speicher, bewohner.Id);
         Fenster.Grundform(this, $"Neue Diagnose – {bewohner.Name}");
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });

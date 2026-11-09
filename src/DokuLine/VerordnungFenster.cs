@@ -96,7 +96,7 @@ public sealed class VerordnungFenster : Form
     {
         this.speicher = speicher;
         this.bewohner = bewohner;
-        Arzt = new ArztWahl(speicher);
+        Arzt = new ArztWahl(speicher, bewohner.Id);
         medikamente = speicher.Medikamente().Where(m => !m.Gesperrt).ToList();   // gesperrte nicht wählbar
         Text = $"Neue Verordnung – {bewohner.Name} ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;

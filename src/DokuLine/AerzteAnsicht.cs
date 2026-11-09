@@ -14,9 +14,13 @@ public sealed class ArztWahl : FlowLayoutPanel
     public Button AnlegenKnopf { get; } = Stil.NebenKnopf("Arzt anlegen …");
     public event Action<Person?>? Gewechselt;
 
-    public ArztWahl(Speicher speicher)
+    private readonly long? bewohnerId;
+
+    // bewohnerId: Die ihm zugeteilten Ärzte (Reiter „Ärzte“) stehen oben, alle übrigen darunter.
+    public ArztWahl(Speicher speicher, long? bewohnerId = null)
     {
         this.speicher = speicher;
+        this.bewohnerId = bewohnerId;
         AutoSize = true;
         WrapContents = false;
         Margin = new Padding(0);
@@ -35,7 +39,9 @@ public sealed class ArztWahl : FlowLayoutPanel
         string bisher = waehlen ?? Gewaehlt;
         namen.Clear();
         Liste.Items.Clear();
-        foreach (var a in speicher.Aerzte(nurAktive: true))
+        var zugeteilt = bewohnerId is long id
+            ? speicher.Angaben(id, DateOnly.FromDateTime(DateTime.Now)).GetValueOrDefault(Angabe.Aerzte)?.Lesen<AerzteAngabe>() : null;
+        foreach (var a in AngabenRegeln.AerzteSortiert(speicher.Aerzte(nurAktive: true), zugeteilt))
         {
             namen.Add(a.Name);
             Liste.Items.Add(a.Anzeige);

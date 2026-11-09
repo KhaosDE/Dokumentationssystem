@@ -3,7 +3,8 @@ using System.Drawing.Drawing2D;
 namespace DokuLine;
 
 // Reiter nebeneinander (z. B. in der Bewohnerakte). Aktiv: Akzentfarbe und ein Balken darunter.
-// Bedienbar mit Maus und Tastatur (Pfeiltasten links/rechts).
+// Bedienbar mit Maus und Tastatur (Pfeiltasten links/rechts). Passen nicht alle in eine Zeile, brechen sie um
+// (HoeheFuer gibt die nötige Höhe).
 public sealed class Reiterleiste : Control
 {
     private readonly List<string> namen;
@@ -49,16 +50,28 @@ public sealed class Reiterleiste : Control
         Gewechselt?.Invoke(name);
     }
 
-    private void Berechnen(Graphics g)
+    private int Zeile => Stil.Px(this, 40);
+
+    private List<Rectangle> Felder(int gesamt)
     {
-        felder.Clear();
-        int x = 0, innen = Stil.Px(this, Stil.AbstandMittel);
+        var liste = new List<Rectangle>();
+        int x = 0, y = 0, innen = Stil.Px(this, Stil.AbstandMittel);
         foreach (string name in namen)
         {
-            int breite = TextRenderer.MeasureText(g, name, Stil.Fett, Size.Empty, TextFormatFlags.NoPadding).Width + 2 * innen;
-            felder.Add(new Rectangle(x, 0, breite, Height));
+            int breite = TextRenderer.MeasureText(name, Stil.Fett, Size.Empty, TextFormatFlags.NoPadding).Width + 2 * innen;
+            if (x > 0 && x + breite > gesamt) { x = 0; y += Zeile; }
+            liste.Add(new Rectangle(x, y, breite, Zeile));
             x += breite + Stil.Px(this, Stil.AbstandMini);
         }
+        return liste;
+    }
+
+    public int HoeheFuer(int breite) => Felder(breite).Select(f => f.Bottom).DefaultIfEmpty(Zeile).Max();
+
+    private void Berechnen(Graphics _)
+    {
+        felder.Clear();
+        felder.AddRange(Felder(Width));
     }
 
     private int Treffer(Point p)
@@ -110,7 +123,7 @@ public sealed class Reiterleiste : Control
             if (istAktiv)
             {
                 using var balken = new SolidBrush(Stil.Akzent);
-                using var pfad = Stil.Abgerundet(new RectangleF(feld.X + 4 * s, Height - 3 * s, feld.Width - 8 * s, 3 * s), 1.5f * s);
+                using var pfad = Stil.Abgerundet(new RectangleF(feld.X + 4 * s, feld.Bottom - 3 * s, feld.Width - 8 * s, 3 * s), 1.5f * s);
                 g.FillPath(balken, pfad);
             }
             if (Focused && istAktiv)

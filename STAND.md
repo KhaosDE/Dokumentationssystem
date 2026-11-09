@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.22** (Bauplan Schritt 29p: Nachschlagen beim BfArM abgesichert).
+Stand: 09.11.2026. Version: **0.34.0** (Bauplan Schritt 30: Akte mit Betreuung, Angehörigen, Ärzten, Krankenkasse, Kostenträger).
 
 ## Aktuell
 
@@ -314,8 +314,19 @@ BfArM – Anfragen an andere (fremde Schriften, Statistik, Werbung) werden block
 Schließen), ohne SmartScreen-Prüfung (sonst gingen die Adressen an Microsoft), ohne automatisches Ausfüllen. In den
 Einstellungen steht, was das BfArM dabei erhält: Suchbegriff, IP-Adresse der Einrichtung, Uhrzeit.
 
+Neu in 0.34.0: Die **Akte** hat fünf neue Reiter – **Betreuung** (Art, Betreuer aus dem Verzeichnis, Aufgabenbereiche,
+bestellt am, Überprüfung bis, Ersatzbetreuer), **Angehörige** (Beziehung, Hauptkontakt, im Notfall benachrichtigen,
+Hinweis), **Ärzte** (Hausarzt und Psychiater mit drei Zuständen, weitere Ärzte), **Krankenkasse** (Kasse,
+Versichertennummer, Status, Zuzahlungsbefreiung, Pflegegrad) und **Kostenträger** (Aktenzeichen, Sachbearbeitung,
+Bewilligungen von–bis). Jede Änderung ist eine neue Fassung „ab Datum …“ mit Verlauf; „nicht erfasst“ steht in
+Achtung-Farbe, „keine …“ ist ein eigener Zustand. Die Stammdaten zeigen Krankenkasse und Kostenträger als Kurzzeile
+(Klick öffnet den Reiter). Fristen – Betreuung 8, Befreiung 4, Kostenzusage 12 Wochen vorher – stehen als Marke in der
+Bewohnerliste und im neuen Kasten „Fristen“ der Übersicht. Bei der Aufnahme sind Hausarzt und Psychiater Pflicht
+(Arzt, „keiner“ oder „noch nicht bekannt“); zugeteilte Ärzte stehen in den Arztauswahlen oben. Der HEB-Bogen übernimmt
+Kostenträger und Aktenzeichen. Neue Listen in den Einstellungen: Krankenkassen, Kostenträger, Aufgabenbereiche.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 30 „Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger“ (0.34.0).
+als Nächstes 30a „Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente“ (0.34.1).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1362,8 +1373,20 @@ als Nächstes 30 „Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, K
   Anfragen (`WebResourceRequested`), privates Fenster, `IsReputationCheckingRequired = false`; Hinweis in den
   Einstellungen; Schutztest prüft die Einstellungen der Ansicht.
 
+- 0.34.0 — Bauplan Schritt 30:
+  - Kern: `AkteAngaben.cs` (Modelle, `AngabenRegeln`: geltende Fassung, Fristen, Kurzzeilen, Zeilen, Prüfungen,
+    Ärzte sortiert), `SpeicherAkteAngaben.cs`, Datenbank-Schritt 35 (`akte_angaben` mit Inhalt als JSON und Schutz
+    gegen Überschreiben; Listen `krankenkassen`, `kostentraeger`, `betreuungsaufgaben`), `DemodatenAkte.cs`.
+  - Oberfläche: `AngabenAnsicht` (eine Ansicht für alle fünf Reiter), `AngabeFenster` (neue Fassung, „keine …“,
+    „… anlegen“ direkt aus der Auswahl), Kurzzeilen in den Stammdaten, Kasten „Fristen“ in der Übersicht, Pflichtwahl
+    der Ärzte in der Aufnahme, `ArztWahl` mit Bewohner, Reiterleiste mit Zeilenumbruch, `ListenFenster` für beliebige
+    Listen.
+
 ## Offene Punkte
 
+- 09.11.2026 (0.34.0): Im Reiter „Angehörige“ fehlt noch die Marke des Schweigepflicht-Zustands (kommt mit Schritt 35);
+  „Betreuerausweis öffnen“ und „Dokument öffnen“ kommen mit dem Reiter „Dokumente“ (Schritt 31). Der Überleitungsbogen
+  (Schritt 33) nutzt die Ärzte, sobald es ihn gibt.
 - 09.11.2026 (0.33.21), für den Echtbetrieb: Namen von Bewohnern auf einem Bildschirm im Gemeinschaftsbereich zeigen,
   wer an welcher Therapie teilnimmt. Vor einem Einsatz mit Leitung und Datenschutz klären; die Demo zeigt nur
   ausgedachte Namen.
@@ -1447,6 +1470,14 @@ als Nächstes 30 „Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, K
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.34.0): Akte, fünf Reiter – gespeichert wird je Reiter eine Fassung mit dem Inhalt als JSON (eine
+  Tabelle statt fünf); so bleiben Verlauf, Schutz gegen Überschreiben und „ab Datum“ für alle gleich. Es gilt die neueste
+  Fassung, die schon begonnen hat. Die Zeile „Betreuer“ bleibt in den Stammdaten mit „Betreuer …“ für schnelle
+  Kontaktänderungen und „E-Mail an Betreuer …“; speichert man den Reiter „Betreuung“, bekommt sie eine passende Fassung.
+  Fristen stehen als Marke in der Bewohnerliste der Übersicht und im Kasten „Fristen“, nicht im Kopf der Akte (dort
+  stehen sie im Reiter). Die Listen für die Akte haben ein eigenes Fenster („Listen für die Akte“), damit das bisherige
+  nicht zu hoch wird. Arztauswahlen mit bekanntem Bewohner (Verordnung, Diagnose, Kalender, Visite eines Bewohners)
+  zeigen dessen Ärzte oben; in der Visite eines ganzen Bereichs bleibt die Reihenfolge des Verzeichnisses.
 - 09.11.2026 (0.33.22): BfArM-Ansicht – statt „Cookies und Verlauf beim Schließen löschen“ läuft sie als privates
   Fenster (`IsInPrivateModeEnabled`): Dann wird gar nichts davon auf die Platte geschrieben, auch nicht bei einem
   Absturz. Erlaubt bleiben neben dem BfArM (https) nur `data:`, `blob:` und `about:blank` (bleiben im Rechner).
@@ -2277,6 +2308,14 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.34.0:
+
+1. Akte eines Bewohners: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger ansehen; „Ändern …“ und
+   „Verlauf …“ ausprobieren, einmal „keine …“ ankreuzen.
+2. Stammdaten: Krankenkasse und Kostenträger anklicken – der Reiter öffnet sich.
+3. Übersicht (Bereich „Alle“): Kasten „Fristen“ und die Marken „Kostenzusage endet …“.
+4. „Neuer Bewohner …“: ohne Hausarzt/Psychiater kommt ein Hinweis.
 
 Version 0.33.22: Medikament anlegen → „Nachschlagen“: Die BfArM-Suche erscheint wie bisher; unten steht ggf. „… Anfragen
 an andere Adressen blockiert“. Nach dem Schließen liegt `%APPDATA%\DokuLine\nachschlagen.log` mit der Zahl.

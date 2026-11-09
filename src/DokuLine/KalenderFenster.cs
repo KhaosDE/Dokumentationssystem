@@ -39,7 +39,7 @@ public sealed class KalenderFenster : Form
         this.bisher = bisher;
         bewohner = speicher.AlleBewohner();
         Begleitung = new PersonenWahl(speicher) { AccessibleName = "Begleitung" };
-        Arzt = new ArztWahl(speicher);
+        Arzt = new ArztWahl(speicher, bewohnerId);
         Arzt.Gewechselt += a =>   // Termin beim Arzt – Ort und Kontakt aus dem Verzeichnis
         {
             if (a is null) return;

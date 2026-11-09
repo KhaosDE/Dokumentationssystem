@@ -10,10 +10,12 @@ public sealed partial class Speicher
 
     public Betreuer? Betreuer(long bewohnerId) => BetreuerFassungen(bewohnerId).LastOrDefault();
 
-    public List<Betreuer> BetreuerFassungen(long bewohnerId)
+    public List<Betreuer> BetreuerFassungen(long bewohnerId) => BetreuerFassungenIn(null, bewohnerId);
+
+    private List<Betreuer> BetreuerFassungenIn(SqliteTransaction? transaktion, long bewohnerId)
     {
         var liste = new List<Betreuer>();
-        using var befehl = Befehl("SELECT name, stelle, email, telefon, geaendert, kuerzel, keine FROM betreuer WHERE bewohner_id = $b ORDER BY id", null, [("$b", bewohnerId)]);
+        using var befehl = Befehl("SELECT name, stelle, email, telefon, geaendert, kuerzel, keine FROM betreuer WHERE bewohner_id = $b ORDER BY id", transaktion, [("$b", bewohnerId)]);
         using var leser = befehl.ExecuteReader();
         while (leser.Read())
             liste.Add(new Betreuer

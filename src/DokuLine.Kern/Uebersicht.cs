@@ -10,6 +10,7 @@ public sealed record HeuteFuer(Bewohner Bewohner, IReadOnlyList<Termin> Termine,
     IReadOnlyList<(Verordnung Verordnung, string Aenderung)> Medikation, KalenderTermin? Heimfahrt)
 {
     public string? HebFaellig { get; init; }   // z. B. „HEB fällig (letzter 10/2025)“
+    public IReadOnlyList<Marke> Fristen { get; init; } = [];   // Betreuung, Befreiung, Kostenzusage (Bauplan 30)
 }
 
 public static class UebersichtRegeln
@@ -55,6 +56,7 @@ public static class UebersichtRegeln
         if (b.Beschluss == BeschlussZustand.NichtErfasst) marken.Add(new Marke(MarkenArt.NichtErfasst, "Beschluss nicht erfasst"));
         if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offen) marken.Add(offen);
         if (h.HebFaellig is string heb) marken.Add(new Marke(MarkenArt.NichtErfasst, heb));
+        marken.AddRange(h.Fristen);
         if (HeuteWichtigRegeln.Geburtstag(b, heute) is Marke geburtstag) marken.Add(geburtstag);
         foreach (var (v, aenderung) in h.Medikation)
             marken.Add(new Marke(MarkenArt.Wichtig, $"Medikation: {aenderung}"));
