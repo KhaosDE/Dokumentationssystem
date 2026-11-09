@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Wohnbereich-ToDo: Zähler, Kurzliste über den Karten, Bereich „Aufgaben“, neue Aufgabe,
+// Wohnbereich-ToDo: Zähler, Bereich „Aufgaben“, neue Aufgabe,
 // weitergeben, erledigt, aus einem Bericht heraus, Ausdruck.
 [Collection("Oberflaeche")]
 public class AufgabenOberflaechenTests
@@ -23,7 +23,7 @@ public class AufgabenOberflaechenTests
     private static int Offen(Umgebung u) => u.Speicher.Aufgaben(DateTime.Now, bereich: "R1").Count;
 
     [Fact]
-    public void Zaehler_in_der_Seitenleiste_und_Kurzliste_ueber_den_Karten() => Hilfe.Sta(() =>
+    public void Zaehler_in_der_Seitenleiste() => Hilfe.Sta(() =>
     {
         var (u, f) = Oeffnen(bereich: false);
         using (u)
@@ -34,13 +34,6 @@ public class AufgabenOberflaechenTests
             Assert.Equal(offen, Eintrag(f).Anzahl);
             Assert.True(Eintrag(f).Dringend);   // eine Demo-Aufgabe ist überfällig
             Assert.Equal($"Aufgaben, {offen} offen, 1 überfällig", Eintrag(f).AccessibleName);
-            var kurz = f.Bewohner.Aufgaben;
-            Assert.Equal($"AUFGABEN · {offen} OFFEN · 1 ÜBERFÄLLIG", kurz.KopfText);
-            Assert.Equal(AufgabenKurzliste.Hoechstens, kurz.ZeilenTexte.Count());
-            Assert.StartsWith("überfällig · Aushang mit dem Wochenplan", kurz.ZeilenTexte.First());
-            Assert.Equal($"Alle {offen} Aufgaben …", kurz.AlleKnopf.Text);
-            kurz.AlleKnopf.PerformClick();
-            Assert.Equal("Aufgaben", f.AktiverBereich);
         }
     });
 

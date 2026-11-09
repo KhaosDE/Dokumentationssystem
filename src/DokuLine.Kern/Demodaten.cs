@@ -121,6 +121,14 @@ public static class Demodaten
     {
         public List<string> Saetze { get; set; } = [];
         public List<string> Notizen { get; set; } = [];
+        // Berichte mit Übergabe brauchen einen Text, der der nächsten Schicht etwas sagt (nie „Keine Besonderheiten“).
+        public List<UebergabeBericht> Berichte { get; set; } = [];
+    }
+
+    public sealed class UebergabeBericht
+    {
+        public int Bereich { get; set; }   // 0 = allgemein
+        public string Text { get; set; } = "";
     }
 
     // Ein Demo-Bericht mit seinem Übergabe-Eintrag (falls einer dazugehört).
@@ -140,6 +148,11 @@ public static class Demodaten
         var berichte = new List<DemoBericht>();
         string wochentag = jetzt.AddDays(2).ToString("dddd", System.Globalization.CultureInfo.GetCultureInfo("de-DE"));
         string Satz(int i) => bausteine.Uebergabe.Saetze[i % bausteine.Uebergabe.Saetze.Count].Replace("{tag}", wochentag);
+        Bericht Relevant(Bericht bericht, int i)
+        {
+            var vorlage = bausteine.Uebergabe.Berichte[i % bausteine.Uebergabe.Berichte.Count];
+            return bericht with { Text = vorlage.Text, Bereiche = vorlage.Bereich == 0 ? [] : [vorlage.Bereich] };
+        }
         for (int i = 0; i < bewohner.Count; i++)
         {
             var b = bewohner[i];
@@ -170,7 +183,7 @@ public static class Demodaten
             // sonst wird die Übergabe mit 69 Bewohnern unübersichtlich.
             if (i < 10 ? i % 2 == 0 : i % 9 == 0)
             {
-                var bericht = Erzeugen(b, jetzt.AddMinutes(-(40 + i * 25)), zufall, bausteine, jetzt, wichtig: i == 0);
+                var bericht = Relevant(Erzeugen(b, jetzt.AddMinutes(-(40 + i * 25)), zufall, bausteine, jetzt, wichtig: i == 0), i);
                 var wunsch = i switch
                 {
                     2 => new UebergabeWunsch(UebergabeDauer.DreiTage),
@@ -181,17 +194,17 @@ public static class Demodaten
             }
             if (i == 1)
             {
-                var bericht = Erzeugen(b, jetzt.AddDays(-2).Date.AddHours(16), zufall, bausteine, jetzt, wichtig: false);
+                var bericht = Relevant(Erzeugen(b, jetzt.AddDays(-2).Date.AddHours(16), zufall, bausteine, jetzt, wichtig: false), 1);
                 berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.BisErledigt, Text: Satz(2)), "AB", ErledigtVon: "CD"));
             }
             if (i == 3)
             {
-                var bericht = Erzeugen(b, jetzt.AddDays(-5).Date.AddHours(9), zufall, bausteine, jetzt, wichtig: false);
+                var bericht = Relevant(Erzeugen(b, jetzt.AddDays(-5).Date.AddHours(9), zufall, bausteine, jetzt, wichtig: false), 3);
                 berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.NaechsteSchicht)));   // längst abgelaufen
             }
             if (i == 5)
             {
-                var bericht = Erzeugen(b, jetzt.AddHours(-20), zufall, bausteine, jetzt, wichtig: true);
+                var bericht = Relevant(Erzeugen(b, jetzt.AddHours(-20), zufall, bausteine, jetzt, wichtig: true), 5);
                 berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.Woche, Text: Satz(1))));
             }
         }

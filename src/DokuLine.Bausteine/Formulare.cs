@@ -18,6 +18,23 @@ public static class Formular
         return raster;
     }
 
+    // Beschriftung mit einer kleinen zweiten Zeile darunter, z. B. „Teilnehmer“ und „(Anzahl)“.
+    public static Label ZeileMitZusatz(TableLayoutPanel raster, string beschriftung, string zusatz, Control feld)
+    {
+        var text = new FlowLayoutPanel
+        {
+            FlowDirection = FlowDirection.TopDown, AutoSize = true, WrapContents = false,
+            Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandGross, Stil.AbstandKlein),
+        };
+        text.Controls.Add(new Label { Text = beschriftung, AutoSize = true, ForeColor = Stil.TextMittel, Margin = new Padding(0) });
+        var klein = new Label { Text = zusatz, AutoSize = true, ForeColor = Stil.TextLeise, Font = Stil.Klein, Margin = new Padding(0) };
+        text.Controls.Add(klein);
+        raster.Controls.Add(text);
+        feld.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
+        raster.Controls.Add(feld);
+        return klein;
+    }
+
     public static FlowLayoutPanel Reihe(params Control[] teile)
     {
         var reihe = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };

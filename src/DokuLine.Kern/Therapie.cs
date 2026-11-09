@@ -126,7 +126,7 @@ public static class TherapieRegeln
         int hoechstens = 0;
         if (e.Art == AngebotArt.Einzel) hoechstens = 1;
         else if (!int.TryParse(e.Hoechstens.Trim(), out hoechstens) || hoechstens < 1 || hoechstens > 50)
-            fehler.Add("Höchste Teilnehmerzahl: bitte eine Zahl von 1 bis 50.");
+            fehler.Add("Teilnehmer (Anzahl): bitte eine Zahl von 1 bis 50.");
         DateOnly giltAb = default;
         try { giltAb = Datum.Lesen(e.GiltAb, "Gilt ab"); }
         catch (FormatException x) { fehler.Add(x.Message); }
@@ -158,7 +158,7 @@ public static class TherapieRegeln
         for (int i = 0; i < a.Fassungen.Count; i++)
         {
             var f = a.Fassungen[i];
-            liste.Add((f.Erstellt, $"{(i == 0 ? "angelegt" : "geändert")}, gilt ab {Datum.Text(f.GiltAb)}: {f.Name} · {ArtText(f.Art)} · {f.Therapeut} · {f.Ort} · {f.TermineText} · höchstens {f.Hoechstens} · Anbieter {f.Anbieter} · von {f.Kuerzel}"));
+            liste.Add((f.Erstellt, $"{(i == 0 ? "angelegt" : "geändert")}, gilt ab {Datum.Text(f.GiltAb)}: {f.Name} · {ArtText(f.Art)} · {f.Therapeut} · {f.Ort} · {f.TermineText} · {f.Hoechstens} Teilnehmer · Anbieter {f.Anbieter} · von {f.Kuerzel}"));
         }
         foreach (var z in a.Zuteilungen)
         {

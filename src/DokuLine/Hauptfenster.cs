@@ -82,7 +82,6 @@ public sealed partial class Hauptfenster : Form
         Aufgaben = new AufgabenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Aufgaben"] = Aufgaben;
         Aufgaben.Geaendert += () => { if (AktiverBereich == "Aufgaben") Kopf.TexteSetzen(Aufgaben.KopfText, "Aufgaben"); };
-        Bewohner.AufgabenAnzeigen += () => BereichWaehlen("Aufgaben");
         Nachrichten = new NachrichtenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Nachrichten"] = Nachrichten;
         Nachrichten.Geaendert += () => { if (AktiverBereich == "Nachrichten") Kopf.TexteSetzen(Nachrichten.KopfText, "Nachrichten"); };

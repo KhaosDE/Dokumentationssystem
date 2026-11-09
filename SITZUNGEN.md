@@ -106,3 +106,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: Bauplan 29s Teil 2 – Kommentare ohne Verlauf, docs/technik.md (0.33.9).
 - 09.11.2026 — Claude Code: Bauplan 29s Teil 3 – gemeinsame Schnittstelle der Bereichsseiten, große Dateien geteilt (0.33.10).
 - 09.11.2026 — Claude Code: 0.33.11 Kuvert für ungelesene Nachrichten in der Kopfzeile, Hinweis in der Dokumentation entfernt (Bauplan 29e).
+- 09.11.2026 — Claude Code: 0.33.12 kleine Korrekturen – Demo-Übergaben mit Inhalt, Angebot „Teilnehmer“, Dokumentation ohne Aufgabenliste mit abgerundeter Bewohnerleiste (Bauplan 29f).

@@ -2,8 +2,8 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Dokumentation“: links die Bewohner als schmale, einklappbare Liste („Nachname, Vorname“, Bereichswahl und
-// Suche darüber), rechts ihre Berichte mit Filter. Pfeiltasten blättern; Doppelklick oder „Akte öffnen“ öffnet die
+// Bereich „Dokumentation“: links die Bewohner als schmale, einklappbare Liste auf einer abgerundeten Fläche
+// („Nachname, Vorname“, Suche darüber), rechts ihre Berichte mit Filter. Pfeiltasten blättern; Doppelklick oder „Akte öffnen“ öffnet die
 // Akte. Pro Ansicht genau eine Hauptaktion in Akzentfarbe.
 public sealed class BewohnerBereich : Panel, IBereichSeite
 {
@@ -34,10 +34,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     private readonly Button berichteKnopf = Stil.NebenKnopf("Berichte ansehen");
     private readonly Button bearbeitenKnopf = Stil.HauptKnopf("Bearbeiten …");
 
-    public ListBox Namen { get; } = new()
-    {
-        IntegralHeight = false, BorderStyle = BorderStyle.None, Font = Stil.Standard, AccessibleName = "Bewohner",
-    };
+    public ListBox Namen { get; } = new RundeListe { AccessibleName = "Bewohner" };
     public List<Bewohner> Zeilen { get; private set; } = [];
     public Bewohner? Gewaehlt => Namen.SelectedIndex >= 0
         && Namen.SelectedIndex < Zeilen.Count ? Zeilen[Namen.SelectedIndex] : null;
@@ -52,10 +49,8 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     public Button EinklappenKnopf { get; } = Stil.NebenKnopf("◀");
     public bool Eingeklappt { get; private set; }
     private readonly Panel listenFlaeche = new() { Dock = DockStyle.Fill, BackColor = Stil.Seite };
-    private readonly Panel links = new() { Dock = DockStyle.Left, Width = LinksBreite, BackColor = Stil.Flaeche };
+    private readonly KartenFlaeche links = new() { Dock = DockStyle.Left, Width = LinksBreite, Padding = new Padding(0) };
     private long? zuletzt;
-    // Offene Aufgaben über der Liste (Wohnbereich-ToDo), mit Knopf zu allen.
-    public AufgabenKurzliste Aufgaben { get; } = new();
     public event Action<long?>? NachrichtenAnzeigen;
     private readonly Button nachrichtenKnopf = Stil.NebenKnopf("Nachrichten …");
     private readonly Button statusKnopf = Stil.NebenKnopf("Status …");
@@ -77,8 +72,6 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         Akte.NeuLaden();
         return gespeichert;
     }
-    private readonly Panel aufgabenRahmen = new() { Dock = DockStyle.Top, BackColor = Stil.Seite };
-    public event Action? AufgabenAnzeigen;
 
     // Der heutige Tag (für die Aufenthaltsdauer); zum Testen ersetzbar.
     internal Func<DateOnly> Heute { get; set; } = () => DateOnly.FromDateTime(DateTime.Today);
@@ -130,18 +123,12 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         AkteKnopf.Click += (_, _) => AkteOeffnen();
         AnsichtKnopf.Click += (_, _) => AnsichtUmschalten();
         DruckKnopf.Click += (_, _) => Dokumentation.Drucken();
-        aufgabenRahmen.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross,
-            Stil.AbstandKlein);
-        aufgabenRahmen.Controls.Add(Aufgaben);
-        aufgabenRahmen.Layout += (_, _) => AufgabenAnordnen();
-        Aufgaben.AlleKnopf.Click += (_, _) => AufgabenAnzeigen?.Invoke();
         nachrichtenKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) NachrichtenAnzeigen?.Invoke(id); };
         statusKnopf.Click += (_, _) => StatusOeffnen();
         AerztlichKnopf.Click += (_, _) => AerztlichOeffnen();
         berichtKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) BerichtGewuenscht?.Invoke(id); };
         Controls.Add(listenFlaeche);
         Controls.Add(Akte);
-        Controls.Add(aufgabenRahmen);
         listenFlaeche.BringToFront();
         Akte.BringToFront();
         zurueckKnopf.Click += (_, _) => UebersichtZeigen();
@@ -150,16 +137,6 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         {
             if (Akte.Bewohner?.Id is long id) Formular(speicher.Bewohner(id));
         };
-    }
-
-    private void AufgabenAnordnen()
-    {
-        var p = aufgabenRahmen.Padding;
-        int breite = Math.Max(100, aufgabenRahmen.ClientSize.Width - p.Horizontal);
-        Aufgaben.SetBounds(p.Left, p.Top, breite, Aufgaben.Height);
-        Aufgaben.PerformLayout();
-        int hoehe = Aufgaben.Bottom + p.Bottom;
-        if (aufgabenRahmen.Height != hoehe) aufgabenRahmen.Height = hoehe;
     }
 
     private void LinksAnordnen()
@@ -219,7 +196,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         finally { abgleichen = false; }
         BerichteZeigen();
         Akte.Visible = false;
-        listenFlaeche.Visible = aufgabenRahmen.Visible = true;
+        listenFlaeche.Visible = true;
         AkteSichtbar = false;
         KopfSetzen(KopfText, "Dokumentation", [BerichtNeuKnopf, BedarfKnopf, AkteKnopf, AnsichtKnopf, DruckKnopf]);
     }
@@ -329,7 +306,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
             return;
         }
         Akte.Zeigen(b);
-        listenFlaeche.Visible = aufgabenRahmen.Visible = false;
+        listenFlaeche.Visible = false;
         Akte.Visible = true;
         AkteSichtbar = true;
         AkteKnoepfeSperren();
@@ -360,13 +337,6 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     }
 
     public BewohnerFormular FormularErstellen(Bewohner? b) => new(speicher, b);
-
-    public void AufgabenSetzen(IReadOnlyList<Aufgabe> offen, DateTime jetzt)
-    {
-        var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
-        Aufgaben.Setzen(offen, namen, jetzt);
-        aufgabenRahmen.PerformLayout();
-    }
 
     // „Neuer Bewohner …“ aus der Übersicht: Formular; der gespeicherte Bewohner oder null.
     public Bewohner? NeuerBewohner()

@@ -40,7 +40,7 @@ public sealed class TherapieTests : IDisposable
         Assert.Contains("Name des Angebots fehlt.", fehler);
         Assert.Contains("Therapeutin oder Therapeut fehlt.", fehler);
         Assert.Contains("Mindestens ein Termin (Wochentag, von, bis).", fehler);
-        Assert.Contains("Höchste Teilnehmerzahl: bitte eine Zahl von 1 bis 50.", fehler);
+        Assert.Contains("Teilnehmer (Anzahl): bitte eine Zahl von 1 bis 50.", fehler);
         Assert.Contains("Gilt ab fehlt.", fehler);
         fehler = Assert.Throws<Eingabefehler>(() => TherapieRegeln.AusEingabe(new AngebotEingabe
         {

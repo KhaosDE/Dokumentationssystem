@@ -288,6 +288,17 @@ public sealed class BerichteTests : IDisposable
     }
 
     [Fact]
+    public void Demo_Uebergaben_nur_mit_Inhalt_fuer_die_naechste_Schicht()
+    {
+        var relevant = Demodaten.BerichtBausteine().Uebergabe.Berichte.Select(x => x.Text).ToHashSet();
+        var texte = Demodaten.Berichte(s.AlleBewohner(), DateTime.Now).Berichte
+            .Where(x => x.Uebergabe is not null).Select(x => x.Bericht.Text).ToList();
+        Assert.NotEmpty(texte);
+        Assert.All(texte, t => Assert.Contains(t, relevant));
+        Assert.DoesNotContain(texte, t => t.Contains("Besonderheiten") || t.Contains("Ruhiger Dienst"));
+    }
+
+    [Fact]
     public void Nach_dem_Update_kommen_Demo_Berichte_dazu()
     {
         s.DemoZuruecksetzen();

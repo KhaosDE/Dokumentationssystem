@@ -67,8 +67,7 @@ public sealed partial class Hauptfenster
         else if (AktiverBereich == "Dokumentation") Bewohner.NeuLesen();
     }
 
-    // Zähler offener Aufgaben in der Seitenleiste (rot, wenn etwas überfällig ist) und die
-    // Kurzliste über den Bewohnerkarten.
+    // Zähler offener Aufgaben in der Seitenleiste (rot, wenn etwas überfällig ist).
     public void AufgabenZaehlen()
     {
         var jetzt = DateTime.Now;
@@ -77,7 +76,6 @@ public sealed partial class Hauptfenster
         int ueberfaellig = offen.Count(a => AufgabenRegeln.Ueberfaellig(a, jetzt));
         Navigation.Single(n => n.Text == "Aufgaben").ZaehlerSetzen(offen.Count, ueberfaellig > 0,
             $"{offen.Count} offen" + (ueberfaellig > 0 ? $", {ueberfaellig} überfällig" : ""));
-        Bewohner.AufgabenSetzen(offen, jetzt);
     }
 
     // Zähler ungelesener Nachrichten des angemeldeten Benutzers (Seitenleiste und Kuvert in der Kopfzeile).

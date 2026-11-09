@@ -102,7 +102,8 @@ public sealed class AngebotFenster : Form
     public ComboBox[] Tage { get; } = new ComboBox[TerminZeilen];
     public TextBox[] Von { get; } = new TextBox[TerminZeilen];
     public TextBox[] Bis { get; } = new TextBox[TerminZeilen];
-    public TextBox Hoechstens { get; } = new() { Width = 60 };
+    public TextBox Teilnehmer { get; } = new() { Width = 60 };
+    public Label TeilnehmerZusatz { get; }
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public TextBox GiltAb { get; } = new DatumFeld() { Width = 100 };
     public ComboBox Anbieter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
@@ -147,8 +148,8 @@ public sealed class AngebotFenster : Form
             termine.Controls.AddRange([Tage[i], Von[i], Bis[i]]);
         }
         zeile("Termine (jede Woche)", termine);
-        zeile("Höchstens", Hoechstens);
-        Einzel.CheckedChanged += (_, _) => { Hoechstens.Enabled = !Einzel.Checked; if (Einzel.Checked) Hoechstens.Text = "1"; };
+        TeilnehmerZusatz = Formular.ZeileMitZusatz(raster, "Teilnehmer", "(Anzahl)", Teilnehmer);
+        Einzel.CheckedChanged += (_, _) => { Teilnehmer.Enabled = !Einzel.Checked; if (Einzel.Checked) Teilnehmer.Text = "1"; };
         zeile("Hinweis", Hinweis);
         GiltAb.Text = Datum.Text(DateOnly.FromDateTime(Jetzt()));
         zeile(bisher is null ? "Beginnt am" : "Änderung gilt ab", GiltAb);
@@ -165,7 +166,7 @@ public sealed class AngebotFenster : Form
                 Von[i].Text = f.Termine[i].Von.ToString("HH:mm");
                 Bis[i].Text = f.Termine[i].Bis.ToString("HH:mm");
             }
-            Hoechstens.Text = f.Hoechstens.ToString();
+            Teilnehmer.Text = f.Hoechstens.ToString();
             Hinweis.Text = f.Hinweis;
         }
         zeile(null, new Label { Text = bisher is null ? "" : "Die bisherige Fassung bleibt im Verlauf; bis zum Datum gilt sie weiter.", AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise });
@@ -192,7 +193,7 @@ public sealed class AngebotFenster : Form
                 Name = NameFeld.Text, Art = Einzel.Checked ? AngebotArt.Einzel : AngebotArt.Gruppe, Therapeut = Therapeut.Text, Ort = Ort.Text,
                 Termine = Enumerable.Range(0, TerminZeilen)
                     .Select(i => (Tage[i].SelectedIndex > 0 ? (DayOfWeek?)TherapieRegeln.Woche[Tage[i].SelectedIndex - 1] : null, Von[i].Text, Bis[i].Text)).ToList(),
-                Hoechstens = Hoechstens.Text, Hinweis = Hinweis.Text, GiltAb = GiltAb.Text, Kuerzel = Einstellungen.Laden().Kuerzel,
+                Hoechstens = Teilnehmer.Text, Hinweis = Hinweis.Text, GiltAb = GiltAb.Text, Kuerzel = Einstellungen.Laden().Kuerzel,
                 Anbieter = Anbieter.SelectedItem as string ?? "",
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.AngebotAnlegen(f) : speicher.AngebotAendern(bisher.Id, f);

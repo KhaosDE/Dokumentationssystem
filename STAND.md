@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.11** (Bauplan Schritt 29e: Kuvert für Nachrichten in der Kopfzeile).
+Stand: 09.11.2026. Version: **0.33.12** (Bauplan Schritt 29f: kleine Korrekturen).
 
 ## Aktuell
 
@@ -247,8 +247,13 @@ es einen roten Kreis mit Ausrufezeichen und daneben die Zahl („3“); der Hinw
 Nachrichten“. Ohne ungelesene ist es grau und ohne Zeichen. Ein Klick öffnet „Nachrichten“. Der Hinweis über der
 Liste im Bereich „Dokumentation“ entfällt; der Zähler in der Seitenleiste bleibt.
 
+Neu in 0.33.12: In den Demo-Daten tragen nur noch Berichte mit Inhalt für die nächste Schicht „Übergabe“ (nie „Keine
+Besonderheiten“). Beim Angebot heißt das Feld **„Teilnehmer“** mit „(Anzahl)“ darunter. Im Bereich „Dokumentation“
+steht keine Aufgabenliste mehr über den Berichten; die Bewohnerleiste liegt auf einer abgerundeten Fläche, der gewählte
+Name ist abgerundet hell hervorgehoben.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29f „Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation)“ (0.33.12).
+als Nächstes 29g „Tagesplan im normalen Programmstil“ (0.33.13).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1200,6 +1205,13 @@ als Nächstes 29f „Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation
   - Der Nachrichten-Hinweis über der Liste im Bereich „Dokumentation“ ist entfernt (Klasse `NachrichtenHinweis`
     gelöscht).
 
+- 0.33.12 — Bauplan Schritt 29f:
+  - Demo-Daten: eigene Texte für Berichte mit Übergabe (`berichte.json`, `uebergabe.berichte`); Test, dass keine
+    Demo-Übergabe „Keine Besonderheiten“ oder „Ruhiger Dienst“ trägt.
+  - Angebot: „Teilnehmer“ mit „(Anzahl)“ (`Formular.ZeileMitZusatz`); Fehlertext und Verlauf ohne „höchstens“.
+  - Dokumentation: Aufgaben-Kurzliste entfernt (Klasse `AufgabenKurzliste` gelöscht); Bewohnerleiste als
+    `KartenFlaeche`, Namen in `RundeListe` (gewählte Zeile abgerundet, heller Akzent, mit Fokus umrandet).
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1281,6 +1293,10 @@ als Nächstes 29f „Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.12): Die Demo-Übergaben bekommen eigene Texte statt einer Auswahl aus den Tagesberichten: So kann
+  kein zufälliger Bericht „Keine Besonderheiten“ zur Übergabe werden. Im Datenmodell heißt die Zahl weiter
+  `Hoechstens`, nur die Oberfläche sagt „Teilnehmer“ – keine Änderung an der Datenbank nötig.
 
 - 09.11.2026 (0.33.11): Das Kuvert zeigt die Zahl zusätzlich als Text neben dem roten Kreis, damit die Farbe nicht
   allein die Information trägt (`docs/gestaltung.md`). Ohne Anmeldung steht kein Kuvert da, weil es dann niemanden
@@ -2045,6 +2061,13 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.12:
+
+1. „Demo-Daten zurücksetzen“, dann Übergabe: kein Eintrag lautet „Keine Besonderheiten“ oder „Ruhiger Dienst“.
+2. Therapie → „Neues Angebot …“: Feld „Teilnehmer“, darunter klein „(Anzahl)“.
+3. Dokumentation: keine Aufgaben über den Berichten; links die Namen auf einer abgerundeten weißen Fläche, der
+   gewählte Name hell und abgerundet hinterlegt.
 
 Version 0.33.11:
 

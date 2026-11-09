@@ -1964,7 +1964,7 @@ Umfang:
 - Sonst bleibt die Kopfzeile wie in Schritt 26i.
 
 ## Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation)
-Status: freigegeben (Bauplan Schritt 29f; Vorgaben Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.12; Bauplan Schritt 29f; Vorgaben Tobi 09.11.2026)
 Datum: 09.11.2026
 Umfang:
 - **Demo-Daten:** Berichte wie „Keine Besonderheiten“ oder „Ruhiger Dienst“ bekommen nie
