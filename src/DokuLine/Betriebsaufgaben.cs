@@ -11,7 +11,11 @@ internal static class Betriebsaufgaben
 {
     public const string UpdateOrdner = "update";
 
-    public static string Vorbereitet => Pfade.ImDatenordner(UpdateOrdner, Aktualisierung.Datei);
+    // Im Programmordner, nicht im Datenordner: Die nächtliche Aufgabe läuft als SYSTEM – was sie startet, darf nur ein
+    // Administrator ablegen können (den Datenordner dürfen alle DokuLine-Benutzer ändern).
+    public static string Vorbereitet => Path.Combine(AppContext.BaseDirectory, UpdateOrdner, Aktualisierung.Datei);
+    public const string AlsAdministrator = "Das Update wird im Programmordner abgelegt, den nur Administratoren ändern dürfen. " +
+                                           "Bitte DokuLine dafür einmal mit Rechtsklick → „Als Administrator ausführen“ starten.";
 
     public static int Sichern()
     {

@@ -145,9 +145,11 @@ Rechner, dafür ist SQLite gebaut. DokuLine schaltet im Betrieb den WAL-Modus ei
 
 Im Betrieb aktualisiert sich DokuLine **nicht selbst**.
 
-1. **Einstellungen → System → Update vorbereiten …**: „Herunterladen“ (nur von den Releases dieses Programms) oder
-   „Datei wählen …“ (z. B. vom USB-Stick: `DokuLine.exe` und daneben `DokuLine.exe.sha256`). Die Prüfsumme wird
-   geprüft; passt sie nicht, wird nichts vorbereitet.
+1. DokuLine **als Administrator** starten (Rechtsklick → „Als Administrator ausführen“), dann **Einstellungen → System →
+   Update vorbereiten …**: „Herunterladen“ (nur von den Releases dieses Programms) oder „Datei wählen …“ (z. B. vom
+   USB-Stick: `DokuLine.exe` und daneben `DokuLine.exe.sha256`). Die Prüfsumme wird geprüft; passt sie nicht, wird
+   nichts vorbereitet. Abgelegt wird im Programmordner (`C:\Program Files\DokuLine\update\`), den nur Administratoren
+   ändern dürfen – die nächtliche Aufgabe läuft als SYSTEM und darf nichts starten, was ein normaler Benutzer ablegen kann.
 2. Eingespielt wird nachts durch eine zweite Aufgabe – nur, wenn niemand DokuLine offen hat:
 
    ```powershell

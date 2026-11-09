@@ -334,7 +334,7 @@ public sealed class UpdateFenster : Form
         }
         catch (Exception e) when (e is UpdateFehler or IOException or UnauthorizedAccessException or HttpRequestException or TaskCanceledException)
         {
-            Fehler.Text = e.Message;
+            Fehler.Text = e is UnauthorizedAccessException ? Betriebsaufgaben.AlsAdministrator : e.Message;
             Fehler.ForeColor = Stil.Beschluss.Text;
         }
         Fehler.Visible = true;
