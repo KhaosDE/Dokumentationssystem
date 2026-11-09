@@ -228,10 +228,10 @@ public sealed class AusgangslisteTests : IDisposable
     {
         var heute = db.AusgaengeLaden(Jetzt);
         Assert.Equal(5, heute.Count);
-        var clematis = DigitalerAusgang.StandFuer(P("Clematis"), heute, Jetzt.TimeOfDay);
+        var clematis = DigitalerAusgang.StandFuer(P("Clematis"), heute, Jetzt);
         Assert.NotNull(clematis.Laufend);
         Assert.False(clematis.Ueberfaellig);
-        var ginster = DigitalerAusgang.StandFuer(P("Ginster"), heute, Jetzt.TimeOfDay);
+        var ginster = DigitalerAusgang.StandFuer(P("Ginster"), heute, Jetzt);
         Assert.True(ginster.Ueberfaellig);
         Assert.Equal("Anton Ahorn hat den Ausgang wahrgenommen: 10:20–12:20 Uhr allein, 13:20–14:20 Uhr mit Bewohner.",
             DigitalerAusgang.Berichtstext(P("Ahorn"), heute.Where(e => e.BewohnerId == B("Ahorn"))));

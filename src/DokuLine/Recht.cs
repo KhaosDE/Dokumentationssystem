@@ -9,7 +9,9 @@ public static class Recht
 {
     public const string NichtAngemeldetAnzeige = "– bitte zuerst oben rechts anmelden –";
 
-    public static string Kuerzel => Einstellungen.Laden().Kuerzel;
+    public static string Kuerzel => Sitzung.Kuerzel;
+
+    public static void Anmelden(string kuerzel) => Sitzung.Anmelden(kuerzel);
 
     public static bool Angemeldet => Kuerzel.Length > 0;
 

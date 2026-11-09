@@ -126,3 +126,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.39.0 Schweigepflichtentbindungen: Auskunftsleiste in der Akte, Reiter „Schweigepflicht“, „Auskunft prüfen …“, Spalte „Auskunft“, Fristen (Bauplan 35).
 - 09.11.2026 — Claude Code: 0.40.0 Vitalwerte: Reiter mit Verlauf und Tabelle, Erfassen und Korrektur mit Grund, Grenzen nur nach Anordnung, Richtwerte als Hinweis, Messaufträge als Aufgaben, Druck (Bauplan 36).
 - 09.11.2026 — Claude Code: 0.41.0 Betriebsmodus für den Terminalserver: betrieb.json, Passwörter, Sperre, Zugriffsprotokoll, Sicherung, Update durch den Verwalter, Häuser, docs/betrieb.md (Bauplan 37).
+- 09.11.2026 — Claude Code: 0.41.1 abschließende Fehlersuche (Speicher, Regeln, Oberfläche, Sicherheit): Betrieb gehärtet (Sitzung, Passwörter, Sicherung als ZIP mit Ablage, Rücksicherung per Befehl), Regel-5-Korrekturen, Mitternacht, Tests.

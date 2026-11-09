@@ -75,7 +75,8 @@ public sealed partial class AngabeFenster
         var vorschlag = ZustaendigkeitRegeln.Vorschlag(zust, heute);
         Weg = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
         Weg.Items.AddRange([.. Enum.GetValues<Bestellweg>().Select(ZustaendigkeitRegeln.WegText)]);
-        Weg.SelectedIndex = (int)(b?.Weg ?? vorschlag);
+        // Ohne erfasste Zuständigkeit kein Vorschlag als Wert (ein Klick auf „Speichern“ hätte ihn sonst still übernommen).
+        Weg.SelectedIndex = (int)(b?.Weg ?? (zust is null ? Bestellweg.NichtErfasst : vorschlag));
         var personen = speicher.Personen(PersonGruppe.Forensik, true).Concat(speicher.Personen(PersonGruppe.Fosa, true)).Concat(speicher.Aerzte(true)).ToList();
         var person = Personenwahl(PersonGruppe.Fosa, b?.PersonId, "(keine Ansprechperson)", personen);
         feld("Bestellung über", Formular.Reihe(Weg, new Label { Text = $"Vorschlag: {ZustaendigkeitRegeln.WegText(vorschlag)}", AutoSize = true, ForeColor = Stil.TextLeise, Margin = new Padding(0, Stil.AbstandKlein, 0, 0) }));

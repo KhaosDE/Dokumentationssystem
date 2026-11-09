@@ -154,6 +154,13 @@ public sealed class AkteUebernahmeTests : IDisposable
         Assert.Null(AkteUebernahme.Zuordnen("Birke", liste));             // zwei mit dem Nachnamen: zum Bestätigen
         Assert.Equal(3, AkteUebernahme.Zuordnen("Birke Bernd", liste));
         Assert.Null(AkteUebernahme.Zuordnen("Muster, Max", liste));
+        Assert.Null(AkteUebernahme.Zuordnen("Ahorn, Berta", liste));     // anderer Vorname: nicht Anton Ahorn
+        Assert.Equal(1, AkteUebernahme.Zuordnen("Ahorn 2019", liste));
+        // Nur Dokumente und Bilder; Programme, Skripte, Verknüpfungen und Office-Dateien mit Makros nicht.
+        Assert.True(DokumentRegeln.Erlaubt("Bescheid.PDF"));
+        Assert.True(DokumentRegeln.Erlaubt("Foto.jpeg"));
+        foreach (string gefaehrlich in new[] { "start.exe", "skript.ps1", "verknuepfung.lnk", "makro.docm", "seite.html", "ohne_endung" })
+            Assert.False(DokumentRegeln.Erlaubt(gefaehrlich));
         var kategorien = DokumentRegeln.Kategorienvorgabe;
         Assert.Equal("Krankenkasse", AkteUebernahme.KategorieFuerOrdner("krankenkasse", kategorien));
         Assert.Equal("Ärztliches und Befunde", AkteUebernahme.KategorieFuerOrdner("Arztbriefe", kategorien));

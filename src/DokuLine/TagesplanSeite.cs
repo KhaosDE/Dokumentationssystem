@@ -98,7 +98,7 @@ public sealed class TagesplanSeite : Panel, IBereichSeite
         if (!z.Therapie || Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen) is not null) return false;
         try
         {
-            speicher.TeilnahmeSetzen(z.Termin.ZuteilungId!.Value, z.Termin.Tag, status, Einstellungen.Laden().Kuerzel, Jetzt());
+            speicher.TeilnahmeSetzen(z.Termin.ZuteilungId!.Value, z.Termin.Tag, status, Recht.Kuerzel, Jetzt());
             Fehler.Visible = false;
         }
         catch (Eingabefehler e)

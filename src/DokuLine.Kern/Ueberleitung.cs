@@ -87,7 +87,8 @@ public static class UeberleitungRegeln
                 : s.Dosis.Text;
             z.Add($"{v.Medikament} {v.Staerke}: {dosis}" + (s.Zustand == Zustand.Pausiert ? $" ({s.Text})" : ""));
         }
-        if (z.Count == 0) z.Add($"keine Medikamente (Stand {Datum.Text(heute)})");
+        // Der Plan kennt kein „keine“: Leer heißt nur „nichts eingetragen“ (Regel 5), nicht „nimmt nichts“.
+        if (z.Count == 0) z.Add($"im Medikamentenplan nichts eingetragen (Stand {Datum.Text(heute)}) – bitte nachfragen");
         else z.Insert(0, $"Stand {Datum.Text(heute)}:");
         return z;
     }
@@ -95,8 +96,10 @@ public static class UeberleitungRegeln
     public static List<string> BetreuungZeilen(UeberleitungDaten d)
     {
         var z = new List<string>();
-        var zust = d.Angaben.GetValueOrDefault(Angabe.Zustaendigkeit)?.Lesen<Zustaendigkeit>();
+        var zustFassung = d.Angaben.GetValueOrDefault(Angabe.Zustaendigkeit);
+        var zust = zustFassung?.Lesen<Zustaendigkeit>();
         bool forensik = ZustaendigkeitRegeln.InForensik(zust);
+        if (zustFassung is null) z.Add($"Zuständigkeit Forensik/FOSA: {Nicht}");
         var bf = d.Angaben.GetValueOrDefault(Angabe.Betreuung);
         if (bf is null) z.Add($"Betreuer: {Nicht}");
         else if (bf.Lesen<Betreuung>() is Betreuung bt)
@@ -177,7 +180,7 @@ public static class TextPdf
         {
             y -= 6;
             Zeile(a.Titel, 12, true);
-            foreach (var z in a.Zeilen) foreach (var teil in Umbrechen(z)) Zeile(teil, 10, false);
+            foreach (var z in a.Zeilen.SelectMany(z => z.Split('\n')).Select(z => z.TrimEnd('\r'))) foreach (var teil in Umbrechen(z)) Zeile(teil, 10, false);
         }
         return Bauen(seiten);
     }

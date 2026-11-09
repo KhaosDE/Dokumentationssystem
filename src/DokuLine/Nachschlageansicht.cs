@@ -191,7 +191,7 @@ public sealed class Nachschlageansicht : Panel
         flaeche.Controls.Add(neu);
         web = neu;
         // Daten der Ansicht (Cookies, Zwischenspeicher) im Datenordner, nicht neben der .exe.
-        var umgebung = await CoreWebView2Environment.CreateAsync(null, Pfade.ImDatenordner("webansicht"));
+        var umgebung = await CoreWebView2Environment.CreateAsync(null, Pfade.ImBenutzerordner("webansicht"));   // je Benutzer, nicht im gemeinsamen Ordner
         var optionen = umgebung.CreateCoreWebView2ControllerOptions();
         optionen.IsInPrivateModeEnabled = true;   // Cookies, Verlauf, Zwischenspeicher nur bis zum Schließen
         await neu.EnsureCoreWebView2Async(umgebung, optionen);

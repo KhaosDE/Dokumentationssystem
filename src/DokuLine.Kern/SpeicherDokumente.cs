@@ -89,6 +89,7 @@ public sealed partial class Speicher
         if (DokumentRegeln.Pruefen(e, Dokumentkategorien()) is { Count: > 0 } fehler) throw new Eingabefehler(fehler);
         var info = new FileInfo(quelle);
         if (!info.Exists) throw new Eingabefehler(["Die Datei gibt es nicht (mehr)."]);
+        if (!DokumentRegeln.Erlaubt(info.Name)) throw new Eingabefehler([DokumentRegeln.NichtErlaubtText]);
         if (info.Length > DokumentRegeln.Hoechstgroesse) throw new Eingabefehler(["Die Datei ist größer als 50 MB."]);
         string ordner = Ablage(bewohnerId);
         Directory.CreateDirectory(ordner);
@@ -133,6 +134,9 @@ public sealed partial class Speicher
         Recht(kuerzel, Funktionen.DokumenteAnsehen);
         var d = DokumentNach(id) ?? throw new Eingabefehler(["Dieses Dokument gibt es nicht mehr."]);
         if (d.Geloescht) throw new Eingabefehler(["Dieses Dokument wurde endgültig gelöscht."]);
+        // Der Name kommt aus der Datenbank: nur ein Dateiname in der Ablage des Bewohners, nur erlaubte Dateiarten.
+        if (Path.GetFileName(d.Datei) != d.Datei || d.Datei.Length == 0) throw new Eingabefehler(["Der Eintrag zeigt nicht in die Ablage – bitte die Leitung informieren."]);
+        if (!DokumentRegeln.Erlaubt(d.Datei)) throw new Eingabefehler([DokumentRegeln.NichtErlaubtText]);
         string pfad = Path.Combine(Ablage(d.BewohnerId), d.Datei);
         if (!File.Exists(pfad)) throw new Eingabefehler([$"Die Datei fehlt in der Ablage ({d.Datei})."]);
         using (var strom = File.OpenRead(pfad))
@@ -197,7 +201,8 @@ public sealed partial class Speicher
     {
         string wurzel = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(Pfad))!, DokumentRegeln.Ordner);
         Ausfuehren("DELETE FROM dokumente", transaktion);   // Ereignisse folgen (CASCADE)
-        if (Directory.Exists(wurzel)) Directory.Delete(wurzel, recursive: true);   // nur die Ablage dieser Datenbank
+        // Die alten Dateien löscht erst AblageAufraeumen nach dem Speichern: Bricht die Transaktion ab, sind die alten
+        // Zeilen wieder da – ihre Dateien müssen es auch sein.
         var jetzt = Uhr();
         var heute = DateOnly.FromDateTime(jetzt);
         var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
@@ -212,6 +217,23 @@ public sealed partial class Speicher
                 inhalt.Length, Convert.ToHexString(SHA256.HashData(inhalt)), "EF", jetzt.AddDays(-20), null, transaktion);
         }
         SetzeMeta(DemoDokumente, "1", transaktion);
+    }
+
+    // Dateien und Ordner der Ablage ohne Eintrag in der Datenbank löschen (nach dem Neuladen der Demo).
+    private void AblageAufraeumen()
+    {
+        string wurzel = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(Pfad))!, DokumentRegeln.Ordner);
+        if (!Directory.Exists(wurzel)) return;
+        var bekannt = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using (var befehl = Befehl("SELECT bewohner_id, datei FROM dokumente", null, []))
+        using (var leser = befehl.ExecuteReader())
+            while (leser.Read()) bekannt.Add(Path.Combine(wurzel, leser.GetInt64(0).ToString(CultureInfo.InvariantCulture), leser.GetString(1)));
+        foreach (string datei in Directory.EnumerateFiles(wurzel, "*", SearchOption.AllDirectories).Where(d => !bekannt.Contains(d)).ToList())
+            try { File.Delete(datei); }
+            catch (IOException) { }
+        foreach (string ordner in Directory.EnumerateDirectories(wurzel).Where(o => !Directory.EnumerateFileSystemEntries(o).Any()).ToList())
+            try { Directory.Delete(ordner); }
+            catch (IOException) { }
     }
 }
 

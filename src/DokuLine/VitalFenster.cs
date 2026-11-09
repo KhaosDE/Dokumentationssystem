@@ -137,7 +137,7 @@ public sealed class VitalGrenzenFenster : Form
         var arten = speicher.Vitalarten();
         Art.Items.AddRange([.. arten]);
         AuftragArt.Items.AddRange([.. arten]);
-        Art.SelectedIndex = AuftragArt.SelectedIndex = 0;
+        if (arten.Count > 0) Art.SelectedIndex = AuftragArt.SelectedIndex = 0;
         Arzt.Items.Add("(bitte wählen)");
         arztIds.Add(null);
         foreach (var p in speicher.Personen(PersonGruppe.Arzt, nurAktive: true)) { Arzt.Items.Add(p.Anzeige); arztIds.Add(p.Id); }
@@ -196,7 +196,7 @@ public sealed class VitalGrenzenFenster : Form
         Von.PlaceholderText = blutdruck ? "sys von" : "von";
         Bis.PlaceholderText = blutdruck ? "sys bis" : "bis";
         var g = speicher.Grenzen(bewohner.Id!.Value).GetValueOrDefault(Art.SelectedItem as string ?? "");
-        Bisher.Text = g is null ? "Bisher: keine Anordnung." : "Bisher: " + VitalRegeln.GrenzeText(g, AngabenAnsicht.PersonText(speicher));
+        Bisher.Text = g is null ? "Bisher: keine Anordnung." : "Bisher: " + VitalRegeln.GrenzeText(g, AngabenAnsicht.PersonText(speicher), speicher.Richtwerte());
     }
 
     private bool Ausfuehren(Action aktion)
@@ -210,7 +210,10 @@ public sealed class VitalGrenzenFenster : Form
         DateOnly am;
         try { am = Datum.Lesen(AngeordnetAm.Text, "Angeordnet am"); }
         catch (FormatException x) { throw new Eingabefehler([x.Message]); }
-        var g = new VitalGrenze(0, bewohner.Id!.Value, (string)Art.SelectedItem!, VitalRegeln.Lesen(Von.Text, "von"), VitalRegeln.Lesen(Bis.Text, "bis"),
+        if (Art.SelectedItem is not string art) throw new Eingabefehler(["Bitte einen Wert wählen."]);
+        var r = speicher.Richtwerte();
+        double? Wert(TextBox feld, string name) => VitalRegeln.Lesen(feld.Text, name) is double w ? VitalRegeln.Speicherwert(art, w, r) : null;
+        var g = new VitalGrenze(0, bewohner.Id!.Value, art, Wert(Von, "von"), Wert(Bis, "bis"),
             Von2.Visible ? VitalRegeln.Lesen(Von2.Text, "diastolisch von") : null, Bis2.Visible ? VitalRegeln.Lesen(Bis2.Text, "diastolisch bis") : null,
             arztIds[Math.Max(0, Arzt.SelectedIndex)], am, Recht.Kuerzel, Jetzt());
         if (!g.Gilt) throw new Eingabefehler(["Bitte einen Bereich eintragen (oder „Anordnung aufheben“)."]);
@@ -220,6 +223,7 @@ public sealed class VitalGrenzenFenster : Form
 
     public bool Aufheben() => Ausfuehren(() =>
     {
+        if (Art.SelectedItem is null) throw new Eingabefehler(["Bitte einen Wert wählen."]);
         speicher.GrenzeSetzen(new VitalGrenze(0, bewohner.Id!.Value, (string)Art.SelectedItem!, null, null, null, null, null,
             DateOnly.FromDateTime(Jetzt()), Recht.Kuerzel, Jetzt()), Recht.Kuerzel, Jetzt());
         GrenzeZeigen();
@@ -234,6 +238,7 @@ public sealed class VitalGrenzenFenster : Form
 
     public bool AuftragAnlegen() => Ausfuehren(() =>
     {
+        if (AuftragArt.SelectedItem is null) throw new Eingabefehler(["Bitte einen Wert wählen."]);
         var rhythmus = (Messrhythmus)Rhythmus.SelectedIndex;
         int tag = rhythmus switch { Messrhythmus.Woechentlich => Wann.SelectedIndex, Messrhythmus.Monatlich => Wann.SelectedIndex + 1, _ => 0 };
         speicher.MessauftragAnlegen(new Messauftrag(0, bewohner.Id!.Value, (string)AuftragArt.SelectedItem!, rhythmus, tag, (Schicht)Schicht_.SelectedIndex,

@@ -153,7 +153,7 @@ public static class SchweigepflichtRegeln
                 if (e.Form.Trim().Length > 0) teile.Add(e.Form.Trim());
             }
             if (e.DokumentId is long d && dokument(d) is string titel) teile.Add($"Dokument: {titel}");
-            if (e.WiderrufenAm is DateOnly w) teile.Add($"widerrufen am {Datum.Text(w)}");
+            if (e.WiderrufenAm is DateOnly w) teile.Add(w <= heute ? $"widerrufen am {Datum.Text(w)}" : $"Widerruf ab {Datum.Text(w)}");
             return (Wer(e, name), string.Join(" · ", teile.Where(t => t.Length > 0)), e.Stand == Entbindungsstand.NichtErfasst);
         })];
 
@@ -171,6 +171,7 @@ public static class SchweigepflichtRegeln
     }
 
     // Überleitungsbogen: die ganze Leiste – wer entbunden ist (auch die Klinik, wenn eingetragen) und wer nicht.
+    // Ohne die Zeichen ✓/✕ (die PDF-Schrift kennt sie nicht); das Wort steht ohnehin in jeder Zeile.
     public static List<string> FuerUeberleitung(AngabeFassung? f, Func<long?, string> name, DateOnly heute) =>
-        f is null ? [AngabenRegeln.NichtErfasst] : [.. Leiste(f, name, heute).Select(m => m.Text)];
+        [.. Leiste(f, name, heute).Select(m => m.Text.TrimStart('✓', '✕', '?', ' '))];
 }

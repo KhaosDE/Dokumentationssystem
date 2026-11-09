@@ -37,7 +37,9 @@ public sealed class AnzeigeDienst : IDisposable
         server = null;
         Fehler = null;
         uhr.Stop();
-        if (!werte.An) return;
+        // Im Betrieb aus: Auf dem Terminalserver liefe je Sitzung ein Server, und die Einstellung liegt im gemeinsamen Ordner,
+        // den alle Benutzer ändern dürfen (das Recht „Anzeige verwalten“ wäre umgangen). Offener Punkt in STAND.md.
+        if (!werte.An || Betrieb.Aktiv) return;
         StandSetzen();
         var fest = werte;
         server = AnzeigeServer.Starten(fest.Port, ziel => AnzeigeRegeln.Antwort(ziel, Stand, fest, Farben, DateTime.Now, Stil.DemoHinweis), out var fehler);

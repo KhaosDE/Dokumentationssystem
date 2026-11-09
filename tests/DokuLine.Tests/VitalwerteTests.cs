@@ -90,6 +90,10 @@ public sealed class VitalwerteTests : IDisposable
         var mmol = r with { BlutzuckerEinheit = VitalRegeln.MmolL };
         Assert.Equal("5,4 mmol/l", VitalRegeln.WertText(W(VitalRegeln.Blutzucker, 97), mmol));
         Assert.Equal(97, VitalRegeln.Speicherwert(VitalRegeln.Blutzucker, 5.4, mmol));
+        // Grenzen sind wie die Werte in mg/dl gespeichert und werden in der eingestellten Einheit gezeigt.
+        var grenze = new VitalGrenze(1, 1, VitalRegeln.Blutzucker, 72, 180, null, null, null, DateOnly.FromDateTime(Jetzt), "EF", Jetzt);
+        Assert.StartsWith("Blutzucker: 4–10 (angeordnet", VitalRegeln.GrenzeText(grenze, _ => "", mmol));
+        Assert.StartsWith("Blutzucker: 72–180 (angeordnet", VitalRegeln.GrenzeText(grenze, _ => "", r));
         var letzte = VitalRegeln.Letzte([W(VitalRegeln.Gewicht, 75), W(VitalRegeln.Puls, 70) with { Id = 2 }, W(VitalRegeln.Puls, 90) with { Id = 3, Zeit = Jetzt.AddDays(-1) }], r, "1,78 m");
         Assert.Equal(["Puls: 70 /min (09.11.2026 09:00)", "Gewicht: 75 kg (09.11.2026 09:00)", "BMI: 23,7 (aus Gewicht und Größe)"], letzte);
     }

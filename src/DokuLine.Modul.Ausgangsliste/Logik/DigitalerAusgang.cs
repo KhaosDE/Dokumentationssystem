@@ -32,6 +32,7 @@ public class DigitalStand
     public AusgangEintrag? Laufend { get; init; }
     public bool Ueberfaellig { get; init; }
     public TimeSpan? ZurueckBis { get; init; }
+    public DateTime? ZurueckUm { get; init; }   // mit Datum: auch über Mitternacht richtig
     public List<AusgangEintrag> Erledigt { get; init; } = [];
 }
 
@@ -58,17 +59,19 @@ public static class DigitalerAusgang
     }
 
     // Stand für eine Karte aus den Einträgen des Tages.
-    public static DigitalStand StandFuer(Platz platz, List<AusgangEintrag> heute, TimeSpan jetzt)
+    public static DigitalStand StandFuer(Platz platz, List<AusgangEintrag> heute, DateTime jetzt)
     {
-        var eigene = heute.Where(e => e.BewohnerId == platz.BewohnerId).OrderBy(e => e.Beginn).ToList();
+        var eigene = heute.Where(e => e.BewohnerId == platz.BewohnerId).OrderBy(e => e.Datum).ThenBy(e => e.Beginn).ToList();
         var laufend = eigene.LastOrDefault(e => e.Unterwegs);
         TimeSpan? bis = laufend != null ? ZurueckBis(platz, laufend) : null;
+        DateTime? um = laufend is not null && bis is TimeSpan b ? laufend.Datum.Date + b : null;
         return new DigitalStand
         {
             Laufend = laufend,
             ZurueckBis = bis,
-            Ueberfaellig = bis is TimeSpan b && jetzt > b,
-            Erledigt = eigene.Where(e => !e.Unterwegs).ToList(),
+            ZurueckUm = um,
+            Ueberfaellig = um is DateTime u && jetzt > u,
+            Erledigt = eigene.Where(e => !e.Unterwegs && e.Datum.Date == jetzt.Date).ToList(),
         };
     }
 

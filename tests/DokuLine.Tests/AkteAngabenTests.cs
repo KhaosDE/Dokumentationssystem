@@ -68,6 +68,12 @@ public sealed class AkteAngabenTests : IDisposable
         var abgelaufen = Eine(Angabe.Kostentraeger, new Kostentraeger { Name = "T", Bewilligungen = [new("L", null, Heute.AddDays(-400), Heute.AddDays(-2))] })!;
         Assert.Equal(MarkenArt.Beschluss, abgelaufen.Art);
         Assert.StartsWith("Kostenzusage abgelaufen seit", abgelaufen.Text);
+        // Lücke zwischen zwei Bewilligungen: heute gilt keine, auch wenn eine spätere schon eingetragen ist.
+        var luecke = new Kostentraeger { Name = "T", Bewilligungen = [new("L", null, Heute.AddDays(-400), Heute.AddDays(-2)), new("L", null, Heute.AddDays(5), Heute.AddDays(400))] };
+        var markeLuecke = Eine(Angabe.Kostentraeger, luecke)!;
+        Assert.Equal(MarkenArt.Beschluss, markeLuecke.Art);
+        Assert.Equal($"Kostenzusage: heute keine geltende (nächste ab {Datum.Text(Heute.AddDays(5))})", markeLuecke.Text);
+        Assert.Null(AngabenRegeln.GeltendeBewilligung(luecke, Heute));
         Assert.Empty(AngabenRegeln.Fristen(new Dictionary<Angabe, AngabeFassung> { [Angabe.Betreuung] = F(Angabe.Betreuung, null) }, Heute));
     }
 
@@ -92,6 +98,8 @@ public sealed class AkteAngabenTests : IDisposable
             new Kostentraeger { Name = "", Bewilligungen = [new("", null, Heute, Heute.AddDays(-1))] }, Heute, "EF", Jetzt)).Fehler;
         Assert.Equal(3, fehler.Count);
         Assert.Throws<Eingabefehler>(() => s.AngabeSpeichern(id, Angabe.Betreuung, new Betreuung { PersonId = null }, Heute, "EF", Jetzt));
+        // Eine leere Liste sähe aus wie „keine Angehörigen bekannt“ (Regel 5).
+        Assert.Contains("„keine Angehörigen bekannt“", Assert.Throws<Eingabefehler>(() => s.AngabeSpeichern(id, Angabe.Angehoerige, new Angehoerige(), Heute, "EF", Jetzt)).Fehler[0]);
     }
 
     [Fact]

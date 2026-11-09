@@ -29,7 +29,9 @@ public static class AkteUebernahme
         if (voll.Count == 1) return voll[0].Id;
         if (voll.Count > 1) return null;
         var nachname = bewohner.Where(b => teile.Contains(b.Nachname.ToLower(De))).ToList();
-        return nachname.Count == 1 ? nachname[0].Id : null;
+        // Nur der Nachname im Ordnernamen (ohne weiteres Wort, das ein anderer Vorname sein könnte): „Ahorn, Berta“ gehört
+        // nicht zu Anton Ahorn.
+        return nachname.Count == 1 && teile.All(t => t == nachname[0].Nachname.ToLower(De) || t.Any(char.IsDigit)) ? nachname[0].Id : null;
     }
 
     // Gleicher Name wie eine Kategorie (ohne Groß/klein), sonst Vorschlag nach Stichwörtern.
@@ -44,17 +46,19 @@ public static class AkteUebernahme
         {
             var dateien = new List<UebernahmeDatei>();
             // Dateien direkt im Ordner des Bewohners: Kategorie nach dem Dateinamen.
-            foreach (var f in ordner.EnumerateFiles().Where(Sichtbar))
+            foreach (var f in ordner.EnumerateFiles().Where(Uebernehmbar))
                 dateien.Add(Datei(f, DokumentRegeln.KategorieVorschlag(f.Name, kategorien)));
             foreach (var unter in ordner.EnumerateDirectories().Where(Sichtbar))
             {
                 string kategorie = KategorieFuerOrdner(unter.Name, kategorien);
-                foreach (var f in unter.EnumerateFiles("*", SearchOption.AllDirectories).Where(Sichtbar)) dateien.Add(Datei(f, kategorie));
+                foreach (var f in unter.EnumerateFiles("*", SearchOption.AllDirectories).Where(Uebernehmbar)) dateien.Add(Datei(f, kategorie));
             }
             plan.Add(new UebernahmeOrdner(ordner.FullName, ordner.Name, Zuordnen(ordner.Name, bewohner), dateien));
         }
         return plan;
     }
+
+    private static bool Uebernehmbar(FileInfo f) => Sichtbar(f) && DokumentRegeln.Erlaubt(f.Name);
 
     private static bool Sichtbar(FileSystemInfo f) => !f.Attributes.HasFlag(FileAttributes.Hidden) && !f.Attributes.HasFlag(FileAttributes.System)
                                                       && !f.Name.StartsWith('.') && !f.Name.Equals("Thumbs.db", StringComparison.OrdinalIgnoreCase);

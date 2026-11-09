@@ -166,7 +166,7 @@ public sealed class VerordnungFenster : Form
                 Morgens = Mengen[0].Text, Mittags = Mengen[1].Text, Abends = Mengen[2].Text, Nachts = Mengen[3].Text,
                 Bedarf = Bedarf.Checked, BedarfAnlass = Anlass.Text, BedarfHoechstens = Hoechstens.Text,
                 Beginn = Beginn.Text, Arzt = Arzt.Text, AngeordnetAm = AngeordnetAm.Text, Hinweis = Hinweis.Text,
-                Kuerzel = Einstellungen.Laden().Kuerzel,
+                Kuerzel = Recht.Kuerzel,
             }, m?.Anzeige ?? "", Jetzt());
             Gespeichert = speicher.VerordnungSpeichern(v);
         }
@@ -275,7 +275,7 @@ public sealed class AenderungFenster : Form
 
     public bool Speichern()
     {
-        string kuerzel = Einstellungen.Laden().Kuerzel;
+        string kuerzel = Recht.Kuerzel;
         var jetzt = Jetzt();
         try
         {

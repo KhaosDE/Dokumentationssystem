@@ -17,14 +17,15 @@ internal static class Program
         Messung.An = args.Contains("--messen");
 
         // Betriebsmodus (Bauplan 37): betrieb.json im Programmordner. Fehlerhaft → nicht starten (nie still in die Demo).
+        bool aufgabe = Betriebsaufgaben.IstAufgabe(args);
         try { Betrieb.Setzen(Betrieb.Laden(AppContext.BaseDirectory)); }
         catch (SpeicherFehler e)
         {
+            if (aufgabe) return Betriebsaufgaben.Fehler(args, e.Message);
             MessageBox.Show(e.Message, Programmversion.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
-        if (Betrieb.Aktiv && args.Contains("--sicherung")) return Betriebsaufgaben.Sichern();
-        if (Betrieb.Aktiv && args.Contains("--update-einspielen")) return Betriebsaufgaben.UpdateEinspielen();
+        if (aufgabe) return Betrieb.Aktiv ? Betriebsaufgaben.Ausfuehren(args) : Betriebsaufgaben.Fehler(args, $"Nur im Betrieb – {Betrieb.Datei} fehlt im Programmordner.");
 
         // Übergang: Daten aus %APPDATA%\Dokumentationssystem einmal nach %APPDATA%\DokuLine
         // kopieren – vor allem anderen, was in den Datenordner schreibt.
@@ -90,7 +91,7 @@ internal static class Program
                 speicher.Dispose();
                 return 0;
             }
-            Einstellungen.Aendern(w => w with { Kuerzel = angemeldet.Kuerzel });
+            Recht.Anmelden(angemeldet.Kuerzel);
         }
         using (speicher)
         using (var fenster = new Hauptfenster(speicher))

@@ -79,7 +79,7 @@ public sealed class MedikamenteSeite : Panel
     public bool Sperren(Medikament m, bool gesperrt)
     {
         if (Recht.Grund(speicher, Funktionen.MedikamenteVerwalten) is not null) return false;
-        speicher.MedikamentSperren(m.Id, gesperrt, Einstellungen.Laden().Kuerzel);
+        speicher.MedikamentSperren(m.Id, gesperrt, Recht.Kuerzel);
         Aktualisieren();
         return true;
     }
@@ -375,7 +375,7 @@ public sealed class MedikamentFenster : Form
             {
                 Wirkstoff = Wirkstoff.Text, Handelsnamen = Handelsnamen.Text, Staerken = Staerken.Text,
                 Darreichungsform = Darreichungsform.Text, Quelle = Quelle.Text, Zulassungsnummer = Zulassungsnummer.Text, Bestaetigt = Bestaetigt.Checked,
-                GeprueftAm = GeprueftAm.Text, Gesperrt = bisher?.Gesperrt ?? false, Kuerzel = Einstellungen.Laden().Kuerzel,
+                GeprueftAm = GeprueftAm.Text, Gesperrt = bisher?.Gesperrt ?? false, Kuerzel = Recht.Kuerzel,
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.MedikamentAnlegen(fassung) : speicher.MedikamentAendern(bisher.Id, fassung);
         }

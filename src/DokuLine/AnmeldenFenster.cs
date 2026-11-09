@@ -101,6 +101,7 @@ public sealed class AnmeldenFenster : Form
                     AnmeldeErgebnis.AendernPflicht => PasswortAendernFragen(m!.Kuerzel) ? m : throw new Eingabefehler(["Bitte zuerst ein eigenes Passwort festlegen."]),
                     AnmeldeErgebnis.Gesperrt => throw new Eingabefehler([PasswortRegeln.GesperrtText]),
                     AnmeldeErgebnis.OhnePasswort => throw new Eingabefehler(["Für dieses Kürzel ist noch kein Passwort festgelegt. Bitte an die Leitung oder den Verwalter wenden."]),
+                    AnmeldeErgebnis.Abgelaufen => throw new Eingabefehler([$"Das Einmalpasswort war nur {PasswortRegeln.EinmalTage} Tage gültig. Bitte ein neues bei der Leitung oder dem Verwalter holen."]),
                     _ => throw new Eingabefehler(["Kürzel oder Passwort stimmt nicht."]),
                 };
             }

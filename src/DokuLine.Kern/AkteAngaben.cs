@@ -124,6 +124,10 @@ public static class AngabenRegeln
     public static AngabeFassung? Aktuell(IEnumerable<AngabeFassung> fassungen, DateOnly heute) =>
         fassungen.Where(f => f.Ab <= heute).OrderBy(f => f.Ab).ThenBy(f => f.Id).LastOrDefault();
 
+    // Die Bewilligung, die heute gilt – ohne Rückgriff (eine Lücke zwischen zwei Bewilligungen soll auffallen).
+    public static Bewilligung? GeltendeBewilligung(Kostentraeger k, DateOnly heute) =>
+        k.Bewilligungen.Where(b => b.Von <= heute && heute <= b.Bis).OrderByDescending(b => b.Bis).FirstOrDefault();
+
     // Die Bewilligung, die heute gilt; sonst die zuletzt endende.
     public static Bewilligung? AktuelleBewilligung(Kostentraeger k, DateOnly heute) =>
         k.Bewilligungen.Where(b => b.Von <= heute && heute <= b.Bis).OrderByDescending(b => b.Bis).FirstOrDefault()
@@ -141,10 +145,18 @@ public static class AngabenRegeln
         if (aktuell.GetValueOrDefault(Angabe.Betreuung)?.Lesen<Betreuung>() is Betreuung bt) Frist("Betreuung", bt.UeberpruefungBis, BetreuungWochen);
         if (aktuell.GetValueOrDefault(Angabe.Krankenkasse)?.Lesen<Krankenkasse>() is Krankenkasse kk && kk.Befreiung == JaNein.Ja)
             Frist("Befreiung", kk.BefreitBis, BefreiungWochen);
-        if (aktuell.GetValueOrDefault(Angabe.Kostentraeger)?.Lesen<Kostentraeger>() is Kostentraeger kt && AktuelleBewilligung(kt, heute) is Bewilligung bw)
-            Frist("Kostenzusage", bw.Bis, KostenzusageWochen);
+        if (aktuell.GetValueOrDefault(Angabe.Kostentraeger)?.Lesen<Kostentraeger>() is Kostentraeger kt && kt.Bewilligungen.Count > 0)
+        {
+            if (GeltendeBewilligung(kt, heute) is Bewilligung bw) Frist("Kostenzusage", bw.Bis, KostenzusageWochen);
+            else marken.Add(new Marke(MarkenArt.Beschluss, KeineKostenzusageText(kt, heute)));
+        }
         return marken;
     }
+
+    public static string KeineKostenzusageText(Kostentraeger k, DateOnly heute) =>
+        k.Bewilligungen.Where(b => b.Von > heute).OrderBy(b => b.Von).FirstOrDefault() is Bewilligung n
+            ? $"Kostenzusage: heute keine geltende (nächste ab {Datum.Text(n.Von)})"
+            : $"Kostenzusage abgelaufen seit {Datum.Text(k.Bewilligungen.Max(b => b.Bis))}";
 
     // Kurzzeile für die Stammdaten („Betreuer: …“, „Krankenkasse: …“, „Kostenträger: … bis …“).
     public static string Kurz(Angabe art, AngabeFassung? f, Func<long?, string> personName, DateOnly heute)
@@ -165,7 +177,10 @@ public static class AngabenRegeln
                     .Where(x => x.Length > 0).DefaultIfEmpty("weder Forensik noch FOSA")),
             Angabe.Bestellweg when f.Lesen<BestellwegAngabe>() is BestellwegAngabe w => ZustaendigkeitRegeln.WegText(w.Weg),
             Angabe.Kostentraeger when f.Lesen<Kostentraeger>() is Kostentraeger k =>
-                AktuelleBewilligung(k, heute) is Bewilligung b ? $"{k.Name} bis {Datum.Text(b.Bis)}" : k.Name,
+                GeltendeBewilligung(k, heute) is Bewilligung b ? $"{k.Name} bis {Datum.Text(b.Bis)}"
+                : k.Bewilligungen.Count > 0 ? $"{k.Name} – {KeineKostenzusageText(k, heute)}" : k.Name,
+            Angabe.Schweigepflicht => SchweigepflichtRegeln.Kurz(f, personName, heute).Kurz,
+            Angabe.Personenbeschreibung => AbgaengigkeitRegeln.BeschreibungKurz(f),
             _ => NichtErfasst,
         };
     }
@@ -283,6 +298,8 @@ public static class AngabenRegeln
             case Angehoerige a:
                 if (a.Personen.GroupBy(p => p.PersonId).Any(g => g.Count() > 1)) fehler.Add("Eine Person steht doppelt in der Liste.");
                 if (a.Personen.Any(p => p.Beziehung.Trim().Length == 0)) fehler.Add("Bitte bei jedem Angehörigen die Beziehung eintragen (z. B. Mutter).");
+                // Leer gespeichert sähe aus wie „keine bekannt“ (Regel 5) – das muss man ausdrücklich ankreuzen.
+                if (a.Personen.Count == 0) fehler.Add("Bitte mindestens eine Person eintragen oder „keine Angehörigen bekannt“ ankreuzen.");
                 break;
             case AerzteAngabe a:
                 if ((a.Hausarzt.Stand == ArztStand.Arzt && a.Hausarzt.PersonId is null) || (a.Psychiater.Stand == ArztStand.Arzt && a.Psychiater.PersonId is null))

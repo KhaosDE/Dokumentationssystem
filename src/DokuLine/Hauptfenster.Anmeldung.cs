@@ -9,7 +9,7 @@ public sealed partial class Hauptfenster
     // „Angemeldet: TST – Name“ und „Abmelden (F12)“ oben rechts; ohne Passwort, nur für die Vorführung.
     public void BenutzerAnzeigen()
     {
-        string kuerzel = Einstellungen.Laden().Kuerzel;
+        string kuerzel = Recht.Kuerzel;
         Kopf.BenutzerSetzen(kuerzel.Length > 0 ? kuerzel : null, speicher.MitarbeiterLesen(kuerzel)?.Name);
         AbmeldenEintrag.Text = kuerzel.Length > 0 ? Abmeldung.KnopfText : "Anmelden …";
         AbmeldenEintrag.AccessibleName = AbmeldenEintrag.Text;
@@ -20,7 +20,7 @@ public sealed partial class Hauptfenster
 
     public void BenutzerWaehlen(string kuerzel)
     {
-        Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
+        Recht.Anmelden(kuerzel);
         RechteNeu();
     }
 
@@ -135,10 +135,14 @@ public sealed partial class Hauptfenster
 
     // Abmelden: offene Fenster schließen (vorher fragen, angefangene Eingaben als Entwurf), dann liegt die
     // Sperrfläche über allem und das Anmeldefenster darüber. false = abgebrochen.
+    // Bei der automatischen Sperre ausgeblendete Windows-Dialoge; nach der Anmeldung wieder sichtbar.
+    private readonly List<IntPtr> verborgeneDialoge = [];
+
     // automatisch: Sperre nach Leerlauf im Betrieb – ohne Frage, angefangene Eingaben werden Entwurf.
     public bool Abmelden(bool automatisch = false)
     {
         if (Gesperrt) return false;
+        if (automatisch) verborgeneDialoge.AddRange(Leerlauf.DialogeVerbergen());
         var offen = OffeneFenster();
         if (offen.Count > 0)
         {
@@ -179,6 +183,8 @@ public sealed partial class Hauptfenster
         if (Dialog.Zeigen(fenster, this) == DialogResult.OK && fenster.Angemeldet is Kern.Mitarbeiter m)
         {
             BenutzerWaehlen(m.Kuerzel);
+            Leerlauf.DialogeZeigen(verborgeneDialoge);
+            verborgeneDialoge.Clear();
             if (gesperrt)
             {
                 Sperren(false);

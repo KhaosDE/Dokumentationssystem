@@ -44,22 +44,53 @@ public static class Betrieb
         };
         if (w.Datenordner.Length == 0 || !Path.IsPathFullyQualified(w.Datenordner))
             throw new SpeicherFehler($"{Datei}: „datenordner“ fehlt oder ist kein vollständiger Pfad (z. B. D:\\DokuLine\\Daten).");
-        if (w.Sicherungsordner.Length > 0 && !Path.IsPathFullyQualified(w.Sicherungsordner))
-            throw new SpeicherFehler($"{Datei}: „sicherungsordner“ ist kein vollständiger Pfad.");
+        // Die Sicherung schreibt mit mehr Rechten als ein Benutzer: nie in einen Ordner, den Benutzer ändern dürfen.
+        if (w.Sicherungsordner.Length == 0 || !Path.IsPathFullyQualified(w.Sicherungsordner))
+            throw new SpeicherFehler($"{Datei}: „sicherungsordner“ fehlt oder ist kein vollständiger Pfad (z. B. E:\\DokuLine-Sicherungen).");
+        if (Innerhalb(w.Sicherungsordner, w.Datenordner))
+            throw new SpeicherFehler($"{Datei}: „sicherungsordner“ darf nicht im Datenordner liegen (den dürfen alle Benutzer ändern).");
         return w;
     }
 
     public static void Setzen(BetriebWerte? werte) => Werte = werte;
 
+    private static bool Innerhalb(string pfad, string ordner)
+    {
+        string p = Path.TrimEndingDirectorySeparator(Path.GetFullPath(pfad)), o = Path.TrimEndingDirectorySeparator(Path.GetFullPath(ordner));
+        return p.Equals(o, StringComparison.OrdinalIgnoreCase) || p.StartsWith(o + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Eine Datenbank, die einmal im Betrieb geöffnet wurde, öffnet die Demo nie (sie würde Demo-Daten laden).
+    public const string MetaSchluessel = "betrieb";
+    public const string DemoVerbotenText = "Diese Datenbank gehört zum Betrieb. Die Demo öffnet sie nicht – sie würde dort Demo-Daten laden. " +
+                                           "Im Betrieb wird DokuLine mit der Datei betrieb.json im Programmordner gestartet.";
+
     public static string Sicherungsordner => Werte is { Sicherungsordner.Length: > 0 } w ? w.Sicherungsordner : Pfade.ImDatenordner("sicherungen");
 }
 
-public enum AnmeldeErgebnis { Ok, AendernPflicht, Falsch, Gesperrt, OhnePasswort }
+// Wer in diesem Programmlauf angemeldet ist. Im Betrieb nur im Arbeitsspeicher: Die Einstellungsdatei gehört dem
+// Benutzer und ließe sich ändern (dort steht nur der Vorschlag für die nächste Anmeldung). In der Demo wie bisher.
+public static class Sitzung
+{
+    private static string angemeldet = "";
+
+    public static string Kuerzel => Betrieb.Aktiv ? angemeldet : Einstellungen.Laden().Kuerzel;
+
+    // Nach erfolgreicher Anmeldung bzw. beim Abmelden ("").
+    public static void Anmelden(string kuerzel)
+    {
+        angemeldet = kuerzel;
+        Einstellungen.Aendern(w => w with { Kuerzel = kuerzel });
+    }
+}
+
+public enum AnmeldeErgebnis { Ok, AendernPflicht, Falsch, Gesperrt, OhnePasswort, Abgelaufen }
 
 // Passwörter nur als Hash (PBKDF2 mit SHA-256 aus .NET, keine neue Abhängigkeit); Vergleich in fester Zeit.
 public static class PasswortRegeln
 {
-    public const int Iterationen = 210_000, SalzBytes = 16, HashBytes = 32, MindestLaenge = 10, Fehlversuche = 5;
+    // 600 000 Durchläufe: Empfehlung von OWASP für PBKDF2-SHA256 (die Datei mit den Hashes können Benutzer lesen, docs/betrieb.md).
+    public const int Iterationen = 600_000, SalzBytes = 16, HashBytes = 32, MindestLaenge = 10, Fehlversuche = 5, EinmalTage = 7;
     public const string GesperrtText = "Nach 5 Fehlversuchen gesperrt. Entsperren kann die Leitung oder der Verwalter.";
 
     public static (string Hash, string Salz) Hashen(string passwort, byte[]? salz = null)
@@ -104,10 +135,10 @@ public sealed record Sicherung(string Pfad, DateTime Zeit, long Groesse);
 // Nächtliche Sicherung: 30 tägliche und 12 monatliche Stände; eine Sicherung je Tag.
 public static class SicherungRegeln
 {
-    public const string Praefix = "dokuline-";
+    public const string Praefix = "dokuline-", Endung = ".zip", DatenbankEintrag = "dokuline.db";
     public const int Taeglich = 30, Monatlich = 12, WarnTage = 2;
 
-    public static string Name(DateTime zeit) => $"{Praefix}{zeit:yyyy-MM-dd_HHmm}.db";
+    public static string Name(DateTime zeit) => $"{Praefix}{zeit:yyyy-MM-dd_HHmm}{Endung}";
 
     public static DateTime? ZeitAus(string datei)
     {

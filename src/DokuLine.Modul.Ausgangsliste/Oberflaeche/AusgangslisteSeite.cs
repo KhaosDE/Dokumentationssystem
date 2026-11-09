@@ -72,7 +72,7 @@ public sealed class AusgangslisteSeite : ModulSeite
             if (DigitalAn)
             {
                 var heute = db.AusgaengeLaden(jetzt);
-                var staende = plaetze.Select(p => DigitalerAusgang.StandFuer(p, heute, jetzt.TimeOfDay)).ToList();
+                var staende = plaetze.Select(p => DigitalerAusgang.StandFuer(p, heute, jetzt)).ToList();
                 teile.Add($"{staende.Count(s => s.Laufend is not null)} unterwegs");
                 int ueber = staende.Count(s => s.Ueberfaellig);
                 if (ueber > 0) teile.Add($"{ueber} überfällig");
@@ -109,7 +109,7 @@ public sealed class AusgangslisteSeite : ModulSeite
         var abgaengig = db.Speicher.OffeneAbgaengigkeiten();
         int wartezeit = Einstellungen.Laden().WartezeitMinuten;
         var alle = plaetze.Where(p => imBereich.Contains(p.BewohnerId))
-            .Select(p => new ListenZeile(p, jetzt, DigitalAn ? DigitalerAusgang.StandFuer(p, ausgaenge, jetzt.TimeOfDay) : null,
+            .Select(p => new ListenZeile(p, jetzt, DigitalAn ? DigitalerAusgang.StandFuer(p, ausgaenge, jetzt) : null,
                 kuecheZimmer.Contains(p.Zimmernummer) && p.Anwesend, wartezeit, abgaengig.GetValueOrDefault(p.BewohnerId))).ToList();
         bool nurUnterwegs = DigitalAn && NurUnterwegs.Checked;
         var gezeigt = alle.Where(z => (!nurUnterwegs || z.Unterwegs) && (!NurBeschraenkung.Checked || z.Platz.Status == AnwesenheitsStatus.Ausgangsbeschraenkung)).ToList();
@@ -263,7 +263,7 @@ public static class Aktionen
 
     public static void Beginnen(Datenbank db, Platz p, string art, Control besitzer, Action danach)
     {
-        try { db.AusgangBeginnen(p.BewohnerId, art, Einstellungen.Laden().Kuerzel); }
+        try { db.AusgangBeginnen(p.BewohnerId, art, Sitzung.Kuerzel); }
         catch (Eingabefehler e) { FehlerMelden(besitzer, e); return; }
         danach();
     }
@@ -272,7 +272,7 @@ public static class Aktionen
     {
         var laufend = db.AusgaengeLaden(db.Jetzt()).LastOrDefault(e => e.BewohnerId == p.BewohnerId && e.Unterwegs);
         if (laufend is null) { danach(); return; }
-        try { db.AusgangBeenden(laufend.Id, Einstellungen.Laden().Kuerzel); }
+        try { db.AusgangBeenden(laufend.Id, Sitzung.Kuerzel); }
         catch (Eingabefehler e) { FehlerMelden(besitzer, e); return; }
         danach();
     }

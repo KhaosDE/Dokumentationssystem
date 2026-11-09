@@ -74,6 +74,9 @@ public sealed partial class Speicher
         long neu;
         using (var transaktion = db.BeginTransaction())
         {
+            // In derselben Transaktion noch einmal: Hat ein anderer Arbeitsplatz gerade korrigiert, gäbe es sonst zwei Nachfolger.
+            if (WertIn(transaktion, "SELECT 1 FROM vitalwerte WHERE vorgaenger = $i", ("$i", id)) is not null)
+                throw new Eingabefehler(["Dieser Wert wurde schon korrigiert."]);
             neu = VitalwertEinfuegen(alt.BewohnerId, alt.Zeit, alt.Art, speicher, wert2, bemerkung, kuerzel, jetzt, id, grund.Trim(), transaktion);
             transaktion.Commit();
         }

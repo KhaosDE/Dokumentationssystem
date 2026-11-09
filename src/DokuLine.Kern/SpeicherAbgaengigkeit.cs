@@ -54,6 +54,11 @@ public sealed partial class Speicher
         long id;
         using (var transaktion = db.BeginTransaction())
         {
+            if (WertIn(transaktion, """
+                SELECT 1 FROM abgaengigkeiten a WHERE a.bewohner_id = $b
+                    AND NOT EXISTS (SELECT 1 FROM abgaengigkeit_ereignisse e WHERE e.abgaengigkeit_id = a.id AND e.art = 'zurueck')
+                """, ("$b", bewohnerId)) is not null)
+                throw new Eingabefehler(["Für diesen Bewohner läuft schon eine Meldung."]);   // gleichzeitig von einem anderen Arbeitsplatz
             Ausfuehren("INSERT INTO abgaengigkeiten (bewohner_id, meldung, gemeldet, kuerzel) VALUES ($b, $m, $z, $k)", transaktion,
                 ("$b", bewohnerId), ("$m", JsonSerializer.Serialize(m)), ("$z", Zeit(jetzt)), ("$k", kuerzel.Trim()));
             id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);

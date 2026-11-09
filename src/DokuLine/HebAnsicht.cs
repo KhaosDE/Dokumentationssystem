@@ -208,7 +208,7 @@ public sealed class HebNeuFenster : Form
                 bis = Datum.Lesen(Bis.Text, "Ende");
             }
             catch (FormatException x) { throw new Eingabefehler([x.Message]); }
-            Angelegt = speicher.HebAnlegen(bewohner.Id!.Value, Art, von, bis, Einstellungen.Laden().Kuerzel);
+            Angelegt = speicher.HebAnlegen(bewohner.Id!.Value, Art, von, bis, Recht.Kuerzel);
         }
         catch (Eingabefehler e)
         {

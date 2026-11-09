@@ -128,7 +128,7 @@ public sealed class AngebotFenster : Form
         var raster = Formular.Raster(out var zeile);
         zeile("Name", NameFeld);
         // Anbieter: nur, wofür der Angemeldete Angebote anlegen darf; beim Ändern bleibt der bisherige wählbar.
-        var anbieter = speicher.AngebotAnbieter(Einstellungen.Laden().Kuerzel);
+        var anbieter = speicher.AngebotAnbieter(Recht.Kuerzel);
         if (bisher is not null && !anbieter.Contains(bisher.Anbieter)) anbieter.Insert(0, bisher.Anbieter);
         Anbieter.Items.AddRange([.. anbieter]);
         if (Anbieter.Items.Count > 0) Anbieter.SelectedItem = bisher?.Anbieter ?? anbieter[0];
@@ -193,7 +193,7 @@ public sealed class AngebotFenster : Form
                 Name = NameFeld.Text, Art = Einzel.Checked ? AngebotArt.Einzel : AngebotArt.Gruppe, Therapeut = Therapeut.Text, Ort = Ort.Text,
                 Termine = Enumerable.Range(0, TerminZeilen)
                     .Select(i => (Tage[i].SelectedIndex > 0 ? (DayOfWeek?)TherapieRegeln.Woche[Tage[i].SelectedIndex - 1] : null, Von[i].Text, Bis[i].Text)).ToList(),
-                Hoechstens = Teilnehmer.Text, Hinweis = Hinweis.Text, GiltAb = GiltAb.Text, Kuerzel = Einstellungen.Laden().Kuerzel,
+                Hoechstens = Teilnehmer.Text, Hinweis = Hinweis.Text, GiltAb = GiltAb.Text, Kuerzel = Recht.Kuerzel,
                 Anbieter = Anbieter.SelectedItem as string ?? "",
             }, Jetzt());
             Gespeichert = bisher is null ? speicher.AngebotAnlegen(f) : speicher.AngebotAendern(bisher.Id, f);
@@ -283,7 +283,7 @@ public sealed class ZuteilenFenster : Form
                 Warnung.Visible = true;
                 return false;
             }
-            speicher.Zuteilen(angebot.Id, b.Id!.Value, ab, bis, Einstellungen.Laden().Kuerzel, Jetzt());
+            speicher.Zuteilen(angebot.Id, b.Id!.Value, ab, bis, Recht.Kuerzel, Jetzt());
         }
         catch (Eingabefehler e)
         {
@@ -343,7 +343,7 @@ public sealed class BeendenFenster : Form
             DateOnly ab;
             try { ab = Datum.Lesen(Ab.Text, "Ab"); }
             catch (FormatException x) { throw new Eingabefehler([x.Message]); }
-            speicher.ZuteilungBeenden(zuteilungen[Teilnehmer.SelectedIndex].Id, ab, Einstellungen.Laden().Kuerzel, Jetzt());
+            speicher.ZuteilungBeenden(zuteilungen[Teilnehmer.SelectedIndex].Id, ab, Recht.Kuerzel, Jetzt());
         }
         catch (Eingabefehler e)
         {

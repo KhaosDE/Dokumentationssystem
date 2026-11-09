@@ -82,7 +82,7 @@ public sealed class BezugFenster : Form
         try
         {
             var ab = Datum.Lesen(Ab.Text, "Gilt ab");
-            string von = Einstellungen.Laden().Kuerzel;
+            string von = Recht.Kuerzel;
             speicher.BezugspflegeSetzen(bewohner.Id!.Value, Gewaehlt(Bezugspflege), ab, von);
             speicher.EinzeltrainerSetzen(bewohner.Id!.Value, Gewaehlt(Trainer), Art.Text, ab, von);
         }

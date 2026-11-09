@@ -26,7 +26,7 @@ public sealed class AusgangslisteModul : IModul
         var p = db.Platz(bewohner.Id!.Value);
         if (p is null) return [];
         var stand = speicher.ModulAn(DigitalerAusgang.Schluessel)
-            ? DigitalerAusgang.StandFuer(p, db.AusgaengeLaden(jetzt), jetzt.TimeOfDay)
+            ? DigitalerAusgang.StandFuer(p, db.AusgaengeLaden(jetzt), jetzt)
             : null;
         return AusgangsMarken.Fuer(p, jetzt, stand, wartezeit: Einstellungen.Laden().WartezeitMinuten, abgaengig: speicher.OffeneAbgaengigkeit(bewohner.Id!.Value));
     }

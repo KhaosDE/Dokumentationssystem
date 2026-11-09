@@ -37,8 +37,8 @@ public static partial class AusgangsMarken
             if (abgelaufen) marken.Add(new Marke(MarkenArt.NichtErfasst, $"{Verlauf.Status(p.Status)}: {frist}"));
         }
         if (digital?.Laufend is AusgangEintrag e)
-            marken.Add(digital.Ueberfaellig && digital.ZurueckBis is TimeSpan bis
-                ? abgaengig is null && AbgaengigkeitRegeln.WartezeitVorbei(bis, jetzt.TimeOfDay, wartezeit)
+            marken.Add(digital.Ueberfaellig && digital.ZurueckBis is TimeSpan bis && digital.ZurueckUm is DateTime um
+                ? abgaengig is null && AbgaengigkeitRegeln.WartezeitVorbei(um, jetzt, wartezeit)
                     ? new Marke(MarkenArt.NichtErfasst, AbgaengigkeitRegeln.UeberschrittenText(bis))
                     : new Marke(MarkenArt.NichtErfasst, $"überfällig seit {DigitalerAusgang.Uhrzeit(bis)}")
                 : new Marke(MarkenArt.Ausgang, $"unterwegs seit {DigitalerAusgang.Uhrzeit(e.Beginn)} ({e.Art})"));

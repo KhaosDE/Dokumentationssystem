@@ -56,7 +56,7 @@ public sealed class NachrichtenSeite : Panel, IBereichSeite
         Controls.Add(leiste);
     }
 
-    public static string Ich => Einstellungen.Laden().Kuerzel;
+    public static string Ich => Recht.Kuerzel;
 
     public string KopfText
     {

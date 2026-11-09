@@ -30,7 +30,8 @@ public sealed partial class EinstellungenSeite
     {
         // Persönlich
         AbmeldenKnopf.Click += (_, _) => AbmeldenGewuenscht?.Invoke();
-        Karte("Persönlich", "Angemeldet als", "Anmelden mit dem Kürzel, ohne Passwort (Demo). Das Kürzel steht bei Berichten, Übergabe und Aufgaben. Benutzer wechseln: abmelden (F12) und mit dem anderen Kürzel anmelden.",
+        Karte("Persönlich", "Angemeldet als", (Betrieb.Aktiv ? "Anmelden mit Kürzel und Passwort." : "Anmelden mit dem Kürzel, ohne Passwort (Demo).") +
+            " Das Kürzel steht bei Berichten, Übergabe und Aufgaben. Benutzer wechseln: abmelden (F12) und mit dem anderen Kürzel anmelden.",
             Reihe(Angemeldet, AbmeldenKnopf));
         FarbeKnopf.Click += (_, _) =>
         {
@@ -91,8 +92,9 @@ public sealed partial class EinstellungenSeite
 
         // Anzeige für den Fernseher
         AnzeigeKnopf.Click += (_, _) => { using var f = new AnzeigeFenster(speicher, Anzeige); Dialog.Zeigen(f, FindForm()); Geaendert?.Invoke(); };
-        Karte("Wohnbereich", "Anzeige für den Fernseher", "Laufende Therapien je Wohnbereich als nur lesende Seite im lokalen Netz, mit Zugangscode. " +
-            "Standardmäßig aus; gilt für diesen Rechner.", AnzeigeKnopf, Funktionen.AnzeigeVerwalten);
+        if (!Betrieb.Aktiv)
+            Karte("Wohnbereich", "Anzeige für den Fernseher", "Laufende Therapien je Wohnbereich als nur lesende Seite im lokalen Netz, mit Zugangscode. " +
+                "Standardmäßig aus; gilt für diesen Rechner.", AnzeigeKnopf, Funktionen.AnzeigeVerwalten);
         VollbildBereich.Items.AddRange([.. speicher.Wohnbereiche().Select(w => (object)w.Name)]);
         if (VollbildBereich.Items.Count > 0) VollbildBereich.SelectedIndex = 0;
         VollbildKnopf.Click += (_, _) => VollbildZeigen();

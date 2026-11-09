@@ -98,7 +98,9 @@ public sealed class UeberleitungFenster : Form
     {
         byte[] pdf = [];
         if (Fehlerhaft(() => pdf = Pdf()) || PdfZiel() is not string ziel) return false;
-        return !Fehlerhaft(() => File.WriteAllBytes(ziel, pdf));
+        if (Fehlerhaft(() => File.WriteAllBytes(ziel, pdf))) return false;
+        speicher.Zugriff(Recht.Kuerzel, bewohner.Id, ZugriffRegeln.Gedruckt, "Überleitungsbogen (PDF)");
+        return true;
     }
 
     // Kopie in die Dokumente (wenn man darf), Bericht und Statusmeldung auf Wunsch, dann die Druckvorschau.

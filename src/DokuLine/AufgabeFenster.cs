@@ -201,7 +201,7 @@ public sealed class WeitergebenFenster : Form
     {
         try
         {
-            speicher.AufgabeWeitergeben(aufgabe.Id, Einstellungen.Laden().Kuerzel, Notiz.Text, Jetzt());
+            speicher.AufgabeWeitergeben(aufgabe.Id, Recht.Kuerzel, Notiz.Text, Jetzt());
         }
         catch (Eingabefehler e)
         {
