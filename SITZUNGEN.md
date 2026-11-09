@@ -94,3 +94,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — 29b freigegeben nach Entwurf 1 (Tage abgegrenzt, Rand in Schichtfarbe statt Schicht-Marke, nur Marken Wichtig, Medikation geändert, Bedarfsgabe); 29h um kompakte, schnellere Übergabe ergänzt; 29p freigegeben (Chat „Programme/Apps“).
 - 09.11.2026 — 29n neu gefasst: Therapie als eigener Bereich mit Laufende Therapien, Angebote, Wochenpläne (neu), Dokumentation, Aufgaben, Nachrichten (Chat „Programme/Apps“).
 - 09.11.2026 — Neu 29q: Aufgaben je Bewohner oder Bereich; 29a: Verzeichnisse in die Einstellungen; 30: Arztzuteilung (Hausarzt, Psychiater) bei der Aufnahme (Chat „Programme/Apps“).
+- 09.11.2026 — Vorschlag 37 (offen): Betriebsmodus für den Terminalserver (ein Server für beide Häuser, Thin Clients) (Chat „Programme/Apps“).

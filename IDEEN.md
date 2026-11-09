@@ -94,6 +94,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 34 | Abgängigkeitsmeldung | 0.38.0 |
 | 35 | Schweigepflichtentbindungen | 0.39.0 |
 | 36 | Vitalwerte | 0.40.0 |
+| 37 | Betriebsmodus für den Terminalserver (offen) | 0.41.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2222,3 +2223,60 @@ Umfang:
 - Bestehende Aufgaben ohne Bewohner: beim Update einmalig dem Bereich des Rechners zuordnen, auf
   dem sie angelegt wurden; ist der unbekannt, R1 und in `STAND.md` vermerken.
 - Demo-Daten: Bereichsaufgaben für jeden Bereich getrennt.
+
+## Betriebsmodus für den Terminalserver
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK; dazu Änderung von `CLAUDE.md` Regel 4)
+Datum: 09.11.2026
+Was: Neben der Demo eine Betriebsfassung desselben Programms für den echten Einsatz auf dem Server
+der Einrichtung. Gebaut und getestet wird nur mit ausgedachten Daten.
+Warum: Tobi (09.11.2026): Die Demo ist für die Präsentation, gebraucht wird auch schon eine Version
+für den echten Betrieb. Es gibt **einen Server**, auf den **beide Häuser** zugreifen; alle
+Arbeitsplätze sind kleine Remote-Geräte (Thin Clients) mit Remotedesktop-Sitzung auf diesem
+Server (Terminalserver). Eine eigene IT gibt es nicht; die Verwaltung übernimmt Tobi.
+Folge für die Technik: DokuLine läuft für alle auf **einem** Rechner. Die SQLite-Datei liegt
+dort lokal (kein Netzlaufwerk) — das ist der von SQLite vorgesehene Fall „mehrere Programme, ein
+Rechner“. Ein eigener Datenbankserver ist vorerst nicht nötig.
+Umfang (Vorschlag):
+- **Ein Programm, zwei Modi.** Demo wie bisher. Betriebsmodus über eine Datei `betrieb.json`
+  im Programmordner (legt nur der Verwalter an, nie im Repository). Im Betriebsmodus: keine
+  Demo-Daten, kein „Demo-Daten zurücksetzen“, kein Anmelden ohne Passwort, kein Selbst-Update,
+  kein Demo-Hinweis; stattdessen in der Statusleiste „Betrieb“.
+- **Ordner auf dem Server:** Programm in einem Ordner, den nur der Verwalter ändern darf (z. B.
+  `C:\Programme\DokuLine\`); Daten in einem gemeinsamen Ordner (z. B. `D:\DokuLine\Daten\`)
+  statt `%APPDATA%` (das ist je Benutzer getrennt). Datenbank im WAL-Modus. Anleitung für die
+  Ordnerrechte (Windows-Gruppe „DokuLine-Benutzer“ ändern, alle anderen nichts).
+- **Anmeldung mit eigenem Passwort** je Mitarbeiter: Passwort nur als sicherer Hash
+  (PBKDF2 aus .NET, keine neue Abhängigkeit); erstes Anmelden mit Einmalpasswort und Pflicht zum
+  Ändern; Sperre nach 5 Fehlversuchen (Entsperren durch Leitung/Verwalter); **automatische
+  Sperre** nach einstellbarer Zeit ohne Eingabe (Vorgabe 10 Minuten); F12 sperrt sofort.
+- **Zugriffsprotokoll:** wer wann welche Akte geöffnet, gedruckt oder geändert hat; einsehbar nur
+  mit eigenem Recht (Leitung, Datenschutz); Aufbewahrungsdauer einstellbar.
+- **Sicherung:** automatisch jede Nacht (Sicherungsfunktion von SQLite, auch bei laufendem
+  Betrieb), 30 tägliche und 12 monatliche Stände, Sicherungsordner einstellbar (möglichst auf
+  einem anderen Laufwerk); Prüfung jeder Sicherung; Rücksicherung mit Assistent. Warnung in der
+  Kopfzeile für Verwalter, wenn die letzte Sicherung älter als 2 Tage ist.
+- **Update im Betrieb:** kein Selbst-Update beim Start. Stattdessen „Update vorbereiten …“ für
+  den Verwalter: Datei herunterladen (oder von einem USB-Stick wählen), Prüfsumme prüfen, Einspielen
+  zu einer festgelegten Zeit (z. B. nachts), danach alte Fassung als Rückweg behalten.
+- **Mehrere Häuser:** Bereiche gehören zu einem Haus (Einstellungen: Häuser und ihre Bereiche);
+  Kalender „Haus“ je Haus; Bereichswahl zeigt die Bereiche des eigenen Hauses, andere nur mit
+  Recht.
+- **Technischer Schutz der Datei:** Vorschlag Laufwerksverschlüsselung des Servers (BitLocker) und
+  Ordnerrechte; eine Verschlüsselung der Datenbank selbst (z. B. SQLCipher, BSD-Lizenz) erst,
+  wenn der Datenschutz sie fordert — Begründung in `STAND.md`.
+- **Windows-Server-Version:** unbekannt (offener Punkt im Vault). Claude Code prüft, welche
+  Windows-Server-Versionen .NET 10 unterstützt, und schreibt das Ergebnis in `docs/betrieb.md`.
+- **`docs/betrieb.md` (neu)**, in einfachen Worten für Tobi: Installation Schritt für Schritt,
+  Ordnerrechte, erste Benutzer anlegen, Sicherung prüfen und zurücksichern, Update einspielen,
+  was tun bei Störungen. Dazu eine **Liste der Freigaben** vor dem ersten echten Datensatz:
+  Einrichtung/Träger, Datenschutzbeauftragter (Datenschutz-Folgenabschätzung, technische und
+  organisatorische Maßnahmen), Mitarbeitervertretung, Prüfung „Medizinprodukt ja/nein“ für den
+  Medikamentenplan.
+- Tests: alles im Betriebsmodus mit ausgedachten Daten; eine „Betriebsprobe“ auf einem
+  Test-Rechner, bevor der echte Server berührt wird.
+
+Vorgeschlagene Änderung von `CLAUDE.md`, Regel 4 (erst nach Tobis OK eintragen): „**Kein
+Echtbetrieb ohne Freigabe.** Die Demo zeigt dauerhaft ‚Demo — ausgedachte Daten‘. Echte Daten nur
+im Betriebsmodus und erst nach schriftlicher Freigabe durch Einrichtung, Datenschutz und
+Mitarbeitervertretung. Im Repository, in Tests und Commits nie echte Daten — auch nicht aus dem
+Betrieb.“
