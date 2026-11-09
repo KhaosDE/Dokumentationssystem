@@ -614,13 +614,14 @@ public static class Demodaten
         public string Email { get; set; } = "";
         public string Telefon { get; set; } = "";
         public int VorTagen { get; set; } = 30;
+        public bool Keine { get; set; }   // „keine gesetzliche Betreuung“ (0.33.3)
     }
 
     // Betreuer aus daten/demo/betreuer.json (Nachname des Bewohners → Betreuer).
     public static List<(string Nachname, Kern.Betreuer Betreuer)> Betreuer(DateTime jetzt) =>
         Lesen<BetreuerDatei>("betreuer.json").Betreuer.Select(b => (b.Bewohner, new Kern.Betreuer
         {
-            Name = b.Name, Stelle = b.Stelle, Email = b.Email, Telefon = b.Telefon, Geaendert = jetzt.Date.AddDays(-b.VorTagen).AddHours(10), Kuerzel = "EF",
+            Name = b.Name, Stelle = b.Stelle, Email = b.Email, Telefon = b.Telefon, Geaendert = jetzt.Date.AddDays(-b.VorTagen).AddHours(10), Kuerzel = "EF", Keine = b.Keine,
         })).ToList();
 
     // ----- Visiten (Schritt 26) -----

@@ -186,9 +186,9 @@ public sealed class EinstellungenSeite : Panel
         Nacht.AccessibleName = "Beginn Nachtdienst";
         Karte("Wohnbereich", "Schichtzeiten", "Beginn von Früh, Spät und Nacht für diesen Bereich (alle Rechner). Danach richten sich Schicht der Berichte, Übergabe und Aufgaben.",
             Reihe(Frueh, Spaet, Nacht), Funktionen.EinstellungenBereich);
-        BeschlussFrist.ValueChanged += (_, _) => { if (!laedt) Einstellungen.Aendern(w => w with { BeschlussFristTage = (int)BeschlussFrist.Value }); };
+        BeschlussFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { BeschlussFristTage = (int)BeschlussFrist.Value }); };
         Karte("Wohnbereich", "Beschluss endet bald", "So viele Tage vorher zeigt die Übersicht „Beschluss endet in …“.", BeschlussFrist, Funktionen.EinstellungenBereich);
-        HebFrist.ValueChanged += (_, _) => { if (!laedt) Einstellungen.Aendern(w => w with { HebFristMonate = (int)HebFrist.Value }); };
+        HebFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { HebFristMonate = (int)HebFrist.Value }); };
         Karte("Wohnbereich", "HEB fällig", "So viele Monate nach dem letzten Bogen gilt der HEB-Bogen als fällig.", HebFrist, Funktionen.EinstellungenBereich);
         logoVorschau.Paint += (_, e) => LogoZeichnen(e.Graphics);
         LogoKnopf.Click += (_, _) => LogoWaehlen();
@@ -222,7 +222,7 @@ public sealed class EinstellungenSeite : Panel
         }
 
         // Aufgaben, Fahrzeuge (eigene Fenster mit „Speichern“)
-        VorlagenKnopf.Click += (_, _) => { using var f = new VorlagenFenster(speicher); Dialog.Zeigen(f, FindForm()); Geaendert?.Invoke(); };
+        VorlagenKnopf.Click += (_, _) => { FensterZeigen(new VorlagenFenster(speicher)); Geaendert?.Invoke(); };
         Karte("Aufgaben", "Standardaufgaben", "Aufgaben, die zu Beginn jeder Schicht von selbst entstehen (z. B. Rundgänge im Nachtdienst). Ohne Recht nur ansehen.", VorlagenKnopf);
         FahrzeugeKnopf.Click += (_, _) => { using var f = new FahrzeugeFenster(speicher); Dialog.Zeigen(f, FindForm()); Geaendert?.Invoke(); };
         Karte("Fahrzeuge", "Fahrzeugliste", "Firmenwagen für Fahrten (Arzt, Ausflug, Sporttherapie); hinzufügen, stilllegen, wieder aktivieren.", FahrzeugeKnopf, Funktionen.Fahrzeuge);
@@ -253,9 +253,9 @@ public sealed class EinstellungenSeite : Panel
             string.Join(", ", ExterneAdressen.Nachschlagebereiche) + "). Aus: nur „Im Browser öffnen“.", NachschlageAnsicht);
 
         // Verwaltung
-        MitarbeiterKnopf.Click += (_, _) => { using var f = new MitarbeiterFenster(speicher); Dialog.Zeigen(f, FindForm()); };
-        ListenKnopf.Click += (_, _) => { using var f = new ListenFenster(speicher); Dialog.Zeigen(f, FindForm()); };
-        RechteKnopf.Click += (_, _) => { using var f = new RechteFenster(speicher); Dialog.Zeigen(f, FindForm()); };
+        MitarbeiterKnopf.Click += (_, _) => FensterZeigen(new MitarbeiterFenster(speicher));
+        ListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher));
+        RechteKnopf.Click += (_, _) => FensterZeigen(new RechteFenster(speicher));
         AerzteKnopf.Click += (_, _) => { using var f = new AerzteFenster(speicher); Dialog.Zeigen(f, FindForm()); };
         Karte("Verwaltung", "Mitarbeiter", "Mitarbeiter mit Bereichen, Positionen und Qualifikation (Assistenzkraft oder Fachkraft). Die Bereichsleitung verwaltet ihren Bereich.", MitarbeiterKnopf);
         Karte("Verwaltung", "Bereiche und Positionen", "Listen zum Zuordnen; stilllegen statt löschen, solange jemand zugeordnet ist.", ListenKnopf);
@@ -272,7 +272,7 @@ public sealed class EinstellungenSeite : Panel
             ort, Funktionen.EinstellungenBereich, darunter: true);
         Karte("System", "Sicherung", "Noch nicht gebaut (siehe STAND.md, offene Punkte). Die Datenbank ist eine Datei im Datenordner bzw. im gemeinsamen Ordner.",
             new Label { Text = "–", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche });
-        AutoUpdate.CheckedChanged += (_, _) => { if (!laedt) Einstellungen.Aendern(w => w with { AutoUpdate = AutoUpdate.Checked }); };
+        AutoUpdate.CheckedChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { AutoUpdate = AutoUpdate.Checked }); };
         Karte("System", "Update", "Beim Start nach einer neuen Version suchen (nur die Releases dieses Programms). Abschaltbar auch mit „--kein-update“.",
             AutoUpdate, Funktionen.EinstellungenBereich);
         DemoKnopf.Click += (_, _) => DemoGewuenscht?.Invoke();
@@ -321,13 +321,13 @@ public sealed class EinstellungenSeite : Panel
             HebFrist.Value = Math.Clamp(werte.HebFristMonate, (int)HebFrist.Minimum, (int)HebFrist.Maximum);
             LogoLaden(Einstellungen.LogoPfad());
             foreach (var (schluessel, haken) in Module) haken.Checked = speicher.ModulAn(schluessel);
-            ModulHakenAbgleichen();
             foreach (var art in Vorlagen.Keys) VorlageAnzeigen(art);
             NachschlageAnsicht.Checked = werte.NachschlageAnsicht;
             OrtAnzeigen(werte.DatenbankOrdner);
             AutoUpdate.Checked = werte.AutoUpdate;
             WebAnsichtStand.Text = $"WebView2 {Nachschlageansicht.Laufzeit}";
             foreach (var k in Karten) k.Sperren(k.Funktion is string r ? Recht.Grund(speicher, r) : null);
+            ModulHakenAbgleichen();   // 0.33.3: nach den Karten – deren Sperre gab die Untermodule sonst wieder frei
             // Erst nach den Karten: Deren Sperre setzt die Knöpfe sonst wieder frei. Die eigene Farbe braucht eine Anmeldung.
             foreach (var k in new[] { FarbeKnopf, FarbeVorgabeKnopf }) Stil.Sperren(k, ich is null ? RechteRegeln.NichtAngemeldetText : null);
             Stil.Sperren(MitarbeiterKnopf, Recht.Darf(speicher, Funktionen.MitarbeiterAlle) ? null : Recht.Grund(speicher, Funktionen.MitarbeiterBereich));
@@ -398,6 +398,13 @@ public sealed class EinstellungenSeite : Panel
     public bool SchichtzeitenUebernehmen()
     {
         if (laedt) return false;
+        // Unverändert: nichts zu tun – auch ohne Recht kein Fehler beim Verlassen des Felds (0.33.3).
+        var bisher = speicher.Schichtzeiten(Einstellungen.Laden().Bereich);
+        if ((Frueh.Text.Trim(), Spaet.Text.Trim(), Nacht.Text.Trim()) == (bisher.Frueh.ToString("HH:mm"), bisher.Spaet.ToString("HH:mm"), bisher.Nacht.ToString("HH:mm")))
+        {
+            Fehler.Visible = fehlerZeigen = false;
+            return true;
+        }
         if (Recht.Grund(speicher, Funktionen.EinstellungenBereich) is string grund) return FehlerZeigen(grund);
         Kern.Schichtzeiten zeiten;
         try { zeiten = Kern.Schichtzeiten.AusEingabe(Frueh.Text, Spaet.Text, Nacht.Text); }
@@ -415,6 +422,22 @@ public sealed class EinstellungenSeite : Panel
         if (laedt || speicher.ModulAn(schluessel) == an) return;
         if (Recht.Grund(speicher, Funktionen.Module) is string grund) { FehlerZeigen(grund); return; }
         speicher.ModulSetzen(schluessel, an);   // Hauptfenster baut Seitenleiste und Akte neu (ModuleGeaendert)
+    }
+
+    // Ein Fenster der Einstellungen (Mitarbeiter, Rechte …): danach Werte und Sperren neu – die Rechte des Angemeldeten
+    // können sich geändert haben (0.33.3).
+    private void FensterZeigen(Form fenster)
+    {
+        using (fenster) Dialog.Zeigen(fenster, FindForm());
+        Zeigen();
+    }
+
+    // Rechte auch im Handler prüfen (0.33.3): Die Sperre der Karte allein verhindert nicht jeden Weg.
+    private bool Darf(string funktion)
+    {
+        if (Recht.Grund(speicher, funktion) is not string grund) return true;
+        FehlerZeigen(grund);
+        return false;
     }
 
     // Untermodule nur, wenn das Modul an ist.

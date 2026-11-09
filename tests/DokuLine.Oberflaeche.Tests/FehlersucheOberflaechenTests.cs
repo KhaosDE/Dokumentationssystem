@@ -1,4 +1,5 @@
 using DokuLine.Kern;
+using DokuLine.Modul.Ausgangsliste;
 
 namespace DokuLine.Oberflaeche.Tests;
 
@@ -154,5 +155,86 @@ public class FehlersucheOberflaechenTests
         Assert.DoesNotContain("R2", s.BereichWahl.Items.Cast<string>());
         f.Therapie.Laufend.Aktualisieren();
         Assert.Contains("Nord", f.Therapie.Laufend.BereichWahl.Items.Cast<string>());
+    });
+
+    // ----- 0.33.3 -----
+
+    [Fact]
+    public void Uebersicht_Nachrichtenzaehler_und_Bereichswahl_verdeckt_nichts() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var f = Fenster(u, "AB");
+        f.BereichWaehlen("Übersicht");
+        var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
+        int ungelesen = u.Speicher.UngeleseneNachrichten("AB");
+        Assert.True(ungelesen > s.Nachrichten.Zeilen.Count, "Demo: mehrere ungelesene in einem Verlauf");
+        Assert.Equal(ungelesen, s.Nachrichten.Anzahl);   // wie die Seitenleiste (vorher: Zahl der Verläufe)
+
+        // Schmal: die Bereichswahl wird schmaler oder verschwindet, liegt aber nie über „Drucken …“ oder den Knöpfen links.
+        int voll = s.BereichWahl.Width;
+        foreach (int breite in new[] { 1600, 1000, 800, 640 })
+        {
+            f.WindowState = FormWindowState.Normal;
+            f.Size = new Size(breite, 700);
+            Application.DoEvents();
+            f.Kopf.Leiste.PerformLayout();
+            var wahl = s.BereichWahl;
+            if (!wahl.Visible) continue;
+            Assert.True(wahl.Right <= s.DruckKnopf.Left, $"{breite}: Bereichswahl über „Drucken …“");
+            foreach (var k in f.Kopf.Knoepfe.Where(k => k != s.DruckKnopf && k.Visible))
+                Assert.False(wahl.Bounds.IntersectsWith(k.Bounds), $"{breite}: Bereichswahl über „{k.Text}“");
+        }
+        f.WindowState = FormWindowState.Maximized;
+        Application.DoEvents();
+        Assert.True(s.BereichWahl.Visible);
+        Assert.Equal(voll, s.BereichWahl.Width);   // wieder volle Breite
+    });
+
+    [Fact]
+    public void Einstellungen_Modulhaken_Schichtzeiten_Dialogsymbol() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var f = Fenster(u, "RS");   // Hausleitung: darf Module schalten
+        Assert.True(f.EinstellungenOeffnen("Module"));
+        var e = f.Einstellungsseite;
+        e.Module["ausgangsliste"].Checked = false;
+        Assert.False(e.Module[Kuechendienst.Schluessel].Enabled);
+        e.Zeigen();   // erneut öffnen: Untermodul bleibt gesperrt (vorher gab die Kartensperre es frei)
+        Assert.False(e.Module[Kuechendienst.Schluessel].Enabled);
+        e.Module["ausgangsliste"].Checked = true;
+        Assert.True(e.Module[Kuechendienst.Schluessel].Enabled);
+
+        // Ohne Recht: Feld unverändert verlassen ist kein Fehler.
+        f.BenutzerWaehlen("CD");
+        Assert.True(f.EinstellungenOeffnen("Wohnbereich"));
+        Assert.NotNull(Recht.Grund(u.Speicher, Funktionen.EinstellungenBereich));
+        Assert.True(e.SchichtzeitenUebernehmen());
+        Assert.False(e.Fehler.Visible);
+
+        // Dialoge haben ein eigenes Symbol-Objekt (sonst zeigt der Dialograhmen keins), auch ohne „Grundform“.
+        using (var formular = new BewohnerFormular(u.Speicher, null))
+        {
+            Stil.SymbolSetzen(formular);
+            Assert.Same(Stil.Dialogsymbol, formular.Icon);
+        }
+    });
+
+    [Fact]
+    public void Therapie_Balkenklick_zeigt_Angebot_trotz_Anbieterfilter() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        using var f = Fenster(u, "OP");
+        f.BereichWaehlen("Therapie");
+        var t = f.Therapie;
+        t.Jetzt = () => Heute(10, 15);
+        t.Laufend.Aktualisieren();
+        var termin = t.Laufend.Tafel!.Laufend.First();
+        string anderer = t.AnbieterFilter.Items.Cast<string>().First(a => a != TherapieSeite.AlleAnbieter && a != termin.Angebot.Anbieter);
+        t.AnbieterFilter.SelectedItem = anderer;
+        Assert.DoesNotContain(t.Karten, k => k.Angebot.Id == termin.Angebot.Id);
+        t.Laufend.Leiste.Oeffnen(termin);
+        Assert.Equal(TherapieSeite.AngeboteReiter, t.Reiter.Aktiv);
+        Assert.Equal(TherapieSeite.AlleAnbieter, t.AnbieterFilter.SelectedItem);
+        Assert.Contains(t.Karten, k => k.Angebot.Id == termin.Angebot.Id);
     });
 }

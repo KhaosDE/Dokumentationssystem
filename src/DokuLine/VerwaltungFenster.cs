@@ -10,7 +10,7 @@ static class Fenster
     public static void Grundform(Form f, string titel)
     {
         f.Text = $"{titel} ({Stil.DemoHinweis})";
-        f.Icon = Stil.Programmsymbol;
+        f.Icon = Stil.Dialogsymbol;   // eigenes Objekt, sonst zeigt der Dialograhmen kein Symbol (0.33.3)
         f.FormBorderStyle = FormBorderStyle.FixedDialog;
         f.MaximizeBox = f.MinimizeBox = false;
         f.ShowInTaskbar = false;

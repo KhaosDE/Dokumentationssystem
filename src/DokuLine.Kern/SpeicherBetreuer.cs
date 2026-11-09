@@ -13,13 +13,13 @@ public sealed partial class Speicher
     public List<Betreuer> BetreuerFassungen(long bewohnerId)
     {
         var liste = new List<Betreuer>();
-        using var befehl = Befehl("SELECT name, stelle, email, telefon, geaendert, kuerzel FROM betreuer WHERE bewohner_id = $b ORDER BY id", null, [("$b", bewohnerId)]);
+        using var befehl = Befehl("SELECT name, stelle, email, telefon, geaendert, kuerzel, keine FROM betreuer WHERE bewohner_id = $b ORDER BY id", null, [("$b", bewohnerId)]);
         using var leser = befehl.ExecuteReader();
         while (leser.Read())
             liste.Add(new Betreuer
             {
                 Name = leser.GetString(0), Stelle = leser.GetString(1), Email = leser.GetString(2), Telefon = leser.GetString(3),
-                Geaendert = AusZeit(leser.GetString(4)), Kuerzel = leser.GetString(5),
+                Geaendert = AusZeit(leser.GetString(4)), Kuerzel = leser.GetString(5), Keine = leser.GetInt64(6) != 0,
             });
         return liste;
     }
@@ -32,8 +32,8 @@ public sealed partial class Speicher
     }
 
     private void BetreuerEinfuegen(long bewohnerId, Betreuer b, SqliteTransaction? transaktion) =>
-        Ausfuehren("INSERT INTO betreuer (bewohner_id, name, stelle, email, telefon, geaendert, kuerzel) VALUES ($b, $n, $s, $e, $t, $g, $k)", transaktion,
-            ("$b", bewohnerId), ("$n", b.Name), ("$s", b.Stelle), ("$e", b.Email), ("$t", b.Telefon), ("$g", Zeit(b.Geaendert)), ("$k", b.Kuerzel));
+        Ausfuehren("INSERT INTO betreuer (bewohner_id, name, stelle, email, telefon, geaendert, kuerzel, keine) VALUES ($b, $n, $s, $e, $t, $g, $k, $x)", transaktion,
+            ("$b", bewohnerId), ("$n", b.Name), ("$s", b.Stelle), ("$e", b.Email), ("$t", b.Telefon), ("$g", Zeit(b.Geaendert)), ("$k", b.Kuerzel), ("$x", b.Keine ? 1 : 0));
 
     private void DemoBetreuerEinfuegen(SqliteTransaction transaktion)
     {

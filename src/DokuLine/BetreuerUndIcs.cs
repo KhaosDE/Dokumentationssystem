@@ -15,6 +15,8 @@ public sealed class BetreuerFenster : Form
     public TextBox Stelle { get; } = new() { Width = 320, PlaceholderText = "z. B. Betreuungsverein, Berufsbetreuer, Angehörige" };
     public TextBox Email { get; } = new() { Width = 320, PlaceholderText = "name@example.org (Demo)" };
     public TextBox Telefon { get; } = new() { Width = 200 };
+    // 0.33.3: dritter Zustand neben „eingetragen“ und „nicht erfasst“, z. B. wenn eine Betreuung endet.
+    public CheckBox Keine { get; } = new() { Text = "Keine gesetzliche Betreuung", AutoSize = true };
     public Label Fehler { get; } = Fenster.Fehlerfeld();
     public Betreuer? Gespeichert { get; private set; }
 
@@ -26,9 +28,12 @@ public sealed class BetreuerFenster : Form
         this.bewohner = bewohner;
         Fenster.Grundform(this, $"Betreuer – {bewohner.Name}");
         var e = BetreuerRegeln.AlsEingabe(speicher.Betreuer(bewohner.Id!.Value));
-        (NameFeld.Text, Stelle.Text, Email.Text, Telefon.Text) = (e.Name, e.Stelle, e.Email, e.Telefon);
+        (NameFeld.Text, Stelle.Text, Email.Text, Telefon.Text, Keine.Checked) = (e.Name, e.Stelle, e.Email, e.Telefon, e.Keine);
+        Keine.CheckedChanged += (_, _) => FelderSperren();
+        FelderSperren();
         var raster = Formular.Raster(out var zeile);
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
+        zeile(null, Keine);
         zeile("Name", NameFeld);
         zeile("Stelle", Stelle);
         zeile("E-Mail", Email);
@@ -41,11 +46,17 @@ public sealed class BetreuerFenster : Form
         Stil.DpiSkalierungEinschalten(this);
     }
 
+    private void FelderSperren()
+    {
+        foreach (var feld in new[] { NameFeld, Stelle, Email, Telefon }) feld.Enabled = !Keine.Checked;
+    }
+
     public bool Speichern()
     {
         try
         {
-            var b = BetreuerRegeln.AusEingabe(new BetreuerEingabe { Name = NameFeld.Text, Stelle = Stelle.Text, Email = Email.Text, Telefon = Telefon.Text, Kuerzel = Recht.Kuerzel }, Jetzt());
+            var b = BetreuerRegeln.AusEingabe(new BetreuerEingabe
+                { Name = NameFeld.Text, Stelle = Stelle.Text, Email = Email.Text, Telefon = Telefon.Text, Kuerzel = Recht.Kuerzel, Keine = Keine.Checked }, Jetzt());
             speicher.BetreuerSpeichern(bewohner.Id!.Value, b);
             Gespeichert = b;
         }
@@ -135,7 +146,7 @@ public sealed class IcsImportFenster : Form
                 catch (Eingabefehler x) { fehler.AddRange(x.Fehler.Select(f => $"{t.Titel}: {f}")); }
             }
             if (fehler.Count > 0) throw new Eingabefehler([.. fehler.Distinct()]);
-            foreach (var f in fassungen) Angelegt.Add(speicher.KalenderAnlegen(f));
+            Angelegt.AddRange(speicher.KalenderAnlegenAlle(fassungen));
         }
         catch (Eingabefehler x)
         {

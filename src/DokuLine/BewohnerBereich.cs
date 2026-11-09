@@ -76,7 +76,7 @@ public sealed class BewohnerBereich : Panel
 
     // Zum Testen ersetzbar: öffnet das Formular als Dialog und gibt den gespeicherten Bewohner zurück.
     internal Func<BewohnerFormular, Bewohner?> FormularZeigen { get; set; } =
-        f => f.ShowDialog() == DialogResult.OK ? f.Gespeichert : null;
+        f => { Stil.SymbolSetzen(f); return f.ShowDialog() == DialogResult.OK ? f.Gespeichert : null; };
 
     public BewohnerBereich(Speicher speicher, KopfBereich kopf)
     {
@@ -650,6 +650,7 @@ public sealed class AkteAnsicht : Panel
         BetreuerText.MaximumSize = new Size(S(560), 0);
         Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BetreuerKnopf);
         Stil.Sperren(EmailKnopf, betreuer is null ? "Kein Betreuer eingetragen."
+            : betreuer.Keine ? "Keine gesetzliche Betreuung eingetragen."
             : !BetreuerRegeln.EmailGueltig(betreuer.Email) ? "Für den Betreuer ist keine E-Mail-Adresse eingetragen." : null);
     }
 
@@ -665,7 +666,7 @@ public sealed class AkteAnsicht : Panel
     // selbst sendet nichts; Text und Versand macht der Mensch im E-Mail-Programm.
     public bool EmailSchreiben()
     {
-        if (Bewohner?.Id is not long id || speicher.Betreuer(id) is not Betreuer b || !BetreuerRegeln.EmailGueltig(b.Email)) return false;
+        if (Bewohner?.Id is not long id || speicher.Betreuer(id) is not Betreuer b || b.Keine || !BetreuerRegeln.EmailGueltig(b.Email)) return false;
         if (!EmailBestaetigen($"{BetreuerRegeln.EmailHinweis}\n\nDas E-Mail-Programm öffnet sich mit Empfänger und Betreff. Text und Versand machen Sie dort."))
             return false;
         Extern.Oeffnen(BetreuerRegeln.Mailto(b, BetreuerRegeln.Betreff(Bewohner)));
