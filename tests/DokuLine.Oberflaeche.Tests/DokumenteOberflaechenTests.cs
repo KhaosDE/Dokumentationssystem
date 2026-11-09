@@ -104,6 +104,7 @@ public class AkteUebernahmeOberflaechenTests
         using var u = new Umgebung();
         Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
         using var fenster = new AkteUebernahmeFenster(u.Speicher);
+        Hilfe.Zeigen(fenster);   // PerformClick wirkt nur auf sichtbare Knöpfe
         Assert.NotNull(Stil.Sperrgrund(fenster.UebernehmenKnopf));   // noch nichts gewählt
         fenster.DemoKnopf.PerformClick();
         Assert.Equal(4, fenster.Vorschau.Rows.Count);

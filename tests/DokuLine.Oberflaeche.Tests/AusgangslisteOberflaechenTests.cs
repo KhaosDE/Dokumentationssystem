@@ -60,7 +60,7 @@ public class AusgangslisteOberflaechenTests
             Assert.StartsWith("Küchendienst heute: ", s.KuechendienstText.Text);
             Assert.Contains(Karte(s, "Holunder").MarkenTexte, t => t.StartsWith("abwesend: Heimfahrt bis"));
             if (DateTime.Now.TimeOfDay > TimeSpan.FromHours(2.5))   // Demo-Zeiten liegen kurz nach Mitternacht nicht weit genug zurück
-                Assert.Contains(Karte(s, "Ginster").MarkenTexte, t => t.StartsWith("überfällig seit"));
+                Assert.Contains(Karte(s, "Ginster").MarkenTexte, t => t.StartsWith("überfällig seit") || t.StartsWith("Rückkehrzeit überschritten seit"));   // nach der Wartezeit: Frage nach der Abgängigkeit
             Assert.Contains(Karte(s, "Clematis").MarkenTexte, t => t.StartsWith("unterwegs seit"));
             Assert.Contains("Unterbringung nicht erfasst", Karte(s, "Distel").MarkenTexte);
             Assert.StartsWith("Ausgang 3 Std: 2 Std allein · 1 Std mit Bewohner", Karte(s, "Ahorn").AusgangZeile);
@@ -73,7 +73,7 @@ public class AusgangslisteOberflaechenTests
             if (DateTime.Now.TimeOfDay > TimeSpan.FromHours(2.5))
             {
                 Assert.True(Karte(s, "Ginster").Ueberfaellig);
-                Assert.StartsWith("überfällig seit ", Karte(s, "Ginster").StandText);
+                Assert.Matches("^(überfällig seit |Rückkehrzeit überschritten seit )", Karte(s, "Ginster").StandText);
                 Assert.True(s.Zeilen[0].Ueberfaellig);   // Überfällige ganz oben
             }
 
@@ -332,7 +332,7 @@ public class AusgangslisteOberflaechenTests
             Assert.False(neu.KuechendienstKnopf.Visible);
             Assert.False(neu.NachtberichtKnopf.Visible);
             Assert.False(Karte(neu, "Ahorn").AlleinKnopf.Available);
-            Assert.DoesNotContain(Karte(neu, "Ginster").MarkenTexte, t => t.StartsWith("überfällig"));
+            Assert.DoesNotContain(Karte(neu, "Ginster").MarkenTexte, t => t.StartsWith("überfällig") || t.StartsWith("Rückkehrzeit"));
         }
     });
 }

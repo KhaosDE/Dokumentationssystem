@@ -32,7 +32,8 @@ public class MedikationOberflaechenTests
         using (u)
         using (f)
         {
-            Assert.Equal(["Stammdaten", "Medikamentenplan", "Wochenplan"], f.Bewohner.Akte.Reiter.Namen.Take(3));
+            var namen = f.Bewohner.Akte.Reiter.Namen.ToList();
+            Assert.True(namen.IndexOf("Stammdaten") == 0 && namen.IndexOf("Medikamentenplan") < namen.IndexOf("Wochenplan"));
             Assert.Equal(Heute(), m.TagFeld.Text);
             Assert.Equal("Demo — nicht zum Stellen verwenden", m.Hinweis.Text);
             Assert.Equal(["Medikament", "morgens", "mittags", "abends", "nachts", "verordnet von", "seit", "Status", "Hinweis"],

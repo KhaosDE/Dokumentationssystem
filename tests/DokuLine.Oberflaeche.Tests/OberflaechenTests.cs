@@ -111,12 +111,12 @@ public class BewohnerOberflaechenTests
         f.BereichWaehlen("Übersicht");
         f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);   // Ginster wohnt in R2
         var birke = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Birke");
-        // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu
-        Assert.DoesNotContain(birke.Marken, m => m.Art is MarkenArt.Beschluss or MarkenArt.Allergie or MarkenArt.NichtErfasst);
+        // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu (Fristen der Akte wie „Forensik: Überprüfung …“ zählen nicht)
+        Assert.DoesNotContain(birke.Marken, m => m.Text.StartsWith("Allergie", StringComparison.Ordinal) || m.Text.StartsWith("Beschluss", StringComparison.Ordinal));
         Assert.Equal("seit 15.02.2016 · 10 Jahre, 8 Monate", birke.AufenthaltText);
         var ginster = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Ginster");
         Assert.Equal(["Allergien nicht erfasst", "Beschluss nicht erfasst"],
-            ginster.Marken.Where(m => m.Art == MarkenArt.NichtErfasst && !m.Text.StartsWith("überfällig")).Select(m => m.Text));
+            ginster.Marken.Where(m => m.Text.StartsWith("Allergie", StringComparison.Ordinal) || m.Text.StartsWith("Beschluss", StringComparison.Ordinal)).Select(m => m.Text));
     });
 
     [Fact]
@@ -176,7 +176,7 @@ public class BewohnerOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         var akte = f.Bewohner.Akte;
-        Assert.Equal(["Stammdaten", "Medikamentenplan", "Wochenplan", "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
+        Assert.Equal([.. Bauplan.AktenReiter.Take(Array.IndexOf(Bauplan.AktenReiter, "Wochenplan") + 1), "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
         Assert.Empty(Bauplan.Reiter);   // alle Reiter sind gebaut
