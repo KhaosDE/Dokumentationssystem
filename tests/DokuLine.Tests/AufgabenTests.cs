@@ -139,8 +139,13 @@ public sealed class AufgabenTests : IDisposable
         var mitVisiten = s.Aufgaben(Jetzt, auchErledigte: true);
         Assert.Equal(3, mitVisiten.Count(a => a.VisiteAnordnungId is not null || a.VisiteEintragId is not null && !a.Offen));   // Demo-Visiten (Schritt 26): erledigt
         var alle = mitVisiten.Where(a => a.VisiteAnordnungId is null && a.VisiteEintragId is null).ToList();
-        Assert.Equal(6, alle.Count);
+        Assert.Equal(10, alle.Count);
         Assert.Single(alle, a => !a.Offen);
+        // Jede Aufgabe gehört zu genau einem Bereich: die Bereiche zusammen ergeben alle.
+        Assert.All(alle.Where(a => a.BewohnerId is null), a => Assert.Contains(a.Bereich, new[] { "R1", "R2", "R3" }));
+        var ids = alle.Select(a => a.Id).ToHashSet();
+        Assert.Equal(alle.Count, new[] { "R1", "R2", "R3" }.Sum(b => s.Aufgaben(Jetzt, true, b).Count(a => ids.Contains(a.Id))));
+        Assert.Equal(2, s.Aufgaben(Jetzt, true, "R2").Count(a => a.BewohnerId is null));
         var ueberfaellig = Assert.Single(alle, a => AufgabenRegeln.Ueberfaellig(a, Jetzt));
         Assert.Single(ueberfaellig.Weitergaben);
         Assert.Equal(ueberfaellig.Id, s.Aufgaben(Jetzt)[0].Id);   // steht oben
@@ -148,10 +153,10 @@ public sealed class AufgabenTests : IDisposable
         Assert.Contains(alle, a => a.Fuer == AufgabeFuer.Schicht && a.FuerSchicht!.Value.Beginn > Jetzt);
         Assert.DoesNotContain(alle, a => a.Text.Contains('{'));
         Assert.All(alle, a => Assert.True(a.Erstellt <= Jetzt));
-        Assert.Equal(5, s.OffeneAufgaben());
+        Assert.Equal(9, s.OffeneAufgaben());
 
         s.DemoZuruecksetzen();   // zweimal laden verdoppelt nichts
-        Assert.Equal(9, s.Aufgaben(Jetzt, auchErledigte: true).Count);   // 6 + 3 aus den Demo-Visiten
+        Assert.Equal(13, s.Aufgaben(Jetzt, auchErledigte: true).Count);   // 10 + 3 aus den Demo-Visiten
     }
 
     [Fact]
@@ -165,7 +170,7 @@ public sealed class AufgabenTests : IDisposable
         }
         int berichte = s.Berichte(s.AlleBewohner()[0].Id!.Value).Count;
         Assert.True(s.DemoBeimErstenStart());
-        Assert.Equal(6, s.Aufgaben(Jetzt, auchErledigte: true).Count);
+        Assert.Equal(10, s.Aufgaben(Jetzt, auchErledigte: true).Count);
         Assert.Equal(berichte, s.Berichte(s.AlleBewohner()[0].Id!.Value).Count);   // Berichte nicht doppelt
         Assert.False(s.DemoBeimErstenStart());
     }

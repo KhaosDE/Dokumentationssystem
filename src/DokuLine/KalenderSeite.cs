@@ -109,7 +109,7 @@ public sealed class KalenderSeite : Panel
 
     public void Zeigen()
     {
-        bewohner = speicher.AlleBewohner();
+        bewohner = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt);
         long? vorher = BewohnerFilter;
         Filter.Items.Clear();
         Filter.Items.Add("alle Bewohner");
@@ -137,7 +137,11 @@ public sealed class KalenderSeite : Panel
         var (von, bis) = Ansicht == KalenderAnsicht.Monat
             ? (WochenplanRegeln.Montag(new DateOnly(Stichtag.Year, Stichtag.Month, 1)), WochenplanRegeln.Montag(new DateOnly(Stichtag.Year, Stichtag.Month, 1)).AddDays(41))
             : KalenderRegeln.Zeitraum(Ansicht, Stichtag);
-        return speicher.Kalender(von, bis, BewohnerFilter).Where(k => KalenderRegeln.Passt(k.Aktuell, Wahl)).ToList();
+        // Termine von Bewohnern nur aus dem gewählten Bereich; Haus- und Bereichstermine ohne Bewohner stehen immer da.
+        var ids = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt)
+            .Select(b => b.Id!.Value).ToHashSet();
+        bool ImBereich(KalenderTermin k) => k.Aktuell.Bewohner.Count == 0 || k.Aktuell.Bewohner.Any(ids.Contains);
+        return speicher.Kalender(von, bis, BewohnerFilter).Where(k => KalenderRegeln.Passt(k.Aktuell, Wahl) && ImBereich(k)).ToList();
     }
 
     private Dictionary<long, string> Namen() => speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);

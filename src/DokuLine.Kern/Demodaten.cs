@@ -215,6 +215,7 @@ public static class Demodaten
     {
         public string Text { get; set; } = "";
         public string? Bewohner { get; set; }          // Nachname aus bewohner.json
+        public string Bereich { get; set; } = "R1";   // ohne Bewohner
         public string Fuer { get; set; } = "naechste_schicht";
         public int SchichtInTagen { get; set; }
         public string Schicht { get; set; } = "frueh";
@@ -249,6 +250,7 @@ public static class Demodaten
             liste.Add(new DemoAufgabe(new Aufgabe
             {
                 BewohnerId = b?.Id,
+                Bereich = b is null ? v.Bereich : "",
                 Text = v.Text.Replace("{vorname}", b?.Vorname ?? ""),
                 Fuer = fuer,
                 FuerSchicht = fuer == AufgabeFuer.Schicht

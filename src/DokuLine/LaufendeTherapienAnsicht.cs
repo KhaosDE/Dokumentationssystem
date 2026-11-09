@@ -12,13 +12,9 @@ public sealed class LaufendeTherapienAnsicht : Panel
 {
     private readonly Speicher speicher;
     private readonly System.Windows.Forms.Timer uhr = new() { Interval = 60_000 };
-    private readonly Label bereichLabel = new() { Text = "Bereich", AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite };
     private readonly FlowLayoutPanel spaltenFlaeche = new() { WrapContents = false, AutoScroll = true, FlowDirection = FlowDirection.LeftToRight, BackColor = Stil.Seite };
     private readonly Label restTitel = new() { Text = "REST DES TAGES", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite };
-    private string? vorgabeFuer;
-    private bool abgleichen;
 
-    public ComboBox BereichWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160, Font = Stil.Standard, AccessibleName = "Bereich" };
     public Label Titel { get; } = new() { AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite, UseMnemonic = false };
     public Tagesleiste Leiste { get; } = new();
     public Label Hinweis { get; } = new() { AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false, Visible = false };
@@ -36,30 +32,16 @@ public sealed class LaufendeTherapienAnsicht : Panel
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        BereichWahl.Items.Add(LaufendeRegeln.AlleBereiche);
-        foreach (var w in speicher.Wohnbereiche()) BereichWahl.Items.Add(w.Name);
-        BereichWahl.SelectedIndex = 0;
-        BereichWahl.SelectedIndexChanged += (_, _) => { if (!abgleichen) Aktualisieren(); };
         Leiste.TerminGeklickt += t => AngebotGewaehlt?.Invoke(t.Angebot);
-        Controls.AddRange([Titel, bereichLabel, BereichWahl, Leiste, Hinweis, spaltenFlaeche, restTitel, Rest]);
+        Controls.AddRange([Titel, Leiste, Hinweis, spaltenFlaeche, restTitel, Rest]);
         uhr.Tick += (_, _) => { if (Visible) Aktualisieren(); };
         uhr.Start();
     }
 
-    // Beim Öffnen: Vorgabe der Bereichswahl für den Angemeldeten (Wohnbereich oder alle), dann neu lesen.
-    public void Zeigen()
-    {
-        var werte = Einstellungen.Laden();
-        if (vorgabeFuer != werte.Kuerzel)
-        {
-            vorgabeFuer = werte.Kuerzel;
-            var eigene = speicher.MitarbeiterLesen(werte.Kuerzel)?.Bereiche is { Count: > 0 } b ? b : [werte.Bereich];
-            BereichWahl.SelectedItem = LaufendeRegeln.Vorgabe(eigene, speicher.AlleBewohner());
-        }
-        Aktualisieren();
-    }
+    public void Zeigen() => Aktualisieren();
 
-    public string? Bereich => BereichWahl.SelectedItem is string w && w != LaufendeRegeln.AlleBereiche ? w : null;
+    // Der in der Übersicht gewählte Wohnbereich; „Alle“ und Bereiche ohne Bewohner (Therapie) zeigen alle.
+    public string? Bereich => speicher.AlleBewohner().Any(b => b.Wohnbereich == Arbeitsbereich.Gewaehlt) ? Arbeitsbereich.Gewaehlt : null;
 
     public string KopfText => Tafel is null ? "Laufende Therapien"
         : $"{Bereich ?? LaufendeRegeln.AlleBereiche} · {Tafel.Laufend.Count} {(Tafel.Laufend.Count == 1 ? "läuft" : "laufen")} · " +
@@ -67,9 +49,6 @@ public sealed class LaufendeTherapienAnsicht : Panel
 
     public void Aktualisieren()
     {
-        abgleichen = true;
-        try { Auswahl.Abgleichen(BereichWahl, [LaufendeRegeln.AlleBereiche, .. speicher.Wohnbereiche().Select(w => w.Name)]); }
-        finally { abgleichen = false; }
         var jetzt = Jetzt();
         var tag = DateOnly.FromDateTime(jetzt);
         var bewohner = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value);
@@ -149,9 +128,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
         base.OnLayout(levent);
         int breite = ClientSize.Width, klein = Stil.Px(this, Stil.AbstandKlein), mittel = Stil.Px(this, Stil.AbstandMittel);
         Titel.Location = new Point(0, Stil.Px(this, 6));
-        BereichWahl.Location = new Point(breite - BereichWahl.Width, 0);
-        bereichLabel.Location = new Point(BereichWahl.Left - klein - bereichLabel.PreferredWidth, Stil.Px(this, 5));
-        int y = Math.Max(Titel.Bottom, BereichWahl.Bottom) + klein;
+        int y = Titel.Bottom + klein;
         Leiste.SetBounds(0, y, breite, Leiste.Height);
         y = Leiste.Bottom + mittel;
         if (Hinweis.Visible)
@@ -182,7 +159,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
 public sealed class TherapieSpalte : KartenFlaeche
 {
     public const int Breite = 240;
-    private readonly Label titel = new() { AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
+    private readonly KastenKopf titel;
     private readonly List<Label> zeilen = [];
     private readonly Panel inhalt = new() { AutoScroll = true, BackColor = Stil.Flaeche };
     public string Titel => titel.Text;
@@ -193,7 +170,7 @@ public sealed class TherapieSpalte : KartenFlaeche
 
     public TherapieSpalte(string titelText, IEnumerable<string> kopf)
     {
-        titel.Text = titelText;
+        titel = new KastenKopf(titelText) { Cursor = Cursors.Default };
         Controls.Add(titel);
         foreach (var text in kopf)
         {
@@ -238,9 +215,8 @@ public sealed class TherapieSpalte : KartenFlaeche
         base.OnLayout(levent);
         int innen = Stil.Px(this, Stil.AbstandMittel), mini = Stil.Px(this, Stil.AbstandMini);
         int breite = Width - 2 * innen;
-        titel.MaximumSize = new Size(breite, 0);
-        titel.Location = new Point(innen, innen);
-        int y = titel.Bottom + mini;
+        titel.SetBounds(1, 1, Math.Max(10, Width - 2), titel.Hoehe);
+        int y = titel.Bottom + Stil.Px(this, Stil.AbstandKlein);
         foreach (var z in zeilen) { z.MaximumSize = new Size(breite, 0); z.Location = new Point(innen, y); y = z.Bottom; }
         y += Stil.Px(this, Stil.AbstandKlein);
         inhalt.SetBounds(innen, y, breite, Math.Max(40, Height - y - innen));

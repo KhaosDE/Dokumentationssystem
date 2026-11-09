@@ -1919,7 +1919,7 @@ Umfang:
 - Test: je Position ein Bildschirmfoto der Seitenleiste und einer Akte.
 
 ## Wohnbereich einmal in der Übersicht wählen, gilt überall
-Status: freigegeben (Bauplan Schritt 29d; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.7; Bauplan Schritt 29d, Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der Wohnbereich wird an einer Stelle gewählt, in der Übersicht. Alle Bereiche des Programms
 zeigen danach nur diesen Wohnbereich.
@@ -2214,7 +2214,7 @@ Umfang (Vorschlag):
   sendet (Suchbegriff, IP-Adresse der Einrichtung, Uhrzeit).
 
 ## Aufgaben gehören zu einem Bewohner oder einem Bereich
-Status: freigegeben (Bauplan Schritt 29q; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.7; Bauplan Schritt 29q, Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Jede Aufgabe gehört entweder zu einem Bewohner oder zu einem Bereich. Man sieht nur die
 Aufgaben des gewählten Bereichs.
@@ -2290,7 +2290,7 @@ Mitarbeitervertretung. Im Repository, in Tests und Commits nie echte Daten — a
 Betrieb.“
 
 ## Übersicht: Überschriften der Kästen eingerahmt
-Status: freigegeben (Bauplan Schritt 29r; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.7; Bauplan Schritt 29r, Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Überschriften der Kästen in der Übersicht heben sich deutlich von ihren Einträgen ab.
 Warum: Vorgabe Tobi (09.11.2026): In der Übersicht sollen die einzelnen Fensterbenennungen

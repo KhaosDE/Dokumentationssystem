@@ -18,7 +18,6 @@ public sealed class TagesplanSeite : Panel
 
     public RadioButton NachUhrzeit { get; } = new() { Text = "nach Uhrzeit", AutoSize = true, Checked = true, BackColor = Stil.Seite };
     public RadioButton NachBewohner { get; } = new() { Text = "nach Bewohner", AutoSize = true, BackColor = Stil.Seite };
-    public CheckBox AlleBereiche { get; } = new() { Text = "alle Bereiche", AutoSize = true, BackColor = Stil.Seite };
     public Button VollbildKnopf { get; } = Stil.NebenKnopf("Vollbild (F11)");
     public Label Fehler { get; } = new() { AutoSize = true, ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public AnzeigeTafel Tafel { get; } = new() { Dock = DockStyle.Fill };
@@ -35,14 +34,13 @@ public sealed class TagesplanSeite : Panel
         this.speicher = speicher;
         BackColor = Stil.Seite;
         leiste.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross, Stil.AbstandKlein);
-        foreach (var c in new Control[] { NachUhrzeit, NachBewohner, AlleBereiche }) c.Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandMittel, Stil.AbstandKlein);
+        foreach (var c in new Control[] { NachUhrzeit, NachBewohner }) c.Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandMittel, Stil.AbstandKlein);
         VollbildKnopf.AutoSize = true;
         VollbildKnopf.Margin = new Padding(Stil.AbstandGross, 0, Stil.AbstandMittel, 0);
         Fehler.Margin = new Padding(Stil.AbstandGross, Stil.AbstandMini, 0, Stil.AbstandKlein);
-        leiste.Controls.AddRange([NachUhrzeit, NachBewohner, AlleBereiche, VollbildKnopf, Fehler]);
+        leiste.Controls.AddRange([NachUhrzeit, NachBewohner, VollbildKnopf, Fehler]);
         NachUhrzeit.CheckedChanged += (_, _) => { if (NachUhrzeit.Checked) Aktualisieren(); };
         NachBewohner.CheckedChanged += (_, _) => { if (NachBewohner.Checked) Aktualisieren(); };
-        AlleBereiche.CheckedChanged += (_, _) => Aktualisieren();
         VollbildKnopf.Click += (_, _) => VollbildZeigen();
         Controls.Add(Tafel);
         Controls.Add(leiste);
@@ -77,18 +75,14 @@ public sealed class TagesplanSeite : Panel
         var jetzt = Jetzt();
         letzteMinute = new DateTime(jetzt.Year, jetzt.Month, jetzt.Day, jetzt.Hour, jetzt.Minute, 0);
         var heute = DateOnly.FromDateTime(jetzt);
-        var werte = Einstellungen.Laden();
-        // Eigene Bereiche wie in der Übersicht: Wohnbereiche des Angemeldeten, sonst der des Rechners.
+        // Der in der Übersicht gewählte Bereich („Alle“ und Bereiche ohne Bewohner: alle).
         var alle = speicher.AlleBewohner();
-        var meine = speicher.MitarbeiterLesen(werte.Kuerzel)?.Bereiche.Where(b => alle.Any(x => x.Wohnbereich == b)).ToList()
-            is { Count: > 0 } liste ? liste : [werte.Bereich];
-        var eigene = alle.Where(b => meine.Contains(b.Wohnbereich)).ToList();
-        bool allesZeigen = AlleBereiche.Checked || eigene.Count == 0;
-        bereichText = allesZeigen ? "alle Bereiche" : string.Join(", ", meine);
-        var zeilen = speicher.Tagesplan(heute, allesZeigen ? alle : eigene);
+        var gezeigt = BereichswahlRegeln.Bewohner(alle, Arbeitsbereich.Gewaehlt);
+        bereichText = gezeigt.Count == alle.Count ? "alle Bereiche" : Arbeitsbereich.Gewaehlt;
+        var zeilen = speicher.Tagesplan(heute, gezeigt);
         TafelZeilen = NachBewohner.Checked ? TafelRegeln.NachBewohner(zeilen, jetzt) : TafelRegeln.Tafel(zeilen, jetzt);
         Zeilen = TafelZeilen.Select(z => z.Zeile).ToList();
-        string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);   // Rechte (Schritt 19)
+        string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);
         string titel = $"TAGESPLAN · {bereichText}";
         Tafel.Fuellen(titel, TafelZeilen, NachBewohner.Checked, jetzt, grund, (z, s) => Setzen(z, s));
         Vollbild?.Tafel.Fuellen(titel, TafelZeilen, NachBewohner.Checked, jetzt, grund, (z, s) => Setzen(z, s));

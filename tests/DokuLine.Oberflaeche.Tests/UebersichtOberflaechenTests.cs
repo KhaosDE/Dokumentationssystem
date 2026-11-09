@@ -17,7 +17,8 @@ public class UebersichtOberflaechenTests
         u.Speicher.WohnbereichNotiz("Getränkelieferung kommt (Test).", "AB", new UebergabeWunsch(UebergabeDauer.Woche), jetzt);
         u.Speicher.AufgabeSpeichern(new Aufgabe
         {
-            Text = "Kühlschrank abtauen (Test)", Fuer = AufgabeFuer.WerZeitHat, Erstellt = jetzt.AddHours(-1), Verfasser = "AB",
+            Text = "Kühlschrank abtauen (Test)", Bereich = "R1", Fuer = AufgabeFuer.WerZeitHat, Erstellt = jetzt.AddHours(-1),
+            Verfasser = "AB",
         });
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
@@ -28,13 +29,14 @@ public class UebersichtOberflaechenTests
         var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
         Assert.StartsWith("R1 · 23 Bewohner · 2 Betten frei · Stand ", f.Kopf.KleinText);   // eigener Bereich (Mehrplatz, Schritt 26e)
 
-        // Aktionsleiste: Hauptaktion, drei weitere, „Neuer Bewohner …“ grün; rechts Bereichswahl und Drucken.
+        // Aktionsleiste: Hauptaktion, drei weitere, „Neuer Bewohner …“ grün; rechts Drucken. Oben die Wahl des Wohnbereichs.
         Assert.Equal(["Neuer Bericht …", "Neue Aufgabe …", "Neue Nachricht …", "Neuer Bewohner …", "Drucken …"], f.Kopf.Knoepfe.Select(k => k.Text));
         Assert.Equal(1, AktionsLeiste.Gruppe(s.BerichtNeuKnopf));
         Assert.Equal(Stil.Erfolg.ToArgb(), s.BewohnerNeuKnopf.BackColor.ToArgb());
-        Assert.Same(s.BereichWahl, f.Kopf.Leiste.Zusatz);
-        Assert.Same(f.Kopf.Leiste, s.BereichWahl.Parent);
-        Assert.True(s.BereichWahl.Right <= s.DruckKnopf.Left);
+        Assert.Null(f.Kopf.Leiste.Zusatz);
+        Assert.Equal(["R1", "R2", "R3"], s.Umschalter.Knoepfe.Select(k => k.Text));   // Bereichsleitung: die Wohnbereiche
+        Assert.Equal("R1", Assert.Single(s.Umschalter.Knoepfe, k => k.Aktiv).Text);
+        Assert.False(s.Umschalter.Eingesprungen.Visible);
         Assert.StartsWith("DEMO — ausgedachte Daten · ", f.Statusleiste.StatusText);
         Assert.Contains("dienst · Stand ", f.Statusleiste.StatusText);
 
@@ -86,7 +88,6 @@ public class UebersichtOberflaechenTests
         s.Uebergaben.Zeilen.OfType<HeuteEintrag>().First().Klicken();
         Assert.Equal("Übergabe", f.AktiverBereich);
         f.BereichWaehlen("Übersicht");
-        Assert.Same(s.BereichWahl, f.Kopf.Leiste.Zusatz);   // nach dem Wechsel wieder da
 
         // „Neuer Bericht …“ braucht eine gewählte Zeile; Doppelklick bzw. Enter öffnet die Akte.
         Assert.Equal("Bitte zuerst einen Bewohner in der Liste wählen.", Stil.Sperrgrund(s.BerichtNeuKnopf));
@@ -109,9 +110,18 @@ public class UebersichtOberflaechenTests
         s.Suche.Text = "Birke";
         Assert.Equal("Birke", Assert.Single(s.Zeilen).Bewohner.Nachname);
         s.Suche.Text = "";
-        s.BereichWahl.SelectedItem = "R2";
+        s.Umschalter.Knoepfe.Single(k => k.Text == "R2").Ausloesen();   // gilt überall, „eingesprungen“
         Assert.All(s.Zeilen, z => Assert.Equal("R2", z.Bewohner.Wohnbereich));
         Assert.StartsWith("BEWOHNER R2 · 23 · ", s.ListenKopfText);
+        Assert.Equal("R2", Arbeitsbereich.Gewaehlt);
+        Assert.True(s.Umschalter.Eingesprungen.Visible);
+        Assert.True(f.Kopf.Eingesprungen.Visible);
+        f.BereichWaehlen("Dokumentation");
+        Assert.All(f.Bewohner.Zeilen, b => Assert.Equal("R2", b.Wohnbereich));
+        Assert.StartsWith("R2 · 23 Bewohner", f.Kopf.KleinText);
+        f.BereichWaehlen("Übergabe");
+        Assert.StartsWith("R2 · ", f.Kopf.KleinText);   // der Bereich steht immer vorn in der kleinen Zeile
+        Hilfe.Foto(f, "127_eingesprungen_r2");
     });
 
     [Fact]

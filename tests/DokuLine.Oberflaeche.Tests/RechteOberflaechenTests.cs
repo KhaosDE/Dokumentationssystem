@@ -65,12 +65,14 @@ public class RechteOberflaechenTests
         Assert.False(menue.Items[1].Enabled);
         Assert.Equal($"Neuer Bericht … – {RechteRegeln.NichtAngemeldetText}", menue.Items[1].Text);
 
-        // Die Übersicht richtet sich nach den Bereichen des Angemeldeten: PR (A und B) sieht beide.
+        // Die Übersicht zeigt den gewählten Bereich (Vorgabe: der des Rechners), umschaltbar je nach Recht.
         f.BenutzerWaehlen("PR");
-        Assert.Equal(46, f.Uebersicht.Zeilen.Count);
-        Assert.StartsWith("R1, R2 · 46 Bewohner · 4 Betten frei · ", f.Kopf.KleinText);
+        Assert.Equal(23, f.Uebersicht.Zeilen.Count);
+        Assert.StartsWith("R1 · 23 Bewohner · 2 Betten frei · ", f.Kopf.KleinText);
+        f.Uebersicht.Umschalter.Knoepfe.Single(k => k.Text == "R2").Ausloesen();
+        Assert.All(f.Uebersicht.Zeilen, z => Assert.Equal("R2", z.Bewohner.Wohnbereich));
         f.BenutzerWaehlen("MN");
-        Assert.Equal(23, f.Uebersicht.Zeilen.Count);   // R2
+        Assert.Equal(23, f.Uebersicht.Zeilen.Count);   // die Wahl gilt bis zum Abmelden
 
         // OP (Therapie): Akte ansehen ja, bearbeiten nein; Berichte schreiben ja.
         f.BenutzerWaehlen("OP");

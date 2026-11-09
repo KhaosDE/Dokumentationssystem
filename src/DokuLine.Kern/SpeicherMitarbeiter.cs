@@ -163,7 +163,9 @@ public sealed partial class Speicher
             if (art == Liste.Berichtsarten)
                 Ausfuehren("UPDATE berichte SET art = $neu WHERE art = $alt", transaktion, ("$neu", neu), ("$alt", alt));
             if (art == Liste.Bereiche)
-                Ausfuehren("UPDATE team_mitglieder SET team = $neu WHERE team = $alt; " +
+                Ausfuehren("UPDATE aufgaben SET bereich = $neu WHERE bereich = $alt; " +
+                           "UPDATE aufgabe_vorlagen SET bereich = $neu WHERE bereich = $alt; " +
+                           "UPDATE team_mitglieder SET team = $neu WHERE team = $alt; " +
                            "UPDATE bewohner SET wohnbereich = $neu WHERE wohnbereich = $alt; " +
                            "UPDATE nachricht_empfaenger SET ziel = $neu WHERE art = 'team' AND ziel = $alt", transaktion, ("$neu", neu), ("$alt", alt));
             transaktion.Commit();

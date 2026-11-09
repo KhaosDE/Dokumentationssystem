@@ -53,7 +53,10 @@ public sealed class VisitenSeite : Panel
 
     private static Label Beschriftung(string text) => new() { Text = text, AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite };
 
-    private static string Bereich => Einstellungen.Laden().Bereich;
+    // Visiten gehören zu einem Wohnbereich: dem in der Übersicht gewählten.
+    private static string Bereich => Arbeitsbereich.Gewaehlt.Length > 0 ? Arbeitsbereich.Gewaehlt : Einstellungen.Laden().Bereich;
+    public const string WohnbereichWaehlenText = "Bitte zuerst in der Übersicht einen Wohnbereich wählen.";
+    private string? OhneWohnbereich => speicher.AlleBewohner().Any(b => b.Wohnbereich == Bereich) ? null : WohnbereichWaehlenText;
 
     public string KopfText => Rundgang is not null ? $"Visite läuft · {Rundgang.KopfText}" : (Karten.Count == 1 ? "1 Visite" : $"{Karten.Count} Visiten") +
                               (BewohnerFilter.SelectedIndex > 0 ? $" · {bewohner[BewohnerFilter.SelectedIndex - 1].Name}" : "");
@@ -85,7 +88,7 @@ public sealed class VisitenSeite : Panel
     {
         if (BewohnerFilter.Items.Count == 0) return;   // noch nicht gezeigt
         Stil.Sperren(NeuKnopf, Recht.Grund(speicher, Funktionen.Visiten));   // Rechte (Schritt 19)
-        Stil.Sperren(BeginnenKnopf, Recht.Grund(speicher, Funktionen.Visiten));
+        Stil.Sperren(BeginnenKnopf, Recht.Grund(speicher, Funktionen.Visiten) ?? OhneWohnbereich);
         BeginnenKnopf.Text = speicher.VisitenEntwurf(Bereich) is null ? "Visite beginnen …" : "Visite fortsetzen";
         bool fehler = false;
         DateOnly? Lesen(TextBox feld)
@@ -127,7 +130,7 @@ public sealed class VisitenSeite : Panel
     // „Visite beginnen …“ (Datum, Arzt, dabei) bzw. eine unterbrochene Visite fortsetzen.
     public bool Beginnen()
     {
-        if (Recht.Grund(speicher, Funktionen.Visiten) is not null) return false;
+        if (Recht.Grund(speicher, Funktionen.Visiten) is not null || OhneWohnbereich is not null) return false;
         var entwurf = speicher.VisitenEntwurf(Bereich);
         if (entwurf is null)
         {

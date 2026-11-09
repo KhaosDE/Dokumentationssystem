@@ -87,6 +87,7 @@ public sealed class Umgebung : IDisposable
     public Umgebung()
     {
         Environment.SetEnvironmentVariable(Pfade.Umlenkung, Ordner);
+        Arbeitsbereich.Gewaehlt = "";   // die Wahl der Übersicht gilt je Programmlauf; jeder Test beginnt ohne
         Speicher = new Speicher();
         Modulverwaltung.Anmelden(Speicher);
         Speicher.DemoBeimErstenStart();

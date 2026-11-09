@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Bereich „Dokumentation“: links die Bewohner („Nachname, Vorname“, alphabetisch, Bereichswahl, Suche,
+// Bereich „Dokumentation“: links die Bewohner des gewählten Bereichs („Nachname, Vorname“, alphabetisch, Suche,
 // einklappbar), rechts ihre Berichte nach Tagen mit Schichtrand, Marken, Filtern und gespeicherten Filtern.
 [Collection("Oberflaeche")]
 public class BewohnerListeTests
@@ -63,9 +63,9 @@ public class BewohnerListeTests
             Assert.Equal("Theo Tanne", Assert.Single(b.Zeilen).Name);
             Assert.StartsWith("R1 · 1 von 23 Bewohner", f.Kopf.KleinText);
             b.Suche.Text = "";
-            b.BereichWahl.SelectedItem = BewohnerBereich.AlleBereiche;
+            f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);   // in der Übersicht gewählt, gilt auch hier
             Assert.Equal(69, b.Zeilen.Count);
-            b.BereichWahl.SelectedIndex = 0;
+            f.ArbeitsbereichWaehlen("R1");
             b.Einklappen(true);
             Assert.False(b.Namen.Visible);
             b.Einklappen(false);
@@ -167,7 +167,7 @@ public class BewohnerListeTests
             // „Bedarf gegeben …“ (Tagetes hat eine Bedarfsverordnung): Bericht mit Marke „Bedarfsgabe“.
             Einstellungen.Aendern(w => w with { Kuerzel = "AB" });   // Fachkraft
             f.BenutzerWaehlen("AB");
-            b.BereichWahl.SelectedItem = BewohnerBereich.AlleBereiche;
+            f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);
             Assert.True(b.Waehlen(u.Demo("Tagetes").Id!.Value));
             Assert.Null(Stil.Sperrgrund(b.BedarfKnopf));
             b.BedarfWaehlen = _ => 0;

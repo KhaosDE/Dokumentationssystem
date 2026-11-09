@@ -50,6 +50,10 @@ public static class Stil
     public static readonly Marke MedikationGeaendert = new(Color.FromArgb(196, 43, 28), Color.White);
     public static readonly Color MedikationZeile = Color.FromArgb(253, 240, 238);
     public static readonly Color TagKopfFlaeche = Color.FromArgb(238, 242, 251);
+    // Kopfleiste eines Kastens (Übersicht, Laufende Therapien): Fläche, beim Darüberfahren, Trennlinie darunter.
+    public static readonly Color KastenKopfFlaeche = Color.FromArgb(238, 242, 251);
+    public static readonly Color KastenKopfMaus = Color.FromArgb(224, 231, 247);
+    public static readonly Color KastenKopfLinie = Color.FromArgb(217, 224, 236);
     // Schichtfarben (Rand der Berichte, Übergabe): Früh Orange, Spät Blau, Nacht Violett.
     public static readonly Color SchichtFrueh = Color.FromArgb(238, 166, 60);
     public static readonly Color SchichtSpaet = Color.FromArgb(45, 84, 156);
@@ -75,6 +79,7 @@ public static class Stil
     public static readonly Font MarkeSchrift = new("Segoe UI Semibold", 9F);
     public static readonly Font Abschnitt = new("Segoe UI Semibold", 8.5F);   // „STAMMDATEN“
     public static readonly Font TagKopf = new("Segoe UI Semibold", 11.5F);
+    public static readonly Font KastenKopfSchrift = new("Segoe UI Semibold", 9.5F);
 
     // Symbole: „Segoe Fluent Icons“ (Windows 11), sonst „Segoe MDL2 Assets“ (Windows 10, gleiche Zeichen).
     public static readonly Font Symbolschrift = new(SymbolFamilie(), 12F);

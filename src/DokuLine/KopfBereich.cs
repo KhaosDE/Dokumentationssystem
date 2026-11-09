@@ -61,7 +61,7 @@ public sealed class KopfBereich : Panel
         Height = S(GesamtHoehe);
         AccessibleName = DemoHinweis;
         EntwurfKnopf.Visible = false;
-        Controls.AddRange([BenutzerAnzeige, AbmeldenKnopf]);
+        Controls.AddRange([BenutzerAnzeige, AbmeldenKnopf, Eingesprungen]);
         Leiste.EntwurfSetzen(EntwurfKnopf);
         BenutzerSetzen(null, null);
     }
@@ -100,12 +100,25 @@ public sealed class KopfBereich : Panel
     public string KleinText => klein.Text;
     public string TitelText => titel.Text;
 
+    // Der gewählte Bereich steht immer vorn in der kleinen Zeile; „eingesprungen“, wenn es nicht der des Rechners ist.
+    public MarkenFeld Eingesprungen { get; } = new("eingesprungen", Stil.Hinweis) { Visible = false };
+    private string bereich = "", kleinRoh = "";
+
+    public void BereichSetzen(string gewaehlt, bool eingesprungen)
+    {
+        bereich = gewaehlt;
+        Eingesprungen.Visible = eingesprungen;
+        TexteSetzen(kleinRoh, titel.Text);
+    }
+
     private int S(int wert) => Stil.Px(this, wert);
     private float Skala => Stil.Skala(this);
 
     public void TexteSetzen(string kleinText, string titelText)
     {
-        klein.Text = kleinText;
+        kleinRoh = kleinText;
+        bool steht = bereich.Length == 0 || kleinText == bereich || kleinText.StartsWith(bereich + " ·", StringComparison.Ordinal);
+        klein.Text = steht ? kleinText : kleinText.Length == 0 ? bereich : $"{bereich} · {kleinText}";
         titel.Text = titelText;
         PerformLayout();
         Invalidate();
@@ -196,6 +209,7 @@ public sealed class KopfBereich : Panel
         int textHoehe = klein.PreferredHeight + S(Stil.AbstandMini) + titel.PreferredHeight;
         int textOben = oben + Math.Max(0, (S(TitelHoehe) - textHoehe) / 2);
         klein.Location = new Point(links, textOben);
+        Eingesprungen.Location = new Point(klein.Left + klein.PreferredWidth + S(Stil.AbstandKlein), textOben);
         titel.Location = new Point(links - S(2), textOben + klein.PreferredHeight + S(Stil.AbstandMini));
 
         // Benutzer unter dem Demo-Hinweis, rechtsbündig mit ihm: [Entwurf fortsetzen] Angemeldet: … [Abmelden (F12)]

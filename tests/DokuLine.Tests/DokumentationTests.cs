@@ -228,6 +228,8 @@ public sealed class DokumentationTests : IDisposable
             ALTER TABLE berichte DROP COLUMN art;
             CREATE TRIGGER berichte_bleiben BEFORE UPDATE ON berichte
                 BEGIN SELECT RAISE(ABORT, 'Berichte werden nicht überschrieben – Korrekturen sind Nachträge.'); END;
+            ALTER TABLE aufgaben DROP COLUMN bereich;
+            ALTER TABLE aufgabe_vorlagen DROP COLUMN bereich;
             PRAGMA user_version = 30;
             """);
         string pfad = s.Pfad;

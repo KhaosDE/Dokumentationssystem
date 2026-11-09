@@ -67,7 +67,8 @@ public sealed class VorlagenFenster : Form
         zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
         zeile(null, Fenster.Hinweis("Wiederkehrende Aufgaben je Schicht. Zu Beginn jeder Schicht entstehen daraus die Aufgaben dieser Schicht " +
                                     "(an den gewählten Wochentagen). Nicht erledigte bleiben als „aus der … offen“ stehen."));
-        foreach (var (titel, breite) in new[] { ("Aufgabe", 300), ("Schicht", 100), ("Tage", 130), ("Uhrzeit", 70), ("Bewohner", 110), ("Status", 70) })
+        foreach (var (titel, breite) in new[] { ("Aufgabe", 280), ("Bereich", 70), ("Schicht", 100), ("Tage", 120), ("Uhrzeit", 60),
+                                                ("Bewohner", 110), ("Status", 70) })
             Liste.Columns.Add(titel, breite);
         Liste.DoubleClick += (_, _) => Aendern();
         zeile(null, Liste);
@@ -87,11 +88,11 @@ public sealed class VorlagenFenster : Form
 
     private void Fuellen()
     {
-        vorlagen = speicher.Vorlagen();
+        vorlagen = [.. speicher.Vorlagen().Where(v => BereichswahlRegeln.Passt(v.Bereich, Arbeitsbereich.Gewaehlt))];
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
         Liste.Items.Clear();
         foreach (var v in vorlagen)
-            Liste.Items.Add(new ListViewItem([v.Text, BerichtRegeln.SchichtText(v.Schicht), AufgabenRegeln.TageText(v.Tage),
+            Liste.Items.Add(new ListViewItem([v.Text, v.Bereich, BerichtRegeln.SchichtText(v.Schicht), AufgabenRegeln.TageText(v.Tage),
                 v.Uhrzeit?.ToString("HH:mm") ?? "", v.BewohnerId is long b ? namen.GetValueOrDefault(b, "?") : "", v.Aktiv ? "aktiv" : "stillgelegt"]));
     }
 
@@ -133,6 +134,7 @@ public sealed class VorlageFenster : Form
         { Text = System.Globalization.CultureInfo.GetCultureInfo("de-DE").DateTimeFormat.GetAbbreviatedDayName(t), AutoSize = true, Checked = true }).ToArray();
     public TextBox Uhrzeit { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "optional" };
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
+    public ComboBox BereichWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160, AccessibleName = "Bereich" };
     public Label Fehler { get; } = Fenster.Fehlerfeld();
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
@@ -145,9 +147,15 @@ public sealed class VorlageFenster : Form
         Fenster.Grundform(this, bisher is null ? "Neue Standardaufgabe" : "Standardaufgabe ändern");
         SchichtWahl.Items.AddRange([.. Enum.GetValues<Schicht>().Select(BerichtRegeln.SchichtText)]);
         SchichtWahl.SelectedIndex = (int)Schicht.Nacht;
-        BewohnerWahl.Items.Add("– kein einzelner Bewohner –");
+        BewohnerWahl.Items.Add(AufgabeFenster.FuerBereich);
         BewohnerWahl.Items.AddRange([.. bewohner.Select(b => b.Name)]);
         BewohnerWahl.SelectedIndex = 0;
+        string[] bereiche = [.. speicher.Wohnbereiche().Select(w => w.Name), TherapieRegeln.AnbieterTherapie];
+        BereichWahl.Items.AddRange(bereiche);
+        string vorgabe = bisher is { Bereich.Length: > 0 } ? bisher.Bereich
+            : Arbeitsbereich.Gewaehlt is { Length: > 0 } g && bereiche.Contains(g) ? g : Einstellungen.Laden().Bereich;
+        BereichWahl.SelectedIndex = Math.Max(0, Array.IndexOf(bereiche, vorgabe));
+        BewohnerWahl.SelectedIndexChanged += (_, _) => BereichWahl.Enabled = BewohnerWahl.SelectedIndex == 0;
         Taeglich.CheckedChanged += (_, _) => { foreach (var t in Tage) { t.Checked = Taeglich.Checked || t.Checked; t.Enabled = !Taeglich.Checked; } };
         foreach (var t in Tage) t.Enabled = false;
         var raster = Formular.Raster(out var zeile);
@@ -156,6 +164,7 @@ public sealed class VorlageFenster : Form
         zeile("Wochentage", Formular.Reihe([Taeglich, .. Tage]));
         zeile("Uhrzeit", Uhrzeit);
         zeile("Bewohner", BewohnerWahl);
+        zeile("Bereich", BereichWahl);
         zeile(null, Fehler);
         zeile(null, Formular.Knoepfe(this, "Speichern", () => Speichern()));
         Controls.Add(raster);
@@ -180,6 +189,7 @@ public sealed class VorlageFenster : Form
                 Text = TextFeld.Text, Schicht = (Schicht)SchichtWahl.SelectedIndex,
                 Tage = Taeglich.Checked ? [.. Woche] : Woche.Where((_, i) => Tage[i].Checked).ToList(), Uhrzeit = Uhrzeit.Text,
                 BewohnerId = BewohnerWahl.SelectedIndex > 0 ? bewohner[BewohnerWahl.SelectedIndex - 1].Id : null, Kuerzel = Recht.Kuerzel,
+                Bereich = BewohnerWahl.SelectedIndex > 0 ? "" : BereichWahl.SelectedItem as string ?? "",
             }, Jetzt());
             speicher.VorlageSpeichern(bisher is null ? v : v with { Id = bisher.Id, Aktiv = bisher.Aktiv });
         }

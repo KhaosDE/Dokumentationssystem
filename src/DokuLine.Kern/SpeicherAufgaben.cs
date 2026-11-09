@@ -13,6 +13,8 @@ public sealed partial class Speicher
     public Aufgabe AufgabeSpeichern(Aufgabe a)
     {
         if (a.BewohnerId is long b && Bewohner(b) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        if (a.BewohnerId is null && a.Bereich.Trim().Length == 0)
+            throw new Eingabefehler([AufgabenRegeln.BereichFehlt]);
         if (a.Id != 0) throw new InvalidOperationException("Aufgaben werden nicht überschrieben.");
         using var transaktion = db.BeginTransaction();
         long id = AufgabeEinfuegen(a, transaktion);
@@ -26,9 +28,10 @@ public sealed partial class Speicher
     private long AufgabeEinfuegen(Aufgabe a, SqliteTransaction transaktion)
     {
         Ausfuehren("""
-            INSERT INTO aufgaben (bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id, visite_anordnung_id, visite_eintrag_id)
-            VALUES ($b, $r, $t, $f, $st, $s, $fb, $e, $v, $vo, $va, $ve)
-            """, transaktion,
+            INSERT INTO aufgaben (bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id,
+                                  visite_anordnung_id, visite_eintrag_id, bereich)
+            VALUES ($b, $r, $t, $f, $st, $s, $fb, $e, $v, $vo, $va, $ve, $be)
+            """, transaktion, ("$be", a.BewohnerId is null ? a.Bereich.Trim() : ""),
             ("$b", a.BewohnerId), ("$r", a.BerichtId), ("$t", a.Text.Trim()), ("$f", AufgabenRegeln.FuerKuerzel(a.Fuer)),
             ("$st", a.FuerSchicht is SchichtTermin s1 ? Iso(s1.Tag) : null),
             ("$s", a.FuerSchicht is SchichtTermin s2 ? BerichtRegeln.Kuerzel(s2.Schicht) : null),
@@ -37,13 +40,15 @@ public sealed partial class Speicher
         return Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
     }
 
-    public Aufgabe? AufgabeLesen(long id) => AufgabenLesen("WHERE id = $id", ("$id", id)).FirstOrDefault();
+    public Aufgabe? AufgabeLesen(long id) => AufgabenLesen("WHERE a.id = $id", ("$id", id)).FirstOrDefault();
 
-    // Offene Aufgaben in der Reihenfolge der Liste; mit „auchErledigte“ alle.
-    public List<Aufgabe> Aufgaben(DateTime jetzt, bool auchErledigte = false) =>
-        AufgabenRegeln.Sortiert(AufgabenLesen("").Where(a => auchErledigte || a.Offen), jetzt);
+    // Offene Aufgaben in der Reihenfolge der Liste; mit „auchErledigte“ alle. bereich: nur dieser (oder „Alle“).
+    public List<Aufgabe> Aufgaben(DateTime jetzt, bool auchErledigte = false, string bereich = BereichswahlRegeln.Alle) =>
+        AufgabenRegeln.Sortiert(
+            AufgabenLesen("").Where(a => (auchErledigte || a.Offen) && BereichswahlRegeln.Passt(a.Bereich, bereich)), jetzt);
 
-    public int OffeneAufgaben() => AufgabenLesen("").Count(a => a.Offen);
+    public int OffeneAufgaben(string bereich = BereichswahlRegeln.Alle) =>
+        AufgabenLesen("").Count(a => a.Offen && BereichswahlRegeln.Passt(a.Bereich, bereich));
 
     public void AufgabeWeitergeben(long id, string kuerzel, string notiz, DateTime zeit)
     {
@@ -79,7 +84,10 @@ public sealed partial class Speicher
     public List<AufgabeVorlage> Vorlagen()
     {
         var liste = new List<AufgabeVorlage>();
-        using var befehl = Befehl("SELECT id, text, schicht, tage, uhrzeit, bewohner_id, aktiv, erstellt, kuerzel FROM aufgabe_vorlagen ORDER BY id", null, []);
+        using var befehl = Befehl("""
+            SELECT v.id, v.text, v.schicht, v.tage, v.uhrzeit, v.bewohner_id, v.aktiv, v.erstellt, v.kuerzel, COALESCE(b.wohnbereich, v.bereich)
+            FROM aufgabe_vorlagen v LEFT JOIN bewohner b ON b.id = v.bewohner_id ORDER BY v.id
+            """, null, []);
         using var leser = befehl.ExecuteReader();
         while (leser.Read())
             liste.Add(new AufgabeVorlage
@@ -87,7 +95,7 @@ public sealed partial class Speicher
                 Id = leser.GetInt64(0), Text = leser.GetString(1), Schicht = BerichtRegeln.SchichtAus(leser.GetString(2)),
                 Tage = AufgabenRegeln.TageAus(leser.GetInt32(3)), Uhrzeit = leser.IsDBNull(4) ? null : TimeOnly.ParseExact(leser.GetString(4), "HH:mm", CultureInfo.InvariantCulture),
                 BewohnerId = leser.IsDBNull(5) ? null : leser.GetInt64(5), Aktiv = leser.GetInt64(6) == 1,
-                Erstellt = AusZeit(leser.GetString(7)), Kuerzel = leser.GetString(8),
+                Erstellt = AusZeit(leser.GetString(7)), Kuerzel = leser.GetString(8), Bereich = leser.GetString(9),
             });
         return liste;
     }
@@ -99,20 +107,29 @@ public sealed partial class Speicher
     private AufgabeVorlage VorlageSpeichern(AufgabeVorlage v, SqliteTransaction? transaktion)
     {
         if (v.BewohnerId is long b && Bewohner(b) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        if (v.BewohnerId is null && v.Bereich.Trim().Length == 0)
+            throw new Eingabefehler([AufgabenRegeln.BereichFehlt]);
         (string, object?)[] werte =
         [
             ("$id", v.Id), ("$t", v.Text), ("$s", BerichtRegeln.Kuerzel(v.Schicht)), ("$ta", AufgabenRegeln.TageMaske(v.Tage)),
             ("$u", v.Uhrzeit is TimeOnly u ? u.ToString("HH:mm", CultureInfo.InvariantCulture) : null), ("$b", v.BewohnerId),
             ("$a", v.Aktiv ? 1 : 0), ("$e", Zeit(v.Erstellt)), ("$k", v.Kuerzel),
+            ("$be", v.BewohnerId is null ? v.Bereich.Trim() : ""),
         ];
         long id = v.Id;
         if (id == 0)
         {
-            Ausfuehren("INSERT INTO aufgabe_vorlagen (text, schicht, tage, uhrzeit, bewohner_id, aktiv, erstellt, kuerzel) VALUES ($t, $s, $ta, $u, $b, $a, $e, $k)", transaktion, werte);
+            Ausfuehren("""
+                INSERT INTO aufgabe_vorlagen (text, schicht, tage, uhrzeit, bewohner_id, aktiv, erstellt, kuerzel, bereich)
+                VALUES ($t, $s, $ta, $u, $b, $a, $e, $k, $be)
+                """, transaktion, werte);
             id = Convert.ToInt64(transaktion is null ? Wert("SELECT last_insert_rowid()") : WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
         }
         else
-            Ausfuehren("UPDATE aufgabe_vorlagen SET text = $t, schicht = $s, tage = $ta, uhrzeit = $u, bewohner_id = $b, aktiv = $a, kuerzel = $k WHERE id = $id", transaktion, werte);
+            Ausfuehren("""
+                UPDATE aufgabe_vorlagen SET text = $t, schicht = $s, tage = $ta, uhrzeit = $u, bewohner_id = $b, aktiv = $a, kuerzel = $k,
+                    bereich = $be WHERE id = $id
+                """, transaktion, werte);
         if (transaktion is null) AufgabenGeaendert?.Invoke();
         return v with { Id = id };
     }
@@ -132,9 +149,9 @@ public sealed partial class Speicher
         foreach (var v in Vorlagen().Where(v => AufgabenRegeln.Gilt(v, schicht)))
         {
             Ausfuehren("""
-                INSERT OR IGNORE INTO aufgaben (bewohner_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id)
-                VALUES ($b, $t, 'schicht', $st, $s, $fb, $e, $v, $vo)
-                """, null,
+                INSERT OR IGNORE INTO aufgaben (bewohner_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id, bereich)
+                VALUES ($b, $t, 'schicht', $st, $s, $fb, $e, $v, $vo, $be)
+                """, null, ("$be", v.BewohnerId is null ? v.Bereich : ""),
                 ("$b", v.BewohnerId), ("$t", v.Text), ("$st", Iso(schicht.Tag)), ("$s", BerichtRegeln.Kuerzel(schicht.Schicht)),
                 ("$fb", Zeit(AufgabenRegeln.FaelligIn(v, schicht))), ("$e", Zeit(schicht.Beginn)), ("$v", v.Kuerzel), ("$vo", v.Id));
             neu += Convert.ToInt32(Wert("SELECT changes()"), CultureInfo.InvariantCulture);
@@ -165,8 +182,19 @@ public sealed partial class Speicher
     private void DemoStandardaufgabenEinfuegen(SqliteTransaction transaktion)
     {
         Ausfuehren("DELETE FROM aufgabe_vorlagen WHERE kuerzel IN ('AB', 'CD', 'EF', 'KL')", transaktion);
-        foreach (var v in Demodaten.Standardaufgaben(Uhr())) VorlageSpeichern(v, transaktion);
+        var wohnbereiche = LesenNamen(transaktion, "SELECT DISTINCT wohnbereich FROM bewohner ORDER BY wohnbereich");
+        foreach (var v in Demodaten.Standardaufgaben(Uhr()))
+            foreach (string bereich in wohnbereiche) VorlageSpeichern(v with { Bereich = bereich }, transaktion);
         SetzeMeta(DemoStandardaufgaben, "1", transaktion);
+    }
+
+    private List<string> LesenNamen(SqliteTransaction? transaktion, string sql)
+    {
+        var liste = new List<string>();
+        using var befehl = Befehl(sql, transaktion, []);
+        using var leser = befehl.ExecuteReader();
+        while (leser.Read()) liste.Add(leser.GetString(0));
+        return liste;
     }
 
     private Aufgabe AufgabeOffen(long id, string kuerzel)
@@ -181,8 +209,9 @@ public sealed partial class Speicher
     {
         var liste = new List<Aufgabe>();
         using (var befehl = Befehl($"""
-            SELECT id, bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id, visite_anordnung_id, visite_eintrag_id
-            FROM aufgaben {bedingung}
+            SELECT a.id, a.bewohner_id, a.bericht_id, a.text, a.fuer, a.schicht_tag, a.schicht, a.faellig_bis, a.erstellt, a.verfasser,
+                   a.vorlage_id, a.visite_anordnung_id, a.visite_eintrag_id, COALESCE(b.wohnbereich, a.bereich)
+            FROM aufgaben a LEFT JOIN bewohner b ON b.id = a.bewohner_id {bedingung}
             """, null, parameter))
         using (var leser = befehl.ExecuteReader())
         {
@@ -203,6 +232,7 @@ public sealed partial class Speicher
                     VorlageId = leser.IsDBNull(10) ? null : leser.GetInt64(10),
                     VisiteAnordnungId = leser.IsDBNull(11) ? null : leser.GetInt64(11),
                     VisiteEintragId = leser.IsDBNull(12) ? null : leser.GetInt64(12),
+                    Bereich = leser.GetString(13),
                 });
             }
         }
