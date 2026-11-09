@@ -130,6 +130,27 @@ public sealed class MitarbeiterTests : IDisposable
         Assert.DoesNotContain(s.Positionsliste(), p => p.Name == "Hauswirtschaft");
     }
 
+    // 0.33.1: Ein neues Recht wird beim Start einmal vorbelegt. Fehlt eine der vorgesehenen Positionen
+    // (umbenannt oder gelöscht), darf das den Start nicht abbrechen.
+    [Fact]
+    public void Vorbelegen_neuer_Rechte_uebersteht_umbenannte_und_geloeschte_Positionen()
+    {
+        s.DemoBeimErstenStart();
+        s.ListeneintragUmbenennen(Liste.Positionen, "Mitarbeiter Wohnbereich", "Betreuung");
+        foreach (var m in s.AlleMitarbeiter().Where(m => m.Positionen.Contains("Verwaltung")))
+            s.MitarbeiterSpeichern(m with { Positionen = [.. m.Positionen.Where(p => p != "Verwaltung").DefaultIfEmpty("Hausleitung")] }, neu: false);
+        s.ListeneintragLoeschen(Liste.Positionen, "Verwaltung");
+        using (var befehl = s.Verbindung.CreateCommand())
+        {
+            // wie eine Datenbank vor 0.33.0: Recht unbekannt
+            befehl.CommandText = $"DELETE FROM rechte WHERE funktion = '{Funktionen.BedarfGeben}'; DELETE FROM meta WHERE schluessel = 'rechte_vorbelegt_{Funktionen.BedarfGeben}'";
+            befehl.ExecuteNonQuery();
+        }
+        using var neu = new Speicher();
+        Assert.Equal(["Administrator", "Geschäftsführung", "Hausleitung", "Bereichsleitung"],
+            neu.Positionsliste().Select(p => p.Name).Where(neu.Rechte()[Funktionen.BedarfGeben].Contains));
+    }
+
     [Fact]
     public void Mitarbeiter_verwalten_im_eigenen_Bereich()
     {
