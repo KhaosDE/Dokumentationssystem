@@ -82,7 +82,7 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 08.11.2026 — Claude Code: Bauplan Schritt 28 „E-Mail und Kalender über externe Programme“ (0.31.0).
 - 08.11.2026 — Claude Code: Bauplan Schritt 29 „Einstellungen neu gegliedert“ (0.32.0); Bauplan ab 07.11.2026 abgearbeitet.
 - 08.11.2026 — Claude Code: „Assistenzkraft und Fachkraft“ nach Freigabe durch Tobi gebaut: Qualifikation, Visiten nur Fachkräfte, „Bedarf gegeben …“ mit Absprache (0.33.0).
-- 09.11.2026 — Claude Code: Fehlersuche 0.29.10–0.33.0; Startabbruch nach Update auf 0.33.0 behoben (0.33.1).
+- 09.11.2026 — Claude Code: Fehlersuche 0.29.10–0.33.0; Startabbruch nach Update behoben, Sicherheitstests für Updates (0.33.1); Korrekturen Übersicht, Tafel, Bewohner, Bedarf, Visite, Demo (0.33.2).
 - 09.11.2026 — Vorschläge 30–32 (offen): Akte-Reiter Betreuer, Krankenkasse, Kostenträger; Reiter „Dokumente“ als digitale Akte; Übernahme der vorhandenen Ordner-Akte (Chat „Programme/Apps“).
 - 09.11.2026 — Schritte 30–32 freigegeben; Dokumente in eigener Ablage von DokuLine (Entscheidung Tobi) (Chat „Programme/Apps“).
 - 09.11.2026 — Schritte 33–36 freigegeben: Überleitungsbogen, Abgängigkeitsmeldung, Schweigepflichtentbindungen, Vitalwerte (Chat „Programme/Apps“).

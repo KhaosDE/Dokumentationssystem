@@ -16,6 +16,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
     private readonly FlowLayoutPanel spaltenFlaeche = new() { WrapContents = false, AutoScroll = true, FlowDirection = FlowDirection.LeftToRight, BackColor = Stil.Seite };
     private readonly Label restTitel = new() { Text = "REST DES TAGES", AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite };
     private string? vorgabeFuer;
+    private bool abgleichen;
 
     public ComboBox BereichWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160, Font = Stil.Standard, AccessibleName = "Bereich" };
     public Label Titel { get; } = new() { AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite, UseMnemonic = false };
@@ -29,6 +30,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
     public event Action? Geaendert;
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
+    public Doppelklickschutz Schutz { get; } = new();
 
     public LaufendeTherapienAnsicht(Speicher speicher)
     {
@@ -37,7 +39,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
         BereichWahl.Items.Add(LaufendeRegeln.AlleBereiche);
         foreach (var w in speicher.Wohnbereiche()) BereichWahl.Items.Add(w.Name);
         BereichWahl.SelectedIndex = 0;
-        BereichWahl.SelectedIndexChanged += (_, _) => Aktualisieren();
+        BereichWahl.SelectedIndexChanged += (_, _) => { if (!abgleichen) Aktualisieren(); };
         Leiste.TerminGeklickt += t => AngebotGewaehlt?.Invoke(t.Angebot);
         Controls.AddRange([Titel, bereichLabel, BereichWahl, Leiste, Hinweis, spaltenFlaeche, restTitel, Rest]);
         uhr.Tick += (_, _) => { if (Visible) Aktualisieren(); };
@@ -65,6 +67,9 @@ public sealed class LaufendeTherapienAnsicht : Panel
 
     public void Aktualisieren()
     {
+        abgleichen = true;
+        try { Auswahl.Abgleichen(BereichWahl, [LaufendeRegeln.AlleBereiche, .. speicher.Wohnbereiche().Select(w => w.Name)]); }
+        finally { abgleichen = false; }
         var jetzt = Jetzt();
         var tag = DateOnly.FromDateTime(jetzt);
         var bewohner = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value);
@@ -83,6 +88,10 @@ public sealed class LaufendeTherapienAnsicht : Panel
         Hinweis.Text = tafel.Hinweis ?? "";
         Hinweis.Visible = tafel.Hinweis is not null;
 
+        // Bildlauf merken (0.33.2): Die Tafel baut sich jede Minute und nach jedem Klick neu auf; sonst
+        // spränge die Spalte „Noch offen“ jedes Mal nach oben.
+        var bildlauf = Spalten.GroupBy(s => s.Titel).ToDictionary(g => g.Key, g => g.First().Bildlauf);
+        int quer = -spaltenFlaeche.AutoScrollPosition.X;
         spaltenFlaeche.SuspendLayout();
         foreach (var s in Spalten) { spaltenFlaeche.Controls.Remove(s); s.Dispose(); }
         Spalten.Clear();
@@ -114,13 +123,17 @@ public sealed class LaufendeTherapienAnsicht : Panel
         Rest.Text = tafel.RestDesTages.Count == 0 ? "Heute nichts mehr."
             : string.Join(Environment.NewLine, tafel.RestDesTages.Select(t => $"{t.Zeit}  {t.Name} · {t.Fassung.Ort} · {t.Teilnehmer.Count} Teilnehmer"));
         PerformLayout();
+        spaltenFlaeche.AutoScrollPosition = new Point(quer, 0);
+        foreach (var s in Spalten)
+            if (bildlauf.TryGetValue(s.Titel, out int y)) s.Bildlauf = y;
         Geaendert?.Invoke();
     }
 
     // „gegangen“ oder „abgesagt“: derselbe Eintrag wie im Tagesplan (Kürzel und Uhrzeit).
+    // Nach dem Klick baut sich die Tafel neu auf; der zweite Klick eines Doppelklicks träfe den Nächsten (0.33.2).
     public bool Setzen(TherapieTermin t, TafelTeilnehmer p, Teilnahme status)
     {
-        if (Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen) is not null) return false;
+        if (Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen) is not null || !Schutz.Frei()) return false;
         try { speicher.TeilnahmeSetzen(p.ZuteilungId, t.Tag, status, Einstellungen.Laden().Kuerzel, Jetzt()); }
         catch (Eingabefehler e)
         {
@@ -193,6 +206,13 @@ public sealed class TherapieSpalte : KartenFlaeche
         Width = Stil.Px(this, Breite);
         Margin = new Padding(0, 0, Stil.AbstandMittel, 0);
         AccessibleName = $"{titelText}: {string.Join(", ", KopfTexte)}";
+    }
+
+    // Senkrechter Bildlauf der Teilnehmerliste in Pixeln (0 = oben).
+    public int Bildlauf
+    {
+        get => -inhalt.AutoScrollPosition.Y;
+        set { PerformLayout(); inhalt.AutoScrollPosition = new Point(0, value); }
     }
 
     public void Hinzufuegen(Kaertchen k)

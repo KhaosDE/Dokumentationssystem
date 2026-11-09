@@ -117,8 +117,11 @@ public sealed partial class Speicher
         Ausfuehren("DELETE FROM visite_entwuerfe WHERE bereich = $b", null, ("$b", bereich));
 
     // „Visite abschließen“: aus dem Entwurf die Visite (Berichte, Übergaben, Aufgaben); der Entwurf ist dann weg.
-    public VisiteGespeichert VisiteAbschliessen(VisitenEntwurf v, DateTime jetzt)
+    // kuerzel: wer abschließt – braucht das Recht „Visiten“ (0.33.2: vorher nur beim Beginnen geprüft; wer sich
+    // während der Visite umgemeldet hatte, konnte ohne Recht abschließen).
+    public VisiteGespeichert VisiteAbschliessen(VisitenEntwurf v, string kuerzel, DateTime jetzt)
     {
+        if (Grund(kuerzel, Funktionen.Visiten) is string grund) throw new Eingabefehler([grund]);
         var visite = VisitenRegeln.AusEingabe(VisitenEntwurfRegeln.AlsVisite(v), jetzt);
         var gespeichert = VisiteSpeichern(visite);
         VisitenEntwurfVerwerfen(v.Bereich);

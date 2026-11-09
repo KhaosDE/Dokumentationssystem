@@ -10,6 +10,12 @@ public sealed partial class Speicher
 
     public List<Bedarfsgabe> BedarfsgabenBewohner(long bewohnerId) => BedarfsgabenLesen("WHERE bewohner_id = $b", ("$b", bewohnerId));
 
+    // Alle Gaben desselben Medikaments an diesen Bewohner, auch aus anderen Bedarfsverordnungen (0.33.2): Für die
+    // Anzeige „in den letzten 24 Stunden“ und die Höchstmenge zählt, was er davon bekommen hat.
+    public List<Bedarfsgabe> BedarfsgabenMittel(Verordnung v) => BedarfsgabenLesen(
+        "WHERE bewohner_id = $b AND verordnung_id IN (SELECT id FROM verordnungen WHERE bewohner_id = $b AND medikament_id = $m)",
+        ("$b", v.BewohnerId), ("$m", v.MedikamentId));
+
     private List<Bedarfsgabe> BedarfsgabenLesen(string bedingung, params (string, object?)[] parameter)
     {
         var liste = new List<Bedarfsgabe>();

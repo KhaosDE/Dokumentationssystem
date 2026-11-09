@@ -266,7 +266,7 @@ public sealed class VisitenRundgang : Panel
         Merken();
         if (!Entwurf.Eintraege.Any(e => e.HatInhalt)) return FehlerZeigen("Noch nichts eingetragen – bitte bei mindestens einem Bewohner eintragen, was besprochen wurde.");
         Speicher.VisiteGespeichert gespeichert;
-        try { gespeichert = speicher.VisiteAbschliessen(Entwurf, Jetzt()); }
+        try { gespeichert = speicher.VisiteAbschliessen(Entwurf, Recht.Kuerzel, Jetzt()); }
         catch (Eingabefehler e)
         {
             var namen = alle.ToDictionary(b => b.Id!.Value, b => b.Name);

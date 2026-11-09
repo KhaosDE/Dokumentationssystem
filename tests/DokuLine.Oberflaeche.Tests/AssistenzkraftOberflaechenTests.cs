@@ -66,12 +66,12 @@ public class AssistenzkraftOberflaechenTests
                 case VerordnungDetailFenster d:
                     Assert.True(d.Karte.BedarfMoeglich);   // der Dialog ist im Test nicht angezeigt: Visible wäre false
                     Assert.Null(Stil.Sperrgrund(d.Karte.BedarfKnopf));
-                    Assert.Contains(d.Karte.MarkenTexte, t => t.StartsWith("heute "));
+                    Assert.Contains(d.Karte.MarkenTexte, t => t.StartsWith("in 24 Std. "));
                     Assert.True(d.BedarfWaehlen());
                     return DialogResult.OK;
                 case BedarfFenster b:
                     wer = b.Wer.Text;
-                    Assert.StartsWith("Heute", b.Heute.Text);
+                    Assert.StartsWith("In den letzten 24 Stunden", b.Bisher.Text);
                     Assert.Equal("Höchstens: 2 in 24 Stunden", b.Hoechstens.Text);
                     Assert.Equal("bei starker Unruhe", b.Anlass.Text);
                     Assert.False(b.Speichern());                         // ohne Absprache nicht
@@ -101,14 +101,14 @@ public class AssistenzkraftOberflaechenTests
         f.Bewohner.Akte.Reiter.Waehlen("Medikamentenplan");
         m = f.Bewohner.Akte.Medikation;
         bedarf = m.BedarfEintraege.First(s => s.Verordnung.Bedarf);
-        int anzahl24 = BedarfRegeln.Letzte24Stunden(u.Speicher.Bedarfsgaben(bedarf.Verordnung.Id), DateTime.Now).Count;
+        bool zuViel = BedarfRegeln.Warnung(bedarf.Verordnung, u.Speicher.BedarfsgabenMittel(bedarf.Verordnung), DateTime.Now, 1) is not null;
         string? warnung = null, knopf = null;
         using (new DialogErsatz(fenster =>
         {
             if (fenster is VerordnungDetailFenster d) { Assert.True(d.BedarfWaehlen()); return DialogResult.OK; }
             var b = Assert.IsType<BedarfFenster>(fenster);
             Assert.Equal(BedarfFenster.OhneAbsprache, b.Absprache.Text);
-            if (anzahl24 >= 2)
+            if (zuViel)
             {
                 Assert.False(b.Speichern());
                 warnung = b.Warnung.Text;
@@ -117,7 +117,7 @@ public class AssistenzkraftOberflaechenTests
             return b.Speichern() ? DialogResult.OK : DialogResult.Cancel;
         }))
             m.Oeffnen(bedarf);
-        if (anzahl24 >= 2)
+        if (zuViel)
         {
             Assert.StartsWith("Achtung: höchstens 2 in 24 Stunden", warnung);
             Assert.Equal("Trotzdem eintragen", knopf);

@@ -21,7 +21,8 @@ public sealed record Bedarfsgabe
     public long? BerichtId { get; init; }
 }
 
-// Eingaben aus dem Fenster, noch ungeprüft. Die Gabe gilt für heute (Uhrzeit).
+// Eingaben aus dem Fenster, noch ungeprüft. Die Gabe gilt für heute (Uhrzeit); kurz nach Mitternacht meint
+// eine spätere Uhrzeit gestern (0.33.2).
 public sealed class BedarfEingabe
 {
     public long VerordnungId { get; set; }
@@ -39,36 +40,68 @@ public static partial class BedarfRegeln
     [GeneratedRegex(@"^\s*(\d+)")]
     private static partial Regex ZahlVorne();
 
-    // „2 in 24 Stunden“ → 2; ohne Zahl vorne: keine Grenze bekannt.
+    // „2 in 24 Stunden“ → 2 (in der Einheit der Verordnung, z. B. Stück); ohne Zahl vorne: nicht prüfbar.
     public static int? Hoechstens(string text) =>
         ZahlVorne().Match(text) is { Success: true } m && int.TryParse(m.Groups[1].Value, out int n) && n > 0 ? n : null;
+
+    public static string HoechstensText(Verordnung v) =>
+        v.BedarfHoechstens.Length == 0 ? "Höchstens: keine Angabe in der Verordnung – das Programm kann die Menge nicht prüfen."
+        : Hoechstens(v.BedarfHoechstens) is null ? $"Höchstens: {v.BedarfHoechstens} – ohne Zahl vorne kann das Programm die Menge nicht prüfen."
+        : $"Höchstens: {v.BedarfHoechstens}";
+
+    // Eine gespeicherte Menge als Zahl („0,5“ → 0.5); gespeichert wird nur, was Pruefen als Zahl angenommen hat.
+    public static decimal MengeZahl(string menge) =>
+        decimal.TryParse(menge.Trim().Replace(',', '.'), NumberStyles.Number, CultureInfo.InvariantCulture, out var m) ? m : 0;
+
+    private static string Zahl(decimal d) => d.ToString("0.##", CultureInfo.GetCultureInfo("de-DE"));
+
+    // „14:30“ → wann: heute; liegt das mehr als 5 Minuten in der Zukunft, aber höchstens 12 Stunden zurück
+    // gestern (kurz nach Mitternacht eingetragen). null = keine Uhrzeit.
+    public static DateTime? Zeitpunkt(string uhrzeit, DateTime jetzt)
+    {
+        if (!TimeOnly.TryParseExact(uhrzeit.Trim(), ["HH:mm", "H:mm", "HH.mm", "H.mm"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var uhr))
+            return null;
+        var zeit = DateOnly.FromDateTime(jetzt).ToDateTime(uhr);
+        if (zeit > jetzt.AddMinutes(5) && zeit.AddDays(-1) >= jetzt.AddHours(-12)) zeit = zeit.AddDays(-1);
+        return zeit;
+    }
 
     // Gaben in den 24 Stunden vor einem Zeitpunkt (einschließlich).
     public static List<Bedarfsgabe> Letzte24Stunden(IEnumerable<Bedarfsgabe> gaben, DateTime zeit) =>
         [.. gaben.Where(g => g.Zeit > zeit.AddHours(-24) && g.Zeit <= zeit).OrderBy(g => g.Zeit)];
 
-    // Hinweis, wenn die Höchstmenge schon erreicht ist (dann erst nach Rückfrage eintragen).
-    public static string? Warnung(Verordnung v, IEnumerable<Bedarfsgabe> gaben, DateTime zeit)
+    // Hinweis, wenn die neue Gabe die Höchstmenge überschreiten würde (dann erst nach Rückfrage eintragen).
+    // 0.33.2: gezählt wird die Menge (nicht die Zahl der Gaben), und zwar in jedem 24-Stunden-Fenster, in dem die
+    // neue Gabe liegt – auch bei einem Nachtrag, nach dem schon weitere Gaben kamen.
+    public static string? Warnung(Verordnung v, IEnumerable<Bedarfsgabe> gaben, DateTime zeit, decimal menge)
     {
         if (Hoechstens(v.BedarfHoechstens) is not int n) return null;
-        int schon = Letzte24Stunden(gaben, zeit).Count;
-        return schon >= n
-            ? $"Achtung: höchstens {v.BedarfHoechstens} – in den 24 Stunden davor schon {schon}× gegeben. Bitte mit einer Fachkraft klären."
-            : null;
+        var liste = gaben.ToList();
+        var enden = liste.Where(g => g.Zeit > zeit && g.Zeit < zeit.AddHours(24)).Select(g => g.Zeit).Prepend(zeit).Order();
+        foreach (var ende in enden)
+        {
+            decimal summe = menge + Letzte24Stunden(liste, ende).Sum(g => MengeZahl(g.Menge));
+            if (summe > n)
+                return $"Achtung: höchstens {v.BedarfHoechstens} – mit dieser Gabe {Menge(Zahl(summe), v.Einheit)} innerhalb von 24 Stunden" +
+                       (ende > zeit ? $" (bis zur Gabe um {ende:HH\\:mm})" : "") + ". Bitte mit einer Fachkraft klären.";
+        }
+        return null;
     }
 
-    // „Heute 2× gegeben: 09:15 (1 Stück, AB), 14:30 (1 Stück, KL mit CD)“
-    public static string HeuteText(IEnumerable<Bedarfsgabe> gaben, DateOnly heute, string einheit)
+    // „In den letzten 24 Stunden 2× gegeben: gestern 23:50 (1 Stück, AB), 09:15 (1 Stück, KL mit CD)“ (0.33.2: vorher
+    // nur der Kalendertag – kurz nach Mitternacht stand „noch nicht gegeben“, obwohl eben erst gegeben).
+    public static string Letzte24Text(IEnumerable<Bedarfsgabe> gaben, DateTime jetzt, string einheit)
     {
-        var liste = gaben.Where(g => DateOnly.FromDateTime(g.Zeit) == heute).OrderBy(g => g.Zeit).ToList();
-        if (liste.Count == 0) return "Heute noch nicht gegeben.";
-        return $"Heute {liste.Count}× gegeben: " + string.Join(", ", liste.Select(g =>
-            $"{g.Zeit:HH\\:mm} ({Menge(g.Menge, einheit)}, {g.Kuerzel}{(g.Absprache is string a ? $" mit {a}" : "")})"));
+        var liste = Letzte24Stunden(gaben, jetzt);
+        if (liste.Count == 0) return "In den letzten 24 Stunden noch nicht gegeben.";
+        var heute = DateOnly.FromDateTime(jetzt);
+        return $"In den letzten 24 Stunden {liste.Count}× gegeben: " + string.Join(", ", liste.Select(g =>
+            $"{(DateOnly.FromDateTime(g.Zeit) == heute ? "" : "gestern ")}{g.Zeit:HH\\:mm} ({Menge(g.Menge, einheit)}, {g.Kuerzel}{(g.Absprache is string a ? $" mit {a}" : "")})"));
     }
 
-    // Kurz für die Karte: „heute 2× gegeben“ / „heute noch nicht gegeben“.
-    public static string HeuteKurz(IEnumerable<Bedarfsgabe> gaben, DateOnly heute) =>
-        gaben.Count(g => DateOnly.FromDateTime(g.Zeit) == heute) is int n && n > 0 ? $"heute {n}× gegeben" : "heute noch nicht gegeben";
+    // Kurz für die Karte: „in 24 Std. 2× gegeben“ / „in 24 Std. nicht gegeben“.
+    public static string Letzte24Kurz(IEnumerable<Bedarfsgabe> gaben, DateTime jetzt) =>
+        Letzte24Stunden(gaben, jetzt).Count is int n && n > 0 ? $"in 24 Std. {n}× gegeben" : "in 24 Std. nicht gegeben";
 
     public static string Menge(string menge, string einheit) =>
         einheit.Length == 0 || einheit == "Stück" ? $"{menge} Stück" : $"{menge} {einheit}";
@@ -79,37 +112,37 @@ public static partial class BedarfRegeln
         var fehler = new List<string>();
         if (ich is null) fehler.Add(RechteRegeln.NichtAngemeldetText);
         if (!v.Bedarf) fehler.Add("Das ist keine Bedarfsverordnung.");
-        var heute = DateOnly.FromDateTime(jetzt);
-        if (v.Bedarf && MedikationRegeln.Stand(v, heute).Zustand != Zustand.Gilt)
-            fehler.Add("Diese Bedarfsverordnung gilt heute nicht (pausiert, abgesetzt oder noch nicht begonnen).");
         DateTime zeit = jetzt;
-        if (!TimeOnly.TryParseExact(e.Uhrzeit.Trim(), ["HH:mm", "H:mm", "HH.mm", "H.mm"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var uhr))
+        if (Zeitpunkt(e.Uhrzeit, jetzt) is not DateTime z)
             fehler.Add("Uhrzeit: bitte als hh:mm, z. B. 14:30.");
         else
         {
-            zeit = heute.ToDateTime(uhr);
+            zeit = z;
             if (zeit > jetzt.AddMinutes(5)) fehler.Add("Uhrzeit: Die Gabe liegt in der Zukunft.");
         }
+        if (v.Bedarf && MedikationRegeln.Stand(v, DateOnly.FromDateTime(zeit)).Zustand != Zustand.Gilt)
+            fehler.Add("Diese Bedarfsverordnung gilt zu dieser Zeit nicht (pausiert, abgesetzt oder noch nicht begonnen).");
         string menge = e.Menge.Trim();
         if (!decimal.TryParse(menge.Replace(',', '.'), NumberStyles.Number, CultureInfo.InvariantCulture, out var m) || m <= 0)
             fehler.Add("Menge: bitte eine Zahl größer als 0, z. B. 1 oder 0,5.");
         string anlass = e.Anlass.Trim();
         if (anlass.Length == 0) fehler.Add("Anlass fehlt.");
-        string absprache = e.Absprache.Trim().ToUpperInvariant();
-        bool fachkraft = ich is not null && (ich.Fachkraft || RechteRegeln.IstAdministrator(ich));
+        // Es zählt die Qualifikation, nicht die Position (0.33.2: vorher galt ein Administrator immer als Fachkraft).
+        string absprache = e.Absprache.Trim();
+        var mit = fachkraefte.FirstOrDefault(f => f.Kuerzel.Equals(absprache, StringComparison.OrdinalIgnoreCase) && f.Fachkraft && f.Aktiv);
         if (absprache.Length == 0)
         {
-            if (ich is not null && !fachkraft) fehler.Add(AbspracheText);
+            if (ich is not null && !ich.Fachkraft) fehler.Add(AbspracheText);
         }
-        else if (!fachkraefte.Any(f => f.Kuerzel.Equals(absprache, StringComparison.OrdinalIgnoreCase) && f.Fachkraft && f.Aktiv))
+        else if (mit is null)
             fehler.Add(KeineFachkraftText);
-        else if (ich is not null && absprache.Equals(ich.Kuerzel, StringComparison.OrdinalIgnoreCase))
+        else if (ich is not null && mit.Kuerzel.Equals(ich.Kuerzel, StringComparison.OrdinalIgnoreCase))
             fehler.Add("In Absprache mit: bitte eine andere Fachkraft als sich selbst.");
         if (fehler.Count > 0) throw new Eingabefehler(fehler);
         return new Bedarfsgabe
         {
             VerordnungId = v.Id, BewohnerId = v.BewohnerId, Zeit = zeit, Menge = menge, Anlass = anlass, Kuerzel = ich!.Kuerzel,
-            Absprache = absprache.Length > 0 ? absprache : null, Erstellt = jetzt,
+            Absprache = mit?.Kuerzel, Erstellt = jetzt,   // so geschrieben wie in der Mitarbeiterliste
         };
     }
 
