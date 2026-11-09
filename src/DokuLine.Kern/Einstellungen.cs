@@ -18,12 +18,29 @@ public static partial class Einstellungen
     [GeneratedRegex(@"^[\p{L}\d]*$")]
     private static partial Regex KuerzelMuster();
 
+    // Viele Seiten fragen bei jedem Aufbau nach den Einstellungen: Die Datei wird nur neu gelesen, wenn sie (Pfad, Zeit,
+    // Größe) sich geändert hat – auch wenn ein anderes Programm sie geschrieben hat.
+    private static (string Pfad, DateTime Zeit, long Groesse, EinstellungsWerte Werte)? zuletzt;
+    private static readonly Lock Sperre = new();
+
     public static EinstellungsWerte Laden()
+    {
+        string pfad = Pfade.ImDatenordner(Datei);
+        var info = new FileInfo(pfad);
+        var stempel = info.Exists ? (info.LastWriteTimeUtc, info.Length) : (DateTime.MinValue, -1L);
+        lock (Sperre)
+            if (zuletzt is var (p, z, g, w) && p == pfad && z == stempel.Item1 && g == stempel.Item2) return w;
+        var werte = DateiLesen(pfad);
+        lock (Sperre) zuletzt = (pfad, stempel.Item1, stempel.Item2, werte);
+        return werte;
+    }
+
+    private static EinstellungsWerte DateiLesen(string pfad)
     {
         var werte = new EinstellungsWerte();
         try
         {
-            var knoten = JsonNode.Parse(File.ReadAllText(Pfade.ImDatenordner(Datei))) as JsonObject;
+            var knoten = JsonNode.Parse(File.ReadAllText(pfad)) as JsonObject;
             if (knoten is null) return werte;
             if (knoten["auto_update"] is JsonValue a && a.TryGetValue(out bool an)) werte = werte with { AutoUpdate = an };
             if (knoten["kuerzel"] is JsonValue k && k.TryGetValue(out string? kuerzel) && KuerzelPruefen(kuerzel) is null)
@@ -73,6 +90,7 @@ public static partial class Einstellungen
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen
+        lock (Sperre) zuletzt = null;
     }
 
     // Kürzel: leer oder bis zu 6 Buchstaben/Ziffern. Rückgabe: Fehlertext oder null.

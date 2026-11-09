@@ -233,6 +233,9 @@ nur bei den Releases dieses Repositorys, sonst geht es nirgends ins Internet.
 - Oder die `.exe` mit `--kein-update` starten (Verknüpfung anlegen, Rechtsklick →
   Eigenschaften → bei „Ziel“ hinten ` --kein-update` anhängen).
 
+**Zeiten messen:** Mit ` --messen` (genauso hinten an „Ziel“ angehängt) schreibt das Programm für jeden Wechsel
+zwischen den Bereichen eine Zeile mit der Dauer in `%APPDATA%\DokuLine\messung.log` (nur Bereich und Zeit).
+
 ### Von Version 0.2.0 auf 0.3.0
 
 Ab Version 0.3.0 ist das Programm in C# geschrieben statt in Python. Die installierte

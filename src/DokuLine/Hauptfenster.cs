@@ -283,16 +283,28 @@ public sealed partial class Hauptfenster : Form
 
     public void BereichWaehlen(string name, bool filterBehalten)
     {
+        var uhr = Messung.Beginnen();
         name = Schluessel(name) == "Dokumentation" ? "Dokumentation" : name;
         string schluessel = Schluessel(name);
         AktiverBereich = name;
         StatuszeileSetzen(neuGelesen: true);
         foreach (var eintrag in Navigation) eintrag.Aktiv = eintrag.Text == name;
-        foreach (var (key, s) in seiten) s.Visible = key == schluessel;
-        if (seiten.GetValueOrDefault(schluessel) is not IBereichSeite seite) return;
-        seite.Zeigen(filterBehalten);
-        Kopf.TexteSetzen(seite.KopfText, seite.Titel);
-        Kopf.KnoepfeSetzen([.. seite.Knoepfe]);
+        var neu = seiten.GetValueOrDefault(schluessel);
+        // Erst alles austauschen, dann einmal anordnen: kein Zwischenbild mit zwei oder keiner Seite.
+        var rahmen = neu?.Parent;
+        rahmen?.SuspendLayout();
+        try
+        {
+            foreach (var (key, s) in seiten) s.Visible = key == schluessel;
+            if (neu is not IBereichSeite seite) return;
+            seite.Zeigen(filterBehalten);
+            Kopf.TexteSetzen(seite.KopfText, seite.Titel);
+            Kopf.KnoepfeSetzen([.. seite.Knoepfe]);
+        }
+        finally { rahmen?.ResumeLayout(true); }
+        if (uhr is null) return;
+        Update();   // bis zur fertigen Anzeige
+        Messung.Merken(name, uhr);
     }
 
     protected override void Dispose(bool disposing)

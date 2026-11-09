@@ -14,6 +14,7 @@ internal static class Program
         Stil.SymbolFuerAlleFenster();   // Programmsymbol für alle Fenster
 
         if (args.Contains("--selbsttest")) return Selbsttest.Ausfuehren();
+        Messung.An = args.Contains("--messen");
 
         // Übergang: Daten aus %APPDATA%\Dokumentationssystem einmal nach %APPDATA%\DokuLine
         // kopieren – vor allem anderen, was in den Datenordner schreibt.

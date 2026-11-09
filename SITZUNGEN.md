@@ -113,3 +113,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.33.16 Ausgangsliste einzeilig ohne Unterbringung, alle Bewohner des Bereichs ohne Bildlauf (zwei Spalten bei knapper Höhe); kleine Knöpfe passen in kompakte Zeilen (Bauplan 29j).
 - 09.11.2026 — Claude Code: 0.33.17 Visite getrennt nach Psychiater und Hausarzt, „Weitere Bewohner …“, Visitenberichte fett „Visite Psychiater – Dr. …“ (Bauplan 29k).
 - 09.11.2026 — Claude Code: 0.33.18 Medikamentenänderungen sieben Tage rot markiert, automatisch wichtig in der Übergabe bis drei Schichten gelesen haben, Kasten in der Übersicht (Bauplan 29l).
+- 09.11.2026 — Claude Code: 0.33.19 ruhigerer und schnellerer Wechsel zwischen den Bereichen, Messung mit --messen (Bauplan 29m).

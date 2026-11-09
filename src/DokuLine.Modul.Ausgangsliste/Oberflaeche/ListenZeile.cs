@@ -14,8 +14,8 @@ public sealed class ListenZeile : Panel
 
     private readonly Label[] zellen;
     private readonly FlowLayoutPanel knoepfe = new() { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
-    private readonly ContextMenuStrip menue = new();
-    private readonly ContextMenuStrip rausMenue = new();
+    // Die Menüs entstehen erst beim ersten Öffnen: 23 Zeilen mit je zwei Menüs kosteten sonst merklich Zeit beim Aufbau.
+    private ContextMenuStrip? menue, rausMenue;
     private readonly Color balken;
 
     public Platz Platz { get; }
@@ -86,17 +86,13 @@ public sealed class ListenZeile : Panel
         }).ToArray();
         Controls.AddRange(zellen);
 
-        menue.Items.AddRange([AusgangEintrag, AnwesenheitEintrag, UnterbringungEintrag, VerlaufEintrag]);
-        rausMenue.Items.AddRange([AlleinKnopf, MitBewohnerKnopf]);
-        ContextMenuStrip = menue;
-        foreach (var zelle in zellen)
+        foreach (var c in zellen.Append<Control>(this))
         {
-            zelle.ContextMenuStrip = menue;
-            zelle.DoubleClick += (_, _) => Doppelklick();
+            c.DoubleClick += (_, _) => Doppelklick();
+            c.MouseUp += (_, e) => { if (e.Button == MouseButtons.Right) Menue().Show(Cursor.Position); };
         }
-        DoubleClick += (_, _) => Doppelklick();
-        MehrKnopf.Click += (_, _) => menue.Show(MehrKnopf, new Point(0, MehrKnopf.Height));
-        RausKnopf.Click += (_, _) => rausMenue.Show(RausKnopf, new Point(0, RausKnopf.Height));
+        MehrKnopf.Click += (_, _) => Menue().Show(MehrKnopf, new Point(0, MehrKnopf.Height));
+        RausKnopf.Click += (_, _) => RausMenue().Show(RausKnopf, new Point(0, RausKnopf.Height));
         MehrKnopf.AccessibleName = $"Weitere Aktionen für {p.Bewohnername}";
         RausKnopf.AccessibleName = $"Ausgang beginnen: {p.Bewohnername}";
         bool frei = digital is not null && !p.HatStatus && !Unterwegs;
@@ -114,17 +110,34 @@ public sealed class ListenZeile : Panel
         AccessibleName = $"{p.Bewohnername}, Zimmer {p.Zimmernummer}, {StandText}" + (RueckkehrText.Length > 0 ? $", zurück {RueckkehrText}" : "");
     }
 
+    private ContextMenuStrip Menue()
+    {
+        if (menue is not null) return menue;
+        menue = new ContextMenuStrip();
+        menue.Items.AddRange([AusgangEintrag, AnwesenheitEintrag, UnterbringungEintrag, VerlaufEintrag]);
+        return menue;
+    }
+
+    private ContextMenuStrip RausMenue()
+    {
+        if (rausMenue is not null) return rausMenue;
+        rausMenue = new ContextMenuStrip();
+        rausMenue.Items.AddRange([AlleinKnopf, MitBewohnerKnopf]);
+        return rausMenue;
+    }
+
     // Doppelklick: der naheliegende Handgriff – zurück, wenn unterwegs, sonst „raus“ wählen.
     private void Doppelklick()
     {
         if (Unterwegs) ZurueckKnopf.PerformClick();
-        else if (RausKnopf.Visible) rausMenue.Show(this, PointToClient(Cursor.Position));
+        else if (AlleinKnopf.Available || MitBewohnerKnopf.Available) RausMenue().Show(Cursor.Position);
     }
 
+    // Hinweise nur an Name (mit Ausgangszeiten) und Status – die übrigen Spalten sind kurz.
     public void Hinweise(ToolTip tip)
     {
-        for (int i = 0; i < zellen.Length; i++) tip.SetToolTip(zellen[i], $"{Spalten[i]}: {zellen[i].Text}");
         tip.SetToolTip(zellen[1], $"{zellen[1].Text} · {AusgangZeile}");
+        tip.SetToolTip(zellen[2], $"{Spalten[2]}: {zellen[2].Text}");
     }
 
     // x-Position und Breite je Spalte bei gegebener Tabellenbreite.
@@ -169,7 +182,7 @@ public sealed class ListenZeile : Panel
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) { menue.Dispose(); rausMenue.Dispose(); }
+        if (disposing) { menue?.Dispose(); rausMenue?.Dispose(); }
         base.Dispose(disposing);
     }
 }

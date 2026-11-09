@@ -2100,7 +2100,7 @@ Umfang:
   gibt.
 
 ## Schnellerer Wechsel zwischen den Bereichen
-Status: freigegeben (Bauplan Schritt 29m; Rückmeldung Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.19; Bauplan Schritt 29m; Rückmeldung Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der Wechsel zwischen den Bereichen soll sofort und ohne Flackern gehen.
 Warum: Rückmeldung Tobi (09.11.2026): Der Wechsel zu manchen Fenstern ist sehr zaghaft; er muss

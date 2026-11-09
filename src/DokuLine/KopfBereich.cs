@@ -199,7 +199,7 @@ public sealed class KopfBereich : Panel
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) logo?.Dispose();
+        if (disposing) { logo?.Dispose(); hintergrund?.Dispose(); }
         base.Dispose(disposing);
     }
 
@@ -230,9 +230,27 @@ public sealed class KopfBereich : Panel
         Kuvert.Location = new Point(BenutzerAnzeige.Left - S(Stil.AbstandKlein) - Kuvert.Width, zeile + (hoehe - Kuvert.Height) / 2);
     }
 
+    // Fläche mit Verlauf als Bild: neu nur bei anderer Größe oder Skalierung (die Verläufe sind teuer zu zeichnen).
+    private Bitmap? hintergrund;
+    private (Size Groesse, int Dpi) hintergrundFuer;
+
     protected override void OnPaint(PaintEventArgs e)
     {
         var g = e.Graphics;
+        if (hintergrund is null || hintergrundFuer != (Size, DeviceDpi))
+        {
+            hintergrund?.Dispose();
+            hintergrund = new Bitmap(Math.Max(1, Width), Math.Max(1, Height));
+            using (var bild = Graphics.FromImage(hintergrund)) HintergrundMalen(bild);
+            hintergrundFuer = (Size, DeviceDpi);
+        }
+        g.DrawImageUnscaled(hintergrund, 0, 0);
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        VordergrundMalen(g, Flaeche);
+    }
+
+    private void HintergrundMalen(Graphics g)
+    {
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.Clear(Stil.Seite);
         RectangleF f = Flaeche;
@@ -262,7 +280,10 @@ public sealed class KopfBereich : Panel
         g.Clip = vorher;
 
         using (var rand = new Pen(Stil.KarteRand, 1f)) g.DrawPath(rand, pfad);
+    }
 
+    private void VordergrundMalen(Graphics g, RectangleF f)
+    {
         // Logofeld oben rechts, im Seitenverhältnis, rechtsbündig.
         int rechts = (int)f.Right - S(InnenSeite);
         if (logo is not null)

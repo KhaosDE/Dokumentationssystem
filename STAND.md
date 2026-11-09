@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.18** (Bauplan Schritt 29l: Medikamentenänderungen auffällig und in der Übergabe).
+Stand: 09.11.2026. Version: **0.33.19** (Bauplan Schritt 29m: schnellerer Wechsel zwischen den Bereichen).
 
 ## Aktuell
 
@@ -287,8 +287,13 @@ geändert: 1–0–0–0 → 2–0–0–0“). Jede eingetragene Änderung wird
 „Medikamentenänderung: … ab …, angeordnet von …“; der Eintrag bleibt, bis Früh-, Spät- und Nachtdienst ihn gelesen haben
 (höchstens 7 Tage). In der Übersicht steht oben der Kasten „Medikamentenänderungen“, wenn es welche gibt.
 
+Neu in 0.33.19: Der **Wechsel zwischen den Bereichen** ist ruhiger und schneller: Die Seiten werden auf einmal getauscht
+(kein Zwischenbild), die Einstellungsdatei wird nur noch gelesen, wenn sie sich geändert hat, der Farbverlauf der
+Kopfzeile wird nicht mehr bei jedem Zeichnen neu berechnet, und die Ausgangsliste baut ihre Menüs erst beim Öffnen.
+Mit `DokuLine.exe --messen` schreibt das Programm die Zeit jedes Wechsels in `messung.log` im Datenordner.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29m „Schnellerer Wechsel zwischen den Bereichen“ (0.33.19).
+als Nächstes 29n „Therapie als eigener Bereich“ (0.33.20).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1289,6 +1294,25 @@ als Nächstes 29m „Schnellerer Wechsel zwischen den Bereichen“ (0.33.19).
   - Oberfläche: Marke in Akte-Kopf und Bewohnerliste, Hinweis im Visitenrundgang, hervorgehobene Zeilen im
     Medikamentenplan (auch in der Visite), Kasten „Medikamentenänderungen“ in der Übersicht.
 
+- 0.33.19 — Bauplan Schritt 29m:
+  - `Messung` (`--messen`, `messung.log`); `Hauptfenster.BereichWaehlen` tauscht die Seiten mit angehaltenem Layout.
+  - `Einstellungen.Laden` liest die Datei nur bei geändertem Pfad, Zeitstempel oder Größe.
+  - `KopfBereich`: Fläche mit Verlauf als Bild zwischengespeichert (neu bei anderer Größe oder Skalierung).
+  - Ausgangsliste: Menüs je Zeile erst beim Öffnen, Hinweise nur an Name und Status.
+  - Messung (CI-Rechner, Windows, 1920 × 1080, erster Wechsel in einen Bereich; Test `UebersichtlichkeitTests`):
+
+    | Bereich | vorher (0.33.7) | nachher erster / wiederholter Wechsel |
+    |---|---|---|
+    | Übersicht | 554 ms | folgt mit dem Testlauf dieser Version |
+    | Tagesplan | 160 ms | |
+    | Dokumentation | 181 ms | |
+    | Übergabe | 201 ms | |
+    | Visiten | 200 ms | |
+    | Aufgaben | 93 ms | |
+    | Kalender | 93 ms | |
+    | Therapie | 242 ms | |
+    | Ausgangsliste | 4188 ms | |
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1370,6 +1394,12 @@ als Nächstes 29m „Schnellerer Wechsel zwischen den Bereichen“ (0.33.19).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.19): Beim Wechsel liest jede Seite ihre Daten weiter neu. Ein Überspringen „wenn sich nichts geändert
+  hat“ bräuchte einen Änderungszähler für Schreibvorgänge im eigenen Programm (`PRAGMA data_version` zählt nur die
+  anderer Verbindungen) – das Risiko, veraltete Daten zu zeigen, ist größer als der Gewinn. `WS_EX_COMPOSITED` für die
+  ganze Fläche ist nicht eingebaut: Es verlangsamt das Zeichnen von Tabellen und Textfeldern, und Flackern lässt sich in
+  der CI nicht messen. Der Küchendienst wird beim Öffnen der Ausgangsliste weiter neu geplant (rund 100 ms).
 
 - 09.11.2026 (0.33.18): „Sieben Tage auffällig“ zählt ab dem Tag, an dem die Änderung gilt (auch die nächste Stufe eines
   Stufenplans); eine für später eingetragene Änderung ist schon ab dem Eintragen markiert. Nachträglich für die
@@ -2175,6 +2205,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.19: Zwischen allen Bereichen hin und her wechseln – ohne Flackern, die Ausgangsliste deutlich schneller.
+Optional: `DokuLine.exe --messen` starten, ein paar Wechsel, dann `%APPDATA%\DokuLine\messung.log` ansehen.
 
 Version 0.33.18:
 
