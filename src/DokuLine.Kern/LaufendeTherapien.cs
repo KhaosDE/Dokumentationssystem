@@ -1,6 +1,6 @@
 namespace DokuLine.Kern;
 
-// Therapie, Bauplan Schritt 26m: „Laufende Therapien“ als Anwesenheitstafel. Oben eine Tagesleiste
+// Therapie: „Laufende Therapien“ als Anwesenheitstafel. Oben eine Tagesleiste
 // (7–21 Uhr), darunter je laufender Therapie eine Spalte mit den Teilnehmern, daneben „Gleich“ und
 // „Noch offen“, unten der Rest des Tages. Dieselben Teilnahme-Einträge wie Tagesplan und Wochenplan.
 

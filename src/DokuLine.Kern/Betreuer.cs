@@ -1,6 +1,6 @@
 namespace DokuLine.Kern;
 
-// Betreuer eines Bewohners (Bauplan Schritt 28): Name, Stelle, E-Mail, Telefon. Jede Änderung ist
+// Betreuer eines Bewohners: Name, Stelle, E-Mail, Telefon. Jede Änderung ist
 // eine neue Fassung (wer, wann); gezeigt wird die neueste. „E-Mail an Betreuer …“ übergibt nur
 // Empfänger und Betreff an das E-Mail-Programm des Rechners (mailto:) – das Programm selbst sendet
 // nichts (CLAUDE.md, Regel 6). Demo-Adressen nur mit der Endung @example.org.
@@ -12,7 +12,7 @@ public sealed record Betreuer
     public string Telefon { get; init; } = "";
     public DateTime Geaendert { get; init; }
     public string Kuerzel { get; init; } = "";
-    public bool Keine { get; init; }   // „keine gesetzliche Betreuung“ (0.33.3); dann sind die übrigen Angaben leer
+    public bool Keine { get; init; }   // „keine gesetzliche Betreuung“; dann sind die übrigen Angaben leer
 }
 
 public sealed class BetreuerEingabe
@@ -53,7 +53,7 @@ public static class BetreuerRegeln
     }
 
     // Einfache Prüfung: genau ein @, davor etwas, danach ein Name mit Punkt; keine Leer- oder Steuerzeichen,
-    // nichts, was eine mailto-Adresse verändert (?, &, #, %, Komma, Semikolon; 0.33.3: # und % dazu).
+    // nichts, was eine mailto-Adresse verändert (?, &, #, %, Komma, Semikolon).
     public static bool EmailGueltig(string email)
     {
         if (email.Any(c => char.IsWhiteSpace(c) || char.IsControl(c) || c is '?' or '&' or '#' or '%' or ',' or ';' or '<' or '>' or '"')) return false;

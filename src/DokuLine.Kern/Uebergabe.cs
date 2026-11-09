@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace DokuLine.Kern;
 
-// Übergabe (Teil der Täglichen Dokumentation, Bauplan Schritt 3): Einträge, die die folgenden
+// Übergabe (Teil der Täglichen Dokumentation): Einträge, die die folgenden
 // Schichten wissen oder tun müssen. Sie bleiben stehen, bis sie ablaufen oder als erledigt
 // markiert werden – auch über mehrere Tage. Verlängern und „erledigt“ sind eigene Ereignisse;
 // gelöscht oder überschrieben wird nichts.

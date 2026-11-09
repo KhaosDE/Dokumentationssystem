@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.8** (Bauplan Schritt 29s, Teil 1: Prüfung von Format und Code-Maßen, Überblick).
+Stand: 09.11.2026. Version: **0.33.9** (Bauplan Schritt 29s, Teil 2: Kommentare ohne Verlauf).
 
 ## Aktuell
 
@@ -236,8 +236,11 @@ Neu in 0.33.8 (nur für die, die den Code ansehen; das Programm verhält sich wi
 Leerzeichen und Einrückung nach `.editorconfig` und listet Dateien, Methoden und Zeilen über den Richtwerten
 (`werkzeuge/code-masse.py`). Neu `docs/aufbau.md` mit Überblick über die Projekte, den Weg der Daten und einem Glossar.
 
+Neu in 0.33.9 (Aufräumen, das Programm verhält sich wie vorher): Die Kommentare im Code erzählen keinen Verlauf mehr
+(„Schritt …“, „0.33.2: vorher …“); lange Erklärungen stehen in `docs/technik.md`.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29s Teil 2 „Kommentare ohne Verlauf“ (0.33.9), dann Teil 3 „Bereichsseiten und große Dateien“.
+als Nächstes 29s Teil 3 „Bereichsseiten und große Dateien“ (0.33.10).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1165,7 +1168,17 @@ als Nächstes 29s Teil 2 „Kommentare ohne Verlauf“ (0.33.9), dann Teil 3 „
   - Code-Maße vorher (Programmcode in `src/`, 09.11.2026, Stand 0.33.7): 33.480 Zeilen, 2.038 Kommentarzeilen
     (davon 301 mit Verlauf), 21 Dateien über 400 Zeilen, 88 Methoden über 40 Zeilen, 2.057 Zeilen über 120 Zeichen.
 
+- 0.33.9 — Bauplan Schritt 29s, Teil 2 (Aufräumen, ohne neue Funktion):
+  - Verlauf aus den Kommentaren entfernt (Schrittnummern, Versionsangaben, „vorher …“): von 301 auf 12 Zeilen; die
+    übrigen nennen Altlasten, die noch gelten (z. B. „Ältere Installationen bis 0.29.1 suchen …“).
+  - Lange Dateiköpfe (Selbst-Update, Einstellungsdatei, Speicher) gekürzt; die Erklärungen stehen in
+    `docs/technik.md`.
+  - Code-Maße nachher: 33.442 Zeilen, 2.000 Kommentarzeilen (12 mit Verlauf).
+
 ## Offene Punkte
+
+- Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; sie werden
+  nach der Pfadfinderregel gekürzt, sobald die Datei geändert wird.
 
 - Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
   Termine des Tages für den Kasten „Termine heute“ ein zweites Mal (der Kasten braucht auch abgesagte Termine, die
@@ -1997,6 +2010,8 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.9: nichts Neues zum Ansehen im Programm (Aufräumen).
 
 Version 0.33.8: nichts Neues zum Ansehen im Programm (Aufräumen). Im Windows-Build stehen die Code-Maße.
 

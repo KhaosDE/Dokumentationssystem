@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// Datum und Uhrzeit mit automatischen Punkten (Bauplan Schritt 26d) – ein gemeinsamer Baustein für alle
+// Datum und Uhrzeit mit automatischen Punkten – ein gemeinsamer Baustein für alle
 // Felder: Beim Tippen setzt das Programm die Punkte (TT. MM.) bzw. den Doppelpunkt (SS:) selbst; beim
 // Verlassen und beim Lesen werden 8 Ziffern zu TT.MM.JJJJ, 6 Ziffern und TT.MM.JJ zu TT.MM.20JJ,
 // 4 Ziffern zu SS:MM. Wer selbst Punkte tippt, wird nicht gestört.

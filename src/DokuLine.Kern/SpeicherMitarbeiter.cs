@@ -12,7 +12,7 @@ public sealed partial class Speicher
 {
     private const string Grundbestand = "rechte_vorbelegt";
     private const string DemoMitarbeiterSchluessel = "demo_mitarbeiter";
-    private const string AdminSchluessel = "admin_tst";   // Schritt 26a2: Position Administrator und TST einmal ergänzt
+    private const string AdminSchluessel = "admin_tst";   // Position Administrator und TST einmal ergänzt
     public const string AdminKuerzel = "TST";
 
     // Was beim Öffnen von selbst ergänzt wurde (fürs Protokoll; die Oberfläche schreibt es in update.log).
@@ -240,7 +240,7 @@ public sealed partial class Speicher
 
     public bool Darf(string? kuerzel, string funktion) => Grund(kuerzel, funktion) is null;
 
-    // Therapieangebote nach Anbieter (Schritt 22).
+    // Therapieangebote nach Anbieter.
     public string? AngebotGrund(string? kuerzel, string anbieter) => RechteRegeln.AngebotGrund(MitarbeiterLesen(kuerzel), anbieter, Rechte(), NurFachkraft());
     public List<string> AngebotAnbieter(string? kuerzel) =>
         RechteRegeln.Anbieter(MitarbeiterLesen(kuerzel), AlleBewohner().Select(b => b.Wohnbereich).ToHashSet(), Rechte(), NurFachkraft());
@@ -277,7 +277,7 @@ public sealed partial class Speicher
             FunktionVorbelegen(f, transaktion);
             transaktion.Commit();
         }
-        // „Nur Fachkräfte“ für später dazugekommene Fälle (0.33.0: Visiten) einmal setzen; danach gilt die Rechte-Tabelle.
+        // „Nur Fachkräfte“ für später dazugekommene Fälle einmal setzen; danach gilt die Rechte-Tabelle.
         foreach (var f in RechteRegeln.NurFachkraftNachtraeglich.Where(f => Meta(FachkraftSchluessel(f)) is null))
         {
             using var transaktion = db.BeginTransaction();
@@ -290,7 +290,7 @@ public sealed partial class Speicher
     private static string NachtraeglichSchluessel(string funktion) => $"rechte_vorbelegt_{funktion}";
     private static string FachkraftSchluessel(string funktion) => $"nur_fachkraft_vorbelegt_{funktion}";
 
-    // Schritt 26a2, einmal je Datenbank: Position „Administrator“ (an erster Stelle, alle Häkchen) und –
+    // Einmal je Datenbank: Position „Administrator“ (an erster Stelle, alle Häkchen) und –
     // in einer schon benutzten Datenbank ohne TST – den Mitarbeiter TST in allen Bereichen. Ein
     // vorhandener TST wird nicht verändert.
     private void AdministratorPruefen()
@@ -319,7 +319,7 @@ public sealed partial class Speicher
     }
 
     // Nur Positionen, die es noch gibt: Eine umbenannte oder gelöschte Position der Vorgabe wird übersprungen
-    // (sonst bricht der Fremdschlüssel den Start ab; Fehler in 0.33.0, behoben in 0.33.1).
+    // (sonst bricht der Fremdschlüssel den Start ab).
     private void FunktionVorbelegen(string funktion, SqliteTransaction transaktion)
     {
         foreach (var p in RechteRegeln.Positionen)

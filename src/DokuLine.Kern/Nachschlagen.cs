@@ -2,8 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// Nachschlagen beim BfArM im Formular „Medikament anlegen/ändern“ (Bauplan Schritt 21, CLAUDE.md
-// Regel 6): welche Adresse geöffnet wird und welche die Ansicht zeigen darf. Gesucht wird nur mit
+// Nachschlagen beim BfArM im Formular „Medikament anlegen/ändern“ (CLAUDE.md Regel 6): welche Adresse geöffnet wird und welche die Ansicht zeigen darf. Gesucht wird nur mit
 // dem Medikamentennamen – die Methoden bekommen nichts anderes.
 public static partial class Nachschlagen
 {

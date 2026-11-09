@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace DokuLine.Kern;
 
-// Fahrzeuge und Fahrten (Bauplan Schritt 24): Mit den Firmenwagen werden Bewohner zum Arzt
+// Fahrzeuge und Fahrten: Mit den Firmenwagen werden Bewohner zum Arzt
 // gefahren, Ausflüge gemacht oder Sporttherapien begleitet. Je Fahrzeug sieht man „vor Ort“ oder
 // „unterwegs seit …, zurück geplant …“. „losgefahren“ und „zurück“ sind eigene Einträge mit
 // Uhrzeit und Kürzel; eine Fahrt wird nie überschrieben.

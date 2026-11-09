@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace DokuLine.Kern;
 
-// Übersicht, Bauplan Schritt 26l: links „Heute wichtig“ (vier Kästen), rechts die Bewohnerliste mit
+// Übersicht: links „Heute wichtig“ (vier Kästen), rechts die Bewohnerliste mit
 // der Spalte „Wo“. Hier nur die Regeln; die Oberfläche stellt sie dar.
 
 // Laufender Dienst: „6 von 9 erledigt“ und die offenen Aufgaben zum Abhaken.
@@ -105,7 +105,7 @@ public static class HeuteWichtigRegeln
         return heuteDran ? new Marke(MarkenArt.Angabe, $"Geburtstag heute ({BewohnerRegeln.Alter(g, heute)})") : null;
     }
 
-    // Statusleiste (Schritt 26l): „DEMO — ausgedachte Daten · Sa 08.11.2026 · Spätdienst · Stand 14:32“.
+    // Statusleiste: „DEMO — ausgedachte Daten · Sa 08.11.2026 · Spätdienst · Stand 14:32“.
     public static string StatusText(DateTime jetzt, DateTime stand) =>
         $"DEMO — ausgedachte Daten · {jetzt.ToString("ddd dd.MM.yyyy", CultureInfo.GetCultureInfo("de-DE"))} · " +
         $"{BerichtRegeln.SchichtText(SchichtTermin.Zu(jetzt).Schicht)} · Stand {stand:HH\\:mm}";

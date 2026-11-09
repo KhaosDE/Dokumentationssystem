@@ -26,7 +26,7 @@ public sealed record AngebotFassung
     public IReadOnlyList<Wochentermin> Termine { get; init; } = [];
     public int Hoechstens { get; init; }
     public string Hinweis { get; init; } = "";
-    public string Anbieter { get; init; } = TherapieRegeln.AnbieterTherapie;   // Schritt 22: „Therapie“ oder ein Wohnbereich
+    public string Anbieter { get; init; } = TherapieRegeln.AnbieterTherapie;   // „Therapie“ oder ein Wohnbereich
     public DateTime Erstellt { get; init; }
     public string Kuerzel { get; init; } = "";
 
@@ -120,7 +120,7 @@ public static class TherapieRegeln
         for (int i = 0; i < termine.Count; i++)
             for (int j = i + 1; j < termine.Count; j++)
                 if (termine[i].Ueberschneidet(termine[j])) fehler.Add($"Die Termine {termine[i].Text} und {termine[j].Text} überschneiden sich.");
-                // Die Teilnahme gilt je Tag (gegangen/abgesagt): zwei Termine an einem Tag teilten sie sich (0.33.3).
+                // Die Teilnahme gilt je Tag (gegangen/abgesagt): zwei Termine an einem Tag teilten sie sich.
                 else if (termine[i].Tag == termine[j].Tag)
                     fehler.Add($"Termin {TagName(termine[i].Tag)}: höchstens ein Termin je Wochentag – für einen zweiten bitte ein eigenes Angebot anlegen.");
         int hoechstens = 0;

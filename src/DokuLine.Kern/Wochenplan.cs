@@ -4,7 +4,7 @@ namespace DokuLine.Kern;
 
 // Wochenplan je Bewohner: eine Regelwoche (gilt jede Woche gleich, bis sie „ab Datum …“ geändert
 // wird) aus freien Einträgen und den zugeteilten Therapien; dazu einzelne Termine aus dem
-// Kalender (ab 0.13.0). Frühere Fassungen bleiben – der HEB-Bogen muss zeigen können, welcher
+// Kalender. Frühere Fassungen bleiben – der HEB-Bogen muss zeigen können, welcher
 // Plan in seinem Zeitraum galt. Bei Therapien lässt sich je Tag die Teilnahme eintragen.
 
 public enum Teilnahme { Offen, Teilgenommen, Abgesagt, Ausgefallen }
@@ -40,7 +40,7 @@ public sealed record Termin
     public string Titel { get; init; } = "";
     public string Ort { get; init; } = "";
     public string Hinweis { get; init; } = "";
-    public string Begleitung { get; init; } = "";   // Tagesplan-Tafel (Schritt 26g): Therapeut, Begleitung des Ausflugs, Fahrzeug und Fahrer
+    public string Begleitung { get; init; } = "";   // Tagesplan-Tafel: Therapeut, Begleitung des Ausflugs, Fahrzeug und Fahrer
     public TerminQuelle Quelle { get; init; }
     public long? PlanEintragId { get; init; }
     public long? ZuteilungId { get; init; }

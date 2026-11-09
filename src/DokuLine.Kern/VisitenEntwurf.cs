@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace DokuLine.Kern;
 
-// Visite mit allen Bewohnern (Bauplan Schritt 26c): Man geht mit dem Arzt die Bewohner der Reihe nach
+// Visite mit allen Bewohnern: Man geht mit dem Arzt die Bewohner der Reihe nach
 // durch. Was je Bewohner eingetragen wird, steht sofort als Entwurf in der Datenbank (je Bereich ein
 // Entwurf) – beim Wechsel zum nächsten Bewohner, auch nach einem Absturz geht nichts verloren. Erst
 // „Visite abschließen“ macht daraus eine Visite mit Berichten, Übergaben und Aufgaben.

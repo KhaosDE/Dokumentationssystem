@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Fahrzeuge (Bauplan Schritt 24): je Fahrzeug „vor Ort“ oder „unterwegs seit …, zurück geplant …“
+// Fahrzeuge: je Fahrzeug „vor Ort“ oder „unterwegs seit …, zurück geplant …“
 // mit den Knöpfen „losgefahren“ und „zurück“ (Uhrzeit und Kürzel setzt das Programm), darunter die
 // Fahrten von heute; „Neue Fahrt …“. Steht in der Übersicht und im Kalender.
 public sealed class FahrzeugLeiste : FlowLayoutPanel
@@ -31,7 +31,7 @@ public sealed class FahrzeugLeiste : FlowLayoutPanel
     public void Aktualisieren()
     {
         var jetzt = Jetzt();
-        string? grund = Recht.Grund(speicher, Funktionen.Fahrzeuge);   // Rechte (Schritt 19)
+        string? grund = Recht.Grund(speicher, Funktionen.Fahrzeuge);   // Rechte
         SuspendLayout();
         foreach (Control c in Controls.Cast<Control>().ToList()) { Controls.Remove(c); if (c != NeuKnopf && c != Fehler) c.Dispose(); }
         Controls.Add(Fehler);
@@ -129,7 +129,7 @@ public sealed class FahrtFenster : Form
     public TextBox Von { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "09:00" };
     public TextBox Bis { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "11:00" };
     public ComboBox Zweck { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200 };
-    public PersonWahl Fahrer { get; }   // Schritt 26a: Auswahl aus den Mitarbeitern, vorbelegt mit der angemeldeten Person
+    public PersonWahl Fahrer { get; }   // Auswahl aus den Mitarbeitern, vorbelegt mit der angemeldeten Person
     public CheckedListBox Mitfahrende { get; } = new() { Width = 300, Height = 150, CheckOnClick = true, IntegralHeight = false };
     public TextBox Ziel { get; } = new() { Width = 300, PlaceholderText = "z. B. Praxis, Hallenbad (ausgedacht)" };
     public Label Warnung { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };

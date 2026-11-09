@@ -2,8 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine.Modul.Ausgangsliste;
 
-// Die Seite „Ausgangsliste“ (seit Schritt 27 von DokuLine eine Liste, angelehnt an die
-// Tagesliste): oben Küchendienst, Digitaler Ausgang (wenn eingeschaltet) und Filter, darunter eine
+// Die Seite „Ausgangsliste“ (eine Liste, angelehnt an die Tagesliste): oben Küchendienst, Digitaler Ausgang (wenn eingeschaltet) und Filter, darunter eine
 // Zeile je Bewohner. Wer unterwegs ist, steht oben (Überfällige zuerst), dann alle anderen nach
 // Zimmer. Ausdruck der Tagesliste über den Knopf im Kopf.
 public sealed class AusgangslisteSeite : ModulSeite
@@ -224,7 +223,7 @@ public static class Aktionen
         karte.ZurueckKnopf.Click += (_, _) => Zurueck(db, p, besitzer, danach);
     }
 
-    // Dieselben Abläufe für eine Zeile der Liste (Schritt 27): „raus“/„zurück“ direkt, der Rest über „…“.
+    // Dieselben Abläufe für eine Zeile der Liste: „raus“/„zurück“ direkt, der Rest über „…“.
     public static void Verbinden(ListenZeile zeile, Datenbank db, Control besitzer, Action danach)
     {
         var p = zeile.Platz;

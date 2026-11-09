@@ -4,7 +4,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-// Fahrzeuge und Fahrten im Speicher (Bauplan Schritt 24). Fahrten und „losgefahren“/„zurück“
+// Fahrzeuge und Fahrten im Speicher. Fahrten und „losgefahren“/„zurück“
 // werden nie überschrieben (Datenbank-Regel).
 public sealed partial class Speicher
 {

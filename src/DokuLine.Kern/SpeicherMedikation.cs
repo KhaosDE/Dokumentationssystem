@@ -142,7 +142,7 @@ public sealed partial class Speicher
     private void DemoMedikationEinfuegen(SqliteTransaction transaktion)
     {
         var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
-        // Erst die Berichte der Bedarfsgaben (0.33.2): Das Löschen der Verordnungen nähme die Gaben mit, ihre
+        // Erst die Berichte der Bedarfsgaben: Das Löschen der Verordnungen nähme die Gaben mit, ihre
         // Berichte blieben ohne Gabe in der Akte stehen.
         Ausfuehren("DELETE FROM berichte WHERE id IN (SELECT bericht_id FROM bedarfsgaben WHERE bericht_id IS NOT NULL); DELETE FROM verordnungen", transaktion);
         var medikamente = MedikamenteLesenIn(transaktion);

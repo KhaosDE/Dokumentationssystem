@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bezugspflege und Einzeltrainer eines Bewohners ändern (Schritt 20). Ein Wechsel ist ein neuer
+// Bezugspflege und Einzeltrainer eines Bewohners ändern. Ein Wechsel ist ein neuer
 // Eintrag mit Datum; der Verlauf bleibt. Ab fünf Bezugsbewohnern nur ein Hinweis, keine Grenze.
 public sealed class BezugFenster : Form
 {

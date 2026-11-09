@@ -4,8 +4,8 @@ namespace DokuLine;
 
 // Bereich „Therapie“: Angebote mit Terminen, Teilnehmern und freien Plätzen. Angebote anlegen,
 // „ab Datum“ ändern, Bewohner zuteilen (Warnung bei Überschneidung), Teilnahme beenden, Verlauf.
-// Zugeteilte Therapien erscheinen im Wochenplan des Bewohners (ab 0.12.0). Jedes Angebot gehört
-// der Therapie oder einem Wohnbereich (Schritt 22); alle sehen alles, ändern und zuteilen darf nur
+// Zugeteilte Therapien erscheinen im Wochenplan des Bewohners . Jedes Angebot gehört
+// der Therapie oder einem Wohnbereich; alle sehen alles, ändern und zuteilen darf nur
 // der Anbieter. Filter nach Anbieter.
 public sealed class TherapieSeite : Panel
 {
@@ -20,7 +20,7 @@ public sealed class TherapieSeite : Panel
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neues Angebot …");
     public List<AngebotKarte> Karten { get; } = [];
     public event Action? Geaendert;
-    // Schritt 26m: erster Reiter „Laufende Therapien“ (Anwesenheitstafel), zweiter die Angebote wie bisher.
+    // Erster Reiter „Laufende Therapien“ (Anwesenheitstafel), zweiter die Angebote wie bisher.
     public const string LaufendReiter = "Laufende Therapien", AngeboteReiter = "Angebote";
     public Reiterleiste Reiter { get; } = new([LaufendReiter, AngeboteReiter]);
     public LaufendeTherapienAnsicht Laufend { get; }
@@ -50,7 +50,7 @@ public sealed class TherapieSeite : Panel
         Laufend.AngebotGewaehlt += a =>
         {
             Reiter.Waehlen(AngeboteReiter);
-            // Ist ein anderer Anbieter gefiltert, stünde das Angebot nicht da (0.33.3): dann alle Anbieter zeigen.
+            // Ist ein anderer Anbieter gefiltert, stünde das Angebot nicht da: dann alle Anbieter zeigen.
             if (AnbieterFilter.SelectedItem is string f && f != AlleAnbieter && f != a.Anbieter) AnbieterFilter.SelectedItem = AlleAnbieter;
             if (Karten.FirstOrDefault(k => k.Angebot.Id == a.Id) is AngebotKarte karte) ScrollControlIntoView(karte);
         };
@@ -140,7 +140,7 @@ public sealed class TherapieSeite : Panel
         var tag = Stichtag;
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
         FilterFuellen();
-        // Rechte (Schritt 19/22): neu anlegen, wer für mindestens einen Anbieter darf.
+        // Rechte: neu anlegen, wer für mindestens einen Anbieter darf.
         Stil.Sperren(NeuKnopf, speicher.AngebotAnbieter(Recht.Kuerzel).Count > 0 ? null
             : Recht.Grund(speicher, Funktionen.TherapienBearbeiten) ?? Recht.Grund(speicher, Funktionen.TherapienBereich));
         SuspendLayout();
@@ -251,7 +251,7 @@ public sealed class AngebotKarte : KartenFlaeche
         int frei = a.FreiAm(tag);
         var liste = new List<(string, Stil.Marke)>
         {
-            (a.Anbieter, a.Anbieter == TherapieRegeln.AnbieterTherapie ? Stil.Hinweis : Stil.Unterwegs),   // Anbieter (Schritt 22)
+            (a.Anbieter, a.Anbieter == TherapieRegeln.AnbieterTherapie ? Stil.Hinweis : Stil.Unterwegs),   // Anbieter
             (TherapieRegeln.ArtText(f.Art), Stil.Zimmer),
             (f.TermineText, Stil.Unterwegs),
             (frei == 0 ? "voll" : frei == 1 ? "1 Platz frei" : $"{frei} Plätze frei", frei == 0 ? Stil.Achtung : Stil.Offen),
@@ -350,7 +350,7 @@ public sealed class AngebotFenster : Form
         AutoSizeMode = AutoSizeMode.GrowAndShrink;
         var raster = Formular.Raster(out var zeile);
         zeile("Name", NameFeld);
-        // Anbieter (Schritt 22): nur, wofür der Angemeldete Angebote anlegen darf; beim Ändern bleibt der bisherige wählbar.
+        // Anbieter: nur, wofür der Angemeldete Angebote anlegen darf; beim Ändern bleibt der bisherige wählbar.
         var anbieter = speicher.AngebotAnbieter(Einstellungen.Laden().Kuerzel);
         if (bisher is not null && !anbieter.Contains(bisher.Anbieter)) anbieter.Insert(0, bisher.Anbieter);
         Anbieter.Items.AddRange([.. anbieter]);

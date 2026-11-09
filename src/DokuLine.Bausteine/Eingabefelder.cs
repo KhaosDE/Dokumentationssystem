@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Datumsfeld (Bauplan Schritt 26d): setzt beim Tippen die Punkte selbst (08112026 → 08.11.2026) und
+// Datumsfeld: setzt beim Tippen die Punkte selbst (08112026 → 08.11.2026) und
 // ergänzt beim Verlassen das Jahrhundert (081126 → 08.11.2026). Für alle Datumsfelder des Programms.
 public class DatumFeld : TextBox
 {

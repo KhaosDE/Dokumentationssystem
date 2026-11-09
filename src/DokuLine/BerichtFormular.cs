@@ -15,7 +15,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     public TextBox Uhrzeit { get; } = new UhrzeitFeld() { Width = 80 };
     public ComboBox Schichtwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 210 };
     public ComboBox Art { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 260, AccessibleName = "Berichtsart" };
-    public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // Schritt 26a: aus der Anmeldung
+    public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // aus der Anmeldung
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
     {
         Text = BerichtRegeln.BereichText(n), AutoSize = true, Margin = new Padding(0, 0, Stil.AbstandGross, Stil.AbstandMini),
@@ -35,7 +35,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     internal Func<string, DialogResult> Rueckfrage { get; set; }
     public Label Fehler { get; } = new();
     public Bericht? Gespeichert { get; private set; }
-    // Schritt 26a3: Entwurf der angemeldeten Person für diesen Bewohner (beim Abmelden gespeichert).
+    // Entwurf der angemeldeten Person für diesen Bewohner (beim Abmelden gespeichert).
     public Entwurf? Entwurf { get; private set; }
     public Label EntwurfHinweis { get; } = new() { AutoSize = true, ForeColor = Stil.Hinweis.Text, BackColor = Stil.Hinweis.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Button EntwurfVerwerfenKnopf { get; } = Stil.NebenKnopf("Entwurf verwerfen");
@@ -170,7 +170,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
 
     public void BewohnerWaehlen(long id) => BewohnerWahl.SelectedIndex = auswahl.FindIndex(b => b.Id == id);
 
-    // ----- Entwurf (Schritt 26a3) -----
+    // ----- Entwurf -----
 
     public bool HatEingaben => Inhalt.Text.Trim().Length > 0 || UebergabeText.Text.Trim().Length > 0;
 

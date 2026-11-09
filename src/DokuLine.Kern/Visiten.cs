@@ -1,6 +1,6 @@
 namespace DokuLine.Kern;
 
-// Visiten (Bauplan Schritt 26): was besprochen wurde, ob sich Anordnungen geändert haben und ob ein
+// Visiten: was besprochen wurde, ob sich Anordnungen geändert haben und ob ein
 // Facharzttermin nötig ist – je Bewohner. Beim Speichern entstehen sofort Aufgaben (je geänderter
 // Anordnung eine, je Facharzttermin eine) und je Bewohner ein Bericht (Lebensbereich 5, mit
 // Übergabe, wenn sich etwas ändert). Die Medikation selbst ändert das Programm nicht.
@@ -23,7 +23,7 @@ public sealed record Visite
 {
     public long Id { get; init; }
     public DateOnly Datum { get; init; }
-    public string Art { get; init; } = "";   // seit Schritt 26c nicht mehr erfasst (ältere Visiten behalten sie)
+    public string Art { get; init; } = "";   // wird nicht mehr erfasst (ältere Visiten behalten sie)
     public string Arzt { get; init; } = "";
     public string Teilnehmer { get; init; } = "";
     public DateTime Erstellt { get; init; }

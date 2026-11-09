@@ -11,8 +11,8 @@ public sealed partial class Speicher
 
     public KalenderTermin KalenderAnlegen(KalenderFassung f) => KalenderAnlegenAlle([f])[0];
 
-    // Mehrere Termine in einem Zug (Übernahme aus einer .ics-Datei): alle oder keiner (0.33.3: vorher einzeln –
-    // ging einer schief, waren die davor schon gespeichert).
+    // Mehrere Termine in einem Zug (Übernahme aus einer .ics-Datei): alle oder keiner – geht einer schief, ist
+    // auch keiner der übrigen gespeichert.
     public List<KalenderTermin> KalenderAnlegenAlle(IReadOnlyList<KalenderFassung> fassungen)
     {
         foreach (var f in fassungen) BewohnerPruefen(f);

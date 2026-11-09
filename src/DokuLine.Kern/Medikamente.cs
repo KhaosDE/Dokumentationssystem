@@ -14,10 +14,10 @@ public sealed record MedikamentFassung
     public IReadOnlyList<string> Staerken { get; init; } = [];
     public string Darreichungsform { get; init; } = "";
     public string Quelle { get; init; } = "";
-    public string Zulassungsnummer { get; init; } = "";   // Schritt 21: optional, damit ein Eintrag eindeutig wiederzufinden ist
+    public string Zulassungsnummer { get; init; } = "";   // optional, damit ein Eintrag eindeutig wiederzufinden ist
     public Pruefstatus Pruefstatus { get; init; } = Pruefstatus.Ungeprueft;
-    public DateOnly? GeprueftAm { get; init; }   // Schritt 21: wann gegen die Quelle geprüft (bei „bestätigt“)
-    public bool Gesperrt { get; init; }           // Schritt 21: gesperrt = nicht mehr wählbar
+    public DateOnly? GeprueftAm { get; init; }   // wann gegen die Quelle geprüft (bei „bestätigt“)
+    public bool Gesperrt { get; init; }           // gesperrt = nicht mehr wählbar
     public DateTime Geaendert { get; init; }
     public string Kuerzel { get; init; } = "";
 }

@@ -3,7 +3,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Tagesplan als Anzeigetafel (Bauplan Schritt 26g), nach dem Vorbild einer Abflugtafel am Flughafen:
+// Tagesplan als Anzeigetafel, nach dem Vorbild einer Abflugtafel am Flughafen:
 // dunkle Fläche, helle große Schrift, Uhrzeit in fester Zeichenbreite, oben rechts groß Uhrzeit und
 // Datum. Spalten: Zeit · Bewohner · Termin · Ort · Begleitung · Status. Der Status ist immer ein Wort,
 // die Farbe kommt nur dazu. Der Rest des Programms bleibt hell.

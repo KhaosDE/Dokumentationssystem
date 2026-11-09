@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Einstellungen (Bauplan Schritt 29) wie in den Windows-11-Einstellungen: eine ganze Seite, links die
+// Einstellungen wie in den Windows-11-Einstellungen: eine ganze Seite, links die
 // Gruppen mit Symbol und oben die Suche, rechts die Einstellungen der Gruppe als Karten (Name, ein
 // Satz Erklärung, rechts das Bedienelement). Änderungen wirken sofort – Häkchen und Zahlen beim
 // Ändern, Textfelder beim Verlassen; nur ganze Datensätze (Mitarbeiter, Medikament, Fahrzeug,
@@ -41,7 +41,7 @@ public sealed class EinstellungenSeite : Panel
 
     // Persönlich
     public Label Angemeldet { get; } = new() { AutoSize = true, Font = Stil.Fett, UseMnemonic = false };
-    public Button AbmeldenKnopf { get; } = Stil.NebenKnopf(Abmeldung.KnopfText);   // Schritt 26a3
+    public Button AbmeldenKnopf { get; } = Stil.NebenKnopf(Abmeldung.KnopfText);
     public Panel MeineFarbe { get; } = new() { Size = new Size(28, 28), BorderStyle = BorderStyle.FixedSingle };
     public Button FarbeKnopf { get; } = Stil.NebenKnopf("Farbe wählen …");
     public Button FarbeVorgabeKnopf { get; } = Stil.NebenKnopf("Vorgabe");
@@ -53,10 +53,10 @@ public sealed class EinstellungenSeite : Panel
     public CheckBox MenueEingeklappt { get; } = new() { Text = "eingeklappt", AutoSize = true };
     // Wohnbereich
     public ComboBox Bereich { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 220, MaxLength = Kern.Bereiche.Laenge };
-    public TextBox Frueh { get; } = new UhrzeitFeld() { Width = 60 };   // Doppelpunkt setzt das Programm (Schritt 26d)
+    public TextBox Frueh { get; } = new UhrzeitFeld() { Width = 60 };   // Doppelpunkt setzt das Programm
     public TextBox Spaet { get; } = new UhrzeitFeld() { Width = 60 };
     public TextBox Nacht { get; } = new UhrzeitFeld() { Width = 60 };
-    public Button ZimmerKnopf { get; } = Stil.NebenKnopf("Zimmer und Betten …");   // Schritt 26e
+    public Button ZimmerKnopf { get; } = Stil.NebenKnopf("Zimmer und Betten …");
     public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
@@ -203,7 +203,7 @@ public sealed class EinstellungenSeite : Panel
         LogoWeg.Click += (_, _) => LogoEntfernen();
         Karte("Wohnbereich", "Bild im Kopf (Logo)", "Erscheint oben rechts. Die Datei wird in den Datenordner kopiert und nie mitgeliefert.",
             Reihe(logoVorschau, LogoKnopf, LogoWeg), Funktionen.EinstellungenBereich);
-        // Schritt 26e: Wohnbereiche R1–R3 (offen/beschützend), Zimmer und Betten; Rechte prüft das Fenster.
+        // Wohnbereiche R1–R3 (offen/beschützend), Zimmer und Betten; Rechte prüft das Fenster.
         ZimmerKnopf.Click += (_, _) => { using var f = new ZimmerFenster(speicher); Dialog.Zeigen(f, FindForm()); };
         Karte("Wohnbereich", "Zimmer und Betten", "Wohnbereiche (offen oder beschützend) mit ihren Zimmern: Einzelzimmer oder „Bett Fenster“ und „Bett Tür“. Die Aufnahme zeigt nur freie Betten.",
             ZimmerKnopf);
@@ -414,7 +414,7 @@ public sealed class EinstellungenSeite : Panel
     public bool SchichtzeitenUebernehmen()
     {
         if (laedt) return false;
-        // Unverändert: nichts zu tun – auch ohne Recht kein Fehler beim Verlassen des Felds (0.33.3).
+        // Unverändert: nichts zu tun – auch ohne Recht kein Fehler beim Verlassen des Felds.
         var bisher = speicher.Schichtzeiten(Einstellungen.Laden().Bereich);
         if ((Frueh.Text.Trim(), Spaet.Text.Trim(), Nacht.Text.Trim()) == (bisher.Frueh.ToString("HH:mm"), bisher.Spaet.ToString("HH:mm"), bisher.Nacht.ToString("HH:mm")))
         {
@@ -441,14 +441,14 @@ public sealed class EinstellungenSeite : Panel
     }
 
     // Ein Fenster der Einstellungen (Mitarbeiter, Rechte …): danach Werte und Sperren neu – die Rechte des Angemeldeten
-    // können sich geändert haben (0.33.3).
+    // können sich geändert haben.
     private void FensterZeigen(Form fenster)
     {
         using (fenster) Dialog.Zeigen(fenster, FindForm());
         Zeigen();
     }
 
-    // Rechte auch im Handler prüfen (0.33.3): Die Sperre der Karte allein verhindert nicht jeden Weg.
+    // Rechte auch im Handler prüfen: Die Sperre der Karte allein verhindert nicht jeden Weg.
     private bool Darf(string funktion)
     {
         if (Recht.Grund(speicher, funktion) is not string grund) return true;

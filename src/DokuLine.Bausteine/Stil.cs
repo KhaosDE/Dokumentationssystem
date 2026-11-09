@@ -12,7 +12,7 @@ public static class Stil
 {
     // Dauerhaft sichtbarer Hinweis (Regel 4 in CLAUDE.md): im Kopf, in Fenstertiteln und auf Ausdrucken.
     public const string DemoHinweis = "Demo — ausgedachte Daten";
-    public const string ProgrammName = "DokuLine";                 // Schritt 26a1, vorher „Dokumentationssystem“
+    public const string ProgrammName = "DokuLine";
     public const string Leittext = "Betreuung auf Augenhöhe";
 
     // ----- Flächen und Text -----
@@ -193,7 +193,7 @@ public static class Stil
     public static int MarkenBreite(Graphics g, string text, float skala) =>
         TextRenderer.MeasureText(g, text, MarkeSchrift, Size.Empty, TextFormatFlags.NoPadding).Width + (int)Math.Round(16 * skala);
 
-    // ----- Programmsymbol (Schritt 26n) -----
+    // ----- Programmsymbol -----
 
     // Das Symbol der .exe, auch für alle Fenster und Dialoge. Nicht im Logofeld der Kopfzeile: Das bleibt
     // für das Bild der Einrichtung aus den Einstellungen (CLAUDE.md, Regel 7).
@@ -206,7 +206,7 @@ public static class Stil
 
     public static Icon Programmsymbol => programmsymbol.Value;
 
-    // Dasselbe Bild als eigenes Objekt für Dialoge (0.33.3): Ein Fenster mit festem Dialograhmen zeigt das
+    // Dasselbe Bild als eigenes Objekt für Dialoge: Ein Fenster mit festem Dialograhmen zeigt das
     // Vorgabesymbol nicht an, und Windows Forms erkennt das Vorgabesymbol am Objekt – deshalb eine Kopie.
     private static readonly Lazy<Icon> dialogsymbol = new(() => new Icon(Programmsymbol, Programmsymbol.Size));
     public static Icon Dialogsymbol => dialogsymbol.Value;

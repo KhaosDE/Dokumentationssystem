@@ -4,7 +4,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Reiter „Medikamentenplan“ in der Akte (Schritt 21): „Was gilt am …“ (heute oder ein gewählter Tag) als
+// Reiter „Medikamentenplan“ in der Akte: „Was gilt am …“ (heute oder ein gewählter Tag) als
 // Tabelle, berechnet aus Grundverordnung, Pausen und Stufenplänen; Bedarfsmedikation als eigene Tabelle
 // darunter. Klick auf eine Zeile öffnet Einzelheiten und Verlauf; dort Pause, Stufenplan, Absetzen.
 // Demo — nicht zum Stellen verwenden.
@@ -26,7 +26,7 @@ public sealed class MedikationAnsicht : Panel
     public DataGridView Tabelle { get; } = RegelTabelleBauen();
     public DataGridView BedarfTabelle { get; } = BedarfTabelleBauen();
 
-    // Auch für die Visitenansicht (Schritt 26c): dieselben Tabellen wie im Medikamentenplan.
+    // Auch für die Visitenansicht: dieselben Tabellen wie im Medikamentenplan.
     public static DataGridView RegelTabelleBauen() => PlanTabelle.Bauen(
         ("medikament", "Medikament", 30), ("morgens", "morgens", 7), ("mittags", "mittags", 7), ("abends", "abends", 7), ("nachts", "nachts", 7),
         ("arzt", "verordnet von", 13), ("seit", "seit", 9), ("status", "Status", 14), ("hinweis", "Hinweis", 16));
@@ -123,7 +123,7 @@ public sealed class MedikationAnsicht : Panel
     public void Aktualisieren()
     {
         if (bewohner is null) return;
-        Stil.Sperren(NeuKnopf, Recht.Grund(speicher, Funktionen.MedikationBearbeiten));   // Rechte (Schritt 19)
+        Stil.Sperren(NeuKnopf, Recht.Grund(speicher, Funktionen.MedikationBearbeiten));   // Rechte
         var tag = Stichtag();
         TagFehler.Visible = tag is null;
         TagFehler.Text = "Tag bitte als TT.MM.JJJJ eingeben.";
@@ -146,7 +146,7 @@ public sealed class MedikationAnsicht : Panel
     public void Oeffnen(Tagesstand s)
     {
         string? grund = Recht.Grund(speicher, Funktionen.MedikationBearbeiten);
-        // 0.33.0: „Bedarf gegeben …“ an Bedarfsverordnungen (eigenes Recht; Assistenzkräfte mit Absprache).
+        // „Bedarf gegeben …“ an Bedarfsverordnungen (eigenes Recht; Assistenzkräfte mit Absprache).
         string? bedarfGrund = Recht.Grund(speicher, Funktionen.BedarfGeben);
         string? heute = s.Verordnung.Bedarf ? BedarfRegeln.Letzte24Kurz(speicher.BedarfsgabenMittel(s.Verordnung), DateTime.Now) : null;
         AenderungArt? wunsch;
@@ -184,7 +184,7 @@ public sealed class MedikationAnsicht : Panel
         if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
     }
 
-    // Aus einer Visiten-Aufgabe (Schritt 26): das passende Formular, vorbelegt mit der Visite als
+    // Aus einer Visiten-Aufgabe: das passende Formular, vorbelegt mit der Visite als
     // Anordnung (Arzt, Datum) und einem Hinweis auf die Visite. Neu verordnet (oder noch keine
     // Verordnung): „Neue Verordnung“; Dosis: Stufenplan; pausiert: Pause; abgesetzt: Absetzen.
     // true = gespeichert.
@@ -361,7 +361,7 @@ public sealed class VerordnungDetailFenster : Form
         Karte.VerlaufKnopf.Visible = false;   // der Verlauf steht darunter
         foreach (var (knopf, art) in Karte.Aenderungen)
         {
-            Stil.Sperren(knopf, sperrgrund);   // Rechte (Schritt 19): sichtbar, aber gesperrt
+            Stil.Sperren(knopf, sperrgrund);   // Rechte: sichtbar, aber gesperrt
             knopf.Click += (_, _) => Waehlen(art);
         }
         Karte.PerformLayout();
@@ -417,7 +417,7 @@ public sealed class VerordnungKarte : KartenFlaeche
     public Button StufenplanKnopf { get; } = Stil.NebenKnopf("Stufenplan …");
     public Button AbsetzenKnopf { get; } = Stil.NebenKnopf("Absetzen …");
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
-    public Button BedarfKnopf { get; } = Stil.NebenKnopf("Bedarf gegeben …");   // 0.33.0
+    public Button BedarfKnopf { get; } = Stil.NebenKnopf("Bedarf gegeben …");
     public bool BedarfMoeglich { get; }
     public IReadOnlyList<string> MarkenTexte { get; }
     public string DosisText => dosis.Text;
@@ -520,7 +520,7 @@ public sealed class VerordnungFenster : Form
     public TextBox Anlass { get; } = new() { Width = 260, PlaceholderText = "z. B. bei starker Unruhe", Enabled = false };
     public TextBox Hoechstens { get; } = new() { Width = 160, PlaceholderText = "z. B. 2 in 24 Stunden", Enabled = false };
     public TextBox Beginn { get; } = new DatumFeld() { Width = 100 };
-    public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
+    public ArztWahl Arzt { get; }   // Auswahl aus dem Ärzteverzeichnis
     public TextBox AngeordnetAm { get; } = new DatumFeld() { Width = 100 };
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
@@ -533,7 +533,7 @@ public sealed class VerordnungFenster : Form
         this.speicher = speicher;
         this.bewohner = bewohner;
         Arzt = new ArztWahl(speicher);
-        medikamente = speicher.Medikamente().Where(m => !m.Gesperrt).ToList();   // gesperrte nicht wählbar (Schritt 21)
+        medikamente = speicher.Medikamente().Where(m => !m.Gesperrt).ToList();   // gesperrte nicht wählbar
         Text = $"Neue Verordnung – {bewohner.Name} ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
@@ -583,7 +583,7 @@ public sealed class VerordnungFenster : Form
         Stil.DpiSkalierungEinschalten(this);
     }
 
-    // Ein Medikament vorwählen (aus einer Visite, Schritt 26); gesperrte stehen nicht zur Wahl.
+    // Ein Medikament vorwählen (aus einer Visite); gesperrte stehen nicht zur Wahl.
     public bool MedikamentWaehlen(long medikamentId)
     {
         int i = medikamente.FindIndex(m => m.Id == medikamentId);
@@ -629,7 +629,7 @@ public sealed class AenderungFenster : Form
     public TextBox Von { get; } = new DatumFeld() { Width = 100 };
     public TextBox Bis { get; } = new DatumFeld() { Width = 100, PlaceholderText = "leer = bis auf Weiteres" };
     public TextBox[,] Stufen { get; } = new TextBox[StufenZeilen, 5];
-    public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
+    public ArztWahl Arzt { get; }   // Auswahl aus dem Ärzteverzeichnis
     public TextBox AngeordnetAm { get; } = new DatumFeld() { Width = 100 };
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };

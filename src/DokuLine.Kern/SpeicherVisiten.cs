@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-// Visiten im Speicher (Bauplan Schritt 26). Eine Visite wird in einem Zug gespeichert: Visite,
+// Visiten im Speicher. Eine Visite wird in einem Zug gespeichert: Visite,
 // Einträge je Bewohner, Anordnungen, je Bewohner ein Bericht (Lebensbereich 5, mit Übergabe, wenn
 // sich etwas ändert) und die Aufgaben (je Anordnung, je Facharzttermin). Nichts wird überschrieben.
 public sealed partial class Speicher
@@ -88,7 +88,7 @@ public sealed partial class Speicher
         return id;
     }
 
-    // ----- Entwurf einer Visite mit allen Bewohnern (Schritt 26c) -----
+    // ----- Entwurf einer Visite mit allen Bewohnern -----
 
     public VisitenEntwurf? VisitenEntwurf(string bereich)
     {
@@ -117,8 +117,8 @@ public sealed partial class Speicher
         Ausfuehren("DELETE FROM visite_entwuerfe WHERE bereich = $b", null, ("$b", bereich));
 
     // „Visite abschließen“: aus dem Entwurf die Visite (Berichte, Übergaben, Aufgaben); der Entwurf ist dann weg.
-    // kuerzel: wer abschließt – braucht das Recht „Visiten“ (0.33.2: vorher nur beim Beginnen geprüft; wer sich
-    // während der Visite umgemeldet hatte, konnte ohne Recht abschließen).
+    // kuerzel: wer abschließt – braucht das Recht „Visiten“, auch wenn sich während der Visite jemand anderes
+    // angemeldet hat.
     public VisiteGespeichert VisiteAbschliessen(VisitenEntwurf v, string kuerzel, DateTime jetzt)
     {
         if (Grund(kuerzel, Funktionen.Visiten) is string grund) throw new Eingabefehler([grund]);

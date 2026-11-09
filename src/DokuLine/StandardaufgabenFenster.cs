@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Begründet schließen (Bauplan Schritt 25): Eine Standardaufgabe wurde nicht erledigt und ist nicht
+// Begründet schließen: Eine Standardaufgabe wurde nicht erledigt und ist nicht
 // mehr zu tun – mit kurzer Begründung, Kürzel und Uhrzeit.
 public sealed class SchliessenFenster : Form
 {
@@ -44,7 +44,7 @@ public sealed class SchliessenFenster : Form
     }
 }
 
-// Standardaufgaben verwalten (Schritt 25): Liste mit Schicht, Tagen und Uhrzeit; neu, ändern,
+// Standardaufgaben verwalten: Liste mit Schicht, Tagen und Uhrzeit; neu, ändern,
 // stilllegen. Verwalten darf, wer „Aufgaben-Vorlagen verwalten“ hat; ansehen dürfen alle.
 public sealed class VorlagenFenster : Form
 {

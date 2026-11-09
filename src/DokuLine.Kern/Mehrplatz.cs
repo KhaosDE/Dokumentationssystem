@@ -19,13 +19,13 @@ public sealed class Konflikt(string meldung, string andere, string meine) : Exce
 // Bereichskennung je Installation und Wohnbereich je Bewohner (allgemeine Kürzel, z. B. „R1“).
 public static class Bereiche
 {
-    public const string Vorgabe = "R1";   // Schritt 26e (vorher „Wohnbereich A“)
+    public const string Vorgabe = "R1";
     public const int Laenge = 30;
 
     // Vorschläge in den Einstellungen; eigene Kennungen sind möglich.
     public static readonly string[] Vorschlaege = ["R1", "R2", "R3", "Therapie", "Leitung"];
 
-    // Schritt 26e: die alten Demo-Bereiche heißen jetzt R1 und R2 (Bereichskennung dieses Rechners).
+    // Die alten Demo-Bereiche heißen jetzt R1 und R2 (Bereichskennung dieses Rechners).
     public static string Umbenannt(string bereich) => bereich switch { "Wohnbereich A" => "R1", "Wohnbereich B" => "R2", _ => bereich };
 
     public static string Bereinigen(string? text) => string.IsNullOrWhiteSpace(text) ? Vorgabe : string.Join(' ', text.Split(' ', StringSplitOptions.RemoveEmptyEntries));

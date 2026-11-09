@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// Zimmer und Betten (Bauplan Schritt 26e). Ein Zimmer gehört zu einem Wohnbereich und hat ein Bett
+// Zimmer und Betten. Ein Zimmer gehört zu einem Wohnbereich und hat ein Bett
 // (Einzelzimmer) oder zwei („Bett Fenster“, „Bett Tür“). Ein Bett ist frei oder von einem Bewohner
 // belegt; welcher Bewohner wo liegt, steht am Bewohner (Zimmer und Bett).
 public sealed record Zimmer(string Nummer, string Bereich, int Betten, bool Aktiv = true)

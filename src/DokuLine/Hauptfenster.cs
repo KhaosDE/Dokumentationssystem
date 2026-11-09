@@ -12,8 +12,8 @@ public sealed class Hauptfenster : Form
 {
     private const int LeisteBreite = 232, LeisteSchmal = 60;
 
-    // Reihenfolge der Seitenleiste. „Einstellungen“ steht fest ganz unten (Schritt 29: eine Seite wie die
-    // übrigen). Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
+    // Reihenfolge der Seitenleiste. „Einstellungen“ steht fest ganz unten (eine Seite wie die übrigen).
+    // Eingeschaltete Module (Modulverwaltung) stehen zusätzlich vor „Einstellungen“.
     // „Neuer Bericht …“ gibt es nur mit gewähltem Bewohner (Dokumentation, Akte, Rechtsklick in der Übersicht).
     public static readonly string[] Bereiche =
         ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
@@ -22,7 +22,7 @@ public sealed class Hauptfenster : Form
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
     private readonly Label programmName = new();
-    public Label LeittextAnzeige { get; } = new();   // unter dem Namen (Schritt 26a1)
+    public Label LeittextAnzeige { get; } = new();   // unter dem Namen
     private readonly Panel bereichsFlaeche = new() { Dock = DockStyle.Fill, BackColor = Stil.Seite };
     private readonly Dictionary<string, Control> seiten = [];
     private readonly Dictionary<string, ModulSeite> modulSeiten = [];
@@ -48,7 +48,7 @@ public sealed class Hauptfenster : Form
     // zurücksetzen“ nur als Symbol mit Hinweis.
     public SeitenleistenEintrag MenueKnopf { get; } = new("Menü einklappen") { Symbol = Symbole.Menue, Eingeklappt = true };
     public SeitenleistenEintrag InfoSymbol { get; } = new("Version") { Symbol = Symbole.Info, Eingeklappt = true, Visible = false, Cursor = Cursors.Default };
-    // Schritt 26a3: Abmelden auch unten in der Seitenleiste (eingeklappt als Symbol mit Hinweis), F12 überall.
+    // Abmelden auch unten in der Seitenleiste (eingeklappt als Symbol mit Hinweis), F12 überall.
     public SeitenleistenEintrag AbmeldenEintrag { get; } = new(Abmeldung.KnopfText) { Symbol = Symbole.Abmelden };
     public Sperrflaeche Sperre { get; } = new();
     public bool Gesperrt => Sperre.Visible;
@@ -66,7 +66,7 @@ public sealed class Hauptfenster : Form
         this.speicher = speicher;
         Modulverwaltung.Anmelden(speicher);   // schon beim Start geschehen; sicherheitshalber (legt nur fehlende Tabellen an)
         Text = $"{Programmversion.Name} – {KopfBereich.DemoHinweis}";
-        Stil.SymbolFuerAlleFenster();   // schon beim Start geschehen; sicherheitshalber (Schritt 26n)
+        Stil.SymbolFuerAlleFenster();   // schon beim Start geschehen; sicherheitshalber
         Icon = Stil.Programmsymbol;
         BackColor = Stil.Seite;
         Font = Stil.Standard;
@@ -126,7 +126,7 @@ public sealed class Hauptfenster : Form
             AufgabenZaehlen();
         };
         Einstellungsseite.SchichtzeitenGeaendert += AufgabenZaehlen;
-        Einstellungsseite.AbmeldenGewuenscht += () => Abmelden();   // Schritt 26a3: Abmelden auch unter „Persönlich“
+        Einstellungsseite.AbmeldenGewuenscht += () => Abmelden();   // Abmelden auch unter „Persönlich“
         Einstellungsseite.MenueGewuenscht += eingeklappt => MenueSetzen(eingeklappt, merken: true);
         Einstellungsseite.DemoGewuenscht += () => DemoZuruecksetzen();
         Uebersicht = new UebersichtSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
@@ -137,7 +137,7 @@ public sealed class Hauptfenster : Form
             Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht");
             StatuszeileSetzen(neuGelesen: true);
         };
-        // „Heute wichtig“ (Schritt 26l): ein Klick führt an die Stelle, an die der Eintrag gehört.
+        // „Heute wichtig“: ein Klick führt an die Stelle, an die der Eintrag gehört.
         Uebersicht.StelleGewuenscht += bereich => BereichWaehlen(bereich);
         Uebersicht.VerlaufGewuenscht += v =>
         {
@@ -214,7 +214,7 @@ public sealed class Hauptfenster : Form
         // ----- Inhalt rechts: Kopf oben, Bereich darunter -----
         var inhalt = new Panel { Dock = DockStyle.Fill, BackColor = Stil.Seite };
         inhalt.Controls.Add(bereichsFlaeche);
-        inhalt.Controls.Add(Kopf.Leiste);   // Schritt 26i: Aktionsleiste direkt unter der Kopfzeile
+        inhalt.Controls.Add(Kopf.Leiste);   // Aktionsleiste direkt unter der Kopfzeile
         inhalt.Controls.Add(Kopf);
         inhalt.Controls.Add(Statusleiste);
         bereichsFlaeche.BringToFront();   // Fill wird zuletzt angeordnet und nimmt den Rest
@@ -319,7 +319,7 @@ public sealed class Hauptfenster : Form
 
     private int S(int wert) => Stil.Px(this, wert);
 
-    // Statusleiste (Schritt 26l): Demo-Hinweis, Datum, Dienst und wann die gezeigten Daten gelesen wurden.
+    // Statusleiste: Demo-Hinweis, Datum, Dienst und wann die gezeigten Daten gelesen wurden.
     private DateTime gelesen = DateTime.Now;
 
     private void StatuszeileSetzen(bool neuGelesen)
@@ -435,7 +435,7 @@ public sealed class Hauptfenster : Form
     public void AufgabenZaehlen()
     {
         var jetzt = DateTime.Now;
-        speicher.StandardaufgabenErzeugen(jetzt);   // Schritt 25: zu Schichtbeginn die Standardaufgaben
+        speicher.StandardaufgabenErzeugen(jetzt);   // zu Schichtbeginn die Standardaufgaben
         var offen = speicher.Aufgaben(jetzt, bereich: Arbeitsbereich.Gewaehlt);
         int ueberfaellig = offen.Count(a => AufgabenRegeln.Ueberfaellig(a, jetzt));
         Navigation.Single(n => n.Text == "Aufgaben").ZaehlerSetzen(offen.Count, ueberfaellig > 0,
@@ -541,7 +541,7 @@ public sealed class Hauptfenster : Form
     }
 
     // Offene Fenster des Programms (Dialoge), die beim Abmelden geschlossen werden.
-    // F11 im Tagesplan: nur die Tafel, bildschirmfüllend (Schritt 26g).
+    // F11 im Tagesplan: nur die Tafel, bildschirmfüllend.
     protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
         if (keyData == Keys.F11 && AktiverBereich == "Tagesplan" && !Gesperrt) { Tagesplan.VollbildZeigen(); return true; }
@@ -639,7 +639,7 @@ public sealed class Hauptfenster : Form
         return bericht;
     }
 
-    // Aufgabe aus einer Visite ausführen (Schritt 26). Facharzttermin: Datum, Uhrzeit, Ort (Kalender,
+    // Aufgabe aus einer Visite ausführen. Facharzttermin: Datum, Uhrzeit, Ort (Kalender,
     // auf Wunsch Fahrt). Medikation: fehlt das Medikament in der Datenbank, zuerst „Neues Medikament“
     // (Name vorbelegt); dann die Akte beim Reiter „Medikamentenplan“ und dort das passende Formular.
     // Ist es gespeichert, ist die Aufgabe erledigt. true = erledigt.
@@ -683,7 +683,7 @@ public sealed class Hauptfenster : Form
         return erledigt;
     }
 
-    // Einstellungen als Seite (Schritt 29), auf Wunsch gleich bei einer Gruppe (z. B. „Wohnbereich“ für das Logo).
+    // Einstellungen als Seite, auf Wunsch gleich bei einer Gruppe (z. B. „Wohnbereich“ für das Logo).
     public bool EinstellungenOeffnen(string? gruppe = null)
     {
         BereichWaehlen("Einstellungen");
@@ -806,7 +806,7 @@ public sealed class Hauptfenster : Form
             y += eintrag.Height + S(Stil.AbstandMini);
         }
 
-        // Unten fest: „Einstellungen“ (Schritt 29), darunter Arbeitsplatz und Version bzw. das Info-Symbol.
+        // Unten fest: „Einstellungen“, darunter Arbeitsplatz und Version bzw. das Info-Symbol.
         int unten = leiste.ClientSize.Height - leiste.Padding.Bottom;
         var einstellungen = Navigation.Single(e => e.Text == "Einstellungen");
         if (MenueEingeklappt)

@@ -26,7 +26,7 @@ public static class Demodaten
     public static List<Bewohner> Bewohner() =>
         Lesen<BewohnerDatei>("bewohner.json").Bewohner.Select(e => BewohnerRegeln.AusEingabe(e)).ToList();
 
-    // ----- Wohnbereiche, Zimmer und Betten (Schritt 26e) -----
+    // ----- Wohnbereiche, Zimmer und Betten -----
 
     private sealed class ZimmerDatei
     {
@@ -55,7 +55,7 @@ public static class Demodaten
         return new DemoZimmer([.. datei.Bereiche.Select(b => (b.Name, b.Beschuetzt))], [.. datei.Zimmer.Select(z => new Kern.Zimmer(z.Nummer, z.Bereich, z.Betten))]);
     }
 
-    // ----- Ärztliche Informationen (Schritt 26f) -----
+    // ----- Ärztliche Informationen -----
 
     private sealed class AerztlichDatei
     {
@@ -166,7 +166,7 @@ public static class Demodaten
             }
             // Übergabe: bei jedem zweiten Bewohner ein Bericht aus den letzten Stunden für die
             // nächste Schicht, dazu einige länger laufende, erledigte und abgelaufene Einträge.
-            // Die ersten zehn (Ahorn … Kiefer) wie bisher jeder zweite; die weiteren (Schritt 26h) seltener,
+            // Die ersten zehn (Ahorn … Kiefer) wie bisher jeder zweite; die weiteren seltener,
             // sonst wird die Übergabe mit 69 Bewohnern unübersichtlich.
             if (i < 10 ? i % 2 == 0 : i % 9 == 0)
             {
@@ -394,7 +394,7 @@ public static class Demodaten
 
     public sealed record DemoVerordnung(Verordnung Verordnung);
 
-    // Schritt 26h: Verordnungen der weiteren Demo-Bewohner stehen lesbar in medikation.json.
+    // Verordnungen der weiteren Demo-Bewohner stehen lesbar in medikation.json.
     private sealed class MedikationDatei
     {
         public List<VerordnungVorlage> Verordnungen { get; set; } = [];
@@ -520,7 +520,7 @@ public static class Demodaten
         public int Hoechstens { get; set; }
         public string Hinweis { get; set; } = "";
         public int SeitTagen { get; set; }
-        public string Anbieter { get; set; } = TherapieRegeln.AnbieterTherapie;   // Schritt 22
+        public string Anbieter { get; set; } = TherapieRegeln.AnbieterTherapie;
         public string Kuerzel { get; set; } = "OP";                               // wer angelegt und zugeteilt hat
         public List<TerminVorlage> Termine { get; set; } = [];
         public AenderungVorlage? Aenderung { get; set; }
@@ -580,7 +580,7 @@ public static class Demodaten
         return liste;
     }
 
-    // ----- Ärzteverzeichnis (Schritt 26b) -----
+    // ----- Ärzteverzeichnis -----
 
     private sealed class AerzteDatei
     {
@@ -639,7 +639,7 @@ public static class Demodaten
             Telefon = p.Telefon, Mobil = p.Mobil, Email = p.Email, Anschrift = p.Anschrift, Erreichbarkeit = p.Erreichbarkeit, Hinweis = p.Hinweis,
         }, p.Zuordnungen.Select(z => (z.Bewohner, z.Rolle)).ToList())).ToList();
 
-    // ----- Betreuer (Schritt 28) -----
+    // ----- Betreuer -----
 
     private sealed class BetreuerDatei
     {
@@ -654,7 +654,7 @@ public static class Demodaten
         public string Email { get; set; } = "";
         public string Telefon { get; set; } = "";
         public int VorTagen { get; set; } = 30;
-        public bool Keine { get; set; }   // „keine gesetzliche Betreuung“ (0.33.3)
+        public bool Keine { get; set; }   // „keine gesetzliche Betreuung“
     }
 
     // Betreuer aus daten/demo/betreuer.json (Nachname des Bewohners → Betreuer).
@@ -664,9 +664,9 @@ public static class Demodaten
             Name = b.Name, Stelle = b.Stelle, Email = b.Email, Telefon = b.Telefon, Geaendert = jetzt.Date.AddDays(-b.VorTagen).AddHours(10), Kuerzel = "EF", Keine = b.Keine,
         })).ToList();
 
-    // ----- Visiten (Schritt 26) -----
+    // ----- Visiten -----
 
-    // ----- Bedarfsgaben (0.33.0) -----
+    // ----- Bedarfsgaben -----
 
     private sealed class BedarfDatei
     {
@@ -734,7 +734,7 @@ public static class Demodaten
         }).ToList();
     }
 
-    // ----- Standardaufgaben (Schritt 25) -----
+    // ----- Standardaufgaben -----
 
     private sealed class StandardaufgabenDatei
     {
@@ -762,7 +762,7 @@ public static class Demodaten
         }).ToList();
     }
 
-    // ----- Fahrzeuge und Fahrten (Schritt 24) -----
+    // ----- Fahrzeuge und Fahrten -----
 
     private sealed class FahrtenDatei
     {
@@ -913,7 +913,7 @@ public static class Demodaten
         public string Treffpunkt { get; set; } = "";
         public string Begleitung { get; set; } = "";
         public bool Abgesagt { get; set; }
-        public bool Haus { get; set; }   // Schritt 24: Kalender „Haus“
+        public bool Haus { get; set; }   // Kalender „Haus“
         public KalenderAenderungVorlage? Aenderung { get; set; }
     }
 

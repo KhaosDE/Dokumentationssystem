@@ -18,7 +18,7 @@ public sealed class KopfBereich : Panel
     private const int Innen = 16, InnenSeite = 24;
     private const int TitelHoehe = 64;
     private const int LogoHoehe = 56, LogoMaxBreite = 220, PlatzhalterBreite = 150;
-    // Schritt 26i: ohne die Knopfzeile – die Knöpfe stehen in der Aktionsleiste darunter.
+    // Ohne die Knopfzeile – die Knöpfe stehen in der Aktionsleiste darunter.
     public const int GesamtHoehe = RandOben + Innen + TitelHoehe + Innen + RandUnten;
 
     private readonly Label klein = new();
@@ -31,14 +31,14 @@ public sealed class KopfBereich : Panel
     public event Action? LogoGewuenscht;
     public const string PlatzhalterText = "Logo der Einrichtung";
 
-    // Schritt 26a3: unter dem Demo-Hinweis „Angemeldet: TST – Name“ und daneben ein eigener Knopf
+    // Unter dem Demo-Hinweis „Angemeldet: TST – Name“ und daneben ein eigener Knopf
     // „Abmelden (F12)“ (ohne Anmeldung: „Anmelden …“) – kein verstecktes Klappmenü. Hat die angemeldete
     // Person Entwürfe, steht davor „Entwurf fortsetzen“.
     public Label BenutzerAnzeige { get; } = new() { AutoSize = true, BackColor = Color.Transparent, Font = Stil.Standard, UseMnemonic = false };
     public Button AbmeldenKnopf { get; } = Stil.NebenKnopf("Abmelden (F12)");
     public Button EntwurfKnopf { get; } = Stil.NebenKnopf("Entwurf fortsetzen");
     private const int BenutzerHoehe = 30;
-    // Schritt 26i: Die Aktionen des Bereichs stehen in einer Leiste direkt unter der Kopfzeile (das
+    // Die Aktionen des Bereichs stehen in einer Leiste direkt unter der Kopfzeile (das
     // Hauptfenster legt sie dorthin); „Entwurf fortsetzen“ steht dort rechts außen.
     public AktionsLeiste Leiste { get; } = new();
 
@@ -124,7 +124,7 @@ public sealed class KopfBereich : Panel
         Invalidate();
     }
 
-    // Die Aktionen des Bereichs (Schritt 26i: in der Aktionsleiste unter der Kopfzeile). Knoepfe behält
+    // Die Aktionen des Bereichs (in der Aktionsleiste unter der Kopfzeile). Knoepfe behält
     // die übergebene Reihenfolge; wie sie in der Leiste stehen, entscheidet AktionsLeiste.Reihenfolge.
     public void KnoepfeSetzen(params Button[] neue)
     {
@@ -135,7 +135,7 @@ public sealed class KopfBereich : Panel
 
     public IReadOnlyList<Button> Knoepfe => knoepfe;
 
-    // Ein Bedienelement rechts in der Aktionsleiste, z. B. die Bereichswahl der Übersicht (Schritt 26l).
+    // Ein Bedienelement rechts in der Aktionsleiste, z. B. die Bereichswahl der Übersicht.
     // Nach KnoepfeSetzen aufrufen; der nächste KnoepfeSetzen-Aufruf entfernt es wieder.
     public void ZusatzSetzen(Control? zusatz) => Leiste.ZusatzSetzen(zusatz);
 

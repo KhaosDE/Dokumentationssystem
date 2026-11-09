@@ -4,18 +4,8 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// Einstellungen als lesbare Datei einstellungen.json im Datenordner:
-//   auto_update – beim Start nach einer neuen Version fragen (Vorgabe: ja)
-//   kuerzel     – eigenes Kürzel, z. B. für Berichte (Vorgabe: leer)
-//   logo        – Dateiname des eigenen Bildes für den Kopf im Ordner „logo“ (Vorgabe: keins)
-//   beschluss_frist_tage – Startseite: „Beschluss endet bald“ ab so vielen Tagen vorher (Vorgabe: 90)
-//   heb_frist_monate     – Startseite: „HEB fällig“, wenn der letzte Bogen so alt ist (Vorgabe: 12)
-//   bereich              – Mehrplatz: Bereichskennung dieser Installation (Vorgabe: „R1“, bis 0.29.6 „Wohnbereich A“)
-//   datenbank_ordner     – Mehrplatz: gemeinsamer Ordner der Datenbank; leer = lokal im Datenordner
-//   menue_eingeklappt    – Seitenmenü nur mit Symbolen (Vorgabe: nein)
-//   nachschlage_ansicht  – Formular „Medikament“: eingebettete Nachschlage-Ansicht des BfArM (Vorgabe: ja)
+// Einstellungen als lesbare Datei einstellungen.json im Datenordner (Schlüssel und Vorgaben: docs/technik.md).
 // Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben.
-// Dieselbe Datei hat schon die Python-Version (bis 0.2.0) benutzt.
 public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90, int HebFristMonate = 12,
     string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false, bool NachschlageAnsicht = true);
 

@@ -134,7 +134,7 @@ public sealed partial class Speicher
         NachrichtenGeaendert?.Invoke();
     }
 
-    // Schritt 26d: „Gelesen“ im Posteingang (auch mehrere auf einmal) – gilt als gelesen und wandert ins
+    // „Gelesen“ im Posteingang (auch mehrere auf einmal) – gilt als gelesen und wandert ins
     // Archiv, nur für mich (bei Team-Nachrichten bleibt sie bei den anderen ungelesen). Nichts wird gelöscht.
     public void VerlaeufeGelesen(string ich, IEnumerable<long> verlaufIds, DateTime zeit)
     {

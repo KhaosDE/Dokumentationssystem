@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Verwaltung (Bauplan Schritt 19): Mitarbeiter, Bereiche und Positionen, Rechte-Tabelle. Wer was
+// Verwaltung: Mitarbeiter, Bereiche und Positionen, Rechte-Tabelle. Wer was
 // darf, steht in der Rechte-Tabelle selbst. Ohne Recht bleibt alles sichtbar, aber gesperrt.
 
 static class Fenster
@@ -10,7 +10,7 @@ static class Fenster
     public static void Grundform(Form f, string titel)
     {
         f.Text = $"{titel} ({Stil.DemoHinweis})";
-        f.Icon = Stil.Dialogsymbol;   // eigenes Objekt, sonst zeigt der Dialograhmen kein Symbol (0.33.3)
+        f.Icon = Stil.Dialogsymbol;   // eigenes Objekt, sonst zeigt der Dialograhmen kein Symbol
         f.FormBorderStyle = FormBorderStyle.FixedDialog;
         f.MaximizeBox = f.MinimizeBox = false;
         f.ShowInTaskbar = false;
@@ -119,7 +119,7 @@ public sealed class MitarbeiterFenster : Form
     }
 }
 
-// Ein Mitarbeiter: Kürzel (nur beim Anlegen), Name, Qualifikation (Assistenzkraft oder Fachkraft, 0.33.0), aktiv,
+// Ein Mitarbeiter: Kürzel (nur beim Anlegen), Name, Qualifikation (Assistenzkraft oder Fachkraft), aktiv,
 // Bereiche und Positionen per Häkchen.
 // eigeneBereiche: Wer nur den eigenen Bereich verwalten darf, kann nur diese Bereiche ändern.
 public sealed class MitarbeiterFormular : Form
@@ -167,7 +167,7 @@ public sealed class MitarbeiterFormular : Form
             return feld;
         }
         zeile("Bereiche", Haken(speicher.Bereichsliste(), Bereiche, bisher?.Bereiche ?? [], b => eigeneBereiche is null || eigeneBereiche.Contains(b)));
-        // Schritt 26a2: „Administrator“ vergibt nur ein Administrator; der letzte aktive bleibt es (Hinweis statt Fehler).
+        // „Administrator“ vergibt nur ein Administrator; der letzte aktive bleibt es (Hinweis statt Fehler).
         bool ichAdmin = RechteRegeln.IstAdministrator(speicher.MitarbeiterLesen(Recht.Kuerzel));
         bool letzterAdmin = RechteRegeln.IstAdministrator(bisher) && speicher.AlleMitarbeiter().Count(RechteRegeln.IstAdministrator) == 1;
         zeile("Positionen", Haken(speicher.Positionsliste(), Positionen, bisher?.Positionen ?? [], p => p != RechteRegeln.Administrator || (ichAdmin && !letzterAdmin)));
@@ -354,7 +354,7 @@ public sealed class RechteFenster : Form
         Tabelle.ReadOnly = grund is not null;
         Gesperrt.Text = grund is null ? "" : $"Nur ansehen: {grund}";
         Gesperrt.Visible = grund is not null;
-        // Schritt 26a2: Spalte „Administrator“ immer voll, ausgegraut, mit Hinweis.
+        // Spalte „Administrator“ immer voll, ausgegraut, mit Hinweis.
         int admin = Spalte(RechteRegeln.Administrator);
         if (admin > 0)
         {

@@ -56,7 +56,7 @@ public sealed class BewohnerKarte : Control
     }
 
     // Bezugspflege (kräftiger Farbstreifen links, Kürzel in der Zimmerzeile) und Einzeltrainer
-    // (kleiner Farbpunkt mit „DBT · AB“), Schritt 20. Farbe nie allein: das Kürzel steht dabei.
+    // (kleiner Farbpunkt mit „DBT · AB“). Farbe nie allein: das Kürzel steht dabei.
     public (string Kuerzel, Color Farbe)? Bezugspflege { get; private set; }
     public (string Text, Color Farbe)? Trainer { get; private set; }
 
@@ -76,7 +76,7 @@ public sealed class BewohnerKarte : Control
         AccessibleName = $"{Bewohner.Name}, Zimmer {Bewohner.Zimmer}{marken}{bezug}. Akte öffnen";
     }
 
-    // Rechte (Schritt 19): ohne „Berichte schreiben“ ist der Eintrag grau und nennt den Grund.
+    // Rechte: ohne „Berichte schreiben“ ist der Eintrag grau und nennt den Grund.
     public string? BerichtGrund { get; private set; }
 
     public void BerichtSperren(string? grund)

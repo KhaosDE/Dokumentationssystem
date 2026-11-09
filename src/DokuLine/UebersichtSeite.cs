@@ -112,8 +112,7 @@ public sealed class UebersichtSeite : Panel
     private List<HeuteFuer> gezeigt = [];
     private List<BewohnerZeile> alleZeilen = [];
 
-    // Neuer Tag oder neue Schicht seit dem letzten Aufbau (0.33.2: vorher nur der Tag – der Kasten „Laufender
-    // Dienst“ zeigte nach dem Schichtwechsel noch die alte Schicht).
+    // Neuer Tag oder neue Schicht seit dem letzten Aufbau – der Kasten „Laufender Dienst“ folgt dem Schichtwechsel.
     public bool Veraltet => DateOnly.FromDateTime(Jetzt()) != gezeigtAm || SchichtTermin.Zu(Jetzt()) != gezeigtSchicht;
 
     public void Aktualisieren()
@@ -154,8 +153,8 @@ public sealed class UebersichtSeite : Panel
 
         // Bewohnerliste: Marken wie bisher auf den Karten, dazu Übergabe und Geburtstag; „Wo“ eigene Spalte.
         var status = speicher.GeltendeStatusmeldungen(jetzt);
-        var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan (Schritt 23)
-        var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten (Schritt 24): abwesend während der Fahrt
+        var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan
+        var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten: abwesend während der Fahrt
         var farben = BezugAnzeige.Farben(speicher);
         int frist = werte.BeschlussFristTage;
         alleZeilen = [];
@@ -236,7 +235,7 @@ public sealed class UebersichtSeite : Panel
             Eintrag($"{t.Zeit}  {t.Text}", null, (t.StatusText, StatusMarke(t.Status)), () => StelleGewuenscht?.Invoke("Tagesplan"))));
 
         // 3. Laufender Dienst: „6 von 9 erledigt“, Balken, offene Aufgaben zum Abhaken. Die Standardaufgaben der
-        // Schicht zuerst anlegen (0.33.2: vorher erst beim Öffnen von „Aufgaben“).
+        // Schicht zuerst anlegen.
         speicher.StandardaufgabenErzeugen(jetzt);
         var aufgaben = speicher.Aufgaben(jetzt, auchErledigte: true, Arbeitsbereich.Gewaehlt);
         var dienst = HeuteWichtigRegeln.Dienst(aufgaben, jetzt);
@@ -255,7 +254,7 @@ public sealed class UebersichtSeite : Panel
                 ForeColor = faellig.Length > 0 ? Stil.Beschluss.Text : Stil.TextNormal, Enabled = sperre is null, AccessibleName = $"Erledigt: {a.Text}{name}",
             };
             // Nach dem Abhaken baut sich der Kasten neu auf; der zweite Klick eines Doppelklicks träfe sonst die
-            // nächste Aufgabe (0.33.2).
+            // nächste Aufgabe.
             haken.CheckedChanged += (_, _) =>
             {
                 if (!haken.Checked) return;
@@ -271,8 +270,8 @@ public sealed class UebersichtSeite : Panel
         {
             var verlaeufe = speicher.Verlaeufe(kuerzel, NachrichtenOrdner.Posteingang);
             var ungelesen = HeuteWichtigRegeln.Ungelesen(verlaeufe, kuerzel);
-            // Zähler wie in der Seitenleiste: alle ungelesenen Nachrichten; je Verlauf steht die neueste da (0.33.3:
-            // vorher zählte der Kasten die Verläufe).
+            // Zähler wie in der Seitenleiste: alle ungelesenen Nachrichten (nicht die Verläufe); je Verlauf steht die
+            // neueste da.
             Nachrichten.Setzen(verlaeufe.Sum(v => v.Ungelesen), ungelesen.Select(n =>
             {
                 var v = verlaeufe.First(x => x.Id == n.Verlauf);
@@ -418,7 +417,7 @@ public sealed class UebersichtSeite : Panel
     }
 }
 
-// Ein Kasten in „Heute wichtig“ (Schritt 26l): Überschrift in Großbuchstaben mit Zähler, darunter die
+// Ein Kasten in „Heute wichtig“: Überschrift in Großbuchstaben mit Zähler, darunter die
 // Einträge. Ohne Einträge steht „Nichts offen“ da; der Kasten verschwindet nicht.
 public sealed class HeuteKasten : KartenFlaeche
 {

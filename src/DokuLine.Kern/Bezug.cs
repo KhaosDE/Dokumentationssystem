@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-// Bezugspflege und Einzeltrainer (Bauplan Schritt 20). Jeder Bewohner hat eine Bezugspflege und
+// Bezugspflege und Einzeltrainer. Jeder Bewohner hat eine Bezugspflege und
 // optional einen Einzeltrainer (DBT, Suchtgruppe, erweiterbar). Wechsel sind eigene Einträge mit
 // Datum und Kürzel – nichts wird überschrieben, der Verlauf bleibt. Kürzel leer = keine/keiner.
 

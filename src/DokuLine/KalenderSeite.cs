@@ -24,12 +24,12 @@ public sealed class KalenderSeite : Panel
     public Button VorKnopf { get; } = Stil.NebenKnopf("▶");
     public Button HeuteKnopf { get; } = Stil.NebenKnopf("Heute");
     public ComboBox Filter { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 220 };
-    // Schritt 24: Kalender „Bereich“ und „Haus“ – beide, nur Bereich oder nur Haus.
+    // Kalender „Bereich“ und „Haus“ – beide, nur Bereich oder nur Haus.
     public ComboBox Kalenderwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 170 };
     public KalenderWahl Wahl => (KalenderWahl)Math.Max(0, Kalenderwahl.SelectedIndex);
     public FahrzeugLeiste Fahrzeuge { get; }
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Drucken …");
-    // Schritt 28: Austausch über .ics-Dateien (z. B. mit Outlook); keine Verbindung zu einem Server.
+    // Austausch über .ics-Dateien (z. B. mit Outlook); keine Verbindung zu einem Server.
     public Button ExportKnopf { get; } = Stil.NebenKnopf("Als .ics speichern …");
     public Button ImportKnopf { get; } = Stil.NebenKnopf(".ics übernehmen …");
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neuer Termin …");
@@ -83,7 +83,7 @@ public sealed class KalenderSeite : Panel
         {
             ziel.AllowDrop = true;
             ziel.DragEnter += (_, e) => e.Effect = IcsDatei(e.Data) is not null ? DragDropEffects.Copy : DragDropEffects.None;
-            // Erst nach dem Ziehen öffnen (0.33.3): Ein Fenster mitten im Ziehen hält das Programm fest, aus dem gezogen
+            // Erst nach dem Ziehen öffnen: Ein Fenster mitten im Ziehen hält das Programm fest, aus dem gezogen
             // wurde (z. B. den Explorer), bis es geschlossen ist.
             ziel.DragDrop += (_, e) => { if (IcsDatei(e.Data) is string pfad) BeginInvoke(() => Importieren(pfad)); };
         }
@@ -149,7 +149,7 @@ public sealed class KalenderSeite : Panel
     public void Aktualisieren()
     {
         foreach (var (a, knopf) in Ansichten) knopf.Aktiv = a == Ansicht;
-        Recht.NurAngemeldet(NeuKnopf);   // Schritt 26a: ohne Anmeldung nur ansehen
+        Recht.NurAngemeldet(NeuKnopf);   // ohne Anmeldung nur ansehen
         ZeitraumText.Text = KalenderRegeln.ZeitraumText(Ansicht, Stichtag);
         Fahrzeuge.Aktualisieren();
         string? hausGrund = Recht.Grund(speicher, Funktionen.KalenderHaus);   // Haus-Termine: Recht „Kalender Haus bearbeiten“
@@ -251,7 +251,7 @@ public sealed class KalenderSeite : Panel
         string vorschlag = $"Kalender {ZeitraumText.Text}.ics".Replace(',', ' ').Replace(':', ' ');
         if (KalenderAustausch.SpeichernUnter(FindForm(), vorschlag) is not string pfad) return null;
         try { KalenderAustausch.Schreiben(pfad, Ics.Schreiben(termine, Namen(), Jetzt(), speicher.IcsKennung())); }
-        catch (Exception x) when (x is IOException or UnauthorizedAccessException)   // 0.33.3: vorher Absturz
+        catch (Exception x) when (x is IOException or UnauthorizedAccessException)
         {
             MessageBox.Show(FindForm(), $"Die Datei ließ sich nicht speichern: {x.Message}", "Als .ics speichern", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return null;
@@ -455,7 +455,7 @@ public sealed class KalenderKarte : KartenFlaeche
         var marke = f.Art switch { KalenderArt.Heimfahrt => Stil.Achtung, KalenderArt.Ausflug => Stil.Hinweis, KalenderArt.Wohnbereich => Stil.Zimmer, _ => Stil.Unterwegs };
         var liste = new List<(string, Stil.Marke)>
         {
-            ($"Kalender {KalenderRegeln.KalenderName(f.Haus)}", f.Haus ? Stil.Abwesend : Stil.Zimmer),   // Schritt 24
+            ($"Kalender {KalenderRegeln.KalenderName(f.Haus)}", f.Haus ? Stil.Abwesend : Stil.Zimmer),
             (KalenderRegeln.ArtText(f.Art), marke), (KalenderRegeln.ZeitText(f), Stil.Zimmer),
         };
         if (k.Fassungen.Count > 1) liste.Add(("geändert", Stil.Hinweis));
@@ -531,8 +531,8 @@ public sealed class KalenderFenster : Form
     public CheckedListBox BewohnerListe { get; } = new() { Width = 320, Height = 150, CheckOnClick = true, IntegralHeight = false };
     public TextBox Ort { get; } = new() { Width = 320 };
     public TextBox Treffpunkt { get; } = new() { Width = 320 };
-    public PersonenWahl Begleitung { get; }   // Schritt 26a: Auswahl aus den Mitarbeitern
-    public ArztWahl Arzt { get; }   // Schritt 26b: Termin beim Arzt (füllt Ort und Hinweis)
+    public PersonenWahl Begleitung { get; }   // Auswahl aus den Mitarbeitern
+    public ArztWahl Arzt { get; }   // Termin beim Arzt (füllt Ort und Hinweis)
     public TextBox Hinweis { get; } = new() { Width = 420 };
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(560, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public KalenderTermin? Gespeichert { get; private set; }
@@ -546,7 +546,7 @@ public sealed class KalenderFenster : Form
         bewohner = speicher.AlleBewohner();
         Begleitung = new PersonenWahl(speicher) { AccessibleName = "Begleitung" };
         Arzt = new ArztWahl(speicher);
-        Arzt.Gewechselt += a =>   // Schritt 26b: Termin beim Arzt – Ort und Kontakt aus dem Verzeichnis
+        Arzt.Gewechselt += a =>   // Termin beim Arzt – Ort und Kontakt aus dem Verzeichnis
         {
             if (a is null) return;
             if (Ort.Text.Trim().Length == 0) Ort.Text = a.Praxis;
@@ -566,7 +566,7 @@ public sealed class KalenderFenster : Form
         var arten = new FlowLayoutPanel { AutoSize = true, WrapContents = true, MaximumSize = new Size(460, 0), Margin = new Padding(0) };
         arten.Controls.AddRange(Arten);
         zeile("Art", arten);
-        // Schritt 24: Kalender „Haus“ nur mit dem Recht „Kalender Haus bearbeiten“.
+        // Kalender „Haus“ nur mit dem Recht „Kalender Haus bearbeiten“.
         zeile("Kalender", Formular.Reihe(BereichWahl, HausWahl));
         if (Recht.Grund(speicher, Funktionen.KalenderHaus) is string hausGrund)
         {

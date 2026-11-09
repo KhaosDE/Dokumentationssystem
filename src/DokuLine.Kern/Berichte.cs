@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// Tägliche Dokumentation (Bauplan Schritt 3): Berichte je Bewohner mit Schicht, Kürzel,
+// Tägliche Dokumentation: Berichte je Bewohner mit Schicht, Kürzel,
 // Lebensbereichen und Text. Nichts wird gelöscht oder überschrieben – Korrekturen sind Nachträge
 // mit eigenem Zeitstempel, der ursprüngliche Text bleibt sichtbar.
 
@@ -90,7 +90,7 @@ public static partial class BerichtRegeln
         _ => Schicht.Nacht,
     };
 
-    // Schichtzeiten des Bereichs (Schritt 25, Einstellungen); Vorgabe 6, 14 und 22 Uhr. Das Programm
+    // Schichtzeiten des Bereichs (Einstellungen); Vorgabe 6, 14 und 22 Uhr. Das Programm
     // setzt sie beim Start und nach dem Speichern der Einstellungen.
     public static Schichtzeiten Zeiten { get; set; } = Schichtzeiten.Vorgabe;
 
@@ -124,7 +124,7 @@ public static partial class BerichtRegeln
 
     public static TimeOnly UhrzeitLesen(string? text)
     {
-        text = Eingabeformat.UhrzeitFertig(text);   // 0930 → 09:30 (Schritt 26d)
+        text = Eingabeformat.UhrzeitFertig(text);   // 0930 → 09:30
         var treffer = UhrzeitMuster().Match(text);
         if ((text ?? "").Trim().Length == 0) throw new FormatException("Uhrzeit fehlt.");
         if (!treffer.Success) throw new FormatException("Uhrzeit: bitte als SS:MM eingeben, z. B. 14:30.");

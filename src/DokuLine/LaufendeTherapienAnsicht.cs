@@ -3,7 +3,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Therapie, Reiter „Laufende Therapien“ (Bauplan Schritt 26m): oben die Tagesleiste 7–21 Uhr mit allen
+// Therapie, Reiter „Laufende Therapien“: oben die Tagesleiste 7–21 Uhr mit allen
 // Angeboten des Tages und einem Strich für „jetzt“; darunter je laufender Therapie eine Spalte mit den
 // Teilnehmern (Bereich und Zimmer, Name, Bezugspflege, Status als Wort mit Farbe), daneben „Gleich“ und
 // „Noch offen“ (mit „gegangen“/„abgesagt“); unten der Rest des Tages. Bestätigt wird derselbe Eintrag wie
@@ -67,7 +67,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
         Hinweis.Text = tafel.Hinweis ?? "";
         Hinweis.Visible = tafel.Hinweis is not null;
 
-        // Bildlauf merken (0.33.2): Die Tafel baut sich jede Minute und nach jedem Klick neu auf; sonst
+        // Bildlauf merken: Die Tafel baut sich jede Minute und nach jedem Klick neu auf; sonst
         // spränge die Spalte „Noch offen“ jedes Mal nach oben.
         var bildlauf = Spalten.GroupBy(s => s.Titel).ToDictionary(g => g.Key, g => g.First().Bildlauf);
         int quer = -spaltenFlaeche.AutoScrollPosition.X;
@@ -109,7 +109,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
     }
 
     // „gegangen“ oder „abgesagt“: derselbe Eintrag wie im Tagesplan (Kürzel und Uhrzeit).
-    // Nach dem Klick baut sich die Tafel neu auf; der zweite Klick eines Doppelklicks träfe den Nächsten (0.33.2).
+    // Nach dem Klick baut sich die Tafel neu auf; der zweite Klick eines Doppelklicks träfe den Nächsten.
     public bool Setzen(TherapieTermin t, TafelTeilnehmer p, Teilnahme status)
     {
         if (Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen) is not null || !Schutz.Frei()) return false;

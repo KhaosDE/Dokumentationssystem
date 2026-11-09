@@ -3,9 +3,9 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Visite mit allen Bewohnern (Bauplan Schritt 26c): Man geht mit dem Arzt die Bewohner des Bereichs
+// Visite mit allen Bewohnern: Man geht mit dem Arzt die Bewohner des Bereichs
 // der Reihe nach durch. Links die Liste (Zimmer, Name, Bezugspflege, Häkchen „besprochen“), rechts
-// zum gewählten Bewohner Allergiehinweis, Diagnosen (nur mit Recht, Schritt 26f), die aktuelle Medikation (wie im Medikamentenplan), die
+// zum gewählten Bewohner Allergiehinweis, Diagnosen (nur mit Recht), die aktuelle Medikation (wie im Medikamentenplan), die
 // letzte Visite, offene Aufgaben zur Medikation und darunter die Eingabe. Beim Wechsel steht alles
 // sofort als Entwurf in der Datenbank. Während der Visite gibt es keine Einblendungen; erst „Visite
 // abschließen“ legt Berichte, Übergaben und Aufgaben an und zeigt die Aufgaben gesammelt.
@@ -35,7 +35,7 @@ public sealed class VisitenRundgang : Panel
     public Label VorgemerktText { get; } = new() { AutoSize = true, ForeColor = Stil.Hinweis.Text, BackColor = Stil.Hinweis.Flaeche, Padding = new Padding(Stil.AbstandMini) };
     public Button VorherigerKnopf { get; } = Stil.NebenKnopf("◀ Vorheriger");
     public Button NaechsterKnopf { get; } = Stil.NebenKnopf("Nächster Bewohner ▶");
-    // Schritt 26k: „◀ Vorheriger“ und „Nächster Bewohner ▶“ direkt unter der Eingabe; „Nächster“ erst, wenn
+    // „◀ Vorheriger“ und „Nächster Bewohner ▶“ direkt unter der Eingabe; „Nächster“ erst, wenn
     // zu diesem Bewohner etwas eingetragen ist.
     public const string ErstEintragenText = "Erst den Bericht zu diesem Bewohner schreiben.";
     private readonly FlowLayoutPanel weiter = new() { AutoSize = true, WrapContents = false, BackColor = Stil.Seite, Margin = new Padding(0) };
@@ -208,7 +208,7 @@ public sealed class VisitenRundgang : Panel
         f.Dringend.Checked = e.Dringend;
     }
 
-    // „Nächster Bewohner ▶“ grau mit Hinweis, solange „Besprochenes“ leer ist (Schritt 26k).
+    // „Nächster Bewohner ▶“ grau mit Hinweis, solange „Besprochenes“ leer ist.
     private void NaechsterSperren() =>
         Stil.Sperren(NaechsterKnopf, Feld is { } f && f.Besprochen.Text.Trim().Length > 0 ? null : ErstEintragenText);
 

@@ -16,7 +16,7 @@ public sealed class NachrichtenSeite : Panel
     public long? BewohnerFilter { get; private set; }
     public Button BewohnerFilterKnopf { get; } = Stil.NebenKnopf("");
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neue Nachricht …");
-    // Schritt 26d: mehrere Nachrichten auf einmal als gelesen markieren (wandern ins Archiv).
+    // Mehrere Nachrichten auf einmal als gelesen markieren (wandern ins Archiv).
     public Button MarkierteGelesenKnopf { get; } = Stil.NebenKnopf("Markierte als gelesen");
     public Label Hinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini) };
     public List<VerlaufKarte> Karten { get; } = [];
@@ -135,7 +135,7 @@ public sealed class NachrichtenSeite : Panel
         MarkierteGelesenKnopf.Enabled = n > 0;
     }
 
-    // Schritt 26d: als gelesen markieren – die Nachrichten wandern (nur für mich) ins Archiv.
+    // Als gelesen markieren – die Nachrichten wandern (nur für mich) ins Archiv.
     public void Gelesen(IReadOnlyList<Verlauf> verlaeufe)
     {
         if (speicher.Kollege(Ich) is not Kollege ich || verlaeufe.Count == 0) return;
@@ -232,7 +232,7 @@ public sealed class VerlaufKarte : KartenFlaeche
     public IReadOnlyList<string> MarkenTexte { get; }
     public string Vorschau => vorschau.Text;
     public event Action<Verlauf>? Gewaehlt;
-    // Schritt 26d: im Posteingang Häkchen und „Gelesen“, im Archiv „Wieder als ungelesen“.
+    // Im Posteingang Häkchen und „Gelesen“, im Archiv „Wieder als ungelesen“.
     public CheckBox Auswahl { get; } = new() { AutoSize = true, BackColor = Stil.Flaeche, AccessibleName = "Markieren" };
     public Button GelesenKnopf { get; } = Stil.NebenKnopf("Gelesen");
     public Button UngelesenKnopf { get; } = Stil.NebenKnopf("Wieder als ungelesen");

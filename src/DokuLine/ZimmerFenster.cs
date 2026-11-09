@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Zimmer und Betten (Bauplan Schritt 26e): Einstellungen → Wohnbereiche → „Zimmer und Betten …“.
+// Zimmer und Betten: Einstellungen → Wohnbereiche → „Zimmer und Betten …“.
 // Oben die Wohnbereiche mit Art (offen/beschützend), darunter die Zimmer mit Belegung.
 public sealed class ZimmerFenster : Form
 {

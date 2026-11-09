@@ -5,7 +5,7 @@ using Microsoft.Web.WebView2.WinForms;
 
 namespace DokuLine;
 
-// Nachschlagen beim BfArM im Formular „Medikament anlegen/ändern“ (Bauplan Schritt 21) – die einzige
+// Nachschlagen beim BfArM im Formular „Medikament anlegen/ändern“ – die einzige
 // eingebettete Webansicht im Programm (CLAUDE.md, Regel 6). Gesucht wird nur mit dem Medikamentennamen.
 // Jede Navigation wird geprüft: Nur Adressen aus ExterneAdressen.Nachschlagebereiche bleiben in der
 // Ansicht, alles andere öffnet im normalen Browser. Verbunden wird erst auf „Nachschlagen“ – das

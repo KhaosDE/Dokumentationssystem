@@ -3,14 +3,14 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-// Bedarfsgaben (0.33.0): eintragen mit Bericht in einem Zug, lesen je Verordnung. Nichts wird überschrieben.
+// Bedarfsgaben: eintragen mit Bericht in einem Zug, lesen je Verordnung. Nichts wird überschrieben.
 public sealed partial class Speicher
 {
     public List<Bedarfsgabe> Bedarfsgaben(long verordnungId) => BedarfsgabenLesen("WHERE verordnung_id = $v", ("$v", verordnungId));
 
     public List<Bedarfsgabe> BedarfsgabenBewohner(long bewohnerId) => BedarfsgabenLesen("WHERE bewohner_id = $b", ("$b", bewohnerId));
 
-    // Alle Gaben desselben Medikaments an diesen Bewohner, auch aus anderen Bedarfsverordnungen (0.33.2): Für die
+    // Alle Gaben desselben Medikaments an diesen Bewohner, auch aus anderen Bedarfsverordnungen: Für die
     // Anzeige „in den letzten 24 Stunden“ und die Höchstmenge zählt, was er davon bekommen hat.
     public List<Bedarfsgabe> BedarfsgabenMittel(Verordnung v) => BedarfsgabenLesen(
         "WHERE bewohner_id = $b AND verordnung_id IN (SELECT id FROM verordnungen WHERE bewohner_id = $b AND medikament_id = $m)",

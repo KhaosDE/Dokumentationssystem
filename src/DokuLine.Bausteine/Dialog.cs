@@ -8,7 +8,7 @@ public static class Dialog
 {
     public static Func<Form, IWin32Window?, DialogResult> Zeigen { get; set; } = (fenster, besitzer) =>
     {
-        Stil.SymbolSetzen(fenster);   // 0.33.3: Dialoge zeigen sonst kein Programmsymbol
+        Stil.SymbolSetzen(fenster);   // Dialoge zeigen sonst kein Programmsymbol
         return fenster.ShowDialog(besitzer);
     };
 }
@@ -56,7 +56,7 @@ public static class Druckvorschau
         Dialog.Zeigen(fenster, besitzer);
     }
 
-    // Fußzeile auf jeder Seite (Schritt 26a1): Programmname und Demo-Hinweis, klein im unteren Rand.
+    // Fußzeile auf jeder Seite: Programmname und Demo-Hinweis, klein im unteren Rand.
     public const string FusszeileText = Stil.ProgrammName + " · " + Stil.DemoHinweis;
 
     public static Func<PrintDocument> MitFusszeile(Func<PrintDocument> dokumentBauen) => () =>

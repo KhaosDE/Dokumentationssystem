@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine.Modul.Ausgangsliste;
 
-// Eine Zeile der Ausgangsliste am Bildschirm (Schritt 27 von DokuLine), angelehnt an
+// Eine Zeile der Ausgangsliste am Bildschirm (von DokuLine), angelehnt an
 // die ausdruckbare Tagesliste: Zimmer, Bewohner, Ausgang, Unterbringung, Ausgänge heute (von–bis,
 // Hz.) und „Stand jetzt“. Rechts „raus“ bzw. „zurück“ direkt in der Zeile, dazu „…“ (auch per
 // Rechtsklick) für Ausgang, Anwesenheit, Unterbringung und Verlauf. Wer unterwegs ist, ist

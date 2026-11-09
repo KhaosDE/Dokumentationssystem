@@ -19,7 +19,7 @@ public static class Symbole
     public const string Zuruecksetzen = "\uE72C";  // Refresh
     public const string Info = "\uE946";           // Info
     public const string Modul = "\uE74C";          // OEM (Baustein)
-    public const string Abmelden = "\uF3B1";       // SignOut (Schritt 26a3)
+    public const string Abmelden = "\uF3B1";       // SignOut
 
     public static string Fuer(string bereich) => bereich switch
     {

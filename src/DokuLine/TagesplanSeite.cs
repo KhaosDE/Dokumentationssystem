@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Tagesplan“ (Bauplan Schritt 23, als Anzeigetafel seit Schritt 26g): alle Termine von heute
+// Bereich „Tagesplan“ (als Anzeigetafel): alle Termine von heute
 // für die Bewohner des eigenen Bereichs (Häkchen „alle Bereiche“). Oben „Jetzt und gleich“, darunter
 // „Später heute“, unten blasser „Erledigt“ – oder „nach Bewohner“. Bei Therapien „gegangen“,
 // „abgesagt“, „ausgefallen“ direkt in der Zeile; das ist derselbe Eintrag wie im Wochenplan, mit

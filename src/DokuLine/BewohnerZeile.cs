@@ -2,9 +2,9 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Eine Zeile der Bewohnerliste (Bauplan Schritt 26j): dieselben Angaben wie eine Bewohnerkarte –
+// Eine Zeile der Bewohnerliste: dieselben Angaben wie eine Bewohnerkarte –
 // Marken, Bezugspflege, Einzeltrainer, Aufenthalt –, aber als eine Zeile in der Tabelle.
-// In der Übersicht (Schritt 26l) mit der Spalte „Wo“ zwischen Bezug und Hinweisen.
+// In der Übersicht mit der Spalte „Wo“ zwischen Bezug und Hinweisen.
 public sealed class BewohnerZeile
 {
     public Bewohner Bewohner { get; }

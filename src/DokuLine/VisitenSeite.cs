@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Visiten“ (Bauplan Schritt 26): alle Visiten (neueste oben) mit Filter nach Bewohner und
+// Bereich „Visiten“: alle Visiten (neueste oben) mit Filter nach Bewohner und
 // Zeitraum. „Neue Visite …“ trägt ein, was besprochen wurde, geänderte Anordnungen und nötige
 // Facharzttermine. Nach dem Speichern blendet das Programm sofort die entstandenen Aufgaben ein;
 // in der Akte steht die Visite als Bericht (Lebensbereich 5).
@@ -14,7 +14,7 @@ public sealed class VisitenSeite : Panel
     private List<Bewohner> bewohner = [];
 
     public Button NeuKnopf { get; } = Stil.NebenKnopf("Neue Visite …");   // einzelne Bewohner
-    // Schritt 26c: Visite mit allen Bewohnern des Bereichs (fortsetzen, wenn ein Entwurf besteht).
+    // Visite mit allen Bewohnern des Bereichs (fortsetzen, wenn ein Entwurf besteht).
     public Button BeginnenKnopf { get; } = Stil.HauptKnopf("Visite beginnen …");
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Visitenliste drucken …");
     public VisitenRundgang? Rundgang { get; private set; }
@@ -87,7 +87,7 @@ public sealed class VisitenSeite : Panel
     public void Aktualisieren()
     {
         if (BewohnerFilter.Items.Count == 0) return;   // noch nicht gezeigt
-        Stil.Sperren(NeuKnopf, Recht.Grund(speicher, Funktionen.Visiten));   // Rechte (Schritt 19)
+        Stil.Sperren(NeuKnopf, Recht.Grund(speicher, Funktionen.Visiten));   // Rechte
         Stil.Sperren(BeginnenKnopf, Recht.Grund(speicher, Funktionen.Visiten) ?? OhneWohnbereich);
         BeginnenKnopf.Text = speicher.VisitenEntwurf(Bereich) is null ? "Visite beginnen …" : "Visite fortsetzen";
         bool fehler = false;
@@ -325,8 +325,8 @@ public sealed class VisiteFenster : Form
     private readonly FlowLayoutPanel eintraege = new() { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0), BackColor = Stil.Fensterhintergrund };
 
     public TextBox DatumFeld { get; } = new DatumFeld() { Width = 100 };
-    public ArztWahl Arzt { get; }   // Schritt 26b: Auswahl aus dem Ärzteverzeichnis
-    public PersonenWahl Teilnehmer { get; }   // Schritt 26a: Auswahl, vorbelegt mit der angemeldeten Person
+    public ArztWahl Arzt { get; }   // Auswahl aus dem Ärzteverzeichnis
+    public PersonenWahl Teilnehmer { get; }   // Auswahl, vorbelegt mit der angemeldeten Person
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 280 };
     public Button HinzufuegenKnopf { get; } = Stil.NebenKnopf("Hinzufügen");
     public List<VisiteEintragFeld> Eintraege { get; } = [];
@@ -641,7 +641,7 @@ public sealed class FacharztTerminFenster : Form
 
     public TextBox DatumFeld { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public TextBox Uhrzeit { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "10:00" };
-    public ArztWahl Arzt { get; }   // Schritt 26b: aus dem Verzeichnis, füllt den Ort
+    public ArztWahl Arzt { get; }   // aus dem Verzeichnis, füllt den Ort
     public TextBox Ort { get; } = new() { Width = 320, PlaceholderText = "z. B. Praxis Dr. Esche (ausgedacht)" };
     public CheckBox MitFahrt { get; } = new() { Text = "Fahrt mit Fahrzeug eintragen", AutoSize = true };
     public ComboBox Fahrzeug { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 200, Enabled = false };
@@ -733,7 +733,7 @@ public sealed class FacharztTerminFenster : Form
     }
 }
 
-// Was der Knopf einer Visiten-Aufgabe heißt und wann er gesperrt ist (Rechte, Schritt 19).
+// Was der Knopf einer Visiten-Aufgabe heißt und wann er gesperrt ist (Rechte).
 public static class VisitenAblauf
 {
     public static string KnopfText(VisitenAktion a) => a switch

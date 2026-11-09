@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Farben der Mitarbeiter für Bezugspflege und Einzeltrainer (Schritt 20).
+// Farben der Mitarbeiter für Bezugspflege und Einzeltrainer.
 public static class BezugAnzeige
 {
     public static Dictionary<string, string> Farben(Speicher speicher) =>

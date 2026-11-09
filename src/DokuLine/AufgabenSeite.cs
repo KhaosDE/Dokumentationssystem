@@ -21,7 +21,7 @@ public sealed class AufgabenSeite : Panel
     public int Offen { get; private set; }
     public int Ueberfaellig { get; private set; }
     public event Action? Geaendert;
-    // Schritt 26: Aufgabe aus einer Visite ausführen (Medikamentenplan, Medikament anlegen, Termin) – das Hauptfenster.
+    // Aufgabe aus einer Visite ausführen (Medikamentenplan, Medikament anlegen, Termin) – das Hauptfenster.
     public event Action<Aufgabe>? VisitenAufgabeGewuenscht;
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
@@ -31,7 +31,7 @@ public sealed class AufgabenSeite : Panel
         this.speicher = speicher;
         AutoScroll = true;
         BackColor = Stil.Seite;
-        // Standardaufgaben verwalten: Einstellungen → „Aufgaben“ (Schritt 29).
+        // Standardaufgaben verwalten: Einstellungen → „Aufgaben“.
         foreach (var c in new Control[] { DruckKnopf, ErledigteZeigen, KuerzelHinweis })
         {
             c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
@@ -54,14 +54,14 @@ public sealed class AufgabenSeite : Panel
     {
         var jetzt = Jetzt();
         string kuerzel = Kuerzel;
-        speicher.StandardaufgabenErzeugen(jetzt);   // Schritt 25: Standardaufgaben der laufenden Schicht
+        speicher.StandardaufgabenErzeugen(jetzt);   // Standardaufgaben der laufenden Schicht
         var alle = speicher.Aufgaben(jetzt, auchErledigte: true, Arbeitsbereich.Gewaehlt);
         var offen = alle.Where(a => a.Offen).ToList();
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}");
         Offen = offen.Count;
         Ueberfaellig = offen.Count(a => AufgabenRegeln.Ueberfaellig(a, jetzt));
         KuerzelHinweis.Visible = kuerzel.Length == 0;
-        Recht.NurAngemeldet(NeuKnopf);   // Schritt 26a: ohne Anmeldung nur ansehen
+        Recht.NurAngemeldet(NeuKnopf);   // ohne Anmeldung nur ansehen
 
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
@@ -80,7 +80,7 @@ public sealed class AufgabenSeite : Panel
             if (a.Offen && (a.VisiteAnordnungId is not null || a.VisiteEintragId is not null) && speicher.VisitenAufgabe(a) is { } info)
                 aktion = (VisitenAblauf.KnopfText(info.Aktion), VisitenAblauf.Sperrgrund(speicher, info.Aktion));
             var karte = new AufgabeKarte(a, a.BewohnerId is long id ? namen.GetValueOrDefault(id) : null, jetzt, kuerzel, aktion);
-            // Facharzttermin: „Erledigt“ fragt nach Datum, Uhrzeit und Ort (Schritt 26).
+            // Facharzttermin: „Erledigt“ fragt nach Datum, Uhrzeit und Ort.
             karte.ErledigtGeklickt += x =>
             {
                 if (x.VisiteEintragId is not null) VisitenAufgabeGewuenscht?.Invoke(x);
@@ -93,7 +93,7 @@ public sealed class AufgabenSeite : Panel
             inhalt.Add(karte);
         }
 
-        // Schritt 25: gruppiert nach Schicht, oben die laufende (Liegengebliebenes davor).
+        // Gruppiert nach Schicht, oben die laufende (Liegengebliebenes davor).
         foreach (var (titel, aufgaben) in AufgabenRegeln.Gruppen(offen, jetzt))
         {
             Abschnitt($"{titel} ({aufgaben.Count})");
@@ -127,7 +127,7 @@ public sealed class AufgabenSeite : Panel
         if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
     }
 
-    // Begründet schließen (Schritt 25): nicht erledigt, aber erledigt im Sinne von „nicht mehr zu tun“.
+    // Begründet schließen: nicht erledigt, aber erledigt im Sinne von „nicht mehr zu tun“.
     public void Schliessen(Aufgabe a)
     {
         using var fenster = new SchliessenFenster(speicher, a);
@@ -193,8 +193,8 @@ public sealed class AufgabeKarte : KartenFlaeche
     public Aufgabe Aufgabe { get; }
     public Button Erledigt { get; } = Stil.NebenKnopf("Erledigt");
     public Button Weitergeben { get; } = Stil.NebenKnopf("An die nächste Schicht weitergeben …");
-    public Button SchliessenKnopf { get; } = Stil.NebenKnopf("Schließen mit Begründung …");   // Schritt 25
-    public Button AktionKnopf { get; } = Stil.NebenKnopf("");   // Schritt 26: Aufgabe aus einer Visite
+    public Button SchliessenKnopf { get; } = Stil.NebenKnopf("Schließen mit Begründung …");
+    public Button AktionKnopf { get; } = Stil.NebenKnopf("");   // Aufgabe aus einer Visite
     public IReadOnlyList<string> MarkenTexte { get; }
     public IEnumerable<string> VerlaufTexte => verlauf.Select(l => l.Text);
 
