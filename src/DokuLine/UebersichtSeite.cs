@@ -3,12 +3,8 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Startseite „Übersicht“ (seit Bauplan Schritt 26l): links „Heute wichtig“ mit vier Kästen (Übergaben
-// offen, Termine heute, laufender Dienst, Nachrichten ungelesen), rechts alle Bewohner des Bereichs als
-// Liste (Zimmer/Bett, Name, Bezugspflege, Wo, Hinweise). Doppelklick öffnet die Akte; Berichte zeigt
-// erst der Bereich „Bewohner“. Unter 1100 px Breite steht „Heute wichtig“ über der Liste.
-// Baut sich nach Änderungen und um Mitternacht neu auf. Mehrplatz: gezeigt wird der eigene Bereich
-// (Einstellungen), umschaltbar auf „alle Bereiche“ oder einen Wohnbereich.
+// Startseite: oben die Wahl des Wohnbereichs (gilt überall), links „Heute wichtig“ mit vier Kästen, rechts die
+// Bewohner des Bereichs als Liste; Doppelklick öffnet die Akte. Unter 1100 px steht „Heute wichtig“ über der Liste.
 public sealed class UebersichtSeite : Panel
 {
     public const int LinksBreite = 380, SchmalAb = 1100;
@@ -16,11 +12,10 @@ public sealed class UebersichtSeite : Panel
     private readonly System.Windows.Forms.Timer uhr = new() { Interval = 60_000 };
     private DateOnly gezeigtAm;
     private SchichtTermin? gezeigtSchicht;
-    private bool abgleichen;
     public Doppelklickschutz Schutz { get; } = new();
     private readonly Panel links = new() { AutoScroll = true, BackColor = Stil.Seite };
     private readonly KartenFlaeche rechts = new();
-    private readonly Label listenKopf = new() { AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, UseMnemonic = false };
+    public KastenKopf ListenKopf { get; } = new("BEWOHNER") { Cursor = Cursors.Default };
 
     // „Heute wichtig“
     public HeuteKasten Uebergaben { get; } = new("ÜBERGABEN OFFEN");
@@ -40,13 +35,12 @@ public sealed class UebersichtSeite : Panel
     };
     public List<BewohnerZeile> Zeilen { get; private set; } = [];
     public BewohnerZeile? Gewaehlt => Liste.SelectedItems.Count == 1 ? Liste.SelectedItems[0].Tag as BewohnerZeile : null;
-    public string ListenKopfText => listenKopf.Text;
+    public string ListenKopfText => ListenKopf.Text;
     public TextBox Suche { get; } = new() { Width = 220, PlaceholderText = "Name oder Zimmer suchen", Font = Stil.Standard, AccessibleName = "Bewohner suchen" };
-    // Bereichswahl (steht rechts in der Aktionsleiste): eigene Bereiche, alle Bereiche, R1, R2, R3 …
-    public ComboBox BereichWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 150, Font = Stil.Standard, AccessibleName = "Bereich" };
-    public const string EigeneBereiche = "eigene Bereiche";
-    public const string AlleBereiche = "alle Bereiche";
-    // Schritt 20: nur die eigenen Bezugsbewohner bzw. Einzeltrainings (aus allen Bereichen).
+    // Wohnbereich: R1 · R2 · R3 … (gilt für alle Bereiche des Programms).
+    public BereichUmschalter Umschalter { get; } = new();
+    public event Action<string>? BereichGewechselt;
+    // Nur die eigenen Bezugsbewohner bzw. Einzeltrainings (aus allen Bereichen).
     public CheckBox MeineBezugsbewohner { get; } = new() { Text = "Meine Bezugsbewohner", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
     public CheckBox MeineEinzeltrainings { get; } = new() { Text = "Meine Einzeltrainings", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
     public Label BereichHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, Visible = false, UseMnemonic = false };
@@ -78,11 +72,7 @@ public sealed class UebersichtSeite : Panel
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        BereichWahl.Items.Add(EigeneBereiche);
-        BereichWahl.Items.Add(AlleBereiche);
-        BereichWahl.Items.AddRange([.. speicher.Wohnbereiche().Select(w => (object)w.Name)]);
-        BereichWahl.SelectedIndex = 0;
-        BereichWahl.SelectedIndexChanged += (_, _) => { if (!abgleichen) Aktualisieren(); };
+        Umschalter.Gewaehlt += b => BereichGewechselt?.Invoke(b);
         foreach (var c in new[] { MeineBezugsbewohner, MeineEinzeltrainings }) c.CheckedChanged += (_, _) => Aktualisieren();
         Suche.TextChanged += (_, _) => ListeFuellen();
 
@@ -103,7 +93,7 @@ public sealed class UebersichtSeite : Panel
         menue.Items.Add("Akte öffnen", null, (_, _) => AkteOeffnen());
         menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
         Liste.ContextMenuStrip = menue;
-        rechts.Controls.AddRange([listenKopf, Suche, MeineBezugsbewohner, MeineEinzeltrainings, BereichHinweis, Liste]);
+        rechts.Controls.AddRange([ListenKopf, Suche, MeineBezugsbewohner, MeineEinzeltrainings, BereichHinweis, Liste]);
 
         BerichtNeuKnopf.Click += (_, _) => NeuerBericht();
         AufgabeNeuKnopf.Click += (_, _) => AufgabeNeuGewuenscht?.Invoke();
@@ -111,6 +101,7 @@ public sealed class UebersichtSeite : Panel
         BewohnerNeuKnopf.Click += (_, _) => BewohnerNeuGewuenscht?.Invoke();
         DruckKnopf.Click += (_, _) => Drucken();
 
+        Controls.Add(Umschalter);
         Controls.Add(links);
         Controls.Add(rechts);
         // Immer aktuell: Datums- und Schichtwechsel (jede Minute prüfen, nur wenn sichtbar neu bauen).
@@ -131,26 +122,16 @@ public sealed class UebersichtSeite : Panel
         var heute = DateOnly.FromDateTime(jetzt);
         gezeigtAm = heute;
         gezeigtSchicht = SchichtTermin.Zu(jetzt);
-        abgleichen = true;
-        try { Auswahl.Abgleichen(BereichWahl, [EigeneBereiche, AlleBereiche, .. speicher.Wohnbereiche().Select(w => w.Name)]); }
-        finally { abgleichen = false; }
         var werte = Einstellungen.Laden();
+        string gewaehlt = Arbeitsbereich.Gewaehlt.Length > 0 ? Arbeitsbereich.Gewaehlt : werte.Bereich;
+        Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.Wohnbereiche().Select(w => w.Name), f => Recht.Darf(speicher, f)), gewaehlt,
+            BereichswahlRegeln.Eingesprungen(gewaehlt, werte.Bereich));
         var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
-        // Eigene Bereiche: die Wohnbereiche des angemeldeten Mitarbeiters (Schritt 19); hat er keinen
-        // mit Bewohnern, der Bereich dieses Rechners. Hat auch der keine Bewohner (z. B. „Therapie“),
-        // alle mit Hinweis.
-        var meine = speicher.MitarbeiterLesen(werte.Kuerzel)?.Bereiche.Where(b => jeder.Any(h => h.Bewohner.Wohnbereich == b)).ToList()
-            is { Count: > 0 } liste ? liste : [werte.Bereich];
-        var eigene = jeder.Where(h => meine.Contains(h.Bewohner.Wohnbereich)).ToList();
-        string? wahl = BereichWahl.SelectedItem as string;
-        bool allesZeigen = wahl == AlleBereiche || eigene.Count == 0;
+        // Der gewählte Bereich; „Alle“ und Bereiche ohne eigene Bewohner (z. B. „Therapie“) zeigen alle, mit Hinweis.
+        var eigene = jeder.Where(h => h.Bewohner.Wohnbereich == gewaehlt).ToList();
+        bool allesZeigen = gewaehlt == BereichswahlRegeln.Alle || eigene.Count == 0;
         var alle = allesZeigen ? jeder : eigene;
-        if (wahl is not null && wahl != EigeneBereiche && wahl != AlleBereiche)
-        {
-            meine = [wahl];
-            alle = jeder.Where(h => h.Bewohner.Wohnbereich == wahl).ToList();
-            allesZeigen = false;
-        }
+        List<string> meine = allesZeigen ? [.. speicher.Wohnbereiche().Select(w => w.Name)] : [gewaehlt];
         var bezuege = speicher.Bezuege();
         bool angemeldet = speicher.MitarbeiterLesen(werte.Kuerzel) is not null;
         MeineBezugsbewohner.Enabled = MeineEinzeltrainings.Enabled = angemeldet;
@@ -162,11 +143,11 @@ public sealed class UebersichtSeite : Panel
                                     ((meineBp && Meins(b.Bezugspflege)) || (meineEt && Meins(b.Einzeltrainer)))).ToList();
             allesZeigen = true;
         }
-        BereichHinweis.Visible = wahl == EigeneBereiche && eigene.Count == 0 && jeder.Count > 0;
-        BereichHinweis.Text = $"Für „{string.Join(", ", meine)}“ gibt es keine eigenen Bewohner – gezeigt werden alle Bereiche.";
+        BereichHinweis.Visible = gewaehlt != BereichswahlRegeln.Alle && eigene.Count == 0 && jeder.Count > 0;
+        BereichHinweis.Text = $"Für „{gewaehlt}“ gibt es keine eigenen Bewohner – gezeigt werden alle Bereiche.";
         string bereichText = meineBp || meineEt
             ? string.Join(" und ", new[] { meineBp ? "meine Bezugsbewohner" : null, meineEt ? "meine Einzeltrainings" : null }.OfType<string>())
-            : allesZeigen ? AlleBereiche : string.Join(", ", meine);
+            : gewaehlt;
         gezeigt = alle;
         var ids = alle.Select(h => h.Bewohner.Id!.Value).ToHashSet();
         var offeneUebergaben = speicher.Uebergaben(jetzt).Where(u => u.BewohnerId is null || ids.Contains(u.BewohnerId.Value)).ToList();
@@ -192,7 +173,7 @@ public sealed class UebersichtSeite : Panel
             if (inTherapie.TryGetValue(id, out var wo)) marken.Insert(0, wo);
             int uebergaben = offeneUebergaben.Count(u => u.BewohnerId == id);
             if (uebergaben > 0) marken.Add(new Marke(MarkenArt.Uebergabe, uebergaben == 1 ? "Übergabe" : $"{uebergaben} Übergaben"));
-            if (allesZeigen && !meine.Contains(h.Bewohner.Wohnbereich)) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
+            if (allesZeigen) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
             var bezug = bezuege.GetValueOrDefault(id);
             var zeile = new BewohnerZeile(h.Bewohner, heute, marken,
                 bezug?.Bezugspflege is { } bp ? (bp.Kuerzel, BezugAnzeige.Farbe(farben, bp.Kuerzel)) : null,
@@ -203,7 +184,7 @@ public sealed class UebersichtSeite : Panel
         }
         alleZeilen = [.. alleZeilen.OrderBy(z => z.Bewohner.Zimmer.PadLeft(8), StringComparer.Ordinal).ThenBy(z => z.Bewohner.Bett == ZimmerRegeln.Tuer ? 1 : 0)];
         string kurz = meineBp || meineEt ? bereichText : allesZeigen ? "alle Bereiche" : string.Join(", ", meine);
-        listenKopf.Text = $"BEWOHNER {kurz.ToUpperInvariant()} · {alleZeilen.Count} · {alleZeilen.Count(z => z.ImHaus)} IM HAUS";
+        ListenKopf.Text = $"BEWOHNER {kurz.ToUpperInvariant()} · {alleZeilen.Count} · {alleZeilen.Count(z => z.ImHaus)} IM HAUS";
         ListeFuellen();
 
         HeuteFuellen(jetzt, alle, offeneUebergaben, werte.Kuerzel);
@@ -257,7 +238,7 @@ public sealed class UebersichtSeite : Panel
         // 3. Laufender Dienst: „6 von 9 erledigt“, Balken, offene Aufgaben zum Abhaken. Die Standardaufgaben der
         // Schicht zuerst anlegen (0.33.2: vorher erst beim Öffnen von „Aufgaben“).
         speicher.StandardaufgabenErzeugen(jetzt);
-        var aufgaben = speicher.Aufgaben(jetzt, auchErledigte: true).Where(a => a.BewohnerId is null || ids.Contains(a.BewohnerId.Value));
+        var aufgaben = speicher.Aufgaben(jetzt, auchErledigte: true, Arbeitsbereich.Gewaehlt);
         var dienst = HeuteWichtigRegeln.Dienst(aufgaben, jetzt);
         DienstStand = dienst;
         DienstText.Text = $"{BerichtRegeln.SchichtText(dienst.Schicht.Schicht)}: {dienst.Text}";
@@ -372,7 +353,11 @@ public sealed class UebersichtSeite : Panel
     {
         base.OnLayout(levent);
         int rand = Stil.Px(this, Stil.AbstandGross), abstand = Stil.Px(this, Stil.AbstandMittel);
-        int breite = Math.Max(300, ClientSize.Width - 2 * rand), hoehe = Math.Max(200, ClientSize.Height - 2 * rand);
+        int breite = Math.Max(300, ClientSize.Width - 2 * rand);
+        Umschalter.MaximumSize = new Size(breite, 0);
+        Umschalter.Location = new Point(rand, rand);
+        int oben = Umschalter.Bottom + abstand;
+        int hoehe = Math.Max(200, ClientSize.Height - oben - rand);
         Schmal = ClientSize.Width < Stil.Px(this, SchmalAb);
         int linksBreite = Schmal ? breite : Stil.Px(this, LinksBreite);
         // Die Kästen untereinander; im schmalen Fenster über der Liste (höchstens 40 % der Höhe, dann Bildlauf).
@@ -388,39 +373,27 @@ public sealed class UebersichtSeite : Panel
         if (Schmal)
         {
             int obenHoehe = Math.Min(inhalt, hoehe * 2 / 5);
-            links.SetBounds(rand, rand, breite, obenHoehe);
+            links.SetBounds(rand, oben, breite, obenHoehe);
             rechts.SetBounds(rand, links.Bottom + abstand, breite, Math.Max(150, hoehe - obenHoehe - abstand));
         }
         else
         {
-            links.SetBounds(rand, rand, linksBreite, hoehe);
-            rechts.SetBounds(links.Right + abstand, rand, Math.Max(200, breite - linksBreite - abstand), hoehe);
+            links.SetBounds(rand, oben, linksBreite, hoehe);
+            rechts.SetBounds(links.Right + abstand, oben, Math.Max(200, breite - linksBreite - abstand), hoehe);
         }
         links.AutoScrollMinSize = new Size(0, inhalt);
 
         // Rechts: Kopf mit Zählern, Suche und Filtern, darunter die Liste.
         int innen = Stil.Px(this, Stil.AbstandMittel);
         int rb = rechts.ClientSize.Width - 2 * innen;
-        listenKopf.Location = new Point(innen, innen + Stil.Px(this, 4));
-        int x = rechts.ClientSize.Width - innen;
-        foreach (var c in new Control[] { MeineEinzeltrainings, MeineBezugsbewohner, Suche })
+        ListenKopf.SetBounds(1, 1, Math.Max(10, rechts.ClientSize.Width - 2), ListenKopf.Hoehe);
+        int fx = innen, zeile = ListenKopf.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        foreach (var c in new Control[] { Suche, MeineBezugsbewohner, MeineEinzeltrainings })
         {
-            int w = c is TextBox ? c.Width : c.PreferredSize.Width;
-            x -= w;
-            c.Location = new Point(x, innen + (c is TextBox ? 0 : Stil.Px(this, 3)));
-            x -= Stil.Px(this, Stil.AbstandMittel);
+            c.Location = new Point(fx, zeile + (c is TextBox ? 0 : Stil.Px(this, 3)));
+            fx += (c is TextBox ? c.Width : c.PreferredSize.Width) + Stil.Px(this, Stil.AbstandMittel);
         }
-        int unter = Math.Max(listenKopf.Bottom, Suche.Bottom) + Stil.Px(this, Stil.AbstandKlein);
-        if (x < listenKopf.Right)   // zu schmal: Suche und Filter in eine eigene Zeile
-        {
-            int fx = innen;
-            foreach (var c in new Control[] { Suche, MeineBezugsbewohner, MeineEinzeltrainings })
-            {
-                c.Location = new Point(fx, listenKopf.Bottom + Stil.Px(this, Stil.AbstandKlein));
-                fx += (c is TextBox ? c.Width : c.PreferredSize.Width) + Stil.Px(this, Stil.AbstandMittel);
-            }
-            unter = Suche.Bottom + Stil.Px(this, Stil.AbstandKlein);
-        }
+        int unter = Suche.Bottom + Stil.Px(this, Stil.AbstandKlein);
         if (BereichHinweis.Visible)
         {
             BereichHinweis.Location = new Point(innen, unter);
@@ -438,8 +411,8 @@ public sealed class UebersichtSeite : Panel
         if (disposing)
         {
             uhr.Dispose();
-            // Bereichswahl und Knöpfe stehen in der Aktionsleiste; sind sie gerade nicht dort, hier freigeben.
-            foreach (var c in Knoepfe.Cast<Control>().Append(BereichWahl).Where(c => c.Parent is null)) c.Dispose();
+            // Die Knöpfe stehen in der Aktionsleiste; sind sie gerade nicht dort, hier freigeben.
+            foreach (var c in Knoepfe.Cast<Control>().Where(c => c.Parent is null)) c.Dispose();
         }
         base.Dispose(disposing);
     }
@@ -449,22 +422,22 @@ public sealed class UebersichtSeite : Panel
 // Einträge. Ohne Einträge steht „Nichts offen“ da; der Kasten verschwindet nicht.
 public sealed class HeuteKasten : KartenFlaeche
 {
-    private readonly Label kopf = new() { AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, UseMnemonic = false, Cursor = Cursors.Hand };
+    public KastenKopf Kopf { get; }
     public Label Leer { get; } = new() { Text = HeuteWichtigRegeln.NichtsOffen, AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche };
     public List<Control> Zeilen { get; } = [];
     public List<Control> Oben { get; } = [];    // feste Teile über den Einträgen (z. B. Fortschritt)
     public List<Control> Unten { get; } = [];   // feste Teile darunter (z. B. „Alle Aufgaben …“)
     public string Titel { get; }
     public int Anzahl { get; private set; }
-    public string KopfText => kopf.Text;
+    public string KopfText => Kopf.Zaehler.Length > 0 ? $"{Titel} · {Kopf.Zaehler}" : Titel;
     public event Action? KopfGeklickt;
 
     public HeuteKasten(string titel)
     {
         Titel = titel;
-        kopf.Text = titel;
-        kopf.Click += (_, _) => KopfGeklickt?.Invoke();
-        Controls.Add(kopf);
+        Kopf = new KastenKopf(titel);
+        Kopf.Click += (_, _) => KopfGeklickt?.Invoke();
+        Controls.Add(Kopf);
         Controls.Add(Leer);
         Padding = new Padding(Stil.AbstandMittel);
     }
@@ -477,7 +450,7 @@ public sealed class HeuteKasten : KartenFlaeche
         Zeilen.AddRange(zeilen);
         foreach (var z in Zeilen) Controls.Add(z);
         Anzahl = anzahl;
-        kopf.Text = $"{Titel} · {anzahl}";
+        Kopf.ZaehlerSetzen(anzahl.ToString(System.Globalization.CultureInfo.InvariantCulture));
         Leer.Text = leer;
         Leer.Visible = Zeilen.Count == 0;
         AccessibleName = $"{Titel}: {anzahl}";
@@ -488,9 +461,9 @@ public sealed class HeuteKasten : KartenFlaeche
     {
         base.OnLayout(levent);
         int innen = Stil.Px(this, Stil.AbstandMittel), mini = Stil.Px(this, Stil.AbstandMini);
-        int breite = Math.Max(100, Width - 2 * innen), y = innen;
-        kopf.Location = new Point(innen, y);
-        y = kopf.Bottom + Stil.Px(this, Stil.AbstandKlein);
+        int breite = Math.Max(100, Width - 2 * innen);
+        Kopf.SetBounds(1, 1, Math.Max(10, Width - 2), Kopf.Hoehe);   // innerhalb des Rands, oben abgerundet wie der Kasten
+        int y = Kopf.Bottom + Stil.Px(this, Stil.AbstandKlein);
         void Setzen(Control c)
         {
             switch (c)

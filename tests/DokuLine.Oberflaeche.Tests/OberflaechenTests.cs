@@ -108,7 +108,7 @@ public class BewohnerOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         f.Uebersicht.Jetzt = () => new DateTime(2026, 11, 7, 12, 0, 0);
         f.BereichWaehlen("Übersicht");
-        f.Uebersicht.BereichWahl.SelectedItem = UebersichtSeite.AlleBereiche;   // Ginster wohnt in R2
+        f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);   // Ginster wohnt in R2
         var birke = f.Uebersicht.Zeilen.Single(k => k.Bewohner.Nachname == "Birke");
         // keine bekannt, kein Beschluss: Normalfall ohne Marke dazu
         Assert.DoesNotContain(birke.Marken, m => m.Art is MarkenArt.Beschluss or MarkenArt.Allergie or MarkenArt.NichtErfasst);

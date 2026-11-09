@@ -19,6 +19,9 @@ public class AufgabenOberflaechenTests
 
     private static SeitenleistenEintrag Eintrag(Hauptfenster f) => f.Navigation.Single(n => n.Text == "Aufgaben");
 
+    // Gezählt wird der gewählte Bereich (Vorgabe: der des Rechners, R1).
+    private static int Offen(Umgebung u) => u.Speicher.Aufgaben(DateTime.Now, bereich: "R1").Count;
+
     [Fact]
     public void Zaehler_in_der_Seitenleiste_und_Kurzliste_ueber_den_Karten() => Hilfe.Sta(() =>
     {
@@ -26,14 +29,16 @@ public class AufgabenOberflaechenTests
         using (u)
         using (f)
         {
-            Assert.Equal(5, Eintrag(f).Anzahl);
+            int offen = Offen(u);
+            Assert.True(offen < u.Speicher.Aufgaben(DateTime.Now).Count);   // andere Bereiche zählen nicht mit
+            Assert.Equal(offen, Eintrag(f).Anzahl);
             Assert.True(Eintrag(f).Dringend);   // eine Demo-Aufgabe ist überfällig
-            Assert.Equal("Aufgaben, 5 offen, 1 überfällig", Eintrag(f).AccessibleName);
+            Assert.Equal($"Aufgaben, {offen} offen, 1 überfällig", Eintrag(f).AccessibleName);
             var kurz = f.Bewohner.Aufgaben;
-            Assert.Equal("AUFGABEN · 5 OFFEN · 1 ÜBERFÄLLIG", kurz.KopfText);
+            Assert.Equal($"AUFGABEN · {offen} OFFEN · 1 ÜBERFÄLLIG", kurz.KopfText);
             Assert.Equal(AufgabenKurzliste.Hoechstens, kurz.ZeilenTexte.Count());
             Assert.StartsWith("überfällig · Aushang mit dem Wochenplan", kurz.ZeilenTexte.First());
-            Assert.Equal("Alle 5 Aufgaben …", kurz.AlleKnopf.Text);
+            Assert.Equal($"Alle {offen} Aufgaben …", kurz.AlleKnopf.Text);
             kurz.AlleKnopf.PerformClick();
             Assert.Equal("Aufgaben", f.AktiverBereich);
         }
@@ -48,10 +53,10 @@ public class AufgabenOberflaechenTests
         {
             var seite = f.Aufgaben;
             Assert.Same(seite, f.Seite("Aufgaben"));
-            Assert.Equal("5 offene Aufgaben · 1 überfällig", f.Kopf.KleinText);
+            Assert.Equal($"R1 · {Offen(u)} offene Aufgaben · 1 überfällig", f.Kopf.KleinText);
             Assert.Equal("Neue Aufgabe …", Assert.Single(f.Kopf.Knoepfe).Text);
-            // Schritt 25: gruppiert nach Schicht (Summe wie bisher 5), oben die laufende.
-            Assert.Equal(5, seite.Abschnitte.Sum(a => int.Parse(a[(a.LastIndexOf('(') + 1)..^1])));
+            // Gruppiert nach Schicht (Summe wie oben), oben die laufende.
+            Assert.Equal(Offen(u), seite.Abschnitte.Sum(a => int.Parse(a[(a.LastIndexOf('(') + 1)..^1])));
             Assert.Contains(seite.Abschnitte, a => a.StartsWith("JETZT: "));
             var erste = seite.Karten.Single(k => k.MarkenTexte[0].StartsWith("überfällig seit "));
             Assert.StartsWith("überfällig seit ", erste.MarkenTexte[0]);
@@ -61,7 +66,8 @@ public class AufgabenOberflaechenTests
             Assert.Contains(seite.Karten, k => k.MarkenTexte.Any(m => m.StartsWith("für Spätdienst ")));
             Assert.False(seite.KuerzelHinweis.Visible);
             seite.ErledigteZeigen.Checked = true;
-            Assert.Equal("ERLEDIGT (4)", seite.Abschnitte.Last());   // 1 Demo-Aufgabe und 3 aus den Demo-Visiten (Schritt 26)
+            int erledigt = u.Speicher.Aufgaben(DateTime.Now, true, "R1").Count(a => !a.Offen);
+            Assert.Equal($"ERLEDIGT ({erledigt})", seite.Abschnitte.Last());
             Assert.StartsWith("erledigt ", seite.Karten.Last().MarkenTexte[0]);
             Assert.False(seite.Karten.Last().Erledigt.Visible);
         }
@@ -97,8 +103,9 @@ public class AufgabenOberflaechenTests
             Assert.Contains("Tag der Schicht", fehler);
             var karte = f.Aufgaben.Karten.Single(k => k.Aufgabe.Text == "Blumen im Gemeinschaftsraum gießen");
             Assert.Contains(karte.MarkenTexte, m => m.StartsWith("für Frühdienst "));
-            Assert.Equal(6, Eintrag(f).Anzahl);
-            Assert.Equal("6 offene Aufgaben · 1 überfällig", f.Kopf.KleinText);
+            Assert.Equal("R1", karte.Aufgabe.Bereich);   // ohne Bewohner: der gewählte Bereich
+            Assert.Equal(Offen(u), Eintrag(f).Anzahl);
+            Assert.Equal($"R1 · {Offen(u)} offene Aufgaben · 1 überfällig", f.Kopf.KleinText);
         }
     });
 
@@ -125,7 +132,7 @@ public class AufgabenOberflaechenTests
 
             Karte().Erledigt.PerformClick();
             Assert.DoesNotContain(seite.Karten, k => k.Aufgabe.Id == id);
-            Assert.Equal(4, Eintrag(f).Anzahl);
+            Assert.Equal(Offen(u), Eintrag(f).Anzahl);
             seite.ErledigteZeigen.Checked = true;
             Assert.EndsWith("· CD", Karte().MarkenTexte[0]);
         }
@@ -165,7 +172,7 @@ public class AufgabenOberflaechenTests
             var aufgabe = u.Speicher.Aufgaben(DateTime.Now).Single(a => a.Text.StartsWith("Mit Anton"));
             Assert.Equal(ahorn.Id, aufgabe.BewohnerId);
             Assert.Equal(bericht.Id, aufgabe.BerichtId);
-            Assert.Equal(6, Eintrag(f).Anzahl);   // Zähler folgt sofort
+            Assert.Equal(Offen(u), Eintrag(f).Anzahl);   // Zähler folgt sofort
         }
     });
 

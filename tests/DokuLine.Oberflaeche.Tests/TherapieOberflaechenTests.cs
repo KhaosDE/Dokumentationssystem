@@ -30,7 +30,7 @@ public class TherapieOberflaechenTests
         {
             Assert.Same(t, f.Seite("Therapie"));
             Assert.Equal("Neues Angebot …", Assert.Single(f.Kopf.Knoepfe).Text);
-            Assert.StartsWith("20 Angebote · ", f.Kopf.KleinText);   // seit Schritt 26h drei mehr, seit 26m zehn tägliche
+            Assert.Contains("20 Angebote · ", f.Kopf.KleinText);   // seit Schritt 26h drei mehr, seit 26m zehn tägliche
             Assert.Equal(20, t.Karten.Count);
             var holz = t.Karten.Single(k => k.Angebot.Am(DateOnly.FromDateTime(DateTime.Today)).Name == "Holzwerkstatt");
             Assert.Equal(["Therapie", "Gruppe", "Mo 09:00–11:30, Mi 09:00–11:30", "4 Plätze frei"], holz.MarkenTexte);
@@ -145,7 +145,7 @@ public class TherapieOberflaechenTests
             Assert.Equal([TherapieSeite.AlleAnbieter, "Therapie", "R1", "R2"], t.AnbieterFilter.Items.Cast<string>().Take(4));
             t.AnbieterFilter.SelectedItem = "R1";
             Assert.Equal("Kochgruppe", Assert.Single(t.Karten).Angebot.Fassungen[^1].Name);
-            Assert.StartsWith("1 Angebote · ", f.Kopf.KleinText);
+            Assert.Contains("1 Angebote · ", f.Kopf.KleinText);
             t.AnbieterFilter.SelectedItem = "Therapie";
             Assert.Equal(16, t.Karten.Count);   // seit Schritt 26m zehn tägliche Angebote der Therapie
             t.AnbieterFilter.SelectedItem = TherapieSeite.AlleAnbieter;

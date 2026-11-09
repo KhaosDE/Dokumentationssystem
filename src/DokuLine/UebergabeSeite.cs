@@ -60,13 +60,15 @@ public sealed class UebergabeSeite : Panel
     {
         var jetzt = Jetzt();
         string kuerzel = Kuerzel;
-        var alle = speicher.Uebergaben(jetzt, auchErledigte: true);
+        // Nur der gewählte Bereich; allgemeine Einträge des Wohnbereichs stehen immer da.
+        var ids = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt).Select(b => b.Id!.Value).ToHashSet();
+        var alle = speicher.Uebergaben(jetzt, auchErledigte: true).Where(u => u.BewohnerId is not long b || ids.Contains(b)).ToList();
         var offen = alle.Where(u => UebergabeRegeln.Offen(u, jetzt)).ToList();
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Nachname.ToUpperInvariant()}, {b.Vorname.ToUpperInvariant()} · ZI. {b.Zimmer}");
         Offen = offen.Count;
         Neu = offen.Count(u => UebergabeRegeln.Neu(u, kuerzel, vergleich));
         KuerzelHinweis.Visible = kuerzel.Length == 0;
-        Recht.NurAngemeldet(NotizKnopf);   // Schritt 26a: ohne Anmeldung nur ansehen
+        Recht.NurAngemeldet(NotizKnopf);   // ohne Anmeldung nur ansehen
 
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }

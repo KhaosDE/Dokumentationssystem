@@ -57,7 +57,10 @@ public class FehlersucheOberflaechenTests
         using var u = new Umgebung();
         var jetzt = DateTime.Now;
         foreach (var text in new[] { "Erste (Test)", "Zweite (Test)" })
-            u.Speicher.AufgabeSpeichern(new Aufgabe { Text = text, Fuer = AufgabeFuer.WerZeitHat, Erstellt = jetzt.AddHours(-1), Verfasser = "AB" });
+            u.Speicher.AufgabeSpeichern(new Aufgabe
+            {
+                Text = text, Bereich = "R1", Fuer = AufgabeFuer.WerZeitHat, Erstellt = jetzt.AddHours(-1), Verfasser = "AB",
+            });
         using var f = Fenster(u, "EF");
         f.BereichWaehlen("Übersicht");
         var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
@@ -142,20 +145,18 @@ public class FehlersucheOberflaechenTests
         b.UebersichtZeigen();
         Assert.Equal(anderer.Id, b.Gewaehlt!.Id);
 
-        // Bereich umbenannt: die Bereichswahlen zeigen den neuen Namen.
+        // Bereich umbenannt: die Bereichswahl in der Übersicht zeigt den neuen Namen, alle folgen ihr.
         u.Speicher.ListeneintragUmbenennen(Liste.Bereiche, "R2", "Nord");
-        b.UebersichtZeigen();
-        Assert.Contains("Nord", b.BereichWahl.Items.Cast<string>());
-        Assert.DoesNotContain("R2", b.BereichWahl.Items.Cast<string>());
-        b.BereichWahl.SelectedItem = "Nord";
-        Assert.NotEmpty(b.Zeilen);
-        Assert.All(b.Zeilen, z => Assert.Equal("Nord", z.Wohnbereich));
         var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
         s.Aktualisieren();
-        Assert.Contains("Nord", s.BereichWahl.Items.Cast<string>());
-        Assert.DoesNotContain("R2", s.BereichWahl.Items.Cast<string>());
+        Assert.Contains("Nord", s.Umschalter.Knoepfe.Select(k => k.Text));
+        Assert.DoesNotContain("R2", s.Umschalter.Knoepfe.Select(k => k.Text));
+        f.ArbeitsbereichWaehlen("Nord");
+        b.UebersichtZeigen();
+        Assert.NotEmpty(b.Zeilen);
+        Assert.All(b.Zeilen, z => Assert.Equal("Nord", z.Wohnbereich));
         f.Therapie.Laufend.Aktualisieren();
-        Assert.Contains("Nord", f.Therapie.Laufend.BereichWahl.Items.Cast<string>());
+        Assert.Equal("Nord", f.Therapie.Laufend.Bereich);
     });
 
     // ----- 0.33.3 -----
@@ -171,24 +172,17 @@ public class FehlersucheOberflaechenTests
         Assert.True(ungelesen > s.Nachrichten.Zeilen.Count, "Demo: mehrere ungelesene in einem Verlauf");
         Assert.Equal(ungelesen, s.Nachrichten.Anzahl);   // wie die Seitenleiste (vorher: Zahl der Verläufe)
 
-        // Schmal: die Bereichswahl wird schmaler oder verschwindet, liegt aber nie über „Drucken …“ oder den Knöpfen links.
-        int voll = s.BereichWahl.Width;
+        // Schmal: die Bereichswahl oben bleibt ganz sichtbar und liegt über den Kästen, nicht auf ihnen.
         foreach (int breite in new[] { 1600, 1000, 800, 640 })
         {
             f.WindowState = FormWindowState.Normal;
             f.Size = new Size(breite, 700);
             Application.DoEvents();
-            f.Kopf.Leiste.PerformLayout();
-            var wahl = s.BereichWahl;
-            if (!wahl.Visible) continue;
-            Assert.True(wahl.Right <= s.DruckKnopf.Left, $"{breite}: Bereichswahl über „Drucken …“");
-            foreach (var k in f.Kopf.Knoepfe.Where(k => k != s.DruckKnopf && k.Visible))
-                Assert.False(wahl.Bounds.IntersectsWith(k.Bounds), $"{breite}: Bereichswahl über „{k.Text}“");
+            Assert.True(s.Umschalter.Right <= s.ClientSize.Width, $"{breite}: Bereichswahl ragt heraus");
+            Assert.True(s.Umschalter.Bottom <= s.Uebergaben.Parent!.Top, $"{breite}: Bereichswahl über den Kästen");
         }
         f.WindowState = FormWindowState.Maximized;
         Application.DoEvents();
-        Assert.True(s.BereichWahl.Visible);
-        Assert.Equal(voll, s.BereichWahl.Width);   // wieder volle Breite
     });
 
     [Fact]

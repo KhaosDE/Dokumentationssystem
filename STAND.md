@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.6** (Bauplan Schritt 29c: Fehlendes ausblenden statt ausgrauen).
+Stand: 09.11.2026. Version: **0.33.7** (Bauplan Schritte 29d, 29q, 29r: Wohnbereich wählen, Aufgaben je Bereich, Kopfleisten).
 
 ## Aktuell
 
@@ -225,8 +225,15 @@ Neu in 0.33.6: **Was jemand nicht darf, sieht er nicht.** Knöpfe, Menüeinträg
 Seitenleiste ohne Recht sind ausgeblendet, die übrigen rücken zusammen (z. B. „Visiten“ fehlt für Assistenzkräfte).
 Grau mit Hinweis bleibt nur, was gerade nicht geht. Nach An- und Abmelden baut sich alles sofort neu auf.
 
+Neu in 0.33.7: Oben in der Übersicht **„Wohnbereich: R1 · R2 · R3“** (je nach Recht dazu „Therapie“ und „Alle“).
+Die Wahl gilt **überall** – Dokumentation, Übergabe, Tagesplan, Visiten, Aufgaben, Kalender, Laufende Therapien,
+Ausgangsliste – bis zum Abmelden; vorgegeben ist der Bereich des Rechners. Der Bereich steht vorn in der Kopfzeile,
+bei einem anderen Bereich mit der Marke „eingesprungen“. Die einzelnen Bereichswahlen in den Fenstern entfallen.
+**Aufgaben** gehören zu einem Bewohner oder einem Bereich; jeder sieht nur die seines Bereichs, Standardaufgaben gibt
+es je Bereich. Die Kästen der Übersicht haben eine eigene **Kopfleiste**.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29d „Wohnbereich einmal in der Übersicht wählen“ mit 29q und 29r (0.33.7).
+als Nächstes 29s „Aufräumen nach den Code-Regeln“ (mehrere kleine Auslieferungen ab 0.33.8).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1121,6 +1128,29 @@ als Nächstes 29d „Wohnbereich einmal in der Übersicht wählen“ mit 29q und
     erlaubte Karte verschwinden. „Persönlich“, „Über“ und „Verzeichnisse“ (ansehen dürfen alle) bleiben.
   - Neu aufgebaut wird nach An- und Abmelden und nach Änderungen an Mitarbeitern oder Rechten.
 
+- 0.33.7 — Bauplan Schritte 29d „Wohnbereich einmal in der Übersicht wählen“, 29q „Aufgaben gehören zu einem Bewohner
+  oder einem Bereich“, 29r „Kopfleisten der Kästen“:
+  - `Arbeitsbereich.Gewaehlt` (Bausteine) hält den gewählten Bereich; `BereichswahlRegeln` (Kern): Knöpfe je Recht,
+    Vorgabe, wer dazugehört, „eingesprungen“. Drei neue Rechte: „Wohnbereiche wählen“ (alle Positionen mit
+    Wohnbereichsbezug und Therapie), „Bereich Therapie wählen“ (Therapie), „Alle Bereiche zusammen ansehen“
+    (Leitungen, Verwaltung, Administrator); in bestehenden Datenbanken einmal vorbelegt.
+  - Übersicht: oben „Wohnbereich:“ mit großen Umschaltknöpfen (`BereichUmschalter`) statt der Bereichswahl in der
+    Aktionsleiste; ohne Anmeldung nur der Bereich des Rechners.
+  - Kopfzeile: vorn immer der gewählte Bereich („R1 · …“), daneben „eingesprungen“ (Hinweis-Farbe), wenn es nicht der
+    Bereich des Rechners ist.
+  - Es folgen dem gewählten Bereich: Dokumentation (Bereichswahl entfällt; ein Bewohner aus einem anderen Bereich, z. B.
+    aus dem Verzeichnis, steht zusätzlich in der Liste), Übergabe (allgemeine Einträge stehen immer da), Tagesplan
+    (Häkchen „alle Bereiche“ entfällt), Visiten (nur in einem Wohnbereich), Aufgaben mit Zähler und „Laufender
+    Dienst“, Kalender (Termine von Bewohnern), Laufende Therapien (Bereichswahl entfällt), Ausgangsliste, Standardaufgaben.
+  - Aufgaben: Datenbank-Schritt 32 (Spalte `bereich` bei Aufgaben und Standardaufgaben). „Neue Aufgabe“ und
+    „Standardaufgabe“: Bewohner oder Bereich (R1, R2, R3, Therapie; Vorgabe der gewählte). Mit Bewohner gehört sie
+    zu dessen Wohnbereich, auch nach einem Umzug. Bestehende Aufgaben ohne Bewohner kommen zu R1, bestehende
+    Standardaufgaben gibt es danach in jedem Wohnbereich. Umbenennen eines Bereichs nimmt beides mit.
+  - Demo: Bereichsaufgaben für R1, R2 und R3; Standardaufgaben je Wohnbereich.
+  - Kopfleiste `KastenKopf` (heller Akzent, oben abgerundet, Trennlinie, Überschrift links, Zähler rechts, beim
+    Darüberfahren kräftiger) für die vier Kästen und die Bewohnerliste der Übersicht und die Spalten der Laufenden
+    Therapien; `docs/gestaltung.md` ergänzt.
+
 ## Offene Punkte
 
 - Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
@@ -1197,6 +1227,20 @@ als Nächstes 29d „Wohnbereich einmal in der Übersicht wählen“ mit 29q und
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.7): „Leitung“ für den Knopf „Alle“ sind Geschäftsführung, Hausleitung und Verwaltung (sie haben
+  schon alle Rechte) und der Administrator; die Bereichsleitung sieht die Wohnbereiche. In der Rechte-Tabelle änderbar.
+- 09.11.2026 (0.33.7): Die Wahl gilt je Programmfenster bis zum Abmelden; das Anmelden eines anderen Kürzels ohne
+  Abmelden behält sie, solange der Knopf erlaubt ist.
+- 09.11.2026 (0.33.7): „eingesprungen“ erscheint nicht bei „Alle“ – „Alle“ ist kein Bereich, in den man einspringt.
+- 09.11.2026 (0.33.7): Wo eine Aufgabe ohne Bewohner angelegt wurde, hat die Datenbank nie gespeichert; sie kommen
+  beim Update deshalb alle zu R1 (Vorgabe des Eintrags). Bestehende Standardaufgaben gelten danach in jedem
+  Wohnbereich, damit kein Bereich seine Rundgänge verliert.
+- 09.11.2026 (0.33.7): Übergabe-Einträge „Wohnbereich allgemein“ und Kalendertermine ohne Bewohner haben keinen eigenen
+  Bereich; sie stehen in jedem Bereich. Nachrichten an Teams bleiben, wie sie sind (jeder liest die seiner Teams) –
+  das Einspringen ändert nicht, wer Empfänger ist.
+- 09.11.2026 (0.33.7): Visiten gehen nur in einem Wohnbereich; bei „Alle“ oder „Therapie“ ist „Visite beginnen …“ grau
+  mit „Bitte zuerst in der Übersicht einen Wohnbereich wählen.“
 
 - 09.11.2026 (0.33.6): Ohne Anmeldung bleibt alles grau mit „Bitte zuerst anmelden.“ statt ausgeblendet: Es gibt
   dann noch niemanden, dem ein Recht fehlt, und man sieht, was es nach der Anmeldung gibt.
@@ -1935,6 +1979,18 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.7:
+
+1. Übersicht: oben „Wohnbereich: R1 · R2 · R3“. R2 drücken → Liste, Kästen und Kopfzeile zeigen R2, daneben
+   „eingesprungen“. Dokumentation, Übergabe, Tagesplan, Aufgaben, Ausgangsliste: überall R2.
+2. Als „OP“ (Therapie): zusätzlich „Therapie“; als „TST“ zusätzlich „Alle“. Als „CD“ nur R1–R3.
+3. Abmelden (F12) und wieder anmelden → wieder der Bereich des Rechners.
+4. Neue Aufgabe ohne Bewohner → Feld „Bereich“ (Vorgabe der gewählte). Auf R3 wechseln → die Aufgabe von R1 ist
+   nicht zu sehen, der Zähler in der Seitenleiste zählt nur R3.
+5. Einstellungen → Standardaufgaben: Spalte „Bereich“, die Liste zeigt die des gewählten Bereichs.
+6. Visiten bei „Alle“ (als TST): „Visite beginnen …“ ist grau mit Hinweis.
+7. Übersicht: Die Kästen haben eine helle Kopfleiste mit Zähler rechts; beim Darüberfahren wird sie kräftiger.
 
 Version 0.33.6:
 

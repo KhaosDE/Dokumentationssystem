@@ -71,7 +71,7 @@ public class FahrzeugeOberflaechenTests
         f.Uebersicht.Aktualisieren();
         Assert.Contains(f.Uebersicht.Zeilen.Single(k => k.Bewohner.Id == birke).Marken, m => m.Text.StartsWith("abwesend: unterwegs mit VW Bus"));
         f.BereichWaehlen("Tagesplan");
-        f.Tagesplan.AlleBereiche.Checked = true;
+        f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);
         Assert.Contains(f.Tagesplan.Tafel.Zeilen, k => k.Daten.Bewohner.Id == birke && k.Daten.Termin.Quelle == TerminQuelle.Fahrt
                                                       && k.Daten.Termin.Begleitung.StartsWith("VW Bus · Fahrer ", StringComparison.Ordinal));   // Spalte „Begleitung“ (26g)
 

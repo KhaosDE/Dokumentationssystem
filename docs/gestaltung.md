@@ -87,3 +87,21 @@ Grundsätzen oben passen:
 
 Nicht übernommen: fremde Schriften (Inter u. a. bräuchten Mitlieferung), Verläufe außer im
 Kopf, dunkle Flächen als Vorgabe, Pillen-Knöpfe.
+
+## Kopfleiste eines Kastens (Bauplan Schritt 29r, Vorgabe Tobi 09.11.2026)
+
+Kästen mit Einträgen (Übersicht: Übergaben, Termine, laufender Dienst, Nachrichten und die
+Bewohnerliste; Laufende Therapien: die Spalten) haben überall dieselbe Kopfleiste (`KastenKopf`):
+
+- Fläche heller Akzent **238, 242, 251**, oben abgerundet wie der Kasten (8 px), darunter eine
+  Trennlinie **217, 224, 236**; beim Darüberfahren etwas kräftiger (224, 231, 247).
+- Links die Überschrift (Segoe UI Semibold), rechts der Zähler (Text mittel).
+- Die Einträge darunter auf weißer Fläche, 8 px Abstand zur Kopfleiste.
+- Führt ein Klick an eine Stelle (z. B. „Übergaben offen“ → Übergabe), zeigt der Mauszeiger eine Hand.
+
+## Wahl des Wohnbereichs (Bauplan Schritt 29d)
+
+Oben in der Übersicht „Wohnbereich:“ mit großen Umschaltknöpfen (R1 · R2 · R3, je nach Recht
+„Therapie“ und „Alle“). Der gewählte Bereich steht in jeder Ansicht vorn in der kleinen Zeile der
+Kopfzeile („R1 · …“); ist es nicht der Bereich des Rechners, daneben die Marke „eingesprungen“
+(Hinweis-Farbe, mit Wort).

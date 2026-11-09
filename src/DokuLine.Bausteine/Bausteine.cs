@@ -8,10 +8,13 @@ public class KartenFlaeche : Panel
 {
     public KartenFlaeche()
     {
+        // Kein Layout im Konstruktor: Abgeleitete Kästen haben ihre Teile hier noch nicht angelegt.
+        SuspendLayout();
         DoubleBuffered = true;
         ResizeRedraw = true;
         BackColor = Stil.Flaeche;
         Padding = new Padding(Stil.AbstandGross);
+        ResumeLayout(false);
     }
 
     protected override void OnPaintBackground(PaintEventArgs e)

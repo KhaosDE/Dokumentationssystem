@@ -25,7 +25,8 @@ public class LaufendeTherapienOberflaechenTests
         Assert.Equal([TherapieSeite.LaufendReiter, TherapieSeite.AngeboteReiter], t.Reiter.Namen);
         var l = t.Laufend;
         Assert.True(l.Visible);
-        Assert.Equal(LaufendeRegeln.AlleBereiche, l.BereichWahl.SelectedItem);   // Vorgabe für die Therapie
+        f.ArbeitsbereichWaehlen("Therapie");   // die Therapie sieht alle Wohnbereiche
+        Assert.Null(l.Bereich);
 
         t.Jetzt = () => Heute(10, 15);
         l.Aktualisieren();
@@ -40,7 +41,7 @@ public class LaufendeTherapienOberflaechenTests
         Assert.Equal(LaufendeTherapienAnsicht.NochOffenTitel, offen.Titel);
         Assert.Equal(tafel.NochOffen.Count, offen.Kaertchen.Count);
         Assert.Contains(offen.Kaertchen, k => k.Teilnehmer!.Bewohner.Nachname == "Tagetes");   // Morgenrunde vorbei, nicht bestätigt
-        Assert.StartsWith("Alle Bereiche · ", f.Kopf.KleinText);
+        Assert.Contains("Alle Bereiche · ", f.Kopf.KleinText);
         Assert.Contains("noch offen", f.Kopf.KleinText);
         Assert.Contains("Küchenteam", l.Rest.Text);                                            // 11:00, später
         Assert.False(l.Hinweis.Visible);
@@ -66,11 +67,11 @@ public class LaufendeTherapienOberflaechenTests
         Assert.InRange(l.Leiste.JetztX, feld.Feld.Left, feld.Feld.Right);
         l.Leiste.Oeffnen(feld.Termin);
         Assert.Equal(TherapieSeite.AngeboteReiter, t.Reiter.Aktiv);
-        Assert.StartsWith("20 Angebote · ", f.Kopf.KleinText);
+        Assert.Contains("20 Angebote · ", f.Kopf.KleinText);
 
         // Nur R2: nur Teilnehmer aus R2.
         t.Reiter.Waehlen(TherapieSeite.LaufendReiter);
-        l.BereichWahl.SelectedItem = "R2";
+        f.ArbeitsbereichWaehlen("R2");
         Assert.All(l.Spalten.SelectMany(s => s.Kaertchen).Where(k => k.Teilnehmer is not null),
             k => Assert.Equal("R2", k.Teilnehmer!.Bewohner.Wohnbereich));
         Assert.StartsWith("R2 · ", f.Kopf.KleinText);
@@ -93,7 +94,7 @@ public class LaufendeTherapienOberflaechenTests
         f.BereichWaehlen("Therapie");
         var t = f.Therapie;
         var l = t.Laufend;
-        Assert.Equal("R1", l.BereichWahl.SelectedItem);
+        Assert.Equal("R1", l.Bereich);   // der Bereich des Rechners
         t.Jetzt = () => Heute(10, 15);
         l.Aktualisieren();
         Assert.All(l.Spalten.SelectMany(s => s.Kaertchen).Where(k => k.Teilnehmer is not null),

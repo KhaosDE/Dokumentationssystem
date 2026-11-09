@@ -104,8 +104,12 @@ public sealed class AusgangslisteSeite : ModulSeite
         Zeilen.Clear();
         Abschnitte.Clear();
         hinweis.RemoveAll();
-        var alle = plaetze.Select(p => new ListenZeile(p, jetzt, DigitalAn ? DigitalerAusgang.StandFuer(p, ausgaenge, jetzt.TimeOfDay) : null,
-            kuecheZimmer.Contains(p.Zimmernummer) && p.Anwesend)).ToList();
+        // Gezeigt wird der in der Übersicht gewählte Bereich (geplant wird der Küchendienst weiter für alle).
+        var imBereich = BereichswahlRegeln.Bewohner(db.Speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt)
+            .Select(b => b.Id!.Value).ToHashSet();
+        var alle = plaetze.Where(p => imBereich.Contains(p.BewohnerId))
+            .Select(p => new ListenZeile(p, jetzt, DigitalAn ? DigitalerAusgang.StandFuer(p, ausgaenge, jetzt.TimeOfDay) : null,
+                kuecheZimmer.Contains(p.Zimmernummer) && p.Anwesend)).ToList();
         bool nurUnterwegs = DigitalAn && NurUnterwegs.Checked;
         var gezeigt = alle.Where(z => (!nurUnterwegs || z.Unterwegs) && (!NurBeschraenkung.Checked || z.Platz.Status == AnwesenheitsStatus.Ausgangsbeschraenkung)).ToList();
         foreach (var z in alle.Except(gezeigt)) z.Dispose();

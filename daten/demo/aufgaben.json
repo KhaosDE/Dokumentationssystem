@@ -1,5 +1,5 @@
 {
-  "hinweis": "Ausgedachte Aufgaben für die Demo. Zeiten relativ zum Laden der Demo-Daten (Stunden vor/nach jetzt).",
+  "hinweis": "Ausgedachte Aufgaben für die Demo. Zeiten relativ zum Laden der Demo-Daten (Stunden vor/nach jetzt). Ohne Bewohner gehört eine Aufgabe zu einem Bereich (bereich).",
   "aufgaben": [
     {
       "text": "Arzttermin am Donnerstag telefonisch bestätigen und Fahrdienst bestellen",
@@ -11,11 +11,16 @@
     },
     {
       "text": "Aushang mit dem Wochenplan im Flur erneuern",
+      "bereich": "R1",
       "fuer": "naechste_schicht",
       "erstelltVorStunden": 30,
       "faelligInStunden": -4,
       "verfasser": "GH",
-      "weitergabe": { "vorStunden": 14, "kuerzel": "KL", "notiz": "Drucker war leer, Papier ist bestellt." }
+      "weitergabe": {
+        "vorStunden": 14,
+        "kuerzel": "KL",
+        "notiz": "Drucker war leer, Papier ist bestellt."
+      }
     },
     {
       "text": "Anmeldung zum Schwimmkurs zusammen mit {vorname} ausfüllen",
@@ -28,6 +33,7 @@
     },
     {
       "text": "Getränkevorrat im Gemeinschaftsraum auffüllen",
+      "bereich": "R1",
       "fuer": "wer_zeit_hat",
       "erstelltVorStunden": 26,
       "verfasser": "CD"
@@ -46,7 +52,40 @@
       "fuer": "wer_zeit_hat",
       "erstelltVorStunden": 50,
       "verfasser": "AB",
-      "erledigt": { "vorStunden": 20, "kuerzel": "EF" }
+      "erledigt": {
+        "vorStunden": 20,
+        "kuerzel": "EF"
+      }
+    },
+    {
+      "text": "Spieleabend im Gruppenraum vorbereiten",
+      "bereich": "R2",
+      "fuer": "naechste_schicht",
+      "erstelltVorStunden": 3,
+      "faelligInStunden": 10,
+      "verfasser": "MN"
+    },
+    {
+      "text": "Erste-Hilfe-Kasten im Dienstzimmer auffüllen",
+      "bereich": "R2",
+      "fuer": "wer_zeit_hat",
+      "erstelltVorStunden": 20,
+      "verfasser": "MN"
+    },
+    {
+      "text": "Pflanzen im Wintergarten gießen",
+      "bereich": "R3",
+      "fuer": "naechste_schicht",
+      "erstelltVorStunden": 4,
+      "faelligInStunden": 8,
+      "verfasser": "VK"
+    },
+    {
+      "text": "Einkaufsliste für das Wochenende schreiben",
+      "bereich": "R3",
+      "fuer": "wer_zeit_hat",
+      "erstelltVorStunden": 6,
+      "verfasser": "VK"
     }
   ]
 }

@@ -27,9 +27,8 @@ public sealed class BewohnerBereich : Panel
     public Bewohner? Gewaehlt => Namen.SelectedIndex >= 0
         && Namen.SelectedIndex < Zeilen.Count ? Zeilen[Namen.SelectedIndex] : null;
     public DokumentationAnsicht Dokumentation { get; }
-    public ComboBox BereichWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard,
-        AccessibleName = "Bereich" };
-    public const string AlleBereiche = "alle Bereiche";
+    // Ein Bewohner aus einem anderen Bereich, dessen Berichte gerade gewünscht sind (z. B. aus dem Verzeichnis).
+    private long? zusaetzlich;
     public TextBox Suche { get; } = new() { PlaceholderText = "Name suchen", Font = Stil.Standard,
         AccessibleName = "Bewohner suchen" };
     public Button EinklappenKnopf { get; } = Stil.NebenKnopf("◀");
@@ -84,10 +83,6 @@ public sealed class BewohnerBereich : Panel
         Akte = new AkteAnsicht(speicher) { Dock = DockStyle.Fill, Visible = false };
         Akte.BezugGewuenscht += id => BezugOeffnen(id);
         BackColor = Stil.Seite;
-        BereichWahl.Items.AddRange([UebersichtSeite.EigeneBereiche, AlleBereiche,
-            .. speicher.Wohnbereiche().Select(w => (object)w.Name)]);
-        BereichWahl.SelectedIndex = 0;
-        BereichWahl.SelectedIndexChanged += (_, _) => { if (!abgleichen) UebersichtZeigen(); };
         Suche.TextChanged += (_, _) => UebersichtZeigen();
         Namen.SelectedIndexChanged += (_, _) => { if (!abgleichen) BerichteZeigen(); };
         Namen.DoubleClick += (_, _) => AkteOeffnen();
@@ -98,7 +93,7 @@ public sealed class BewohnerBereich : Panel
         Namen.ContextMenuStrip = menue;
         EinklappenKnopf.AccessibleName = "Bewohnerliste ein- oder ausklappen";
         EinklappenKnopf.Click += (_, _) => Einklappen(!Eingeklappt);
-        links.Controls.AddRange([EinklappenKnopf, BereichWahl, Suche, Namen]);
+        links.Controls.AddRange([EinklappenKnopf, Suche, Namen]);
         links.Layout += (_, _) => LinksAnordnen();
         Dokumentation = new DokumentationAnsicht(speicher) { Dock = DockStyle.Fill,
             Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0) };
@@ -157,10 +152,9 @@ public sealed class BewohnerBereich : Panel
         int rand = Stil.Px(this, Stil.AbstandKlein), breite = links.ClientSize.Width - 2 * rand;
         EinklappenKnopf.SetBounds(links.ClientSize.Width - rand - Stil.Px(this, 28), rand, Stil.Px(this, 28),
             Stil.Px(this, 28));
-        foreach (var c in new Control[] { BereichWahl, Suche, Namen }) c.Visible = !Eingeklappt;
+        foreach (var c in new Control[] { Suche, Namen }) c.Visible = !Eingeklappt;
         if (Eingeklappt) return;
-        BereichWahl.SetBounds(rand, rand, breite - Stil.Px(this, 28) - rand, BereichWahl.Height);
-        Suche.SetBounds(rand, BereichWahl.Bottom + rand, breite, Suche.Height);
+        Suche.SetBounds(rand, rand, breite - Stil.Px(this, 28) - rand, Suche.Height);
         Namen.SetBounds(rand, Suche.Bottom + rand, breite, Math.Max(40,
             links.ClientSize.Height - Suche.Bottom - 2 * rand));
     }
@@ -180,21 +174,22 @@ public sealed class BewohnerBereich : Panel
     {
         long? vorher = (AkteSichtbar ? Akte.Bewohner?.Id : null) ?? Gewaehlt?.Id ?? zuletzt;
         if (Namen.SelectedIndex < 0 && !AkteSichtbar) vorher = zuletzt;
-        var werte = Einstellungen.Laden();
+        if (vorher != zusaetzlich) zusaetzlich = null;
         var alle = speicher.AlleBewohner();
+        string bereich = Arbeitsbereich.Gewaehlt;
+        var imBereich = BereichswahlRegeln.Bewohner(alle, bereich);
+        if (zusaetzlich is long z && imBereich.All(b => b.Id != z)
+            && alle.FirstOrDefault(b => b.Id == z) is Bewohner extra) imBereich.Add(extra);
         abgleichen = true;
         try
         {
-            Auswahl.Abgleichen(BereichWahl, [UebersichtSeite.EigeneBereiche, AlleBereiche,
-                .. speicher.Wohnbereiche().Select(w => w.Name)]);
-            var imBereich = BereichFiltern(alle, werte, out string bereichText);
             string suche = Suche.Text.Trim();
-            Zeilen = [.. imBereich.Where(b => suche.Length == 0 || b.Name.Contains(suche,
-                StringComparison.CurrentCultureIgnoreCase)
-                                             || $"{b.Nachname}, {b.Vorname}".Contains(suche,
-                                                 StringComparison.CurrentCultureIgnoreCase))
-                .OrderBy(b => b.Nachname, StringComparer.CurrentCulture).ThenBy(b => b.Vorname,
-                    StringComparer.CurrentCulture)];
+            bool Passt(Bewohner b) => suche.Length == 0
+                || b.Name.Contains(suche, StringComparison.CurrentCultureIgnoreCase)
+                || $"{b.Nachname}, {b.Vorname}".Contains(suche, StringComparison.CurrentCultureIgnoreCase);
+            Zeilen = [.. imBereich.Where(Passt)
+                .OrderBy(b => b.Nachname, StringComparer.CurrentCulture)
+                .ThenBy(b => b.Vorname, StringComparer.CurrentCulture)];
             Namen.BeginUpdate();
             Namen.Items.Clear();
             foreach (var b in Zeilen) Namen.Items.Add($"{b.Nachname}, {b.Vorname}");
@@ -204,7 +199,7 @@ public sealed class BewohnerBereich : Panel
             Namen.SelectedIndex = index;
             string anzahl = imBereich.Count == 1 ? "1 Bewohner" : $"{imBereich.Count} Bewohner";
             string zahl = Zeilen.Count == imBereich.Count ? anzahl : $"{Zeilen.Count} von {anzahl}";
-            kopf.TexteSetzen($"{bereichText} · {zahl}", "Dokumentation");
+            kopf.TexteSetzen($"{bereich} · {zahl}", "Dokumentation");
         }
         finally { abgleichen = false; }
         BerichteZeigen();
@@ -212,25 +207,6 @@ public sealed class BewohnerBereich : Panel
         listenFlaeche.Visible = aufgabenRahmen.Visible = true;
         AkteSichtbar = false;
         kopf.KnoepfeSetzen(BerichtNeuKnopf, BedarfKnopf, AkteKnopf, AnsichtKnopf, DruckKnopf);
-    }
-
-    // Eigene Bereiche wie in der Übersicht (Wohnbereiche des Angemeldeten, sonst der des Rechners; ohne
-    // eigene Bewohner alle), „alle Bereiche“ oder ein gewählter Wohnbereich.
-    private List<Bewohner> BereichFiltern(List<Bewohner> alle, EinstellungsWerte werte, out string text)
-    {
-        string? wahl = BereichWahl.SelectedItem as string;
-        if (wahl == AlleBereiche) { text = AlleBereiche; return alle; }
-        if (wahl is not null && wahl != UebersichtSeite.EigeneBereiche)
-        {
-            text = wahl;
-            return alle.Where(b => b.Wohnbereich == wahl).ToList();
-        }
-        var meine = speicher.MitarbeiterLesen(werte.Kuerzel)?.Bereiche
-            .Where(b => alle.Any(x => x.Wohnbereich == b)).ToList() is { Count: > 0 } liste ? liste : [werte.Bereich];
-        var eigene = alle.Where(b => meine.Contains(b.Wohnbereich)).ToList();
-        if (eigene.Count == 0) { text = AlleBereiche; return alle; }
-        text = string.Join(", ", meine);
-        return eigene;
     }
 
     public bool Waehlen(long bewohnerId)
@@ -242,16 +218,15 @@ public sealed class BewohnerBereich : Panel
     }
 
     // Die Berichte eines Bewohners zeigen (nach „Neuer Bericht …“, „Berichte ansehen“); wohnt er in einem anderen
-    // Bereich oder passt nicht zur Suche, werden alle Bereiche gezeigt.
+    // Bereich, steht er zusätzlich in der Liste, bis man einen anderen wählt.
     public void DokumentationZeigen(long bewohnerId)
     {
         AkteSichtbar = false;
         zuletzt = bewohnerId;
         Namen.SelectedIndex = -1;
-        UebersichtZeigen();
-        if (Waehlen(bewohnerId)) return;
+        zusaetzlich = bewohnerId;
         Suche.Text = "";
-        BereichWahl.SelectedItem = AlleBereiche;
+        UebersichtZeigen();
         Waehlen(bewohnerId);
     }
 

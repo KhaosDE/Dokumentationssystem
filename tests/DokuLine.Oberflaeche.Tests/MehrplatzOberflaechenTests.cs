@@ -40,7 +40,7 @@ public class MehrplatzOberflaechenTests
 
         // Aufgaben zwischen den Fenstern: der Zähler des anderen stimmt nach dem Abgleich.
         int vorher = f2.Navigation.Single(n => n.Text == "Aufgaben").Anzahl ?? 0;
-        u.Speicher.AufgabeSpeichern(AufgabenRegeln.AusEingabe(new AufgabeEingabe { Text = "Fenster putzen", Verfasser = "AB" }, DateTime.Now));
+        u.Speicher.AufgabeSpeichern(AufgabenRegeln.AusEingabe(new AufgabeEingabe { Text = "Fenster putzen", Verfasser = "AB", Bereich = "R1" }, DateTime.Now));
         f2.AenderungenVonAnderen();
         Assert.Equal(vorher + 1, f2.Navigation.Single(n => n.Text == "Aufgaben").Anzahl);
     });
@@ -115,18 +115,17 @@ public class MehrplatzOberflaechenTests
         // Statusmeldung eines anderen Bereichs (Therapie) auf der Karte, vorne.
         Assert.StartsWith("Status: in der Holzwerkstatt, bis ", s.Zeilen.Single(k => k.Bewohner.Nachname == "Ahorn").Marken[0].Text);
 
-        s.BereichWahl.SelectedItem = UebersichtSeite.AlleBereiche;   // seit Schritt 26l in der Bereichswahl
+        f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);
         Assert.Equal(69, s.Zeilen.Count);
-        Assert.StartsWith("alle Bereiche · 69 Bewohner · 6 Betten frei · ", f.Kopf.KleinText);
+        Assert.StartsWith("Alle · 69 Bewohner · 6 Betten frei · ", f.Kopf.KleinText);
         var ginster = s.Zeilen.Single(k => k.Bewohner.Nachname == "Ginster");
         Assert.Equal("R2", ginster.Marken[^1].Text);
         Assert.StartsWith("Status: Besuch bei der Familie, bis ", s.Zeilen.Single(k => k.Bewohner.Nachname == "Immergrün").Marken[0].Text);
         Hilfe.Foto(f, "56_uebersicht_alle_bereiche");
 
         // Ein Bereich ohne eigene Bewohner (z. B. Therapie) sieht alle, mit Hinweis.
-        s.BereichWahl.SelectedItem = UebersichtSeite.EigeneBereiche;
         Einstellungen.Aendern(w => w with { Bereich = "Therapie" });
-        s.Aktualisieren();
+        f.ArbeitsbereichWaehlen("Therapie");
         Assert.Equal(69, s.Zeilen.Count);
         Assert.True(s.BereichHinweis.Visible);
         // In der Dokumentation: ein Bereich ohne eigene Bewohner sieht ebenfalls alle.

@@ -15,6 +15,7 @@ public class AusgangslisteOberflaechenTests
         Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
         var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
+        f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);   // die Demo verteilt die Fälle über alle Bereiche
         f.Navigation.Single(n => n.Text == "Ausgangsliste").Ausloesen();
         return (u, f, Assert.IsType<AusgangslisteSeite>(f.Seite("Ausgangsliste")));
     }
@@ -30,7 +31,7 @@ public class AusgangslisteOberflaechenTests
         using (f)
         {
             Assert.Equal("Tagesliste drucken …", Assert.Single(f.Kopf.Knoepfe).Text);
-            Assert.Equal(69, s.Zeilen.Count);   // alle Bereiche (Schritt 26h: 23 je Wohnbereich)
+            Assert.Equal(69, s.Zeilen.Count);   // „Alle“: 23 je Wohnbereich
             // Oben, wer unterwegs ist (Demo: Clematis, Ginster), darunter alle anderen nach Zimmer.
             Assert.True(s.Zeilen[0].Unterwegs);
             Assert.StartsWith("UNTERWEGS (", s.Abschnitte[0]);
@@ -65,6 +66,9 @@ public class AusgangslisteOberflaechenTests
             Assert.All(s.Zeilen, z => Assert.Equal(AnwesenheitsStatus.Ausgangsbeschraenkung, z.Platz.Status));
             s.NurBeschraenkung.Checked = false;
             Assert.Equal(69, s.Zeilen.Count);
+            f.ArbeitsbereichWaehlen("R1");
+            Assert.Equal(23, s.Zeilen.Count);   // nur der gewählte Bereich
+            Assert.All(s.Zeilen, z => Assert.Equal("R1", u.Speicher.AlleBewohner().Single(b => b.Name == z.Platz.Bewohnername).Wohnbereich));
 
             using (var ersatz = new DialogErsatz(_ => DialogResult.Cancel))
             {

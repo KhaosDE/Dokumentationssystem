@@ -61,7 +61,7 @@ public class AerzteOberflaechenTests
         var v = f.Einstellungsseite.Verzeichnis;
         Assert.True(v.Visible);
         Assert.Equal(f.Einstellungsseite.Knoepfe, f.Kopf.Knoepfe.ToArray());
-        Assert.StartsWith("Verzeichnisse · Ärzte · ", f.Kopf.KleinText);
+        Assert.Contains("Verzeichnisse · Ärzte · ", f.Kopf.KleinText);   // vorn der gewählte Bereich
         Assert.Equal(["Ärzte", "Betreuer", "Angehörige", "Forensik", "FOSA", "Sonstige Stellen"], v.GruppenKnoepfe.Values.Select(k => k.Text));
         Assert.Equal(u.Speicher.Aerzte().Count, v.Liste.Items.Count);
         Assert.Equal(PersonRegeln.Spalten(PersonGruppe.Arzt), v.Liste.Columns.Cast<ColumnHeader>().Select(c => c.Text));

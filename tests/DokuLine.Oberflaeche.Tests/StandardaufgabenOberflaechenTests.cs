@@ -16,7 +16,7 @@ public class StandardaufgabenOberflaechenTests
         var schicht = SchichtTermin.Zu(DateTime.Now);
         u.Speicher.VorlageSpeichern(AufgabenRegeln.VorlageAusEingabe(new VorlageEingabe
         {
-            Text = "Testrundgang", Schicht = schicht.Schicht, Tage = [.. Enum.GetValues<DayOfWeek>()], Kuerzel = "EF",
+            Text = "Testrundgang", Schicht = schicht.Schicht, Tage = [.. Enum.GetValues<DayOfWeek>()], Kuerzel = "EF", Bereich = "R1",
         }, DateTime.Now));
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
@@ -59,9 +59,10 @@ public class StandardaufgabenOberflaechenTests
     {
         using var u = new Umgebung();
         Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
+        Arbeitsbereich.Gewaehlt = "R1";   // wie im Programm: Die Liste zeigt den gewählten Bereich
         using (var fenster = new VorlagenFenster(u.Speicher))
         {
-            Assert.Equal(9, fenster.Liste.Items.Count);   // Demo-Standardaufgaben (in den Tests stillgelegt)
+            Assert.Equal(9, fenster.Liste.Items.Count);   // Demo-Standardaufgaben von R1 (in den Tests stillgelegt)
             Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(fenster.NeuKnopf));
         }
         Einstellungen.Aendern(w => w with { Kuerzel = "EF" });   // Bereichsleitung
@@ -83,10 +84,10 @@ public class StandardaufgabenOberflaechenTests
                 fenster.Bearbeiten(null);
             Assert.Equal(10, fenster.Liste.Items.Count);
             var item = fenster.Liste.Items[9];
-            Assert.Equal(["Blumen gießen", "Frühdienst", "Mo", "09:00"], item.SubItems.Cast<ListViewItem.ListViewSubItem>().Take(4).Select(s => s.Text));
+            Assert.Equal(["Blumen gießen", "R1", "Frühdienst", "Mo", "09:00"], item.SubItems.Cast<ListViewItem.ListViewSubItem>().Take(5).Select(s => s.Text));
             fenster.Waehlen(9);
             fenster.Umschalten();
-            Assert.Equal("stillgelegt", fenster.Liste.Items[9].SubItems[5].Text);
+            Assert.Equal("stillgelegt", fenster.Liste.Items[9].SubItems[6].Text);
             Hilfe.Foto(fenster, "82_standardaufgaben");
         }
 

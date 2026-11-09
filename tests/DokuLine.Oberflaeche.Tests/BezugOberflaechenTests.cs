@@ -80,7 +80,7 @@ public class BezugOberflaechenTests
         s.MeineEinzeltrainings.Checked = true;
         Assert.Equal(["Birke", "Ginster", "Sonnenblume", "Tagetes"], s.Zeilen.Select(k => k.Bewohner.Nachname).Order());   // auch aus R2
         s.MeineEinzeltrainings.Checked = false;
-        Assert.Equal(46, s.Zeilen.Count);   // PR: R1 und R2
+        Assert.Equal(23, s.Zeilen.Count);   // der gewählte Bereich (R1)
     });
 
     [Fact]

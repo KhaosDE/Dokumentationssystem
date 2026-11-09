@@ -27,7 +27,7 @@ public class NachrichtenOberflaechenTests
         Assert.Equal("3 ungelesene Nachrichten für Anna Bachstelze", f.Bewohner.Nachrichten.Text2);
         f.Bewohner.Nachrichten.OeffnenKnopf.PerformClick();
         Assert.Equal("Nachrichten", f.AktiverBereich);
-        Assert.Equal("Anna Bachstelze · 3 ungelesen", f.Kopf.KleinText);
+        Assert.Equal("R1 · Anna Bachstelze · 3 ungelesen", f.Kopf.KleinText);
 
         f.BenutzerWaehlen("OP");
         Assert.Equal("Angemeldet: OP – Olga Pirol", f.Kopf.BenutzerText);
@@ -77,7 +77,7 @@ public class NachrichtenOberflaechenTests
         Assert.NotNull(seite.Offen);
         Assert.Equal(2, seite.Offen!.Texte.Count);
         Assert.Equal(1, Eintrag(f).Anzahl);                       // gelesen beim Öffnen
-        Assert.Equal("Anna Bachstelze · 1 ungelesen", f.Kopf.KleinText);
+        Assert.Equal("R1 · Anna Bachstelze · 1 ungelesen", f.Kopf.KleinText);
 
         using (new DialogErsatz(fenster =>
         {

@@ -23,7 +23,8 @@ public sealed class StandardaufgabenTests : IDisposable
         daten.Dispose();
     }
 
-    private List<Aufgabe> AusVorlagen() => s.Aufgaben(jetzt, auchErledigte: true).Where(a => a.VorlageId is not null).ToList();
+    // Standardaufgaben gibt es je Wohnbereich; geprüft wird R1.
+    private List<Aufgabe> AusVorlagen() => s.Aufgaben(jetzt, auchErledigte: true, "R1").Where(a => a.VorlageId is not null).ToList();
 
     [Fact]
     public void Schichtzeiten_einstellbar_je_Bereich()
@@ -46,10 +47,11 @@ public sealed class StandardaufgabenTests : IDisposable
     [Fact]
     public void Zu_Schichtbeginn_entstehen_die_Aufgaben_einmal()
     {
-        Assert.Equal(9, s.Vorlagen().Count);
+        Assert.Equal(27, s.Vorlagen().Count);   // 9 je Wohnbereich
+        Assert.Equal(9, s.Vorlagen().Count(v => v.Bereich == "R1"));
         Assert.Empty(AusVorlagen());
-        // Montagnacht: vier tägliche Nacht-Aufgaben und „Kühlschränke prüfen“ (Mo, Do).
-        Assert.Equal(5, s.StandardaufgabenErzeugen(jetzt));
+        // Montagnacht: vier tägliche Nacht-Aufgaben und „Kühlschränke prüfen“ (Mo, Do) – in jedem Wohnbereich.
+        Assert.Equal(15, s.StandardaufgabenErzeugen(jetzt));
         Assert.Equal(0, s.StandardaufgabenErzeugen(jetzt.AddMinutes(30)));   // nicht doppelt
         var nacht = AusVorlagen();
         Assert.Equal(5, nacht.Count);
@@ -60,13 +62,13 @@ public sealed class StandardaufgabenTests : IDisposable
         // Dienstag früh: „Post verteilen“ entsteht; die Nachtaufgaben sind „aus der Nachtschicht offen“.
         s.AufgabeErledigt(nacht[0].Id, "MN", jetzt.AddMinutes(10));
         jetzt = new DateTime(2026, 11, 10, 6, 30, 0);
-        Assert.Equal(1, s.StandardaufgabenErzeugen(jetzt));
-        var offen = s.Aufgaben(jetzt).Where(a => a.VorlageId is not null).ToList();
+        Assert.Equal(3, s.StandardaufgabenErzeugen(jetzt));
+        var offen = s.Aufgaben(jetzt, bereich: "R1").Where(a => a.VorlageId is not null).ToList();
         Assert.Equal(5, offen.Count);
         Assert.Equal("aus der Nachtschicht offen", AufgabenRegeln.AusSchichtOffen(offen.First(a => a.FuerSchicht!.Value.Schicht == Schicht.Nacht), jetzt));
         Assert.Null(AufgabenRegeln.AusSchichtOffen(offen.Single(a => a.Text == "Post verteilen"), jetzt));
 
-        var gruppen = AufgabenRegeln.Gruppen(s.Aufgaben(jetzt), jetzt);
+        var gruppen = AufgabenRegeln.Gruppen(s.Aufgaben(jetzt, bereich: "R1"), jetzt);
         Assert.Equal("AUS FRÜHEREN SCHICHTEN OFFEN", gruppen[0].Titel);
         Assert.Equal(4, gruppen[0].Aufgaben.Count(a => a.VorlageId is not null));
         Assert.StartsWith("JETZT: FRÜHDIENST", gruppen[1].Titel);
@@ -89,10 +91,12 @@ public sealed class StandardaufgabenTests : IDisposable
         var fehler = Assert.Throws<Eingabefehler>(() => AufgabenRegeln.VorlageAusEingabe(new VorlageEingabe(), jetzt)).Fehler;
         Assert.Contains("Was ist zu tun? Text fehlt.", fehler);
         Assert.Contains(fehler, f => f.StartsWith("Bitte mindestens einen Wochentag"));
+        Assert.Contains(AufgabenRegeln.BereichFehlt, fehler);
         var v = s.VorlageSpeichern(AufgabenRegeln.VorlageAusEingabe(new VorlageEingabe
         {
-            Text = "Blumen gießen", Schicht = Schicht.Nacht, Tage = [DayOfWeek.Monday], Uhrzeit = "23:15", Kuerzel = "EF",
+            Text = "Blumen gießen", Schicht = Schicht.Nacht, Tage = [DayOfWeek.Monday], Uhrzeit = "23:15", Kuerzel = "EF", Bereich = "R1",
         }, jetzt));
+        Assert.Equal("R1", v.Bereich);
         Assert.Equal("Mo", AufgabenRegeln.TageText(v.Tage));
         Assert.Equal("täglich", AufgabenRegeln.TageText(Enum.GetValues<DayOfWeek>()));
         s.VorlageSpeichern(v with { Text = "Blumen gießen (Flur)" });
@@ -114,7 +118,7 @@ public sealed class StandardaufgabenTests : IDisposable
             befehl.ExecuteNonQuery();
         }
         Assert.True(s.DemoBeimErstenStart());
-        Assert.Equal(9, s.Vorlagen().Count);
+        Assert.Equal(27, s.Vorlagen().Count);
         Assert.False(s.DemoBeimErstenStart());
     }
 }

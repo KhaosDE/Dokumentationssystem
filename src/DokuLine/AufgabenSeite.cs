@@ -55,7 +55,7 @@ public sealed class AufgabenSeite : Panel
         var jetzt = Jetzt();
         string kuerzel = Kuerzel;
         speicher.StandardaufgabenErzeugen(jetzt);   // Schritt 25: Standardaufgaben der laufenden Schicht
-        var alle = speicher.Aufgaben(jetzt, auchErledigte: true);
+        var alle = speicher.Aufgaben(jetzt, auchErledigte: true, Arbeitsbereich.Gewaehlt);
         var offen = alle.Where(a => a.Offen).ToList();
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}");
         Offen = offen.Count;
@@ -146,7 +146,8 @@ public sealed class AufgabenSeite : Panel
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}");
         // Aufgabenliste der Schicht: was jetzt dran ist (auch Liegengebliebenes) und „wer Zeit hat“.
         var schicht = SchichtTermin.Zu(jetzt);
-        var liste = speicher.Aufgaben(jetzt).Where(a => AufgabenRegeln.JetztDran(a, jetzt) || AufgabenRegeln.Zielschicht(a) is null).ToList();
+        var liste = speicher.Aufgaben(jetzt, bereich: Arbeitsbereich.Gewaehlt)
+            .Where(a => AufgabenRegeln.JetztDran(a, jetzt) || AufgabenRegeln.Zielschicht(a) is null).ToList();
         var druck = new AufgabenDruck(liste, namen, jetzt, $"Aufgaben – {schicht.Text}");
         Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, $"Aufgaben – {schicht.Text}");
     }
@@ -319,6 +320,10 @@ public sealed class AufgabeFenster : Form
 
     public TextBox Inhalt { get; } = new() { Multiline = true, Width = 420, Height = 54, AcceptsReturn = false };
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
+    // Ohne Bewohner gehört die Aufgabe zu einem Bereich (Vorgabe: der in der Übersicht gewählte).
+    public ComboBox BereichWahl { get; } = new()
+        { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160, AccessibleName = "Bereich" };
+    public const string FuerBereich = "– für einen Bereich –";
     public RadioButton NaechsteSchicht { get; } = new() { AutoSize = true, Checked = true };
     public RadioButton BestimmteSchicht { get; } = new() { Text = "bestimmte Schicht:", AutoSize = true };
     public RadioButton WerZeitHat { get; } = new() { Text = "wer Zeit hat", AutoSize = true };
@@ -326,7 +331,7 @@ public sealed class AufgabeFenster : Form
     public ComboBox SchichtArt { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 130 };
     public TextBox FaelligDatum { get; } = new DatumFeld() { Width = 100, PlaceholderText = "TT.MM.JJJJ" };
     public TextBox FaelligUhrzeit { get; } = new UhrzeitFeld() { Width = 70, PlaceholderText = "SS:MM" };
-    public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // Schritt 26a: aus der Anmeldung
+    public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // aus der Anmeldung
     public Label Fehler { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Aufgabe? Gespeichert { get; private set; }
 
@@ -366,10 +371,18 @@ public sealed class AufgabeFenster : Form
 
         Zeile(null, new MarkenFeld(KopfBereich.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandMittel) });
         Zeile("Was ist zu tun?", Inhalt);
-        BewohnerWahl.Items.Add("– kein bestimmter Bewohner –");
+        BewohnerWahl.Items.Add(FuerBereich);
         BewohnerWahl.Items.AddRange(auswahl.Select(b => (object)$"{b.Nachname}, {b.Vorname} (Zi. {b.Zimmer})").ToArray());
         BewohnerWahl.SelectedIndex = bewohnerId is long id ? auswahl.FindIndex(b => b.Id == id) + 1 : 0;
         Zeile("Bewohner", BewohnerWahl);
+        string[] bereiche = [.. speicher.Wohnbereiche().Select(w => w.Name), TherapieRegeln.AnbieterTherapie];
+        BereichWahl.Items.AddRange(bereiche);
+        string vorgabe = Arbeitsbereich.Gewaehlt is { Length: > 0 } g && bereiche.Contains(g)
+            ? g : Einstellungen.Laden().Bereich;
+        BereichWahl.SelectedIndex = Math.Max(0, Array.IndexOf(bereiche, vorgabe));
+        BereichWahl.Enabled = BewohnerWahl.SelectedIndex == 0;
+        BewohnerWahl.SelectedIndexChanged += (_, _) => BereichWahl.Enabled = BewohnerWahl.SelectedIndex == 0;
+        Zeile("Bereich", BereichWahl);
 
         var jetzt = Jetzt();
         NaechsteSchicht.Text = $"nächste Schicht ({SchichtTermin.Zu(jetzt).Naechste().Text})";
@@ -412,6 +425,7 @@ public sealed class AufgabeFenster : Form
     {
         Text = Inhalt.Text,
         BewohnerId = BewohnerWahl.SelectedIndex > 0 ? auswahl[BewohnerWahl.SelectedIndex - 1].Id : null,
+        Bereich = BewohnerWahl.SelectedIndex > 0 ? "" : BereichWahl.SelectedItem as string ?? "",
         BerichtId = berichtId,
         Fuer = BestimmteSchicht.Checked ? AufgabeFuer.Schicht : WerZeitHat.Checked ? AufgabeFuer.WerZeitHat : AufgabeFuer.NaechsteSchicht,
         SchichtTag = SchichtTag.Text,

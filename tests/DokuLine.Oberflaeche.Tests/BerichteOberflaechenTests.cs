@@ -139,7 +139,7 @@ public class UebergabeOberflaechenTests
             var seite = f.Uebergabe;
             Assert.Same(seite, f.Seite("Übergabe"));
             Assert.Equal("Übergabe", f.Kopf.TitelText);
-            Assert.Equal(seite.KopfText, f.Kopf.KleinText);
+            Assert.Equal($"R1 · {seite.KopfText}", f.Kopf.KleinText);   // vorn der gewählte Bereich
             Assert.Equal("WOHNBEREICH ALLGEMEIN", seite.Abschnitte[0]);
             Assert.Contains(seite.Abschnitte, a => a.StartsWith("AHORN, ANTON"));
             Assert.DoesNotContain(seite.Abschnitte, a => a.StartsWith("ERLEDIGT"));
@@ -190,7 +190,7 @@ public class UebergabeOberflaechenTests
             Karte().Erledigt.PerformClick();
             Assert.Equal(offen - 1, seite.Offen);
             Assert.DoesNotContain(seite.Karten, k => k.Uebergabe.Id == id);
-            Assert.Equal(seite.KopfText, f.Kopf.KleinText);   // Kopf zählt mit
+            Assert.Equal($"R1 · {seite.KopfText}", f.Kopf.KleinText);   // Kopf zählt mit
 
             seite.ErledigteZeigen.Checked = true;
             Assert.Contains(seite.Abschnitte, a => a.StartsWith("ERLEDIGT / ABGELAUFEN"));

@@ -65,7 +65,8 @@ public sealed record Weitergabe(DateTime Zeit, string Kuerzel, string Notiz);
 public sealed record Aufgabe
 {
     public long Id { get; init; }
-    public long? BewohnerId { get; init; }      // null = betrifft keinen einzelnen Bewohner
+    public long? BewohnerId { get; init; }      // null = Aufgabe des Bereichs
+    public string Bereich { get; init; } = "";  // mit Bewohner: dessen Wohnbereich (wechselt beim Umzug mit)
     public long? BerichtId { get; init; }       // aus einem Bericht heraus angelegt
     public string Text { get; init; } = "";
     public AufgabeFuer Fuer { get; init; }
@@ -94,6 +95,7 @@ public sealed record AufgabeVorlage
     public IReadOnlyList<DayOfWeek> Tage { get; init; } = [];
     public TimeOnly? Uhrzeit { get; init; }
     public long? BewohnerId { get; init; }
+    public string Bereich { get; init; } = "";   // ohne Bewohner: für welchen Bereich
     public bool Aktiv { get; init; } = true;
     public DateTime Erstellt { get; init; }
     public string Kuerzel { get; init; } = "";
@@ -106,6 +108,7 @@ public sealed class VorlageEingabe
     public List<DayOfWeek> Tage { get; set; } = [];
     public string Uhrzeit { get; set; } = "";
     public long? BewohnerId { get; set; }
+    public string Bereich { get; set; } = "";
     public string Kuerzel { get; set; } = "";
 }
 
@@ -114,6 +117,7 @@ public sealed class AufgabeEingabe
 {
     public string Text { get; set; } = "";
     public long? BewohnerId { get; set; }
+    public string Bereich { get; set; } = "";   // ohne Bewohner Pflicht
     public long? BerichtId { get; set; }
     public AufgabeFuer Fuer { get; set; } = AufgabeFuer.NaechsteSchicht;
     public string SchichtTag { get; set; } = "";
@@ -133,6 +137,7 @@ public static class AufgabenRegeln
         var fehler = new List<string>();
         if (string.IsNullOrWhiteSpace(e.Text)) fehler.Add("Was ist zu tun? Text fehlt.");
         if (e.Tage.Count == 0) fehler.Add("Bitte mindestens einen Wochentag wählen (oder „täglich“).");
+        if (e.BewohnerId is null && string.IsNullOrWhiteSpace(e.Bereich)) fehler.Add(BereichFehlt);
         if (string.IsNullOrWhiteSpace(e.Kuerzel)) fehler.Add("Kürzel fehlt (oben rechts „Angemeldet als …“).");
         TimeOnly? uhrzeit = null;
         if (e.Uhrzeit.Trim().Length > 0)
@@ -144,7 +149,8 @@ public static class AufgabenRegeln
         return new AufgabeVorlage
         {
             Text = e.Text.Trim(), Schicht = e.Schicht, Tage = Woche.Where(e.Tage.Contains).ToList(), Uhrzeit = uhrzeit,
-            BewohnerId = e.BewohnerId, Erstellt = jetzt, Kuerzel = e.Kuerzel.Trim(),
+            BewohnerId = e.BewohnerId, Bereich = e.BewohnerId is null ? e.Bereich.Trim() : "", Erstellt = jetzt,
+            Kuerzel = e.Kuerzel.Trim(),
         };
     }
 
@@ -191,11 +197,15 @@ public static class AufgabenRegeln
 
     public static readonly string[] FuerTexte = ["nächste Schicht", "bestimmte Schicht …", "wer Zeit hat"];
 
+    // Fachregel: IDEEN.md „Aufgaben gehören zu einem Bewohner oder einem Bereich“ (kein „ganzes Haus“).
+    public const string BereichFehlt = "Bitte einen Bewohner oder einen Bereich wählen.";
+
     // Baut eine Aufgabe aus den Eingaben. Wirft Eingabefehler mit allen Fehlern auf einmal.
     public static Aufgabe AusEingabe(AufgabeEingabe e, DateTime jetzt)
     {
         var fehler = new List<string>();
         if (string.IsNullOrWhiteSpace(e.Text)) fehler.Add("Was ist zu tun? Text fehlt.");
+        if (e.BewohnerId is null && string.IsNullOrWhiteSpace(e.Bereich)) fehler.Add(BereichFehlt);
         if (string.IsNullOrWhiteSpace(e.Verfasser)) fehler.Add("Verfasser (Kürzel) fehlt.");
         else if (Einstellungen.KuerzelPruefen(e.Verfasser) is string f) fehler.Add(f.Replace("Kürzel", "Verfasser"));
 
@@ -228,6 +238,7 @@ public static class AufgabenRegeln
         return new Aufgabe
         {
             BewohnerId = e.BewohnerId,
+            Bereich = e.BewohnerId is null ? e.Bereich.Trim() : "",
             BerichtId = e.BerichtId,
             Text = e.Text.Trim(),
             Fuer = e.Fuer,

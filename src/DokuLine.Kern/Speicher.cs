@@ -780,6 +780,28 @@ public sealed partial class Speicher : IDisposable
         UPDATE berichte SET art = 'Visite' WHERE text LIKE 'Visite %';
         UPDATE berichte SET art = 'Medikation' WHERE id IN (SELECT bericht_id FROM bedarfsgaben WHERE bericht_id IS NOT NULL);
         """,
+        // 32 – Aufgaben gehören zu einem Bewohner oder einem Bereich; Standardaufgaben je Bereich. Wo eine Aufgabe
+        // angelegt wurde, ist nicht bekannt: Aufgaben ohne Bewohner kommen zu R1 (sonst zum ersten Wohnbereich),
+        // Standardaufgaben gibt es danach in jedem Wohnbereich. Den Bereich darf nur das Umbenennen ändern.
+        """
+        ALTER TABLE aufgaben ADD COLUMN bereich TEXT NOT NULL DEFAULT '';
+        ALTER TABLE aufgabe_vorlagen ADD COLUMN bereich TEXT NOT NULL DEFAULT '';
+        DROP TRIGGER aufgaben_bleiben;
+        CREATE TRIGGER aufgaben_bleiben
+            BEFORE UPDATE OF id, bewohner_id, bericht_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser,
+                             vorlage_id, visite_anordnung_id, visite_eintrag_id ON aufgaben
+            BEGIN SELECT RAISE(ABORT, 'Aufgaben werden nicht überschrieben – Änderungen sind Ereignisse.'); END;
+        CREATE TEMP TABLE erster_bereich AS SELECT COALESCE(
+            (SELECT name FROM bereiche WHERE name = 'R1'),
+            (SELECT name FROM bereiche WHERE art IS NOT NULL AND aktiv = 1 ORDER BY nr, name LIMIT 1), 'R1') AS name;
+        UPDATE aufgaben SET bereich = (SELECT name FROM erster_bereich) WHERE bewohner_id IS NULL;
+        INSERT INTO aufgabe_vorlagen (text, schicht, tage, uhrzeit, bewohner_id, aktiv, erstellt, kuerzel, bereich)
+            SELECT v.text, v.schicht, v.tage, v.uhrzeit, NULL, v.aktiv, v.erstellt, v.kuerzel, w.name
+            FROM aufgabe_vorlagen v, bereiche w
+            WHERE v.bewohner_id IS NULL AND w.art IS NOT NULL AND w.aktiv = 1 AND w.name <> (SELECT name FROM erster_bereich);
+        UPDATE aufgabe_vorlagen SET bereich = (SELECT name FROM erster_bereich) WHERE bewohner_id IS NULL AND bereich = '';
+        DROP TABLE erster_bereich;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;

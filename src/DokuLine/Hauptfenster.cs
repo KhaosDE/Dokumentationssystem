@@ -119,7 +119,12 @@ public sealed class Hauptfenster : Form
         };
         Einstellungsseite.AkteGewuenscht += id => { BereichWaehlen("Dokumentation"); Bewohner.AkteZeigen(id); };
         Einstellungsseite.LogoGeaendert += () => Kopf.LogoSetzen(Einstellungen.LogoPfad());
-        Einstellungsseite.BereichGeaendert += () => { ArbeitsplatzAnzeigen(); AufgabenZaehlen(); };
+        Einstellungsseite.BereichGeaendert += () =>
+        {
+            ArbeitsbereichPruefen(zuruecksetzen: true);
+            ArbeitsplatzAnzeigen();
+            AufgabenZaehlen();
+        };
         Einstellungsseite.SchichtzeitenGeaendert += AufgabenZaehlen;
         Einstellungsseite.AbmeldenGewuenscht += () => Abmelden();   // Schritt 26a3: Abmelden auch unter „Persönlich“
         Einstellungsseite.MenueGewuenscht += eingeklappt => MenueSetzen(eingeklappt, merken: true);
@@ -154,6 +159,7 @@ public sealed class Hauptfenster : Form
             Bewohner.AkteZeigen(id);
         };
         Uebersicht.BerichtGewuenscht += id => NeuerBericht(id);
+        Uebersicht.BereichGewechselt += ArbeitsbereichWaehlen;
         Bewohner.BerichtGewuenscht += id => NeuerBericht(id);
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false };
@@ -230,6 +236,7 @@ public sealed class Hauptfenster : Form
         speicher.StatusGeaendert += StatusNeu;
         speicher.MitarbeiterGeaendert += RechteNeu;
         speicher.BezugGeaendert += StatusNeu;
+        ArbeitsbereichPruefen(zuruecksetzen: true);   // vor den Zählern: Sie zählen nur den gewählten Bereich
         AufgabenZaehlen();
         BenutzerAnzeigen();
         ArbeitsplatzAnzeigen();
@@ -368,7 +375,6 @@ public sealed class Hauptfenster : Form
             Uebersicht.Aktualisieren();
             Kopf.TexteSetzen(Uebersicht.KopfText, "Übersicht");
             Kopf.KnoepfeSetzen(Uebersicht.Knoepfe);
-            Kopf.ZusatzSetzen(Uebersicht.BereichWahl);   // Bereichswahl rechts in der Aktionsleiste
             return;
         }
         if (schluessel == "Tagesplan")
@@ -430,7 +436,7 @@ public sealed class Hauptfenster : Form
     {
         var jetzt = DateTime.Now;
         speicher.StandardaufgabenErzeugen(jetzt);   // Schritt 25: zu Schichtbeginn die Standardaufgaben
-        var offen = speicher.Aufgaben(jetzt);
+        var offen = speicher.Aufgaben(jetzt, bereich: Arbeitsbereich.Gewaehlt);
         int ueberfaellig = offen.Count(a => AufgabenRegeln.Ueberfaellig(a, jetzt));
         Navigation.Single(n => n.Text == "Aufgaben").ZaehlerSetzen(offen.Count, ueberfaellig > 0,
             $"{offen.Count} offen" + (ueberfaellig > 0 ? $", {ueberfaellig} überfällig" : ""));
@@ -469,6 +475,7 @@ public sealed class Hauptfenster : Form
     {
         if (IsDisposed) return;
         BenutzerAnzeigen();
+        ArbeitsbereichPruefen(zuruecksetzen: !Recht.Angemeldet);
         AufgabenZaehlen();
         NavigationRechte();
         if (OhneRechtAusgeblendet.Contains(AktiverBereich)) { BereichWaehlen(Startbereich); return; }
@@ -478,6 +485,37 @@ public sealed class Hauptfenster : Form
             if (Bewohner.AkteSichtbar) Bewohner.Akte.AnsichtNeu();
         }
         else if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
+    }
+
+    // Die Knöpfe der Bereichswahl in der Übersicht, je nach Recht.
+    public List<string> BereichKnoepfe() =>
+        BereichswahlRegeln.Knoepfe(speicher.Wohnbereiche().Select(w => w.Name), f => Recht.Darf(speicher, f));
+
+    // Den Bereich wählen, der überall gilt (Übersicht); die gezeigte Ansicht und die Zähler folgen sofort.
+    public void ArbeitsbereichWaehlen(string bereich)
+    {
+        Arbeitsbereich.Gewaehlt = bereich;
+        KopfBereichSetzen();
+        AufgabenZaehlen();
+        if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
+    }
+
+    // Vorgabe beim Start und nach dem Abmelden: der Bereich des Rechners; sonst bleibt die Wahl, solange sie
+    // erlaubt ist.
+    private void ArbeitsbereichPruefen(bool zuruecksetzen)
+    {
+        var knoepfe = BereichKnoepfe();
+        string rechner = Einstellungen.Laden().Bereich;
+        bool verboten = knoepfe.Count > 0 && !knoepfe.Contains(Arbeitsbereich.Gewaehlt);
+        if (zuruecksetzen || Arbeitsbereich.Gewaehlt.Length == 0 || verboten)
+            Arbeitsbereich.Gewaehlt = BereichswahlRegeln.Start(rechner, knoepfe);
+        KopfBereichSetzen();
+    }
+
+    private void KopfBereichSetzen()
+    {
+        string bereich = Arbeitsbereich.Gewaehlt;
+        Kopf.BereichSetzen(bereich, BereichswahlRegeln.Eingesprungen(bereich, Einstellungen.Laden().Bereich));
     }
 
     // Bereiche mit eigenem Recht; ohne dieses Recht verschwinden sie aus der Seitenleiste.

@@ -89,11 +89,11 @@ public class TagesplanOberflaechenTests
     });
 
     [Fact]
-    public void Eigener_Bereich_oder_alle_Bereiche() => Hilfe.Sta(() =>
+    public void Gewaehlter_Bereich_oder_alle_Bereiche() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        Einstellungen.Aendern(w => w with { Kuerzel = "GH" });   // Bereichsleitung R2
-        TherapieHeute(u, "Ahorn");                               // R1
+        Einstellungen.Aendern(w => w with { Kuerzel = "GH", Bereich = "R2" });   // Bereichsleitung R2 am Rechner von R2
+        TherapieHeute(u, "Ahorn");                                               // R1
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         f.BereichWaehlen("Tagesplan");
@@ -101,7 +101,7 @@ public class TagesplanOberflaechenTests
         Assert.All(t.Zeilen, z => Assert.Equal("R2", z.Bewohner.Wohnbereich));
         Assert.DoesNotContain(t.Tafel.Zeilen, k => k.Daten.Termin.Titel == Name);
         Assert.Contains("R2", f.Kopf.KleinText);
-        t.AlleBereiche.Checked = true;
+        f.ArbeitsbereichWaehlen(BereichswahlRegeln.Alle);
         Assert.Contains(t.Tafel.Zeilen, k => k.Daten.Termin.Titel == Name);
         Assert.Contains("alle Bereiche", f.Kopf.KleinText);
     });
