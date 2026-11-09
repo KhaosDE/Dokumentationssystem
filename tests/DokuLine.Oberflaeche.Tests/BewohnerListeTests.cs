@@ -176,8 +176,8 @@ public class BewohnerListeTests
                 var bedarf = Assert.IsType<BedarfFenster>(fenster);
                 bedarf.Uhrzeit.Text = DateTime.Now.ToString("HH:mm");
                 bedarf.Menge.Text = "1";
-                bedarf.Speichern();
-                return bedarf.Speichern() ? DialogResult.OK : DialogResult.Cancel;   // zweiter Klick bei Warnung
+                // Ein zweiter Klick nur, wenn der erste eine Warnung zeigte („Trotzdem eintragen“).
+                return bedarf.Speichern() || bedarf.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 Assert.True(b.BedarfGeben());
             Assert.Contains(b.Dokumentation.Zeilen,

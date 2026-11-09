@@ -288,9 +288,9 @@ public class AusgangslisteOberflaechenTests
             Assert.DoesNotContain(f.Navigation, n => n.Text == "Ausgangsliste");
             Assert.DoesNotContain("Ausgang", f.Bewohner.Akte.Reiter.Namen);
             Assert.Empty(f.Bewohner.Akte.ModulAnsichten);
-            // „abwesend: unterwegs mit …“ kommt von den Fahrten des Kerns, nicht vom Modul.
-            Assert.DoesNotContain(f.Uebersicht.Zeilen.SelectMany(k => k.Marken),
-                m => m.Art is MarkenArt.Ausgang || m.Art == MarkenArt.Abwesend && !m.Text.StartsWith("abwesend: unterwegs mit ", StringComparison.Ordinal));
+            // Keine Marke mehr vom Modul (Fahrten und Heimfahrten aus dem Kalender kommen vom Kern).
+            Assert.DoesNotContain(f.Uebersicht.Zeilen.SelectMany(k => k.Marken), m => m.Art is MarkenArt.Ausgang);
+            Assert.All(f.Uebersicht.Zeilen, k => Assert.Empty(Modulverwaltung.Marken(u.Speicher, k.Bewohner, DateTime.Now)));
 
             f.EinstellungenOeffnen("Module");
             einstellungen.Module["ausgangsliste"].Checked = true;

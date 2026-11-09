@@ -172,7 +172,7 @@ public class BewohnerOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
         var akte = f.Bewohner.Akte;
-        Assert.Equal(["Stammdaten", "Berichte", "Medikamentenplan", "Wochenplan", "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
+        Assert.Equal(["Stammdaten", "Medikamentenplan", "Wochenplan", "Ausgang", "Biografie", "Reflexion", "HEB"], akte.Reiter.Namen);
         Assert.Equal("Stammdaten", akte.Reiter.Aktiv);
         Assert.False(akte.ReiterPlatzhalter.Visible);
         Assert.Empty(Bauplan.Reiter);   // alle Reiter sind gebaut
@@ -218,6 +218,7 @@ public class BewohnerOberflaechenTests
             Assert.True(formular.Speichern());
             return formular.Gespeichert;
         };
+        f.BereichWaehlen("Übersicht");   // „Neuer Bewohner …“ steht nur in der Übersicht
         f.Kopf.Knoepfe.Single(k => k.Text == "Neuer Bewohner …").PerformClick();
         Assert.True(f.Bewohner.AkteSichtbar);
         Assert.Equal("Bewohnerakte", f.Kopf.TitelText);
