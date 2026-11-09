@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.12** (Bauplan Schritt 29f: kleine Korrekturen).
+Stand: 09.11.2026. Version: **0.33.13** (Bauplan Schritt 29g: Tagesplan im normalen Programmstil).
 
 ## Aktuell
 
@@ -252,8 +252,12 @@ Besonderheiten“). Beim Angebot heißt das Feld **„Teilnehmer“** mit „(An
 steht keine Aufgabenliste mehr über den Berichten; die Bewohnerleiste liegt auf einer abgerundeten Fläche, der gewählte
 Name ist abgerundet hell hervorgehoben.
 
+Neu in 0.33.13: Der **Tagesplan** sieht aus wie das übrige Programm: helle Fläche, normale Schrift und Zeilenhöhe,
+Uhrzeit und Datum oben rechts in normaler Größe, der Status als Marke in denselben Farben wie in der Übersicht. Die
+Blöcke „Jetzt und gleich“, „Später heute“, „Erledigt“ und die Knöpfe „gegangen“, „abgesagt“, „ausgefallen“ bleiben.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29g „Tagesplan im normalen Programmstil“ (0.33.13).
+als Nächstes 29h „Übergabe nach Schichten“ (0.33.14).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1212,6 +1216,12 @@ als Nächstes 29g „Tagesplan im normalen Programmstil“ (0.33.13).
   - Dokumentation: Aufgaben-Kurzliste entfernt (Klasse `AufgabenKurzliste` gelöscht); Bewohnerleiste als
     `KartenFlaeche`, Namen in `RundeListe` (gewählte Zeile abgerundet, heller Akzent, mit Fokus umrandet).
 
+- 0.33.13 — Bauplan Schritt 29g:
+  - `TafelStil` nimmt nur noch Farben und Schriften aus `Stil` (keine dunkle Fläche, kein Consolas, keine
+    Großschrift); Zeilen in Knopfhöhe ohne Zebra, Status mit `Stil.MarkeZeichnen`.
+  - Die Statusfarben stehen einmal in `TafelStil.Status` (vorher doppelt in Übersicht und laufenden Therapien).
+  - Schmalere Spalten für Zeit, Status und Knopf: Bei 900 px passen alle vier Textspalten.
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1293,6 +1303,10 @@ als Nächstes 29g „Tagesplan im normalen Programmstil“ (0.33.13).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.13): Die Status-Wörter bleiben in Großbuchstaben („JETZT“, „NOCH OFFEN“): Sie stehen genauso in der
+  Übersicht und bei den laufenden Therapien; „keine Großschrift“ im Auftrag meint die Schriftgröße. Das Vollbild (F11)
+  bleibt, jetzt ebenfalls hell.
 
 - 09.11.2026 (0.33.12): Die Demo-Übergaben bekommen eigene Texte statt einer Auswahl aus den Tagesberichten: So kann
   kein zufälliger Bericht „Keine Besonderheiten“ zur Übergabe werden. Im Datenmodell heißt die Zahl weiter
@@ -2061,6 +2075,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.13: Tagesplan öffnen – hell wie das übrige Programm, Uhrzeit und Datum klein oben rechts, Zeilen in
+normaler Höhe, Status als farbige Marke. „bestätigen ▾“ → „gegangen“ wirkt wie vorher; „Vollbild (F11)“ ebenfalls hell.
 
 Version 0.33.12:
 

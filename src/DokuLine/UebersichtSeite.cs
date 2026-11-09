@@ -236,7 +236,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         // 2. Termine heute aus dem Tagesplan, mit dem Status der Tafel.
         var termine = HeuteWichtigRegeln.Termine(speicher.Tagesplan(DateOnly.FromDateTime(jetzt), alle.Select(h => h.Bewohner)), jetzt);
         Termine.Setzen(termine.Count, termine.Select(t =>
-            Eintrag($"{t.Zeit}  {t.Text}", null, (t.StatusText, StatusMarke(t.Status)), () => StelleGewuenscht?.Invoke("Tagesplan"))));
+            Eintrag($"{t.Zeit}  {t.Text}", null, (t.StatusText, TafelStil.Status(t.Status)), () => StelleGewuenscht?.Invoke("Tagesplan"))));
 
         // 3. Laufender Dienst: „6 von 9 erledigt“, Balken, offene Aufgaben zum Abhaken. Die Standardaufgaben der
         // Schicht zuerst anlegen.
@@ -293,15 +293,6 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         catch (Eingabefehler e) { MessageBox.Show(FindForm(), string.Join("\n", e.Fehler), "Aufgaben", MessageBoxButtons.OK, MessageBoxIcon.Information); }
         Aktualisieren();
     }
-
-    private static Stil.Marke StatusMarke(TafelStatus s) => s switch
-    {
-        TafelStatus.Gegangen or TafelStatus.Zurueck => Stil.Offen,
-        TafelStatus.NochOffen => Stil.Achtung,
-        TafelStatus.Abgesagt or TafelStatus.Ausgefallen => Stil.Beschluss,
-        TafelStatus.Jetzt or TafelStatus.Gleich => Stil.Unterwegs,
-        _ => Stil.Zimmer,
-    };
 
     private static HeuteEintrag Eintrag(string text, string? unten, (string Text, Stil.Marke Marke)? status, Action klick)
     {

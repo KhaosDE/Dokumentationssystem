@@ -3,43 +3,28 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Tagesplan als Anzeigetafel, nach dem Vorbild einer Abflugtafel am Flughafen:
-// dunkle Fläche, helle große Schrift, Uhrzeit in fester Zeichenbreite, oben rechts groß Uhrzeit und
-// Datum. Spalten: Zeit · Bewohner · Termin · Ort · Begleitung · Status. Der Status ist immer ein Wort,
-// die Farbe kommt nur dazu. Der Rest des Programms bleibt hell.
+// Tagesplan im Stil des übrigen Programms: helle Fläche, normale Schrift und Zeilenhöhe.
+// Spalten: Zeit · Bewohner · Termin · Ort · Begleitung · Status. Der Status ist immer ein Wort, die Farbe kommt dazu.
 public static class TafelStil
 {
-    public static readonly Color Flaeche = Color.FromArgb(14, 20, 27);
-    public static readonly Color Zeile = Color.FromArgb(21, 29, 39);
-    public static readonly Color ZeileAndere = Color.FromArgb(25, 34, 45);
-    public static readonly Color Linie = Color.FromArgb(38, 49, 62);
-    public static readonly Color Text = Color.FromArgb(242, 245, 248);
-    public static readonly Color TextBlass = Color.FromArgb(120, 132, 147);
-    public static readonly Color Spaltenkopf = Color.FromArgb(150, 162, 178);
-    public static readonly Color Zeit = Color.FromArgb(255, 201, 77);   // gelb wie auf der Abflugtafel
+    public static Color Flaeche => Stil.Flaeche;
+    public static Color Text => Stil.TextNormal;
+    public static Color TextBlass => Stil.TextLeise;
+    public static Color Linie => Stil.Trennlinie;
 
-    public static readonly Font ZeitSchrift = new("Consolas", 15F, FontStyle.Bold);
-    public static readonly Font ZellenSchrift = new("Segoe UI Semibold", 13.5F);
-    public static readonly Font StatusSchrift = new("Segoe UI Semibold", 11F);
-    public static readonly Font KleinSchrift = new("Segoe UI", 9.5F);
-    public static readonly Font KopfSchrift = new("Segoe UI Semibold", 9F);
-    public static readonly Font BlockSchrift = new("Segoe UI Semibold", 10.5F);
-    public static readonly Font UhrSchrift = new("Consolas", 30F, FontStyle.Bold);
-    public static readonly Font DatumSchrift = new("Segoe UI", 12F);
-    public static readonly Font TitelSchrift = new("Segoe UI Semibold", 16F);
+    public static Font ZeitSchrift => Stil.Fett;
+    public static Font ZellenSchrift => Stil.Standard;
+    public static Font KleinSchrift => Stil.Klein;
+    public static Font KopfSchrift => Stil.Abschnitt;
 
-    // Fläche und Schrift des Status-Worts (Kontrast mindestens 4,5:1).
-    public static (Color Flaeche, Color Text) Status(TafelStatus s) => s switch
+    // Dieselben Farben wie in der Übersicht und bei den laufenden Therapien.
+    public static Stil.Marke Status(TafelStatus s) => s switch
     {
-        TafelStatus.Jetzt => (Color.FromArgb(25, 135, 84), Color.White),
-        TafelStatus.Gleich => (Color.FromArgb(242, 184, 7), Color.FromArgb(16, 21, 28)),
-        TafelStatus.Gegangen => (Color.FromArgb(47, 111, 183), Color.White),
-        TafelStatus.NochOffen => (Color.FromArgb(194, 65, 12), Color.White),
-        TafelStatus.Abgesagt => (Color.FromArgb(201, 42, 42), Color.White),
-        TafelStatus.Ausgefallen => (Color.FromArgb(166, 30, 77), Color.White),
-        TafelStatus.Zurueck => (Color.FromArgb(42, 54, 68), Color.FromArgb(143, 211, 168)),
-        TafelStatus.Vorbei => (Color.FromArgb(42, 54, 68), Color.FromArgb(170, 180, 192)),
-        _ => (Color.FromArgb(42, 54, 68), Color.FromArgb(214, 222, 231)),   // geplant
+        TafelStatus.Gegangen or TafelStatus.Zurueck => Stil.Offen,
+        TafelStatus.NochOffen => Stil.Achtung,
+        TafelStatus.Abgesagt or TafelStatus.Ausgefallen => Stil.Beschluss,
+        TafelStatus.Jetzt or TafelStatus.Gleich => Stil.Unterwegs,
+        _ => Stil.Zimmer,
     };
 }
 
@@ -54,10 +39,10 @@ public sealed class AnzeigeTafel : Panel
     private readonly ToolTip tipp = new();
     private bool nachBewohner;
 
-    public Label Titel { get; } = new() { AutoSize = true, Font = TafelStil.TitelSchrift, ForeColor = TafelStil.Text, BackColor = TafelStil.Flaeche, UseMnemonic = false };
-    public Label Demo { get; } = new() { AutoSize = true, Text = Stil.DemoHinweis, Font = TafelStil.KleinSchrift, ForeColor = TafelStil.Zeit, BackColor = TafelStil.Flaeche };
-    public Label Uhr { get; } = new() { AutoSize = true, Font = TafelStil.UhrSchrift, ForeColor = TafelStil.Zeit, BackColor = TafelStil.Flaeche };
-    public Label DatumText { get; } = new() { AutoSize = true, Font = TafelStil.DatumSchrift, ForeColor = TafelStil.Text, BackColor = TafelStil.Flaeche };
+    public Label Titel { get; } = new() { AutoSize = true, Font = Stil.Fett, ForeColor = TafelStil.Text, BackColor = TafelStil.Flaeche, UseMnemonic = false };
+    public Label Demo { get; } = new() { AutoSize = true, Text = Stil.DemoHinweis, Font = TafelStil.KleinSchrift, ForeColor = Stil.Hinweis.Text, BackColor = TafelStil.Flaeche };
+    public Label Uhr { get; } = new() { AutoSize = true, Font = Stil.Fett, ForeColor = TafelStil.Text, BackColor = TafelStil.Flaeche };
+    public Label DatumText { get; } = new() { AutoSize = true, Font = Stil.Standard, ForeColor = TafelStil.TextBlass, BackColor = TafelStil.Flaeche };
     public List<TafelZeileAnzeige> Zeilen { get; } = [];
     public List<string> Ueberschriften { get; } = [];   // „JETZT UND GLEICH“ … oder je Bewohner
     // Ein Menü für alle Zeilen („gegangen“, „abgesagt“, „ausgefallen“); es gehört der Tafel und
@@ -100,7 +85,7 @@ public sealed class AnzeigeTafel : Panel
         var a = Aufteilung;
         foreach (var (name, r) in new[] { ("ZEIT", a.Zeit), ("BEWOHNER", a.Bewohner), ("TERMIN", a.Termin), ("ORT", a.Ort), ("BEGLEITUNG", a.Begleitung), ("STATUS", a.Status) })
             if (r.Width > 0)
-                TextRenderer.DrawText(g, name, TafelStil.KopfSchrift, new Rectangle(r.X, 0, r.Width, spalten.Height), TafelStil.Spaltenkopf,
+                TextRenderer.DrawText(g, name, TafelStil.KopfSchrift, new Rectangle(r.X, 0, r.Width, spalten.Height), TafelStil.TextBlass,
                     TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix | TextFormatFlags.EndEllipsis);
         using var stift = new Pen(TafelStil.Linie);
         g.DrawLine(stift, 0, spalten.Height - 1, spalten.Width, spalten.Height - 1);
@@ -129,7 +114,6 @@ public sealed class AnzeigeTafel : Panel
         Zeilen.Clear();
         Ueberschriften.Clear();
         string? bisher = null;
-        int nr = 0;
         foreach (var z in zeilen)
         {
             string gruppe = nachBewohner ? $"{z.Bewohner.Name} · Zimmer {z.Bewohner.Zimmer}".ToUpperInvariant() : TafelRegeln.BlockText(z.Block);
@@ -138,9 +122,8 @@ public sealed class AnzeigeTafel : Panel
                 Ueberschriften.Add(gruppe);
                 inhalt.Add(new TafelUeberschrift(gruppe, !nachBewohner && z.Block == TafelBlock.JetztUndGleich));
                 bisher = gruppe;
-                nr = 0;
             }
-            var zeile = new TafelZeileAnzeige(z, nr++ % 2 == 1, grund, MenueZeigen);
+            var zeile = new TafelZeileAnzeige(z, grund, MenueZeigen);
             tipp.SetToolTip(zeile, zeile.AccessibleName);   // die ganze Zeile, falls Spalten gekürzt sind
             Zeilen.Add(zeile);
             inhalt.Add(zeile);
@@ -164,14 +147,16 @@ public sealed class AnzeigeTafel : Panel
         base.OnLayout(levent);
         int innen = Stil.Px(this, Stil.AbstandGross);
         int breite = ClientSize.Width;
-        // Kopf: links Titel und Demo-Hinweis, rechts groß Uhr und Datum.
-        Titel.Location = new Point(innen, innen);
-        Demo.Location = new Point(innen, Titel.Bottom + Stil.Px(this, Stil.AbstandMini));
-        Uhr.Location = new Point(Math.Max(Titel.Right + innen, breite - innen - Uhr.Width), Stil.Px(this, Stil.AbstandKlein));
-        DatumText.Location = new Point(Math.Max(Titel.Right + innen, breite - innen - DatumText.Width), Uhr.Bottom);
-        int kopfHoehe = Math.Max(Demo.Bottom, DatumText.Bottom) + Stil.Px(this, Stil.AbstandKlein);
+        // Kopf: links Titel und Demo-Hinweis, rechts Uhr und Datum in einer Zeile.
+        int oben = Stil.Px(this, Stil.AbstandMittel);
+        Titel.Location = new Point(innen, oben);
+        Demo.Location = new Point(Titel.Right + Stil.Px(this, Stil.AbstandKlein), oben + (Titel.Height - Demo.Height) / 2);
+        Uhr.Location = new Point(Math.Max(Demo.Right + innen, breite - innen - Uhr.Width), oben);
+        DatumText.Location = new Point(Math.Max(Demo.Right + innen, Uhr.Left - Stil.Px(this, Stil.AbstandKlein) - DatumText.Width),
+            oben + (Uhr.Height - DatumText.Height) / 2);
+        int kopfHoehe = Math.Max(Titel.Bottom, Uhr.Bottom) + Stil.Px(this, Stil.AbstandKlein);
         kopf.SetBounds(0, 0, breite, kopfHoehe);
-        int spaltenHoehe = Stil.Px(this, 28);
+        int spaltenHoehe = Stil.Px(this, 24);
         spalten.SetBounds(0, kopfHoehe, breite, spaltenHoehe);
         spalten.Invalidate();
         liste.SetBounds(0, kopfHoehe + spaltenHoehe, breite, Math.Max(0, ClientSize.Height - kopfHoehe - spaltenHoehe));
@@ -191,8 +176,8 @@ public sealed class AnzeigeTafel : Panel
         {
             int hoehe = c switch
             {
-                TafelZeileAnzeige => Stil.Px(this, 46),
-                TafelUeberschrift => Stil.Px(this, 36),
+                TafelZeileAnzeige => Stil.Px(this, Stil.KnopfHoehe),
+                TafelUeberschrift => Stil.Px(this, 30),
                 _ => c.PreferredSize.Height,
             };
             if (c is Label leer) leer.Location = new Point(Stil.Px(this, Stil.AbstandGross), y + Stil.Px(this, Stil.AbstandKlein));
@@ -207,7 +192,7 @@ public sealed class AnzeigeTafel : Panel
     }
 }
 
-// Überschrift eines Blocks („JETZT UND GLEICH“ mit gelbem Balken) oder eines Bewohners.
+// Überschrift eines Blocks („JETZT UND GLEICH“ mit Balken in Akzentfarbe) oder eines Bewohners.
 public sealed class TafelUeberschrift : Control
 {
     private readonly bool hervorheben;
@@ -226,10 +211,10 @@ public sealed class TafelUeberschrift : Control
     {
         base.OnPaint(e);
         int innen = Stil.Px(this, Stil.AbstandGross);
-        var farbe = hervorheben ? TafelStil.Zeit : TafelStil.Spaltenkopf;
+        var farbe = hervorheben ? Stil.Akzent : TafelStil.TextBlass;
         using var balken = new SolidBrush(farbe);
         e.Graphics.FillRectangle(balken, innen, Height / 2 - Stil.Px(this, 8), Stil.Px(this, 4), Stil.Px(this, 16));
-        TextRenderer.DrawText(e.Graphics, Text, TafelStil.BlockSchrift, new Rectangle(innen + Stil.Px(this, 12), 0, Width - innen, Height), farbe,
+        TextRenderer.DrawText(e.Graphics, Text, TafelStil.KopfSchrift, new Rectangle(innen + Stil.Px(this, 12), 0, Width - innen, Height), farbe,
             TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
     }
 }
@@ -245,12 +230,12 @@ public sealed class TafelZeileAnzeige : Control
     public Button? BestaetigenKnopf { get; }
     public TafelAufteilung Aufteilung { get; set; } = TafelAufteilung.Leer;
 
-    public TafelZeileAnzeige(TafelZeile daten, bool andere, string? grund, Action<TafelZeileAnzeige> menueZeigen)
+    public TafelZeileAnzeige(TafelZeile daten, string? grund, Action<TafelZeileAnzeige> menueZeigen)
     {
         Daten = daten;
         StatusWort = TafelRegeln.Wort(daten.Status);
         Detail = TafelRegeln.Bestaetigt(daten.Zeile);
-        BackColor = andere ? TafelStil.ZeileAndere : TafelStil.Zeile;
+        BackColor = TafelStil.Flaeche;
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
         var t = daten.Termin;
         AccessibleRole = AccessibleRole.Row;
@@ -286,20 +271,18 @@ public sealed class TafelZeileAnzeige : Control
         {
             if (spalte.Width > 0) TextRenderer.DrawText(g, inhalt, schrift, new Rectangle(spalte.X, 0, spalte.Width, Height), farbe, Zelle);
         }
-        Zeichnen(t.Ganztags ? "ganztags" : $"{t.Von:HH\\:mm}–{t.Bis:HH\\:mm}", TafelStil.ZeitSchrift, a.Zeit, Blass ? TafelStil.TextBlass : TafelStil.Zeit);
+        Zeichnen(t.Ganztags ? "ganztags" : $"{t.Von:HH\\:mm}–{t.Bis:HH\\:mm}", TafelStil.ZeitSchrift, a.Zeit, text);
         Zeichnen($"{Daten.Bewohner.Name} · {Daten.Bewohner.Zimmer}", TafelStil.ZellenSchrift, a.Bewohner, text);
         Zeichnen(t.Titel, TafelStil.ZellenSchrift, a.Termin, text);
         Zeichnen(t.Ort, TafelStil.ZellenSchrift, a.Ort, text);
         Zeichnen(t.Begleitung, TafelStil.ZellenSchrift, a.Begleitung, text);
-        // Status: Wort auf farbiger Fläche, daneben klein „wann · wer“.
-        var (flaeche, schrift) = TafelStil.Status(Daten.Status);
-        var groesse = TextRenderer.MeasureText(g, StatusWort, TafelStil.StatusSchrift);
-        int pw = groesse.Width + Stil.Px(this, 14), ph = Stil.Px(this, 26);
-        var pille = new Rectangle(a.Status.X, (Height - ph) / 2, pw, ph);
-        using (var pinsel = new SolidBrush(flaeche)) g.FillRectangle(pinsel, pille);
-        TextRenderer.DrawText(g, StatusWort, TafelStil.StatusSchrift, pille, schrift, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPrefix);
+        // Status: Wort als Marke (wie überall im Programm), daneben klein „wann · wer“.
+        float skala = Stil.Skala(this);
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        int pw = Stil.MarkeZeichnen(g, StatusWort, a.Status.X, (Height - Stil.Px(this, 22)) / 2, TafelStil.Status(Daten.Status), skala);
+        int rechts = a.Status.X + pw + Stil.Px(this, 6);
         if (Detail.Length > 0 && a.Detail)
-            TextRenderer.DrawText(g, Detail, TafelStil.KleinSchrift, new Rectangle(pille.Right + Stil.Px(this, 6), 0, a.Status.Right - pille.Right - Stil.Px(this, 6), Height),
+            TextRenderer.DrawText(g, Detail, TafelStil.KleinSchrift, new Rectangle(rechts, 0, a.Status.Right - rechts, Height),
                 TafelStil.TextBlass, Zelle);
         using var stift = new Pen(TafelStil.Linie);
         g.DrawLine(stift, 0, Height - 1, Width, Height - 1);
@@ -319,7 +302,7 @@ public sealed record TafelAufteilung(Rectangle Zeit, Rectangle Bewohner, Rectang
     public static TafelAufteilung Berechnen(Control bezug, int breite, bool nachBewohner)
     {
         int P(int wert) => Stil.Px(bezug, wert);
-        int innen = P(Stil.AbstandGross), luecke = P(Stil.AbstandMittel), zeit = P(135), pille = P(124), detail = P(84), knopf = P(120), mindest = P(120);
+        int innen = P(Stil.AbstandGross), luecke = P(Stil.AbstandMittel), zeit = P(100), pille = P(100), detail = P(84), knopf = P(110), mindest = P(110);
         // Textspalten nach Wichtigkeit, mit Anteil an der freien Breite.
         var spalten = new List<(string Name, int Anteil)> { ("bewohner", 28), ("termin", 34), ("ort", 21), ("begleitung", 17) };
         if (nachBewohner) spalten.RemoveAt(0);

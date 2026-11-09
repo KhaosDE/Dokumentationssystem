@@ -251,7 +251,7 @@ public sealed class Kaertchen : Panel
         oben.Text = $"{p.Bewohner.Wohnbereich} · {p.Bewohner.Zimmer}" + (zusatz is null ? "" : $" · {zusatz}");
         name.Text = p.Bewohner.Name;
         unten.Text = bezugspflege is null ? "Bezugspflege: –" : $"Bezugspflege: {bezugspflege}";
-        Status = new MarkenFeld(p.StatusText, StatusMarke(p.Status));
+        Status = new MarkenFeld(p.StatusText, TafelStil.Status(p.Status));
         Grundform();
         Controls.Add(Status);
         AccessibleName = $"{p.Bewohner.Name}, {oben.Text}, {unten.Text}, {p.StatusText}";
@@ -271,15 +271,6 @@ public sealed class Kaertchen : Panel
         Padding = new Padding(Stil.AbstandKlein);
         Controls.AddRange([oben, name, unten, knoepfe]);
     }
-
-    public static Stil.Marke StatusMarke(TafelStatus s) => s switch
-    {
-        TafelStatus.Gegangen or TafelStatus.Zurueck => Stil.Offen,
-        TafelStatus.NochOffen => Stil.Achtung,
-        TafelStatus.Abgesagt or TafelStatus.Ausgefallen => Stil.Beschluss,
-        TafelStatus.Jetzt or TafelStatus.Gleich => Stil.Unterwegs,
-        _ => Stil.Zimmer,
-    };
 
     public void Knopf(string text, string? grund, Action aktion)
     {

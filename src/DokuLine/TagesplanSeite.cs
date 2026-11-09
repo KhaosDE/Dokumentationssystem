@@ -2,9 +2,8 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Tagesplan“ (als Anzeigetafel): alle Termine von heute
-// für die Bewohner des eigenen Bereichs (Häkchen „alle Bereiche“). Oben „Jetzt und gleich“, darunter
-// „Später heute“, unten blasser „Erledigt“ – oder „nach Bewohner“. Bei Therapien „gegangen“,
+// Bereich „Tagesplan“: alle Termine von heute für die Bewohner des gewählten Bereichs. Oben „Jetzt und gleich“,
+// darunter „Später heute“, unten blasser „Erledigt“ – oder „nach Bewohner“. Bei Therapien „gegangen“,
 // „abgesagt“, „ausgefallen“ direkt in der Zeile; das ist derselbe Eintrag wie im Wochenplan, mit
 // Kürzel und Uhrzeit. Die Tafel erneuert sich jede Minute und bei jeder Änderung (auch von anderen
 // Rechnern über den Mehrplatz-Abgleich). „Vollbild (F11)“ zeigt nur die Tafel; Esc beendet.

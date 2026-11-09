@@ -69,8 +69,8 @@ Danach fragt Windows für diese Datei nicht mehr.
   Rechtsklick auf eine Bewohnerkarte → „Neuer Bericht …“. Zwei Kennzeichen: **Wichtig** (bleibt in der Akte hervorgehoben)
   und **Übergabe** (erscheint im Bereich „Übergabe“, so lange wie gewählt). Korrigiert wird
   mit **Nachtrag …** – der ursprüngliche Text bleibt stehen.
-- **Tagesplan** (links, unter „Übersicht“): alle Termine von heute als **Anzeigetafel** wie am
-  Flughafen – oben „Jetzt und gleich“, darunter „Später heute“, unten blasser „Erledigt“; jede Zeile mit
+- **Tagesplan** (links, unter „Übersicht“): alle Termine von heute als übersichtliche Liste – oben
+  „Jetzt und gleich“, darunter „Später heute“, unten blasser „Erledigt“; jede Zeile mit
   einem Status-Wort (JETZT, GLEICH, GEPLANT, GEGANGEN, NOCH OFFEN …). Die Tafel geht jede Minute von
   selbst weiter. Bei Therapien „bestätigen ▾“ → „gegangen“, „abgesagt“, „ausgefallen“ (wie im
   Wochenplan). Nach „gegangen“ zeigen Karte und Akte bis zum Ende „in Therapie: … bis …“.

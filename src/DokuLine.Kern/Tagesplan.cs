@@ -44,8 +44,7 @@ public static class TagesplanRegeln
     public static string InTherapieText(string titel, TimeOnly bis) => $"in Therapie: {titel} bis {bis:HH\\:mm}";
 }
 
-// Tagesplan als Anzeigetafel, nach dem Vorbild einer Abflugtafel: Status als Wort
-// (die Farbe kommt dazu, nie allein) und drei Blöcke – „Jetzt und gleich“ oben, „Später heute“,
+// Tagesplan: Status als Wort (die Farbe kommt dazu, nie allein) und drei Blöcke – „Jetzt und gleich“ oben, „Später heute“,
 // „Erledigt“ unten.
 public enum TafelStatus { Jetzt, Gleich, Geplant, Gegangen, NochOffen, Abgesagt, Ausgefallen, Zurueck, Vorbei }
 

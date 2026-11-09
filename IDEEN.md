@@ -1981,7 +1981,7 @@ Umfang:
   mit Schritt 29b.
 
 ## Tagesplan im normalen Programmstil, kleiner und übersichtlicher
-Status: freigegeben (Bauplan Schritt 29g; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.13; Bauplan Schritt 29g; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der Tagesplan verliert die dunkle Flughafen-Optik und bekommt das Aussehen des übrigen
 Programms.

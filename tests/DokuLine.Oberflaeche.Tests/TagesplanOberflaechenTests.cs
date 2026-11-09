@@ -35,7 +35,7 @@ public class TagesplanOberflaechenTests
         f.Navigation.Single(n => n.Text == "Tagesplan").Ausloesen();
         Assert.Equal("Tagesplan", f.AktiverBereich);
         var t = f.Tagesplan;
-        // Anzeigetafel (Schritt 26g): Uhr und Datum oben rechts, Demo-Hinweis, Status als Wort.
+        // Uhr und Datum oben rechts, Demo-Hinweis, Status als Wort.
         Assert.Matches(@"^\d\d:\d\d$", t.Tafel.Uhr.Text);
         Assert.EndsWith(DateTime.Now.ToString("dd.MM.yyyy", System.Globalization.CultureInfo.InvariantCulture), t.Tafel.DatumText.Text);
         Assert.Equal(Stil.DemoHinweis, t.Tafel.Demo.Text);
@@ -141,18 +141,18 @@ public class TagesplanOberflaechenTests
     {
         using var bezug = new Panel();
         int Px(int wert) => Stil.Px(bezug, wert);
-        var schmal = TafelAufteilung.Berechnen(bezug, Px(760), nachBewohner: false);
+        var schmal = TafelAufteilung.Berechnen(bezug, Px(680), nachBewohner: false);
         Assert.Equal(2, schmal.Textspalten);   // Bewohner und Termin; Ort und Begleitung im Hinweis
         Assert.Equal(0, schmal.Ort.Width);
         Assert.False(schmal.Detail);
-        var mittel = TafelAufteilung.Berechnen(bezug, Px(1000), nachBewohner: false);
+        var mittel = TafelAufteilung.Berechnen(bezug, Px(900), nachBewohner: false);
         Assert.Equal(4, mittel.Textspalten);
         Assert.False(mittel.Detail);
         var breit = TafelAufteilung.Berechnen(bezug, Px(1700), nachBewohner: false);
         Assert.True(breit.Detail);
         Assert.All(new[] { breit.Bewohner, breit.Termin, breit.Ort, breit.Begleitung }, r => Assert.True(r.Width >= Px(120)));
         Assert.True(breit.Knopf.Right <= Px(1700));
-        var nachBewohner = TafelAufteilung.Berechnen(bezug, Px(760), nachBewohner: true);
+        var nachBewohner = TafelAufteilung.Berechnen(bezug, Px(680), nachBewohner: true);
         Assert.Equal(0, nachBewohner.Bewohner.Width);   // der Name steht in der Überschrift
         Assert.True(nachBewohner.Termin.Width > 0 && nachBewohner.Ort.Width > 0);
     });
