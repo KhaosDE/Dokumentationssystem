@@ -73,6 +73,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 29b | Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter | 0.33.4 |
 | 29c | Rechte: Fehlendes ausblenden statt ausgrauen | 0.33.5 |
 | 29d | Wohnbereich einmal in der Übersicht wählen, gilt überall | 0.33.6 |
+| 29q | Aufgaben gehören zu einem Bewohner oder einem Bereich | 0.33.6 |
 | 29e | Nachrichten: Kuvert in der Kopfzeile statt Hinweis in jedem Fenster | 0.33.7 |
 | 29f | Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation) | 0.33.8 |
 | 29g | Tagesplan im normalen Programmstil, kleiner und übersichtlicher | 0.33.9 |
@@ -1539,6 +1540,11 @@ Umfang (Vorschlag):
   - Je Zeile Praxis, Telefon und „seit“; Wechsel als neue Fassung mit Datum.
   - Die zugeteilten Ärzte stehen in Visite, Medikamentenplan („verordnet von“), Kalender und
     Überleitungsbogen **oben in der Auswahl**, alle übrigen Ärzte darunter.
+  - **Arztzuteilung schon bei der Aufnahme** (Vorgabe Tobi, 09.11.2026): Das Formular „Neuer
+    Bewohner …“ bekommt den Abschnitt **„Ärzte“** mit **Hausarzt** und **Psychiater** (Auswahl aus
+    „Verzeichnisse → Ärzte“, „Arzt anlegen …“ direkt aus der Auswahl). Für beide muss ein Zustand
+    gewählt sein — Arzt · „keiner“ · „noch nicht bekannt“ (= nicht erfasst) —, sonst lässt sich
+    die Aufnahme nicht abschließen. Weitere Ärzte optional. Die Angaben landen im Reiter „Ärzte“.
 - **Krankenkasse:**
   - Kasse (Auswahl aus einer Liste in den Einstellungen, Demo: ausgedachte Kassen wie
     „Musterkasse Süd“), Versichertennummer (Demo: ausgedacht), Status (Mitglied,
@@ -1752,9 +1758,9 @@ um Angehörige und Betreuer erweitert werden. Für Forensik und FOSA gibt es imm
 den Zuständigen, auch wegen der Medikamentenbestellung.
 Umfang:
 - **Ein eigenes Verzeichnis je Gruppe** (Vorgabe Tobi, 09.11.2026: „Seitenmenü links, ich klicke
-  auf Ärzte und sehe eine Liste von allen Ärzten“): neuer Bereich **„Verzeichnisse“** in der
-  Seitenleiste des Programms (nicht in den Einstellungen versteckt, weil man dort im Alltag
-  Telefonnummern nachschlägt). Darin links ein eigenes Seitenmenü mit den Gruppen und Zähler:
+  auf Ärzte und sehe eine Liste von allen Ärzten“): **„Verzeichnisse“ in den Einstellungen**
+  (Vorgabe Tobi, 09.11.2026: „Verzeichnisse kommt in die Einstellungen hinein“), als eigene Gruppe
+  im Seitenmenü der Einstellungen (Schritt 29). Darunter die Gruppen mit Zähler:
   **Ärzte · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stellen**. Ein Klick zeigt rechts
   die Liste dieser Gruppe mit eigenen Spalten, Suchfeld und „Neu …“ in der Aktionsleiste:
   - Ärzte: Name, Fachrichtung, Praxis, Telefon, E-Mail, zugeordnete Bewohner (Anzahl).
@@ -1765,7 +1771,9 @@ Umfang:
   Doppelklick öffnet die Person; dort „zugeordnet zu …“ mit Sprung in die Akte.
 - Technisch darf es eine gemeinsame Tabelle mit dem Feld „Gruppe“ bleiben (einfacher); für den
   Nutzer sind es getrennte Verzeichnisse. Das bisherige „Ärzteverzeichnis“ in den Einstellungen
-  führt nur noch dorthin.
+  wird zu „Verzeichnisse → Ärzte“. Kein eigener Bereich in der Seitenleiste des Programms.
+- Ansehen dürfen alle (Telefonnummern nachschlagen); ändern nur mit Recht (siehe unten). Wer kein
+  Recht für andere Teile der Einstellungen hat, sieht dort nur „Verzeichnisse“ (Schritt 29c).
 - Felder: Name, Art, Stelle (Praxis, Büro, Klinik, Ambulanz), **Funktion** (bei Forensik und
   FOSA: Psychologe/Psychologin, Arzt/Ärztin, Pflege, Sozialdienst; bei Ärzten die Fachrichtung),
   Telefon, Mobil, E-Mail (Demo nur `@example.org`), Anschrift, Erreichbarkeit, Hinweis,
@@ -2128,7 +2136,7 @@ Umfang:
   4. **Dokumentation** (wie Schritt 29b)
   5. **Aufgaben** (Aufgaben des Teams Therapie)
   6. **Nachrichten** (Team Therapie und eigene)
-  7. **Verzeichnisse** und **Einstellungen** (soweit Rechte)
+  7. **Einstellungen** (soweit Rechte; darin die Verzeichnisse)
   Übersicht, Übergabe, Visiten, Medikamentenplan und Ausgangsliste erscheinen dort nicht.
 - **Bewohner im Bereich Therapie:** alle Bewohner aus R1–R3, die mindestens ein Angebot der
   Therapie haben; in den Bewohnerleisten nach Wohnbereich gruppiert (kleine Überschrift „R1“,
@@ -2195,3 +2203,22 @@ Umfang (Vorschlag):
 - Suchbegriff nur aus dem Feld „Medikamentenname“; nie Bewohner- oder Arztangaben (wie bisher).
 - Hinweis in den Einstellungen bei „Nachschlagen beim BfArM“: welche Daten das Programm dabei
   sendet (Suchbegriff, IP-Adresse der Einrichtung, Uhrzeit).
+
+## Aufgaben gehören zu einem Bewohner oder einem Bereich
+Status: freigegeben (Bauplan Schritt 29q; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Jede Aufgabe gehört entweder zu einem Bewohner oder zu einem Bereich. Man sieht nur die
+Aufgaben des gewählten Bereichs.
+Warum: Vorgabe Tobi (09.11.2026): Aufgaben können bewohnerbezogen oder bereichsbezogen sein. Jemand
+von der R2 muss die Aufgaben der R3 nicht sehen. Aufgaben sind ein wichtiges Übergabeinstrument
+unter Kollegen. Bisher (bis 0.33.3) stehen Aufgaben ohne Bewohner in allen drei Bereichen.
+Umfang:
+- Neue Aufgabe: Auswahl **„Bewohner“** (dann gehört sie zu dessen Bereich, wechselt bei einem
+  Umzug mit) oder **„Bereich“** (R1, R2, R3 oder Therapie; Vorgabe: der in der Übersicht gewählte
+  Bereich, Schritt 29d). Kein „ganzes Haus“.
+- Aufgaben-Seite, Übersicht („Laufender Dienst“) und Zähler zeigen nur Aufgaben des gewählten
+  Bereichs.
+- **Standardaufgaben (Vorlagen)** ebenfalls je Bereich; Schichtzeiten sind schon je Bereich.
+- Bestehende Aufgaben ohne Bewohner: beim Update einmalig dem Bereich des Rechners zuordnen, auf
+  dem sie angelegt wurden; ist der unbekannt, R1 und in `STAND.md` vermerken.
+- Demo-Daten: Bereichsaufgaben für jeden Bereich getrennt.
