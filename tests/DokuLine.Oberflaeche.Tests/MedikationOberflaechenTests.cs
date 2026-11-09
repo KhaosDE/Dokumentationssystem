@@ -101,7 +101,7 @@ public class MedikationOberflaechenTests
             Assert.Empty(m2.Eintraege);   // abgesetzt: nicht unter „Was gilt heute“
             Assert.True(m2.RegelLeer.Visible);
             m2.AbgesetzteZeigen.Checked = true;
-            Assert.StartsWith("abgesetzt am ", Zelle(m2.Tabelle, "status"));
+            Assert.Contains("abgesetzt am ", Zelle(m2.Tabelle, "status"));   // davor ggf. die frische Änderung (29l)
         }
         var (u3, f3, m3) = Oeffnen("Distel");
         using (u3)
@@ -175,7 +175,7 @@ public class MedikationOberflaechenTests
             }))
                 m.Oeffnen(Stand());
             Assert.Equal(["VerordnungDetailFenster", "AenderungFenster"], titel);
-            Assert.StartsWith("pausiert bis ", Zelle(m.Tabelle, "status", Zeile()));
+            Assert.Contains("pausiert bis ", Zelle(m.Tabelle, "status", Zeile()));
 
             m.TagFeld.Text = Heute(3);
             using (new DialogErsatz(fenster =>
@@ -188,7 +188,7 @@ public class MedikationOberflaechenTests
                 return plan.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 m.Oeffnen(Stand());
-            Assert.StartsWith("Stufe 1 von 2 · ", Zelle(m.Tabelle, "status", Zeile()));
+            Assert.Contains("Stufe 1 von 2 · ", Zelle(m.Tabelle, "status", Zeile()));
             Assert.EndsWith("0–0–0–0", Zelle(m.Tabelle, "status", Zeile()));
             Assert.Equal("½", Zelle(m.Tabelle, "morgens", Zeile()));
 
