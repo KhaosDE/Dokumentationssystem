@@ -192,6 +192,17 @@ public static class Stil
 
     public static Icon Programmsymbol => programmsymbol.Value;
 
+    // Dasselbe Bild als eigenes Objekt für Dialoge (0.33.3): Ein Fenster mit festem Dialograhmen zeigt das
+    // Vorgabesymbol nicht an, und Windows Forms erkennt das Vorgabesymbol am Objekt – deshalb eine Kopie.
+    private static readonly Lazy<Icon> dialogsymbol = new(() => new Icon(Programmsymbol, Programmsymbol.Size));
+    public static Icon Dialogsymbol => dialogsymbol.Value;
+
+    // Kein Fenster im Programm hat ein anderes Symbol; deshalb ohne Ausnahme.
+    public static void SymbolSetzen(Form fenster)
+    {
+        if (!ReferenceEquals(fenster.Icon, Dialogsymbol)) fenster.Icon = Dialogsymbol;
+    }
+
     // Macht das Programmsymbol zum Vorgabesymbol aller Fenster (auch der Dialoge, die kein eigenes setzen).
     // Windows Forms hat dafür keine öffentliche Einstellung; das Feld wird deshalb über Reflection gesetzt.
     // Fehlt es in einer künftigen .NET-Version, bleibt das Vorgabesymbol von Windows Forms (false).

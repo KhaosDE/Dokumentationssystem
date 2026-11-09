@@ -83,7 +83,9 @@ public sealed class KalenderSeite : Panel
         {
             ziel.AllowDrop = true;
             ziel.DragEnter += (_, e) => e.Effect = IcsDatei(e.Data) is not null ? DragDropEffects.Copy : DragDropEffects.None;
-            ziel.DragDrop += (_, e) => { if (IcsDatei(e.Data) is string pfad) Importieren(pfad); };
+            // Erst nach dem Ziehen öffnen (0.33.3): Ein Fenster mitten im Ziehen hält das Programm fest, aus dem gezogen
+            // wurde (z. B. den Explorer), bis es geschlossen ist.
+            ziel.DragDrop += (_, e) => { if (IcsDatei(e.Data) is string pfad) BeginInvoke(() => Importieren(pfad)); };
         }
         NeuKnopf.Click += (_, _) => Bearbeiten(null);
         Monat.TagGeklickt += t => { Stichtag = t; AnsichtWaehlen(KalenderAnsicht.Tag); };
@@ -244,7 +246,12 @@ public sealed class KalenderSeite : Panel
         }
         string vorschlag = $"Kalender {ZeitraumText.Text}.ics".Replace(',', ' ').Replace(':', ' ');
         if (KalenderAustausch.SpeichernUnter(FindForm(), vorschlag) is not string pfad) return null;
-        KalenderAustausch.Schreiben(pfad, Ics.Schreiben(termine, Namen(), Jetzt()));
+        try { KalenderAustausch.Schreiben(pfad, Ics.Schreiben(termine, Namen(), Jetzt(), speicher.IcsKennung())); }
+        catch (Exception x) when (x is IOException or UnauthorizedAccessException)   // 0.33.3: vorher Absturz
+        {
+            MessageBox.Show(FindForm(), $"Die Datei ließ sich nicht speichern: {x.Message}", "Als .ics speichern", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return null;
+        }
         return pfad;
     }
 
@@ -255,7 +262,7 @@ public sealed class KalenderSeite : Panel
         if (pfad is null) return 0;
         List<IcsTermin> gelesen;
         try { gelesen = Ics.Lesen(File.ReadAllText(pfad)); }
-        catch (IOException x)
+        catch (Exception x) when (x is IOException or UnauthorizedAccessException)
         {
             MessageBox.Show(FindForm(), $"Die Datei ließ sich nicht lesen: {x.Message}", ".ics übernehmen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return 0;

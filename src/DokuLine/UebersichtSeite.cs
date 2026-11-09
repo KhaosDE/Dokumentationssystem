@@ -290,7 +290,9 @@ public sealed class UebersichtSeite : Panel
         {
             var verlaeufe = speicher.Verlaeufe(kuerzel, NachrichtenOrdner.Posteingang);
             var ungelesen = HeuteWichtigRegeln.Ungelesen(verlaeufe, kuerzel);
-            Nachrichten.Setzen(ungelesen.Count, ungelesen.Select(n =>
+            // Zähler wie in der Seitenleiste: alle ungelesenen Nachrichten; je Verlauf steht die neueste da (0.33.3:
+            // vorher zählte der Kasten die Verläufe).
+            Nachrichten.Setzen(verlaeufe.Sum(v => v.Ungelesen), ungelesen.Select(n =>
             {
                 var v = verlaeufe.First(x => x.Id == n.Verlauf);
                 return Eintrag(HeuteWichtigRegeln.NachrichtText(n), BerichtRegeln.ZeitText(n.Gesendet), null, () => VerlaufGewuenscht?.Invoke(v));

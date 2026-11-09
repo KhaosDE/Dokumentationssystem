@@ -733,6 +733,11 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER bedarfsgaben_bleiben BEFORE UPDATE ON bedarfsgaben
             BEGIN SELECT RAISE(ABORT, 'Bedarfsgaben werden nicht überschrieben.'); END;
         """,
+        // 29 – Betreuer: dritter Zustand „keine gesetzliche Betreuung“ (0.33.3), z. B. wenn eine Betreuung endet.
+        // Ohne Fassung bleibt es „nicht erfasst“ (Regel 5: leer heißt nicht „keiner“).
+        """
+        ALTER TABLE betreuer ADD COLUMN keine INTEGER NOT NULL DEFAULT 0;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;

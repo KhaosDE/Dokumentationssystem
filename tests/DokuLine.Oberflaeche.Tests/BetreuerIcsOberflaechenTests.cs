@@ -60,6 +60,22 @@ public class BetreuerIcsOberflaechenTests
         Assert.Contains("E-Mail-Adresse bitte so", fehler);
         Assert.StartsWith("Test Taucher (Betreuungsverein (ausgedacht))", akte.BetreuerText.Text);
         Assert.Null(Stil.Sperrgrund(akte.EmailKnopf));
+
+        // 0.33.3: Die Betreuung endet → „keine gesetzliche Betreuung“ (dritter Zustand); E-Mail gesperrt.
+        using (new DialogErsatz(fenster =>
+        {
+            var b = Assert.IsType<BetreuerFenster>(fenster);
+            Assert.True(b.NameFeld.Enabled);
+            b.Keine.Checked = true;
+            Assert.False(b.NameFeld.Enabled);
+            return b.Speichern() ? DialogResult.OK : DialogResult.Cancel;
+        }))
+            akte.BetreuerKnopf.PerformClick();
+        Assert.Equal(BetreuerRegeln.KeineText, akte.BetreuerText.Text);
+        Assert.Equal("Keine gesetzliche Betreuung eingetragen.", Stil.Sperrgrund(akte.EmailKnopf));
+        Assert.False(akte.EmailSchreiben());
+        f.Bewohner.AkteZeigen(u.Demo("Ginster").Id!.Value);   // Demo: keine Betreuung
+        Assert.Equal(BetreuerRegeln.KeineText, akte.BetreuerText.Text);
     });
 
     [Fact]

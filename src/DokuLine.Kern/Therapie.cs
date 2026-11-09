@@ -120,6 +120,9 @@ public static class TherapieRegeln
         for (int i = 0; i < termine.Count; i++)
             for (int j = i + 1; j < termine.Count; j++)
                 if (termine[i].Ueberschneidet(termine[j])) fehler.Add($"Die Termine {termine[i].Text} und {termine[j].Text} überschneiden sich.");
+                // Die Teilnahme gilt je Tag (gegangen/abgesagt): zwei Termine an einem Tag teilten sie sich (0.33.3).
+                else if (termine[i].Tag == termine[j].Tag)
+                    fehler.Add($"Termin {TagName(termine[i].Tag)}: höchstens ein Termin je Wochentag – für einen zweiten bitte ein eigenes Angebot anlegen.");
         int hoechstens = 0;
         if (e.Art == AngebotArt.Einzel) hoechstens = 1;
         else if (!int.TryParse(e.Hoechstens.Trim(), out hoechstens) || hoechstens < 1 || hoechstens > 50)

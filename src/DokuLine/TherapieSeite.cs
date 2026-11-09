@@ -50,6 +50,8 @@ public sealed class TherapieSeite : Panel
         Laufend.AngebotGewaehlt += a =>
         {
             Reiter.Waehlen(AngeboteReiter);
+            // Ist ein anderer Anbieter gefiltert, stünde das Angebot nicht da (0.33.3): dann alle Anbieter zeigen.
+            if (AnbieterFilter.SelectedItem is string f && f != AlleAnbieter && f != a.Anbieter) AnbieterFilter.SelectedItem = AlleAnbieter;
             if (Karten.FirstOrDefault(k => k.Angebot.Id == a.Id) is AngebotKarte karte) ScrollControlIntoView(karte);
         };
         Reiter.Gewechselt += _ => AnsichtWechseln();

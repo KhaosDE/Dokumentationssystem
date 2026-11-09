@@ -63,6 +63,7 @@ internal static class Program
         // Anmelden mit dem Kürzel (Schritt 19), ohne Passwort; „Beenden“ schließt das Programm.
         using (var anmelden = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel))
         {
+            Stil.SymbolSetzen(anmelden);
             if (anmelden.ShowDialog() != DialogResult.OK || anmelden.Angemeldet is not Mitarbeiter angemeldet)
             {
                 speicher.Dispose();

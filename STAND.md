@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.2** (Korrekturen: Übersicht, Therapie-Tafel, Bewohner, Bedarf, Visite, Demo).
+Stand: 09.11.2026. Version: **0.33.3** (Korrekturen: Betreuer, .ics, Einstellungen, Dialoge; Fehlersuche abgeschlossen).
 
 ## Aktuell
 
@@ -203,7 +203,12 @@ Therapie-Tafel trifft nicht mehr den nächsten Eintrag; die Tafel behält beim N
 eintragen; angezeigt werden die letzten 24 Stunden; die **Höchstmenge** zählt die Menge (auch bei Nachträgen und über
 alle Bedarfsverordnungen desselben Medikaments). Die **Visite** prüft beim Abschließen das Recht.
 
-**Nächster Schritt:** Die übrigen Funde der Fehlersuche vom 08.11.2026 beheben (0.33.3); Liste unter „Offene Punkte“.
+Neu in 0.33.3: Korrekturen. Beim **Betreuer** gibt es den dritten Zustand **„keine gesetzliche Betreuung“** (z. B. wenn
+eine Betreuung endet). Das Einlesen von **.ics-Dateien** übersteht kaputte Termine, Wochen-Dauern und UTC-Zeitzonen;
+mehrere Termine werden in einem Zug übernommen. **Dialoge** zeigen das Programmsymbol. In den **Einstellungen** bleiben
+Untermodule gesperrt, solange das Modul aus ist. Die Bereichswahl verdeckt nie „Drucken …“.
+
+**Nächster Schritt:** Die Fehlersuche vom 08.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1021,16 +1026,33 @@ alle Bedarfsverordnungen desselben Medikaments). Die **Visite** prüft beim Absc
   - Visite: „Visite abschließen“ prüft das Recht „Visiten“ dessen, der abschließt.
   - Demo: Vor jedem Nachholen von Demo-Daten eine Sicherungskopie (`…-vor-demo-nachholen.db`, mit Startprotokoll);
     beim Nachholen der Medikation bleiben keine Bedarf-Berichte ohne Gabe stehen (vorher doppelt).
+- 0.33.3 — letzte Korrekturen aus der Fehlersuche vom 08.11.2026:
+  - Übersicht: Kasten „Nachrichten ungelesen“ zählt alle ungelesenen Nachrichten wie die Seitenleiste (vorher die
+    Verläufe). Aktionsleiste: Die Bereichswahl wird bei wenig Platz schmaler, unter 90 px ausgeblendet; sie verdeckt
+    nie „Drucken …“ oder andere Knöpfe.
+  - Therapie: Klick auf einen Balken der Tagesleiste zeigt das Angebot auch bei einem anderen gefilterten Anbieter
+    (Filter dann „alle Anbieter“). Höchstens ein Termin je Wochentag und Angebot (die Teilnahme gilt je Tag). Knöpfe
+    melden beim Löschen ihren Hinweistext ab (vorher blieben sie im Speicher).
+  - Betreuer: dritter Zustand „keine gesetzliche Betreuung“ (Häkchen im Formular; Datenbank-Schritt 29, Spalte
+    `keine`); neue Fassung, die alte bleibt im Verlauf. „E-Mail an Betreuer …“ dann gesperrt. Demo: Ginster.
+    E-Mail-Adressen mit `#` oder `%` werden abgelehnt (sie veränderten die mailto-Adresse).
+  - .ics: ein Termin, der sich nicht lesen lässt, wird übersprungen; `P2W` (Wochen); Ende gleich Beginn → eine Stunde;
+    `TZID=UTC` gilt als UTC; Schreiben unabhängig von der Sprache des Rechners; UID mit zufälliger Kennung je
+    Datenbank (`ics_kennung` in `meta`); Übernahme mehrerer Termine in einem Zug; kein Absturz ohne Lese- oder
+    Schreibrecht; Hereinziehen öffnet die Vorschau erst nach dem Ziehen.
+  - Einstellungen: Untermodule bleiben gesperrt, solange das Modul aus ist (auch nach erneutem Öffnen); Schichtzeiten
+    unverändert verlassen ist kein Fehler; nach den Fenstern Mitarbeiter, Bereiche und Positionen, Rechte und
+    Standardaufgaben werden Werte und Sperren neu gelesen; Fristen und Update prüfen das Recht auch im Handler.
+  - Dialoge zeigen das Programmsymbol (`Stil.Dialogsymbol`, gesetzt in `Fenster.Grundform`, `Dialog.Zeigen`, beim
+    Anmelden und im Bewohnerformular).
 
 ## Offene Punkte
 
-- Fehlersuche vom 08.11.2026 (Auftrag Tobi: „behebe alles“); behoben in 0.33.1 (Startabbruch) und 0.33.2. Noch
-  offen, folgt in 0.33.3:
-  - Übersicht: Nachrichtenzähler; Bereichswahl kann „Drucken …“ verdecken; Termine werden doppelt gelesen.
-  - Therapie: Klick auf einen Balken bei gefiltertem Anbieter; zwei Termine eines Angebots am selben Tag;
-    Hinweistexte der Knöpfe bleiben nach dem Schließen im Speicher.
-  - Betreuer: „keine Betreuung“ als dritter Zustand; .ics und E-Mail: Fehlerfälle beim Import/Export.
-  - Einstellungen: Modul-Haken, Schichtzeiten, Rechte in einzelnen Handlern; Dialoge ohne Programmsymbol.
+- Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
+  Termine des Tages für den Kasten „Termine heute“ ein zweites Mal (der Kasten braucht auch abgesagte Termine, die
+  Bewohnerliste nicht); gemessen ist das nur im Windows-Testlauf, nicht auf einem echten Rechner.
+- Nicht automatisch geprüft (nur von Hand): dass Knöpfe ihren Hinweistext beim Löschen abmelden; dass das
+  Hereinziehen einer .ics-Datei den Explorer nicht mehr festhält.
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
   den Bildschirmfotos `109_…` und den Zeiten des Testlaufs von 0.29.10):
@@ -1100,6 +1122,14 @@ alle Bedarfsverordnungen desselben Medikaments). Die **Visite** prüft beim Absc
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.3): „Keine gesetzliche Betreuung“ ist eine eigene Fassung mit Merkmal (Datenbank-Schritt 29), kein
+  leerer Name – so bleiben die drei Zustände unterscheidbar (Regel 5).
+- 09.11.2026 (0.33.3): .ics: Nur `TZID=UTC` (und gleichbedeutende Namen) wird umgerechnet; andere Zeitzonen gelten
+  weiter als Ortszeit – die Demo geht von Dateien aus derselben Zeitzone aus; eine Umrechnung aller Zonen hinge von
+  den Zeitzonen-Daten des Rechners ab. Eine nicht lesbare Dauer ergibt eine Stunde (wie ohne Dauer).
+- 09.11.2026 (0.33.3): Höchstens ein Termin je Wochentag und Angebot, statt die Teilnahme je Termin zu speichern –
+  kleiner Eingriff, keine neue Tabelle; für einen zweiten Termin am selben Tag gibt es ein eigenes Angebot.
 
 - 09.11.2026 (0.33.2): Doppelklickschutz über die Zeit (Doppelklickzeit von Windows), nicht über stehenbleibende
   erledigte Zeilen – einfacher, gilt für Haken und Tafel gleich.
@@ -1790,6 +1820,18 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.3:
+
+1. Akte von Ginster → Betreuer: „keine gesetzliche Betreuung“, „E-Mail an Betreuer …“ grau. Bei einem anderen Bewohner
+   „Betreuer …“ → Häkchen „Keine gesetzliche Betreuung“ → die Felder werden grau; speichern → der alte Betreuer steht
+   im Verlauf.
+2. Kalender → „Als .ics speichern …“ in einen Ordner ohne Schreibrecht → Hinweis statt Absturz. Eine .ics-Datei auf den
+   Kalender ziehen → die Vorschau öffnet sich, der Explorer bleibt bedienbar.
+3. Einen beliebigen Dialog öffnen (z. B. „Neue Aufgabe …“) → oben links steht das Programmsymbol.
+4. Einstellungen als „RS“ → Module → „Ausgangsliste“ aus → andere Gruppe und zurück → „Küchendienst“ bleibt grau.
+5. Übersicht: Fenster schmal ziehen → die Bereichswahl wird schmaler oder verschwindet, „Drucken …“ bleibt sichtbar.
+6. Therapie → Angebot bearbeiten → zwei Termine am selben Wochentag → Hinweis „höchstens ein Termin je Wochentag“.
 
 Version 0.33.2:
 

@@ -15,10 +15,19 @@ public class ProgrammsymbolOberflaechenTests
         Assert.True(Stil.SymbolFuerAlleFenster());
         using (var leer = new Form())
             Assert.Same(Stil.Programmsymbol, leer.Icon);   // Vorgabe für jedes Fenster ohne eigenes Symbol
+        // 0.33.3: Dialoge (fester Rahmen) brauchen ein eigenes Symbol-Objekt; das Vorgabesymbol zeigen sie nicht.
         using (var dialog = new FahrzeugeFenster(u.Speicher))
-            Assert.Same(Stil.Programmsymbol, dialog.Icon);
+        {
+            Assert.Equal(FormBorderStyle.FixedDialog, dialog.FormBorderStyle);
+            Assert.Same(Stil.Dialogsymbol, dialog.Icon);
+            Assert.NotSame(Stil.Programmsymbol, dialog.Icon);
+        }
         using (var anmelden = new AnmeldenFenster(u.Speicher, ""))
-            Assert.Same(Stil.Programmsymbol, anmelden.Icon);
+        {
+            Stil.SymbolSetzen(anmelden);   // wie vor dem Anzeigen (Dialog.Zeigen, Programmstart)
+            Assert.Same(Stil.Dialogsymbol, anmelden.Icon);
+        }
+        Assert.Equal(Stil.Programmsymbol.Size, Stil.Dialogsymbol.Size);
         Assert.False(f.Kopf.HatLogo);                     // das Logofeld bleibt für die Einrichtung
         // Fenster und Taskleiste nehmen die klassischen Bilder bis 64 px; das 256-px-Bild (PNG) liest der
         // Explorer für große Symbole – dass es in der Datei steckt, prüft ProgrammsymbolTests (Kern).

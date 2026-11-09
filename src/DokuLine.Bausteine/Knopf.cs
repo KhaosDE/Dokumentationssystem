@@ -38,6 +38,14 @@ public sealed class Knopf : Button
         }
     }
 
+    // Der Hinweis ist für alle Knöpfe derselbe und merkt sich jeden Knopf; ohne Abmelden blieben gelöschte Knöpfe
+    // (z. B. bei jedem Neuaufbau der Therapie-Tafel) im Speicher (0.33.3).
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) Hinweis.SetToolTip(this, null);
+        base.Dispose(disposing);
+    }
+
     protected override void OnClick(EventArgs e)
     {
         if (sperrgrund is string grund)

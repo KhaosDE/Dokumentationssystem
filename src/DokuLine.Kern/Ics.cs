@@ -7,8 +7,9 @@ namespace DokuLine.Kern;
 // Kalender-Austausch über Dateien im Standardformat .ics (iCalendar, Bauplan Schritt 28). Termine
 // lassen sich als Datei speichern (z. B. für Outlook) und .ics-Dateien einlesen (z. B. eine
 // gespeicherte Einladung). Keine Verbindung zu Outlook, Exchange, Google oder einem Mailserver.
-// Uhrzeiten schreibt das Programm als Ortszeit ohne Zeitzone; beim Lesen gelten Zeiten mit „Z“ als
-// UTC (werden umgerechnet), alle anderen als Ortszeit.
+// Uhrzeiten schreibt das Programm als Ortszeit ohne Zeitzone; beim Lesen gelten Zeiten mit „Z“ oder
+// TZID=UTC als UTC (werden umgerechnet), alle anderen als Ortszeit. Ein Termin, der sich nicht lesen
+// lässt, wird übersprungen (0.33.3: vorher konnte er das Einlesen der ganzen Datei abbrechen).
 public sealed record IcsTermin
 {
     public string Titel { get; init; } = "";
@@ -34,24 +35,26 @@ public static class Ics
 
     // ----- Schreiben -----
 
-    public static string Schreiben(IEnumerable<KalenderTermin> termine, IReadOnlyDictionary<long, string> namen, DateTime jetzt)
+    // kennung: zufällig je Datenbank (Speicher.IcsKennung) – sonst hätten Termine verschiedener Datenbanken dieselbe UID
+    // und ein Kalenderprogramm überschriebe den einen mit dem anderen (0.33.3).
+    public static string Schreiben(IEnumerable<KalenderTermin> termine, IReadOnlyDictionary<long, string> namen, DateTime jetzt, string kennung)
     {
         var zeilen = new List<string> { "BEGIN:VCALENDAR", "VERSION:2.0", $"PRODID:{Produkt}", "CALSCALE:GREGORIAN", "METHOD:PUBLISH" };
         foreach (var k in termine)
         {
             var f = k.Aktuell;
             zeilen.Add("BEGIN:VEVENT");
-            zeilen.Add($"UID:termin-{k.Id}@dokumentationssystem.invalid");
-            zeilen.Add($"DTSTAMP:{jetzt.ToUniversalTime():yyyyMMdd'T'HHmmss'Z'}");
+            zeilen.Add($"UID:termin-{k.Id}-{kennung}@dokuline.invalid");
+            zeilen.Add($"DTSTAMP:{Format(jetzt.ToUniversalTime(), "yyyyMMdd'T'HHmmss'Z'")}");
             if (f.Ganztags)
             {
-                zeilen.Add($"DTSTART;VALUE=DATE:{f.Beginn:yyyyMMdd}");
-                zeilen.Add($"DTEND;VALUE=DATE:{KalenderRegeln.LetzterTag(f).AddDays(1):yyyyMMdd}");
+                zeilen.Add($"DTSTART;VALUE=DATE:{Format(f.Beginn, "yyyyMMdd")}");
+                zeilen.Add($"DTEND;VALUE=DATE:{KalenderRegeln.LetzterTag(f).AddDays(1).ToString("yyyyMMdd", CultureInfo.InvariantCulture)}");
             }
             else
             {
-                zeilen.Add($"DTSTART:{f.Beginn:yyyyMMdd'T'HHmmss}");
-                zeilen.Add($"DTEND:{f.Ende:yyyyMMdd'T'HHmmss}");
+                zeilen.Add($"DTSTART:{Format(f.Beginn, "yyyyMMdd'T'HHmmss")}");
+                zeilen.Add($"DTEND:{Format(f.Ende, "yyyyMMdd'T'HHmmss")}");
             }
             zeilen.Add($"SUMMARY:{Maskieren(f.Titel)}");
             if (f.Ort.Length > 0) zeilen.Add($"LOCATION:{Maskieren(f.Ort)}");
@@ -67,6 +70,9 @@ public static class Ics
         zeilen.Add("END:VCALENDAR");
         return string.Concat(zeilen.SelectMany(Falten).Select(z => z + "\r\n"));
     }
+
+    // Immer gregorianisch mit westlichen Ziffern, unabhängig von der Sprache des Rechners (0.33.3).
+    private static string Format(DateTime zeit, string format) => zeit.ToString(format, CultureInfo.InvariantCulture);
 
     private static string Maskieren(string text) =>
         text.Replace("\\", "\\\\").Replace(";", "\\;").Replace(",", "\\,").Replace("\r\n", "\n").Replace("\n", "\\n");
@@ -124,7 +130,8 @@ public static class Ics
                 if (ereignis is not null && tiefe > 0) { tiefe--; continue; }
                 if (ereignis is not null && wert.Trim().Equals("VEVENT", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (AlsTermin(ereignis) is IcsTermin t) termine.Add(t);
+                    try { if (AlsTermin(ereignis) is IcsTermin t) termine.Add(t); }
+                    catch (Exception x) when (x is ArgumentException or FormatException or OverflowException) { }   // überspringen
                     ereignis = null;
                 }
                 continue;
@@ -160,7 +167,7 @@ public static class Ics
         if (e.TryGetValue("DTEND", out var schluss) && Zeitpunkt(schluss.Parameter, schluss.Wert) is (DateTime ee, _)) ende = ee;
         else if (e.TryGetValue("DURATION", out var dauer) && Dauer(dauer.Wert) is TimeSpan d) ende = beginn + d;
         else ende = ganztags ? beginn.AddDays(1) : beginn.AddHours(1);
-        if (ende < beginn) ende = beginn;
+        if (ende <= beginn) ende = ganztags ? beginn.AddDays(1) : beginn.AddHours(1);   // 0.33.3: vorher Länge 0
         string Text(string feld) => e.TryGetValue(feld, out var w) ? Entmaskieren(w.Wert).Trim() : "";
         string titel = Text("SUMMARY");
         return new IcsTermin
@@ -176,16 +183,21 @@ public static class Ics
         bool nurDatum = parameter.TryGetValue("VALUE", out var art) && art.Equals("DATE", StringComparison.OrdinalIgnoreCase) || wert.Length == 8;
         if (nurDatum)
             return DateTime.TryParseExact(wert, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var tag) ? (tag, true) : null;
-        bool utc = wert.EndsWith('Z');
+        bool utc = wert.EndsWith('Z') ||
+                   parameter.TryGetValue("TZID", out var zone) && zone.Trim() is "UTC" or "Etc/UTC" or "GMT" or "Etc/GMT" or "Z" or "Coordinated Universal Time";
         if (!DateTime.TryParseExact(wert.TrimEnd('Z'), ["yyyyMMdd'T'HHmmss", "yyyyMMdd'T'HHmm"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var zeit))
             return null;
         return (utc ? DateTime.SpecifyKind(zeit, DateTimeKind.Utc).ToLocalTime() : zeit, false);
     }
 
+    // „PT1H30M“, „P1D“; dazu „P2W“ (Wochen kennt XmlConvert nicht, 0.33.3).
     private static TimeSpan? Dauer(string wert)
     {
-        try { return XmlConvert.ToTimeSpan(wert.Trim()); }
-        catch (FormatException) { return null; }
+        wert = wert.Trim().TrimStart('+');
+        if (wert.Length > 2 && wert[0] == 'P' && wert[^1] == 'W' && int.TryParse(wert[1..^1], NumberStyles.None, CultureInfo.InvariantCulture, out int wochen))
+            return TimeSpan.FromDays(7.0 * wochen);
+        try { return XmlConvert.ToTimeSpan(wert); }
+        catch (Exception x) when (x is FormatException or OverflowException) { return null; }
     }
 
     private static string Entmaskieren(string text)

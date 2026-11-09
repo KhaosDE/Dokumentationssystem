@@ -9,17 +9,39 @@ public sealed partial class Speicher
 {
     public event Action? KalenderGeaendert;
 
-    public KalenderTermin KalenderAnlegen(KalenderFassung f)
+    public KalenderTermin KalenderAnlegen(KalenderFassung f) => KalenderAnlegenAlle([f])[0];
+
+    // Mehrere Termine in einem Zug (Übernahme aus einer .ics-Datei): alle oder keiner (0.33.3: vorher einzeln –
+    // ging einer schief, waren die davor schon gespeichert).
+    public List<KalenderTermin> KalenderAnlegenAlle(IReadOnlyList<KalenderFassung> fassungen)
     {
-        BewohnerPruefen(f);
-        using var transaktion = db.BeginTransaction();
-        Ausfuehren("INSERT INTO kalender DEFAULT VALUES", transaktion);
-        long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
-        KalenderFassungEinfuegen(id, f, transaktion);
-        transaktion.Commit();
+        foreach (var f in fassungen) BewohnerPruefen(f);
+        var ids = new List<long>();
+        using (var transaktion = db.BeginTransaction())
+        {
+            foreach (var f in fassungen)
+            {
+                Ausfuehren("INSERT INTO kalender DEFAULT VALUES", transaktion);
+                long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
+                KalenderFassungEinfuegen(id, f, transaktion);
+                ids.Add(id);
+            }
+            transaktion.Commit();
+        }
         KalenderGeaendert?.Invoke();
-        return KalenderTermin(id)!;
+        return [.. ids.Select(id => KalenderTermin(id)!)];
     }
+
+    // Zufällige Kennung dieser Datenbank für die UID in .ics-Dateien (einmal angelegt, dann fest).
+    public string IcsKennung()
+    {
+        if (Meta(IcsKennungSchluessel) is string k) return k;
+        string neu = Guid.NewGuid().ToString("N")[..12];
+        Ausfuehren("INSERT OR IGNORE INTO meta (schluessel, wert) VALUES ($s, $w)", null, ("$s", IcsKennungSchluessel), ("$w", neu));
+        return Meta(IcsKennungSchluessel)!;   // Mehrplatz: hat ein anderer Arbeitsplatz zugleich eine angelegt, gilt seine
+    }
+
+    private const string IcsKennungSchluessel = "ics_kennung";
 
     public KalenderTermin KalenderAendern(long id, KalenderFassung f, int? erwartet = null)
     {

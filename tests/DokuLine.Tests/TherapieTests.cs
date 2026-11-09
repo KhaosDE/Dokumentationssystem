@@ -49,6 +49,13 @@ public sealed class TherapieTests : IDisposable
         }, Jetzt)).Fehler;
         Assert.Contains(fehler, f => f.Contains("„bis“ muss nach „von“"));
         Assert.Contains(fehler, f => f.Contains("überschneiden sich"));
+        // 0.33.3: höchstens ein Termin je Wochentag (die Teilnahme gilt je Tag).
+        fehler = Assert.Throws<Eingabefehler>(() => TherapieRegeln.AusEingabe(new AngebotEingabe
+        {
+            Name = "x", Therapeut = "y", Kuerzel = "OP", Hoechstens = "3", GiltAb = "01.11.2026",
+            Termine = [(DayOfWeek.Friday, "09:00", "10:00"), (DayOfWeek.Friday, "14:00", "15:00")],
+        }, Jetzt)).Fehler;
+        Assert.Equal(["Termin Freitag: höchstens ein Termin je Wochentag – für einen zweiten bitte ein eigenes Angebot anlegen."], fehler);
         var einzel = TherapieRegeln.AusEingabe(new AngebotEingabe
         {
             Name = "x", Therapeut = "y", Kuerzel = "OP", Art = AngebotArt.Einzel, GiltAb = "01.11.2026", Termine = [(DayOfWeek.Monday, "9:00", "9:45")],

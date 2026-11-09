@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using DokuLine.Kern;
 using Microsoft.Data.Sqlite;
@@ -55,6 +56,30 @@ public sealed class BetreuerIcsTests : IDisposable
         Assert.Throws<SqliteException>(() => befehl.ExecuteNonQuery());
     }
 
+    // 0.33.3: drei Zustände – eingetragen, keine gesetzliche Betreuung, nicht erfasst (Regel 5).
+    [Fact]
+    public void Keine_Betreuung_ist_ein_eigener_Zustand()
+    {
+        var distel = B("Distel");
+        s.BetreuerSpeichern(distel.Id!.Value, BetreuerRegeln.AusEingabe(new BetreuerEingabe { Name = "Test Taucher", Email = "taucher@example.org", Kuerzel = "AB" }, Jetzt));
+        var keine = BetreuerRegeln.AusEingabe(new BetreuerEingabe { Name = "wird nicht übernommen", Keine = true, Kuerzel = "AB" }, Jetzt.AddDays(1));
+        Assert.True(keine.Keine);
+        Assert.Equal("", keine.Name);
+        s.BetreuerSpeichern(distel.Id!.Value, keine);
+        var b = s.Betreuer(distel.Id!.Value)!;
+        Assert.True(b.Keine);
+        Assert.Equal("keine gesetzliche Betreuung", BetreuerRegeln.Text(b));
+        Assert.True(BetreuerRegeln.AlsEingabe(b).Keine);
+        Assert.Throws<Eingabefehler>(() => BetreuerRegeln.Mailto(b, "x"));
+        Assert.Equal(2, s.BetreuerFassungen(distel.Id!.Value).Count);   // die Betreuung davor bleibt im Verlauf
+        Assert.EndsWith("AB: keine gesetzliche Betreuung", BetreuerRegeln.Verlauf(s.BetreuerFassungen(distel.Id!.Value))[0]);
+        Assert.Throws<Eingabefehler>(() => BetreuerRegeln.AusEingabe(new BetreuerEingabe { Keine = true }, Jetzt));   // Kürzel fehlt
+        Assert.True(s.Betreuer(B("Ginster").Id!.Value)!.Keine);   // Demo
+        // mailto: # und % verändern die Adresse – nicht erlaubt.
+        Assert.False(BetreuerRegeln.EmailGueltig("a#b@example.org"));
+        Assert.False(BetreuerRegeln.EmailGueltig("a%40b@example.org"));
+    }
+
     [Fact]
     public void Demo_Betreuer_nur_mit_example_org()
     {
@@ -82,7 +107,7 @@ public sealed class BetreuerIcsTests : IDisposable
             Art = KalenderArt.Wohnbereich, Titel = "Sommerfest mit einem sehr langen Titel, damit die Zeile gefaltet werden muss – äöü ÄÖÜ ß",
             BeginnDatum = "20.11.2026", EndeDatum = "21.11.2026", Ganztags = true, Kuerzel = "AB",
         }, Jetzt));
-        string text = Ics.Schreiben([neu, fest], namen, Jetzt);
+        string text = Ics.Schreiben([neu, fest], namen, Jetzt, s.IcsKennung());
         Assert.StartsWith("BEGIN:VCALENDAR\r\nVERSION:2.0\r\n", text);
         Assert.All(text.Split("\r\n"), z => Assert.True(Encoding.UTF8.GetByteCount(z) <= 75, z));
         Assert.Contains("DTSTART:20261112T090000", text);
@@ -90,6 +115,10 @@ public sealed class BetreuerIcsTests : IDisposable
         Assert.Contains("DTEND;VALUE=DATE:20261122", text);   // ganztags: Ende ist der Tag danach
         Assert.Contains(@"SUMMARY:Zahnarzt\; Kontrolle\, kurz", text);
         Assert.Contains("Bewohner: Anton Ahorn", text.Replace("\r\n ", ""));
+        // 0.33.3: UID mit einer zufälligen Kennung je Datenbank (fest für diese Datenbank).
+        Assert.Equal(12, s.IcsKennung().Length);
+        Assert.Equal(s.IcsKennung(), s.IcsKennung());
+        Assert.Contains($"UID:termin-{neu.Id}-{s.IcsKennung()}@dokuline.invalid", text);
 
         var gelesen = Ics.Lesen(text);
         Assert.Equal(2, gelesen.Count);
@@ -137,5 +166,41 @@ public sealed class BetreuerIcsTests : IDisposable
         Assert.True(t[1].Wiederholung);
         Assert.Contains("Wiederholung: nur der erste Termin", Ics.AlsEingabe(t[1], KalenderArt.Wohnbereich, false, [], "EF").Hinweis);
         Assert.Empty(Ics.Lesen("kein Kalender"));
+    }
+
+    // 0.33.3: Fehlerfälle beim Einlesen – ein kaputter Termin bricht nichts ab; Länge 0; Wochen; TZID=UTC; Sprache.
+    [Fact]
+    public void Ics_Fehlerfaelle()
+    {
+        string Ereignis(params string[] zeilen) => string.Join("\r\n", ["BEGIN:VCALENDAR", "BEGIN:VEVENT", .. zeilen, "END:VEVENT", "END:VCALENDAR"]);
+        Assert.Empty(Ics.Lesen(Ereignis("SUMMARY:zu lang", "DTSTART:99991231T230000", "DURATION:P5D")));   // Überlauf: übersprungen
+        var riesig = Ics.Lesen(Ereignis("SUMMARY:riesig", "DTSTART:20261116T140000", "DURATION:P99999999999D")).Single();
+        Assert.Equal(TimeSpan.FromHours(1), riesig.Ende - riesig.Beginn);   // Dauer nicht lesbar: eine Stunde
+        var gleich = Ics.Lesen(Ereignis("SUMMARY:ohne Länge", "DTSTART:20261116T140000", "DTEND:20261116T140000")).Single();
+        Assert.Equal(TimeSpan.FromHours(1), gleich.Ende - gleich.Beginn);
+        var wochen = Ics.Lesen(Ereignis("SUMMARY:Kur", "DTSTART;VALUE=DATE:20261116", "DURATION:P2W")).Single();
+        Assert.Equal(TimeSpan.FromDays(14), wochen.Ende - wochen.Beginn);
+        var utc = Ics.Lesen(Ereignis("SUMMARY:UTC", "DTSTART;TZID=UTC:20261116T140000")).Single();
+        Assert.Equal(new DateTime(2026, 11, 16, 14, 0, 0, DateTimeKind.Utc).ToLocalTime(), utc.Beginn);
+
+        // Schreiben unabhängig von der Sprache des Rechners (z. B. ein anderer Kalender als der gregorianische).
+        var termin = s.KalenderAnlegen(KalenderRegeln.AusEingabe(new KalenderEingabe
+            { Art = KalenderArt.Wohnbereich, Titel = "Probe", BeginnDatum = "12.11.2026", BeginnUhrzeit = "09:00", EndeUhrzeit = "10:00", Kuerzel = "AB" }, Jetzt));
+        var vorher = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("th-TH");
+            Assert.Contains("DTSTART:20261112T090000", Ics.Schreiben([termin], new Dictionary<long, string>(), Jetzt, "k"));
+        }
+        finally { CultureInfo.CurrentCulture = vorher; }
+
+        // Mehrere Termine in einem Zug: gibt es einen Bewohner nicht, wird keiner gespeichert.
+        int anzahl = s.Kalender(DateOnly.FromDateTime(Jetzt), DateOnly.FromDateTime(Jetzt).AddDays(30)).Count;
+        var gut = KalenderRegeln.AusEingabe(new KalenderEingabe
+            { Art = KalenderArt.Wohnbereich, Titel = "eins", BeginnDatum = "13.11.2026", BeginnUhrzeit = "09:00", EndeUhrzeit = "10:00", Kuerzel = "AB" }, Jetzt);
+        var kaputt = gut with { Art = KalenderArt.Bewohner, Bewohner = [999_999] };
+        Assert.Throws<Eingabefehler>(() => s.KalenderAnlegenAlle([gut, kaputt]));
+        Assert.Equal(anzahl, s.Kalender(DateOnly.FromDateTime(Jetzt), DateOnly.FromDateTime(Jetzt).AddDays(30)).Count);
+        Assert.Equal(2, s.KalenderAnlegenAlle([gut, gut with { Titel = "zwei" }]).Count);
     }
 }

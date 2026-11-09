@@ -321,15 +321,30 @@ public sealed class AktionsLeiste : Panel
     {
         foreach (var alt in knoepfe) Controls.Remove(alt);
         knoepfe.Clear();
-        if (Zusatz is not null) Controls.Remove(Zusatz);
+        if (Zusatz is not null)
+        {
+            if (zusatzBreite is int breite) Zusatz.Width = breite;
+            Zusatz.Visible = true;
+            Controls.Remove(Zusatz);
+        }
         Zusatz = null;
+        zusatzBreite = null;
         knoepfe.AddRange(neue);
         foreach (var knopf in knoepfe) Controls.Add(knopf);
         Anordnen();
     }
 
+    private int? zusatzBreite;   // Breite, wie der Zusatz gesetzt wurde (vor dem Schmälern)
+    public const int ZusatzMindestens = 90;
+
     public void ZusatzSetzen(Control? zusatz)
     {
+        if (Zusatz is not null)
+        {
+            if (zusatzBreite is int alt) Zusatz.Width = alt;   // für den nächsten Gebrauch wie vorher
+            Zusatz.Visible = true;
+        }
+        zusatzBreite = null;
         if (Zusatz is not null) Controls.Remove(Zusatz);
         Zusatz = zusatz;
         if (zusatz is not null) Controls.Add(zusatz);
@@ -398,8 +413,14 @@ public sealed class AktionsLeiste : Panel
         }
         if (Zusatz is not null)
         {
+            // Reicht der Platz nicht, wird die Auswahl schmaler, notfalls ausgeblendet – sie verdeckt nie „Drucken …“
+            // (0.33.3: vorher rückte sie über die Knöpfe rechts).
             r -= S(Stil.AbstandKlein);
-            Zusatz.Location = new Point(Math.Max(x, r - Zusatz.Width), Math.Max(0, (hoehe - Zusatz.Height) / 2));
+            zusatzBreite ??= Zusatz.Width;
+            int platz = r - x;
+            Zusatz.Width = Math.Min(zusatzBreite.Value, Math.Max(0, platz));
+            Zusatz.Visible = platz >= S(ZusatzMindestens);
+            Zusatz.Location = new Point(r - Zusatz.Width, Math.Max(0, (hoehe - Zusatz.Height) / 2));
         }
     }
 }

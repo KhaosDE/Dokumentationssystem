@@ -6,7 +6,11 @@ namespace DokuLine;
 // Fenster aus und speichert, statt auf einen Menschen zu warten.
 public static class Dialog
 {
-    public static Func<Form, IWin32Window?, DialogResult> Zeigen { get; set; } = (fenster, besitzer) => fenster.ShowDialog(besitzer);
+    public static Func<Form, IWin32Window?, DialogResult> Zeigen { get; set; } = (fenster, besitzer) =>
+    {
+        Stil.SymbolSetzen(fenster);   // 0.33.3: Dialoge zeigen sonst kein Programmsymbol
+        return fenster.ShowDialog(besitzer);
+    };
 }
 
 // Gemeinsame Druckvorschau für alle Ausdrucke (übernommen aus der Ausgangsliste): erst die

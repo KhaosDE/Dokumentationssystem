@@ -1,5 +1,5 @@
 {
-  "hinweis": "Ausgedachte Betreuer für die Demo. E-Mail-Adressen nur mit der reservierten Endung @example.org (CLAUDE.md, Regel 6), Telefonnummern erkennbar ausgedacht. Bewohner ohne Eintrag stehen als „nicht erfasst“.",
+  "hinweis": "Ausgedachte Betreuer für die Demo. E-Mail-Adressen nur mit der reservierten Endung @example.org (CLAUDE.md, Regel 6), Telefonnummern erkennbar ausgedacht. Bewohner ohne Eintrag stehen als „nicht erfasst“; keine: true = „keine gesetzliche Betreuung“ (dritter Zustand, 0.33.3).",
   "betreuer": [
     { "bewohner": "Ahorn", "name": "Heike Hecht", "stelle": "Betreuungsverein Lindenhof (ausgedacht)", "email": "h.hecht@example.org", "telefon": "0000 111 222", "vorTagen": 200 },
     { "bewohner": "Birke", "name": "Bernd Barsch", "stelle": "Berufsbetreuer (ausgedacht)", "email": "barsch@example.org", "telefon": "0000 333 444", "vorTagen": 90 },
@@ -7,6 +7,7 @@
     { "bewohner": "Eiche", "name": "Heike Hecht", "stelle": "Betreuungsverein Lindenhof (ausgedacht)", "email": "h.hecht@example.org", "telefon": "0000 111 222", "vorTagen": 120 },
     { "bewohner": "Fichte", "name": "Fritz Forelle", "stelle": "Berufsbetreuer (ausgedacht)", "email": "forelle@example.org", "telefon": "0000 777 888", "vorTagen": 60 },
     { "bewohner": "Holunder", "name": "Bernd Barsch", "stelle": "Berufsbetreuer (ausgedacht)", "email": "barsch@example.org", "telefon": "0000 333 444", "vorTagen": 30 },
-    { "bewohner": "Kiefer", "name": "Anke Aal", "stelle": "Betreuungsverein Lindenhof (ausgedacht)", "email": "aal@example.org", "telefon": "0000 999 000", "vorTagen": 15 }
+    { "bewohner": "Kiefer", "name": "Anke Aal", "stelle": "Betreuungsverein Lindenhof (ausgedacht)", "email": "aal@example.org", "telefon": "0000 999 000", "vorTagen": 15 },
+    { "bewohner": "Ginster", "keine": true, "vorTagen": 45 }
   ]
 }
