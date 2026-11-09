@@ -70,13 +70,13 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
 | 29a | Personenverzeichnis (Ärzte, Betreuer, Angehörige, Forensik, FOSA) | 0.33.3 |
-| 29b | Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter (wartet auf Entwurfsauswahl) | 0.33.4 |
+| 29b | Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter | 0.33.4 |
 | 29c | Rechte: Fehlendes ausblenden statt ausgrauen | 0.33.5 |
 | 29d | Wohnbereich einmal in der Übersicht wählen, gilt überall | 0.33.6 |
 | 29e | Nachrichten: Kuvert in der Kopfzeile statt Hinweis in jedem Fenster | 0.33.7 |
 | 29f | Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation) | 0.33.8 |
 | 29g | Tagesplan im normalen Programmstil, kleiner und übersichtlicher | 0.33.9 |
-| 29h | Übergabe nach Schichten mit eigener Umrandung | 0.33.10 |
+| 29h | Übergabe nach Schichten, kompakt und schneller zu bearbeiten | 0.33.10 |
 | 29i | Wochenplan ohne Datum | 0.33.11 |
 | 29j | Ausgangsliste: alle Bewohner auf einen Blick, ohne Unterbringung | 0.33.12 |
 | 29k | Visite: Psychiater und Hausarzt getrennt, Berichte in der Dokumentation | 0.33.13 |
@@ -84,7 +84,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 29m | Schnellerer Wechsel zwischen den Bereichen | 0.33.15 |
 | 29n | Schlanke Ansicht für die Therapie | 0.33.16 |
 | 29o | Therapie-Anzeige für den Fernseher im Wohnbereich | 0.33.17 |
-| 29p | Nachschlagen beim BfArM absichern (offen) | 0.33.18 |
+| 29p | Nachschlagen beim BfArM absichern | 0.33.18 |
 | 30 | Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger | 0.34.0 |
 | 30a | Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente | 0.34.1 |
 | 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine | 0.35.0 |
@@ -1821,7 +1821,7 @@ Umfang:
   Musterstadt“.
 
 ## Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter
-Status: offen (wartet auf Tobis Auswahl der Berichtsdarstellung aus vier Entwürfen, 09.11.2026; danach freigegeben)
+Status: freigegeben (Bauplan Schritt 29b; Entwurf 1 „Zeilen nach Tagen“ mit Änderungen, Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Alle Berichte stehen im Bereich **„Dokumentation“**. Links eine Seitenleiste mit den
 Bewohnern, rechts die Berichte: viele auf einmal, trotzdem übersichtlich, mit Filter. Der Reiter
@@ -1840,11 +1840,27 @@ Umfang:
   **„Nachname, Vorname“**, alphabetisch nach Nachname, ohne Zimmer, Zähler oder Marken.
   Darüber Bereichswahl und Suchfeld. Pfeiltasten blättern, die Berichte wechseln mit. Beim
   Öffnen ist der erste Bewohner gewählt (bzw. der zuletzt gewählte).
-- **Rechts die Berichte als dichte Liste statt Karten:**
-  - Gruppiert nach Tag mit Tagesüberschrift („Montag, 09.11.2026 · 6 Berichte“), neueste oben.
-  - Ein Bericht = eine Zeile mit fester Spaltenfolge: Uhrzeit · Schicht · Marken (Wichtig,
-    Übergabe, Berichtsart, Lebensbereiche als Kurzwort) · Text · Kürzel. Haarlinie zwischen den
-    Berichten, keine Kästen.
+- **Rechts die Berichte als dichte Liste** — Entwurf 1 „Zeilen nach Tagen“ (Auswahl Tobi,
+  09.11.2026), mit diesen Änderungen:
+  - **Wochentage deutlich abgegrenzt:** Tagesüberschrift als eigener Balken über die ganze
+    Breite (heller Akzent 238, 242, 251, Radius 6 px, Schrift 11,5 pt Semibold, z. B. „Montag,
+    09.11.2026 · 3 Berichte“), mit 12–16 px Abstand zum vorigen Tag. Neueste oben.
+  - **Keine Schicht-Marke.** Stattdessen ist **jeder Bericht in der Farbe seiner Schicht
+    umrandet** (1,5 px, Radius 8 px): Früh Orange (238, 166, 60), Spät Blau (45, 84, 156),
+    Nacht Violett (91, 58, 153) — dieselben Farben wie in der Übergabe (29h). Das gilt auch für
+    Visitenberichte. Damit Farbe nicht allein steht: unter der Uhrzeit klein das Wort „Früh“,
+    „Spät“ bzw. „Nacht“ in Schichtfarbe, und ein Farbschlüssel „Rand: Früh · Spät · Nacht“ in
+    der Filterleiste.
+  - **Nur drei Marken bleiben:** „Wichtig“ (Gefahr-Fläche hell), **„Medikation geändert“**
+    (kräftiges Rot, weiße Schrift, Zeile leicht rot hinterlegt) und neu **„Bedarfsgabe“**
+    (Hinweis-Farbe). Keine Marken mehr für Übergabe, Berichtsart oder Lebensbereich in der
+    Liste (die Angaben bleiben gespeichert und filterbar).
+  - **Bedarfsgabe:** Jeder Bericht, der über „Bedarf gegeben …“ (Medikamentenplan, seit 0.33.0)
+    entsteht, trägt die Marke automatisch. In der Aktionsleiste der Dokumentation zusätzlich
+    „Bedarf gegeben …“ für den gewählten Bewohner (gleiches Recht wie im Medikamentenplan).
+  - **Visiten** erkennt man am fetten Anfang „Visite Psychiater – Dr. …“ bzw. „Visite Hausarzt –
+    Dr. …“ (keine eigene Marke).
+  - Eine Zeile: Uhrzeit (darunter das Schichtwort) · Marken · Text · Kürzel.
   - Der Text zeigt **höchstens zwei Zeilen**, dann „… mehr“. Ein Klick klappt den Bericht in
     der Liste auf (kein neues Fenster). Umschalter in der Aktionsleiste: **„kompakt“** (zwei
     Zeilen, Vorgabe) · **„vollständig“** (ganzer Text).
@@ -1855,7 +1871,8 @@ Umfang:
 - **Filterleiste über der Liste** (gilt für den gewählten Bewohner; bleibt beim Wechsel des
   Bewohners eingestellt):
   - Zeitraum: Heute · 7 Tage (Vorgabe) · 30 Tage · frei wählbar.
-  - Kennzeichen: Wichtig · Übergabe · mit Nachtrag.
+  - Knöpfe: Wichtig · Medikation geändert · Bedarfsgabe · Visite; dazu „Übergabe“ und „mit
+    Nachtrag“ in den weiteren Filtern.
   - **Berichtsart** (neu, siehe unten), Lebensbereich, Schicht, Verfasser (Kürzel).
   - Suche im Text mit Hervorhebung der Fundstellen.
   - Gesetzte Filter stehen als kleine Marken mit „×“ über der Liste, dazu „Filter zurücksetzen“.
@@ -1866,7 +1883,7 @@ Umfang:
   Betreuer/Behörde · Besonderes Vorkommnis. Liste in den Einstellungen änderbar. Berichte aus
   Visite und Abgängigkeitsmeldung bekommen ihre Art automatisch. Vorhandene Demo-Berichte
   erhalten passende Arten.
-- **Aktionsleiste:** „Neuer Bericht …“ (Hauptaktion, für den gewählten Bewohner), „Akte öffnen“, kompakt/vollständig, „Drucken …“ (druckt, was der
+- **Aktionsleiste:** „Neuer Bericht …“ (Hauptaktion, für den gewählten Bewohner), „Bedarf gegeben …“, „Akte öffnen“, kompakt/vollständig, „Drucken …“ (druckt, was der
   Filter zeigt).
 - **Akte:** Der Reiter „Berichte“ entfällt. Im Akte-Kopf ein Knopf „Berichte ansehen“, der die
   Dokumentation mit diesem Bewohner öffnet. HEB, Reflexion, Visite und Übergabe lesen die
@@ -1962,7 +1979,8 @@ Umfang:
 - Uhrzeit und Datum oben rechts in normaler Größe.
 
 ## Übergabe nach Schichten mit eigener Umrandung
-Status: freigegeben (Bauplan Schritt 29h; Vorgabe Tobi 09.11.2026)
+Status: freigegeben (Bauplan Schritt 29h; Vorgabe Tobi 09.11.2026; ergänzt: „Die Übergabeseite muss
+effektiver gestaltet werden“)
 Datum: 09.11.2026
 Was: Die Übergabe ist nach Schichten unterteilt; jede Schicht hat eine eigene farbige Umrandung.
 Warum: Vorgabe Tobi (09.11.2026).
@@ -1972,9 +1990,28 @@ Umfang:
   dann die vorherige usw.
 - Jeder Abschnitt in einer Fläche mit **farbiger Umrandung** (2 px) und farbigem Wort in der
   Überschrift — Farbe nie allein: Früh **Orange** (238, 166, 60), Spät **Blau** (45, 84, 156),
-  Nacht **Violett** (91, 58, 153). Dieselbe Farbe als schmale Marke „Früh/Spät/Nacht“ an jedem
-  Eintrag, auch in der Übersicht unter „Heute wichtig“.
+  Nacht **Violett** (91, 58, 153). Statt einer Schicht-Marke ist jeder Eintrag in der Farbe
+  seiner Schicht umrandet, wie die Berichte in der Dokumentation (29b), auch in der Übersicht
+  unter „Heute wichtig“.
 - Einträge „bis erledigt“ bleiben in ihrer Ursprungsschicht und tragen „seit <Tag>“.
+- **Effektiver (Ergänzung 09.11.2026)** — heute ist jeder Eintrag eine große Karte; bei
+  1366 × 768 passen nur zwei von neun auf den Bildschirm (`STAND.md`, offene Punkte):
+  - **Kompakte Zeilen** wie in der Dokumentation: Bewohner (Nachname, Vorname, Zimmer) ·
+    Übergabe-Satz bzw. die ersten zwei Zeilen des Berichts · gültig bis · Kürzel · Knöpfe.
+    Ziel: mindestens 12 Einträge bei 1366 × 768 ohne Bildlauf.
+  - **Reihenfolge innerhalb der Schicht:** Medikamentenänderungen (29l) zuerst, dann „Wichtig“,
+    dann der Rest nach Zimmer. Mehrere Einträge eines Bewohners stehen untereinander unter
+    einem Namen.
+  - **Vorgabe „nur ungelesene“** (von mir noch nicht als gelesen bestätigt), umschaltbar auf
+    „alle offenen“; Zähler an beiden.
+  - **Ein Klick je Handgriff:** „Gelesen“ und „Erledigt“ als kleine Knöpfe mit Wort direkt in
+    der Zeile. Nach „Gelesen“ rutscht die Zeile leise weg (bei „nur ungelesene“). Ein Klick auf
+    den Text klappt den ganzen Bericht in der Zeile auf (kein Meldungsfenster mehr).
+    „Verlängern …“ beim aufgeklappten Eintrag.
+  - **„Alle in diesem Abschnitt gelesen“** je Schicht, mit einer Rückfrage („9 Einträge als
+    gelesen bestätigen?“).
+  - „Wohnbereich allgemein“ als eine kompakte Zeile oben, aufklappbar.
+  - **„Übergabeliste drucken“**: alle offenen Einträge auf einer A4-Seite, nach Schicht.
 
 ## Wochenplan ohne Datum
 Status: freigegeben (Bauplan Schritt 29i; Vorgabe Tobi 09.11.2026)
@@ -2020,9 +2057,9 @@ Umfang:
   ist (Reiter „Ärzte“, Schritt 30; bis dahin alle Bewohner des Bereichs). „Weitere Bewohner …“
   nimmt andere dazu.
 - Jeder Visitenbericht ist ein Bericht in der Dokumentation mit Berichtsart **„Visite“** und
-  Zusatz „Psychiater“ bzw. „Hausarzt“ und Arztname. In der Berichtsliste hervorgehoben durch eine
-  eigene Marke „Visite“ (Hinweis-Farbe, mit Wort) und fetten Anfang „Visite Psychiater – Dr. …“.
-  Filter „nur Visiten“.
+  Zusatz „Psychiater“ bzw. „Hausarzt“ und Arztname. In der Berichtsliste hervorgehoben durch den
+  fetten Anfang „Visite Psychiater – Dr. …“ und den Rand in Schichtfarbe wie alle Berichte (keine
+  eigene Marke, Ergänzung Tobi 09.11.2026). Filter „Visite“.
 - Medikamentenänderungen aus der Visite lösen Schritt 29l aus.
 
 ## Medikamentenänderung auffällig markieren und in die Übergabe
@@ -2117,7 +2154,7 @@ Umfang:
   vorher mit Leitung und Datenschutz klären.
 
 ## Nachschlagen beim BfArM absichern
-Status: offen (Vorschlag aus dem Chat, 09.11.2026)
+Status: freigegeben (Bauplan Schritt 29p; „Alles freigeben“, Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die eingebettete BfArM-Ansicht (WebView2) gibt so wenig wie möglich nach außen.
 Warum: Frage Tobi (09.11.2026): Kann die Medikamentenschnittstelle ins Internet ein

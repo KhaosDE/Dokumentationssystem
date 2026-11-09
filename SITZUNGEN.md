@@ -91,3 +91,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Schritt 29b freigegeben: Bereich „Dokumentation“ mit Bewohner-Seitenleiste, kompakter Berichtsliste und Filter; Reiter „Berichte“ in der Akte entfällt (Chat „Programme/Apps“).
 - 09.11.2026 — Schritt 29b: Bewohnerleiste ohne „Alle Bewohner“, nur „Nachname, Vorname“ (Chat „Programme/Apps“).
 - 09.11.2026 — Schritte 29c–29o freigegeben (Rechte ausblenden, Bereichswahl zentral, Kuvert, Korrekturen, Tagesplan, Übergabe nach Schichten, Wochenplan, Ausgangsliste, Visite, Medikamentenänderung, Tempo, Therapie-Ansicht, Fernseher-Anzeige), 29p offen; 29b wartet auf Entwurfsauswahl; CLAUDE.md Regel 6 um die LAN-Anzeige ergänzt (Chat „Programme/Apps“).
+- 09.11.2026 — 29b freigegeben nach Entwurf 1 (Tage abgegrenzt, Rand in Schichtfarbe statt Schicht-Marke, nur Marken Wichtig, Medikation geändert, Bedarfsgabe); 29h um kompakte, schnellere Übergabe ergänzt; 29p freigegeben (Chat „Programme/Apps“).
