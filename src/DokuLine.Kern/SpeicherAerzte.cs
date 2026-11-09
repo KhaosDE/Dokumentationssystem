@@ -24,9 +24,9 @@ public sealed partial class Speicher
     private static Person PersonLesen(SqliteDataReader l) => new()
     {
         Id = l.GetInt64(0), Gruppe = PersonRegeln.AusSchluessel(l.GetString(1)), Name = l.GetString(2),
-            Art = l.GetString(3), Fachrichtung = l.GetString(4),
+        Art = l.GetString(3), Fachrichtung = l.GetString(4),
         Praxis = l.GetString(5), Telefon = l.GetString(6), Mobil = l.GetString(7), Email = l.GetString(8),
-            Anschrift = l.GetString(9),
+        Anschrift = l.GetString(9),
         Erreichbarkeit = l.GetString(10), Hinweis = l.GetString(11), Aktiv = l.GetInt64(12) == 1,
     };
 
@@ -171,7 +171,7 @@ public sealed partial class Speicher
                 : PersonEinfuegen(new Person
                 {
                     Gruppe = PersonGruppe.Betreuer, Name = b.Name, Praxis = b.Stelle, Email = b.Email,
-                        Telefon = b.Telefon,
+                    Telefon = b.Telefon,
                     Art = b.Stelle.Contains("Berufsbetreuer", StringComparison.OrdinalIgnoreCase) ? "Berufsbetreuer"
                         : b.Stelle.Contains("Verein", StringComparison.OrdinalIgnoreCase) ? "Betreuungsverein"
                         : b.Stelle.Contains("ehrenamtlich", StringComparison.OrdinalIgnoreCase) ? "ehrenamtlich" : "",

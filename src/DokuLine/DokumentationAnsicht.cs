@@ -9,12 +9,18 @@ public sealed class DokumentationAnsicht : Panel
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
     private readonly FlowLayoutPanel weitere = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
-    private readonly FlowLayoutPanel gespeichert = new() { AutoSize = true, WrapContents = true,
-        BackColor = Stil.Seite };
+    private readonly FlowLayoutPanel gespeichert = new()
+    {
+        AutoSize = true, WrapContents = true,
+        BackColor = Stil.Seite
+    };
     private readonly FlowLayoutPanel gesetzt = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
     private readonly Panel liste = new() { AutoScroll = true, BackColor = Stil.Seite };
-    private readonly Label leer = new() { AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite,
-        Text = "Keine Berichte für diese Auswahl." };
+    private readonly Label leer = new()
+    {
+        AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite,
+        Text = "Keine Berichte für diese Auswahl."
+    };
     private bool fuellt;
 
     public DokuFilter Filter { get; private set; } = new();
@@ -34,17 +40,22 @@ public sealed class DokumentationAnsicht : Panel
     public CheckBox Uebergabe { get; } = new() { Text = "Übergabe", AutoSize = true, BackColor = Stil.Seite };
     public CheckBox MitNachtrag { get; } = new() { Text = "mit Nachtrag", AutoSize = true, BackColor = Stil.Seite };
     public ComboBox Art { get; } = Auswahl(190, "Berichtsart", "alle Berichtsarten");
-    public ComboBox Bereich { get; } = Auswahl(190, "Lebensbereich", ["alle Lebensbereiche", .. Enumerable.Range(1,
-        5).Select(BerichtRegeln.BereichText), "allgemein"]);
-    public ComboBox Schichtwahl { get; } = Auswahl(140, "Schicht", "alle Schichten", "Frühdienst", "Spätdienst",
-        "Nachtdienst");
+    public ComboBox Bereich { get; } = Auswahl(190, "Lebensbereich",
+        ["alle Lebensbereiche", .. Enumerable.Range(1, 5).Select(BerichtRegeln.BereichText), "allgemein"]);
+    public ComboBox Schichtwahl { get; } =
+        Auswahl(140, "Schicht", "alle Schichten", "Frühdienst", "Spätdienst", "Nachtdienst");
     public ComboBox Verfasser { get; } = Auswahl(140, "Verfasser", "alle Verfasser");
-    public TextBox Suche { get; } = new() { Width = 200, PlaceholderText = "Im Text suchen", Font = Stil.Standard,
-        AccessibleName = "Im Text suchen" };
+    public TextBox Suche { get; } = new()
+    {
+        Width = 200, PlaceholderText = "Im Text suchen", Font = Stil.Standard, AccessibleName = "Im Text suchen",
+    };
     public Button SpeichernKnopf { get; } = Stil.NebenKnopf("Filter speichern …");
     public Button ZuruecksetzenKnopf { get; } = Stil.NebenKnopf("Filter zurücksetzen");
-    public Label Farbschluessel { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise,
-        BackColor = Stil.Seite, Text = "Rand: " };
+    public Label Farbschluessel { get; } = new()
+    {
+        AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Seite,
+        Text = "Rand: Früh · Spät · Nacht",
+    };
 
     // Name eines neuen gespeicherten Filters; zum Testen ersetzbar.
     public Func<string?> NameFragen { get; set; }
@@ -54,28 +65,24 @@ public sealed class DokumentationAnsicht : Panel
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        NameFragen = () => Eingabe.Fragen(FindForm(), "Filter speichern",
-            "Name des Filters (z. B. „Krisen der letzten 30 Tage“)");
+        NameFragen = () =>
+            Eingabe.Fragen(FindForm(), "Filter speichern", "Name des Filters (z. B. „Krisen der letzten 30 Tage“)");
         Art.Items.AddRange([.. speicher.Berichtsarten()]);
-        foreach (var c in new Control[] { Zeitraum, Von, Bis, WichtigKnopf, MedikationKnopf, BedarfKnopf, VisiteKnopf,
-            Suche, Farbschluessel })
-            c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
-        leiste.Controls.AddRange([Zeitraum, Von, Bis, WichtigKnopf, MedikationKnopf, BedarfKnopf, VisiteKnopf, Suche,
-            Farbschluessel]);
-        foreach (var c in new Control[] { Uebergabe, MitNachtrag, Art, Bereich, Schichtwahl, Verfasser })
-            c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
-        weitere.Controls.AddRange([Uebergabe, MitNachtrag, Art, Bereich, Schichtwahl, Verfasser]);
+        Control[] oben = [Zeitraum, Von, Bis, WichtigKnopf, MedikationKnopf, BedarfKnopf, VisiteKnopf, Suche, Farbschluessel];
+        Control[] unten = [Uebergabe, MitNachtrag, Art, Bereich, Schichtwahl, Verfasser];
+        foreach (var c in oben.Concat(unten)) c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
+        leiste.Controls.AddRange(oben);
+        weitere.Controls.AddRange(unten);
         SpeichernKnopf.Click += (_, _) => FilterSpeichern();
         ZuruecksetzenKnopf.Click += (_, _) => FilterSetzen(new DokuFilter());
-        foreach (var c in new Control[] { Zeitraum, Art, Bereich, Schichtwahl, Verfasser })
-            ((ComboBox)c).SelectedIndexChanged += (_, _) => AusFeldern();
+        foreach (var box in new[] { Zeitraum, Art, Bereich, Schichtwahl, Verfasser })
+            box.SelectedIndexChanged += (_, _) => AusFeldern();
         foreach (var c in new[] { Uebergabe, MitNachtrag }) c.CheckedChanged += (_, _) => AusFeldern();
-        foreach (var k in new[] { WichtigKnopf, MedikationKnopf, BedarfKnopf, VisiteKnopf }) k.Click += (_,
-            _) => { k.Aktiv = !k.Aktiv; AusFeldern(); };
+        foreach (var k in new[] { WichtigKnopf, MedikationKnopf, BedarfKnopf, VisiteKnopf })
+            k.Click += (_, _) => { k.Aktiv = !k.Aktiv; AusFeldern(); };
         Suche.TextChanged += (_, _) => AusFeldern();
         foreach (var d in new[] { Von, Bis }) d.Leave += (_, _) => AusFeldern();
         Farbschluessel.Paint += (_, e) => FarbschluesselZeichnen(e.Graphics);
-        Farbschluessel.Text = "Rand: Früh · Spät · Nacht";
         liste.Controls.Add(leer);
         liste.Layout += (_, _) => ListeAnordnen();
         Controls.AddRange([leiste, weitere, gespeichert, gesetzt, liste]);
@@ -84,8 +91,10 @@ public sealed class DokumentationAnsicht : Panel
 
     private static ComboBox Auswahl(int breite, string name, params string[] eintraege)
     {
-        var box = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = breite,
-            AccessibleName = name };
+        var box = new ComboBox
+        {
+            DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = breite, AccessibleName = name,
+        };
         box.Items.AddRange(eintraege);
         box.SelectedIndex = eintraege.Length > 1 && name == "Zeitraum" ? 1 : 0;
         return box;
@@ -121,13 +130,18 @@ public sealed class DokumentationAnsicht : Panel
             Von.Visible = Bis.Visible = f.Zeitraum == Kern.Zeitraum.Frei;
             Von.Text = f.Von is DateOnly v ? Datum.Text(v) : "";
             Bis.Text = f.Bis is DateOnly bis ? Datum.Text(bis) : "";
-            (WichtigKnopf.Aktiv, MedikationKnopf.Aktiv, BedarfKnopf.Aktiv, VisiteKnopf.Aktiv) = (f.Wichtig,
-                f.MedikationGeaendert, f.Bedarfsgabe, f.Visite);
+            (WichtigKnopf.Aktiv, MedikationKnopf.Aktiv, BedarfKnopf.Aktiv, VisiteKnopf.Aktiv) =
+                (f.Wichtig, f.MedikationGeaendert, f.Bedarfsgabe, f.Visite);
             (Uebergabe.Checked, MitNachtrag.Checked) = (f.Uebergabe, f.MitNachtrag);
             Art.SelectedIndex = f.Art is string art && Art.Items.IndexOf(art) is int i && i > 0 ? i : 0;
             Bereich.SelectedIndex = f.Bereich switch { null => 0, BerichtFilter.Allgemein => 6, int n => n };
-            Schichtwahl.SelectedIndex = f.Schicht switch { Schicht.Frueh => 1, Schicht.Spaet => 2, Schicht.Nacht => 3,
-                _ => 0 };
+            Schichtwahl.SelectedIndex = f.Schicht switch
+            {
+                Schicht.Frueh => 1,
+                Schicht.Spaet => 2,
+                Schicht.Nacht => 3,
+                _ => 0
+            };
             if (f.Verfasser is string vf && !Verfasser.Items.Contains(vf)) Verfasser.Items.Add(vf);
             Verfasser.SelectedIndex = f.Verfasser is string vv ? Verfasser.Items.IndexOf(vv) : 0;
             if (Suche.Text != f.Suche) Suche.Text = f.Suche;
@@ -139,18 +153,25 @@ public sealed class DokumentationAnsicht : Panel
     private void AusFeldern()
     {
         if (fuellt) return;
-        DateOnly? Lesen(TextBox t) { try { return t.Text.Trim().Length > 0 ? Datum.Lesen(t.Text,
-            "Datum") : null; } catch (FormatException) { return null; } }
+        static DateOnly? Lesen(TextBox t)
+        {
+            try { return t.Text.Trim().Length > 0 ? Datum.Lesen(t.Text, "Datum") : null; }
+            catch (FormatException) { return null; }
+        }
         Filter = new DokuFilter
         {
             Zeitraum = (Kern.Zeitraum)Math.Max(0, Zeitraum.SelectedIndex), Von = Lesen(Von), Bis = Lesen(Bis),
             Wichtig = WichtigKnopf.Aktiv, MedikationGeaendert = MedikationKnopf.Aktiv, Bedarfsgabe = BedarfKnopf.Aktiv,
-                Visite = VisiteKnopf.Aktiv,
-            Uebergabe = Uebergabe.Checked, MitNachtrag = MitNachtrag.Checked,
+            Visite = VisiteKnopf.Aktiv, Uebergabe = Uebergabe.Checked, MitNachtrag = MitNachtrag.Checked,
             Art = Art.SelectedIndex > 0 ? Art.SelectedItem as string : null,
             Bereich = Bereich.SelectedIndex switch { 0 => null, 6 => BerichtFilter.Allgemein, int n => n },
-            Schicht = Schichtwahl.SelectedIndex switch { 1 => Schicht.Frueh, 2 => Schicht.Spaet, 3 => Schicht.Nacht,
-                _ => null },
+            Schicht = Schichtwahl.SelectedIndex switch
+            {
+                1 => Schicht.Frueh,
+                2 => Schicht.Spaet,
+                3 => Schicht.Nacht,
+                _ => null
+            },
             Verfasser = Verfasser.SelectedIndex > 0 ? Verfasser.SelectedItem as string : null,
             Suche = Suche.Text,
         };
@@ -233,8 +254,12 @@ public sealed class DokumentationAnsicht : Panel
             k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
             k.Click += (_, _) => FilterSetzen(f.Filter);
             var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
-            menue.Items.Add("Gespeicherten Filter löschen", null, (_, _) => { speicher.FilterLoeschen(Recht.Kuerzel,
-                f.Name); GespeichertZeigen(); PerformLayout(); });
+            menue.Items.Add("Gespeicherten Filter löschen", null, (_, _) =>
+            {
+                speicher.FilterLoeschen(Recht.Kuerzel, f.Name);
+                GespeichertZeigen();
+                PerformLayout();
+            });
             k.ContextMenuStrip = menue;
             gespeichert.Controls.Add(k);
         }
@@ -247,8 +272,12 @@ public sealed class DokumentationAnsicht : Panel
     {
         if (!Recht.Angemeldet || NameFragen() is not string name || name.Trim().Length == 0) return false;
         try { speicher.FilterSpeichern(Recht.Kuerzel, name, Filter); }
-        catch (Eingabefehler e) { MessageBox.Show(FindForm(), string.Join("\n", e.Fehler), "Filter speichern",
-            MessageBoxButtons.OK, MessageBoxIcon.Information); return false; }
+        catch (Eingabefehler e)
+        {
+            MessageBox.Show(FindForm(), string.Join("\n", e.Fehler), "Filter speichern", MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return false;
+        }
         GespeichertZeigen();
         PerformLayout();
         return true;
@@ -279,8 +308,8 @@ public sealed class DokumentationAnsicht : Panel
     public void Drucken()
     {
         if (Bewohner is null) return;
-        var druck = new BerichteDruck(Bewohner, Berichte, string.Join(", ",
-            DokuRegeln.Gesetzt(Filter).Select(g => g.Text).DefaultIfEmpty("7 Tage")));
+        string auswahl = string.Join(", ", DokuRegeln.Gesetzt(Filter).Select(g => g.Text).DefaultIfEmpty("7 Tage"));
+        var druck = new BerichteDruck(Bewohner, Berichte, auswahl);
         Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, $"Berichte {Bewohner.Name}");
     }
 
@@ -288,13 +317,11 @@ public sealed class DokumentationAnsicht : Panel
     {
         // Die Wörter in ihrer Schichtfarbe über den grauen Text malen.
         int x = TextRenderer.MeasureText(g, "Rand: ", Farbschluessel.Font, Size.Empty, TextFormatFlags.NoPadding).Width;
-        foreach (var (wort, farbe) in new[] { ("Früh", Stil.SchichtFrueh), ("Spät", Stil.SchichtSpaet), ("Nacht",
-            Stil.SchichtNacht) })
+        var flags = TextFormatFlags.NoPadding;
+        foreach (var (wort, farbe) in new[] { ("Früh", Stil.SchichtFrueh), ("Spät", Stil.SchichtSpaet), ("Nacht", Stil.SchichtNacht) })
         {
-            TextRenderer.DrawText(g, wort, Stil.MarkeSchrift, new Point(x, 0), farbe, Stil.Seite,
-                TextFormatFlags.NoPadding);
-            x += TextRenderer.MeasureText(g, wort + " · ", Farbschluessel.Font, Size.Empty,
-                TextFormatFlags.NoPadding).Width;
+            TextRenderer.DrawText(g, wort, Stil.MarkeSchrift, new Point(x, 0), farbe, Stil.Seite, flags);
+            x += TextRenderer.MeasureText(g, wort + " · ", Farbschluessel.Font, Size.Empty, flags).Width;
         }
     }
 

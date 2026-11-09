@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.7** (Bauplan Schritte 29d, 29q, 29r: Wohnbereich wählen, Aufgaben je Bereich, Kopfleisten).
+Stand: 09.11.2026. Version: **0.33.8** (Bauplan Schritt 29s, Teil 1: Prüfung von Format und Code-Maßen, Überblick).
 
 ## Aktuell
 
@@ -232,8 +232,12 @@ bei einem anderen Bereich mit der Marke „eingesprungen“. Die einzelnen Berei
 **Aufgaben** gehören zu einem Bewohner oder einem Bereich; jeder sieht nur die seines Bereichs, Standardaufgaben gibt
 es je Bereich. Die Kästen der Übersicht haben eine eigene **Kopfleiste**.
 
+Neu in 0.33.8 (nur für die, die den Code ansehen; das Programm verhält sich wie vorher): Jeder Windows-Build prüft
+Leerzeichen und Einrückung nach `.editorconfig` und listet Dateien, Methoden und Zeilen über den Richtwerten
+(`werkzeuge/code-masse.py`). Neu `docs/aufbau.md` mit Überblick über die Projekte, den Weg der Daten und einem Glossar.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29s „Aufräumen nach den Code-Regeln“ (mehrere kleine Auslieferungen ab 0.33.8).
+als Nächstes 29s Teil 2 „Kommentare ohne Verlauf“ (0.33.9), dann Teil 3 „Bereichsseiten und große Dateien“.
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1151,6 +1155,16 @@ als Nächstes 29s „Aufräumen nach den Code-Regeln“ (mehrere kleine Ausliefe
     Darüberfahren kräftiger) für die vier Kästen und die Bewohnerliste der Übersicht und die Spalten der Laufenden
     Therapien; `docs/gestaltung.md` ergänzt.
 
+- 0.33.8 — Bauplan Schritt 29s, Teil 1 (Aufräumen, ohne neue Funktion):
+  - `.editorconfig` (UTF-8, Einrückung 4, Zeilenende ohne Leerzeichen, Schreibweise des Projekts für kurze Blöcke)
+    und im Windows-Build „Format prüfen“ (`dotnet format whitespace --folder --verify-no-changes`); die Abweichungen
+    sind einmal angeglichen.
+  - `werkzeuge/code-masse.py`: Zeilen, Kommentare (mit Verlauf), Dateien über 400 Zeilen, Methoden über 40 Zeilen,
+    Zeilen über 120 Zeichen – als Hinweis in jedem Build.
+  - `docs/aufbau.md`: Projekte, Weg der Daten, wo man was findet, Glossar.
+  - Code-Maße vorher (Programmcode in `src/`, 09.11.2026, Stand 0.33.7): 33.480 Zeilen, 2.038 Kommentarzeilen
+    (davon 301 mit Verlauf), 21 Dateien über 400 Zeilen, 88 Methoden über 40 Zeilen, 2.057 Zeilen über 120 Zeichen.
+
 ## Offene Punkte
 
 - Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
@@ -1227,6 +1241,10 @@ als Nächstes 29s „Aufräumen nach den Code-Regeln“ (mehrere kleine Ausliefe
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.8): Geprüft wird zunächst nur die Formatierung (Leerzeichen, Einrückung), nicht der ganze
+  Stil: Stilregeln als Fehler hätten bei „Warnungen sind Fehler“ den Build sofort angehalten. Die Größen meldet das
+  Skript als Hinweis (Vorgabe des Eintrags). Gezählt wird der Programmcode in `src/` ohne Tests.
 
 - 09.11.2026 (0.33.7): „Leitung“ für den Knopf „Alle“ sind Geschäftsführung, Hausleitung und Verwaltung (sie haben
   schon alle Rechte) und der Administrator; die Bereichsleitung sieht die Wohnbereiche. In der Rechte-Tabelle änderbar.
@@ -1979,6 +1997,8 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.8: nichts Neues zum Ansehen im Programm (Aufräumen). Im Windows-Build stehen die Code-Maße.
 
 Version 0.33.7:
 

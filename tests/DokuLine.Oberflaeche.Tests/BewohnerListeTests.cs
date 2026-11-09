@@ -117,7 +117,7 @@ public class BewohnerListeTests
             var lang = u.Speicher.BerichtSpeichern(new Bericht
             {
                 BewohnerId = u.Demo("Ahorn").Id!.Value, Zeitpunkt = DateTime.Now.AddMinutes(-5),
-                    Schicht = BerichtRegeln.SchichtZu(DateTime.Now),
+                Schicht = BerichtRegeln.SchichtZu(DateTime.Now),
                 Verfasser = "EF", Text = string.Join(" ",
                     Enumerable.Repeat("Ein langer Bericht mit vielen Sätzen (Test).", 20)), Erfasst = DateTime.Now,
             });

@@ -56,7 +56,7 @@ public sealed class BetreuerFenster : Form
         try
         {
             var b = BetreuerRegeln.AusEingabe(new BetreuerEingabe
-                { Name = NameFeld.Text, Stelle = Stelle.Text, Email = Email.Text, Telefon = Telefon.Text, Kuerzel = Recht.Kuerzel, Keine = Keine.Checked }, Jetzt());
+            { Name = NameFeld.Text, Stelle = Stelle.Text, Email = Email.Text, Telefon = Telefon.Text, Kuerzel = Recht.Kuerzel, Keine = Keine.Checked }, Jetzt());
             speicher.BetreuerSpeichern(bewohner.Id!.Value, b);
             Gespeichert = b;
         }

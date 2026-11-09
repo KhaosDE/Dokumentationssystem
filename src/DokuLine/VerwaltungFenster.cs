@@ -78,7 +78,8 @@ public sealed class MitarbeiterFenster : Form
         Liste.Items.Clear();
         foreach (var m in mitarbeiter)
             Liste.Items.Add(new ListViewItem([m.Kuerzel, m.Name, m.Qualifikation, string.Join(", ", m.Bereiche),
-                string.Join(", ", m.Positionen), m.Aktiv ? "aktiv" : "ausgeschieden"]) { ForeColor = m.Aktiv ? Stil.TextNormal : Stil.TextLeise });
+                string.Join(", ", m.Positionen), m.Aktiv ? "aktiv" : "ausgeschieden"])
+            { ForeColor = m.Aktiv ? Stil.TextNormal : Stil.TextLeise });
         Liste.EndUpdate();
         KnoepfeSetzen();
     }

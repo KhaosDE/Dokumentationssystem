@@ -20,12 +20,21 @@ public sealed class BerichtZeile : Control
     };
     public Label Zeit { get; } = new() { AutoSize = true, Font = Stil.Fett, UseMnemonic = false };
     public Label SchichtWort { get; } = new() { AutoSize = true, Font = Stil.Klein, UseMnemonic = false };
-    public Label Kuerzel { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextMittel,
-        UseMnemonic = false };
-    public Label UebergabeZeichen { get; } = new() { AutoSize = true, Font = Stil.MarkeSchrift, Text = "Übergabe",
-        Visible = false };
-    public LinkLabel Mehr { get; } = new() { AutoSize = true, Text = "… mehr", LinkColor = Stil.Akzent,
-        Visible = false };
+    public Label Kuerzel { get; } = new()
+    {
+        AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextMittel,
+        UseMnemonic = false
+    };
+    public Label UebergabeZeichen { get; } = new()
+    {
+        AutoSize = true, Font = Stil.MarkeSchrift, Text = "Übergabe",
+        Visible = false
+    };
+    public LinkLabel Mehr { get; } = new()
+    {
+        AutoSize = true, Text = "… mehr", LinkColor = Stil.Akzent,
+        Visible = false
+    };
     public List<MarkenFeld> Marken { get; } = [];
     public List<(int Start, int Laenge)> Fundstellen { get; }
     public bool Aufgeklappt { get; private set; }

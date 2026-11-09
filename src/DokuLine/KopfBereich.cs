@@ -243,7 +243,8 @@ public sealed class KopfBereich : Panel
         // senkrechter Strich. Die volle Fläche beginnt deshalb auch einen Pixel früher.
         float von = f.Left + f.Width * 0.70f, bis = f.Left + f.Width * 0.84f;
         using (var auslauf = new LinearGradientBrush(new PointF(von, 0), new PointF(bis, 0),
-                   Color.FromArgb(0, Stil.Flaeche), Stil.Flaeche) { WrapMode = WrapMode.TileFlipX })
+                   Color.FromArgb(0, Stil.Flaeche), Stil.Flaeche)
+        { WrapMode = WrapMode.TileFlipX })
             g.FillRectangle(auslauf, von, f.Top, bis - von, f.Height);
         using (var voll = new SolidBrush(Stil.Flaeche))
             g.FillRectangle(voll, bis - 1, f.Top, f.Right - bis + 1, f.Height);

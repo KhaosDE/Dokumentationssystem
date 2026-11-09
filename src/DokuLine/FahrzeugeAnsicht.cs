@@ -102,7 +102,7 @@ public sealed class FahrzeugZeile : FlowLayoutPanel
         Margin = new Padding(0, 0, 0, Stil.AbstandMini);
         var name = new Label { Text = stand.Fahrzeug, AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, MinimumSize = new Size(80, 0), Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0) };
         StandFeld = new MarkenFeld(stand.Text, stand.Ueberfaellig ? Stil.Beschluss : stand.Unterwegs ? Stil.Unterwegs : Stil.Offen)
-            { Margin = new Padding(0, Stil.AbstandMini + 2, Stil.AbstandKlein, 0) };
+        { Margin = new Padding(0, Stil.AbstandMini + 2, Stil.AbstandKlein, 0) };
         foreach (var k in new[] { LosKnopf, ZurueckKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, 0); }
         LosKnopf.Visible = !stand.Unterwegs && stand.Naechste is not null;
         ZurueckKnopf.Visible = stand.Unterwegs;

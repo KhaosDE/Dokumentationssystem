@@ -106,7 +106,7 @@ public class HebOberflaechenTests
                     zeile.Cells[1].Value = "Feld_Leitziel";
                     return zuordnung.Speichern() ? DialogResult.OK : DialogResult.Cancel;
                 }))
-                    using (var z = new HebZuordnungFenster(Bogenart.B)) Dialog.Zeigen(z, f);
+                using (var z = new HebZuordnungFenster(Bogenart.B)) Dialog.Zeigen(z, f);
             }
             Assert.Equal("Feld_Leitziel", HebPdf.Zuordnung(Bogenart.B)["leitziel"]);
 

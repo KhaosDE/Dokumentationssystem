@@ -142,18 +142,18 @@ public static class PersonRegeln
         return new Person
         {
             Id = id, Gruppe = e.Gruppe, Name = e.Name.Trim(),
-                Art = e.Gruppe == PersonGruppe.Betreuer ? e.Art.Trim() : "",
+            Art = e.Gruppe == PersonGruppe.Betreuer ? e.Art.Trim() : "",
             Fachrichtung = funktion ? e.Fachrichtung.Trim() : "", Praxis = stelle ? e.Praxis.Trim() : "",
-                Telefon = e.Telefon.Trim(), Mobil = e.Mobil.Trim(),
+            Telefon = e.Telefon.Trim(), Mobil = e.Mobil.Trim(),
             Email = e.Email.Trim(), Anschrift = e.Anschrift.Trim(), Erreichbarkeit = e.Erreichbarkeit.Trim(),
-                Hinweis = e.Hinweis.Trim(), Aktiv = aktiv,
+            Hinweis = e.Hinweis.Trim(), Aktiv = aktiv,
         };
     }
 
     public static PersonEingabe AlsEingabe(Person a) => new()
     {
         Gruppe = a.Gruppe, Name = a.Name, Art = a.Art, Fachrichtung = a.Fachrichtung, Praxis = a.Praxis,
-            Telefon = a.Telefon, Mobil = a.Mobil,
+        Telefon = a.Telefon, Mobil = a.Mobil,
         Email = a.Email, Anschrift = a.Anschrift, Erreichbarkeit = a.Erreichbarkeit, Hinweis = a.Hinweis,
     };
 

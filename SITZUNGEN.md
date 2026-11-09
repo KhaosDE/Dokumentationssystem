@@ -102,3 +102,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: Bauplan 29b Bereich Dokumentation mit Berichtsart, Filtern und gespeicherten Filtern (0.33.5).
 - 09.11.2026 — Claude Code: Bauplan 29c Fehlendes ausblenden statt ausgrauen (0.33.6).
 - 09.11.2026 — Claude Code: Bauplan 29d, 29q, 29r Wohnbereich in der Übersicht wählen, Aufgaben je Bereich, Kopfleisten (0.33.7).
+- 09.11.2026 — Claude Code: Bauplan 29s Teil 1 – Format- und Maßprüfung im Build, docs/aufbau.md (0.33.8).

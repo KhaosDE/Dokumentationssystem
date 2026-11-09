@@ -29,8 +29,11 @@ public sealed class BewohnerBereich : Panel
     public DokumentationAnsicht Dokumentation { get; }
     // Ein Bewohner aus einem anderen Bereich, dessen Berichte gerade gewünscht sind (z. B. aus dem Verzeichnis).
     private long? zusaetzlich;
-    public TextBox Suche { get; } = new() { PlaceholderText = "Name suchen", Font = Stil.Standard,
-        AccessibleName = "Bewohner suchen" };
+    public TextBox Suche { get; } = new()
+    {
+        PlaceholderText = "Name suchen", Font = Stil.Standard,
+        AccessibleName = "Bewohner suchen"
+    };
     public Button EinklappenKnopf { get; } = Stil.NebenKnopf("◀");
     public bool Eingeklappt { get; private set; }
     private readonly Panel listenFlaeche = new() { Dock = DockStyle.Fill, BackColor = Stil.Seite };
@@ -95,11 +98,17 @@ public sealed class BewohnerBereich : Panel
         EinklappenKnopf.Click += (_, _) => Einklappen(!Eingeklappt);
         links.Controls.AddRange([EinklappenKnopf, Suche, Namen]);
         links.Layout += (_, _) => LinksAnordnen();
-        Dokumentation = new DokumentationAnsicht(speicher) { Dock = DockStyle.Fill,
-            Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0) };
+        Dokumentation = new DokumentationAnsicht(speicher)
+        {
+            Dock = DockStyle.Fill,
+            Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0)
+        };
         listenFlaeche.Controls.Add(Dokumentation);
-        listenFlaeche.Controls.Add(new Panel { Dock = DockStyle.Left, Width = Stil.AbstandGross,
-            BackColor = Stil.Seite });
+        listenFlaeche.Controls.Add(new Panel
+        {
+            Dock = DockStyle.Left, Width = Stil.AbstandGross,
+            BackColor = Stil.Seite
+        });
         listenFlaeche.Controls.Add(links);
         listenFlaeche.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, 0, 0);
         BerichtNeuKnopf.Click += (_, _) => NeuerBericht();

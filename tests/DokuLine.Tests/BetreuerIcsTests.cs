@@ -43,7 +43,7 @@ public sealed class BetreuerIcsTests : IDisposable
         Assert.Equal("nicht erfasst", BetreuerRegeln.Text(null));
         s.BetreuerSpeichern(distel.Id!.Value, BetreuerRegeln.AusEingabe(new BetreuerEingabe { Name = "Test Taucher", Stelle = "Verein", Kuerzel = "AB" }, Jetzt));
         s.BetreuerSpeichern(distel.Id!.Value, BetreuerRegeln.AusEingabe(new BetreuerEingabe
-            { Name = "Test Taucher", Stelle = "Verein", Email = "taucher@example.org", Telefon = "0000 1", Kuerzel = "CD" }, Jetzt.AddHours(1)));
+        { Name = "Test Taucher", Stelle = "Verein", Email = "taucher@example.org", Telefon = "0000 1", Kuerzel = "CD" }, Jetzt.AddHours(1)));
         var b = s.Betreuer(distel.Id!.Value)!;
         Assert.Equal("Test Taucher (Verein) · Tel. 0000 1 · taucher@example.org", BetreuerRegeln.Text(b));
         Assert.Equal(2, s.BetreuerFassungen(distel.Id!.Value).Count);
@@ -185,7 +185,7 @@ public sealed class BetreuerIcsTests : IDisposable
 
         // Schreiben unabhängig von der Sprache des Rechners (z. B. ein anderer Kalender als der gregorianische).
         var termin = s.KalenderAnlegen(KalenderRegeln.AusEingabe(new KalenderEingabe
-            { Art = KalenderArt.Wohnbereich, Titel = "Probe", BeginnDatum = "12.11.2026", BeginnUhrzeit = "09:00", EndeUhrzeit = "10:00", Kuerzel = "AB" }, Jetzt));
+        { Art = KalenderArt.Wohnbereich, Titel = "Probe", BeginnDatum = "12.11.2026", BeginnUhrzeit = "09:00", EndeUhrzeit = "10:00", Kuerzel = "AB" }, Jetzt));
         var vorher = CultureInfo.CurrentCulture;
         try
         {
@@ -197,7 +197,7 @@ public sealed class BetreuerIcsTests : IDisposable
         // Mehrere Termine in einem Zug: gibt es einen Bewohner nicht, wird keiner gespeichert.
         int anzahl = s.Kalender(DateOnly.FromDateTime(Jetzt), DateOnly.FromDateTime(Jetzt).AddDays(30)).Count;
         var gut = KalenderRegeln.AusEingabe(new KalenderEingabe
-            { Art = KalenderArt.Wohnbereich, Titel = "eins", BeginnDatum = "13.11.2026", BeginnUhrzeit = "09:00", EndeUhrzeit = "10:00", Kuerzel = "AB" }, Jetzt);
+        { Art = KalenderArt.Wohnbereich, Titel = "eins", BeginnDatum = "13.11.2026", BeginnUhrzeit = "09:00", EndeUhrzeit = "10:00", Kuerzel = "AB" }, Jetzt);
         var kaputt = gut with { Art = KalenderArt.Bewohner, Bewohner = [999_999] };
         Assert.Throws<Eingabefehler>(() => s.KalenderAnlegenAlle([gut, kaputt]));
         Assert.Equal(anzahl, s.Kalender(DateOnly.FromDateTime(Jetzt), DateOnly.FromDateTime(Jetzt).AddDays(30)).Count);
