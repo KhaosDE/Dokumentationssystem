@@ -74,6 +74,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 29c | Rechte: Fehlendes ausblenden statt ausgrauen | 0.33.5 |
 | 29d | Wohnbereich einmal in der Übersicht wählen, gilt überall | 0.33.6 |
 | 29q | Aufgaben gehören zu einem Bewohner oder einem Bereich | 0.33.6 |
+| 29r | Übersicht: Überschriften der Kästen eingerahmt | 0.33.6 |
 | 29e | Nachrichten: Kuvert in der Kopfzeile statt Hinweis in jedem Fenster | 0.33.7 |
 | 29f | Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation) | 0.33.8 |
 | 29g | Tagesplan im normalen Programmstil, kleiner und übersichtlicher | 0.33.9 |
@@ -2286,3 +2287,20 @@ Echtbetrieb ohne Freigabe.** Die Demo zeigt dauerhaft ‚Demo — ausgedachte Da
 im Betriebsmodus und erst nach schriftlicher Freigabe durch Einrichtung, Datenschutz und
 Mitarbeitervertretung. Im Repository, in Tests und Commits nie echte Daten — auch nicht aus dem
 Betrieb.“
+
+## Übersicht: Überschriften der Kästen eingerahmt
+Status: freigegeben (Bauplan Schritt 29r; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Die Überschriften der Kästen in der Übersicht heben sich deutlich von ihren Einträgen ab.
+Warum: Vorgabe Tobi (09.11.2026): In der Übersicht sollen die einzelnen Fensterbenennungen
+eingerahmt werden, damit sie sich besser von den Punkten abheben.
+Umfang:
+- Jeder Kasten („Übergaben offen“, „Termine heute“, „Laufender Dienst“, „Nachrichten“,
+  „Medikamentenänderungen“ und der Kopf der Bewohnerliste) bekommt eine **eigene Kopfleiste**:
+  helle Akzentfläche (238, 242, 251), oben abgerundet wie der Kasten (8 px), darunter eine
+  Trennlinie (217, 224, 236). Darin links die Überschrift (Semibold), rechts der Zähler.
+- Die Einträge darunter auf weißer Fläche mit etwas Abstand zur Kopfleiste (8 px).
+- Klick auf die Kopfleiste öffnet wie bisher den Bereich; Mauszeiger als Hand, Kopfleiste beim
+  Darüberfahren etwas kräftiger.
+- Dieselbe Kopfleiste überall, wo es solche Kästen gibt (z. B. Laufende Therapien, Wochenpläne),
+  damit es im Programm einheitlich bleibt (`docs/gestaltung.md` ergänzen).
