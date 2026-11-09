@@ -3,7 +3,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Fenster „Ärztliche Informationen“ (Bauplan Schritt 26f): Diagnosen (nie gelöscht, „beendet am …“),
+// Fenster „Ärztliche Informationen“: Diagnosen (nie gelöscht, „beendet am …“),
 // Allergien und Unverträglichkeiten mit den drei Zuständen (Regel 5) und Art der Reaktion, Hinweise für
 // den Notfall. Ansehen und Bearbeiten hängen an eigenen Rechten; ohne „bearbeiten“ ist alles nur zum Lesen.
 public sealed class AerztlichFenster : Form
@@ -53,7 +53,7 @@ public sealed class AerztlichFenster : Form
         zeile(null, Formular.Reihe(NeuKnopf, BeendenKnopf));
         zeile(null, Abschnitt("ALLERGIEN UND UNVERTRÄGLICHKEITEN"));
         Allergie.Setzen(BewohnerRegeln.Kuerzel(bewohner.Allergie), bewohner.Allergien);
-        Allergie.Feld.Width = 520;   // mehrere Stoffe lesbar (0.29.10)
+        Allergie.Feld.Width = 520;   // mehrere Stoffe lesbar
         zeile(null, Allergie);
         Reaktionen.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Stoff", ReadOnly = true, FillWeight = 35 });
         Reaktionen.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Art der Reaktion (freiwillig)", FillWeight = 65 });

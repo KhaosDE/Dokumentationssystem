@@ -16,7 +16,7 @@ public class RechteOberflaechenTests
             Hilfe.Zeigen(fenster);
             Assert.StartsWith("Anmelden", fenster.Text);
             Assert.Equal("Beenden", fenster.BeendenKnopf.Text);
-            Assert.Equal(27, fenster.DemoListe.Items.Count);   // nur aktive Mitarbeiter (mit TST; 14 mehr seit Schritt 26h)
+            Assert.Equal(28, fenster.DemoListe.Items.Count);   // nur aktive Mitarbeiter (mit TST; 14 mehr seit Schritt 26h, TH seit 29n)
             fenster.Kuerzel.Text = "ZZ";
             Assert.False(fenster.Anmelden());
             Assert.Contains("nicht bekannt", fenster.Fehler.Text);
@@ -149,7 +149,7 @@ public class RechteOberflaechenTests
         using (var fenster = new MitarbeiterFenster(u.Speicher))
         {
             Hilfe.Zeigen(fenster);
-            Assert.Equal(28, fenster.Liste.Items.Count);
+            Assert.Equal(29, fenster.Liste.Items.Count);
             Assert.Null(Stil.Sperrgrund(fenster.NeuKnopf));
             fenster.Waehlen("GH");
             Assert.Equal("Nur Mitarbeiter des eigenen Bereichs.", Stil.Sperrgrund(fenster.BearbeitenKnopf));

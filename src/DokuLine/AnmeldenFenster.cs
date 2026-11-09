@@ -2,9 +2,9 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Anmelden mit dem Kürzel (Bauplan Schritt 19). Demo: ohne Passwort – das Fenster ist so gebaut,
-// dass ein Passwortfeld später darunter Platz hat. Beim Start Pflicht; nach dem Abmelden (F12,
-// Schritt 26a3) liegt es über dem leeren Hauptfenster – anmelden (auch mit anderem Kürzel) oder beenden.
+// Anmelden mit dem Kürzel. Demo: ohne Passwort – das Fenster ist so gebaut,
+// dass ein Passwortfeld später darunter Platz hat. Beim Start Pflicht; nach dem Abmelden (F12) liegt es über
+// dem leeren Hauptfenster – anmelden (auch mit anderem Kürzel) oder beenden.
 public sealed class AnmeldenFenster : Form
 {
     private readonly Speicher speicher;

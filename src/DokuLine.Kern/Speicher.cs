@@ -3,34 +3,29 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-// Der Speicher ist eine SQLite-Datei im Datenordner.
-//
-// Der Aufbau der Datenbank wächst mit dem Programm. Jede Erweiterung ist ein Schritt in
-// Schritte; die Datei merkt sich in „PRAGMA user_version“, wie viele Schritte sie schon hat.
-// Beim Öffnen werden fehlende Schritte nachgeholt – jeder ganz oder gar nicht.
-//
-// Die Python-Version (bis 0.2.0) hatte eine eigene Datei (dokusystem.sqlite3). Sie wird nicht
-// gelöscht und nicht gelesen; die C#-Version beginnt mit den Demo-Daten.
+// Der Speicher ist eine SQLite-Datei im Datenordner. Jede Erweiterung des Aufbaus ist ein Eintrag in Schritte; die
+// Datei merkt sich in „PRAGMA user_version“, wie viele sie hat, fehlende werden beim Öffnen nachgeholt (jeder ganz
+// oder gar nicht). Die Datei der Python-Version (dokusystem.sqlite3) wird weder gelesen noch gelöscht.
 public sealed partial class Speicher : IDisposable
 {
     public const string Datei = "dokumentationssystem.db";
     private const string DemoGeladen = "demo_geladen";
-    private const string DemoVoll = "demo_23";   // Schritt 26h: 23 Bewohner je Wohnbereich
+    private const string DemoVoll = "demo_23";   // 23 Bewohner je Wohnbereich
     private const string DemoBerichte = "demo_berichte";
     private const string DemoAufgaben = "demo_aufgaben";
     private const string DemoNachrichten = "demo_nachrichten";
     private const string DemoMedikamente = "demo_medikamente";
     private const string DemoMedikation = "demo_medikation";
     private const string DemoTherapie = "demo_therapie";
-    private const string DemoTherapieAnbieter = "demo_therapie_anbieter";   // Schritt 22: Demo-Angebote mit Anbieter
-    private const string DemoTherapieTag = "demo_therapie_tag";   // Schritt 26m: Angebote über den ganzen Tag
-    private const string DemoKalenderHaus = "demo_kalender_haus";            // Schritt 24: Demo-Termine im Kalender „Haus“
-    private const string DemoFahrten = "demo_fahrten";                      // Schritt 24: Fahrzeuge und Fahrten
-    private const string DemoStandardaufgaben = "demo_standardaufgaben";    // Schritt 25: Standardaufgaben je Schicht
-    private const string DemoVisiten = "demo_visiten";                      // Schritt 26: Visiten mit allen drei Fällen
-    private const string DemoAerzte = "demo_aerzte";                        // Schritt 26b: Ärzteverzeichnis
-    private const string DemoBedarf = "demo_bedarf";                        // 0.33.0: Bedarfsgaben (mit Absprache)
-    private const string DemoBetreuer = "demo_betreuer";                    // Schritt 28: Betreuer (E-Mail nur @example.org)
+    private const string DemoTherapieAnbieter = "demo_therapie_anbieter";   // Demo-Angebote mit Anbieter
+    private const string DemoTherapieTag = "demo_therapie_tag";   // Angebote über den ganzen Tag
+    private const string DemoKalenderHaus = "demo_kalender_haus";            // Demo-Termine im Kalender „Haus“
+    private const string DemoFahrten = "demo_fahrten";                      // Fahrzeuge und Fahrten
+    private const string DemoStandardaufgaben = "demo_standardaufgaben";    // Standardaufgaben je Schicht
+    private const string DemoVisiten = "demo_visiten";                      // Visiten mit allen drei Fällen
+    private const string DemoAerzte = "demo_aerzte";                        // Ärzteverzeichnis
+    private const string DemoBedarf = "demo_bedarf";                        // Bedarfsgaben (mit Absprache)
+    private const string DemoBetreuer = "demo_betreuer";                    // Betreuer (E-Mail nur @example.org)
     private const string DemoWochenplan = "demo_wochenplan";
     private const string DemoKalender = "demo_kalender";
     private const string DemoBiografie = "demo_biografie";
@@ -614,7 +609,7 @@ public sealed partial class Speicher : IDisposable
         ALTER TABLE aufgaben ADD COLUMN visite_anordnung_id INTEGER REFERENCES visite_anordnungen(id);
         ALTER TABLE aufgaben ADD COLUMN visite_eintrag_id INTEGER REFERENCES visite_eintraege(id);
         """,
-        // 22 – Entwürfe (Schritt 26a3): angefangene Eingaben beim Abmelden; gehören dem Kürzel, das sie anfing.
+        // 22 – Entwürfe: angefangene Eingaben beim Abmelden; gehören dem Kürzel, das sie anfing.
         """
         CREATE TABLE entwuerfe (
             id          INTEGER PRIMARY KEY,
@@ -626,7 +621,7 @@ public sealed partial class Speicher : IDisposable
             UNIQUE (kuerzel, art, bewohner_id)
         );
         """,
-        // 23 – Ärzteverzeichnis (Schritt 26b): Auswahl statt Freitext; nie löschen, nur inaktiv.
+        // 23 – Ärzteverzeichnis: Auswahl statt Freitext; nie löschen, nur inaktiv.
         """
         CREATE TABLE aerzte (
             id           INTEGER PRIMARY KEY,
@@ -641,7 +636,7 @@ public sealed partial class Speicher : IDisposable
         );
         CREATE UNIQUE INDEX aerzte_name ON aerzte (name COLLATE NOCASE);
         """,
-        // 24 – Visite mit allen Bewohnern (Schritt 26c): je Bereich ein Entwurf, bis „Visite abschließen“.
+        // 24 – Visite mit allen Bewohnern: je Bereich ein Entwurf, bis „Visite abschließen“.
         """
         CREATE TABLE visite_entwuerfe (
             bereich    TEXT PRIMARY KEY,
@@ -653,7 +648,7 @@ public sealed partial class Speicher : IDisposable
             eintraege  TEXT NOT NULL DEFAULT '[]'
         );
         """,
-        // 25 – Wohnbereiche R1–R3, Zimmer und Betten (Schritt 26e): Bereiche „offen“/„beschuetzt“ (leer = kein
+        // 25 – Wohnbereiche R1–R3, Zimmer und Betten: Bereiche „offen“/„beschuetzt“ (leer = kein
         // Wohnbereich, z. B. Therapie), Zimmer mit 1 Bett (Einzelzimmer) oder 2 (Fenster, Tür), Bett am Bewohner.
         """
         ALTER TABLE bereiche ADD COLUMN art TEXT CHECK (art IS NULL OR art IN ('offen', 'beschuetzt'));
@@ -665,7 +660,7 @@ public sealed partial class Speicher : IDisposable
         );
         ALTER TABLE bewohner ADD COLUMN bett TEXT NOT NULL DEFAULT '';
         """,
-        // 26 – Ärztliche Informationen (Schritt 26f): Diagnosen (nie gelöscht, nur „beendet am“), Art der
+        // 26 – Ärztliche Informationen: Diagnosen (nie gelöscht, nur „beendet am“), Art der
         // Reaktion je Allergie, Hinweise für den Notfall.
         """
         CREATE TABLE diagnosen (
@@ -699,7 +694,7 @@ public sealed partial class Speicher : IDisposable
             kuerzel     TEXT NOT NULL
         );
         """,
-        // 27 – Betreuer je Bewohner (Schritt 28): jede Änderung eine neue Fassung, die neueste gilt.
+        // 27 – Betreuer je Bewohner: jede Änderung eine neue Fassung, die neueste gilt.
         """
         CREATE TABLE betreuer (
             id          INTEGER PRIMARY KEY,
@@ -714,7 +709,7 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER betreuer_bleiben BEFORE UPDATE ON betreuer
             BEGIN SELECT RAISE(ABORT, 'Betreuer-Fassungen werden nicht überschrieben.'); END;
         """,
-        // 28 – Bedarfsgaben (0.33.0, „Assistenzkraft und Fachkraft“): jede Gabe mit Uhrzeit, Menge, Anlass, wer gab
+        // 28 – Bedarfsgaben: jede Gabe mit Uhrzeit, Menge, Anlass, wer gab
         // und – bei einer Assistenzkraft – mit welcher Fachkraft abgesprochen; dazu der Bericht in der Akte.
         """
         CREATE TABLE bedarfsgaben (
@@ -733,7 +728,7 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER bedarfsgaben_bleiben BEFORE UPDATE ON bedarfsgaben
             BEGIN SELECT RAISE(ABORT, 'Bedarfsgaben werden nicht überschrieben.'); END;
         """,
-        // 29 – Betreuer: dritter Zustand „keine gesetzliche Betreuung“ (0.33.3), z. B. wenn eine Betreuung endet.
+        // 29 – Betreuer: dritter Zustand „keine gesetzliche Betreuung“, z. B. wenn eine Betreuung endet.
         // Ohne Fassung bleibt es „nicht erfasst“ (Regel 5: leer heißt nicht „keiner“).
         """
         ALTER TABLE betreuer ADD COLUMN keine INTEGER NOT NULL DEFAULT 0;
@@ -801,6 +796,15 @@ public sealed partial class Speicher : IDisposable
             WHERE v.bewohner_id IS NULL AND w.art IS NOT NULL AND w.aktiv = 1 AND w.name <> (SELECT name FROM erster_bereich);
         UPDATE aufgabe_vorlagen SET bereich = (SELECT name FROM erster_bereich) WHERE bewohner_id IS NULL AND bereich = '';
         DROP TABLE erster_bereich;
+        """,
+        // 33 – Visite: Psychiater oder Hausarzt auch im Entwurf.
+        """
+        ALTER TABLE visite_entwuerfe ADD COLUMN art TEXT NOT NULL DEFAULT '';
+        """,
+        // 34 – Berichtsart „Therapie“ für Berichte aus dem Bereich Therapie.
+        """
+        INSERT INTO berichtsarten (name, nr) SELECT 'Therapie', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
+            WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Therapie');
         """,
     ];
 
@@ -898,7 +902,7 @@ public sealed partial class Speicher : IDisposable
     {
         var fehler = BewohnerRegeln.Pruefen(b);
         if (fehler.Count > 0) throw new Eingabefehler(fehler);
-        b = BettPruefen(b);   // Schritt 26e: Bett muss es geben und frei sein
+        b = BettPruefen(b);   // Bett muss es geben und frei sein
         Bewohner? vorher = b.Id is long id ? Bewohner(id) : null;
         if (b.Id is not null && vorher is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
 
@@ -947,7 +951,7 @@ public sealed partial class Speicher : IDisposable
             DemoZuruecksetzen();
             return true;
         }
-        // Schritt 26e: Wohnbereiche R1–R3 mit Zimmern und Betten ersetzen „Wohnbereich A/B“ – das betrifft
+        // Wohnbereiche R1–R3 mit Zimmern und Betten ersetzen „Wohnbereich A/B“ – das betrifft
         // fast alle Demo-Daten. Eine ältere Demo-Datenbank wird deshalb einmal neu geladen; vorher sichert
         // das Programm sie als Kopie neben der Datenbank.
         if (Meta(DemoZimmer) is null)
@@ -957,7 +961,7 @@ public sealed partial class Speicher : IDisposable
             Startprotokoll.Add($"Demo-Daten auf die Bereiche R1–R3 mit Zimmern und Betten umgestellt; die bisherige Datenbank liegt als „{Path.GetFileName(sicherung)}“ daneben.");
             return true;
         }
-        // Schritt 26h: 23 Bewohner je Wohnbereich. Neue Bewohner betreffen Zimmer, Bezugspflege, Medikation,
+        // 23 Bewohner je Wohnbereich. Neue Bewohner betreffen Zimmer, Bezugspflege, Medikation,
         // Therapien und Berichte zugleich – deshalb auch hier einmal neu laden, vorher mit Sicherung.
         if (Meta(DemoVoll) is null)
         {
@@ -979,8 +983,7 @@ public sealed partial class Speicher : IDisposable
         bool modulNeu = neueModule.Count > 0;
         if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !modulNeu)
             return false;
-        // Vorher eine Kopie (0.33.2): Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote in
-        // 0.29.15). Bisher gab es die Kopie nur bei den großen Umstellungen oben.
+        // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
         Startprotokoll.Add($"Demo-Daten nach dem Update ergänzt; die bisherige Datenbank liegt als „{Path.GetFileName(kopie)}“ daneben.");
         using var transaktion = db.BeginTransaction();
@@ -1082,7 +1085,9 @@ public sealed partial class Speicher : IDisposable
         var demo = Demodaten.Berichte(bewohner, Uhr());
         foreach (var d in demo.Berichte)
         {
-            long id = BerichtEinfuegen(d.Bericht with { Art = DokuRegeln.ArtFuerDemo(d.Bericht.Text) }, transaktion);
+            // Die Art aus dem Text raten, außer sie steht schon fest (Berichte der Therapie).
+            string art = d.Bericht.Art == DokuRegeln.ArtTherapie ? d.Bericht.Art : DokuRegeln.ArtFuerDemo(d.Bericht.Text);
+            long id = BerichtEinfuegen(d.Bericht with { Art = art }, transaktion);
             if (d.Uebergabe is UebergabeWunsch wunsch)
                 DemoUebergabe(d.Bericht.BewohnerId, id, wunsch, d.Bericht.Erfasst, d.Bericht.Verfasser, d, transaktion);
         }

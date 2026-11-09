@@ -2,21 +2,20 @@ using DokuLine.Kern;
 
 namespace DokuLine.Modul.Ausgangsliste;
 
-// Eine Zeile der Ausgangsliste am Bildschirm (Schritt 27 von DokuLine), angelehnt an
-// die ausdruckbare Tagesliste: Zimmer, Bewohner, Ausgang, Unterbringung, Ausgänge heute (von–bis,
-// Hz.) und „Stand jetzt“. Rechts „raus“ bzw. „zurück“ direkt in der Zeile, dazu „…“ (auch per
-// Rechtsklick) für Ausgang, Anwesenheit, Unterbringung und Verlauf. Wer unterwegs ist, ist
-// hinterlegt und hat links einen Balken; Überfällige sind rot und tragen das Wort „überfällig“.
+// Eine Zeile der Ausgangsliste am Bildschirm, einzeilig, damit alle Bewohner des Bereichs ohne Bildlauf passen:
+// Zimmer · Bewohner · Status (im Haus, unterwegs, abwesend …) · Rückkehr. Rechts „raus ▾“ (allein, mit Bewohner) bzw.
+// „zurück“ und „…“ (Ausgang, Anwesenheit, Unterbringung, Verlauf; auch per Rechtsklick). Doppelklick: „raus“ bzw.
+// „zurück“. Unterbringung und Fristen stehen nicht in der Liste (Akte, Fenster „Unterbringung“). Wer unterwegs ist,
+// ist hinterlegt und hat links einen Balken; Überfällige sind rot und tragen das Wort „überfällig“.
 public sealed class ListenZeile : Panel
 {
-    public static readonly string[] Spalten = ["Zi.", "Bewohner", "Ausgang", "Unterbringung", "Heute (von–bis, Hz.)", "Stand jetzt"];
-    private static readonly int[] Anteile = [5, 17, 22, 18, 17, 21];
-    public const int Schmal = 980;   // darunter stehen die Knöpfe unter der Zeile
+    public static readonly string[] Spalten = ["Zi.", "Bewohner", "Status", "Rückkehr"];
+    private static readonly int[] Anteile = [8, 34, 44, 14];
 
     private readonly Label[] zellen;
-    private readonly Label hinweise = new() { AutoSize = false, AutoEllipsis = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, UseMnemonic = false };
     private readonly FlowLayoutPanel knoepfe = new() { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
-    private readonly ContextMenuStrip menue = new();
+    // Die Menüs entstehen erst beim ersten Öffnen: 23 Zeilen mit je zwei Menüs kosteten sonst merklich Zeit beim Aufbau.
+    private ContextMenuStrip? menue, rausMenue;
     private readonly Color balken;
 
     public Platz Platz { get; }
@@ -25,13 +24,14 @@ public sealed class ListenZeile : Panel
     public string UnterbringungZeile { get; }
     public string HeuteText { get; }
     public string StandText { get; }
-    public string HinweisText => hinweise.Text;
+    public string RueckkehrText { get; }
     public bool Unterwegs { get; }
     public bool Ueberfaellig { get; }
-    public Button ZurueckKnopf { get; } = Stil.HauptKnopf("zurück");
-    public Button AlleinKnopf { get; } = Stil.NebenKnopf("raus allein");
-    public Button MitBewohnerKnopf { get; } = Stil.NebenKnopf("raus mit Bewohner");
-    public Button MehrKnopf { get; } = Stil.NebenKnopf("…");
+    public Button ZurueckKnopf { get; } = Stil.KleinerKnopf("zurück", haupt: true);
+    public Button RausKnopf { get; } = Stil.KleinerKnopf("raus ▾");
+    public Button MehrKnopf { get; } = Stil.KleinerKnopf("…");
+    public ToolStripMenuItem AlleinKnopf { get; } = new("raus allein");
+    public ToolStripMenuItem MitBewohnerKnopf { get; } = new("raus mit Bewohner");
     public ToolStripMenuItem AusgangEintrag { get; } = new("Ausgang ändern …");
     public ToolStripMenuItem AnwesenheitEintrag { get; } = new("Anwesenheit …");
     public ToolStripMenuItem UnterbringungEintrag { get; } = new("Unterbringung …");
@@ -40,6 +40,7 @@ public sealed class ListenZeile : Panel
     // Gemeinsame Breite des Knopfbereichs aller Zeilen (setzt die Seite), damit die Spalten fluchten.
     public int KnopfBreite { get; set; }
     public int EigeneKnopfBreite => knoepfe.GetPreferredSize(Size.Empty).Width;
+    public static int Hoehe(Control bezug) => Stil.Px(bezug, 32);
 
     // digital: null = Untermodul „Digitaler Ausgang“ ausgeschaltet.
     public ListenZeile(Platz p, DateTime jetzt, DigitalStand? digital, bool kueche)
@@ -63,60 +64,80 @@ public sealed class ListenZeile : Panel
         StandText = digital?.Laufend is AusgangEintrag e
             ? Ueberfaellig && digital.ZurueckBis is TimeSpan bis
                 ? $"überfällig seit {DigitalerAusgang.Uhrzeit(bis)} ({e.Art})"
-                : $"unterwegs seit {DigitalerAusgang.Uhrzeit(e.Beginn)} ({e.Art})" + (digital.ZurueckBis is TimeSpan z ? $", zurück bis {DigitalerAusgang.Uhrzeit(z)}" : "")
+                : $"unterwegs seit {DigitalerAusgang.Uhrzeit(e.Beginn)} ({e.Art})"
             : p.Status switch
             {
                 AnwesenheitsStatus.Abwesenheit => $"abwesend: {KartenText.GrundOhneTitel(p)}",
                 AnwesenheitsStatus.Ausgangsbeschraenkung => "Ausgangsbeschränkung" + (KartenText.GrundOhneTitel(p) is { Length: > 0 } r ? $" {r}" : ""),
                 _ => "im Haus",
             };
-        // Was Aufmerksamkeit braucht (Fristen, Widerspruch, nicht erfasst), steht klein unter der Zeile.
-        var hinweisTexte = marken.Where(m => m.Art == MarkenArt.NichtErfasst && !m.Text.StartsWith("überfällig", StringComparison.Ordinal))
-            .Select(m => m.Text).Concat(PlatzTexte.Infos(p)).ToList();
-        hinweise.Text = string.Join(" · ", hinweisTexte);
+        RueckkehrText = Unterwegs && digital!.ZurueckBis is TimeSpan z ? $"bis {DigitalerAusgang.Uhrzeit(z)}" : "";
 
         var hinter = Ueberfaellig ? Stil.Beschluss.Flaeche : Unterwegs ? Stil.Zimmer.Flaeche : Stil.Flaeche;
         balken = Ueberfaellig ? Stil.Beschluss.Text : Stil.Zimmer.Text;
         BackColor = hinter;
         string name = p.Bewohnername + (kueche ? " · Küche" : "");
-        string[] texte = [p.Zimmernummer, name, AusgangZeile, UnterbringungZeile, HeuteText, StandText];
+        string[] texte = [p.Zimmernummer, name, StandText, RueckkehrText];
         zellen = texte.Select((t, i) => new Label
         {
             Text = t, AutoSize = false, AutoEllipsis = true, UseMnemonic = false, BackColor = hinter, TextAlign = ContentAlignment.MiddleLeft,
-            Font = i == 1 || i == 5 && (Unterwegs || p.HatStatus) ? Stil.Fett : Stil.Standard,
-            ForeColor = i == 5 && Ueberfaellig ? Stil.Beschluss.Text : i is 0 or 3 or 4 ? Stil.TextMittel : Stil.TextNormal,
+            Font = i == 1 || i == 2 && (Unterwegs || p.HatStatus) ? Stil.Fett : Stil.Standard,
+            ForeColor = i == 2 && Ueberfaellig ? Stil.Beschluss.Text : i is 0 or 3 ? Stil.TextMittel : Stil.TextNormal,
         }).ToArray();
-        hinweise.BackColor = hinter;
-        hinweise.Visible = hinweise.Text.Length > 0;
         Controls.AddRange(zellen);
-        Controls.Add(hinweise);
 
-        menue.Items.AddRange([AusgangEintrag, AnwesenheitEintrag, UnterbringungEintrag, VerlaufEintrag]);
-        ContextMenuStrip = menue;
-        foreach (var zelle in zellen) zelle.ContextMenuStrip = menue;
-        MehrKnopf.Click += (_, _) => menue.Show(MehrKnopf, new Point(0, MehrKnopf.Height));
-        MehrKnopf.AccessibleName = $"Weitere Aktionen für {p.Bewohnername}";
-        bool frei = digital is not null && !p.HatStatus && !Unterwegs;
-        AlleinKnopf.Visible = frei && DigitalerAusgang.Anspruch(p, "allein") > 0;
-        MitBewohnerKnopf.Visible = frei && DigitalerAusgang.Anspruch(p, "mit Bewohner") > 0;
-        ZurueckKnopf.Visible = Unterwegs;
-        foreach (var k in new[] { ZurueckKnopf, AlleinKnopf, MitBewohnerKnopf, MehrKnopf })
+        foreach (var c in zellen.Append<Control>(this))
         {
-            k.Margin = new Padding(Stil.AbstandKlein, 0, 0, 0);
-            k.AutoSize = true;
+            c.DoubleClick += (_, _) => Doppelklick();
+            c.MouseUp += (_, e) => { if (e.Button == MouseButtons.Right) Menue().Show(Cursor.Position); };
+        }
+        MehrKnopf.Click += (_, _) => Menue().Show(MehrKnopf, new Point(0, MehrKnopf.Height));
+        RausKnopf.Click += (_, _) => RausMenue().Show(RausKnopf, new Point(0, RausKnopf.Height));
+        MehrKnopf.AccessibleName = $"Weitere Aktionen für {p.Bewohnername}";
+        RausKnopf.AccessibleName = $"Ausgang beginnen: {p.Bewohnername}";
+        bool frei = digital is not null && !p.HatStatus && !Unterwegs;
+        AlleinKnopf.Available = frei && DigitalerAusgang.Anspruch(p, "allein") > 0;
+        MitBewohnerKnopf.Available = frei && DigitalerAusgang.Anspruch(p, "mit Bewohner") > 0;
+        RausKnopf.Visible = AlleinKnopf.Available || MitBewohnerKnopf.Available;
+        ZurueckKnopf.Visible = Unterwegs;
+        foreach (var k in new[] { ZurueckKnopf, RausKnopf, MehrKnopf })
+        {
+            k.Margin = new Padding(Stil.AbstandMini, 0, 0, 0);
             knoepfe.Controls.Add(k);   // unsichtbare zählen bei der Breite nicht mit
         }
         knoepfe.BackColor = hinter;
         Controls.Add(knoepfe);
-        AccessibleName = $"{p.Bewohnername}, Zimmer {p.Zimmernummer}, {StandText}. {AusgangZeile}. Unterbringung: {UnterbringungZeile}" +
-                         (hinweise.Text.Length > 0 ? $". {hinweise.Text}" : "");
+        AccessibleName = $"{p.Bewohnername}, Zimmer {p.Zimmernummer}, {StandText}" + (RueckkehrText.Length > 0 ? $", zurück {RueckkehrText}" : "");
     }
 
+    private ContextMenuStrip Menue()
+    {
+        if (menue is not null) return menue;
+        menue = new ContextMenuStrip();
+        menue.Items.AddRange([AusgangEintrag, AnwesenheitEintrag, UnterbringungEintrag, VerlaufEintrag]);
+        return menue;
+    }
+
+    private ContextMenuStrip RausMenue()
+    {
+        if (rausMenue is not null) return rausMenue;
+        rausMenue = new ContextMenuStrip();
+        rausMenue.Items.AddRange([AlleinKnopf, MitBewohnerKnopf]);
+        return rausMenue;
+    }
+
+    // Doppelklick: der naheliegende Handgriff – zurück, wenn unterwegs, sonst „raus“ wählen.
+    private void Doppelklick()
+    {
+        if (Unterwegs) ZurueckKnopf.PerformClick();
+        else if (AlleinKnopf.Available || MitBewohnerKnopf.Available) RausMenue().Show(Cursor.Position);
+    }
+
+    // Hinweise nur an Name (mit Ausgangszeiten) und Status – die übrigen Spalten sind kurz.
     public void Hinweise(ToolTip tip)
     {
-        string[] titel = Spalten;
-        for (int i = 0; i < zellen.Length; i++) tip.SetToolTip(zellen[i], $"{titel[i]}: {zellen[i].Text}");
-        if (hinweise.Visible) tip.SetToolTip(hinweise, hinweise.Text);
+        tip.SetToolTip(zellen[1], $"{zellen[1].Text} · {AusgangZeile}");
+        tip.SetToolTip(zellen[2], $"{Spalten[2]}: {zellen[2].Text}");
     }
 
     // x-Position und Breite je Spalte bei gegebener Tabellenbreite.
@@ -133,35 +154,18 @@ public sealed class ListenZeile : Panel
         return liste;
     }
 
-    public static bool KnoepfeUnten(Control c) => c.Width < Stil.Px(c, Schmal);
-
     protected override void OnLayout(LayoutEventArgs levent)
     {
         base.OnLayout(levent);
         if (zellen is null) return;   // Anordnung schon während des Aufbaus
-        int innen = Stil.Px(this, Stil.AbstandMittel), luecke = Stil.Px(this, Stil.AbstandKlein);
-        bool unten = KnoepfeUnten(this);
+        int innen = Stil.Px(this, Stil.AbstandKlein), luecke = Stil.Px(this, Stil.AbstandKlein);
         var knopfGroesse = knoepfe.GetPreferredSize(Size.Empty);
         int knopfBereich = Math.Max(KnopfBreite, knopfGroesse.Width);
-        int tabelle = Math.Max(100, Width - 2 * innen - (unten ? 0 : knopfBereich + luecke));
-        int zeile = Math.Max(zellen[1].PreferredHeight, knopfGroesse.Height);
-        int y = innen;
+        int tabelle = Math.Max(100, Width - 2 * innen - knopfBereich - luecke);
+        int hoehe = Hoehe(this);
         var pos = Positionen(innen, tabelle);
-        for (int i = 0; i < zellen.Length; i++) zellen[i].SetBounds(pos[i].X, y, pos[i].Breite - luecke, zeile);
-        y += zeile;
-        if (hinweise.Visible)
-        {
-            int h = hinweise.PreferredHeight;
-            hinweise.SetBounds(pos[1].X, y, innen + tabelle - pos[1].X, h);
-            y += h;
-        }
-        if (unten)
-        {
-            knoepfe.Bounds = new Rectangle(new Point(pos[1].X, y + Stil.Px(this, Stil.AbstandMini)), knopfGroesse);
-            y = knoepfe.Bottom;
-        }
-        else knoepfe.Bounds = new Rectangle(new Point(Width - innen - knopfGroesse.Width, innen + (zeile - knopfGroesse.Height) / 2), knopfGroesse);
-        int hoehe = y + innen;
+        for (int i = 0; i < zellen.Length; i++) zellen[i].SetBounds(pos[i].X, 0, pos[i].Breite - luecke, hoehe);
+        knoepfe.Bounds = new Rectangle(new Point(Width - innen - knopfGroesse.Width, (hoehe - knopfGroesse.Height) / 2), knopfGroesse);
         if (Height != hoehe) Height = hoehe;
     }
 
@@ -178,7 +182,7 @@ public sealed class ListenZeile : Panel
 
     protected override void Dispose(bool disposing)
     {
-        if (disposing) menue.Dispose();
+        if (disposing) { menue?.Dispose(); rausMenue?.Dispose(); }
         base.Dispose(disposing);
     }
 }
@@ -202,9 +206,8 @@ public sealed class ListenKopf : Panel
     protected override void OnLayout(LayoutEventArgs levent)
     {
         base.OnLayout(levent);
-        int innen = Stil.Px(this, Stil.AbstandMittel), luecke = Stil.Px(this, Stil.AbstandKlein);
-        bool unten = ListenZeile.KnoepfeUnten(this);
-        int tabelle = Math.Max(100, Width - 2 * innen - (unten ? 0 : KnopfBreite + luecke));
+        int innen = Stil.Px(this, Stil.AbstandKlein), luecke = Stil.Px(this, Stil.AbstandKlein);
+        int tabelle = Math.Max(100, Width - 2 * innen - KnopfBreite - luecke);
         var pos = ListenZeile.Positionen(innen, tabelle);
         int h = titel[0].PreferredHeight;
         for (int i = 0; i < titel.Length; i++) titel[i].SetBounds(pos[i].X, 0, pos[i].Breite - luecke, h);

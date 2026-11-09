@@ -3,7 +3,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Therapie, Reiter „Laufende Therapien“ (Bauplan Schritt 26m): oben die Tagesleiste 7–21 Uhr mit allen
+// Therapie, Reiter „Laufende Therapien“: oben die Tagesleiste 7–21 Uhr mit allen
 // Angeboten des Tages und einem Strich für „jetzt“; darunter je laufender Therapie eine Spalte mit den
 // Teilnehmern (Bereich und Zimmer, Name, Bezugspflege, Status als Wort mit Farbe), daneben „Gleich“ und
 // „Noch offen“ (mit „gegangen“/„abgesagt“); unten der Rest des Tages. Bestätigt wird derselbe Eintrag wie
@@ -58,7 +58,10 @@ public sealed class LaufendeTherapienAnsicht : Panel
         var bezuege = speicher.Bezuege();
         var kollegen = speicher.Kollegen();
         string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);   // wie im Tagesplan
+        // Im Bereich Therapie schlanker: ohne Zimmer und Bezugspflege (die braucht nur der Wohnbereich).
+        bool schlank = TherapieListe.Aktiv;
         string? Bezug(Bewohner b) => bezuege.GetValueOrDefault(b.Id!.Value)?.Bezugspflege?.Kuerzel;
+        Kaertchen Karte(TafelTeilnehmer p, string? zusatz) => new(p, Bezug(p.Bewohner), zusatz, schlank);
         string Kuerzel(string name) => kollegen.FirstOrDefault(k => k.Name == name)?.Kuerzel
             ?? string.Concat(name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(t => char.ToUpperInvariant(t[0])));
 
@@ -67,7 +70,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
         Hinweis.Text = tafel.Hinweis ?? "";
         Hinweis.Visible = tafel.Hinweis is not null;
 
-        // Bildlauf merken (0.33.2): Die Tafel baut sich jede Minute und nach jedem Klick neu auf; sonst
+        // Bildlauf merken: Die Tafel baut sich jede Minute und nach jedem Klick neu auf; sonst
         // spränge die Spalte „Noch offen“ jedes Mal nach oben.
         var bildlauf = Spalten.GroupBy(s => s.Titel).ToDictionary(g => g.Key, g => g.First().Bildlauf);
         int quer = -spaltenFlaeche.AutoScrollPosition.X;
@@ -77,7 +80,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
         foreach (var t in tafel.Laufend)
         {
             var spalte = new TherapieSpalte(t.Name, [$"{t.Fassung.Ort} · {Kuerzel(t.Fassung.Therapeut)}", $"bis {t.Bis:HH\\:mm} · {t.Belegung}"]) { Termin = t };
-            foreach (var p in t.Teilnehmer) spalte.Hinzufuegen(new Kaertchen(p, Bezug(p.Bewohner), null));
+            foreach (var p in t.Teilnehmer) spalte.Hinzufuegen(Karte(p, null));
             if (t.Teilnehmer.Count == 0) spalte.Leer("Niemand aus dem Bereich.");
             Spalten.Add(spalte);
         }
@@ -89,7 +92,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
         var offen = new TherapieSpalte(NochOffenTitel, ["Hat begonnen, Teilnahme nicht bestätigt"]);
         foreach (var (t, p) in tafel.NochOffen)
         {
-            var k = new Kaertchen(p, Bezug(p.Bewohner), $"{t.Von:HH\\:mm} {t.Name}");
+            var k = Karte(p, $"{t.Von:HH\\:mm} {t.Name}");
             k.Knopf("gegangen", grund, () => Setzen(t, p, Teilnahme.Teilgenommen));
             k.Knopf("abgesagt", grund, () => Setzen(t, p, Teilnahme.Abgesagt));
             offen.Hinzufuegen(k);
@@ -109,7 +112,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
     }
 
     // „gegangen“ oder „abgesagt“: derselbe Eintrag wie im Tagesplan (Kürzel und Uhrzeit).
-    // Nach dem Klick baut sich die Tafel neu auf; der zweite Klick eines Doppelklicks träfe den Nächsten (0.33.2).
+    // Nach dem Klick baut sich die Tafel neu auf; der zweite Klick eines Doppelklicks träfe den Nächsten.
     public bool Setzen(TherapieTermin t, TafelTeilnehmer p, Teilnahme status)
     {
         if (Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen) is not null || !Schutz.Frei()) return false;
@@ -234,6 +237,7 @@ public sealed class TherapieSpalte : KartenFlaeche
 
 // Ein Kärtchen: oben klein Bereich und Zimmer, dann der Name, unten die Bezugspflege; rechts der Status
 // als Wort mit Farbe. In „Noch offen“ mit Knöpfen. Ohne Person (Spalte „Gleich“) nur zwei Zeilen.
+// Schlank (Bereich Therapie): nur Bereich, Name und Teilnahme.
 public sealed class Kaertchen : Panel
 {
     private readonly Label oben = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, UseMnemonic = false };
@@ -245,16 +249,16 @@ public sealed class Kaertchen : Panel
     public List<Button> Knoepfe { get; } = [];
     public string NameText => name.Text;
 
-    public Kaertchen(TafelTeilnehmer p, string? bezugspflege, string? zusatz)
+    public Kaertchen(TafelTeilnehmer p, string? bezugspflege, string? zusatz, bool schlank = false)
     {
         Teilnehmer = p;
-        oben.Text = $"{p.Bewohner.Wohnbereich} · {p.Bewohner.Zimmer}" + (zusatz is null ? "" : $" · {zusatz}");
+        oben.Text = (schlank ? p.Bewohner.Wohnbereich : $"{p.Bewohner.Wohnbereich} · {p.Bewohner.Zimmer}") + (zusatz is null ? "" : $" · {zusatz}");
         name.Text = p.Bewohner.Name;
-        unten.Text = bezugspflege is null ? "Bezugspflege: –" : $"Bezugspflege: {bezugspflege}";
-        Status = new MarkenFeld(p.StatusText, StatusMarke(p.Status));
+        unten.Text = schlank ? "" : bezugspflege is null ? "Bezugspflege: –" : $"Bezugspflege: {bezugspflege}";
+        Status = new MarkenFeld(p.StatusText, TafelStil.Status(p.Status));
         Grundform();
         Controls.Add(Status);
-        AccessibleName = $"{p.Bewohner.Name}, {oben.Text}, {unten.Text}, {p.StatusText}";
+        AccessibleName = string.Join(", ", new[] { p.Bewohner.Name, oben.Text, unten.Text, p.StatusText }.Where(x => x.Length > 0));
     }
 
     public Kaertchen(string zeile1, string zeile2)
@@ -271,15 +275,6 @@ public sealed class Kaertchen : Panel
         Padding = new Padding(Stil.AbstandKlein);
         Controls.AddRange([oben, name, unten, knoepfe]);
     }
-
-    public static Stil.Marke StatusMarke(TafelStatus s) => s switch
-    {
-        TafelStatus.Gegangen or TafelStatus.Zurueck => Stil.Offen,
-        TafelStatus.NochOffen => Stil.Achtung,
-        TafelStatus.Abgesagt or TafelStatus.Ausgefallen => Stil.Beschluss,
-        TafelStatus.Jetzt or TafelStatus.Gleich => Stil.Unterwegs,
-        _ => Stil.Zimmer,
-    };
 
     public void Knopf(string text, string? grund, Action aktion)
     {
@@ -318,9 +313,13 @@ public sealed class Kaertchen : Panel
         name.MaximumSize = new Size(breite - (oben.Visible ? 0 : statusBreite), 0);
         name.Location = new Point(innen, y);
         y = name.Bottom;
-        unten.MaximumSize = new Size(breite, 0);
-        unten.Location = new Point(innen, y);
-        y = unten.Bottom;
+        if (unten.Text.Length > 0)
+        {
+            unten.MaximumSize = new Size(breite, 0);
+            unten.Location = new Point(innen, y);
+            y = unten.Bottom;
+        }
+        else unten.Visible = false;
         if (knoepfe.Visible)
         {
             knoepfe.MaximumSize = new Size(breite, 0);

@@ -1,6 +1,6 @@
 namespace DokuLine.Kern;
 
-// Tagesplan und „Wo müsste er sein?“ (Bauplan Schritt 23). Die Teilnahme selbst speichert
+// Tagesplan und „Wo müsste er sein?“. Die Teilnahme selbst speichert
 // TeilnahmeSetzen (Wochenplan) – ein Datensatz für beide Ansichten.
 public sealed partial class Speicher
 {

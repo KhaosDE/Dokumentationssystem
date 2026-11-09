@@ -24,6 +24,24 @@ public class AusgangslisteOberflaechenTests
         s.Zeilen.Single(k => k.Platz.Bewohnername.EndsWith(" " + nachname, StringComparison.Ordinal));
 
     [Fact]
+    public void Alle_Bewohner_des_Bereichs_ohne_Bildlauf() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Arbeitsbereich.Gewaehlt = "R1";
+        using var seite = new AusgangslisteSeite(u.Speicher) { Size = new Size(1100, 900) };
+        seite.Zeigen();
+        seite.PerformLayout();
+        Assert.Equal(23, seite.Zeilen.Count);
+        Assert.Equal(1, seite.Spalten);   // hoch genug: eine Liste
+        Assert.True(seite.AutoScrollMinSize.Height <= seite.ClientSize.Height);
+        seite.Size = new Size(1100, 560);   // etwa 1366 × 768: zwei Spalten
+        seite.PerformLayout();
+        Assert.Equal(2, seite.Spalten);
+        Assert.True(seite.AutoScrollMinSize.Height <= seite.ClientSize.Height, $"{seite.AutoScrollMinSize.Height} > {seite.ClientSize.Height}");
+        Assert.True(seite.Zeilen[12].Left > seite.Zeilen[11].Right);   // die zweite Hälfte steht rechts daneben
+    });
+
+    [Fact]
     public void Seite_mit_Karten_Kuechendienst_und_Kopf() => Hilfe.Sta(() =>
     {
         var (u, f, s) = Oeffnen();
@@ -34,7 +52,6 @@ public class AusgangslisteOberflaechenTests
             Assert.Equal(69, s.Zeilen.Count);   // „Alle“: 23 je Wohnbereich
             // Oben, wer unterwegs ist (Demo: Clematis, Ginster), darunter alle anderen nach Zimmer.
             Assert.True(s.Zeilen[0].Unterwegs);
-            Assert.StartsWith("UNTERWEGS (", s.Abschnitte[0]);
             Assert.Equal("101", s.Zeilen.First(z => !z.Unterwegs).Platz.Zimmernummer);
             Assert.Equal("im Haus", Karte(s, "Ahorn").StandText);
             Assert.StartsWith("unterwegs seit ", Karte(s, "Clematis").StandText);
@@ -47,9 +64,12 @@ public class AusgangslisteOberflaechenTests
             Assert.Contains(Karte(s, "Clematis").MarkenTexte, t => t.StartsWith("unterwegs seit"));
             Assert.Contains("Unterbringung nicht erfasst", Karte(s, "Distel").MarkenTexte);
             Assert.StartsWith("Ausgang 3 Std: 2 Std allein · 1 Std mit Bewohner", Karte(s, "Ahorn").AusgangZeile);
-            Assert.True(Karte(s, "Ahorn").AlleinKnopf.Visible);
-            Assert.False(Karte(s, "Holunder").AlleinKnopf.Visible);   // abwesend
+            Assert.True(Karte(s, "Ahorn").AlleinKnopf.Available);
+            Assert.True(Karte(s, "Ahorn").RausKnopf.Visible);
+            Assert.False(Karte(s, "Holunder").AlleinKnopf.Available);   // abwesend
+            Assert.False(Karte(s, "Holunder").RausKnopf.Visible);
             Assert.True(Karte(s, "Clematis").ZurueckKnopf.Visible);
+            Assert.All(s.Zeilen, z => Assert.Equal(ListenZeile.Hoehe(z), z.Height));   // einzeilig
             if (DateTime.Now.TimeOfDay > TimeSpan.FromHours(2.5))
             {
                 Assert.True(Karte(s, "Ginster").Ueberfaellig);
@@ -311,7 +331,7 @@ public class AusgangslisteOberflaechenTests
             neu = Assert.IsType<AusgangslisteSeite>(f.Seite("Ausgangsliste"));
             Assert.False(neu.KuechendienstKnopf.Visible);
             Assert.False(neu.NachtberichtKnopf.Visible);
-            Assert.False(Karte(neu, "Ahorn").AlleinKnopf.Visible);
+            Assert.False(Karte(neu, "Ahorn").AlleinKnopf.Available);
             Assert.DoesNotContain(Karte(neu, "Ginster").MarkenTexte, t => t.StartsWith("überfällig"));
         }
     });

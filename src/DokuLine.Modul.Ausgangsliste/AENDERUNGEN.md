@@ -3,6 +3,15 @@
 Für den Abgleich mit der eigenständigen Ausgangsliste (`docs/bruecke-ausgangsliste.md`): je
 Version von DokuLine, was sich im Modul geändert hat. Neueste oben.
 
+## 0.33.16 (09.11.2026)
+
+- `ListenZeile` einzeilig (rund 32 px): Zimmer · Bewohner · Status · Rückkehr („bis 12:00“). Unterbringung, Beschluss,
+  Fristen und die Spalten „Ausgang“ und „Heute“ stehen nicht mehr in der Zeile (Unterbringung im Fenster „Unterbringung …“,
+  Ausgang als Hinweis am Namen). „raus allein“ und „raus mit Bewohner“ sind Einträge im Menü „raus ▾“; Doppelklick:
+  „zurück“ bzw. „raus“. Kleine Knöpfe (`Stil.KleinerKnopf`).
+- `AusgangslisteSeite`: ohne Zwischenüberschriften; reicht die Höhe nicht für alle, zwei Spalten nebeneinander
+  (`Spalten`, je mindestens 520 px). Gezeigt wird der gewählte Bereich.
+
 ## 0.30.0 (08.11.2026)
 
 - `AusgangslisteSeite` zeigt eine **Liste** statt Karten (Bauplan Schritt 27 von

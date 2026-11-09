@@ -69,17 +69,20 @@ Danach fragt Windows für diese Datei nicht mehr.
   Rechtsklick auf eine Bewohnerkarte → „Neuer Bericht …“. Zwei Kennzeichen: **Wichtig** (bleibt in der Akte hervorgehoben)
   und **Übergabe** (erscheint im Bereich „Übergabe“, so lange wie gewählt). Korrigiert wird
   mit **Nachtrag …** – der ursprüngliche Text bleibt stehen.
-- **Tagesplan** (links, unter „Übersicht“): alle Termine von heute als **Anzeigetafel** wie am
-  Flughafen – oben „Jetzt und gleich“, darunter „Später heute“, unten blasser „Erledigt“; jede Zeile mit
+- **Tagesplan** (links, unter „Übersicht“): alle Termine von heute als übersichtliche Liste – oben
+  „Jetzt und gleich“, darunter „Später heute“, unten blasser „Erledigt“; jede Zeile mit
   einem Status-Wort (JETZT, GLEICH, GEPLANT, GEGANGEN, NOCH OFFEN …). Die Tafel geht jede Minute von
   selbst weiter. Bei Therapien „bestätigen ▾“ → „gegangen“, „abgesagt“, „ausgefallen“ (wie im
   Wochenplan). Nach „gegangen“ zeigen Karte und Akte bis zum Ende „in Therapie: … bis …“.
   **Vollbild** (Knopf oder F11) zeigt nur die Tafel, z. B. auf einem Bildschirm im Dienstzimmer; Esc beendet.
-- **Übergabe** (links): nur die Übergabe-Einträge, oben „Wohnbereich allgemein“, darunter je
-  Bewohner. Mit eigenem Kürzel (Einstellungen) lassen sie sich als gelesen bestätigen,
-  verlängern oder erledigen. „Übergabeblatt drucken …“ druckt die offenen Einträge.
-- **Visiten** (links, unter „Übergabe“): was in der Visite besprochen wurde, geänderte Anordnungen
-  und nötige Facharzttermine, je Bewohner; Liste mit Filter nach Bewohner und Zeitraum. Nach dem
+- **Übergabe** (links): nur die Übergabe-Einträge in kompakten Zeilen, oben „Wohnbereich allgemein“
+  (aufklappbar), darunter je Schicht ein farbig umrandeter Abschnitt, die laufende Schicht zuerst.
+  Vorgabe „nur ungelesene“. Mit eigenem Kürzel lassen sie sich mit einem Klick als gelesen bestätigen
+  oder erledigen, aufgeklappt auch verlängern. „Übergabeliste drucken …“ druckt die offenen Einträge.
+- **Visiten** (links, unter „Übergabe“): oben der Umschalter **Psychiater · Hausarzt**; was in der Visite
+  besprochen wurde, geänderte Anordnungen und nötige Facharzttermine, je Bewohner; Liste mit Filter nach
+  Bewohner und Zeitraum. In der Dokumentation steht jede Visite als Bericht der Art „Visite“, fett beginnend mit
+  „Visite Psychiater – Dr. …“. Nach dem
   Speichern zeigt das Programm sofort die Aufgaben dazu: Medikament anlegen, im Medikamentenplan
   eintragen (das passende Formular mit Arzt und Datum der Visite) oder den Facharzttermin in den
   Kalender eintragen (auf Wunsch mit Fahrt). Die Medikation ändert das Programm nicht selbst.
@@ -118,14 +121,16 @@ Danach fragt Windows für diese Datei nicht mehr.
 - **Medikamentenplan** (Reiter in der Akte): „Was gilt am …“ als Tabelle – Medikament,
   morgens bis nachts, verordnet von, seit, Status; Bedarfsmedikation darunter; sortierbar. Ein
   Klick auf eine Zeile zeigt Einzelheiten und Verlauf; dort Pause, Stufenplan, Absetzen. Die
-  Grundverordnung wird nie überschrieben. **Demo — nicht zum Stellen verwenden.**
+  Grundverordnung wird nie überschrieben. Jede Änderung (neu, Dosis, Pause, Stufe, abgesetzt, neuer Bedarf) ist
+  sieben Tage lang rot markiert („Medikation geändert“ in Akte, Übersicht, Visite, Zeile im Plan) und kommt als
+  wichtiger Eintrag in die Übergabe, bis alle drei Schichten ihn gelesen haben. **Demo — nicht zum Stellen verwenden.**
 - **Therapie** (links): Angebote mit Terminen, Teilnehmern und freien Plätzen; Bewohner
   zuteilen (mit Warnung bei Überschneidung), Teilnahme beenden, Änderungen „ab Datum“. Jedes
   Angebot gehört der Therapie oder einem Wohnbereich (Filter „Anbieter“); alle sehen alles,
   ändern und zuteilen darf nur der Anbieter.
-- **Wochenplan** (Reiter in der Akte): die Regelwoche mit zugeteilten Therapien und freien
-  Einträgen; Teilnahme an Therapien eintragen; Änderungen gelten „ab Datum“; Ausdruck in
-  großer Schrift nur mit Name und Plan.
+- **Wochenplan** (Reiter in der Akte): ein fester Plan Montag bis Sonntag ohne Datum, mit
+  zugeteilten Therapien und freien Einträgen, wie er heute gilt („gültig seit …“); Änderungen gelten
+  „ab Datum“ (Verlauf). Die Teilnahme steht im Tagesplan. Ausdruck in großer Schrift nur mit Name und Plan.
 - **Biografie** (Reiter in der Akte): Lebensgeschichte in festen Abschnitten als Fließtext.
   „Vom Bewohner angegeben, nicht überprüft“ lässt sich je Abschnitt ankreuzen (Hinweis auf die
   Formulierung „gibt an, dass …“). Leere Abschnitte stehen unten als „Fehlende Angaben“.
@@ -144,7 +149,7 @@ Danach fragt Windows für diese Datei nicht mehr.
   Formularfeldern zu; ausgefüllt wird eine Kopie im Datenordner (Ordner `heb`). Ist ein HEB fällig,
   steht das in der Akte und auf der Übersicht.
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
-  Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Zwei Kalender:
+  Tagesausflüge; Termine eines Bewohners stehen im Tagesplan (nicht im Wochenplan, der hat kein Datum). Zwei Kalender:
   „Bereich“ und „Haus“ (Umschalter oben; Haus-Termine grau). Austausch mit Outlook & Co. nur über
   Dateien: „Als .ics speichern …“ (die gezeigten Termine) und „.ics übernehmen …“ (oder eine
   .ics-Datei auf den Kalender ziehen) mit Vorschau und Zuordnung zu Bewohner und Kalender. Keine
@@ -153,10 +158,10 @@ Danach fragt Windows für diese Datei nicht mehr.
   zurück geplant …“ mit „losgefahren“ und „zurück“; „Neue Fahrt …“ mit Warnung bei Doppelbuchung.
   Mitfahrende stehen im Tagesplan und sind während der Fahrt abwesend. Die Fahrzeugliste steht in
   den Einstellungen.
-- **Ausgangsliste** (links, Modul): eine Liste wie die Tagesliste – je Bewohner eine Zeile mit
-  Zimmer, Name, Ausgang, Unterbringung, Ausgängen von heute (von–bis, Hz.) und „Stand jetzt“. Wer
-  unterwegs ist, steht oben (Überfällige rot und zuerst); „raus“ und „zurück“ direkt in der Zeile,
-  alles andere über „…“ oder Rechtsklick. Filter „nur unterwegs“ und „nur mit Beschränkung“.
+- **Ausgangsliste** (links, Modul): alle Bewohner des gewählten Bereichs auf einen Blick, je eine
+  Zeile mit Zimmer, Name, Status und Rückkehrzeit (bei wenig Höhe in zwei Spalten). Wer unterwegs
+  ist, steht oben (Überfällige rot und zuerst); „raus ▾“ und „zurück“ direkt in der Zeile (auch per
+  Doppelklick), alles andere über „…“ oder Rechtsklick. Filter „nur unterwegs“ und „nur mit Beschränkung“.
   Je Bewohner Ausgangszeiten (allein / mit Bewohner),
   Anwesenheit und Abwesenheit mit Grund und Frist, Unterbringung mit Fristen (eine
   Ausgangsbeschränkung geht nur mit Beschluss oder Forensik), Verlauf je Person und die
@@ -227,6 +232,9 @@ nur bei den Releases dieses Repositorys, sonst geht es nirgends ins Internet.
   entfernen.
 - Oder die `.exe` mit `--kein-update` starten (Verknüpfung anlegen, Rechtsklick →
   Eigenschaften → bei „Ziel“ hinten ` --kein-update` anhängen).
+
+**Zeiten messen:** Mit ` --messen` (genauso hinten an „Ziel“ angehängt) schreibt das Programm für jeden Wechsel
+zwischen den Bereichen eine Zeile mit der Dauer in `%APPDATA%\DokuLine\messung.log` (nur Bereich und Zeit).
 
 ### Von Version 0.2.0 auf 0.3.0
 

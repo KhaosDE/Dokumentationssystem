@@ -1949,7 +1949,7 @@ Umfang:
 - Rechte bleiben unverändert.
 
 ## Nachrichten: Kuvert in der Kopfzeile statt Hinweis in jedem Fenster
-Status: freigegeben (Bauplan Schritt 29e; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.11; Bauplan Schritt 29e; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Ungelesene Nachrichten zeigt ein Kuvert in der Kopfzeile an, nicht mehr ein Hinweis in den
 Fenstern.
@@ -1964,7 +1964,7 @@ Umfang:
 - Sonst bleibt die Kopfzeile wie in Schritt 26i.
 
 ## Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation)
-Status: freigegeben (Bauplan Schritt 29f; Vorgaben Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.12; Bauplan Schritt 29f; Vorgaben Tobi 09.11.2026)
 Datum: 09.11.2026
 Umfang:
 - **Demo-Daten:** Berichte wie „Keine Besonderheiten“ oder „Ruhiger Dienst“ bekommen nie
@@ -1981,7 +1981,7 @@ Umfang:
   mit Schritt 29b.
 
 ## Tagesplan im normalen Programmstil, kleiner und übersichtlicher
-Status: freigegeben (Bauplan Schritt 29g; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.13; Bauplan Schritt 29g; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der Tagesplan verliert die dunkle Flughafen-Optik und bekommt das Aussehen des übrigen
 Programms.
@@ -1997,8 +1997,8 @@ Umfang:
 - Uhrzeit und Datum oben rechts in normaler Größe.
 
 ## Übergabe nach Schichten mit eigener Umrandung
-Status: freigegeben (Bauplan Schritt 29h; Vorgabe Tobi 09.11.2026; ergänzt: „Die Übergabeseite muss
-effektiver gestaltet werden“)
+Status: erledigt (09.11.2026, 0.33.14; Bauplan Schritt 29h; Vorgabe Tobi 09.11.2026; ergänzt: „Die Übergabeseite
+muss effektiver gestaltet werden“)
 Datum: 09.11.2026
 Was: Die Übergabe ist nach Schichten unterteilt; jede Schicht hat eine eigene farbige Umrandung.
 Warum: Vorgabe Tobi (09.11.2026).
@@ -2032,7 +2032,7 @@ Umfang:
   - **„Übergabeliste drucken“**: alle offenen Einträge auf einer A4-Seite, nach Schicht.
 
 ## Wochenplan ohne Datum
-Status: freigegeben (Bauplan Schritt 29i; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.15; Bauplan Schritt 29i; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der Wochenplan ist ein fester Plan Montag bis Sonntag für den ganzen Aufenthalt, ohne Datum.
 Warum: Vorgabe Tobi (09.11.2026): Der Wochenplan gilt für den gesamten Zeitraum des Aufenthaltes;
@@ -2046,7 +2046,7 @@ Umfang:
 - Ausdruck ebenfalls ohne Datum.
 
 ## Ausgangsliste: alle Bewohner auf einen Blick, ohne Unterbringung
-Status: freigegeben (Bauplan Schritt 29j; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.16; Bauplan Schritt 29j; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Ausgangsliste zeigt alle Bewohner des Bereichs auf einmal, ohne Angaben zur Unterbringung.
 Warum: Vorgabe Tobi (09.11.2026): Die Anzeige der Unterbringung ist hier überflüssig; man muss alle
@@ -2062,7 +2062,7 @@ Umfang:
   `src/DokuLine.Modul.Ausgangsliste/AENDERUNGEN.md` vermerken.
 
 ## Visite: Psychiater und Hausarzt getrennt, Berichte in der Dokumentation
-Status: freigegeben (Bauplan Schritt 29k; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.17; Bauplan Schritt 29k; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Visitenseite unterscheidet Psychiater-Visite und Hausarzt-Visite. Visitenberichte stehen
 hervorgehoben in der Dokumentation.
@@ -2081,7 +2081,7 @@ Umfang:
 - Medikamentenänderungen aus der Visite lösen Schritt 29l aus.
 
 ## Medikamentenänderung auffällig markieren und in die Übergabe
-Status: freigegeben (Bauplan Schritt 29l; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.18; Bauplan Schritt 29l; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Jede Änderung am Medikamentenplan ist sofort und auffällig sichtbar und geht automatisch in
 die Übergabe.
@@ -2100,7 +2100,7 @@ Umfang:
   gibt.
 
 ## Schnellerer Wechsel zwischen den Bereichen
-Status: freigegeben (Bauplan Schritt 29m; Rückmeldung Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.19; Bauplan Schritt 29m; Rückmeldung Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der Wechsel zwischen den Bereichen soll sofort und ohne Flackern gehen.
 Warum: Rückmeldung Tobi (09.11.2026): Der Wechsel zu manchen Fenstern ist sehr zaghaft; er muss
@@ -2125,7 +2125,7 @@ Umfang:
 - Nichts am Verhalten ändern; vorher/nachher messen und in `STAND.md` festhalten.
 
 ## Therapie als eigener Bereich (Dokumentation, Nachrichten, Aufgaben, Wochenpläne)
-Status: freigegeben (Bauplan Schritt 29n; Vorgaben Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.20; Bauplan Schritt 29n; Vorgaben Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Therapie ist ein eigener Bereich neben R1, R2 und R3, mit einer schlanken, eigenen
 Seitenleiste.
@@ -2307,7 +2307,7 @@ Umfang:
   damit es im Programm einheitlich bleibt (`docs/gestaltung.md` ergänzen).
 
 ## Aufräumen nach den Code-Regeln (ohne neue Funktionen)
-Status: freigegeben (Bauplan Schritt 29s; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.8–0.33.10; Bauplan Schritt 29s, Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der vorhandene Code wird nach `docs/code-regeln.md` aufgeräumt. Das Programm verhält sich
 danach genau wie vorher.

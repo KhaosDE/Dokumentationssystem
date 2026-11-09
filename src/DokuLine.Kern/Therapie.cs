@@ -26,7 +26,7 @@ public sealed record AngebotFassung
     public IReadOnlyList<Wochentermin> Termine { get; init; } = [];
     public int Hoechstens { get; init; }
     public string Hinweis { get; init; } = "";
-    public string Anbieter { get; init; } = TherapieRegeln.AnbieterTherapie;   // Schritt 22: „Therapie“ oder ein Wohnbereich
+    public string Anbieter { get; init; } = TherapieRegeln.AnbieterTherapie;   // „Therapie“ oder ein Wohnbereich
     public DateTime Erstellt { get; init; }
     public string Kuerzel { get; init; } = "";
 
@@ -88,6 +88,32 @@ public static class TherapieRegeln
 {
     public const string AnbieterTherapie = "Therapie";
 
+    // Bewohner im Bereich Therapie: wer heute mindestens ein Angebot der Therapie hat.
+    public static List<Bewohner> MitTherapie(IEnumerable<Bewohner> alle, IEnumerable<Angebot> angebote, DateOnly heute)
+    {
+        var ids = angebote.Where(a => a.Anbieter == AnbieterTherapie)
+            .SelectMany(a => a.TeilnehmerAm(heute)).Select(z => z.BewohnerId).ToHashSet();
+        return [.. alle.Where(b => b.Id is long id && ids.Contains(id))];
+    }
+
+    // Bewohnerleiste im Bereich Therapie: je Wohnbereich (in der Reihenfolge der Bereiche) eine Gruppe, darin nach Namen.
+    public static List<(string Bereich, List<Bewohner> Bewohner)> NachBereich(IEnumerable<Bewohner> bewohner, IReadOnlyList<string> reihenfolge)
+    {
+        int Rang(string bereich) => reihenfolge.Contains(bereich) ? reihenfolge.ToList().IndexOf(bereich) : int.MaxValue;
+        return [.. bewohner.GroupBy(b => b.Wohnbereich)
+            .OrderBy(g => Rang(g.Key)).ThenBy(g => g.Key, StringComparer.CurrentCulture)
+            .Select(g => (g.Key, g.OrderBy(b => b.Nachname, StringComparer.CurrentCulture)
+                .ThenBy(b => b.Vorname, StringComparer.CurrentCulture).ToList()))];
+    }
+
+    // Die Angebote der Therapie, an denen ein Bewohner an diesem Tag teilnimmt (für den Bericht der Therapie).
+    public static List<string> AngeboteVon(long bewohnerId, IEnumerable<Angebot> angebote, DateOnly tag) =>
+        [.. angebote.Where(a => a.Anbieter == AnbieterTherapie && a.TeilnehmerAm(tag).Any(z => z.BewohnerId == bewohnerId))
+            .Select(a => a.Am(tag).Name).Distinct().Order(StringComparer.CurrentCulture)];
+
+    // „Therapie Holzwerkstatt: …“ – Bericht aus dem Bereich Therapie mit dem Namen des Angebots am Anfang.
+    public static string BerichtText(string angebot, string text) => angebot.Length > 0 ? $"Therapie {angebot}: {text}" : text;
+
     public static readonly DayOfWeek[] Woche =
         [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday];
 
@@ -120,13 +146,13 @@ public static class TherapieRegeln
         for (int i = 0; i < termine.Count; i++)
             for (int j = i + 1; j < termine.Count; j++)
                 if (termine[i].Ueberschneidet(termine[j])) fehler.Add($"Die Termine {termine[i].Text} und {termine[j].Text} überschneiden sich.");
-                // Die Teilnahme gilt je Tag (gegangen/abgesagt): zwei Termine an einem Tag teilten sie sich (0.33.3).
+                // Die Teilnahme gilt je Tag (gegangen/abgesagt): zwei Termine an einem Tag teilten sie sich.
                 else if (termine[i].Tag == termine[j].Tag)
                     fehler.Add($"Termin {TagName(termine[i].Tag)}: höchstens ein Termin je Wochentag – für einen zweiten bitte ein eigenes Angebot anlegen.");
         int hoechstens = 0;
         if (e.Art == AngebotArt.Einzel) hoechstens = 1;
         else if (!int.TryParse(e.Hoechstens.Trim(), out hoechstens) || hoechstens < 1 || hoechstens > 50)
-            fehler.Add("Höchste Teilnehmerzahl: bitte eine Zahl von 1 bis 50.");
+            fehler.Add("Teilnehmer (Anzahl): bitte eine Zahl von 1 bis 50.");
         DateOnly giltAb = default;
         try { giltAb = Datum.Lesen(e.GiltAb, "Gilt ab"); }
         catch (FormatException x) { fehler.Add(x.Message); }
@@ -158,7 +184,7 @@ public static class TherapieRegeln
         for (int i = 0; i < a.Fassungen.Count; i++)
         {
             var f = a.Fassungen[i];
-            liste.Add((f.Erstellt, $"{(i == 0 ? "angelegt" : "geändert")}, gilt ab {Datum.Text(f.GiltAb)}: {f.Name} · {ArtText(f.Art)} · {f.Therapeut} · {f.Ort} · {f.TermineText} · höchstens {f.Hoechstens} · Anbieter {f.Anbieter} · von {f.Kuerzel}"));
+            liste.Add((f.Erstellt, $"{(i == 0 ? "angelegt" : "geändert")}, gilt ab {Datum.Text(f.GiltAb)}: {f.Name} · {ArtText(f.Art)} · {f.Therapeut} · {f.Ort} · {f.TermineText} · {f.Hoechstens} Teilnehmer · Anbieter {f.Anbieter} · von {f.Kuerzel}"));
         }
         foreach (var z in a.Zuteilungen)
         {

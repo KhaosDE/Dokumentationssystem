@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace DokuLine.Kern;
 
-// Entwürfe (Bauplan Schritt 26a3): Wer sich abmeldet, während ein Bericht angefangen ist, kann ihn als
+// Entwürfe: Wer sich abmeldet, während ein Bericht angefangen ist, kann ihn als
 // Entwurf behalten. Ein Entwurf gehört dem Kürzel, das ihn anfing; je Kürzel, Art und Bewohner einer.
 public sealed record Entwurf(long Id, string Kuerzel, string Art, long BewohnerId, string Inhalt, DateTime Geaendert);
 

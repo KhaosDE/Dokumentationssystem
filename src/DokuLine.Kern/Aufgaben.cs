@@ -8,7 +8,7 @@ namespace DokuLine.Kern;
 
 public enum AufgabeFuer { NaechsteSchicht, Schicht, WerZeitHat }
 
-// Beginn der drei Schichten (Schritt 25: in den Einstellungen je Bereich). Die Nachtschicht geht
+// Beginn der drei Schichten (in den Einstellungen je Bereich). Die Nachtschicht geht
 // über Mitternacht bis zum Beginn der Frühschicht.
 public sealed record Schichtzeiten(TimeOnly Frueh, TimeOnly Spaet, TimeOnly Nacht)
 {
@@ -76,17 +76,17 @@ public sealed record Aufgabe
     public string Verfasser { get; init; } = "";
     public DateTime? Erledigt { get; init; }
     public string? ErledigtVon { get; init; }
-    public string ErledigtNotiz { get; init; } = "";   // Schritt 25: begründet geschlossen statt erledigt
-    public long? VorlageId { get; init; }              // Schritt 25: aus einer Standardaufgabe entstanden
-    public long? VisiteAnordnungId { get; init; }      // Schritt 26: geänderte Anordnung einer Visite
-    public long? VisiteEintragId { get; init; }        // Schritt 26: Facharzttermin aus einer Visite
+    public string ErledigtNotiz { get; init; } = "";   // begründet geschlossen statt erledigt
+    public long? VorlageId { get; init; }              // aus einer Standardaufgabe entstanden
+    public long? VisiteAnordnungId { get; init; }      // geänderte Anordnung einer Visite
+    public long? VisiteEintragId { get; init; }        // Facharzttermin aus einer Visite
     public IReadOnlyList<Weitergabe> Weitergaben { get; init; } = [];
 
     public bool Offen => Erledigt is null;
     public bool Geschlossen => Erledigt is not null && ErledigtNotiz.Length > 0;
 }
 
-// Standardaufgabe (Schritt 25): kehrt in einer Schicht an bestimmten Wochentagen wieder.
+// Standardaufgabe: kehrt in einer Schicht an bestimmten Wochentagen wieder.
 public sealed record AufgabeVorlage
 {
     public long Id { get; init; }

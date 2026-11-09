@@ -103,3 +103,15 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: Bauplan 29c Fehlendes ausblenden statt ausgrauen (0.33.6).
 - 09.11.2026 — Claude Code: Bauplan 29d, 29q, 29r Wohnbereich in der Übersicht wählen, Aufgaben je Bereich, Kopfleisten (0.33.7).
 - 09.11.2026 — Claude Code: Bauplan 29s Teil 1 – Format- und Maßprüfung im Build, docs/aufbau.md (0.33.8).
+- 09.11.2026 — Claude Code: Bauplan 29s Teil 2 – Kommentare ohne Verlauf, docs/technik.md (0.33.9).
+- 09.11.2026 — Claude Code: Bauplan 29s Teil 3 – gemeinsame Schnittstelle der Bereichsseiten, große Dateien geteilt (0.33.10).
+- 09.11.2026 — Claude Code: 0.33.11 Kuvert für ungelesene Nachrichten in der Kopfzeile, Hinweis in der Dokumentation entfernt (Bauplan 29e).
+- 09.11.2026 — Claude Code: 0.33.12 kleine Korrekturen – Demo-Übergaben mit Inhalt, Angebot „Teilnehmer“, Dokumentation ohne Aufgabenliste mit abgerundeter Bewohnerleiste (Bauplan 29f).
+- 09.11.2026 — Claude Code: 0.33.13 Tagesplan hell im normalen Programmstil, Statusfarben an einer Stelle (Bauplan 29g).
+- 09.11.2026 — Claude Code: 0.33.14 Übergabe nach Schichten in kompakten Zeilen, „nur ungelesene“, Übergabeliste auf einer Seite (Bauplan 29h).
+- 09.11.2026 — Claude Code: 0.33.15 Wochenplan als fester Plan ohne Datum, „gültig seit“, Teilnahme nur im Tagesplan (Bauplan 29i).
+- 09.11.2026 — Claude Code: 0.33.16 Ausgangsliste einzeilig ohne Unterbringung, alle Bewohner des Bereichs ohne Bildlauf (zwei Spalten bei knapper Höhe); kleine Knöpfe passen in kompakte Zeilen (Bauplan 29j).
+- 09.11.2026 — Claude Code: 0.33.17 Visite getrennt nach Psychiater und Hausarzt, „Weitere Bewohner …“, Visitenberichte fett „Visite Psychiater – Dr. …“ (Bauplan 29k).
+- 09.11.2026 — Claude Code: 0.33.18 Medikamentenänderungen sieben Tage rot markiert, automatisch wichtig in der Übergabe bis drei Schichten gelesen haben, Kasten in der Übersicht (Bauplan 29l).
+- 09.11.2026 — Claude Code: 0.33.19 ruhigerer und schnellerer Wechsel zwischen den Bereichen, Messung mit --messen (Bauplan 29m).
+- 09.11.2026 — Claude Code: 0.33.20 Therapie als eigener Bereich mit eigener Seitenleiste, Seite „Wochenpläne“, Bewohner nach Wohnbereich gruppiert, Berichtsart „Therapie“ mit Angebot (Bauplan 29n).

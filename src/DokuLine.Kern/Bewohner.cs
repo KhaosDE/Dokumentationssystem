@@ -29,7 +29,7 @@ public sealed record Bewohner
     public OffenGefuehrtZustand OffenGefuehrt { get; init; }
     public string? Bild { get; init; }   // Dateiname im Ordner „bilder“ des Datenordners
     public string Wohnbereich { get; init; } = Bereiche.Vorgabe;   // Mehrplatz: zu welchem Bereich er gehört
-    public string Bett { get; init; } = "";   // Schritt 26e: „einzel“, „fenster“, „tuer“; leer = kein Bett zugeordnet
+    public string Bett { get; init; } = "";   // „einzel“, „fenster“, „tuer“; leer = kein Bett zugeordnet
 
     public string Name => $"{Vorname} {Nachname}";
 }

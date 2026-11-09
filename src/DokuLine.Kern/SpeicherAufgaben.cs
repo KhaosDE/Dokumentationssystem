@@ -67,7 +67,7 @@ public sealed partial class Speicher
         AufgabenGeaendert?.Invoke();
     }
 
-    // Begründet schließen (Schritt 25): nicht erledigt, aber nicht mehr zu tun – mit Begründung.
+    // Begründet schließen: nicht erledigt, aber nicht mehr zu tun – mit Begründung.
     public void AufgabeSchliessen(long id, string kuerzel, string begruendung, DateTime zeit)
     {
         var a = AufgabeOffen(id, kuerzel);
@@ -79,7 +79,7 @@ public sealed partial class Speicher
         AufgabenGeaendert?.Invoke();
     }
 
-    // ----- Standardaufgaben (Schritt 25) -----
+    // ----- Standardaufgaben -----
 
     public List<AufgabeVorlage> Vorlagen()
     {
@@ -160,7 +160,7 @@ public sealed partial class Speicher
         return neu;
     }
 
-    // ----- Schichtzeiten je Bereich (Schritt 25) -----
+    // ----- Schichtzeiten je Bereich -----
 
     public Schichtzeiten Schichtzeiten(string bereich)
     {

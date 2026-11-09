@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.8** (Bauplan Schritt 29s, Teil 1: Prüfung von Format und Code-Maßen, Überblick).
+Stand: 09.11.2026. Version: **0.33.20** (Bauplan Schritt 29n: Therapie als eigener Bereich).
 
 ## Aktuell
 
@@ -236,8 +236,73 @@ Neu in 0.33.8 (nur für die, die den Code ansehen; das Programm verhält sich wi
 Leerzeichen und Einrückung nach `.editorconfig` und listet Dateien, Methoden und Zeilen über den Richtwerten
 (`werkzeuge/code-masse.py`). Neu `docs/aufbau.md` mit Überblick über die Projekte, den Weg der Daten und einem Glossar.
 
+Neu in 0.33.9 (Aufräumen, das Programm verhält sich wie vorher): Die Kommentare im Code erzählen keinen Verlauf mehr
+(„Schritt …“, „0.33.2: vorher …“); lange Erklärungen stehen in `docs/technik.md`.
+
+Neu in 0.33.10 (Aufräumen, das Programm verhält sich wie vorher): Alle Bereiche der Seitenleiste folgen einer
+gemeinsamen Schnittstelle; die größten Dateien sind geteilt. Damit ist Schritt 29s abgeschlossen.
+
+Neu in 0.33.11: In der Kopfzeile links neben „Angemeldet: …“ steht ein **Kuvert**. Mit ungelesenen Nachrichten trägt
+es einen roten Kreis mit Ausrufezeichen und daneben die Zahl („3“); der Hinweis beim Darüberfahren sagt „3 ungelesene
+Nachrichten“. Ohne ungelesene ist es grau und ohne Zeichen. Ein Klick öffnet „Nachrichten“. Der Hinweis über der
+Liste im Bereich „Dokumentation“ entfällt; der Zähler in der Seitenleiste bleibt.
+
+Neu in 0.33.12: In den Demo-Daten tragen nur noch Berichte mit Inhalt für die nächste Schicht „Übergabe“ (nie „Keine
+Besonderheiten“). Beim Angebot heißt das Feld **„Teilnehmer“** mit „(Anzahl)“ darunter. Im Bereich „Dokumentation“
+steht keine Aufgabenliste mehr über den Berichten; die Bewohnerleiste liegt auf einer abgerundeten Fläche, der gewählte
+Name ist abgerundet hell hervorgehoben.
+
+Neu in 0.33.13: Der **Tagesplan** sieht aus wie das übrige Programm: helle Fläche, normale Schrift und Zeilenhöhe,
+Uhrzeit und Datum oben rechts in normaler Größe, der Status als Marke in denselben Farben wie in der Übersicht. Die
+Blöcke „Jetzt und gleich“, „Später heute“, „Erledigt“ und die Knöpfe „gegangen“, „abgesagt“, „ausgefallen“ bleiben.
+
+Neu in 0.33.14: Die **Übergabe** ist nach Schichten geteilt: Frühdienst, Spätdienst, Nachtdienst, die laufende Schicht
+oben, jede in einer Fläche mit Rand in ihrer Farbe (Orange, Blau, Violett) und dem farbigen Wort darüber. Jeder Eintrag
+ist eine kompakte Zeile (Bewohner · Text · gültig bis · Kürzel · „Gelesen“ · „Erledigt“), umrandet in der Farbe seiner
+Schicht; ein Klick auf den Text klappt den ganzen Bericht auf, dort steht „Verlängern …“. Vorgabe ist **„nur ungelesene“**
+(umschaltbar auf „alle offenen“, beide mit Zähler); je Schicht „Alle in diesem Abschnitt gelesen“ mit Rückfrage.
+„Wohnbereich allgemein“ ist eine aufklappbare Zeile oben. „Übergabeliste drucken …“ druckt alles auf eine A4-Seite, nach
+Schicht. In der Übersicht sind die Übergaben ebenfalls in der Farbe ihrer Schicht umrandet.
+
+Neu in 0.33.15: Der **Wochenplan** ist ein fester Plan Montag bis Sonntag **ohne Datum**: keine Daten in den
+Spaltenköpfen, kein Blättern, kein „Diese Woche“. Angezeigt wird der heute gültige Plan, darüber klein „gültig seit …“
+und „Verlauf …“. Die Teilnahme an Therapien steht nur noch im Tagesplan; einzelne Termine aus dem Kalender stehen nicht
+mehr im Wochenplan. Der Ausdruck ist ebenfalls ohne Datum.
+
+Neu in 0.33.16: Die **Ausgangsliste** zeigt alle Bewohner des gewählten Bereichs ohne Bildlauf: je eine Zeile mit
+Zimmer · Name · Status · Rückkehr, ohne Unterbringung, Beschluss und Fristen (die stehen in der Akte und im Fenster
+„Unterbringung …“). Reicht die Höhe nicht (z. B. 1366 × 768), stehen die Zeilen in zwei Spalten. In der Zeile „raus ▾“
+(allein, mit Bewohner) bzw. „zurück“ und „…“; Doppelklick macht dasselbe. Außerdem passen die kleinen Knöpfe in der
+Übergabe und im Tagesplan jetzt in ihre Zeile.
+
+Neu in 0.33.17: Die **Visiten** haben oben den Umschalter **Psychiater · Hausarzt**. Die Liste zeigt die Visiten des
+gewählten Arztes; „Visite beginnen …“ und „Neue Visite …“ gelten für ihn. In der Visite nimmt **„Weitere Bewohner …“**
+jemanden aus einem anderen Bereich dazu. Jeder Visitenbericht steht in der Dokumentation als Bericht der Art „Visite“ und
+beginnt fett mit „Visite Psychiater – Dr. …, Datum“ (bzw. Hausarzt); Filter „Visite“ wie bisher.
+
+Neu in 0.33.18: **Medikamentenänderungen** (neu, abgesetzt, Dosis geändert, Pause, Stufe eines Stufenplans, neue
+Bedarfsmedikation) tragen sieben Tage lang die rote Marke **„Medikation geändert“** – im Akte-Kopf, in der Bewohnerliste
+der Übersicht, in der Visite und im Medikamentenplan, wo die Zeile selbst hervorgehoben ist („neu seit 09.11.“, „Dosis
+geändert: 1–0–0–0 → 2–0–0–0“). Jede eingetragene Änderung wird automatisch ein wichtiger Bericht mit Übergabe
+„Medikamentenänderung: … ab …, angeordnet von …“; der Eintrag bleibt, bis Früh-, Spät- und Nachtdienst ihn gelesen haben
+(höchstens 7 Tage). In der Übersicht steht oben der Kasten „Medikamentenänderungen“, wenn es welche gibt.
+
+Neu in 0.33.19: Der **Wechsel zwischen den Bereichen** ist ruhiger und schneller: Die Seiten werden auf einmal getauscht
+(kein Zwischenbild), die Einstellungsdatei wird nur noch gelesen, wenn sie sich geändert hat, der Farbverlauf der
+Kopfzeile wird nicht mehr bei jedem Zeichnen neu berechnet, und die Ausgangsliste baut ihre Menüs erst beim Öffnen.
+Mit `DokuLine.exe --messen` schreibt das Programm die Zeit jedes Wechsels in `messung.log` im Datenordner.
+
+Neu in 0.33.20: **Therapie als eigener Bereich.** Wer in der Bereichswahl „Therapie“ wählt (oder an einem Rechner der
+Therapie arbeitet), bekommt eine schlanke Seitenleiste: Laufende Therapien (Startseite), Angebote, **Wochenpläne** (neu:
+links die Bewohner, rechts ihr Wochenplan zum Lesen und Drucken; Angebote ändert nur ihr Anbieter), Dokumentation,
+Aufgaben, Nachrichten, Einstellungen. Die Bewohnerleisten zeigen alle mit einem Angebot der Therapie, nach Wohnbereich
+gruppiert („R1“, „R2“, „R3“), mit dem Schalter „alle Bewohner des Hauses“. Berichte der Therapie haben die Berichtsart
+**„Therapie“** und beginnen mit dem Namen des Angebots („Therapie Holzwerkstatt: …“). Aufgaben der Therapie sind ohne
+Schicht, mit Fälligkeit. Die laufenden Therapien zeigen dort nur Bereich, Name und Teilnahme. Demo: Theo Hänfling (TH)
+als zweiter Therapeut, Aufgaben und eine Nachricht für das Team Therapie, Therapie-Berichte bei drei Bewohnern.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29s Teil 2 „Kommentare ohne Verlauf“ (0.33.9), dann Teil 3 „Bereichsseiten und große Dateien“.
+als Nächstes 29o „Therapie-Anzeige für den Fernseher im Wohnbereich“ (0.33.21).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1155,7 +1220,9 @@ als Nächstes 29s Teil 2 „Kommentare ohne Verlauf“ (0.33.9), dann Teil 3 „
     Darüberfahren kräftiger) für die vier Kästen und die Bewohnerliste der Übersicht und die Spalten der Laufenden
     Therapien; `docs/gestaltung.md` ergänzt.
 
-- 0.33.8 — Bauplan Schritt 29s, Teil 1 (Aufräumen, ohne neue Funktion):
+- 0.33.8 — Bauplan Schritt 29s, Teil 1 (Aufräumen, ohne neue Funktion). Der Commit auf `main` (607245b) trägt
+  versehentlich den Titel „Übergabe nach Schichten (Bauplan 29h)“; sein Inhalt ist dieser Schritt. Die Übergabe nach
+  Schichten kam mit 0.33.14.
   - `.editorconfig` (UTF-8, Einrückung 4, Zeilenende ohne Leerzeichen, Schreibweise des Projekts für kurze Blöcke)
     und im Windows-Build „Format prüfen“ (`dotnet format whitespace --folder --verify-no-changes`); die Abweichungen
     sind einmal angeglichen.
@@ -1165,7 +1232,115 @@ als Nächstes 29s Teil 2 „Kommentare ohne Verlauf“ (0.33.9), dann Teil 3 „
   - Code-Maße vorher (Programmcode in `src/`, 09.11.2026, Stand 0.33.7): 33.480 Zeilen, 2.038 Kommentarzeilen
     (davon 301 mit Verlauf), 21 Dateien über 400 Zeilen, 88 Methoden über 40 Zeilen, 2.057 Zeilen über 120 Zeichen.
 
+- 0.33.9 — Bauplan Schritt 29s, Teil 2 (Aufräumen, ohne neue Funktion):
+  - Verlauf aus den Kommentaren entfernt (Schrittnummern, Versionsangaben, „vorher …“): von 301 auf 12 Zeilen; die
+    übrigen nennen Altlasten, die noch gelten (z. B. „Ältere Installationen bis 0.29.1 suchen …“).
+  - Lange Dateiköpfe (Selbst-Update, Einstellungsdatei, Speicher) gekürzt; die Erklärungen stehen in
+    `docs/technik.md`.
+  - Code-Maße nachher: 33.442 Zeilen, 2.000 Kommentarzeilen (12 mit Verlauf).
+
+- 0.33.10 — Bauplan Schritt 29s, Teil 3 (Aufräumen, ohne neue Funktion):
+  - `IBereichSeite` (Titel, Kopftext, Knöpfe, Zeigen): alle Seiten der Seitenleiste, Platzhalter und Module;
+    `Hauptfenster.BereichWaehlen` ruft jede Seite gleich auf, statt einer `if`-Kette je Bereich.
+  - Große Dateien geteilt: `Hauptfenster` (Aufbau, Anmeldung, Abläufe, Seitenleiste) und `EinstellungenSeite`
+    (Aufbau, Karten, Handeln) als Teil-Klassen; Nebenklassen von Kalender, Medikation, Visiten, Aufgaben, Übersicht,
+    Nachrichten und Therapie in eigene Dateien.
+  - Code-Maße nachher (vorher in Klammern): 33.574 Zeilen (33.480), 2.010 Kommentarzeilen (2.038), davon 12 mit
+    Verlauf (301), 14 Dateien über 400 Zeilen (21), 87 Methoden über 40 Zeilen (88), rund 2.050 Zeilen über 120
+    Zeichen (2.057).
+
+- 0.33.11 — Bauplan Schritt 29e:
+  - `KuvertKnopf` (Bausteine): Kuvert-Symbol, roter Kreis mit „!“ und Zahl bei ungelesenen Nachrichten, Tooltip,
+    mit Tastatur bedienbar; nur sichtbar, wenn jemand angemeldet ist.
+  - `KopfBereich.NachrichtenSetzen`; das Hauptfenster zählt wie bisher und setzt Seitenleiste und Kuvert.
+  - Der Nachrichten-Hinweis über der Liste im Bereich „Dokumentation“ ist entfernt (Klasse `NachrichtenHinweis`
+    gelöscht).
+
+- 0.33.12 — Bauplan Schritt 29f:
+  - Demo-Daten: eigene Texte für Berichte mit Übergabe (`berichte.json`, `uebergabe.berichte`); Test, dass keine
+    Demo-Übergabe „Keine Besonderheiten“ oder „Ruhiger Dienst“ trägt.
+  - Angebot: „Teilnehmer“ mit „(Anzahl)“ (`Formular.ZeileMitZusatz`); Fehlertext und Verlauf ohne „höchstens“.
+  - Dokumentation: Aufgaben-Kurzliste entfernt (Klasse `AufgabenKurzliste` gelöscht); Bewohnerleiste als
+    `KartenFlaeche`, Namen in `RundeListe` (gewählte Zeile abgerundet, heller Akzent, mit Fokus umrandet).
+
+- 0.33.13 — Bauplan Schritt 29g:
+  - `TafelStil` nimmt nur noch Farben und Schriften aus `Stil` (keine dunkle Fläche, kein Consolas, keine
+    Großschrift); Zeilen in Knopfhöhe ohne Zebra, Status mit `Stil.MarkeZeichnen`.
+  - Die Statusfarben stehen einmal in `TafelStil.Status` (vorher doppelt in Übersicht und laufenden Therapien).
+  - Schmalere Spalten für Zeit, Status und Knopf: Bei 900 px passen alle vier Textspalten.
+
+- 0.33.14 — Bauplan Schritt 29h:
+  - Kern: `UebergabeRegeln.SchichtVon`, `SchichtFolge` (laufende Schicht zuerst), `Rang` und `Ordnen`
+    (Medikamentenänderung, dann „wichtig“, dann nach Zimmer; ein Bewohner zusammen), `SeitText` („seit Mo 09.11.“).
+  - Oberfläche: `UebergabeZeile` (kompakte Zeile, aufklappbar) und `UebergabeAbschnitt` (Rand 2 px in der Schichtfarbe,
+    Zähler, „Alle in diesem Abschnitt gelesen“); `UebergabeSeite` neu; „Notiz …“ und „Übergabeliste drucken …“ stehen
+    jetzt in der Aktionsleiste wie in den anderen Bereichen. `DauerFenster` und `UebergabeDruck` in eigenen Dateien.
+  - Übersicht: `HeuteEintrag.Rahmen` (Übergaben in der Schichtfarbe umrandet).
+
+- 0.33.15 — Bauplan Schritt 29i:
+  - Kern: `WochenplanRegeln.Regelwoche` (heute gültige Einträge und Therapien an ihren Wochentagen, ohne Teilnahme)
+    und `GueltigSeit` (letzte Änderung bis heute: Eintrag, Ende, Zuteilung, Angebot); `Speicher.Regelwoche`,
+    `PlanGueltigSeit`.
+  - Akte → Wochenplan: Blättern, „Diese Woche“ und Teilnahme-Menü entfernt; „gültig seit …“; Ausdruck ohne Datum.
+
+- 0.33.16 — Bauplan Schritt 29j:
+  - Modul Ausgangsliste: `ListenZeile` einzeilig (Zimmer, Bewohner, Status, Rückkehr), „raus ▾“-Menü, Doppelklick;
+    `AusgangslisteSeite` ohne Zwischenüberschriften, zwei Spalten bei knapper Höhe (`Spalten`); vermerkt in
+    `src/DokuLine.Modul.Ausgangsliste/AENDERUNGEN.md`.
+  - `Stil.KleinerKnopf`: kleiner Knopf ohne Mindesthöhe für kompakte Zeilen. Korrektur: Die Knöpfe in Übergabe-Zeilen
+    (0.33.14) und „bestätigen ▾“ im Tagesplan (0.33.13) hatten noch die Mindesthöhe 36 px und ragten über die Zeile.
+
+- 0.33.17 — Bauplan Schritt 29k:
+  - Kern: `VisitenRegeln.Psychiater`/`Hausarzt`/`Arten`; die Art ist Pflicht; `Kopf` = „Visite Psychiater – Dr. …,
+    Datum“ (fetter Anfang des Berichts). `VisitenEntwurf.Art`, Datenbank-Schritt 33 (`visite_entwuerfe.art`).
+    Demo-Visiten: Dr. Linde Psychiater, Dr. Ulme Hausarzt.
+  - Oberfläche: Umschalter auf der Visitenseite, Art in „Visite beginnen“ und „Neue Visite“, „Weitere Bewohner …“ im
+    Rundgang (bleibt im Entwurf).
+
+- 0.33.18 — Bauplan Schritt 29l:
+  - Kern: `MedikationsAenderungen` (Liste der Änderungen, sieben Tage frisch, Text je Änderung, Zeilentext),
+    `Speicher.Medikamentenaenderungen`; beim Speichern einer Verordnung oder Änderung ein wichtiger Bericht (Art
+    „Medikation“) mit Übergabe (gilt 7 Tage); `UebergabeRegeln.Offen`: Medikationsübergaben bleiben, bis drei
+    verschiedene Schichten gelesen haben. `MarkenArt.Medikation`.
+  - Oberfläche: Marke in Akte-Kopf und Bewohnerliste, Hinweis im Visitenrundgang, hervorgehobene Zeilen im
+    Medikamentenplan (auch in der Visite), Kasten „Medikamentenänderungen“ in der Übersicht.
+
+- 0.33.19 — Bauplan Schritt 29m:
+  - `Messung` (`--messen`, `messung.log`); `Hauptfenster.BereichWaehlen` tauscht die Seiten mit angehaltenem Layout.
+  - `Einstellungen.Laden` liest die Datei nur bei geändertem Pfad, Zeitstempel oder Größe.
+  - `KopfBereich`: Fläche mit Verlauf als Bild zwischengespeichert (neu bei anderer Größe oder Skalierung).
+  - Ausgangsliste: Menüs je Zeile erst beim Öffnen, Hinweise nur an Name und Status.
+  - Messung (CI-Rechner, Windows, 1920 × 1080, erster Wechsel in einen Bereich; Test `UebersichtlichkeitTests`):
+
+    | Bereich | vorher (0.33.7) | nachher erster / wiederholter Wechsel |
+    |---|---|---|
+    | Übersicht | 554 ms | folgt mit dem Testlauf dieser Version |
+    | Tagesplan | 160 ms | |
+    | Dokumentation | 181 ms | |
+    | Übergabe | 201 ms | |
+    | Visiten | 200 ms | |
+    | Aufgaben | 93 ms | |
+    | Kalender | 93 ms | |
+    | Therapie | 242 ms | |
+    | Ausgangsliste | 4188 ms | |
+
+- 0.33.20 — Bauplan Schritt 29n:
+  - Seitenleiste je Bereich: `Hauptfenster.TherapieBereiche`, `Ausgeblendet`, `StartSeite`; beim Wechsel in den Bereich
+    Therapie und zurück bleibt die Seite, wenn es sie dort gibt (`Entsprechung`). „Laufende Therapien“ und „Angebote“
+    sind die Reiter der Therapie-Seite; dort steht oben die Bereichswahl.
+  - `TherapieListe` und `RundeListe` mit Überschriften (`ListenUeberschrift`, nicht wählbar); `TherapieRegeln.MitTherapie`,
+    `NachBereich`, `AngeboteVon`, `BerichtText`.
+  - Neue Seite `WochenplaeneSeite`; `WochenplanAnsicht.NurLesen` mit „Angebot ändern …“.
+  - Berichtsart „Therapie“ (Datenbank-Schritt 34), Auswahl des Angebots im Berichtsformular.
+  - Demo: TH, zwei Aufgaben und eine Nachricht des Teams Therapie, drei Therapie-Berichte.
+  - Behoben beim Bauen: Die Demo-Berichte bekamen ihre Art immer aus dem Text geraten (auch wenn sie feststand).
+
 ## Offene Punkte
+
+- Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
+  Zeilen sind länger als 120 Zeichen, 87 Methoden länger als 40 Zeilen (vor allem Aufbau von Fenstern) und 14
+  Dateien länger als 400 Zeilen (am größten `Speicher.cs` und `Demodaten.cs`). Sie werden nach der Pfadfinderregel
+  kleiner, sobald die Datei geändert wird; das Skript im Build zeigt den Stand.
 
 - Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
   Termine des Tages für den Kasten „Termine heute“ ein zweites Mal (der Kasten braucht auch abgesagte Termine, die
@@ -1175,16 +1350,16 @@ als Nächstes 29s Teil 2 „Kommentare ohne Verlauf“ (0.33.9), dann Teil 3 „
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
   den Bildschirmfotos `109_…` und den Zeiten des Testlaufs von 0.29.10):
-  - **Ausgangsliste** zeigt alle 69 Bewohner aller Bereiche; einen Filter nach Wohnbereich hat sie nicht.
-    Ihr Aufbau dauert im Testlauf **6–9 Sekunden** (alle anderen Ansichten unter 0,25 Sekunden); bei
-    1366 × 768 passen zwei Bewohner auf den Bildschirm.
+  - ~~**Ausgangsliste** zeigt alle 69 Bewohner aller Bereiche; einen Filter nach Wohnbereich hat sie nicht.~~ Mit
+    0.33.7 nur der gewählte Bereich, mit 0.33.16 alle 23 ohne Bildlauf. Offen: Ihr Aufbau dauerte im Testlauf
+    **6–9 Sekunden** (alle anderen Ansichten unter 0,25 Sekunden); mit einem Drittel der Zeilen neu messen.
   - **Küchendienst** geht reihum über alle belegten Zimmer aller drei Bereiche (42); je Wohnbereich
     getrennt wäre näher an der Wirklichkeit.
   - ~~**Übersicht:** Bei 1920 × 1080 sind 12 der 23 Karten ohne Bildlauf zu sehen; „Termine heute“ zählt bei
     Gruppenterminen alle Namen auf (Spaziergang: 23 Namen).~~ Erledigt mit 0.29.14 (Liste, höchstens drei
     Namen je Termin).
-  - **Übergabe:** Jeder Eintrag ist eine große Karte; bei 1366 × 768 passen zwei der neun offenen Einträge
-    auf den Bildschirm.
+  - ~~**Übergabe:** Jeder Eintrag ist eine große Karte; bei 1366 × 768 passen zwei der neun offenen Einträge
+    auf den Bildschirm.~~ Erledigt mit 0.33.14 (kompakte Zeilen, rund 30 px hoch).
   - **Tagesplan:** Ein Gruppentermin („Spaziergang mit der Wohngruppe“) steht je Bewohner in einer eigenen
     Zeile (23 Zeilen).
 - **Teil 2: Repository umbenennen — sobald dieses Release erschienen ist** (`KhaosDE/Dokumentationssystem`
@@ -1241,6 +1416,68 @@ als Nächstes 29s Teil 2 „Kommentare ohne Verlauf“ (0.33.9), dann Teil 3 „
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.20): Bereich Therapie – der Wechsel in den Bereich Therapie und zurück behält die Seite, wenn es sie in
+  der anderen Seitenleiste gibt (Dokumentation, Aufgaben, Nachrichten, Einstellungen, Therapie ↔ Laufende
+  Therapien/Angebote), sonst beginnt er auf der Startseite. Aufgaben der Therapie: „Für wen?“ steht fest auf „wer Zeit
+  hat“ (ohne Schicht), die Fälligkeit ist mit morgen vorbelegt. Ein Bericht der Therapie bekommt den Namen des Angebots
+  als Anfang des Textes (kein eigenes Feld in der Datenbank); angeboten werden die Angebote der Therapie, an denen der
+  Bewohner heute teilnimmt. Im Wochenplan der Therapie-Seite sind „hervorgehoben“ die Therapien wie bisher farbig
+  abgesetzt; freie Einträge sind dort nur zu lesen.
+- 09.11.2026 (0.33.19): Beim Wechsel liest jede Seite ihre Daten weiter neu. Ein Überspringen „wenn sich nichts geändert
+  hat“ bräuchte einen Änderungszähler für Schreibvorgänge im eigenen Programm (`PRAGMA data_version` zählt nur die
+  anderer Verbindungen) – das Risiko, veraltete Daten zu zeigen, ist größer als der Gewinn. `WS_EX_COMPOSITED` für die
+  ganze Fläche ist nicht eingebaut: Es verlangsamt das Zeichnen von Tabellen und Textfeldern, und Flackern lässt sich in
+  der CI nicht messen. Der Küchendienst wird beim Öffnen der Ausgangsliste weiter neu geplant (rund 100 ms).
+
+- 09.11.2026 (0.33.18): „Sieben Tage auffällig“ zählt ab dem Tag, an dem die Änderung gilt (auch die nächste Stufe eines
+  Stufenplans); eine für später eingetragene Änderung ist schon ab dem Eintragen markiert. Nachträglich für die
+  Vergangenheit eingetragene Änderungen zählen nur, wenn ihr Datum in den letzten sieben Tagen liegt. „Gelesen von allen
+  drei Schichten“ heißt: drei Bestätigungen, deren Uhrzeiten in drei verschiedenen Schichten liegen. Die Übergabe
+  entsteht beim Speichern im Programm; Demo-Verordnungen bekommen keine (sie sind keine Änderung, die jemand
+  eingetragen hat), die Marken zeigen sie aber.
+
+- 09.11.2026 (0.33.17): Visite: Die Liste der Bewohner bleibt bis Schritt 30 (Ärzte je Bewohner) „alle Bewohner des
+  Bereichs“; „Weitere Bewohner …“ nimmt Bewohner anderer Bereiche dazu. Je Bereich bleibt es bei einem Entwurf: Läuft
+  eine Psychiater-Visite, zeigt „Visite Psychiater fortsetzen“ sie auch, wenn „Hausarzt“ gewählt ist (zwei offene
+  Visiten gleichzeitig wären verwirrend). Ältere Visiten ohne Art stehen unter beiden; ein Entwurf ohne Art bekommt beim
+  Fortsetzen die gewählte.
+
+- 09.11.2026 (0.33.16): In der Ausgangsliste fallen auch die Spalten „Ausgang“ (Stunden) und „Heute“ weg: Sonst passen
+  nicht alle 23 Bewohner und zwei Spalten nicht nebeneinander. Die Ausgangsstunden stehen im Hinweis am Namen und im
+  Fenster „Ausgang ändern …“, die Ausgänge des Tages im Nachtbericht und in der Tagesliste. Doppelklick auf eine Zeile:
+  „zurück“, wenn jemand unterwegs ist, sonst das Menü „raus“ – ein Klick weniger, ohne etwas ungefragt zu beginnen.
+  Zwei Spalten erst ab 2 × 520 px Breite, sonst lieber Bildlauf als abgeschnittene Namen.
+
+- 09.11.2026 (0.33.15): Einzelne Termine aus dem Kalender (Arzttermine, Heimfahrten, Fahrten) stehen nicht mehr im
+  Wochenplan: Ein Plan ohne Datum kann keinen Termin an einem bestimmten Tag zeigen. Sie stehen im Kalender und am
+  jeweiligen Tag im Tagesplan. Der heutige Wochentag bleibt im Raster hell hinterlegt (ohne Datum), damit man ihn
+  findet.
+
+- 09.11.2026 (0.33.14): Eingeklappt zeigt jede Übergabe-Zeile **eine** Textzeile (mit „…“), nicht zwei: Mit zwei Zeilen
+  wären bei 1366 × 768 nur etwa neun Einträge ohne Bildlauf zu sehen, das Ziel waren zwölf. Ein Klick zeigt den ganzen
+  Text. Rechnerisch passen jetzt rund 14 Einträge (Zeile etwa 30 px); am echten Bildschirm nicht gemessen.
+- 09.11.2026 (0.33.14): „läuft heute ab“ steht als Wort in der Spalte „gültig“ (Farbe „bitte klären“), nicht als Marke –
+  so bleibt die Zeile einzeilig. „Neu“ bleibt eine Marke neben dem Namen.
+- 09.11.2026 (0.33.14): Die Schicht eines Eintrags ist die seines Berichts, bei Notizen die Uhrzeit der Notiz.
+  „Alle in diesem Abschnitt gelesen“ bestätigt jeden Eintrag einzeln (wie der Knopf in der Zeile), damit Kürzel und
+  Uhrzeit bei jedem Eintrag stehen.
+
+- 09.11.2026 (0.33.13): Die Status-Wörter bleiben in Großbuchstaben („JETZT“, „NOCH OFFEN“): Sie stehen genauso in der
+  Übersicht und bei den laufenden Therapien; „keine Großschrift“ im Auftrag meint die Schriftgröße. Das Vollbild (F11)
+  bleibt, jetzt ebenfalls hell.
+
+- 09.11.2026 (0.33.12): Die Demo-Übergaben bekommen eigene Texte statt einer Auswahl aus den Tagesberichten: So kann
+  kein zufälliger Bericht „Keine Besonderheiten“ zur Übergabe werden. Im Datenmodell heißt die Zahl weiter
+  `Hoechstens`, nur die Oberfläche sagt „Teilnehmer“ – keine Änderung an der Datenbank nötig.
+
+- 09.11.2026 (0.33.11): Das Kuvert zeigt die Zahl zusätzlich als Text neben dem roten Kreis, damit die Farbe nicht
+  allein die Information trägt (`docs/gestaltung.md`). Ohne Anmeldung steht kein Kuvert da, weil es dann niemanden
+  gibt, dessen Nachrichten gezählt werden. Ab 100 ungelesenen steht „99+“.
+
+- 09.11.2026 (0.33.10): Lange Zeilen und lange Methoden werden nicht auf einmal umgebrochen: Ein maschineller Umbruch
+  macht den Code schlechter lesbar (bei 29b ausprobiert), ein Umbau von Hand aller 2.000 Stellen wäre ein großes
+  Risiko ohne Nutzen für die Vorführung. Geteilt wurden die Dateien, die der Eintrag zuerst nennt.
 
 - 09.11.2026 (0.33.8): Geprüft wird zunächst nur die Formatierung (Leerzeichen, Einrückung), nicht der ganze
   Stil: Stilregeln als Fehler hätten bei „Warnungen sind Fehler“ den Build sofort angehalten. Die Größen meldet das
@@ -1997,6 +2234,67 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.20:
+
+1. Übersicht: Bereich „Therapie“ wählen – links nur noch Laufende Therapien, Angebote, Wochenpläne, Dokumentation,
+   Aufgaben, Nachrichten, Einstellungen.
+2. Dokumentation und Wochenpläne: Bewohner nach R1/R2/R3 gruppiert; „alle Bewohner des Hauses“ ankreuzen.
+3. Neuer Bericht: Art „Therapie“ und das Angebot sind vorgewählt; gespeichert steht „Therapie Holzwerkstatt: …“.
+4. Oben auf „Laufende Therapien“ R1 wählen: wieder die gewohnte Seitenleiste.
+
+Version 0.33.19: Zwischen allen Bereichen hin und her wechseln – ohne Flackern, die Ausgangsliste deutlich schneller.
+Optional: `DokuLine.exe --messen` starten, ein paar Wechsel, dann `%APPDATA%\DokuLine\messung.log` ansehen.
+
+Version 0.33.18:
+
+1. Übersicht: oben der Kasten „Medikamentenänderungen“; in der Liste bei diesen Bewohnern die rote Marke.
+2. Akte eines solchen Bewohners: Marke im Kopf; Medikamentenplan: die Zeile rot hinterlegt mit „Dosis geändert …“
+   bzw. „pausiert …“.
+3. Eine Dosis ändern (Stufenplan mit einer Stufe ab heute) → Übergabe: „Medikamentenänderung: …“ als wichtig. Als AB,
+   CD und EF zu Zeiten in drei Schichten „Gelesen“ → erst dann verschwindet der Eintrag.
+
+Version 0.33.17: Visiten: oben „Psychiater“ und „Hausarzt“ – je eigene Liste. „Visite beginnen …“ (Titel nennt die Art),
+in der Visite „Weitere Bewohner …“ → jemand aus R2 kommt dazu. Nach „Visite abschließen“: in der Dokumentation beginnt
+der Bericht fett mit „Visite Psychiater – Dr. …“.
+
+Version 0.33.16: Ausgangsliste bei 1366 × 768: alle 23 Bewohner von R1 ohne Bildlauf in zwei Spalten; bei 1920 × 1080
+in einer Liste. Keine Unterbringung in der Zeile. „raus ▾“ → „raus allein“; Doppelklick auf eine unterwegs-Zeile →
+zurück. Übergabe und Tagesplan: die kleinen Knöpfe sitzen in ihrer Zeile.
+
+Version 0.33.15: Akte → Wochenplan: Spalten nur „Montag“ … „Sonntag“, kein Blättern, darüber „gültig seit …“ und
+„Verlauf …“. Klick auf eine Therapie öffnet nichts mehr (Teilnahme im Tagesplan). „Drucken …“ ohne Datum.
+
+Version 0.33.14:
+
+1. Übergabe öffnen: oben „Wohnbereich allgemein“ (Klick klappt auf), darunter drei Abschnitte Früh, Spät, Nacht mit
+   farbigem Rand, die laufende Schicht oben. Jeder Eintrag eine Zeile, umrandet in seiner Schichtfarbe.
+2. „Gelesen“ in einer Zeile → die Zeile verschwindet (Vorgabe „nur ungelesene“); „alle offenen“ zeigt sie wieder.
+3. Klick auf einen Text → ganzer Bericht, Herkunft, wer gelesen hat und „Verlängern …“.
+4. „Alle in diesem Abschnitt gelesen“ → Rückfrage „… Einträge als gelesen bestätigen?“.
+5. „Übergabeliste drucken …“ → eine A4-Seite, nach Schicht. Übersicht: Übergaben in der Schichtfarbe umrandet.
+
+Version 0.33.13: Tagesplan öffnen – hell wie das übrige Programm, Uhrzeit und Datum klein oben rechts, Zeilen in
+normaler Höhe, Status als farbige Marke. „bestätigen ▾“ → „gegangen“ wirkt wie vorher; „Vollbild (F11)“ ebenfalls hell.
+
+Version 0.33.12:
+
+1. „Demo-Daten zurücksetzen“, dann Übergabe: kein Eintrag lautet „Keine Besonderheiten“ oder „Ruhiger Dienst“.
+2. Therapie → „Neues Angebot …“: Feld „Teilnehmer“, darunter klein „(Anzahl)“.
+3. Dokumentation: keine Aufgaben über den Berichten; links die Namen auf einer abgerundeten weißen Fläche, der
+   gewählte Name hell und abgerundet hinterlegt.
+
+Version 0.33.11:
+
+1. Als „AB“ anmelden: oben links neben „Angemeldet: AB – …“ ein Kuvert mit rotem Ausrufezeichen und „3“. Maus
+   darüber → „3 ungelesene Nachrichten“. Klick → Bereich „Nachrichten“.
+2. Als „OP“ anmelden: Kuvert grau, ohne Zeichen. Abmelden (F12): kein Kuvert.
+3. Bereich „Dokumentation“: über der Liste steht kein Nachrichten-Hinweis mehr.
+
+Version 0.33.10: Jeden Bereich der Seitenleiste einmal öffnen – Kopfzeile und Aktionsleiste sind wie vorher
+(Aufräumen, keine neue Funktion).
+
+Version 0.33.9: nichts Neues zum Ansehen im Programm (Aufräumen).
 
 Version 0.33.8: nichts Neues zum Ansehen im Programm (Aufräumen). Im Windows-Build stehen die Code-Maße.
 

@@ -36,6 +36,12 @@
         { "von": "MN", "an": [ "AB" ], "vorStunden": 140, "text": "Könnten wir am Samstag den Dienst tauschen? Ich hätte dafür nächste Woche Mittwoch frei.", "gelesenVon": [ "AB" ] },
         { "von": "AB", "vorStunden": 138, "text": "Ja, das passt. Ich trage es in den Plan ein.", "gelesenVon": [ "MN" ] }
       ]
+    },
+    {
+      "betreff": "Material Holzwerkstatt",
+      "nachrichten": [
+        { "von": "TH", "an": [ "team:Therapie" ], "vorStunden": 20, "text": "Schleifpapier und Leim sind fast leer. Ich bestelle bis Freitag nach, wenn niemand widerspricht.", "gelesenVon": [ "OP" ] }
+      ]
     }
   ]
 }

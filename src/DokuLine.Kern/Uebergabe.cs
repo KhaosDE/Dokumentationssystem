@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace DokuLine.Kern;
 
-// Übergabe (Teil der Täglichen Dokumentation, Bauplan Schritt 3): Einträge, die die folgenden
+// Übergabe (Teil der Täglichen Dokumentation): Einträge, die die folgenden
 // Schichten wissen oder tun müssen. Sie bleiben stehen, bis sie ablaufen oder als erledigt
 // markiert werden – auch über mehrere Tage. Verlängern und „erledigt“ sind eigene Ereignisse;
 // gelöscht oder überschrieben wird nichts.
@@ -59,7 +59,13 @@ public static class UebergabeRegeln
         }
     }
 
-    public static bool Offen(Uebergabe u, DateTime jetzt) => u.Erledigt is null && (u.GiltBis is null || u.GiltBis >= jetzt);
+    public static bool Offen(Uebergabe u, DateTime jetzt) =>
+        u.Erledigt is null && (u.GiltBis is null || u.GiltBis >= jetzt) && !(Medikation(u) && AlleSchichtenGelesen(u));
+
+    // Medikamentenänderungen bleiben stehen, bis jede der drei Schichten sie gelesen hat (höchstens 7 Tage: GiltBis).
+    public static bool Medikation(Uebergabe u) => u.Bericht is Bericht b && DokuRegeln.Marken(b).Contains(DokuMarke.MedikationGeaendert);
+
+    public static bool AlleSchichtenGelesen(Uebergabe u) => u.Gelesen.Select(g => BerichtRegeln.SchichtZu(g.Zeit)).Distinct().Count() >= 3;
 
     public static bool LaeuftHeuteAb(Uebergabe u, DateTime jetzt) => Offen(u, jetzt) && u.GiltBis?.Date == jetzt.Date;
 
@@ -70,6 +76,40 @@ public static class UebergabeRegeln
     // entstanden und von dir noch nicht gelesen. Ohne Kürzel gibt es kein „neu“.
     public static bool Neu(Uebergabe u, string kuerzel, DateTime? letzterBesuch) =>
         kuerzel.Length > 0 && !GelesenVon(u, kuerzel) && (letzterBesuch is null || u.Erstellt > letzterBesuch);
+
+    // Schicht, in der der Eintrag entstanden ist (die des Berichts, sonst die der Notiz).
+    public static Schicht SchichtVon(Uebergabe u) => u.Bericht?.Schicht ?? BerichtRegeln.SchichtZu(u.Erstellt);
+
+    // Reihenfolge der Abschnitte: die laufende Schicht oben, dann die vorherige, dann die davor.
+    public static IReadOnlyList<Schicht> SchichtFolge(DateTime jetzt)
+    {
+        var laufend = BerichtRegeln.SchichtZu(jetzt);
+        return [laufend, Vorher(laufend), Vorher(Vorher(laufend))];
+    }
+
+    private static Schicht Vorher(Schicht s) => s switch
+    {
+        Schicht.Frueh => Schicht.Nacht,
+        Schicht.Spaet => Schicht.Frueh,
+        _ => Schicht.Spaet,
+    };
+
+    // Rang innerhalb einer Schicht: Medikamentenänderung, dann „wichtig“, dann der Rest.
+    public static int Rang(Uebergabe u) =>
+        u.Bericht is Bericht b && DokuRegeln.Marken(b).Contains(DokuMarke.MedikationGeaendert) ? 0 : u.Bericht?.Wichtig == true ? 1 : 2;
+
+    // Einträge einer Schicht: die Einträge eines Bewohners zusammen, Bewohner nach dem wichtigsten Eintrag,
+    // dann nach Zimmer; allgemeine Einträge zuletzt.
+    public static List<Uebergabe> Ordnen(IEnumerable<Uebergabe> eintraege, Func<long, string> zimmer) =>
+        [.. eintraege.GroupBy(u => u.BewohnerId)
+            .OrderBy(g => g.Key is null ? 1 : 0)
+            .ThenBy(g => g.Min(Rang))
+            .ThenBy(g => g.Key is long id ? zimmer(id) : "", StringComparer.CurrentCulture)
+            .SelectMany(g => g.OrderBy(Rang).ThenBy(u => u.Erstellt))];
+
+    // „bis erledigt“: seit wann der Eintrag steht.
+    public static string? SeitText(Uebergabe u) =>
+        u.GiltBis is null && u.Erledigt is null ? $"seit {u.Erstellt.ToString("ddd dd.MM.", CultureInfo.GetCultureInfo("de-DE"))}" : null;
 
     public static string GueltigText(Uebergabe u, DateTime jetzt)
     {

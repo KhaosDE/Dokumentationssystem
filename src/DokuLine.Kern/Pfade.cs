@@ -31,7 +31,7 @@ public static class Pfade
         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), name)
         : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share", name.ToLowerInvariant());
 
-    // Übergang (Schritt 26a1): Gibt es den neuen Datenordner noch nicht, aber den alten, wird dessen
+    // Übergang: Gibt es den neuen Datenordner noch nicht, aber den alten, wird dessen
     // Inhalt (Datenbank, Bilder, Einstellungen, Protokolle) in den neuen kopiert. Erst in einen
     // Zwischenordner, dann umbenannt – bricht das Kopieren ab, gibt es keinen halben neuen Ordner,
     // und beim nächsten Start wird es wieder versucht. Gibt einen Satz fürs Protokoll zurück oder

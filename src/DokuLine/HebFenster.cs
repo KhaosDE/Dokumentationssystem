@@ -181,12 +181,12 @@ public sealed class HebFenster : Form, IEntwurfFenster
         FertigKnopf.Text = fertig ? "Wieder als Entwurf" : "Als fertig markieren";
         SpeichernKnopf.Enabled = !fertig;
         BausteinKnopf.Enabled = !fertig;
-        Recht.Anwenden(speicher, Funktionen.Heb, SpeichernKnopf, FertigKnopf);   // Rechte (Schritt 19)
+        Recht.Anwenden(speicher, Funktionen.Heb, SpeichernKnopf, FertigKnopf);   // Rechte
         Kopf.Text = $"{HebRegeln.ArtText(Bogen.Art)}" + (Bogen.Nummer is int n ? $" · Nr. {n}" : "") +
                     $" · Zeitraum {HebRegeln.ZeitraumText(Bogen)}{Environment.NewLine}" +
                     $"{bewohner.Name} · Aufnahme {Datum.Text(bewohner.Aufnahmedatum)} · Beschluss: {BewohnerRegeln.BeschlussText(bewohner)}" +
                     (Bogen.Art == Bogenart.C ? "" : $" · {HebRegeln.PlanungText(HebRegeln.Planungsmonate(bewohner, Bogen.Erstellt))}") +
-                    // Diagnosen nur als Information und nur mit Recht (Schritt 26f)
+                    // Diagnosen nur als Information und nur mit Recht
                     (Recht.Darf(speicher, Funktionen.AerztlicheAnsehen) ? $"{Environment.NewLine}Diagnosen: {DiagnoseRegeln.Kurz(speicher.Diagnosen(bewohner.Id!.Value))}" : "");
         QuellenLaden();
     }
@@ -280,7 +280,7 @@ public sealed class HebFenster : Form, IEntwurfFenster
 
     public bool Speichern(bool fertig) => Speichern(fertig, ohnePruefung: false);
 
-    // Schritt 26a3: Beim Abmelden bleibt der Bogen als Entwurf (wie beim Schließen mit „Ja“).
+    // Beim Abmelden bleibt der Bogen als Entwurf (wie beim Schließen mit „Ja“).
     public bool HatEingaben => Geaendert && !Bogen.Fertig;
     public bool AlsEntwurfSpeichern() => Speichern(false);
 

@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// Mitarbeiter, Anmeldung und Rechte (Bauplan Schritt 19). Anmelden mit dem Kürzel, ohne Passwort
+// Mitarbeiter, Anmeldung und Rechte. Anmelden mit dem Kürzel, ohne Passwort
 // (Demo). Rechte hängen an Positionen; wer mehrere Positionen hat, hat die Rechte aller zusammen.
 // Ausgeschiedene können sich nicht anmelden, bleiben aber an ihren Einträgen sichtbar.
 
@@ -12,7 +12,7 @@ public sealed record Mitarbeiter(string Kuerzel, string Vorname, string Nachname
     public string Name => $"{Vorname} {Nachname}";
     public string Anzeige => $"{Name} ({Kuerzel})";
     public string Qualifikation => RechteRegeln.Qualifikation(Fachkraft);   // „Assistenzkraft“ oder „Fachkraft“
-    public string? Farbe { get; init; }   // #RRGGBB (Schritt 20); null = Vorgabe aus dem Kürzel
+    public string? Farbe { get; init; }   // #RRGGBB; null = Vorgabe aus dem Kürzel
 }
 
 // Ein Eintrag der Listen „Bereiche“ und „Positionen“ (stillgelegt = nicht mehr wählbar).
@@ -29,7 +29,7 @@ public static class Funktionen
     public const string MedikamenteVerwalten = "medikamente_verwalten";
     public const string BedarfGeben = "bedarf_geben";   // „Bedarf gegeben …“ (Assistenzkraft nur mit Absprache)
     public const string TherapienBearbeiten = "therapien_bearbeiten";
-    public const string TherapienBereich = "therapien_bereich";   // Schritt 22: Angebote des eigenen Wohnbereichs
+    public const string TherapienBereich = "therapien_bereich";   // Angebote des eigenen Wohnbereichs
     public const string TeilnahmeBestaetigen = "teilnahme_bestaetigen";
     public const string KalenderHaus = "kalender_haus";
     public const string Fahrzeuge = "fahrzeuge";
@@ -41,9 +41,9 @@ public static class Funktionen
     public const string Module = "module";
     public const string EinstellungenBereich = "einstellungen_bereich";
     public const string DemoZuruecksetzen = "demo_zuruecksetzen";
-    public const string Aerzte = "aerzte";   // Schritt 26b
-    public const string AerztlicheAnsehen = "aerztliche_ansehen";        // Schritt 26f
-    public const string AerztlicheBearbeiten = "aerztliche_bearbeiten";  // Schritt 26f
+    public const string Aerzte = "aerzte";
+    public const string AerztlicheAnsehen = "aerztliche_ansehen";
+    public const string AerztlicheBearbeiten = "aerztliche_bearbeiten";
     public const string BereicheWohnbereiche = "bereiche_wohnbereiche";   // Übersicht: Knöpfe der Wohnbereiche
     public const string BereichTherapie = "bereich_therapie";             // Übersicht: Knopf „Therapie“
     public const string BereicheAlle = "bereiche_alle";                   // Übersicht: Knopf „Alle“
@@ -95,7 +95,7 @@ public static partial class RechteRegeln
     public const string Assistenzkraft = "Assistenzkraft", Fachkraft = "Fachkraft";
     public static string Qualifikation(bool fachkraft) => fachkraft ? Fachkraft : Assistenzkraft;
 
-    // Schritt 26a2: Der Administrator hat immer alle Rechte, in allen Bereichen, auch ohne „Fachkraft“.
+    // Der Administrator hat immer alle Rechte, in allen Bereichen, auch ohne „Fachkraft“.
     // Es bleibt immer mindestens ein aktiver Administrator, damit sich niemand aussperren kann.
     public const string Administrator = "Administrator";
     public const string AdminImmerText = "Der Administrator hat immer alle Rechte.";
@@ -112,7 +112,7 @@ public static partial class RechteRegeln
         [Administrator, "Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung", "Mitarbeiter Wohnbereich",
          "Psychologischer Fachdienst", "Pädagogischer Fachdienst", "Therapie"];
 
-    // Visiten seit 0.33.0: Assistenzkräfte machen keine Visiten.
+    // Assistenzkräfte machen keine Visiten.
     public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten];
 
     // „Nur Fachkräfte“, das nach der ersten Vorbelegung dazukam: in bestehenden Datenbanken einmal setzen.
@@ -152,12 +152,12 @@ public static partial class RechteRegeln
         ],
     };
 
-    // Funktionen, die nach der ersten Vorbelegung (0.22.0) dazukamen: werden in bestehenden
+    // Funktionen, die nach der ersten Vorbelegung dazukamen: werden in bestehenden
     // Datenbanken einmal nachträglich vorbelegt.
     public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten,
         Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle];
 
-    // Schritt 26f: Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
+    // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
     public static bool Vorbelegt(string position, string funktion) =>
         funktion is Funktionen.AerztlicheAnsehen or Funktionen.AerztlicheBearbeiten ? position != "Verwaltung" :
@@ -175,7 +175,7 @@ public static partial class RechteRegeln
         return null;
     }
 
-    // Therapieangebote (Schritt 22): Angebote der Therapie ändert, wer „Therapien bearbeiten“ hat;
+    // Therapieangebote: Angebote der Therapie ändert, wer „Therapien bearbeiten“ hat;
     // Angebote eines Wohnbereichs ändert, wer „Therapien des eigenen Bereichs bearbeiten“ hat und
     // zu diesem Bereich gehört. Das gilt auch für das Zuteilen von Bewohnern.
     public static string? AngebotGrund(Mitarbeiter? m, string anbieter, IReadOnlyDictionary<string, HashSet<string>> rechte, IReadOnlySet<string> nurFachkraft)

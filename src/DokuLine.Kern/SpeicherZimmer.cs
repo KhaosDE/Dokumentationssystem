@@ -2,10 +2,10 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-// Wohnbereiche (offen/beschützend), Zimmer und Betten im Speicher (Bauplan Schritt 26e).
+// Wohnbereiche (offen/beschützend), Zimmer und Betten im Speicher.
 public sealed partial class Speicher
 {
-    private const string DemoZimmer = "demo_zimmer";   // Schritt 26e: R1–R3 mit Zimmern und Betten
+    private const string DemoZimmer = "demo_zimmer";   // R1–R3 mit Zimmern und Betten
 
     public event Action? ZimmerGeaendert;
 

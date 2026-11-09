@@ -254,7 +254,7 @@ public sealed class Dreiwahl : TableLayoutPanel
     {
         this.kuerzel = kuerzel;
         bool mitFeld = platzhalter is not null;
-        Feld = platzhalter == "TT.MM.JJJJ" ? new DatumFeld() : new TextBox();   // Schritt 26d
+        Feld = platzhalter == "TT.MM.JJJJ" ? new DatumFeld() : new TextBox();
         ColumnCount = mitFeld ? 2 : 3;
         RowCount = mitFeld ? 3 : 1;
         AutoSize = true;
@@ -387,12 +387,12 @@ public sealed class FilterKnopf : Control
 // Statusleiste unten mit dem Farbschlüssel der Marken (Farbe nie allein, docs/gestaltung.md).
 public sealed class Statusleiste : Control
 {
-    // Bezugspflege und Einzeltrainer haben die Farbe der Person (Schritt 20) – das Kürzel steht immer dabei.
+    // Bezugspflege und Einzeltrainer haben die Farbe der Person – das Kürzel steht immer dabei.
     public const string BezugText = "Streifen: Bezugspflege, Punkt: Einzeltrainer";
     private static readonly string Schluessel = "Farbschlüssel: " + string.Join("; ", Stil.Farbschluessel.Select(f => f.Text)) + "; " + BezugText;
     private string statusText = "";
 
-    // Links vor dem Farbschlüssel (Schritt 26l): „DEMO — ausgedachte Daten · Datum · Dienst · Stand“.
+    // Links vor dem Farbschlüssel: „DEMO — ausgedachte Daten · Datum · Dienst · Stand“.
     public string StatusText
     {
         get => statusText;
@@ -456,7 +456,7 @@ public sealed class Statusleiste : Control
     }
 }
 
-// Schutz vor dem zweiten Klick eines Doppelklicks (0.33.2): Baut sich eine Liste nach dem ersten Klick neu
+// Schutz vor dem zweiten Klick eines Doppelklicks: Baut sich eine Liste nach dem ersten Klick neu
 // auf, liegt unter dem Mauszeiger schon der nächste Eintrag – der zweite Klick träfe ihn. Klicks innerhalb
 // der Doppelklickzeit von Windows nach einem angenommenen Klick zählen deshalb nicht.
 public sealed class Doppelklickschutz
@@ -475,9 +475,9 @@ public sealed class Doppelklickschutz
 
 public static class Auswahl
 {
-    // Hält die Einträge einer Auswahl aktuell, z. B. nach dem Umbenennen oder Anlegen eines Bereichs (0.33.2:
-    // vorher blieb die Liste vom Programmstart). Die Wahl bleibt, sonst der erste Eintrag. Wer auf
-    // SelectedIndexChanged reagiert, sperrt das während des Abgleichs selbst. true = Einträge geändert.
+    // Hält die Einträge einer Auswahl aktuell, z. B. nach dem Umbenennen oder Anlegen eines Bereichs. Die Wahl
+    // bleibt, sonst der erste Eintrag. Wer auf SelectedIndexChanged reagiert, sperrt das während des Abgleichs
+    // selbst. true = Einträge geändert.
     public static bool Abgleichen(ComboBox box, IReadOnlyList<string> eintraege)
     {
         if (box.Items.Cast<object>().Select(o => o.ToString()).SequenceEqual(eintraege)) return false;

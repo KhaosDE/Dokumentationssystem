@@ -55,7 +55,7 @@ public static class UebersichtRegeln
         if (b.Beschluss == BeschlussZustand.NichtErfasst) marken.Add(new Marke(MarkenArt.NichtErfasst, "Beschluss nicht erfasst"));
         if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offen) marken.Add(offen);
         if (h.HebFaellig is string heb) marken.Add(new Marke(MarkenArt.NichtErfasst, heb));
-        if (HeuteWichtigRegeln.Geburtstag(b, heute) is Marke geburtstag) marken.Add(geburtstag);   // Schritt 26l
+        if (HeuteWichtigRegeln.Geburtstag(b, heute) is Marke geburtstag) marken.Add(geburtstag);
         foreach (var (v, aenderung) in h.Medikation)
             marken.Add(new Marke(MarkenArt.Wichtig, $"Medikation: {aenderung}"));
         var termine = h.Termine.OrderBy(t => t.Ganztags ? TimeOnly.MinValue : t.Von).ToList();

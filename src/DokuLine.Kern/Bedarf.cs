@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// „Bedarf gegeben …“ (Eintrag „Assistenzkraft und Fachkraft“, 0.33.0): Jede Gabe einer Bedarfsmedikation
+// „Bedarf gegeben …“ (Fachregel: IDEEN.md „Assistenzkraft und Fachkraft“): Jede Gabe einer Bedarfsmedikation
 // mit Uhrzeit, Menge und Anlass. Eine Assistenzkraft gibt Bedarf nur nach Absprache mit einer Fachkraft;
 // die steht dann dabei. Jede Gabe steht zugleich als Bericht in der Akte. Nichts wird überschrieben.
 
@@ -22,7 +22,7 @@ public sealed record Bedarfsgabe
 }
 
 // Eingaben aus dem Fenster, noch ungeprüft. Die Gabe gilt für heute (Uhrzeit); kurz nach Mitternacht meint
-// eine spätere Uhrzeit gestern (0.33.2).
+// eine spätere Uhrzeit gestern.
 public sealed class BedarfEingabe
 {
     public long VerordnungId { get; set; }
@@ -71,7 +71,7 @@ public static partial class BedarfRegeln
         [.. gaben.Where(g => g.Zeit > zeit.AddHours(-24) && g.Zeit <= zeit).OrderBy(g => g.Zeit)];
 
     // Hinweis, wenn die neue Gabe die Höchstmenge überschreiten würde (dann erst nach Rückfrage eintragen).
-    // 0.33.2: gezählt wird die Menge (nicht die Zahl der Gaben), und zwar in jedem 24-Stunden-Fenster, in dem die
+    // Gezählt wird die Menge (nicht die Zahl der Gaben), und zwar in jedem 24-Stunden-Fenster, in dem die
     // neue Gabe liegt – auch bei einem Nachtrag, nach dem schon weitere Gaben kamen.
     public static string? Warnung(Verordnung v, IEnumerable<Bedarfsgabe> gaben, DateTime zeit, decimal menge)
     {
@@ -88,8 +88,8 @@ public static partial class BedarfRegeln
         return null;
     }
 
-    // „In den letzten 24 Stunden 2× gegeben: gestern 23:50 (1 Stück, AB), 09:15 (1 Stück, KL mit CD)“ (0.33.2: vorher
-    // nur der Kalendertag – kurz nach Mitternacht stand „noch nicht gegeben“, obwohl eben erst gegeben).
+    // „In den letzten 24 Stunden 2× gegeben: gestern 23:50 (1 Stück, AB), 09:15 (1 Stück, KL mit CD)“ – die letzten
+    // 24 Stunden, nicht der Kalendertag: kurz nach Mitternacht zählt die Gabe von eben mit.
     public static string Letzte24Text(IEnumerable<Bedarfsgabe> gaben, DateTime jetzt, string einheit)
     {
         var liste = Letzte24Stunden(gaben, jetzt);
@@ -127,7 +127,7 @@ public static partial class BedarfRegeln
             fehler.Add("Menge: bitte eine Zahl größer als 0, z. B. 1 oder 0,5.");
         string anlass = e.Anlass.Trim();
         if (anlass.Length == 0) fehler.Add("Anlass fehlt.");
-        // Es zählt die Qualifikation, nicht die Position (0.33.2: vorher galt ein Administrator immer als Fachkraft).
+        // Es zählt die Qualifikation, nicht die Position.
         string absprache = e.Absprache.Trim();
         var mit = fachkraefte.FirstOrDefault(f => f.Kuerzel.Equals(absprache, StringComparison.OrdinalIgnoreCase) && f.Fachkraft && f.Aktiv);
         if (absprache.Length == 0)

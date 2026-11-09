@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-// Ärztliche Informationen im Speicher (Bauplan Schritt 26f).
+// Ärztliche Informationen im Speicher.
 public sealed partial class Speicher
 {
     private const string DemoAerztlich = "demo_aerztlich";

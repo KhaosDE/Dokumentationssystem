@@ -56,12 +56,13 @@ public class TherapieOberflaechenTests
             using (new DialogErsatz(fenster =>
             {
                 var neu = Assert.IsType<AngebotFenster>(fenster);
+                Assert.Equal("(Anzahl)", neu.TeilnehmerZusatz.Text);
                 Assert.False(neu.Speichern());
                 neu.NameFeld.Text = "Kräutergruppe";   // „Gartengruppe“ gibt es seit Schritt 26h in R3
                 neu.Therapeut.Text = "Ben Amsel";
                 neu.Ort.Text = "Garten";
                 neu.TerminSetzen(0, DayOfWeek.Monday, "10:00", "11:00");   // überschneidet sich mit der Holzwerkstatt
-                neu.Hoechstens.Text = "4";
+                neu.Teilnehmer.Text = "4";
                 return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 f.Kopf.Knoepfe[0].PerformClick();
@@ -164,7 +165,7 @@ public class TherapieOberflaechenTests
                 neu.NameFeld.Text = "Gartengruppe A";
                 neu.Therapeut.Text = "Emma Fink";
                 neu.TerminSetzen(0, DayOfWeek.Friday, "10:00", "11:00");
-                neu.Hoechstens.Text = "4";
+                neu.Teilnehmer.Text = "4";
                 Hilfe.Foto(neu, "74_angebot_anbieter");
                 return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))

@@ -11,11 +11,12 @@ internal static class Program
     {
         // Grundeinstellungen für die Oberfläche (Schriften, Skalierung) – vor dem ersten Fenster.
         ApplicationConfiguration.Initialize();
-        Stil.SymbolFuerAlleFenster();   // Programmsymbol für alle Fenster (Schritt 26n)
+        Stil.SymbolFuerAlleFenster();   // Programmsymbol für alle Fenster
 
         if (args.Contains("--selbsttest")) return Selbsttest.Ausfuehren();
+        Messung.An = args.Contains("--messen");
 
-        // Übergang (Schritt 26a1): Daten aus %APPDATA%\Dokumentationssystem einmal nach %APPDATA%\DokuLine
+        // Übergang: Daten aus %APPDATA%\Dokumentationssystem einmal nach %APPDATA%\DokuLine
         // kopieren – vor allem anderen, was in den Datenordner schreibt.
         try
         {
@@ -47,9 +48,9 @@ internal static class Program
             (speicher, hinweis) = Speicher.Oeffnen(Einstellungen.Laden());
             Modulverwaltung.Anmelden(speicher);
             speicher.DemoBeimErstenStart();
-            foreach (string zeile in speicher.Startprotokoll) Aktualisierung.Protokoll(zeile);   // z. B. TST ergänzt (Schritt 26a2)
+            foreach (string zeile in speicher.Startprotokoll) Aktualisierung.Protokoll(zeile);   // z. B. TST ergänzt
             string bereich = Einstellungen.Laden().Bereich;
-            if (Kern.Bereiche.Umbenannt(bereich) != bereich) Einstellungen.Aendern(w => w with { Bereich = Kern.Bereiche.Umbenannt(bereich) });   // Schritt 26e
+            if (Kern.Bereiche.Umbenannt(bereich) != bereich) Einstellungen.Aendern(w => w with { Bereich = Kern.Bereiche.Umbenannt(bereich) });
         }
         catch (SpeicherFehler e)
         {
@@ -59,8 +60,8 @@ internal static class Program
         if (hinweis is not null)
             MessageBox.Show(hinweis, Programmversion.Name, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         _ = Nachschlageansicht.Laufzeit;
-        BerichtRegeln.Zeiten = speicher.Schichtzeiten(Einstellungen.Laden().Bereich);   // Schichtzeiten des Bereichs (Schritt 25)   // WebView2 vorhanden? Steht in den Einstellungen (Schritt 21).
-        // Anmelden mit dem Kürzel (Schritt 19), ohne Passwort; „Beenden“ schließt das Programm.
+        BerichtRegeln.Zeiten = speicher.Schichtzeiten(Einstellungen.Laden().Bereich);   // Schichtzeiten des Bereichs // WebView2 vorhanden? Steht in den Einstellungen.
+        // Anmelden mit dem Kürzel, ohne Passwort; „Beenden“ schließt das Programm.
         using (var anmelden = new AnmeldenFenster(speicher, Einstellungen.Laden().Kuerzel))
         {
             Stil.SymbolSetzen(anmelden);
@@ -74,7 +75,7 @@ internal static class Program
         using (speicher)
         using (var fenster = new Hauptfenster(speicher))
         {
-            fenster.BereichWaehlen(Hauptfenster.Startbereich);
+            fenster.BereichWaehlen(fenster.StartSeite);
             Application.Run(fenster);
         }
         return 0;

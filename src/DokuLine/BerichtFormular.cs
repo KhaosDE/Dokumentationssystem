@@ -15,7 +15,11 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     public TextBox Uhrzeit { get; } = new UhrzeitFeld() { Width = 80 };
     public ComboBox Schichtwahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 210 };
     public ComboBox Art { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 260, AccessibleName = "Berichtsart" };
-    public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // Schritt 26a: aus der Anmeldung
+    // Berichtsart „Therapie“: dazu das Angebot (dessen Name steht beim Speichern am Anfang des Textes).
+    public ComboBox AngebotWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 220, AccessibleName = "Angebot der Therapie", Visible = false };
+    public const string OhneAngebot = "ohne Angebot";
+    public bool AngebotGefragt => Art.SelectedItem as string == DokuRegeln.ArtTherapie;
+    public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // aus der Anmeldung
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
     {
         Text = BerichtRegeln.BereichText(n), AutoSize = true, Margin = new Padding(0, 0, Stil.AbstandGross, Stil.AbstandMini),
@@ -35,7 +39,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     internal Func<string, DialogResult> Rueckfrage { get; set; }
     public Label Fehler { get; } = new();
     public Bericht? Gespeichert { get; private set; }
-    // Schritt 26a3: Entwurf der angemeldeten Person für diesen Bewohner (beim Abmelden gespeichert).
+    // Entwurf der angemeldeten Person für diesen Bewohner (beim Abmelden gespeichert).
     public Entwurf? Entwurf { get; private set; }
     public Label EntwurfHinweis { get; } = new() { AutoSize = true, ForeColor = Stil.Hinweis.Text, BackColor = Stil.Hinweis.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public Button EntwurfVerwerfenKnopf { get; } = Stil.NebenKnopf("Entwurf verwerfen");
@@ -96,8 +100,17 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         Zeile("Datum, Uhrzeit, Schicht", wann);
         Zeile("Eingetragen von", Verfasser);
         Art.Items.AddRange([.. speicher.Berichtsarten()]);
-        Art.SelectedIndex = Art.Items.IndexOf(DokuRegeln.ArtAlltag) is int alltag && alltag >= 0 ? alltag : Art.Items.Count > 0 ? 0 : -1;
-        Zeile("Berichtsart", Art);
+        // Im Bereich Therapie schreibt man Berichte der Therapie.
+        string vorgabe = TherapieListe.Aktiv ? DokuRegeln.ArtTherapie : DokuRegeln.ArtAlltag;
+        Art.SelectedIndex = Art.Items.IndexOf(vorgabe) is int start && start >= 0 ? start : Art.Items.Count > 0 ? 0 : -1;
+        var artReihe = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Margin = new Padding(0) };
+        Art.Margin = new Padding(0, 0, Stil.AbstandKlein, 0);
+        AngebotWahl.Margin = new Padding(0);
+        artReihe.Controls.AddRange([Art, AngebotWahl]);
+        Zeile("Berichtsart", artReihe);
+        Art.SelectedIndexChanged += (_, _) => AngeboteFuellen();
+        BewohnerWahl.SelectedIndexChanged += (_, _) => AngeboteFuellen();
+        AngeboteFuellen();
 
         // Zwei Spalten mit den kurzen Namen; der volle Name steht im Hinweis unter der Maus.
         var bereiche = new TableLayoutPanel { AutoSize = true, ColumnCount = 2, Margin = new Padding(0) };
@@ -168,9 +181,28 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         Stil.DpiSkalierungEinschalten(this);
     }
 
+    // Die Angebote der Therapie, an denen der gewählte Bewohner heute teilnimmt; das erste ist vorgewählt.
+    private void AngeboteFuellen()
+    {
+        string? vorher = AngebotWahl.SelectedItem as string;
+        var namen = BewohnerWahl.SelectedIndex >= 0 && auswahl[BewohnerWahl.SelectedIndex].Id is long id
+            ? TherapieRegeln.AngeboteVon(id, speicher.Angebote(), DateOnly.FromDateTime(Jetzt())) : [];
+        AngebotWahl.Items.Clear();
+        AngebotWahl.Items.Add(OhneAngebot);
+        AngebotWahl.Items.AddRange([.. namen]);
+        int index = vorher is null ? -1 : AngebotWahl.Items.IndexOf(vorher);
+        AngebotWahl.SelectedIndex = index >= 0 ? index : namen.Count > 0 ? 1 : 0;
+        AngebotWahl.Visible = AngebotGefragt;
+    }
+
+    // Leerer Text bleibt leer: Sonst ginge ein Bericht nur mit dem Namen des Angebots durch die Prüfung.
+    private string MitAngebot(string text) =>
+        AngebotGefragt && AngebotWahl.SelectedIndex > 0 && text.Trim().Length > 0
+            ? TherapieRegeln.BerichtText((string)AngebotWahl.SelectedItem!, text) : text;
+
     public void BewohnerWaehlen(long id) => BewohnerWahl.SelectedIndex = auswahl.FindIndex(b => b.Id == id);
 
-    // ----- Entwurf (Schritt 26a3) -----
+    // ----- Entwurf -----
 
     public bool HatEingaben => Inhalt.Text.Trim().Length > 0 || UebergabeText.Text.Trim().Length > 0;
 
@@ -252,6 +284,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         try
         {
             var eingabe = Eingabe();
+            eingabe.Text = MitAngebot(eingabe.Text);
             Gespeichert = speicher.BerichtSpeichern(BerichtRegeln.AusEingabe(eingabe, Jetzt()), BerichtRegeln.UebergabeAus(eingabe));
             if (Entwurf is not null) { speicher.EntwurfLoeschen(Entwurf.Id); Entwurf = null; }
         }

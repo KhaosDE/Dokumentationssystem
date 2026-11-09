@@ -2,11 +2,26 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Dokumentation“: links die Bewohner als schmale, einklappbare Liste („Nachname, Vorname“, Bereichswahl und
-// Suche darüber), rechts ihre Berichte mit Filter. Pfeiltasten blättern; Doppelklick oder „Akte öffnen“ öffnet die
+// Bereich „Dokumentation“: links die Bewohner als schmale, einklappbare Liste auf einer abgerundeten Fläche
+// („Nachname, Vorname“, Suche darüber), rechts ihre Berichte mit Filter. Pfeiltasten blättern; Doppelklick oder „Akte öffnen“ öffnet die
 // Akte. Pro Ansicht genau eine Hauptaktion in Akzentfarbe.
-public sealed class BewohnerBereich : Panel
+public sealed class BewohnerBereich : Panel, IBereichSeite
 {
+    // Kopfzeile und Aktionsleiste je nach Ansicht (Liste oder Akte); das Hauptfenster übernimmt sie beim Wechsel.
+    public string Titel { get; private set; } = "Dokumentation";
+    public string KopfText { get; private set; } = "";
+    public IReadOnlyList<Button> Knoepfe { get; private set; } = [];
+    void IBereichSeite.Zeigen(bool filterBehalten) => UebersichtZeigen();
+
+    private void KopfSetzen(string klein, string titel, IReadOnlyList<Button>? knoepfe = null)
+    {
+        (KopfText, Titel) = (klein, titel);
+        kopf.TexteSetzen(klein, titel);
+        if (knoepfe is null) return;
+        Knoepfe = knoepfe;
+        kopf.KnoepfeSetzen([.. knoepfe]);
+    }
+
     public const int LinksBreite = 240, LinksEingeklappt = 36;
     private readonly Speicher speicher;
     private readonly KopfBereich kopf;
@@ -19,13 +34,13 @@ public sealed class BewohnerBereich : Panel
     private readonly Button berichteKnopf = Stil.NebenKnopf("Berichte ansehen");
     private readonly Button bearbeitenKnopf = Stil.HauptKnopf("Bearbeiten …");
 
-    public ListBox Namen { get; } = new()
-    {
-        IntegralHeight = false, BorderStyle = BorderStyle.None, Font = Stil.Standard, AccessibleName = "Bewohner",
-    };
+    public ListBox Namen { get; } = new RundeListe { AccessibleName = "Bewohner" };
     public List<Bewohner> Zeilen { get; private set; } = [];
+    // Je Zeile der Liste der Bewohner; null bei einer Überschrift (Wohnbereich im Bereich Therapie).
+    private List<Bewohner?> eintraege = [];
     public Bewohner? Gewaehlt => Namen.SelectedIndex >= 0
-        && Namen.SelectedIndex < Zeilen.Count ? Zeilen[Namen.SelectedIndex] : null;
+        && Namen.SelectedIndex < eintraege.Count ? eintraege[Namen.SelectedIndex] : null;
+    public CheckBox AlleKnopf { get; } = TherapieListe.AlleSchalter();
     public DokumentationAnsicht Dokumentation { get; }
     // Ein Bewohner aus einem anderen Bereich, dessen Berichte gerade gewünscht sind (z. B. aus dem Verzeichnis).
     private long? zusaetzlich;
@@ -37,11 +52,8 @@ public sealed class BewohnerBereich : Panel
     public Button EinklappenKnopf { get; } = Stil.NebenKnopf("◀");
     public bool Eingeklappt { get; private set; }
     private readonly Panel listenFlaeche = new() { Dock = DockStyle.Fill, BackColor = Stil.Seite };
-    private readonly Panel links = new() { Dock = DockStyle.Left, Width = LinksBreite, BackColor = Stil.Flaeche };
+    private readonly KartenFlaeche links = new() { Dock = DockStyle.Left, Width = LinksBreite, Padding = new Padding(0) };
     private long? zuletzt;
-    // Offene Aufgaben über der Liste (Wohnbereich-ToDo), mit Knopf zu allen.
-    public AufgabenKurzliste Aufgaben { get; } = new();
-    public NachrichtenHinweis Nachrichten { get; } = new() { Visible = false };
     public event Action<long?>? NachrichtenAnzeigen;
     private readonly Button nachrichtenKnopf = Stil.NebenKnopf("Nachrichten …");
     private readonly Button statusKnopf = Stil.NebenKnopf("Status …");
@@ -63,8 +75,6 @@ public sealed class BewohnerBereich : Panel
         Akte.NeuLaden();
         return gespeichert;
     }
-    private readonly Panel aufgabenRahmen = new() { Dock = DockStyle.Top, BackColor = Stil.Seite };
-    public event Action? AufgabenAnzeigen;
 
     // Der heutige Tag (für die Aufenthaltsdauer); zum Testen ersetzbar.
     internal Func<DateOnly> Heute { get; set; } = () => DateOnly.FromDateTime(DateTime.Today);
@@ -87,6 +97,7 @@ public sealed class BewohnerBereich : Panel
         Akte.BezugGewuenscht += id => BezugOeffnen(id);
         BackColor = Stil.Seite;
         Suche.TextChanged += (_, _) => UebersichtZeigen();
+        AlleKnopf.CheckedChanged += (_, _) => UebersichtZeigen();
         Namen.SelectedIndexChanged += (_, _) => { if (!abgleichen) BerichteZeigen(); };
         Namen.DoubleClick += (_, _) => AkteOeffnen();
         Namen.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.Handled = true; AkteOeffnen(); } };
@@ -96,7 +107,7 @@ public sealed class BewohnerBereich : Panel
         Namen.ContextMenuStrip = menue;
         EinklappenKnopf.AccessibleName = "Bewohnerliste ein- oder ausklappen";
         EinklappenKnopf.Click += (_, _) => Einklappen(!Eingeklappt);
-        links.Controls.AddRange([EinklappenKnopf, Suche, Namen]);
+        links.Controls.AddRange([EinklappenKnopf, Suche, AlleKnopf, Namen]);
         links.Layout += (_, _) => LinksAnordnen();
         Dokumentation = new DokumentationAnsicht(speicher)
         {
@@ -116,20 +127,12 @@ public sealed class BewohnerBereich : Panel
         AkteKnopf.Click += (_, _) => AkteOeffnen();
         AnsichtKnopf.Click += (_, _) => AnsichtUmschalten();
         DruckKnopf.Click += (_, _) => Dokumentation.Drucken();
-        aufgabenRahmen.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandGross,
-            Stil.AbstandKlein);
-        aufgabenRahmen.Controls.Add(Aufgaben);
-        aufgabenRahmen.Controls.Add(Nachrichten);
-        aufgabenRahmen.Layout += (_, _) => AufgabenAnordnen();
-        Aufgaben.AlleKnopf.Click += (_, _) => AufgabenAnzeigen?.Invoke();
-        Nachrichten.OeffnenKnopf.Click += (_, _) => NachrichtenAnzeigen?.Invoke(null);
         nachrichtenKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) NachrichtenAnzeigen?.Invoke(id); };
         statusKnopf.Click += (_, _) => StatusOeffnen();
         AerztlichKnopf.Click += (_, _) => AerztlichOeffnen();
         berichtKnopf.Click += (_, _) => { if (Akte.Bewohner?.Id is long id) BerichtGewuenscht?.Invoke(id); };
         Controls.Add(listenFlaeche);
         Controls.Add(Akte);
-        Controls.Add(aufgabenRahmen);
         listenFlaeche.BringToFront();
         Akte.BringToFront();
         zurueckKnopf.Click += (_, _) => UebersichtZeigen();
@@ -140,32 +143,22 @@ public sealed class BewohnerBereich : Panel
         };
     }
 
-    private void AufgabenAnordnen()
-    {
-        var p = aufgabenRahmen.Padding;
-        int breite = Math.Max(100, aufgabenRahmen.ClientSize.Width - p.Horizontal), y = p.Top;
-        if (nachrichtenSichtbar)
-        {
-            Nachrichten.SetBounds(p.Left, y, breite, Nachrichten.Height);
-            Nachrichten.PerformLayout();
-            y = Nachrichten.Bottom + Stil.Px(this, Stil.AbstandKlein);
-        }
-        Aufgaben.SetBounds(p.Left, y, breite, Aufgaben.Height);
-        Aufgaben.PerformLayout();
-        int hoehe = Aufgaben.Bottom + p.Bottom;
-        if (aufgabenRahmen.Height != hoehe) aufgabenRahmen.Height = hoehe;
-    }
-
     private void LinksAnordnen()
     {
         int rand = Stil.Px(this, Stil.AbstandKlein), breite = links.ClientSize.Width - 2 * rand;
         EinklappenKnopf.SetBounds(links.ClientSize.Width - rand - Stil.Px(this, 28), rand, Stil.Px(this, 28),
             Stil.Px(this, 28));
         foreach (var c in new Control[] { Suche, Namen }) c.Visible = !Eingeklappt;
+        AlleKnopf.Visible = !Eingeklappt && TherapieListe.Aktiv;
         if (Eingeklappt) return;
         Suche.SetBounds(rand, rand, breite - Stil.Px(this, 28) - rand, Suche.Height);
-        Namen.SetBounds(rand, Suche.Bottom + rand, breite, Math.Max(40,
-            links.ClientSize.Height - Suche.Bottom - 2 * rand));
+        int oben = Suche.Bottom + rand;
+        if (TherapieListe.Aktiv)
+        {
+            AlleKnopf.Location = new Point(rand, oben);
+            oben = AlleKnopf.Bottom + rand;
+        }
+        Namen.SetBounds(rand, oben, breite, Math.Max(40, links.ClientSize.Height - oben - rand));
     }
 
     public void Einklappen(bool ein)
@@ -186,7 +179,8 @@ public sealed class BewohnerBereich : Panel
         if (vorher != zusaetzlich) zusaetzlich = null;
         var alle = speicher.AlleBewohner();
         string bereich = Arbeitsbereich.Gewaehlt;
-        var imBereich = BereichswahlRegeln.Bewohner(alle, bereich);
+        bool therapie = TherapieListe.Aktiv;
+        var imBereich = therapie ? TherapieListe.Bewohner(speicher, AlleKnopf.Checked, Heute()) : BereichswahlRegeln.Bewohner(alle, bereich);
         if (zusaetzlich is long z && imBereich.All(b => b.Id != z)
             && alle.FirstOrDefault(b => b.Id == z) is Bewohner extra) imBereich.Add(extra);
         abgleichen = true;
@@ -199,28 +193,34 @@ public sealed class BewohnerBereich : Panel
             Zeilen = [.. imBereich.Where(Passt)
                 .OrderBy(b => b.Nachname, StringComparer.CurrentCulture)
                 .ThenBy(b => b.Vorname, StringComparer.CurrentCulture)];
-            Namen.BeginUpdate();
-            Namen.Items.Clear();
-            foreach (var b in Zeilen) Namen.Items.Add($"{b.Nachname}, {b.Vorname}");
-            Namen.EndUpdate();
-            int index = Zeilen.FindIndex(b => b.Id == vorher);
-            if (index < 0 && Zeilen.Count > 0) index = 0;
+            if (therapie) eintraege = TherapieListe.Fuellen(Namen, Zeilen, speicher);
+            else
+            {
+                eintraege = [.. Zeilen];
+                Namen.BeginUpdate();
+                Namen.Items.Clear();
+                foreach (var b in Zeilen) Namen.Items.Add($"{b.Nachname}, {b.Vorname}");
+                Namen.EndUpdate();
+            }
+            int index = eintraege.FindIndex(b => b is not null && b.Id == vorher);
+            if (index < 0) index = eintraege.FindIndex(b => b is not null);
             Namen.SelectedIndex = index;
+            links.PerformLayout();
             string anzahl = imBereich.Count == 1 ? "1 Bewohner" : $"{imBereich.Count} Bewohner";
             string zahl = Zeilen.Count == imBereich.Count ? anzahl : $"{Zeilen.Count} von {anzahl}";
-            kopf.TexteSetzen($"{bereich} · {zahl}", "Dokumentation");
+            KopfSetzen($"{bereich} · {zahl}", "Dokumentation");
         }
         finally { abgleichen = false; }
         BerichteZeigen();
         Akte.Visible = false;
-        listenFlaeche.Visible = aufgabenRahmen.Visible = true;
+        listenFlaeche.Visible = true;
         AkteSichtbar = false;
-        kopf.KnoepfeSetzen(BerichtNeuKnopf, BedarfKnopf, AkteKnopf, AnsichtKnopf, DruckKnopf);
+        KopfSetzen(KopfText, "Dokumentation", [BerichtNeuKnopf, BedarfKnopf, AkteKnopf, AnsichtKnopf, DruckKnopf]);
     }
 
     public bool Waehlen(long bewohnerId)
     {
-        int index = Zeilen.FindIndex(b => b.Id == bewohnerId);
+        int index = eintraege.FindIndex(b => b is not null && b.Id == bewohnerId);
         if (index < 0) return false;
         Namen.SelectedIndex = index;
         return true;
@@ -311,7 +311,7 @@ public sealed class BewohnerBereich : Panel
         if (!AkteSichtbar) { UebersichtZeigen(); return; }
         if (Akte.Bewohner?.Id is not long id || speicher.Bewohner(id) is not Bewohner b) { UebersichtZeigen(); return; }
         Akte.NeuLaden();
-        kopf.TexteSetzen("Dokumentation", "Bewohnerakte");   // der Name steht nur einmal, auf der Karte darunter
+        KopfSetzen("Dokumentation", "Bewohnerakte");   // der Name steht nur einmal, auf der Karte darunter
         AkteKnoepfeSperren();
     }
 
@@ -323,13 +323,13 @@ public sealed class BewohnerBereich : Panel
             return;
         }
         Akte.Zeigen(b);
-        listenFlaeche.Visible = aufgabenRahmen.Visible = false;
+        listenFlaeche.Visible = false;
         Akte.Visible = true;
         AkteSichtbar = true;
-        kopf.TexteSetzen("Dokumentation", "Bewohnerakte");   // der Name steht nur einmal, auf der Karte darunter
         AkteKnoepfeSperren();
-        kopf.KnoepfeSetzen(zurueckKnopf, berichteKnopf, nachrichtenKnopf, statusKnopf, AerztlichKnopf, berichtKnopf,
-            bearbeitenKnopf);
+        // Der Name steht nur einmal, auf der Karte darunter.
+        KopfSetzen("Dokumentation", "Bewohnerakte",
+            [zurueckKnopf, berichteKnopf, nachrichtenKnopf, statusKnopf, AerztlichKnopf, berichtKnopf, bearbeitenKnopf]);
     }
 
     // Statusmeldung setzen oder aufheben (Mehrplatzbetrieb); danach die Akte neu lesen.
@@ -354,25 +354,6 @@ public sealed class BewohnerBereich : Panel
     }
 
     public BewohnerFormular FormularErstellen(Bewohner? b) => new(speicher, b);
-
-    // Hinweis auf ungelesene Nachrichten über den Karten (nur wenn es welche gibt).
-    private bool nachrichtenSichtbar;
-    public bool NachrichtenHinweisSichtbar => nachrichtenSichtbar;
-
-    public void NachrichtenSetzen(int ungelesen, string? name)
-    {
-        nachrichtenSichtbar = ungelesen > 0 && name is not null;
-        Nachrichten.Visible = nachrichtenSichtbar;
-        if (nachrichtenSichtbar) Nachrichten.Setzen(ungelesen, name);
-        aufgabenRahmen.PerformLayout();
-    }
-
-    public void AufgabenSetzen(IReadOnlyList<Aufgabe> offen, DateTime jetzt)
-    {
-        var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
-        Aufgaben.Setzen(offen, namen, jetzt);
-        aufgabenRahmen.PerformLayout();
-    }
 
     // „Neuer Bewohner …“ aus der Übersicht: Formular; der gespeicherte Bewohner oder null.
     public Bewohner? NeuerBewohner()

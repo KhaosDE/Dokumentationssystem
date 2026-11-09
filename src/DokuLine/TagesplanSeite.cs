@@ -2,14 +2,17 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bereich „Tagesplan“ (Bauplan Schritt 23, als Anzeigetafel seit Schritt 26g): alle Termine von heute
-// für die Bewohner des eigenen Bereichs (Häkchen „alle Bereiche“). Oben „Jetzt und gleich“, darunter
-// „Später heute“, unten blasser „Erledigt“ – oder „nach Bewohner“. Bei Therapien „gegangen“,
+// Bereich „Tagesplan“: alle Termine von heute für die Bewohner des gewählten Bereichs. Oben „Jetzt und gleich“,
+// darunter „Später heute“, unten blasser „Erledigt“ – oder „nach Bewohner“. Bei Therapien „gegangen“,
 // „abgesagt“, „ausgefallen“ direkt in der Zeile; das ist derselbe Eintrag wie im Wochenplan, mit
 // Kürzel und Uhrzeit. Die Tafel erneuert sich jede Minute und bei jeder Änderung (auch von anderen
 // Rechnern über den Mehrplatz-Abgleich). „Vollbild (F11)“ zeigt nur die Tafel; Esc beendet.
-public sealed class TagesplanSeite : Panel
+public sealed class TagesplanSeite : Panel, IBereichSeite
 {
+    string IBereichSeite.Titel => "Tagesplan";
+    IReadOnlyList<Button> IBereichSeite.Knoepfe => [];
+    void IBereichSeite.Zeigen(bool filterBehalten) => Aktualisieren();
+
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, Dock = DockStyle.Top, BackColor = Stil.Seite };
     private readonly System.Windows.Forms.Timer takt = new() { Interval = 1000 };

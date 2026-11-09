@@ -20,12 +20,12 @@ public static class Selbsttest
                 if (!speicher.DemoBeimErstenStart() || speicher.AlleBewohner().Count == 0)
                     throw new InvalidOperationException("Demo-Daten fehlen.");
                 using var fenster = new Hauptfenster(speicher);
-                fenster.BereichWaehlen(Hauptfenster.Startbereich);
+                fenster.BereichWaehlen(fenster.StartSeite);
                 fenster.Bewohner.AkteZeigen(speicher.AlleBewohner()[0].Id!.Value);
                 using var formular = fenster.Bewohner.FormularErstellen(speicher.AlleBewohner()[0]);
                 using var bild = new Bitmap(fenster.Width, fenster.Height);
                 fenster.DrawToBitmap(bild, new Rectangle(Point.Empty, fenster.Size));
-                // Nachschlage-Ansicht (Schritt 21): Der WebView2-Lader muss in der .exe stecken.
+                // Nachschlage-Ansicht: Der WebView2-Lader muss in der .exe stecken.
                 if (!Nachschlageansicht.LaderVorhanden())
                     throw new InvalidOperationException("WebView2Loader.dll fehlt in der .exe (Nachschlage-Ansicht).");
             }

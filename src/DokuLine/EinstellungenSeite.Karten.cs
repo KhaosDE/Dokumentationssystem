@@ -1,0 +1,179 @@
+using DokuLine.Kern;
+
+namespace DokuLine;
+
+// Die Karten der Einstellungen je Gruppe: Name, ein Satz Erklärung, das Bedienelement und das nötige Recht.
+public sealed partial class EinstellungenSeite
+{
+    // ------------------------------------------------------------------ Karten
+
+    private EinstellungKarte Karte(string gruppe, string name, string erklaerung, Control bedienung, string? recht = null, bool darunter = false)
+    {
+        var k = new EinstellungKarte(gruppe, name, erklaerung, bedienung, darunter) { Funktion = recht };
+        Karten.Add(k);
+        return k;
+    }
+
+    private static FlowLayoutPanel Reihe(params Control[] teile)
+    {
+        var r = new FlowLayoutPanel { AutoSize = true, WrapContents = true, Margin = new Padding(0), BackColor = Stil.Flaeche };
+        foreach (var t in teile)
+        {
+            t.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini);
+            if (t is Button b) b.AutoSize = true;
+            r.Controls.Add(t);
+        }
+        return r;
+    }
+
+    private void KartenBauen()
+    {
+        // Persönlich
+        AbmeldenKnopf.Click += (_, _) => AbmeldenGewuenscht?.Invoke();
+        Karte("Persönlich", "Angemeldet als", "Anmelden mit dem Kürzel, ohne Passwort (Demo). Das Kürzel steht bei Berichten, Übergabe und Aufgaben. Benutzer wechseln: abmelden (F12) und mit dem anderen Kürzel anmelden.",
+            Reihe(Angemeldet, AbmeldenKnopf));
+        FarbeKnopf.Click += (_, _) =>
+        {
+            if (Recht.Kuerzel is { Length: > 0 } k && FarbeWaehlen(MeineFarbe.BackColor) is Color c)
+            {
+                speicher.FarbeSetzen(k, $"#{c.R:X2}{c.G:X2}{c.B:X2}");
+                FarbeZeigen();
+            }
+        };
+        FarbeVorgabeKnopf.Click += (_, _) => { if (Recht.Kuerzel is { Length: > 0 } k) { speicher.FarbeSetzen(k, null); FarbeZeigen(); } };
+        Karte("Persönlich", "Meine Farbe", "Für Bezugspflege (Streifen auf der Karte) und Einzeltrainer (Punkt). Gilt auf allen Rechnern.",
+            Reihe(MeineFarbe, FarbeKnopf, FarbeVorgabeKnopf));
+        MenueEingeklappt.CheckedChanged += (_, _) => { if (!laedt) MenueGewuenscht?.Invoke(MenueEingeklappt.Checked); };
+        Karte("Persönlich", "Seitenmenü", "Eingeklappt zeigt die Seitenleiste nur Symbole; der Name steht beim Darüberfahren.", MenueEingeklappt);
+
+        // Wohnbereich (Recht „Einstellungen des Bereichs“)
+        Bereich.Items.AddRange([.. Kern.Bereiche.Vorschlaege]);
+        Bereich.Leave += (_, _) => BereichUebernehmen();
+        Bereich.SelectedIndexChanged += (_, _) => BereichUebernehmen();
+        Bereich.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; BereichUebernehmen(); } };
+        Karte("Wohnbereich", "Bereich dieses Rechners", "Ausgedachte Kennung des Arbeitsplatzes. Die Übersicht zeigt zuerst die Bewohner dieses Bereichs; Statusmeldungen tragen ihn mit.",
+            Bereich, Funktionen.EinstellungenBereich);
+        foreach (var feld in new[] { Frueh, Spaet, Nacht })
+        {
+            feld.Leave += (_, _) => SchichtzeitenUebernehmen();
+            feld.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; SchichtzeitenUebernehmen(); } };
+        }
+        Frueh.AccessibleName = "Beginn Frühdienst";
+        Spaet.AccessibleName = "Beginn Spätdienst";
+        Nacht.AccessibleName = "Beginn Nachtdienst";
+        Karte("Wohnbereich", "Schichtzeiten", "Beginn von Früh, Spät und Nacht für diesen Bereich (alle Rechner). Danach richten sich Schicht der Berichte, Übergabe und Aufgaben.",
+            Reihe(Frueh, Spaet, Nacht), Funktionen.EinstellungenBereich);
+        BeschlussFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { BeschlussFristTage = (int)BeschlussFrist.Value }); };
+        Karte("Wohnbereich", "Beschluss endet bald", "So viele Tage vorher zeigt die Übersicht „Beschluss endet in …“.", BeschlussFrist, Funktionen.EinstellungenBereich);
+        HebFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { HebFristMonate = (int)HebFrist.Value }); };
+        Karte("Wohnbereich", "HEB fällig", "So viele Monate nach dem letzten Bogen gilt der HEB-Bogen als fällig.", HebFrist, Funktionen.EinstellungenBereich);
+        logoVorschau.Paint += (_, e) => LogoZeichnen(e.Graphics);
+        LogoKnopf.Click += (_, _) => LogoWaehlen();
+        LogoWeg.Click += (_, _) => LogoEntfernen();
+        Karte("Wohnbereich", "Bild im Kopf (Logo)", "Erscheint oben rechts. Die Datei wird in den Datenordner kopiert und nie mitgeliefert.",
+            Reihe(logoVorschau, LogoKnopf, LogoWeg), Funktionen.EinstellungenBereich);
+        // Wohnbereiche R1–R3 (offen/beschützend), Zimmer und Betten; Rechte prüft das Fenster.
+        ZimmerKnopf.Click += (_, _) => { using var f = new ZimmerFenster(speicher); Dialog.Zeigen(f, FindForm()); };
+        Karte("Wohnbereich", "Zimmer und Betten", "Wohnbereiche (offen oder beschützend) mit ihren Zimmern: Einzelzimmer oder „Bett Fenster“ und „Bett Tür“. Die Aufnahme zeigt nur freie Betten.",
+            ZimmerKnopf);
+
+        // Module (Recht „Module ein- und ausschalten“): ein Modul je Karte, Untermodule darin (eine Ebene).
+        foreach (var m in Modulverwaltung.Alle)
+        {
+            var spalte = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0), BackColor = Stil.Flaeche };
+            var haken = new CheckBox { Text = "eingeschaltet", AutoSize = true, Font = Stil.Fett, BackColor = Stil.Flaeche };
+            Module[m.Daten.Schluessel] = haken;
+            spalte.Controls.Add(haken);
+            string schluessel = m.Daten.Schluessel;
+            haken.CheckedChanged += (_, _) => ModulSetzen(schluessel, haken.Checked);
+            foreach (var u in m.Untermodule)
+            {
+                var unter = new CheckBox { Text = $"{u.Name} – {u.Beschreibung}", AutoSize = true, MaximumSize = new Size(420, 0), BackColor = Stil.Flaeche, Margin = new Padding(Stil.AbstandGross, 0, 0, 0) };
+                Module[u.Schluessel] = unter;
+                string us = u.Schluessel;
+                unter.CheckedChanged += (_, _) => ModulSetzen(us, unter.Checked);
+                spalte.Controls.Add(unter);
+            }
+            Karte("Module", m.Name, $"{m.Beschreibung} Ausgeschaltet verschwindet es aus Seitenleiste, Akte und Karten; die Daten bleiben.",
+                spalte, Funktionen.Module, darunter: true);
+        }
+
+        // Aufgaben, Fahrzeuge (eigene Fenster mit „Speichern“)
+        VorlagenKnopf.Click += (_, _) => { FensterZeigen(new VorlagenFenster(speicher)); Geaendert?.Invoke(); };
+        Karte("Aufgaben", "Standardaufgaben", "Aufgaben, die zu Beginn jeder Schicht von selbst entstehen (z. B. Rundgänge im Nachtdienst). Ohne Recht nur ansehen.", VorlagenKnopf);
+        FahrzeugeKnopf.Click += (_, _) => { using var f = new FahrzeugeFenster(speicher); Dialog.Zeigen(f, FindForm()); Geaendert?.Invoke(); };
+        Karte("Fahrzeuge", "Fahrzeugliste", "Firmenwagen für Fahrten (Arzt, Ausflug, Sporttherapie); hinzufügen, stilllegen, wieder aktivieren.", FahrzeugeKnopf, Funktionen.Fahrzeuge);
+
+        // Vorlagen: HEB-PDFs je Bogenart
+        foreach (var art in Enum.GetValues<Bogenart>())
+        {
+            var status = new Label { AutoSize = true, MaximumSize = new Size(360, 0), BackColor = Stil.Flaeche, Margin = new Padding(0, 0, 0, Stil.AbstandMini) };
+            Vorlagen[art] = status;
+            var zuteilen = Stil.NebenKnopf("Zuteilen …");
+            var entfernen = Stil.NebenKnopf("Entfernen");
+            var zuordnung = Stil.NebenKnopf("Zuordnung …");
+            zuteilen.Click += (_, _) => { if (PdfWaehlen() is string pfad) VorlageZuteilen(art, pfad); };
+            entfernen.Click += (_, _) => { HebPdf.VorlageEntfernen(art); VorlageAnzeigen(art); };
+            zuordnung.Click += (_, _) => { using var f = new HebZuordnungFenster(art); Dialog.Zeigen(f, FindForm()); };
+            var spalte = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0), BackColor = Stil.Flaeche };
+            spalte.Controls.AddRange([status, Reihe(zuteilen, entfernen, zuordnung)]);
+            Karte("Vorlagen", $"HEB-Bogen {HebRegeln.ArtKurz(art)}", "PDF mit Formularfeldern des Kostenträgers. Sie wird in den Datenordner kopiert und nie mitgeliefert; ausgefüllt wird immer eine Kopie.",
+                spalte, Funktionen.Heb);
+        }
+
+        // Medikamente
+        MedikamenteKnopf.Click += (_, _) => { using var f = new MedikamenteFenster(speicher); Dialog.Zeigen(f, FindForm()); };
+        Karte("Medikamente", "Medikamentendatenbank", "Liste, aus der beim Verordnen gewählt wird. Anlegen dürfen Fachkräfte (sie prüfen mit Quelle und Datum), verwalten der Psychologische Fachdienst.",
+            MedikamenteKnopf);
+        NachschlageAnsicht.CheckedChanged += (_, _) => { if (!laedt) Einstellungen.Aendern(w => w with { NachschlageAnsicht = NachschlageAnsicht.Checked }); };
+        Karte("Medikamente", "Nachschlage-Ansicht (BfArM)", "Eingebettete Suche des BfArM über der Maske „Medikament“ – die einzige Webansicht im Programm, nur feste Adressen (" +
+            string.Join(", ", ExterneAdressen.Nachschlagebereiche) + "). Aus: nur „Im Browser öffnen“.", NachschlageAnsicht);
+
+        // Verwaltung
+        MitarbeiterKnopf.Click += (_, _) => FensterZeigen(new MitarbeiterFenster(speicher));
+        ListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher));
+        RechteKnopf.Click += (_, _) => FensterZeigen(new RechteFenster(speicher));
+        Karte("Verwaltung", "Mitarbeiter", "Mitarbeiter mit Bereichen, Positionen und Qualifikation (Assistenzkraft oder Fachkraft). Die Bereichsleitung verwaltet ihren Bereich.", MitarbeiterKnopf);
+        Karte("Verwaltung", "Bereiche, Positionen und Berichtsarten",
+            "Listen zum Zuordnen; stilllegen statt löschen, solange etwas zugeordnet ist.", ListenKnopf);
+        Karte("Verwaltung", "Rechte", "Tabelle: welche Position was darf, je Funktion „nur Fachkräfte“. Ohne Recht nur ansehen.", RechteKnopf);
+
+        // System (folgenreich: fragt vorher)
+        OrdnerKnopf.Click += (_, _) => { if (OrdnerWaehlen() is string ordner) OrdnerSetzen(ordner); };
+        LokalKnopf.Click += (_, _) => OrdnerSetzen(null);
+        var ort = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Margin = new Padding(0), BackColor = Stil.Flaeche };
+        ort.Controls.AddRange([DatenbankOrt, Reihe(OrdnerKnopf, LokalKnopf)]);
+        DatenbankOrt.BackColor = Stil.Flaeche;
+        Karte("System", "Ort der Datenbank", "Mehrere Rechner mit demselben Ordner arbeiten gemeinsam. Gilt nach dem Neustart; ist der Ordner leer, entstehen dort die Demo-Daten. Auch dort nur ausgedachte Daten.",
+            ort, Funktionen.EinstellungenBereich, darunter: true);
+        Karte("System", "Sicherung", "Noch nicht gebaut (siehe STAND.md, offene Punkte). Die Datenbank ist eine Datei im Datenordner bzw. im gemeinsamen Ordner.",
+            new Label { Text = "–", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche }, Funktionen.EinstellungenBereich);
+        AutoUpdate.CheckedChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { AutoUpdate = AutoUpdate.Checked }); };
+        Karte("System", "Update", "Beim Start nach einer neuen Version suchen (nur die Releases dieses Programms). Abschaltbar auch mit „--kein-update“.",
+            AutoUpdate, Funktionen.EinstellungenBereich);
+        DemoKnopf.Click += (_, _) => DemoGewuenscht?.Invoke();
+        var achtung = new Label
+        {
+            Text = "Achtung: löscht alle Änderungen und hinterlegten Bilder und lädt die ausgedachten Demo-Daten neu (fragt vorher).",
+            AutoSize = true, MaximumSize = new Size(360, 0), ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandMini),
+        };
+        Karte("System", "Demo-Daten zurücksetzen", "Für die Vorführung: alles auf den Anfang.", Reihe(DemoKnopf, achtung), Funktionen.DemoZuruecksetzen, darunter: true);
+
+        // Über
+        Karte("Über", "Programm", "Bis Version 0.29.1 hieß das Programm „Dokumentationssystem“.",
+            new Label { Text = $"{Programmversion.Name} – {Programmversion.Leittext}", AutoSize = true, Font = Stil.Fett, BackColor = Stil.Flaeche });
+        Karte("Über", "Version", "Neue Versionen kommen über das Selbst-Update.", new Label { Text = Programmversion.Text, AutoSize = true, Font = Stil.Fett, BackColor = Stil.Flaeche });
+        Karte("Über", "Tastenkürzel", "Gelten im ganzen Programm.",
+            new Label { Text = "F12 = Abmelden · F11 = Tagesplan im Vollbild (Esc beendet)", AutoSize = true, Font = Stil.Fett, BackColor = Stil.Flaeche });
+        Karte("Über", "Demo", "Kein Echtbetrieb: Echte Daten wären Gesundheitsdaten (Art. 9 DSGVO) und bräuchten Freigaben, die es nicht gibt.",
+            new MarkenFeld(Stil.DemoHinweis, Stil.Achtung));
+        Karte("Über", "Bausteine und Lizenzen", "Freie Bibliotheken, die das Programm benutzt.",
+            new Label
+            {
+                Text = "Microsoft.Data.Sqlite (MIT) · PDFsharp 6.2.4 (MIT) · System.Security.Cryptography.Pkcs (MIT) · WebView2-Steuerelement von Microsoft (BSD-artige Lizenz) · .NET 10 (MIT)",
+                AutoSize = true, MaximumSize = new Size(360, 0), BackColor = Stil.Flaeche,
+            }, darunter: true);
+        WebAnsichtStand.BackColor = Stil.Flaeche;
+        Karte("Über", "Nachschlage-Ansicht", "Ob Microsoft Edge WebView2 auf diesem Rechner da ist (Hinweis für die IT).", WebAnsichtStand);
+    }
+}

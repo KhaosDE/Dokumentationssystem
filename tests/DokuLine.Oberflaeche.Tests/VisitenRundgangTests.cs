@@ -19,13 +19,14 @@ public class VisitenRundgangTests
         var seite = f.Visiten;
         Assert.Equal("Visite beginnen …", seite.BeginnenKnopf.Text);
         Assert.Contains(seite.BeginnenKnopf, f.Kopf.Knoepfe);
-        long ahorn = u.Demo("Ahorn").Id!.Value, birke = u.Demo("Birke").Id!.Value;
+        long ahorn = u.Demo("Ahorn").Id!.Value, holunder = u.Demo("Holunder").Id!.Value;   // beide Zi. 101 (Fenster, Tür)
         int imBereich = u.Speicher.AlleBewohner().Count(b => b.Wohnbereich == "R1");
 
         string? fehler = null;
         using (new DialogErsatz(fenster =>
         {
             var b = Assert.IsType<VisiteBeginnenFenster>(fenster);
+            Assert.StartsWith("Visite Psychiater beginnen", b.Text);
             Assert.False(b.Beginnen());
             fehler = b.Fehler.Text;
             Assert.Equal("EF", b.Teilnehmer.AlsText);
@@ -43,6 +44,16 @@ public class VisitenRundgangTests
         Assert.StartsWith("Allergien: ", r.Allergie.Text);
         Assert.True(r.Tabelle.Rows.Count >= 2);   // Quetiapin und Pantoprazol
         Assert.Contains("Dr. Linde (ausgedacht)", r.LetzteVisite.Text);   // Demo-Visite vor 6 Tagen
+        Assert.Equal(VisitenRegeln.Psychiater, r.Entwurf.Art);
+
+        // „Weitere Bewohner …“: jemand aus R2 kommt dazu und bleibt im Entwurf.
+        var aus2 = u.Speicher.AlleBewohner().Where(b => b.Wohnbereich == "R2").OrderBy(b => b.Nachname).First();
+        r.WeitereWaehlen = texte => { Assert.DoesNotContain(texte, t => t.Contains("(R1)")); return texte.ToList().FindIndex(t => t.StartsWith(aus2.Nachname + ",")); };
+        Assert.True(r.WeitereHinzufuegen());
+        Assert.Equal(imBereich + 1, r.Bewohner.Count);
+        Assert.Equal(aus2.Id, r.Bewohner[r.Aktuell].Id);
+        r.Waehlen(r.Bewohner.FindIndex(b => b.Id == ahorn));
+        imBereich++;
 
         r.Feld!.Besprochen.Text = "Schläft gut, Abenddosis bleibt.";
         r.Feld.AnordnungenGeaendert.Checked = true;
@@ -52,7 +63,7 @@ public class VisitenRundgangTests
         Assert.Equal("1 Aufgabe vorgemerkt", r.VorgemerktText.Text);
         Assert.True(r.Liste.Items[0].Checked);   // Häkchen „besprochen“
         Assert.Equal("Schläft gut, Abenddosis bleibt.", u.Speicher.VisitenEntwurf("R1")!.Eintrag(ahorn).Besprochen);   // schon gespeichert
-        Assert.Equal(birke, r.Bewohner[r.Aktuell].Id);
+        Assert.Equal(holunder, r.Bewohner[r.Aktuell].Id);   // nach Zimmer: dasselbe Zimmer, Bett an der Tür
         r.Feld!.Besprochen.Text = "Herzklopfen beim Treppensteigen.";
         r.Feld.FacharztNoetig.Checked = true;
         r.Feld.Fachrichtung.Text = "Kardiologie";
@@ -64,10 +75,14 @@ public class VisitenRundgangTests
         // Unterbrechen und fortsetzen.
         r.UnterbrechenKnopf.PerformClick();
         Assert.Null(seite.Rundgang);
-        Assert.Equal("Visite fortsetzen", seite.BeginnenKnopf.Text);
+        Assert.Equal("Visite Psychiater fortsetzen", seite.BeginnenKnopf.Text);
+        seite.ArtWaehlen(VisitenRegeln.Hausarzt);
+        Assert.Equal("Visite Psychiater fortsetzen", seite.BeginnenKnopf.Text);   // ein Entwurf je Bereich, mit seiner Art
         Assert.True(seite.Beginnen());   // ohne Fenster: der Entwurf geht weiter
         r = seite.Rundgang!;
-        Assert.Equal("Herzklopfen beim Treppensteigen.", r.Entwurf.Eintrag(birke).Besprochen);
+        Assert.Equal("Herzklopfen beim Treppensteigen.", r.Entwurf.Eintrag(holunder).Besprochen);
+        Assert.Equal(imBereich, r.Bewohner.Count);   // der Bewohner aus R2 ist wieder dabei
+        seite.ArtWaehlen(VisitenRegeln.Psychiater);
 
         // Ausdruck „Visitenliste“.
         using (var ersatz = new DialogErsatz(_ => DialogResult.Cancel))
@@ -89,8 +104,8 @@ public class VisitenRundgangTests
         Assert.Equal(1, einblendungen);
         Assert.Null(seite.Rundgang);
         Assert.Null(u.Speicher.VisitenEntwurf("R1"));
-        Assert.Equal(6, seite.Karten.Count);   // 5 Demo-Visiten (seit Schritt 26h) und die neue
-        Assert.Contains(u.Speicher.Berichte(ahorn), b => b.Text.Contains("(Dr. Linde (ausgedacht)), dabei: EF: Schläft gut"));
+        Assert.Equal(4, seite.Karten.Count);   // 3 Demo-Visiten des Psychiaters und die neue
+        Assert.Contains(u.Speicher.Berichte(ahorn), b => b.Text.StartsWith("Visite Psychiater – Dr. Linde (ausgedacht), ") && b.Text.Contains(", dabei: EF: Schläft gut"));
         Assert.Equal("Visite beginnen …", seite.BeginnenKnopf.Text);
     });
 

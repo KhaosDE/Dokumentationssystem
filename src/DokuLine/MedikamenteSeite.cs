@@ -3,9 +3,8 @@ using DokuLine.Kern;
 namespace DokuLine;
 
 // Die Medikamentendatenbank (Demo-Bestand) mit Suche; Einträge ansehen, anlegen, ändern und sperren.
-// Jede Änderung ist eine neue Fassung; der Verlauf bleibt einsehbar. Seit Schritt 21 in den
-// Einstellungen (MedikamenteFenster) statt in der Seitenleiste. Die Quelle steht als Adresse da
-// (zum Kopieren) – das Programm selbst geht nicht ins Internet.
+// Jede Änderung ist eine neue Fassung; der Verlauf bleibt einsehbar. Steht in den Einstellungen
+// (MedikamenteFenster). Die Quelle steht als Adresse da (zum Kopieren) – das Programm geht nicht ins Internet.
 public sealed class MedikamenteSeite : Panel
 {
     private readonly Speicher speicher;
@@ -43,7 +42,7 @@ public sealed class MedikamenteSeite : Panel
     {
         var liste = speicher.Medikamente(Suche.Text);
         Anzahl = speicher.Medikamente().Count;
-        Recht.Anwenden(speicher, Funktionen.MedikamentAnlegen, NeuKnopf);   // Rechte (Schritt 19)
+        Recht.Anwenden(speicher, Funktionen.MedikamentAnlegen, NeuKnopf);   // Rechte
         string? verwalten = Recht.Grund(speicher, Funktionen.MedikamenteVerwalten);
         SuspendLayout();
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
@@ -205,7 +204,7 @@ public sealed class MedikamentKarte : KartenFlaeche
 }
 
 // Anlegen oder ändern. Beim Ändern entsteht eine neue Fassung mit Datum und Kürzel.
-// Prüfung (Schritt 21): Wer anlegt, prüft selbst gegen eine offizielle Quelle und bestätigt mit
+// Prüfung: Wer anlegt, prüft selbst gegen eine offizielle Quelle und bestätigt mit
 // Quelle und Prüfdatum. Oben die Nachschlage-Ansicht des BfArM (abschaltbar, dann nur „Im Browser
 // öffnen“); markierter Text geht mit „In Feld übernehmen“ in das zuletzt gewählte Feld.
 public sealed class MedikamentFenster : Form
@@ -430,7 +429,7 @@ public sealed class MedikamentVerlaufFenster : Form
     }
 }
 
-// Medikamentendatenbank als eigenes Fenster (Schritt 21): aus den Einstellungen, Abschnitt „Medikamente“.
+// Medikamentendatenbank als eigenes Fenster: aus den Einstellungen, Abschnitt „Medikamente“.
 public sealed class MedikamenteFenster : Form
 {
     public MedikamenteSeite Seite { get; }

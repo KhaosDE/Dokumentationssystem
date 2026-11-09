@@ -5,8 +5,12 @@ namespace DokuLine;
 
 // Startseite: oben die Wahl des Wohnbereichs (gilt überall), links „Heute wichtig“ mit vier Kästen, rechts die
 // Bewohner des Bereichs als Liste; Doppelklick öffnet die Akte. Unter 1100 px steht „Heute wichtig“ über der Liste.
-public sealed class UebersichtSeite : Panel
+public sealed class UebersichtSeite : Panel, IBereichSeite
 {
+    string IBereichSeite.Titel => "Übersicht";
+    IReadOnlyList<Button> IBereichSeite.Knoepfe => Knoepfe;
+    void IBereichSeite.Zeigen(bool filterBehalten) => Aktualisieren();
+
     public const int LinksBreite = 380, SchmalAb = 1100;
     private readonly Speicher speicher;
     private readonly System.Windows.Forms.Timer uhr = new() { Interval = 60_000 };
@@ -17,7 +21,10 @@ public sealed class UebersichtSeite : Panel
     private readonly KartenFlaeche rechts = new();
     public KastenKopf ListenKopf { get; } = new("BEWOHNER") { Cursor = Cursors.Default };
 
-    // „Heute wichtig“
+    // „Heute wichtig“; „Medikamentenänderungen“ nur, wenn es welche gibt (dann ganz oben).
+    public HeuteKasten Medikation { get; } = new("MEDIKAMENTENÄNDERUNGEN");
+    public bool MedikationZeigen { get; private set; }
+    private HeuteKasten[] Kaesten => MedikationZeigen ? [Medikation, Uebergaben, Termine, Dienst, Nachrichten] : [Uebergaben, Termine, Dienst, Nachrichten];
     public HeuteKasten Uebergaben { get; } = new("ÜBERGABEN OFFEN");
     public HeuteKasten Termine { get; } = new("TERMINE HEUTE");
     public HeuteKasten Dienst { get; } = new("LAUFENDER DIENST · NOCH OFFEN");
@@ -83,7 +90,9 @@ public sealed class UebersichtSeite : Panel
         Termine.KopfGeklickt += () => StelleGewuenscht?.Invoke("Tagesplan");
         Dienst.KopfGeklickt += () => StelleGewuenscht?.Invoke("Aufgaben");
         Nachrichten.KopfGeklickt += () => StelleGewuenscht?.Invoke("Nachrichten");
-        links.Controls.AddRange([Uebergaben, Termine, Dienst, Nachrichten]);
+        Medikation.KopfGeklickt += () => StelleGewuenscht?.Invoke("Übergabe");
+        Medikation.Visible = false;
+        links.Controls.AddRange([Medikation, Uebergaben, Termine, Dienst, Nachrichten]);
 
         foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Hinweise", 300) }) Liste.Columns.Add(titel, breite);
         Liste.DoubleClick += (_, _) => AkteOeffnen();
@@ -112,8 +121,7 @@ public sealed class UebersichtSeite : Panel
     private List<HeuteFuer> gezeigt = [];
     private List<BewohnerZeile> alleZeilen = [];
 
-    // Neuer Tag oder neue Schicht seit dem letzten Aufbau (0.33.2: vorher nur der Tag – der Kasten „Laufender
-    // Dienst“ zeigte nach dem Schichtwechsel noch die alte Schicht).
+    // Neuer Tag oder neue Schicht seit dem letzten Aufbau – der Kasten „Laufender Dienst“ folgt dem Schichtwechsel.
     public bool Veraltet => DateOnly.FromDateTime(Jetzt()) != gezeigtAm || SchichtTermin.Zu(Jetzt()) != gezeigtSchicht;
 
     public void Aktualisieren()
@@ -151,11 +159,13 @@ public sealed class UebersichtSeite : Panel
         gezeigt = alle;
         var ids = alle.Select(h => h.Bewohner.Id!.Value).ToHashSet();
         var offeneUebergaben = speicher.Uebergaben(jetzt).Where(u => u.BewohnerId is null || ids.Contains(u.BewohnerId.Value)).ToList();
+        var medikation = speicher.Medikamentenaenderungen(heute).Where(a => ids.Contains(a.BewohnerId)).ToList();
+        var medikationGeaendert = medikation.Select(a => a.BewohnerId).ToHashSet();
 
         // Bewohnerliste: Marken wie bisher auf den Karten, dazu Übergabe und Geburtstag; „Wo“ eigene Spalte.
         var status = speicher.GeltendeStatusmeldungen(jetzt);
-        var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan (Schritt 23)
-        var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten (Schritt 24): abwesend während der Fahrt
+        var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan
+        var mitfahrende = speicher.Mitfahrende(jetzt);  // Fahrten: abwesend während der Fahrt
         var farben = BezugAnzeige.Farben(speicher);
         int frist = werte.BeschlussFristTage;
         alleZeilen = [];
@@ -171,6 +181,7 @@ public sealed class UebersichtSeite : Panel
             marken.AddRange(modul.Where(m => m.Art != MarkenArt.Abwesend));
             if (status.TryGetValue(id, out var s)) marken.Insert(0, StatusmeldungRegeln.Marke(s, jetzt));
             if (inTherapie.TryGetValue(id, out var wo)) marken.Insert(0, wo);
+            if (medikationGeaendert.Contains(id)) marken.Insert(0, new Marke(MarkenArt.Medikation, MedikationsAenderungen.MarkeText));
             int uebergaben = offeneUebergaben.Count(u => u.BewohnerId == id);
             if (uebergaben > 0) marken.Add(new Marke(MarkenArt.Uebergabe, uebergaben == 1 ? "Übergabe" : $"{uebergaben} Übergaben"));
             if (allesZeigen) marken.Add(new Marke(MarkenArt.Angabe, h.Bewohner.Wohnbereich));
@@ -188,6 +199,7 @@ public sealed class UebersichtSeite : Panel
         ListeFuellen();
 
         HeuteFuellen(jetzt, alle, offeneUebergaben, werte.Kuerzel);
+        MedikationFuellen(medikation, alle);
 
         // Kopf: „R2 · 23 Bewohner · 3 Betten frei · Stand 14:32 Uhr“ (freie Betten der gezeigten Wohnbereiche).
         var bereiche = meineBp || meineEt ? [] : allesZeigen ? speicher.Wohnbereiche().Select(w => w.Name).ToList() : meine;
@@ -218,6 +230,19 @@ public sealed class UebersichtSeite : Panel
     }
 
     // Die vier Kästen links.
+    // Kasten „Medikamentenänderungen“: je Änderung eine Zeile, rot umrandet; Klick öffnet die Akte.
+    private void MedikationFuellen(List<Medikamentenaenderung> liste, List<HeuteFuer> alle)
+    {
+        var bewohner = alle.ToDictionary(h => h.Bewohner.Id!.Value, h => h.Bewohner);
+        Medikation.Setzen(liste.Count, liste.Select(a =>
+        {
+            string name = bewohner.TryGetValue(a.BewohnerId, out var b) ? $"{b.Name}, Zi. {b.Zimmer}" : "?";
+            return Eintrag($"{name}: {a.Medikament}: {a.Was}", $"ab {Datum.Text(a.Ab)} · {a.Arzt}", null,
+                () => AkteGewuenscht?.Invoke(a.BewohnerId), Stil.Gefahr);
+        }));
+        MedikationZeigen = Medikation.Visible = liste.Count > 0;
+    }
+
     private void HeuteFuellen(DateTime jetzt, List<HeuteFuer> alle, List<Uebergabe> offen, string kuerzel)
     {
         var bewohner = alle.ToDictionary(h => h.Bewohner.Id!.Value, h => h.Bewohner);
@@ -227,16 +252,17 @@ public sealed class UebersichtSeite : Panel
         Uebergaben.Setzen(offen.Count, offen.Select(u =>
         {
             var b = u.BewohnerId is long id ? bewohner.GetValueOrDefault(id) : null;
-            return Eintrag(HeuteWichtigRegeln.UebergabeText(u, b), HeuteWichtigRegeln.SeitText(u), null, () => StelleGewuenscht?.Invoke("Übergabe"));
+            return Eintrag(HeuteWichtigRegeln.UebergabeText(u, b), HeuteWichtigRegeln.SeitText(u), null, () => StelleGewuenscht?.Invoke("Übergabe"),
+                BerichtZeile.Schichtfarbe(UebergabeRegeln.SchichtVon(u)));
         }));
 
         // 2. Termine heute aus dem Tagesplan, mit dem Status der Tafel.
         var termine = HeuteWichtigRegeln.Termine(speicher.Tagesplan(DateOnly.FromDateTime(jetzt), alle.Select(h => h.Bewohner)), jetzt);
         Termine.Setzen(termine.Count, termine.Select(t =>
-            Eintrag($"{t.Zeit}  {t.Text}", null, (t.StatusText, StatusMarke(t.Status)), () => StelleGewuenscht?.Invoke("Tagesplan"))));
+            Eintrag($"{t.Zeit}  {t.Text}", null, (t.StatusText, TafelStil.Status(t.Status)), () => StelleGewuenscht?.Invoke("Tagesplan"))));
 
         // 3. Laufender Dienst: „6 von 9 erledigt“, Balken, offene Aufgaben zum Abhaken. Die Standardaufgaben der
-        // Schicht zuerst anlegen (0.33.2: vorher erst beim Öffnen von „Aufgaben“).
+        // Schicht zuerst anlegen.
         speicher.StandardaufgabenErzeugen(jetzt);
         var aufgaben = speicher.Aufgaben(jetzt, auchErledigte: true, Arbeitsbereich.Gewaehlt);
         var dienst = HeuteWichtigRegeln.Dienst(aufgaben, jetzt);
@@ -255,7 +281,7 @@ public sealed class UebersichtSeite : Panel
                 ForeColor = faellig.Length > 0 ? Stil.Beschluss.Text : Stil.TextNormal, Enabled = sperre is null, AccessibleName = $"Erledigt: {a.Text}{name}",
             };
             // Nach dem Abhaken baut sich der Kasten neu auf; der zweite Klick eines Doppelklicks träfe sonst die
-            // nächste Aufgabe (0.33.2).
+            // nächste Aufgabe.
             haken.CheckedChanged += (_, _) =>
             {
                 if (!haken.Checked) return;
@@ -271,8 +297,8 @@ public sealed class UebersichtSeite : Panel
         {
             var verlaeufe = speicher.Verlaeufe(kuerzel, NachrichtenOrdner.Posteingang);
             var ungelesen = HeuteWichtigRegeln.Ungelesen(verlaeufe, kuerzel);
-            // Zähler wie in der Seitenleiste: alle ungelesenen Nachrichten; je Verlauf steht die neueste da (0.33.3:
-            // vorher zählte der Kasten die Verläufe).
+            // Zähler wie in der Seitenleiste: alle ungelesenen Nachrichten (nicht die Verläufe); je Verlauf steht die
+            // neueste da.
             Nachrichten.Setzen(verlaeufe.Sum(v => v.Ungelesen), ungelesen.Select(n =>
             {
                 var v = verlaeufe.First(x => x.Id == n.Verlauf);
@@ -291,18 +317,9 @@ public sealed class UebersichtSeite : Panel
         Aktualisieren();
     }
 
-    private static Stil.Marke StatusMarke(TafelStatus s) => s switch
+    private static HeuteEintrag Eintrag(string text, string? unten, (string Text, Stil.Marke Marke)? status, Action klick, Color? rahmen = null)
     {
-        TafelStatus.Gegangen or TafelStatus.Zurueck => Stil.Offen,
-        TafelStatus.NochOffen => Stil.Achtung,
-        TafelStatus.Abgesagt or TafelStatus.Ausgefallen => Stil.Beschluss,
-        TafelStatus.Jetzt or TafelStatus.Gleich => Stil.Unterwegs,
-        _ => Stil.Zimmer,
-    };
-
-    private static HeuteEintrag Eintrag(string text, string? unten, (string Text, Stil.Marke Marke)? status, Action klick)
-    {
-        var e = new HeuteEintrag(text, unten, status);
+        var e = new HeuteEintrag(text, unten, status) { Rahmen = rahmen };
         e.Geklickt += klick;
         return e;
     }
@@ -345,7 +362,7 @@ public sealed class UebersichtSeite : Panel
 
     public void Drucken()
     {
-        var druck = new UebersichtDruck(ListenKopfText, KopfText, [Uebergaben, Termine, Dienst, Nachrichten], Zeilen, Jetzt());
+        var druck = new UebersichtDruck(ListenKopfText, KopfText, Kaesten, Zeilen, Jetzt());
         Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, "Übersicht");
     }
 
@@ -363,7 +380,7 @@ public sealed class UebersichtSeite : Panel
         // Die Kästen untereinander; im schmalen Fenster über der Liste (höchstens 40 % der Höhe, dann Bildlauf).
         int kastenBreite = linksBreite - SystemInformation.VerticalScrollBarWidth;   // Platz für den Bildlauf
         int y = links.AutoScrollPosition.Y;
-        foreach (var k in new[] { Uebergaben, Termine, Dienst, Nachrichten })
+        foreach (var k in Kaesten)
         {
             k.SetBounds(0, y, kastenBreite, k.Height);
             k.PerformLayout();
@@ -415,212 +432,5 @@ public sealed class UebersichtSeite : Panel
             foreach (var c in Knoepfe.Cast<Control>().Where(c => c.Parent is null)) c.Dispose();
         }
         base.Dispose(disposing);
-    }
-}
-
-// Ein Kasten in „Heute wichtig“ (Schritt 26l): Überschrift in Großbuchstaben mit Zähler, darunter die
-// Einträge. Ohne Einträge steht „Nichts offen“ da; der Kasten verschwindet nicht.
-public sealed class HeuteKasten : KartenFlaeche
-{
-    public KastenKopf Kopf { get; }
-    public Label Leer { get; } = new() { Text = HeuteWichtigRegeln.NichtsOffen, AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche };
-    public List<Control> Zeilen { get; } = [];
-    public List<Control> Oben { get; } = [];    // feste Teile über den Einträgen (z. B. Fortschritt)
-    public List<Control> Unten { get; } = [];   // feste Teile darunter (z. B. „Alle Aufgaben …“)
-    public string Titel { get; }
-    public int Anzahl { get; private set; }
-    public string KopfText => Kopf.Zaehler.Length > 0 ? $"{Titel} · {Kopf.Zaehler}" : Titel;
-    public event Action? KopfGeklickt;
-
-    public HeuteKasten(string titel)
-    {
-        Titel = titel;
-        Kopf = new KastenKopf(titel);
-        Kopf.Click += (_, _) => KopfGeklickt?.Invoke();
-        Controls.Add(Kopf);
-        Controls.Add(Leer);
-        Padding = new Padding(Stil.AbstandMittel);
-    }
-
-    public void Setzen(int anzahl, IEnumerable<Control> zeilen, string leer = HeuteWichtigRegeln.NichtsOffen)
-    {
-        foreach (var c in Oben.Concat(Unten)) if (c.Parent != this) Controls.Add(c);
-        foreach (var z in Zeilen) { Controls.Remove(z); z.Dispose(); }
-        Zeilen.Clear();
-        Zeilen.AddRange(zeilen);
-        foreach (var z in Zeilen) Controls.Add(z);
-        Anzahl = anzahl;
-        Kopf.ZaehlerSetzen(anzahl.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        Leer.Text = leer;
-        Leer.Visible = Zeilen.Count == 0;
-        AccessibleName = $"{Titel}: {anzahl}";
-        PerformLayout();
-    }
-
-    protected override void OnLayout(LayoutEventArgs levent)
-    {
-        base.OnLayout(levent);
-        int innen = Stil.Px(this, Stil.AbstandMittel), mini = Stil.Px(this, Stil.AbstandMini);
-        int breite = Math.Max(100, Width - 2 * innen);
-        Kopf.SetBounds(1, 1, Math.Max(10, Width - 2), Kopf.Hoehe);   // innerhalb des Rands, oben abgerundet wie der Kasten
-        int y = Kopf.Bottom + Stil.Px(this, Stil.AbstandKlein);
-        void Setzen(Control c)
-        {
-            switch (c)
-            {
-                case Label l when l.AutoSize: l.MaximumSize = new Size(breite, 0); l.Location = new Point(innen, y); break;
-                case CheckBox k:
-                    int hoch = TextRenderer.MeasureText(k.Text, k.Font, new Size(breite - Stil.Px(this, 22), 0), TextFormatFlags.WordBreak).Height + Stil.Px(this, 6);
-                    k.SetBounds(innen, y, breite, Math.Max(Stil.Px(this, 24), hoch));
-                    break;
-                case HeuteEintrag e: e.Width = breite; e.Location = new Point(innen, y); e.PerformLayout(); break;
-                default: c.SetBounds(innen, y, c is ProgressBar ? breite : c.Width, c.Height); break;
-            }
-            y = c.Bottom + mini;
-        }
-        foreach (var c in Oben) Setzen(c);
-        if (Leer.Visible) Setzen(Leer);
-        foreach (var z in Zeilen) Setzen(z);
-        foreach (var c in Unten) Setzen(c);
-        int hoehe = y - mini + innen;
-        if (Height != hoehe) Height = hoehe;
-    }
-}
-
-// Ein Eintrag in einem Kasten: Text (umbrechend), darunter klein z. B. „seit 07.11. · AB“, rechts
-// ein Status als Wort mit Farbe. Klick öffnet die Stelle, an die er gehört.
-public sealed class HeuteEintrag : Panel
-{
-    public Label Text1 { get; } = new() { AutoSize = true, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
-    public Label? Text2 { get; }
-    public MarkenFeld? Status { get; }
-    public event Action? Geklickt;
-
-    public HeuteEintrag(string text, string? unten, (string Text, Stil.Marke Marke)? status)
-    {
-        BackColor = Stil.Flaeche;
-        Cursor = Cursors.Hand;
-        Text1.Text = text;
-        Controls.Add(Text1);
-        if (unten is not null)
-        {
-            Text2 = new Label { Text = unten, AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, UseMnemonic = false };
-            Controls.Add(Text2);
-        }
-        if (status is { } s)
-        {
-            Status = new MarkenFeld(s.Text, s.Marke);
-            Controls.Add(Status);
-        }
-        AccessibleRole = AccessibleRole.Link;
-        AccessibleName = text + (unten is null ? "" : $", {unten}") + (status is { } st ? $", {st.Text}" : "");
-        foreach (Control c in Controls) { c.Cursor = Cursors.Hand; c.Click += (_, _) => Klicken(); }
-        Click += (_, _) => Klicken();
-    }
-
-    public void Klicken() => Geklickt?.Invoke();
-
-    protected override void OnLayout(LayoutEventArgs levent)
-    {
-        base.OnLayout(levent);
-        int statusBreite = Status is null ? 0 : Status.PreferredSize.Width + Stil.Px(this, Stil.AbstandKlein);
-        Text1.MaximumSize = new Size(Math.Max(60, Width - statusBreite), 0);
-        Text1.Location = Point.Empty;
-        int y = Text1.Bottom;
-        if (Text2 is not null) { Text2.Location = new Point(0, y); y = Text2.Bottom; }
-        if (Status is not null) Status.Bounds = new Rectangle(Width - Status.PreferredSize.Width, 0, Status.PreferredSize.Width, Status.PreferredSize.Height);
-        int hoehe = Math.Max(y, Status?.Bottom ?? 0) + Stil.Px(this, 2);
-        if (Height != hoehe) Height = hoehe;
-    }
-}
-
-// „Drucken …“ in der Übersicht: Kopf, die vier Kästen als Text und die Bewohnerliste als Tabelle.
-public sealed class UebersichtDruck(string listenKopf, string kopf, IReadOnlyList<HeuteKasten> kaesten, IReadOnlyList<BewohnerZeile> zeilen, DateTime jetzt)
-{
-    private int naechster;
-
-    // Alle Zeilen des Ausdrucks: (Abschnitt?, Text, Spalten?) – Spalten nur für die Bewohnerliste.
-    public List<(string? Abschnitt, string Text)> Zeilen()
-    {
-        var liste = new List<(string?, string)>();
-        foreach (var k in kaesten)
-        {
-            if (k.Zeilen.Count == 0) liste.Add((k.KopfText, k.Leer.Text));
-            foreach (var z in k.Zeilen)
-                liste.Add((k.KopfText, z switch
-                {
-                    HeuteEintrag e => e.AccessibleName ?? e.Text1.Text,
-                    CheckBox c => "☐ " + c.Text,
-                    _ => z.Text,
-                }));
-        }
-        foreach (var z in zeilen)
-            liste.Add((listenKopf, $"{z.ZimmerText}\t{z.Bewohner.Name}\t{z.Bezugspflege?.Kuerzel ?? ""}\t{z.Wo}\t{z.HinweisText}"));
-        return liste;
-    }
-
-    public PrintDocument DokumentBauen()
-    {
-        var dokument = new PrintDocument { DocumentName = "Übersicht" };
-        dokument.DefaultPageSettings.Landscape = true;
-        dokument.BeginPrint += (_, _) => naechster = 0;
-        dokument.PrintPage += (_, e) =>
-        {
-            naechster = SeiteZeichnen(e.Graphics!, naechster);
-            e.HasMorePages = naechster < Zeilen().Count;
-        };
-        return dokument;
-    }
-
-    public int SeiteZeichnen(Graphics g, int start)
-    {
-        g.PageUnit = GraphicsUnit.Millimeter;
-        const float links = 15f, rechts = 282f, unten = 195f;
-        float y = 12f;
-        using var titel = new Font("Segoe UI Semibold", 13F);
-        using var fett = new Font("Segoe UI Semibold", 9.5F);
-        using var normal = new Font("Segoe UI", 9F);
-        using var klein = new Font("Segoe UI", 7.5F);
-        using var linie = new Pen(Color.Gray, 0.2f);
-        var alle = Zeilen();
-        g.DrawString("Übersicht – " + kopf, titel, Brushes.Black, links, y);
-        y += 7f;
-        g.DrawString($"Gedruckt {BerichtRegeln.ZeitText(jetzt)} · {KopfBereich.DemoHinweis}", klein, Brushes.DimGray, links, y);
-        y += 5f;
-        g.DrawLine(linie, links, y, rechts, y);
-        y += 2f;
-        float[] spalten = [0f, 22f, 70f, 88f, 150f];   // Zimmer, Name, Bezug, Wo, Hinweise (mm ab links)
-        string? letzter = null;
-        int i = start;
-        for (; i < alle.Count; i++)
-        {
-            var (abschnitt, text) = alle[i];
-            bool tabelle = abschnitt == listenKopf;
-            float hoehe = (tabelle ? 4.5f : g.MeasureString(text, normal, new SizeF(rechts - links - 4f, 1000f)).Height + 0.5f) + (abschnitt != letzter ? 7f : 0f);
-            if (y + hoehe > unten && i > start) break;
-            if (abschnitt != letzter)
-            {
-                y += 1.5f;
-                g.DrawString(abschnitt, fett, Brushes.Black, links, y);
-                y += 5.5f;
-                letzter = abschnitt;
-            }
-            if (tabelle)
-            {
-                var teile = text.Split('\t');
-                for (int s = 0; s < teile.Length && s < spalten.Length; s++)
-                {
-                    float x = links + spalten[s], bis = s + 1 < spalten.Length ? links + spalten[s + 1] - 1f : rechts;
-                    g.DrawString(teile[s], normal, Brushes.Black, new RectangleF(x, y, bis - x, 4.5f), new StringFormat { Trimming = StringTrimming.EllipsisCharacter, FormatFlags = StringFormatFlags.NoWrap });
-                }
-                y += 4.5f;
-            }
-            else
-            {
-                g.DrawString(text, normal, Brushes.Black, new RectangleF(links + 4f, y, rechts - links - 4f, 1000f));
-                y += g.MeasureString(text, normal, new SizeF(rechts - links - 4f, 1000f)).Height + 0.5f;
-            }
-        }
-        return i;
     }
 }

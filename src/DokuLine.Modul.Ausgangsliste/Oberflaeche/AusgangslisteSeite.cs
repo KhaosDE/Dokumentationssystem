@@ -2,15 +2,14 @@ using DokuLine.Kern;
 
 namespace DokuLine.Modul.Ausgangsliste;
 
-// Die Seite „Ausgangsliste“ (seit Schritt 27 von DokuLine eine Liste, angelehnt an die
-// Tagesliste): oben Küchendienst, Digitaler Ausgang (wenn eingeschaltet) und Filter, darunter eine
-// Zeile je Bewohner. Wer unterwegs ist, steht oben (Überfällige zuerst), dann alle anderen nach
-// Zimmer. Ausdruck der Tagesliste über den Knopf im Kopf.
+// Die Seite „Ausgangsliste“: oben Küchendienst, Nachtbericht und Filter, darunter eine einzeilige Zeile je Bewohner des
+// gewählten Bereichs – alle ohne Bildlauf: reicht die Höhe nicht, in zwei Spalten. Wer unterwegs ist, steht oben
+// (Überfällige zuerst), dann alle anderen nach Zimmer. Ausdruck der Tagesliste über den Knopf im Kopf.
 public sealed class AusgangslisteSeite : ModulSeite
 {
     private readonly Datenbank db;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
-    private readonly ListenKopf kopf = new();
+    private readonly ListenKopf kopf = new(), kopfRechts = new();
     private readonly List<Control> inhalt = [];
     private readonly ToolTip hinweis = new();
 
@@ -21,7 +20,8 @@ public sealed class AusgangslisteSeite : ModulSeite
     public CheckBox NurBeschraenkung { get; } = new() { Text = "nur mit Beschränkung", AutoSize = true, BackColor = Stil.Seite };
     public Label KuechendienstText { get; } = new() { AutoSize = true, BackColor = Stil.Seite, ForeColor = Stil.TextNormal, Font = Stil.Fett, UseMnemonic = false };
     public List<ListenZeile> Zeilen { get; } = [];
-    public List<string> Abschnitte { get; } = [];
+    public int Spalten { get; private set; } = 1;
+    public const int SpalteMindestens = 520;   // schmaler wird eine Spalte nicht, sonst lieber Bildlauf
 
     public AusgangslisteSeite(Speicher speicher)
     {
@@ -49,7 +49,7 @@ public sealed class AusgangslisteSeite : ModulSeite
         }
         leiste.Controls.AddRange([KuechendienstText, KuechendienstKnopf, NachtberichtKnopf, NurUnterwegs, NurBeschraenkung]);
         Controls.Add(leiste);
-        Controls.Add(kopf);
+        Controls.AddRange([kopf, kopfRechts]);
     }
 
     private bool KuechendienstAn => db.Speicher.ModulAn(Kuechendienst.Schluessel);
@@ -102,7 +102,6 @@ public sealed class AusgangslisteSeite : ModulSeite
         foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
         inhalt.Clear();
         Zeilen.Clear();
-        Abschnitte.Clear();
         hinweis.RemoveAll();
         // Gezeigt wird der in der Übersicht gewählte Bereich (geplant wird der Küchendienst weiter für alle).
         var imBereich = BereichswahlRegeln.Bewohner(db.Speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt)
@@ -115,27 +114,16 @@ public sealed class AusgangslisteSeite : ModulSeite
         foreach (var z in alle.Except(gezeigt)) z.Dispose();
         // Oben, wer unterwegs ist (Überfällige zuerst, dann nach Beginn); darunter alle anderen nach Zimmer.
         var unterwegs = gezeigt.Where(z => z.Unterwegs).OrderByDescending(z => z.Ueberfaellig).ThenBy(z => z.HeuteText.Split(" · ")[^1]).ToList();
-        var andere = gezeigt.Where(z => !z.Unterwegs).ToList();
-        void Abschnitt(string text)
+        foreach (var z in unterwegs.Concat(gezeigt.Where(z => !z.Unterwegs)))
         {
-            Abschnitte.Add(text);
-            inhalt.Add(new Label { Text = text, AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite, UseMnemonic = false });
-        }
-        foreach (var (titel, zeilen) in new[] { ("UNTERWEGS", unterwegs), (unterwegs.Count > 0 ? "IM HAUS ODER ABWESEND" : "BEWOHNER", andere) })
-        {
-            if (zeilen.Count == 0) continue;
-            Abschnitt($"{titel} ({zeilen.Count})");
-            foreach (var z in zeilen)
-            {
-                Aktionen.Verbinden(z, db, this, Zeigen);
-                z.Hinweise(hinweis);
-                Zeilen.Add(z);
-                inhalt.Add(z);
-            }
+            Aktionen.Verbinden(z, db, this, Zeigen);
+            z.Hinweise(hinweis);
+            Zeilen.Add(z);
+            inhalt.Add(z);
         }
         int knopfBreite = Zeilen.Count > 0 ? Zeilen.Max(z => z.EigeneKnopfBreite) : 0;
         foreach (var z in Zeilen) z.KnopfBreite = knopfBreite;
-        kopf.KnopfBreite = knopfBreite;
+        kopf.KnopfBreite = kopfRechts.KnopfBreite = knopfBreite;
         kopf.Visible = Zeilen.Count > 0;
         if (Zeilen.Count == 0)
             inhalt.Add(new Label
@@ -181,27 +169,29 @@ public sealed class AusgangslisteSeite : ModulSeite
         leiste.MaximumSize = new Size(breite, 0);
         leiste.Bounds = new Rectangle(new Point(rand, y), leiste.GetPreferredSize(new Size(Math.Max(100, breite), 0)));
         y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
-        if (kopf.Visible)
+        int zeile = ListenZeile.Hoehe(this), luecke = Stil.Px(this, Stil.AbstandGross);
+        // Zwei Spalten, wenn die Höhe für alle nicht reicht und die Breite zwei lesbare Spalten hergibt.
+        int frei = ClientSize.Height - (y - AutoScrollPosition.Y) - kopf.Height - rand;
+        bool zwei = Zeilen.Count * zeile > frei && breite >= 2 * Stil.Px(this, SpalteMindestens) + luecke;
+        Spalten = zwei ? 2 : 1;
+        int spalte = zwei ? (breite - luecke) / 2 : breite, proSpalte = zwei ? (Zeilen.Count + 1) / 2 : Zeilen.Count;
+        kopfRechts.Visible = zwei && kopf.Visible;
+        for (int s = 0; s < Spalten; s++)
         {
-            kopf.SetBounds(rand, y, breite, kopf.Height);
-            kopf.PerformLayout();
-            y = kopf.Bottom;
+            var k = s == 0 ? kopf : kopfRechts;
+            k.SetBounds(rand + s * (spalte + luecke), y, spalte, k.Height);
+            k.PerformLayout();
         }
+        int oben = y + (kopf.Visible ? kopf.Height : 0), unten = oben, nr = 0;
         foreach (var c in inhalt)
         {
-            if (c is ListenZeile zeile)
-            {
-                zeile.SetBounds(rand, y, breite, zeile.Height);
-                zeile.PerformLayout();
-                y += zeile.Height;
-            }
-            else
-            {
-                c.Location = new Point(rand + Stil.Px(this, Stil.AbstandMini), y + Stil.Px(this, Stil.AbstandMittel));
-                y = c.Bottom + Stil.Px(this, Stil.AbstandMini);
-            }
+            if (c is not ListenZeile z) { c.Location = new Point(rand, oben + Stil.Px(this, Stil.AbstandMittel)); unten = c.Bottom; continue; }
+            int s = nr / Math.Max(1, proSpalte), reihe = nr++ % Math.Max(1, proSpalte);
+            z.SetBounds(rand + s * (spalte + luecke), oben + reihe * zeile, spalte, zeile);
+            z.PerformLayout();
+            unten = Math.Max(unten, z.Bottom);
         }
-        AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y + rand);
+        AutoScrollMinSize = new Size(0, unten - AutoScrollPosition.Y + rand);
     }
 }
 
@@ -224,7 +214,7 @@ public static class Aktionen
         karte.ZurueckKnopf.Click += (_, _) => Zurueck(db, p, besitzer, danach);
     }
 
-    // Dieselben Abläufe für eine Zeile der Liste (Schritt 27): „raus“/„zurück“ direkt, der Rest über „…“.
+    // Dieselben Abläufe für eine Zeile der Liste: „raus“/„zurück“ direkt, der Rest über „…“.
     public static void Verbinden(ListenZeile zeile, Datenbank db, Control besitzer, Action danach)
     {
         var p = zeile.Platz;

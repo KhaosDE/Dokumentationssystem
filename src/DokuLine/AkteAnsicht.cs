@@ -285,6 +285,8 @@ public sealed class AkteAnsicht : Panel
         }
         var jetzt = DateTime.Now;
         var marken = new List<Marke>();
+        if (MedikationsAenderungen.Liste(speicher.Verordnungen(b.Id!.Value), DateOnly.FromDateTime(jetzt)).Count > 0)
+            marken.Add(new Marke(MarkenArt.Medikation, MedikationsAenderungen.MarkeText));
         if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offenMarke) marken.Add(offenMarke);
         marken.AddRange(Modulverwaltung.Marken(speicher, b, jetzt));
         foreach (var m in marken)

@@ -3,7 +3,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Bauplan Schritt 28: Betreuer bearbeiten (neue Fassung, Verlauf bleibt) und Termine aus einer
+// Betreuer bearbeiten (neue Fassung, Verlauf bleibt) und Termine aus einer
 // .ics-Datei übernehmen (Vorschau, Zuordnung zu Bewohner und Kalender Bereich/Haus).
 
 public sealed class BetreuerFenster : Form
@@ -15,7 +15,7 @@ public sealed class BetreuerFenster : Form
     public TextBox Stelle { get; } = new() { Width = 320, PlaceholderText = "z. B. Betreuungsverein, Berufsbetreuer, Angehörige" };
     public TextBox Email { get; } = new() { Width = 320, PlaceholderText = "name@example.org (Demo)" };
     public TextBox Telefon { get; } = new() { Width = 200 };
-    // 0.33.3: dritter Zustand neben „eingetragen“ und „nicht erfasst“, z. B. wenn eine Betreuung endet.
+    // Dritter Zustand neben „eingetragen“ und „nicht erfasst“, z. B. wenn eine Betreuung endet.
     public CheckBox Keine { get; } = new() { Text = "Keine gesetzliche Betreuung", AutoSize = true };
     public Label Fehler { get; } = Fenster.Fehlerfeld();
     public Betreuer? Gespeichert { get; private set; }

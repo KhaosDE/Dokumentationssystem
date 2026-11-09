@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// Ärztliche Informationen (Bauplan Schritt 26f): Diagnosen, Allergien mit Art der Reaktion, Hinweise für
+// Ärztliche Informationen: Diagnosen, Allergien mit Art der Reaktion, Hinweise für
 // den Notfall. Das Programm zeigt Diagnosen nur an (Akte, Visite, HEB-Bogen) und wertet sie nicht.
 public enum DiagnoseArt { Haupt, Neben }
 

@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// „Bedarf gegeben …“ (0.33.0) an einer Bedarfsverordnung: Uhrzeit (jetzt), Menge (Einzeldosis), Anlass (aus
+// „Bedarf gegeben …“ an einer Bedarfsverordnung: Uhrzeit (jetzt), Menge (Einzeldosis), Anlass (aus
 // der Verordnung) und „in Absprache mit“ – Pflicht für Assistenzkräfte, nur Fachkräfte wählbar. Oben steht,
 // was in den letzten 24 Stunden gegeben wurde (dasselbe Medikament) und was höchstens erlaubt ist. Würde die
 // Gabe die Höchstmenge überschreiten: Warnung, Eintragen erst beim zweiten Klick. Die Gabe steht danach als

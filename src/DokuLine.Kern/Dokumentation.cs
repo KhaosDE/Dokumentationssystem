@@ -31,14 +31,14 @@ public sealed record GespeicherterFilter(string Name, DokuFilter Filter);
 
 public static class DokuRegeln
 {
-    public const string ArtAlltag = "Alltag", ArtVisite = "Visite", ArtMedikation = "Medikation";
+    public const string ArtAlltag = "Alltag", ArtVisite = "Visite", ArtMedikation = "Medikation", ArtTherapie = "Therapie";
 
-    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation];
+    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie];
 
     public static readonly string[] Berichtsarten =
     [
         ArtAlltag, "Krise", "Arztkontakt", ArtVisite, ArtMedikation, "Konflikt", "Ausgang/Abgängigkeit",
-        "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis",
+        "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis", ArtTherapie,
     ];
 
     public static string ZeitraumText(Zeitraum z) => z switch
@@ -114,10 +114,11 @@ public static class DokuRegeln
         _ => "Nacht"
     };
 
-    // Visiten erkennt man am fetten Anfang „Visite Psychiater – Dr. …“ (vor „, dabei:“ bzw. dem ersten Doppelpunkt).
+    // Visiten und Therapie-Berichte erkennt man am fetten Anfang „Visite Psychiater – Dr. …“ bzw. „Therapie Holzwerkstatt“
+    // (vor „, dabei:“ bzw. dem ersten Doppelpunkt).
     public static string? FettAnfang(Bericht b)
     {
-        if (b.Art != ArtVisite) return null;
+        if (b.Art is not (ArtVisite or ArtTherapie)) return null;
         int[] stellen = [b.Text.IndexOf(", dabei: ", StringComparison.Ordinal), b.Text.IndexOf(": ",
             StringComparison.Ordinal)];
         int i = stellen.Where(x => x > 0).DefaultIfEmpty(-1).Min();

@@ -4,12 +4,12 @@ using System.Xml;
 
 namespace DokuLine.Kern;
 
-// Kalender-Austausch über Dateien im Standardformat .ics (iCalendar, Bauplan Schritt 28). Termine
+// Kalender-Austausch über Dateien im Standardformat .ics (iCalendar). Termine
 // lassen sich als Datei speichern (z. B. für Outlook) und .ics-Dateien einlesen (z. B. eine
 // gespeicherte Einladung). Keine Verbindung zu Outlook, Exchange, Google oder einem Mailserver.
 // Uhrzeiten schreibt das Programm als Ortszeit ohne Zeitzone; beim Lesen gelten Zeiten mit „Z“ oder
 // TZID=UTC als UTC (werden umgerechnet), alle anderen als Ortszeit. Ein Termin, der sich nicht lesen
-// lässt, wird übersprungen (0.33.3: vorher konnte er das Einlesen der ganzen Datei abbrechen).
+// lässt, wird übersprungen.
 public sealed record IcsTermin
 {
     public string Titel { get; init; } = "";
@@ -36,7 +36,7 @@ public static class Ics
     // ----- Schreiben -----
 
     // kennung: zufällig je Datenbank (Speicher.IcsKennung) – sonst hätten Termine verschiedener Datenbanken dieselbe UID
-    // und ein Kalenderprogramm überschriebe den einen mit dem anderen (0.33.3).
+    // und ein Kalenderprogramm überschriebe den einen mit dem anderen.
     public static string Schreiben(IEnumerable<KalenderTermin> termine, IReadOnlyDictionary<long, string> namen, DateTime jetzt, string kennung)
     {
         var zeilen = new List<string> { "BEGIN:VCALENDAR", "VERSION:2.0", $"PRODID:{Produkt}", "CALSCALE:GREGORIAN", "METHOD:PUBLISH" };
@@ -71,7 +71,7 @@ public static class Ics
         return string.Concat(zeilen.SelectMany(Falten).Select(z => z + "\r\n"));
     }
 
-    // Immer gregorianisch mit westlichen Ziffern, unabhängig von der Sprache des Rechners (0.33.3).
+    // Immer gregorianisch mit westlichen Ziffern, unabhängig von der Sprache des Rechners.
     private static string Format(DateTime zeit, string format) => zeit.ToString(format, CultureInfo.InvariantCulture);
 
     private static string Maskieren(string text) =>
@@ -167,7 +167,7 @@ public static class Ics
         if (e.TryGetValue("DTEND", out var schluss) && Zeitpunkt(schluss.Parameter, schluss.Wert) is (DateTime ee, _)) ende = ee;
         else if (e.TryGetValue("DURATION", out var dauer) && Dauer(dauer.Wert) is TimeSpan d) ende = beginn + d;
         else ende = ganztags ? beginn.AddDays(1) : beginn.AddHours(1);
-        if (ende <= beginn) ende = ganztags ? beginn.AddDays(1) : beginn.AddHours(1);   // 0.33.3: vorher Länge 0
+        if (ende <= beginn) ende = ganztags ? beginn.AddDays(1) : beginn.AddHours(1);   // nie Länge 0
         string Text(string feld) => e.TryGetValue(feld, out var w) ? Entmaskieren(w.Wert).Trim() : "";
         string titel = Text("SUMMARY");
         return new IcsTermin
@@ -190,7 +190,7 @@ public static class Ics
         return (utc ? DateTime.SpecifyKind(zeit, DateTimeKind.Utc).ToLocalTime() : zeit, false);
     }
 
-    // „PT1H30M“, „P1D“; dazu „P2W“ (Wochen kennt XmlConvert nicht, 0.33.3).
+    // „PT1H30M“, „P1D“; dazu „P2W“ (Wochen kennt XmlConvert nicht).
     private static TimeSpan? Dauer(string wert)
     {
         wert = wert.Trim().TrimStart('+');

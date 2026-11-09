@@ -68,6 +68,58 @@
     "notizen": [
       "Getränkelieferung kommt {tag}, bitte Leergut im Keller bereitstellen.",
       "Waschmaschine im Keller ist defekt, der Hausmeister ist informiert."
+    ],
+    "berichte": [
+      {
+        "bereich": 5,
+        "text": "Gibt an, schlecht geschlafen zu haben. Bitte in der nächsten Schicht nach dem Befinden fragen."
+      },
+      {
+        "bereich": 5,
+        "text": "War unter Begleitung beim Arzttermin. Kontrolltermin in zwei Wochen, die Überweisung liegt im Büro."
+      },
+      {
+        "bereich": 5,
+        "text": "Wirkte am Nachmittag angespannt und hat sich zurückgezogen. Gesprächsangebot steht, bitte am Abend noch einmal nachfragen."
+      },
+      {
+        "bereich": 3,
+        "text": "Hat die Arbeitstherapie nach einer Stunde beendet und klagt über Kopfschmerzen. Bitte im Blick behalten."
+      },
+      {
+        "bereich": 2,
+        "text": "Hat die Wäsche nicht abgeholt. Sie liegt noch in der Waschküche. Bitte morgen daran erinnern."
+      },
+      {
+        "bereich": 0,
+        "text": "Ist eine Stunde später als vereinbart aus dem Ausgang zurückgekehrt und hat vorher angerufen. Gespräch dazu steht noch aus."
+      }
     ]
-  }
+  },
+  "therapie": [
+    {
+      "bewohner": "Ahorn",
+      "angebot": "Holzwerkstatt",
+      "bereich": 3,
+      "vorTagen": 1,
+      "verfasser": "OP",
+      "text": "Hat konzentriert am Vogelhaus weitergearbeitet und um Hilfe gebeten, als ein Teil nicht passte."
+    },
+    {
+      "bewohner": "Clematis",
+      "angebot": "Bewegungsgruppe",
+      "bereich": 4,
+      "vorTagen": 2,
+      "verfasser": "TH",
+      "text": "War die ganze Stunde dabei und hat beim Ballspiel andere zum Mitmachen ermuntert."
+    },
+    {
+      "bewohner": "Birke",
+      "angebot": "Gesprächsgruppe",
+      "bereich": 1,
+      "vorTagen": 3,
+      "verfasser": "OP",
+      "text": "Hat von sich aus von ihrem Wochenende erzählt und anderen zugehört."
+    }
+  ]
 }

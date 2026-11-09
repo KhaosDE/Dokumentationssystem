@@ -22,7 +22,7 @@ public sealed record KalenderFassung
     public string Treffpunkt { get; init; } = "";   // Ausflug
     public string Begleitung { get; init; } = "";   // Ausflug
     public bool Abgesagt { get; init; }
-    public bool Haus { get; init; }                 // Schritt 24: Kalender „Haus“ statt „Bereich“
+    public bool Haus { get; init; }                 // Kalender „Haus“ statt „Bereich“
     public DateTime Erstellt { get; init; }
     public string Kuerzel { get; init; } = "";
 }
@@ -56,7 +56,7 @@ public sealed class KalenderEingabe
     public string Kuerzel { get; set; } = "";
 }
 
-// Welche Kalender gezeigt werden (Schritt 24).
+// Welche Kalender gezeigt werden.
 public enum KalenderWahl { Beide, Bereich, Haus }
 
 public enum KalenderAnsicht { Monat, Woche, Tag }
@@ -197,7 +197,7 @@ public static class KalenderRegeln
             KalenderArt.Ausflug => $"Ausflug: {f.Titel}",
             _ => f.Titel,
         };
-        if (f.Haus) titel = $"Haus: {titel}";   // Schritt 24: Haus-Termine beschriftet
+        if (f.Haus) titel = $"Haus: {titel}";   // Haus-Termine beschriftet
         if (mehrtaegig && f.Art == KalenderArt.Heimfahrt) ganztags = true;
         return new Termin
         {

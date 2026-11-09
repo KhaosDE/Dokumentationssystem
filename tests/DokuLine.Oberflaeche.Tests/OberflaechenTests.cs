@@ -14,8 +14,9 @@ public class HauptfensterTests
         Assert.Equal("Demo — ausgedachte Daten", KopfBereich.DemoHinweis);
         Assert.Equal(KopfBereich.DemoHinweis, fenster.Kopf.AccessibleName);
         Assert.Equal(["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
-                      "Ausgangsliste", "Einstellungen"],
+                      "Laufende Therapien", "Angebote", "Wochenpläne", "Ausgangsliste", "Einstellungen"],
             fenster.Navigation.Select(n => n.Text));
+        Assert.All(Hauptfenster.TherapieBereiche, b => Assert.True(fenster.Ausgeblendet(b)));   // nur im Bereich Therapie (29n)
         Assert.Equal("Dokumentation", fenster.AktiverBereich);
         Assert.True(fenster.Navigation.Single(n => n.Text == "Dokumentation").Aktiv);
         Assert.Matches(@"^Version \d+\.\d+\.\d+ · ", fenster.VersionText.Text);
@@ -343,7 +344,7 @@ public class BildschirmfotoTests
             g.Clear(Color.White);
             g.ScaleTransform(1240f / 210f / 3.7795f, 1240f / 210f / 3.7795f);
             new UebergabeDruck(u.Speicher.Uebergaben(DateTime.Now),
-                u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => $"{b.Name}, Zi. {b.Zimmer}"), DateTime.Now).SeiteZeichnen(g, 0);
+                u.Speicher.AlleBewohner().ToDictionary(b => b.Id!.Value), DateTime.Now).SeiteZeichnen(g, 0);
             string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
             if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "17_uebergabeblatt.png"), System.Drawing.Imaging.ImageFormat.Png);
         }
@@ -447,8 +448,7 @@ public class BildschirmfotoTests
         {
             g.Clear(Color.White);
             g.ScaleTransform(1754f / 297f / 3.7795f, 1754f / 297f / 3.7795f);
-            var montag = WochenplanRegeln.Montag(DateOnly.FromDateTime(DateTime.Today));
-            new WochenplanDruck(u.Demo("Ahorn"), montag, u.Speicher.Woche(u.Demo("Ahorn").Id!.Value, montag)).SeiteZeichnen(g);
+            new WochenplanDruck(u.Demo("Ahorn"), u.Speicher.Regelwoche(u.Demo("Ahorn").Id!.Value, DateOnly.FromDateTime(DateTime.Today))).SeiteZeichnen(g);
             string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
             if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "35_wochenplan_druck.png"), System.Drawing.Imaging.ImageFormat.Png);
         }

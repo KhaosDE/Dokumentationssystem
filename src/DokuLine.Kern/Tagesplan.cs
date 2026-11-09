@@ -1,6 +1,6 @@
 namespace DokuLine.Kern;
 
-// Tagesplan (Bauplan Schritt 23): alle Termine eines Tages für die Bewohner eines Bereichs – nach
+// Tagesplan: alle Termine eines Tages für die Bewohner eines Bereichs – nach
 // Uhrzeit oder nach Bewohner. Bei Therapien die Teilnahme „gegangen“, „abgesagt“, „ausgefallen“;
 // das ist derselbe Datensatz wie im Wochenplan („gegangen“ = „teilgenommen“), nicht doppelt.
 // „Wo müsste er sein?“: Nach „gegangen“ steht der Bewohner bis zum Ende des Termins als „in
@@ -44,8 +44,7 @@ public static class TagesplanRegeln
     public static string InTherapieText(string titel, TimeOnly bis) => $"in Therapie: {titel} bis {bis:HH\\:mm}";
 }
 
-// Tagesplan als Anzeigetafel (Bauplan Schritt 26g), nach dem Vorbild einer Abflugtafel: Status als Wort
-// (die Farbe kommt dazu, nie allein) und drei Blöcke – „Jetzt und gleich“ oben, „Später heute“,
+// Tagesplan: Status als Wort (die Farbe kommt dazu, nie allein) und drei Blöcke – „Jetzt und gleich“ oben, „Später heute“,
 // „Erledigt“ unten.
 public enum TafelStatus { Jetzt, Gleich, Geplant, Gegangen, NochOffen, Abgesagt, Ausgefallen, Zurueck, Vorbei }
 

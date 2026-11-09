@@ -3,7 +3,7 @@ using DokuLine.Kern;
 namespace DokuLine;
 
 // Formular: Bewohner anlegen oder bearbeiten. Prüfen und Speichern macht der Kern.
-// Schritt 26e: erst der Wohnbereich, dann eine Liste nur der freien Betten („102 – Bett Fenster“).
+// Erst der Wohnbereich, dann eine Liste nur der freien Betten („102 – Bett Fenster“).
 // „Offen geführt“ steht nicht in der Aufnahme – neue Bewohner sind „nein“ (geschlossen aufgenommen).
 public sealed class BewohnerFormular : Form
 {
@@ -92,7 +92,7 @@ public sealed class BewohnerFormular : Form
         Zeile("Beschluss", Beschluss);
         OffenGefuehrt.Margin = new Padding(0, Stil.AbstandMini, 0, Stil.AbstandMini);
         if (bewohner is not null) Zeile("Offen geführt", OffenGefuehrt);   // in der Aufnahme nicht (immer „nein“)
-        // Schritt 26f: Allergien bearbeitet man nur noch in „Ärztliche Informationen“ (Akte); neu: „nicht erfasst“.
+        // Allergien bearbeitet man nur noch in „Ärztliche Informationen“ (Akte); neu: „nicht erfasst“.
         Zeile("Allergien", new Label
         {
             Text = bewohner is null ? "nicht erfasst – in der Akte unter „Ärztliche Informationen …“ eintragen"
@@ -201,7 +201,7 @@ public sealed class BewohnerFormular : Form
 
     private static TextBox Feld(string platzhalter = "")
     {
-        var feld = platzhalter == "TT.MM.JJJJ" ? new DatumFeld() : new TextBox();   // Datum mit Punkten (Schritt 26d)
+        var feld = platzhalter == "TT.MM.JJJJ" ? new DatumFeld() : new TextBox();   // Datum mit Punkten
         feld.Dock = DockStyle.Fill;
         feld.PlaceholderText = platzhalter;
         feld.Font = Stil.Standard;
@@ -257,7 +257,7 @@ public sealed class BewohnerFormular : Form
         Aufnahmedatum = Aufnahmedatum.Text,
         Beschluss = Beschluss.Zustand,
         Beschlussende = Beschluss.Feld.Text,
-        OffenGefuehrt = bewohner is null ? "nein" : OffenGefuehrt.Zustand,   // Aufnahme: geschlossen (Schritt 26e)
+        OffenGefuehrt = bewohner is null ? "nein" : OffenGefuehrt.Zustand,   // Aufnahme: geschlossen
         Wohnbereich = Wohnbereich.SelectedIndex >= 0 ? wohnbereiche[Wohnbereich.SelectedIndex].Name : "",
         Allergie = bewohner is null ? "nicht_erfasst" : BewohnerRegeln.Kuerzel(bewohner.Allergie),
         Allergien = bewohner?.Allergien ?? "",

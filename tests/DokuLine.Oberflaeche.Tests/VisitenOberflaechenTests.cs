@@ -20,23 +20,30 @@ public class VisitenOberflaechenTests
         Assert.Equal(namen.IndexOf("Übergabe") + 1, namen.IndexOf("Visiten"));
         f.BereichWaehlen("Visiten");
         var seite = f.Visiten;
-        Assert.Equal(5, seite.Karten.Count);   // Demo: drei Visiten mit allen drei Fällen, seit Schritt 26h je eine in R2 und R3
-        Assert.Equal("5 Visiten", seite.KopfText);
+        Assert.Equal(VisitenRegeln.Psychiater, seite.Art);   // Vorgabe
+        Assert.Equal(3, seite.Karten.Count);   // Demo: drei Visiten des Psychiaters, zwei des Hausarztes
+        Assert.Equal("Psychiater · 3 Visiten", seite.KopfText);
         Assert.Contains(seite.Karten.SelectMany(k => k.Texte), t => t == "Quetiapin: Dosis geändert");
-        Assert.Contains(seite.Karten.SelectMany(k => k.Texte), t => t == "Facharzttermin nötig: Neurologie, dringend");
+        Assert.All(seite.Karten, k => Assert.Equal(VisitenRegeln.Psychiater, k.Visite.Art));
         Hilfe.Foto(f, "83_visiten");
+        seite.HausarztKnopf.Ausloesen();
+        Assert.Equal(VisitenRegeln.Hausarzt, seite.Art);
+        Assert.Equal("Hausarzt · 2 Visiten", seite.KopfText);
+        Assert.Contains(seite.Karten.SelectMany(k => k.Texte), t => t == "Facharzttermin nötig: Neurologie, dringend");
+        seite.ArtWaehlen(VisitenRegeln.Psychiater);
 
         seite.BewohnerWaehlen(u.Demo("Ahorn").Id);
         var karte = Assert.Single(seite.Karten);
         Assert.Contains("Quetiapin: Dosis geändert", karte.Texte);
         Assert.DoesNotContain(karte.Texte, t => t.Contains("Fichte"));   // nur der gewählte Bewohner
         seite.BewohnerWaehlen(null);
+        seite.ArtWaehlen(VisitenRegeln.Hausarzt);
         seite.Von.Text = Heute(-2);
         Assert.Single(seite.Karten);   // nur die Visite von gestern
         seite.Bis.Text = "gestern";
         Assert.True(seite.FilterFehler.Visible);
         seite.Von.Text = seite.Bis.Text = "";
-        Assert.Equal(5, seite.Karten.Count);   // seit Schritt 26h auch je eine Visite in R2 und R3
+        Assert.Equal(2, seite.Karten.Count);
     });
 
     [Fact]
@@ -110,7 +117,7 @@ public class VisitenOberflaechenTests
         Assert.StartsWith("Bitte prüfen:", fehlerLeer);
         Assert.Contains("Arzt fehlt", fehlerLeer);
         Assert.Equal(3, einblendungen);
-        Assert.StartsWith($"laut Visite {Heute()} (Dr. Test (ausgedacht))", verlaufHinweis);
+        Assert.StartsWith($"laut Visite Psychiater – Dr. Test (ausgedacht), {Heute()}", verlaufHinweis);
         // Der Medikamentenplan des Bewohners ist offen; die Stufe steht dort.
         Assert.Equal("Dokumentation", f.AktiverBereich);
         Assert.Equal("Medikamentenplan", f.Bewohner.Akte.Reiter.Aktiv);
@@ -162,7 +169,7 @@ public class VisitenOberflaechenTests
         var jetzt = DateTime.Now;
         u.Speicher.VisiteSpeichern(VisitenRegeln.AusEingabe(new VisiteEingabe
         {
-            Datum = Heute(), Arzt = "Dr. Ulme (ausgedacht)", Kuerzel = "KL",
+            Datum = Heute(), Art = VisitenRegeln.Hausarzt, Arzt = "Dr. Ulme (ausgedacht)", Kuerzel = "KL",
             Eintraege = [new VisiteEintragEingabe { BewohnerId = u.Demo("Clematis").Id!.Value, Besprochen = "Schlaf besprochen.", Anordnungen = [(AnordnungArt.Pause, null, "Mirtazapin")] }],
         }, jetzt));
         using var f = new Hauptfenster(u.Speicher);

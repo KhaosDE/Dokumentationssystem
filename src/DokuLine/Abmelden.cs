@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Abmelden (Bauplan Schritt 26a3): Knopf „Abmelden (F12)“ oben rechts, Taste F12 aus jedem Fenster,
+// Abmelden: Knopf „Abmelden (F12)“ oben rechts, Taste F12 aus jedem Fenster,
 // Symbol in der Seitenleiste und in den Einstellungen. Danach liegt eine Sperrfläche über dem ganzen
 // Hauptfenster (keine Bewohnerdaten sichtbar) und das Anmeldefenster darüber.
 

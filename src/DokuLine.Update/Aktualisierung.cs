@@ -7,26 +7,8 @@ using DokuLine.Kern;
 
 namespace DokuLine.Update;
 
-// Selbst-Update der Windows-Programmdatei (Vorbild: KhaosDE/N3XTBYT3; Ablauf wie in der
-// Python-Version bis 0.2.0).
-//
-// 1. Beim Start fragt das Programm die Adresse ApiNeueste, ob es einen neueren Build gibt
-//    (Zeitlimit wenige Sekunden; ohne Netz geht es einfach weiter). Antwortet die Adresse des
-//    umbenannten Repositorys (noch) nicht, fragt es die alte (ApiNeuesteAlt).
-// 2. Wenn ja: Meldung „Neue Version wird geladen“, dann werden DokuLine.exe (oder, in älteren
-//    Releases, Dokumentationssystem.exe) und die Prüfsumme dazu geladen und verglichen.
-// 3. Die laufende .exe wird in „….exe.alt“ umbenannt (das erlaubt Windows auch im Betrieb),
-//    die neue unter dem Namen der laufenden Datei an ihren Platz gelegt und gestartet; dieses
-//    Programm endet. Die neue Version löscht beim Start die alte Datei.
-//
-// Übergang beim Umbenennen (Bauplan Schritt 26a1): Das Repository heißt noch
-// „Dokumentationssystem“ und wird danach in „DokuLine“ umbenannt. Erlaubt sind deshalb beide
-// Adressen und beide Dateinamen. Ältere Installationen (bis 0.29.1) suchen nur
-// Dokumentationssystem.exe – der Workflow legt diese Datei deshalb zusätzlich in jedes Release.
-//
-// Jeder Schritt und jeder Fehler steht in update.log im Datenordner. Bei einem Fehler startet
-// das Programm ganz normal in der alten Version.
-// Abschalten: Häkchen „Beim Start nach Updates suchen“ (einstellungen.json) oder --kein-update.
+// Selbst-Update der Windows-Programmdatei über die Releases dieses Repositorys: prüfen, laden, Prüfsumme
+// vergleichen, austauschen, neu starten; bei einem Fehler startet die alte Version. Ablauf: docs/technik.md.
 public static partial class Aktualisierung
 {
     public const string ApiNeueste = "https://api.github.com/repos/KhaosDE/DokuLine/releases/latest";

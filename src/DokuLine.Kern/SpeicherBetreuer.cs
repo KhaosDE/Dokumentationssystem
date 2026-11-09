@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-// Betreuer je Bewohner (Bauplan Schritt 28): jede Änderung ist eine neue Fassung, nichts wird
+// Betreuer je Bewohner: jede Änderung ist eine neue Fassung, nichts wird
 // überschrieben; die neueste gilt.
 public sealed partial class Speicher
 {

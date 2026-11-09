@@ -86,6 +86,22 @@
       "fuer": "wer_zeit_hat",
       "erstelltVorStunden": 6,
       "verfasser": "VK"
+    },
+    {
+      "text": "Material für die Holzwerkstatt bestellen (Schleifpapier, Leim)",
+      "bereich": "Therapie",
+      "fuer": "wer_zeit_hat",
+      "erstelltVorStunden": 20,
+      "faelligInStunden": 48,
+      "verfasser": "OP"
+    },
+    {
+      "text": "Teilnehmerliste der Bewegungsgruppe für den Aushang aktualisieren",
+      "bereich": "Therapie",
+      "fuer": "wer_zeit_hat",
+      "erstelltVorStunden": 5,
+      "faelligInStunden": 72,
+      "verfasser": "TH"
     }
   ]
 }

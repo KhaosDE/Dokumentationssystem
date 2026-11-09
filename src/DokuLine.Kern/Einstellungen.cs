@@ -4,18 +4,8 @@ using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
-// Einstellungen als lesbare Datei einstellungen.json im Datenordner:
-//   auto_update – beim Start nach einer neuen Version fragen (Vorgabe: ja)
-//   kuerzel     – eigenes Kürzel, z. B. für Berichte (Vorgabe: leer)
-//   logo        – Dateiname des eigenen Bildes für den Kopf im Ordner „logo“ (Vorgabe: keins)
-//   beschluss_frist_tage – Startseite: „Beschluss endet bald“ ab so vielen Tagen vorher (Vorgabe: 90)
-//   heb_frist_monate     – Startseite: „HEB fällig“, wenn der letzte Bogen so alt ist (Vorgabe: 12)
-//   bereich              – Mehrplatz: Bereichskennung dieser Installation (Vorgabe: „R1“, bis 0.29.6 „Wohnbereich A“)
-//   datenbank_ordner     – Mehrplatz: gemeinsamer Ordner der Datenbank; leer = lokal im Datenordner
-//   menue_eingeklappt    – Seitenmenü nur mit Symbolen (Vorgabe: nein)
-//   nachschlage_ansicht  – Formular „Medikament“: eingebettete Nachschlage-Ansicht des BfArM (Vorgabe: ja)
+// Einstellungen als lesbare Datei einstellungen.json im Datenordner (Schlüssel und Vorgaben: docs/technik.md).
 // Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben.
-// Dieselbe Datei hat schon die Python-Version (bis 0.2.0) benutzt.
 public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90, int HebFristMonate = 12,
     string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false, bool NachschlageAnsicht = true);
 
@@ -28,12 +18,29 @@ public static partial class Einstellungen
     [GeneratedRegex(@"^[\p{L}\d]*$")]
     private static partial Regex KuerzelMuster();
 
+    // Viele Seiten fragen bei jedem Aufbau nach den Einstellungen: Die Datei wird nur neu gelesen, wenn sie (Pfad, Zeit,
+    // Größe) sich geändert hat – auch wenn ein anderes Programm sie geschrieben hat.
+    private static (string Pfad, DateTime Zeit, long Groesse, EinstellungsWerte Werte)? zuletzt;
+    private static readonly Lock Sperre = new();
+
     public static EinstellungsWerte Laden()
+    {
+        string pfad = Pfade.ImDatenordner(Datei);
+        var info = new FileInfo(pfad);
+        var stempel = info.Exists ? (info.LastWriteTimeUtc, info.Length) : (DateTime.MinValue, -1L);
+        lock (Sperre)
+            if (zuletzt is var (p, z, g, w) && p == pfad && z == stempel.Item1 && g == stempel.Item2) return w;
+        var werte = DateiLesen(pfad);
+        lock (Sperre) zuletzt = (pfad, stempel.Item1, stempel.Item2, werte);
+        return werte;
+    }
+
+    private static EinstellungsWerte DateiLesen(string pfad)
     {
         var werte = new EinstellungsWerte();
         try
         {
-            var knoten = JsonNode.Parse(File.ReadAllText(Pfade.ImDatenordner(Datei))) as JsonObject;
+            var knoten = JsonNode.Parse(File.ReadAllText(pfad)) as JsonObject;
             if (knoten is null) return werte;
             if (knoten["auto_update"] is JsonValue a && a.TryGetValue(out bool an)) werte = werte with { AutoUpdate = an };
             if (knoten["kuerzel"] is JsonValue k && k.TryGetValue(out string? kuerzel) && KuerzelPruefen(kuerzel) is null)
@@ -83,6 +90,7 @@ public static partial class Einstellungen
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen
+        lock (Sperre) zuletzt = null;
     }
 
     // Kürzel: leer oder bis zu 6 Buchstaben/Ziffern. Rückgabe: Fehlertext oder null.

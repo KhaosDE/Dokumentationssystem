@@ -2,9 +2,9 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Rechte des Angemeldeten (Bauplan Schritt 19) für die Oberfläche: Knöpfe ohne Berechtigung
+// Rechte des Angemeldeten für die Oberfläche: Knöpfe ohne Berechtigung
 // bleiben sichtbar, aber gesperrt (Stil.Sperren). Wer angemeldet ist, steht in den Einstellungen.
-// Schritt 26a: Das Kürzel kommt immer aus der Anmeldung – „eingetragen von“ tippt niemand ein.
+// Das Kürzel kommt immer aus der Anmeldung – „eingetragen von“ tippt niemand ein.
 public static class Recht
 {
     public const string NichtAngemeldetAnzeige = "– bitte zuerst oben rechts anmelden –";
@@ -38,7 +38,7 @@ public static class Recht
 }
 
 // Personen-Feld mit einer Person (z. B. Fahrer): Auswahl aus den aktiven Mitarbeitern, kein Freitext;
-// vorbelegt mit der angemeldeten Person (Schritt 26a).
+// vorbelegt mit der angemeldeten Person.
 public sealed class PersonWahl : ComboBox
 {
     private readonly List<Mitarbeiter> personen;

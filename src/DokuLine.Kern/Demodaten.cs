@@ -26,7 +26,7 @@ public static class Demodaten
     public static List<Bewohner> Bewohner() =>
         Lesen<BewohnerDatei>("bewohner.json").Bewohner.Select(e => BewohnerRegeln.AusEingabe(e)).ToList();
 
-    // ----- Wohnbereiche, Zimmer und Betten (Schritt 26e) -----
+    // ----- Wohnbereiche, Zimmer und Betten -----
 
     private sealed class ZimmerDatei
     {
@@ -55,7 +55,7 @@ public static class Demodaten
         return new DemoZimmer([.. datei.Bereiche.Select(b => (b.Name, b.Beschuetzt))], [.. datei.Zimmer.Select(z => new Kern.Zimmer(z.Nummer, z.Bereich, z.Betten))]);
     }
 
-    // ----- Ärztliche Informationen (Schritt 26f) -----
+    // ----- Ärztliche Informationen -----
 
     private sealed class AerztlichDatei
     {
@@ -115,12 +115,32 @@ public static class Demodaten
         public Dictionary<string, List<string>> Texte { get; set; } = [];
         public List<string> Nachtraege { get; set; } = [];
         public UebergabeTexte Uebergabe { get; set; } = new();
+        public List<TherapieBericht> Therapie { get; set; } = [];
+    }
+
+    // Ein Bericht aus dem Bereich Therapie (Berichtsart „Therapie“, Angebot am Anfang).
+    public sealed class TherapieBericht
+    {
+        public string Bewohner { get; set; } = "";   // Nachname aus bewohner.json
+        public string Angebot { get; set; } = "";
+        public int Bereich { get; set; }
+        public int VorTagen { get; set; }
+        public string Verfasser { get; set; } = "";
+        public string Text { get; set; } = "";
     }
 
     public sealed class UebergabeTexte
     {
         public List<string> Saetze { get; set; } = [];
         public List<string> Notizen { get; set; } = [];
+        // Berichte mit Übergabe brauchen einen Text, der der nächsten Schicht etwas sagt (nie „Keine Besonderheiten“).
+        public List<UebergabeBericht> Berichte { get; set; } = [];
+    }
+
+    public sealed class UebergabeBericht
+    {
+        public int Bereich { get; set; }   // 0 = allgemein
+        public string Text { get; set; } = "";
     }
 
     // Ein Demo-Bericht mit seinem Übergabe-Eintrag (falls einer dazugehört).
@@ -140,6 +160,11 @@ public static class Demodaten
         var berichte = new List<DemoBericht>();
         string wochentag = jetzt.AddDays(2).ToString("dddd", System.Globalization.CultureInfo.GetCultureInfo("de-DE"));
         string Satz(int i) => bausteine.Uebergabe.Saetze[i % bausteine.Uebergabe.Saetze.Count].Replace("{tag}", wochentag);
+        Bericht Relevant(Bericht bericht, int i)
+        {
+            var vorlage = bausteine.Uebergabe.Berichte[i % bausteine.Uebergabe.Berichte.Count];
+            return bericht with { Text = vorlage.Text, Bereiche = vorlage.Bereich == 0 ? [] : [vorlage.Bereich] };
+        }
         for (int i = 0; i < bewohner.Count; i++)
         {
             var b = bewohner[i];
@@ -166,11 +191,11 @@ public static class Demodaten
             }
             // Übergabe: bei jedem zweiten Bewohner ein Bericht aus den letzten Stunden für die
             // nächste Schicht, dazu einige länger laufende, erledigte und abgelaufene Einträge.
-            // Die ersten zehn (Ahorn … Kiefer) wie bisher jeder zweite; die weiteren (Schritt 26h) seltener,
+            // Die ersten zehn (Ahorn … Kiefer) wie bisher jeder zweite; die weiteren seltener,
             // sonst wird die Übergabe mit 69 Bewohnern unübersichtlich.
             if (i < 10 ? i % 2 == 0 : i % 9 == 0)
             {
-                var bericht = Erzeugen(b, jetzt.AddMinutes(-(40 + i * 25)), zufall, bausteine, jetzt, wichtig: i == 0);
+                var bericht = Relevant(Erzeugen(b, jetzt.AddMinutes(-(40 + i * 25)), zufall, bausteine, jetzt, wichtig: i == 0), i);
                 var wunsch = i switch
                 {
                     2 => new UebergabeWunsch(UebergabeDauer.DreiTage),
@@ -181,19 +206,30 @@ public static class Demodaten
             }
             if (i == 1)
             {
-                var bericht = Erzeugen(b, jetzt.AddDays(-2).Date.AddHours(16), zufall, bausteine, jetzt, wichtig: false);
+                var bericht = Relevant(Erzeugen(b, jetzt.AddDays(-2).Date.AddHours(16), zufall, bausteine, jetzt, wichtig: false), 1);
                 berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.BisErledigt, Text: Satz(2)), "AB", ErledigtVon: "CD"));
             }
             if (i == 3)
             {
-                var bericht = Erzeugen(b, jetzt.AddDays(-5).Date.AddHours(9), zufall, bausteine, jetzt, wichtig: false);
+                var bericht = Relevant(Erzeugen(b, jetzt.AddDays(-5).Date.AddHours(9), zufall, bausteine, jetzt, wichtig: false), 3);
                 berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.NaechsteSchicht)));   // längst abgelaufen
             }
             if (i == 5)
             {
-                var bericht = Erzeugen(b, jetzt.AddHours(-20), zufall, bausteine, jetzt, wichtig: true);
+                var bericht = Relevant(Erzeugen(b, jetzt.AddHours(-20), zufall, bausteine, jetzt, wichtig: true), 5);
                 berichte.Add(new DemoBericht(bericht, new UebergabeWunsch(UebergabeDauer.Woche, Text: Satz(1))));
             }
+        }
+        foreach (var t in bausteine.Therapie)
+        {
+            if (bewohner.FirstOrDefault(b => b.Nachname == t.Bewohner) is not Bewohner b) continue;
+            var zeit = jetzt.Date.AddDays(-t.VorTagen).AddHours(11);
+            berichte.Add(new DemoBericht(new Bericht
+            {
+                BewohnerId = b.Id ?? 0, Zeitpunkt = zeit, Schicht = BerichtRegeln.SchichtZu(zeit), Verfasser = t.Verfasser,
+                Bereiche = t.Bereich is >= 1 and <= 5 ? [t.Bereich] : [], Text = TherapieRegeln.BerichtText(t.Angebot, t.Text),
+                Erfasst = zeit.AddMinutes(20), Art = DokuRegeln.ArtTherapie,
+            }));
         }
         var notizen = bausteine.Uebergabe.Notizen;
         var allgemein = new List<DemoNotiz>
@@ -394,7 +430,7 @@ public static class Demodaten
 
     public sealed record DemoVerordnung(Verordnung Verordnung);
 
-    // Schritt 26h: Verordnungen der weiteren Demo-Bewohner stehen lesbar in medikation.json.
+    // Verordnungen der weiteren Demo-Bewohner stehen lesbar in medikation.json.
     private sealed class MedikationDatei
     {
         public List<VerordnungVorlage> Verordnungen { get; set; } = [];
@@ -520,7 +556,7 @@ public static class Demodaten
         public int Hoechstens { get; set; }
         public string Hinweis { get; set; } = "";
         public int SeitTagen { get; set; }
-        public string Anbieter { get; set; } = TherapieRegeln.AnbieterTherapie;   // Schritt 22
+        public string Anbieter { get; set; } = TherapieRegeln.AnbieterTherapie;
         public string Kuerzel { get; set; } = "OP";                               // wer angelegt und zugeteilt hat
         public List<TerminVorlage> Termine { get; set; } = [];
         public AenderungVorlage? Aenderung { get; set; }
@@ -580,7 +616,7 @@ public static class Demodaten
         return liste;
     }
 
-    // ----- Ärzteverzeichnis (Schritt 26b) -----
+    // ----- Ärzteverzeichnis -----
 
     private sealed class AerzteDatei
     {
@@ -639,7 +675,7 @@ public static class Demodaten
             Telefon = p.Telefon, Mobil = p.Mobil, Email = p.Email, Anschrift = p.Anschrift, Erreichbarkeit = p.Erreichbarkeit, Hinweis = p.Hinweis,
         }, p.Zuordnungen.Select(z => (z.Bewohner, z.Rolle)).ToList())).ToList();
 
-    // ----- Betreuer (Schritt 28) -----
+    // ----- Betreuer -----
 
     private sealed class BetreuerDatei
     {
@@ -654,7 +690,7 @@ public static class Demodaten
         public string Email { get; set; } = "";
         public string Telefon { get; set; } = "";
         public int VorTagen { get; set; } = 30;
-        public bool Keine { get; set; }   // „keine gesetzliche Betreuung“ (0.33.3)
+        public bool Keine { get; set; }   // „keine gesetzliche Betreuung“
     }
 
     // Betreuer aus daten/demo/betreuer.json (Nachname des Bewohners → Betreuer).
@@ -664,9 +700,9 @@ public static class Demodaten
             Name = b.Name, Stelle = b.Stelle, Email = b.Email, Telefon = b.Telefon, Geaendert = jetzt.Date.AddDays(-b.VorTagen).AddHours(10), Kuerzel = "EF", Keine = b.Keine,
         })).ToList();
 
-    // ----- Visiten (Schritt 26) -----
+    // ----- Visiten -----
 
-    // ----- Bedarfsgaben (0.33.0) -----
+    // ----- Bedarfsgaben -----
 
     private sealed class BedarfDatei
     {
@@ -734,7 +770,7 @@ public static class Demodaten
         }).ToList();
     }
 
-    // ----- Standardaufgaben (Schritt 25) -----
+    // ----- Standardaufgaben -----
 
     private sealed class StandardaufgabenDatei
     {
@@ -762,7 +798,7 @@ public static class Demodaten
         }).ToList();
     }
 
-    // ----- Fahrzeuge und Fahrten (Schritt 24) -----
+    // ----- Fahrzeuge und Fahrten -----
 
     private sealed class FahrtenDatei
     {
@@ -913,7 +949,7 @@ public static class Demodaten
         public string Treffpunkt { get; set; } = "";
         public string Begleitung { get; set; } = "";
         public bool Abgesagt { get; set; }
-        public bool Haus { get; set; }   // Schritt 24: Kalender „Haus“
+        public bool Haus { get; set; }   // Kalender „Haus“
         public KalenderAenderungVorlage? Aenderung { get; set; }
     }
 
