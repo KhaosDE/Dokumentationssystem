@@ -15,6 +15,9 @@ public sealed class UebersichtSeite : Panel
     private readonly Speicher speicher;
     private readonly System.Windows.Forms.Timer uhr = new() { Interval = 60_000 };
     private DateOnly gezeigtAm;
+    private SchichtTermin? gezeigtSchicht;
+    private bool abgleichen;
+    public Doppelklickschutz Schutz { get; } = new();
     private readonly Panel links = new() { AutoScroll = true, BackColor = Stil.Seite };
     private readonly KartenFlaeche rechts = new();
     private readonly Label listenKopf = new() { AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Flaeche, UseMnemonic = false };
@@ -79,7 +82,7 @@ public sealed class UebersichtSeite : Panel
         BereichWahl.Items.Add(AlleBereiche);
         BereichWahl.Items.AddRange([.. speicher.Wohnbereiche().Select(w => (object)w.Name)]);
         BereichWahl.SelectedIndex = 0;
-        BereichWahl.SelectedIndexChanged += (_, _) => Aktualisieren();
+        BereichWahl.SelectedIndexChanged += (_, _) => { if (!abgleichen) Aktualisieren(); };
         foreach (var c in new[] { MeineBezugsbewohner, MeineEinzeltrainings }) c.CheckedChanged += (_, _) => Aktualisieren();
         Suche.TextChanged += (_, _) => ListeFuellen();
 
@@ -110,19 +113,27 @@ public sealed class UebersichtSeite : Panel
 
         Controls.Add(links);
         Controls.Add(rechts);
-        // Immer aktuell: Datumswechsel um Mitternacht (jede Minute prüfen, nur wenn sichtbar neu bauen).
-        uhr.Tick += (_, _) => { if (Visible && DateOnly.FromDateTime(Jetzt()) != gezeigtAm) Aktualisieren(); };
+        // Immer aktuell: Datums- und Schichtwechsel (jede Minute prüfen, nur wenn sichtbar neu bauen).
+        uhr.Tick += (_, _) => { if (Visible && Veraltet) Aktualisieren(); };
         uhr.Start();
     }
 
     private List<HeuteFuer> gezeigt = [];
     private List<BewohnerZeile> alleZeilen = [];
 
+    // Neuer Tag oder neue Schicht seit dem letzten Aufbau (0.33.2: vorher nur der Tag – der Kasten „Laufender
+    // Dienst“ zeigte nach dem Schichtwechsel noch die alte Schicht).
+    public bool Veraltet => DateOnly.FromDateTime(Jetzt()) != gezeigtAm || SchichtTermin.Zu(Jetzt()) != gezeigtSchicht;
+
     public void Aktualisieren()
     {
         var jetzt = Jetzt();
         var heute = DateOnly.FromDateTime(jetzt);
         gezeigtAm = heute;
+        gezeigtSchicht = SchichtTermin.Zu(jetzt);
+        abgleichen = true;
+        try { Auswahl.Abgleichen(BereichWahl, [EigeneBereiche, AlleBereiche, .. speicher.Wohnbereiche().Select(w => w.Name)]); }
+        finally { abgleichen = false; }
         var werte = Einstellungen.Laden();
         var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
         // Eigene Bereiche: die Wohnbereiche des angemeldeten Mitarbeiters (Schritt 19); hat er keinen
@@ -243,7 +254,9 @@ public sealed class UebersichtSeite : Panel
         Termine.Setzen(termine.Count, termine.Select(t =>
             Eintrag($"{t.Zeit}  {t.Text}", null, (t.StatusText, StatusMarke(t.Status)), () => StelleGewuenscht?.Invoke("Tagesplan"))));
 
-        // 3. Laufender Dienst: „6 von 9 erledigt“, Balken, offene Aufgaben zum Abhaken.
+        // 3. Laufender Dienst: „6 von 9 erledigt“, Balken, offene Aufgaben zum Abhaken. Die Standardaufgaben der
+        // Schicht zuerst anlegen (0.33.2: vorher erst beim Öffnen von „Aufgaben“).
+        speicher.StandardaufgabenErzeugen(jetzt);
         var aufgaben = speicher.Aufgaben(jetzt, auchErledigte: true).Where(a => a.BewohnerId is null || ids.Contains(a.BewohnerId.Value));
         var dienst = HeuteWichtigRegeln.Dienst(aufgaben, jetzt);
         DienstStand = dienst;
@@ -260,7 +273,14 @@ public sealed class UebersichtSeite : Panel
                 Text = a.Text + name + faellig, AutoSize = false, BackColor = Stil.Flaeche, Font = Stil.Standard, UseMnemonic = false, Tag = a,
                 ForeColor = faellig.Length > 0 ? Stil.Beschluss.Text : Stil.TextNormal, Enabled = sperre is null, AccessibleName = $"Erledigt: {a.Text}{name}",
             };
-            haken.CheckedChanged += (_, _) => { if (haken.Checked) BeginInvoke(() => Erledigen(a)); };
+            // Nach dem Abhaken baut sich der Kasten neu auf; der zweite Klick eines Doppelklicks träfe sonst die
+            // nächste Aufgabe (0.33.2).
+            haken.CheckedChanged += (_, _) =>
+            {
+                if (!haken.Checked) return;
+                if (Schutz.Frei()) BeginInvoke(() => Erledigen(a));
+                else haken.Checked = false;
+            };
             return (Control)haken;
         }), leer: dienst.Gesamt > 0 ? "Alles erledigt" : HeuteWichtigRegeln.NichtsOffen);
 

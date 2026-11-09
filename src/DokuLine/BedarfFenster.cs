@@ -4,8 +4,9 @@ namespace DokuLine;
 
 // „Bedarf gegeben …“ (0.33.0) an einer Bedarfsverordnung: Uhrzeit (jetzt), Menge (Einzeldosis), Anlass (aus
 // der Verordnung) und „in Absprache mit“ – Pflicht für Assistenzkräfte, nur Fachkräfte wählbar. Oben steht,
-// wie viel heute schon gegeben wurde und was höchstens erlaubt ist. Ist die Höchstmenge in den 24 Stunden
-// davor erreicht: Warnung, Eintragen erst beim zweiten Klick. Die Gabe steht danach als Bericht in der Akte.
+// was in den letzten 24 Stunden gegeben wurde (dasselbe Medikament) und was höchstens erlaubt ist. Würde die
+// Gabe die Höchstmenge überschreiten: Warnung, Eintragen erst beim zweiten Klick. Die Gabe steht danach als
+// Bericht in der Akte.
 public sealed class BedarfFenster : Form
 {
     private readonly Speicher speicher;
@@ -13,7 +14,7 @@ public sealed class BedarfFenster : Form
     private readonly List<Mitarbeiter> fachkraefte;
     private string? gewarntFuer;
 
-    public Label Heute { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), Font = Stil.Fett, UseMnemonic = false };
+    public Label Bisher { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), Font = Stil.Fett, UseMnemonic = false };
     public Label Hoechstens { get; } = new() { AutoSize = true, MaximumSize = new Size(520, 0), ForeColor = Stil.TextMittel, UseMnemonic = false };
     public TextBox Uhrzeit { get; } = new() { Width = 80 };
     public TextBox Menge { get; } = new() { Width = 80 };
@@ -35,7 +36,7 @@ public sealed class BedarfFenster : Form
         verordnung = v;
         Fenster.Grundform(this, $"Bedarf gegeben – {bewohner.Name}");
         var ich = speicher.MitarbeiterLesen(Recht.Kuerzel);
-        bool fachkraft = ich is not null && (ich.Fachkraft || RechteRegeln.IstAdministrator(ich));
+        bool fachkraft = ich is not null && ich.Fachkraft;
         // Fachkräfte des Wohnbereichs zuerst, dann alle übrigen aktiven Fachkräfte; nicht man selbst.
         fachkraefte = [.. speicher.AlleMitarbeiter()
             .Where(m => m.Aktiv && m.Fachkraft && !m.Kuerzel.Equals(Recht.Kuerzel, StringComparison.OrdinalIgnoreCase))
@@ -54,9 +55,9 @@ public sealed class BedarfFenster : Form
             Text = $"{v.Medikament}{(v.Staerke.Length > 0 ? $" · {v.Staerke}" : "")} – bei Bedarf: {v.BedarfAnlass} · Einzeldosis {BedarfRegeln.Menge(v.Dosis.Morgens, v.Einheit)}",
             AutoSize = true, MaximumSize = new Size(520, 0), Font = Stil.KarteName, UseMnemonic = false,
         });
-        zeile(null, Heute);
+        zeile(null, Bisher);
         zeile(null, Hoechstens);
-        zeile("Uhrzeit (heute)", Uhrzeit);
+        zeile("Uhrzeit", Uhrzeit);
         zeile($"Menge ({(v.Einheit.Length > 0 ? v.Einheit : "Stück")})", Menge);
         zeile("Anlass", Anlass);
         zeile("In Absprache mit", Absprache);
@@ -73,9 +74,8 @@ public sealed class BedarfFenster : Form
         Menge.Text = v.Dosis.Morgens;
         Anlass.Text = v.BedarfAnlass;
         Wer.Text = ich is null ? RechteRegeln.NichtAngemeldetText : $"{ich.Kuerzel} – {ich.Name} ({ich.Qualifikation})";
-        var gaben = speicher.Bedarfsgaben(v.Id);
-        Heute.Text = BedarfRegeln.HeuteText(gaben, DateOnly.FromDateTime(Jetzt()), v.Einheit);
-        Hoechstens.Text = v.BedarfHoechstens.Length > 0 ? $"Höchstens: {v.BedarfHoechstens}" : "Höchstens: keine Angabe in der Verordnung";
+        Bisher.Text = BedarfRegeln.Letzte24Text(speicher.BedarfsgabenMittel(v), Jetzt(), v.Einheit);
+        Hoechstens.Text = BedarfRegeln.HoechstensText(v);
         Stil.DpiSkalierungEinschalten(this);
     }
 
@@ -97,12 +97,12 @@ public sealed class BedarfFenster : Form
         try
         {
             var jetzt = Jetzt();
-            if (TimeOnly.TryParse(Uhrzeit.Text.Trim().Replace('.', ':'), out var uhr))
+            if (BedarfRegeln.Zeitpunkt(Uhrzeit.Text, jetzt) is DateTime zeit)
             {
-                var zeit = DateOnly.FromDateTime(jetzt).ToDateTime(uhr);
-                if (BedarfRegeln.Warnung(verordnung, speicher.Bedarfsgaben(verordnung.Id), zeit) is string warnung && gewarntFuer != Uhrzeit.Text)
+                string fuer = $"{Uhrzeit.Text}|{Menge.Text}";   // geänderte Uhrzeit oder Menge: neu warnen
+                if (BedarfRegeln.Warnung(verordnung, speicher.BedarfsgabenMittel(verordnung), zeit, BedarfRegeln.MengeZahl(Menge.Text)) is string warnung && gewarntFuer != fuer)
                 {
-                    gewarntFuer = Uhrzeit.Text;
+                    gewarntFuer = fuer;
                     Warnung.Text = warnung + " Trotzdem eintragen? Dann noch einmal „Trotzdem eintragen“.";
                     Warnung.Visible = true;
                     SpeichernKnopf.Text = "Trotzdem eintragen";

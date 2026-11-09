@@ -29,6 +29,8 @@ public sealed class BewohnerBereich : Panel
     public const string AlleBereiche = "alle Bereiche";
     public TextBox Suche { get; } = new() { Width = 200, PlaceholderText = "Name oder Zimmer suchen", Font = Stil.Standard, AccessibleName = "Bewohner suchen" };
     private readonly Panel listenFlaeche = new() { Dock = DockStyle.Fill, BackColor = Stil.Seite };
+    // Die Berichte wachsen mit ihrem Inhalt; der Rahmen rollt (0.33.2: vorher abgeschnitten, kein Bildlauf).
+    public Panel BerichteRahmen { get; } = new() { Dock = DockStyle.Fill, AutoScroll = true, BackColor = Stil.Seite };
     private readonly Panel links = new() { Dock = DockStyle.Left, Width = 640, BackColor = Stil.Flaeche };   // Spalten 600 px + Bildlauf; mit der Trennlinie verschiebbar
     private int sortSpalte;
     private bool absteigend;
@@ -95,7 +97,7 @@ public sealed class BewohnerBereich : Panel
         BereichWahl.Items.Add(AlleBereiche);
         foreach (var w in speicher.Wohnbereiche()) BereichWahl.Items.Add(w.Name);
         BereichWahl.SelectedIndex = 0;
-        BereichWahl.SelectedIndexChanged += (_, _) => UebersichtZeigen();
+        BereichWahl.SelectedIndexChanged += (_, _) => { if (!abgleichen) UebersichtZeigen(); };
         Suche.TextChanged += (_, _) => UebersichtZeigen();
         foreach (var c in new Control[] { BereichWahl, Suche }) c.Margin = new Padding(Stil.AbstandMittel, Stil.AbstandKlein, 0, 0);
         FilterLeiste.Controls.AddRange([BereichWahl, Suche]);
@@ -109,10 +111,18 @@ public sealed class BewohnerBereich : Panel
         menue.Items.Add("Akte öffnen", null, (_, _) => AkteOeffnen());
         menue.Items.Add("Neuer Bericht …", null, (_, _) => NeuerBericht());
         Liste.ContextMenuStrip = menue;
-        Berichte = new BerichteAnsicht(speicher) { Dock = DockStyle.Fill, Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0) };
+        Berichte = new BerichteAnsicht(speicher);
         Berichte.NeuKnopf.Visible = false;   // „Neuer Bericht …“ steht in der Aktionsleiste
+        BerichteRahmen.Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0);
+        BerichteRahmen.Controls.Add(Berichte);
+        BerichteRahmen.Layout += (_, _) =>
+        {
+            var p = BerichteRahmen.Padding;
+            int breite = Math.Max(100, BerichteRahmen.ClientSize.Width - p.Horizontal);
+            Berichte.SetBounds(p.Left + BerichteRahmen.AutoScrollPosition.X, p.Top + BerichteRahmen.AutoScrollPosition.Y, breite, Berichte.Height);
+        };
         links.Controls.Add(Liste);
-        listenFlaeche.Controls.Add(Berichte);
+        listenFlaeche.Controls.Add(BerichteRahmen);
         listenFlaeche.Controls.Add(new Splitter { Dock = DockStyle.Left, Width = 6, BackColor = Stil.Seite });
         listenFlaeche.Controls.Add(links);
         listenFlaeche.Padding = new Padding(Stil.AbstandGross, Stil.AbstandKlein, 0, 0);
@@ -164,9 +174,15 @@ public sealed class BewohnerBereich : Panel
 
     // Kopf und Inhalt der Liste: Filterknöpfe mit Zählern (im gewählten Bereich), darunter die Bewohner;
     // die Auswahl bleibt, sonst ist der erste gewählt und rechts stehen seine Berichte.
+    private bool abgleichen;
+
     public void UebersichtZeigen()
     {
-        long? vorher = Gewaehlt?.Bewohner.Id;
+        // Zurück aus der Akte: deren Bewohner bleibt gewählt (0.33.2: vorher der zuletzt in der Liste gewählte).
+        long? vorher = (AkteSichtbar ? Akte.Bewohner?.Id : null) ?? Gewaehlt?.Bewohner.Id;
+        abgleichen = true;
+        try { Auswahl.Abgleichen(BereichWahl, [UebersichtSeite.EigeneBereiche, AlleBereiche, .. speicher.Wohnbereiche().Select(w => w.Name)]); }
+        finally { abgleichen = false; }
         var werte = Einstellungen.Laden();
         var alle = speicher.AlleBewohner();
         var imBereich = BereichFiltern(alle, werte, out string bereichText);
@@ -215,6 +231,7 @@ public sealed class BewohnerBereich : Panel
         if (index < 0 && Zeilen.Count > 0) index = 0;
         if (index >= 0) { Liste.Items[index].Selected = true; Liste.Items[index].Focused = true; Liste.EnsureVisible(index); }
         BerichteZeigen();
+        BerichteRahmen.AutoScrollPosition = Point.Empty;
         Akte.Visible = false;
         listenFlaeche.Visible = FilterLeiste.Visible = aufgabenRahmen.Visible = true;
         AkteSichtbar = false;

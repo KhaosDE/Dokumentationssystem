@@ -452,3 +452,39 @@ public sealed class Statusleiste : Control
         TextRenderer.DrawText(g, BezugText, Stil.Klein, new Rectangle(x + Stil.Px(this, 20), 0, Width, Height), Stil.TextMittel, flags);
     }
 }
+
+// Schutz vor dem zweiten Klick eines Doppelklicks (0.33.2): Baut sich eine Liste nach dem ersten Klick neu
+// auf, liegt unter dem Mauszeiger schon der nächste Eintrag – der zweite Klick träfe ihn. Klicks innerhalb
+// der Doppelklickzeit von Windows nach einem angenommenen Klick zählen deshalb nicht.
+public sealed class Doppelklickschutz
+{
+    private long? letzter;
+    public Func<long> Uhr { get; set; } = () => Environment.TickCount64;   // Millisekunden; im Test ersetzbar
+
+    public bool Frei()
+    {
+        long jetzt = Uhr();
+        if (letzter is long l && jetzt - l < SystemInformation.DoubleClickTime) return false;
+        letzter = jetzt;
+        return true;
+    }
+}
+
+public static class Auswahl
+{
+    // Hält die Einträge einer Auswahl aktuell, z. B. nach dem Umbenennen oder Anlegen eines Bereichs (0.33.2:
+    // vorher blieb die Liste vom Programmstart). Die Wahl bleibt, sonst der erste Eintrag. Wer auf
+    // SelectedIndexChanged reagiert, sperrt das während des Abgleichs selbst. true = Einträge geändert.
+    public static bool Abgleichen(ComboBox box, IReadOnlyList<string> eintraege)
+    {
+        if (box.Items.Cast<object>().Select(o => o.ToString()).SequenceEqual(eintraege)) return false;
+        string? wahl = box.SelectedItem as string;
+        box.BeginUpdate();
+        box.Items.Clear();
+        foreach (var e in eintraege) box.Items.Add(e);
+        box.EndUpdate();
+        int index = wahl is null ? -1 : eintraege.ToList().IndexOf(wahl);
+        box.SelectedIndex = index >= 0 ? index : eintraege.Count > 0 ? 0 : -1;
+        return true;
+    }
+}

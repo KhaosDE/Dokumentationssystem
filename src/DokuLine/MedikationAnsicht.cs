@@ -148,7 +148,7 @@ public sealed class MedikationAnsicht : Panel
         string? grund = Recht.Grund(speicher, Funktionen.MedikationBearbeiten);
         // 0.33.0: „Bedarf gegeben …“ an Bedarfsverordnungen (eigenes Recht; Assistenzkräfte mit Absprache).
         string? bedarfGrund = Recht.Grund(speicher, Funktionen.BedarfGeben);
-        string? heute = s.Verordnung.Bedarf ? BedarfRegeln.HeuteKurz(speicher.Bedarfsgaben(s.Verordnung.Id), DateOnly.FromDateTime(DateTime.Now)) : null;
+        string? heute = s.Verordnung.Bedarf ? BedarfRegeln.Letzte24Kurz(speicher.BedarfsgabenMittel(s.Verordnung), DateTime.Now) : null;
         AenderungArt? wunsch;
         bool bedarf;
         using (var fenster = new VerordnungDetailFenster(s, grund, bedarfGrund, heute))

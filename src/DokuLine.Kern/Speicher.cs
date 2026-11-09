@@ -909,6 +909,10 @@ public sealed partial class Speicher : IDisposable
         bool modulNeu = neueModule.Count > 0;
         if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !bedarf && !modulNeu)
             return false;
+        // Vorher eine Kopie (0.33.2): Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote in
+        // 0.29.15). Bisher gab es die Kopie nur bei den großen Umstellungen oben.
+        string kopie = SicherungAnlegen("vor-demo-nachholen");
+        Startprotokoll.Add($"Demo-Daten nach dem Update ergänzt; die bisherige Datenbank liegt als „{Path.GetFileName(kopie)}“ daneben.");
         using var transaktion = db.BeginTransaction();
         if (berichte) DemoBerichteEinfuegen(transaktion);
         if (aufgaben) DemoAufgabenEinfuegen(transaktion);

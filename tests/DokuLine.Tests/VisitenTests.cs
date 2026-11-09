@@ -164,7 +164,11 @@ public sealed class VisitenTests : IDisposable
         s.VisitenEntwurfSpeichern(gelesen);   // überschreibt den Entwurf (kein zweiter)
         Assert.Equal("Schläft besser, Dosis angepasst.", s.VisitenEntwurf("R1")!.Eintrag(B("Ahorn")).Besprochen);
 
-        var (visite, aufgaben) = s.VisiteAbschliessen(s.VisitenEntwurf("R1")!, Jetzt);
+        // 0.33.2: Abschließen braucht das Recht „Visiten“ (nur Fachkräfte) – geprüft wird, wer abschließt.
+        Assert.Equal([RechteRegeln.NurFachkraftText], Assert.Throws<Eingabefehler>(() => s.VisiteAbschliessen(s.VisitenEntwurf("R1")!, "KL", Jetzt)).Fehler);
+        Assert.Equal([RechteRegeln.NichtAngemeldetText], Assert.Throws<Eingabefehler>(() => s.VisiteAbschliessen(s.VisitenEntwurf("R1")!, "", Jetzt)).Fehler);
+        Assert.NotNull(s.VisitenEntwurf("R1"));   // Entwurf bleibt
+        var (visite, aufgaben) = s.VisiteAbschliessen(s.VisitenEntwurf("R1")!, "EF", Jetzt);
         Assert.Equal(2, visite.Eintraege.Count);   // Clematis ohne Inhalt zählt nicht
         Assert.Equal("", visite.Art);
         Assert.Equal(2, aufgaben.Count);

@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.1** (Korrektur: Startabbruch nach dem Update auf 0.33.0).
+Stand: 09.11.2026. Version: **0.33.2** (Korrekturen: Übersicht, Therapie-Tafel, Bewohner, Bedarf, Visite, Demo).
 
 ## Aktuell
 
@@ -193,10 +193,17 @@ steht als Bericht in der Akte.
 
 Neu in 0.33.1: Korrektur. War eine der vorgegebenen Positionen (z. B. „Mitarbeiter Wohnbereich“) umbenannt oder
 gelöscht, brach der erste Start nach dem Update auf 0.33.0 mit „Die Datenbank lässt sich nicht öffnen“ ab. Jetzt
-wird eine fehlende Position beim Vorbelegen neuer Rechte übersprungen.
+wird eine fehlende Position beim Vorbelegen neuer Rechte übersprungen. Dazu ein **Sicherheitsnetz für Updates**:
+Tests starten das Programm mit einer vom Nutzer veränderten Datenbank und holen dabei jeden einmaligen Schritt nach.
 
-**Nächster Schritt:** Die übrigen Funde der Fehlersuche vom 08.11.2026 beheben (0.33.2, 0.33.3); Liste unter
-„Offene Punkte“.
+Neu in 0.33.2: Korrekturen. Die **Übersicht** folgt dem Schichtwechsel und legt die Standardaufgaben der Schicht
+selbst an. Ein **Doppelklick** auf einen Haken im Kasten „Laufender Dienst“ oder auf „gegangen“/„abgesagt“ der
+Therapie-Tafel trifft nicht mehr den nächsten Eintrag; die Tafel behält beim Neuaufbau ihren Bildlauf. Im Bereich
+**Bewohner** lassen sich die Berichte rollen. **Bedarf:** Eine Gabe kurz vor Mitternacht lässt sich danach noch
+eintragen; angezeigt werden die letzten 24 Stunden; die **Höchstmenge** zählt die Menge (auch bei Nachträgen und über
+alle Bedarfsverordnungen desselben Medikaments). Die **Visite** prüft beim Abschließen das Recht.
+
+**Nächster Schritt:** Die übrigen Funde der Fehlersuche vom 08.11.2026 beheben (0.33.3); Liste unter „Offene Punkte“.
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -996,22 +1003,34 @@ wird eine fehlende Position beim Vorbelegen neuer Rechte übersprungen.
       sich jeder Bereich der Seitenleiste und jeder Reiter der Akte, als TST und als EF. Die Bereiche kommen
       aus der Seitenleiste – neue Bereiche sind automatisch dabei.
     - Die Änderungen des Nutzers stehen einmal in `tests/DokuLine.Tests/NutzerStand.cs` (beide Testprojekte).
+- 0.33.2 — Korrekturen aus der Fehlersuche vom 08.11.2026 (jede mit Test, der vorher rot war):
+  - Übersicht: baut sich beim Schichtwechsel neu auf (vorher nur beim Datumswechsel) und legt die
+    Standardaufgaben der Schicht selbst an (vorher erst beim Öffnen von „Aufgaben“).
+  - Doppelklickschutz (`Doppelklickschutz` in den Bausteinen): Nach dem Abhaken im Kasten „Laufender Dienst“ und
+    nach „gegangen“/„abgesagt“ auf der Tafel zählt ein weiterer Klick innerhalb der Doppelklickzeit von Windows
+    nicht.
+  - Therapie-Tafel: Bildlauf je Spalte und quer bleibt beim Neuaufbau (jede Minute, nach jedem Klick).
+  - Bewohner: Berichte rechts in einem rollbaren Rahmen (vorher abgeschnitten); zurück aus der Akte bleibt deren
+    Bewohner gewählt.
+  - Bereichswahl in Übersicht, Bewohner und Tafel folgt umbenannten und neuen Bereichen (`Auswahl.Abgleichen`).
+  - Bedarf: Uhrzeit kurz nach Mitternacht (später als jetzt + 5 Minuten, höchstens 12 Stunden zurück) gilt für
+    gestern. Fenster: „In den letzten 24 Stunden 2× gegeben: gestern 23:50 (…), 09:15 (…)“; Karte: „in 24 Std.
+    2× gegeben“. Höchstmenge: Summe der Mengen in jedem 24-Stunden-Fenster, in dem die neue Gabe liegt, über alle
+    Bedarfsverordnungen desselben Medikaments; ohne Zahl vorne „… kann die Menge nicht prüfen“. Absprache-Kürzel
+    wie in der Mitarbeiterliste. Keine Sonderregel mehr für Administratoren.
+  - Visite: „Visite abschließen“ prüft das Recht „Visiten“ dessen, der abschließt.
+  - Demo: Vor jedem Nachholen von Demo-Daten eine Sicherungskopie (`…-vor-demo-nachholen.db`, mit Startprotokoll);
+    beim Nachholen der Medikation bleiben keine Bedarf-Berichte ohne Gabe stehen (vorher doppelt).
 
 ## Offene Punkte
 
-- Fehlersuche vom 08.11.2026 (Auftrag Tobi: „behebe alles“); 0.33.1 hat den Startabbruch behoben, der Rest
-  folgt in 0.33.2 und 0.33.3:
-  - Übersicht: Dienst wechselt nicht mit der Schicht (nur beim Datumswechsel neu); Standardaufgaben des Tages
-    fehlen, bis man „Aufgaben“ öffnet; schneller Doppelklick auf einen Haken trifft die nächste Aufgabe;
-    Nachrichtenzähler; Bereichswahl kann „Drucken …“ verdecken.
-  - Therapie-Tafel: Doppelklick auf „gegangen“/„abgesagt“ trifft den Nächsten; Bildlauf springt nach oben;
-    Klick auf einen Balken bei gefiltertem Anbieter; zwei Termine eines Angebots am selben Tag.
-  - Bewohner: Berichte im Bereich „Bewohner“ nicht rollbar; Rücksprung wählt den falschen Bewohner.
-  - Bedarf: um Mitternacht; Höchstmenge zählt Gaben statt Menge; Absprache-Kürzel; Administrator-Ausnahme.
-  - Visite: Abschließen prüft das Recht nicht.
+- Fehlersuche vom 08.11.2026 (Auftrag Tobi: „behebe alles“); behoben in 0.33.1 (Startabbruch) und 0.33.2. Noch
+  offen, folgt in 0.33.3:
+  - Übersicht: Nachrichtenzähler; Bereichswahl kann „Drucken …“ verdecken; Termine werden doppelt gelesen.
+  - Therapie: Klick auf einen Balken bei gefiltertem Anbieter; zwei Termine eines Angebots am selben Tag;
+    Hinweistexte der Knöpfe bleiben nach dem Schließen im Speicher.
   - Betreuer: „keine Betreuung“ als dritter Zustand; .ics und E-Mail: Fehlerfälle beim Import/Export.
   - Einstellungen: Modul-Haken, Schichtzeiten, Rechte in einzelnen Handlern; Dialoge ohne Programmsymbol.
-  - Demo: Bedarf-Berichte beim Nachholen der Medikation; Sicherungskopie vor dem Nachholen der Therapie-Demo.
 
 - Übersichtlichkeit mit 23 Bewohnern je Bereich (Schritt 26h, nicht umgebaut, nur festgehalten; Befund aus
   den Bildschirmfotos `109_…` und den Zeiten des Testlaufs von 0.29.10):
@@ -1082,6 +1101,18 @@ wird eine fehlende Position beim Vorbelegen neuer Rechte übersprungen.
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 09.11.2026 (0.33.2): Doppelklickschutz über die Zeit (Doppelklickzeit von Windows), nicht über stehenbleibende
+  erledigte Zeilen – einfacher, gilt für Haken und Tafel gleich.
+- 09.11.2026 (0.33.2): Bedarf nach Mitternacht: Eine Uhrzeit später als jetzt + 5 Minuten gilt für gestern, wenn
+  sie höchstens 12 Stunden zurückliegt; sonst „in der Zukunft“. Die Anzeige zeigt die letzten 24 Stunden – wie die
+  Höchstmenge rechnet. Ersetzt die Entscheidung „Eine Gabe gilt für heute“ vom 08.11.2026.
+- 09.11.2026 (0.33.2): Die Höchstmenge ist eine Menge in der Einheit der Verordnung („2 in 24 Stunden“ = 2 Stück),
+  gezählt über alle Bedarfsverordnungen desselben Medikaments für den Bewohner. Weiter Warnung, keine Sperre.
+- 09.11.2026 (0.33.2): Ob eine Absprache nötig ist, hängt nur an der Qualifikation, nicht an der Position
+  „Administrator“ (TST ist in der Demo Fachkraft).
+- 09.11.2026 (0.33.2): Vor jedem Nachholen von Demo-Daten eine Sicherungskopie – auch wenn der Teil nichts Vorhandenes
+  ersetzt. Einfacher als je Teil zu entscheiden; nachgeholt wird nur nach Updates.
+
 - 09.11.2026 (0.33.1): Jede Korrektur bekommt einen Test, der vor der Korrektur rot ist (Gegenprobe). Neue
   einmalige Schritte beim Start (Rechte vorbelegen, Demo nachholen) brauchen keinen eigenen Update-Test mehr:
   Der Sicherheitstest findet sie über ihren Merker in `meta`. Er prüft nur, dass der Start nicht abbricht –
@@ -1095,10 +1126,10 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   haben): Assistenzkräfte dürfen geben, brauchen aber die Absprache. Fachkräfte können eine Absprache eintragen,
   müssen es nicht.
 - 08.11.2026 (0.33.0): Die Höchstmenge liest das Programm aus der Zahl vorne in „höchstens“ (z. B. „2 in 24
-  Stunden“) und zählt die Gaben der 24 Stunden davor. Bei erreichter Menge warnt es, sperrt aber nicht – die
+  Stunden“) und zählt die Gaben der 24 Stunden davor. *(Ersetzt am 09.11.2026, 0.33.2: es zählt die Menge.)* Bei erreichter Menge warnt es, sperrt aber nicht – die
   Entscheidung bleibt beim Menschen (z. B. nach ärztlicher Rücksprache). Ohne Zahl: keine Warnung.
 - 08.11.2026 (0.33.0): Eine Gabe gilt für heute (nur Uhrzeit), höchstens 5 Minuten in der Zukunft. Nachträge
-  für frühere Tage gibt es nicht; dafür gibt es den Bericht.
+  für frühere Tage gibt es nicht; dafür gibt es den Bericht. *(Ersetzt am 09.11.2026, 0.33.2: kurz nach Mitternacht auch gestern.)*
 
 - 08.11.2026 (Schritt 26n): Umwandlung SVG → ICO mit einem eigenen Python-Skript **nur mit der
   Standardbibliothek** (keine weitere Abhängigkeit). Geprüft und verworfen: `Svg.Skia` (MIT) zieht `Svg.Custom`
@@ -1759,6 +1790,19 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.2:
+
+1. Übersicht als „EF“: im Kasten „Laufender Dienst“ schnell doppelt auf einen Haken klicken → nur diese Aufgabe ist
+   erledigt, die nächste bleibt offen.
+2. Therapie → „Laufende Therapien“ als „OP“: in „Noch offen“ nach unten rollen, „gegangen“ klicken → die Spalte bleibt
+   an der Stelle; Doppelklick trifft nicht den Nächsten.
+3. Bewohner: einen Bewohner mit vielen Berichten wählen, Zeitraum „alle“ → rechts lässt sich rollen. Akte eines
+   anderen Bewohners öffnen, „Zurück“ → dieser Bewohner ist in der Liste gewählt.
+4. Einstellungen → „Bereiche und Positionen …“: „R2“ umbenennen → in Übersicht, Bewohner und Therapie-Tafel steht in
+   der Bereichswahl der neue Name.
+5. Akte → Medikamentenplan → Bedarfsmedikation: oben „In den letzten 24 Stunden …“; Menge 3 bei „höchstens 2“ →
+   Warnung „… mit dieser Gabe 3 Stück …“.
 
 Version 0.33.1:
 
