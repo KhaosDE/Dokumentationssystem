@@ -447,8 +447,7 @@ public class BildschirmfotoTests
         {
             g.Clear(Color.White);
             g.ScaleTransform(1754f / 297f / 3.7795f, 1754f / 297f / 3.7795f);
-            var montag = WochenplanRegeln.Montag(DateOnly.FromDateTime(DateTime.Today));
-            new WochenplanDruck(u.Demo("Ahorn"), montag, u.Speicher.Woche(u.Demo("Ahorn").Id!.Value, montag)).SeiteZeichnen(g);
+            new WochenplanDruck(u.Demo("Ahorn"), u.Speicher.Regelwoche(u.Demo("Ahorn").Id!.Value, DateOnly.FromDateTime(DateTime.Today))).SeiteZeichnen(g);
             string? ordner = Environment.GetEnvironmentVariable("DOKUSYSTEM_BILDSCHIRMFOTOS");
             if (!string.IsNullOrWhiteSpace(ordner)) bild.Save(Path.Combine(ordner, "35_wochenplan_druck.png"), System.Drawing.Imaging.ImageFormat.Png);
         }

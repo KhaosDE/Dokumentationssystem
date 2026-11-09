@@ -2032,7 +2032,7 @@ Umfang:
   - **„Übergabeliste drucken“**: alle offenen Einträge auf einer A4-Seite, nach Schicht.
 
 ## Wochenplan ohne Datum
-Status: freigegeben (Bauplan Schritt 29i; Vorgabe Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.33.15; Bauplan Schritt 29i; Vorgabe Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Der Wochenplan ist ein fester Plan Montag bis Sonntag für den ganzen Aufenthalt, ohne Datum.
 Warum: Vorgabe Tobi (09.11.2026): Der Wochenplan gilt für den gesamten Zeitraum des Aufenthaltes;

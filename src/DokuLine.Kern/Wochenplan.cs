@@ -126,6 +126,42 @@ public static class WochenplanRegeln
 
     // Die Termine einer Woche: freie Einträge und Therapien aus der Regelwoche, dazu einzelne
     // (z. B. aus dem Kalender). Sortiert nach Tag und Uhrzeit.
+    // Der heute gültige Plan ohne Datum: Einträge und Therapien, die heute gelten, an ihren Wochentagen. Für das Raster
+    // steht jeder Termin auf seinem Tag in dieser Woche; angezeigt wird nur der Wochentag. Ohne Teilnahme (Tagesplan).
+    public static List<Termin> Regelwoche(DateOnly heute, IEnumerable<PlanEintrag> eintraege,
+        IEnumerable<(Angebot Angebot, Zuteilung Zuteilung)> therapien)
+    {
+        var montag = Montag(heute);
+        DateOnly TagIn(DayOfWeek d) => montag.AddDays(((int)d + 6) % 7);
+        var liste = eintraege.Where(e => e.GiltAm(heute)).Select(e => new Termin
+        {
+            Tag = TagIn(e.Termin.Tag), Von = e.Termin.Von, Bis = e.Termin.Bis, Titel = e.Titel, Ort = e.Ort, Hinweis = e.Hinweis,
+            Quelle = TerminQuelle.Plan, PlanEintragId = e.Id,
+        }).ToList();
+        foreach (var (a, z) in therapien.Where(x => x.Zuteilung.GiltAm(heute)))
+        {
+            var f = a.Am(heute);
+            if (f.GiltAb > heute && a.Fassungen[0].GiltAb > heute) continue;   // Angebot beginnt erst später
+            liste.AddRange(f.Termine.Select(t => new Termin
+            {
+                Tag = TagIn(t.Tag), Von = t.Von, Bis = t.Bis, Titel = f.Name, Ort = f.Ort, Hinweis = f.Therapeut, Begleitung = f.Therapeut,
+                Quelle = TerminQuelle.Therapie, ZuteilungId = z.Id,
+            }));
+        }
+        return liste.OrderBy(t => t.Tag).ThenBy(t => t.Von).ToList();
+    }
+
+    // „gültig seit“: der letzte Tag bis heute, an dem sich der Plan geändert hat (Eintrag, Ende, Zuteilung, Angebot).
+    public static DateOnly? GueltigSeit(DateOnly heute, IEnumerable<PlanEintrag> eintraege,
+        IEnumerable<(Angebot Angebot, Zuteilung Zuteilung)> therapien)
+    {
+        var daten = eintraege.SelectMany(e => new DateOnly?[] { e.Ab, e.EndetAb })
+            .Concat(therapien.SelectMany(x => x.Angebot.Fassungen.Select(f => (DateOnly?)f.GiltAb)
+                .Append(x.Zuteilung.Ab).Append(x.Zuteilung.Ende?.AddDays(1))))
+            .OfType<DateOnly>().Where(d => d <= heute).ToList();
+        return daten.Count == 0 ? null : daten.Max();
+    }
+
     public static List<Termin> Woche(DateOnly montag, IEnumerable<PlanEintrag> eintraege,
         IEnumerable<(Angebot Angebot, Zuteilung Zuteilung)> therapien,
         IReadOnlyDictionary<(long ZuteilungId, DateOnly Tag), Teilnahme> teilnahmen,

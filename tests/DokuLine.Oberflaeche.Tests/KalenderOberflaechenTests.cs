@@ -109,7 +109,7 @@ public class KalenderOberflaechenTests
     });
 
     [Fact]
-    public void Termine_erscheinen_im_Wochenplan() => Hilfe.Sta(() =>
+    public void Einzelne_Termine_nicht_im_Wochenplan_ohne_Datum() => Hilfe.Sta(() =>
     {
         var (u, f, k) = Oeffnen();
         using (u)
@@ -119,8 +119,7 @@ public class KalenderOberflaechenTests
             f.Bewohner.AkteZeigen(u.Demo("Ahorn").Id!.Value);
             f.Bewohner.Akte.Reiter.Waehlen("Wochenplan");
             var w = f.Bewohner.Akte.Wochenplan;
-            w.WocheZeigen(WochenplanRegeln.Montag(Naechster(DayOfWeek.Thursday)));
-            Assert.Contains(w.Raster.Termine, t => t.Quelle == TerminQuelle.Kalender && t.Titel == "Hausarzt: Kontrolle");
+            Assert.DoesNotContain(w.Raster.Termine, t => t.Quelle is TerminQuelle.Kalender or TerminQuelle.Fahrt);   // der Plan hat kein Datum
         }
     });
 

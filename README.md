@@ -124,9 +124,9 @@ Danach fragt Windows für diese Datei nicht mehr.
   zuteilen (mit Warnung bei Überschneidung), Teilnahme beenden, Änderungen „ab Datum“. Jedes
   Angebot gehört der Therapie oder einem Wohnbereich (Filter „Anbieter“); alle sehen alles,
   ändern und zuteilen darf nur der Anbieter.
-- **Wochenplan** (Reiter in der Akte): die Regelwoche mit zugeteilten Therapien und freien
-  Einträgen; Teilnahme an Therapien eintragen; Änderungen gelten „ab Datum“; Ausdruck in
-  großer Schrift nur mit Name und Plan.
+- **Wochenplan** (Reiter in der Akte): ein fester Plan Montag bis Sonntag ohne Datum, mit
+  zugeteilten Therapien und freien Einträgen, wie er heute gilt („gültig seit …“); Änderungen gelten
+  „ab Datum“ (Verlauf). Die Teilnahme steht im Tagesplan. Ausdruck in großer Schrift nur mit Name und Plan.
 - **Biografie** (Reiter in der Akte): Lebensgeschichte in festen Abschnitten als Fließtext.
   „Vom Bewohner angegeben, nicht überprüft“ lässt sich je Abschnitt ankreuzen (Hinweis auf die
   Formulierung „gibt an, dass …“). Leere Abschnitte stehen unten als „Fehlende Angaben“.
@@ -145,7 +145,7 @@ Danach fragt Windows für diese Datei nicht mehr.
   Formularfeldern zu; ausgefüllt wird eine Kopie im Datenordner (Ordner `heb`). Ist ein HEB fällig,
   steht das in der Akte und auf der Übersicht.
 - **Kalender** (links): Monat, Woche, Tag; Termine von Bewohnern, Wohnbereich, Heimfahrten und
-  Tagesausflüge; Termine eines Bewohners stehen auch in seinem Wochenplan. Zwei Kalender:
+  Tagesausflüge; Termine eines Bewohners stehen im Tagesplan (nicht im Wochenplan, der hat kein Datum). Zwei Kalender:
   „Bereich“ und „Haus“ (Umschalter oben; Haus-Termine grau). Austausch mit Outlook & Co. nur über
   Dateien: „Als .ics speichern …“ (die gezeigten Termine) und „.ics übernehmen …“ (oder eine
   .ics-Datei auf den Kalender ziehen) mit Vorschau und Zuordnung zu Bewohner und Kalender. Keine

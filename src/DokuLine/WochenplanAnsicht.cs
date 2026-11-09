@@ -5,21 +5,16 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Reiter „Wochenplan“ in der Akte: Montag bis Sonntag als Spalten, Uhrzeiten als Zeilen. Freie
-// Einträge der Regelwoche und die zugeteilten Therapien (farblich abgesetzt); Blättern nach
-// Kalenderwochen. Klick auf einen Termin: bei Therapien die Teilnahme, bei freien Einträgen
-// „Ändern ab …“ oder „Entfernen ab …“. Ausdruck groß und nur mit Name und Plan.
+// Reiter „Wochenplan“ in der Akte: ein fester Plan Montag bis Sonntag ohne Datum, Uhrzeiten als Zeilen. Freie
+// Einträge und die zugeteilten Therapien (farblich abgesetzt), wie sie heute gelten; darüber „gültig seit …“.
+// Klick auf einen freien Eintrag: „Ändern ab …“ oder „Entfernen ab …“ (Teilnahme steht im Tagesplan).
 public sealed class WochenplanAnsicht : Panel
 {
     private readonly Speicher speicher;
     private readonly FlowLayoutPanel leiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
     private Bewohner? bewohner;
 
-    public DateOnly Montag { get; private set; }
-    public Label WocheText { get; } = new() { AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Seite };
-    public Button ZurueckKnopf { get; } = Stil.NebenKnopf("◀");
-    public Button VorKnopf { get; } = Stil.NebenKnopf("▶");
-    public Button DieseWocheKnopf { get; } = Stil.NebenKnopf("Diese Woche");
+    public Label GueltigText { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, BackColor = Stil.Seite };
     public Button NeuKnopf { get; } = Stil.NebenKnopf("Neuer Eintrag …");
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Drucken …");
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
@@ -35,18 +30,12 @@ public sealed class WochenplanAnsicht : Panel
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        foreach (var c in new Control[] { ZurueckKnopf, WocheText, VorKnopf, DieseWocheKnopf, NeuKnopf, DruckKnopf, VerlaufKnopf })
+        foreach (var c in new Control[] { NeuKnopf, DruckKnopf, VerlaufKnopf, GueltigText })
         {
             c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
             leiste.Controls.Add(c);
         }
-        ZurueckKnopf.Width = VorKnopf.Width = 44;
-        WocheText.Margin = new Padding(Stil.AbstandKlein, Stil.AbstandKlein + 2, Stil.AbstandKlein, 0);
-        ZurueckKnopf.AccessibleName = "Vorige Woche";
-        VorKnopf.AccessibleName = "Nächste Woche";
-        ZurueckKnopf.Click += (_, _) => WocheZeigen(Montag.AddDays(-7));
-        VorKnopf.Click += (_, _) => WocheZeigen(Montag.AddDays(7));
-        DieseWocheKnopf.Click += (_, _) => WocheZeigen(WochenplanRegeln.Montag(DateOnly.FromDateTime(Jetzt())));
+        GueltigText.Margin = new Padding(Stil.AbstandKlein, Stil.AbstandKlein + 2, Stil.AbstandKlein, 0);
         NeuKnopf.Click += (_, _) => Bearbeiten(null);
         DruckKnopf.Click += (_, _) => Drucken();
         VerlaufKnopf.Click += (_, _) => VerlaufZeigen();
@@ -58,61 +47,34 @@ public sealed class WochenplanAnsicht : Panel
     public void Zeigen(Bewohner b)
     {
         bewohner = b;
-        WocheZeigen(WochenplanRegeln.Montag(DateOnly.FromDateTime(Jetzt())));
-    }
-
-    public void WocheZeigen(DateOnly montag)
-    {
-        Montag = montag;
         Aktualisieren();
     }
 
-    public List<Termin> Termine => bewohner?.Id is long id ? speicher.Woche(id, Montag) : [];
+    private DateOnly Heute => DateOnly.FromDateTime(Jetzt());
+    public List<Termin> Termine => bewohner?.Id is long id ? speicher.Regelwoche(id, Heute) : [];
 
     public void Aktualisieren()
     {
-        if (bewohner is null) return;
-        WocheText.Text = WochenplanRegeln.WochenText(Montag);
-        Raster.Setzen(Montag, Termine, DateOnly.FromDateTime(Jetzt()));
+        if (bewohner?.Id is not long id) return;
+        GueltigText.Text = speicher.PlanGueltigSeit(id, Heute) is DateOnly seit ? $"gültig seit {Datum.Text(seit)}" : "noch keine Einträge";
+        Raster.Setzen(WochenplanRegeln.Montag(Heute), Termine, Heute);
         PerformLayout();
     }
 
     private static string Kuerzel => Einstellungen.Laden().Kuerzel;
 
-    // Kontextmenü beim Klick auf einen Termin.
+    // Kontextmenü beim Klick auf einen freien Eintrag; Therapien ändert der Bereich „Therapie“.
     private void TerminMenue(Termin t, Point wo)
     {
+        if (t.Quelle != TerminQuelle.Plan) return;
         var menue = new ContextMenuStrip { Font = Stil.Standard, ShowImageMargin = false };
-        string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);
-        if (t.Quelle == TerminQuelle.Therapie && !RechteRegeln.FehltRecht(grund))
-        {
-            if (grund is not null) menue.Items.Add(new ToolStripMenuItem(grund) { Enabled = false });
-            foreach (var s in new[] { Teilnahme.Teilgenommen, Teilnahme.Abgesagt, Teilnahme.Ausgefallen, Teilnahme.Offen })
-            {
-                var e = new ToolStripMenuItem(s == Teilnahme.Offen ? "zurück auf „offen“" : WochenplanRegeln.TeilnahmeText(s))
-                { Checked = t.Teilnahme == s, Enabled = grund is null };
-                e.Click += (_, _) => TeilnahmeSetzen(t, s);
-                menue.Items.Add(e);
-            }
-        }
-        else if (t.Quelle == TerminQuelle.Plan)
-        {
-            var aendern = new ToolStripMenuItem("Ändern ab …");
-            aendern.Click += (_, _) => Bearbeiten(t);
-            var entfernen = new ToolStripMenuItem("Entfernen ab …");
-            entfernen.Click += (_, _) => Entfernen(t);
-            menue.Items.AddRange([aendern, entfernen]);
-        }
-        if (menue.Items.Count == 0) { menue.Dispose(); return; }
+        var aendern = new ToolStripMenuItem("Ändern ab …");
+        aendern.Click += (_, _) => Bearbeiten(t);
+        var entfernen = new ToolStripMenuItem("Entfernen ab …");
+        entfernen.Click += (_, _) => Entfernen(t);
+        menue.Items.AddRange([aendern, entfernen]);
         menue.Closed += (_, _) => BeginInvoke(menue.Dispose);
         menue.Show(Raster, wo);
-    }
-
-    public void TeilnahmeSetzen(Termin t, Teilnahme status)
-    {
-        try { speicher.TeilnahmeSetzen(t.ZuteilungId!.Value, t.Tag, status, Kuerzel, Jetzt()); }
-        catch (Eingabefehler e) { MessageBox.Show(FindForm(), string.Join("\n", e.Fehler), "Teilnahme", MessageBoxButtons.OK, MessageBoxIcon.Information); }
-        Aktualisieren();
     }
 
     // termin == null: neuer Eintrag; sonst „ändern ab …“ (der bisherige endet, der neue beginnt).
@@ -120,14 +82,14 @@ public sealed class WochenplanAnsicht : Panel
     {
         if (bewohner is null) return;
         var alt = termin?.PlanEintragId is long id ? speicher.PlanEintraege(bewohner.Id!.Value).FirstOrDefault(e => e.Id == id) : null;
-        using var fenster = new PlanEintragFenster(speicher, bewohner, alt, termin?.Tag ?? Montag);
+        using var fenster = new PlanEintragFenster(speicher, bewohner, alt, termin?.Tag ?? Heute);
         if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
     }
 
     public void Entfernen(Termin termin)
     {
         if (termin.PlanEintragId is not long id) return;
-        using var fenster = new DatumFenster($"„{termin.Titel}“ entfernen", "nicht mehr ab", termin.Tag, ab =>
+        using var fenster = new DatumFenster($"„{termin.Titel}“ entfernen", "nicht mehr ab", Heute, ab =>
             speicher.PlanEintragEntfernen(id, ab, Kuerzel, Jetzt()));
         if (Dialog.Zeigen(fenster, FindForm()) == DialogResult.OK) Aktualisieren();
     }
@@ -143,7 +105,7 @@ public sealed class WochenplanAnsicht : Panel
     public void Drucken()
     {
         if (bewohner is null) return;
-        var druck = new WochenplanDruck(bewohner, Montag, Termine);
+        var druck = new WochenplanDruck(bewohner, Termine);
         Druckvorschau.Zeigen(FindForm(), druck.DokumentBauen, $"Wochenplan {bewohner.Name}");
     }
 
@@ -159,8 +121,8 @@ public sealed class WochenplanAnsicht : Panel
     }
 }
 
-// Das Wochenraster: gezeichnet, Spalten Mo–So, Zeilen je Stunde. Therapien blaugrün, freie
-// Einträge blaugrau, einzelne Termine (Kalender) violett. Teilnahme als Wort im Kästchen.
+// Das Wochenraster: gezeichnet, Spalten Mo–So (nur der Wochentag, kein Datum), Zeilen je Stunde. Therapien blaugrün,
+// freie Einträge blaugrau. Der heutige Wochentag ist hell hinterlegt.
 public sealed class WochenRaster : Control
 {
     private const int KopfHoehe = 42, StundeHoehe = 44, ZeitBreite = 52, GanztagsZeile = 40;
@@ -192,8 +154,7 @@ public sealed class WochenRaster : Control
         vonStunde = Math.Min(7, mitZeit.Count == 0 ? 7 : mitZeit.Min(t => t.Von.Hour));
         bisStunde = Math.Max(21, mitZeit.Count == 0 ? 21 : mitZeit.Max(t => t.Bis.Minute > 0 ? t.Bis.Hour + 1 : t.Bis.Hour));
         AccessibleName = "Wochenplan: " + (termine.Count == 0 ? "keine Termine" :
-            string.Join("; ", termine.Select(t => $"{t.Tag.ToString("ddd", CultureInfo.GetCultureInfo("de-DE"))} {t.ZeitText} {t.Titel}" +
-                                                  (t.Quelle == TerminQuelle.Therapie ? $" ({WochenplanRegeln.TeilnahmeText(t.Teilnahme)})" : ""))));
+            string.Join("; ", termine.Select(t => $"{t.Tag.ToString("ddd", CultureInfo.GetCultureInfo("de-DE"))} {t.ZeitText} {t.Titel}")));
         Invalidate();
     }
 
@@ -259,7 +220,7 @@ public sealed class WochenRaster : Control
             var kopfFeld = new Rectangle((int)x, S(4), (int)spalte, kopf - S(8));
             if (tag == heute)
                 using (var heuteFarbe = new SolidBrush(Stil.AkzentHell)) g.FillRectangle(heuteFarbe, x, S(1), spalte, Height - S(2));
-            TextRenderer.DrawText(g, $"{tag.ToString("dddd", de)}\n{tag.ToString("dd.MM.", de)}", tag == heute ? Stil.Fett : Stil.Standard, kopfFeld,
+            TextRenderer.DrawText(g, tag.ToString("dddd", de), tag == heute ? Stil.Fett : Stil.Standard, kopfFeld,
                 tag == heute ? Stil.Akzent : Stil.TextNormal, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             g.DrawLine(linie, x, kopf, x, Height - 1);
         }
@@ -286,15 +247,12 @@ public sealed class WochenRaster : Control
                 feld = new Rectangle((int)(x + spuren[k].Nr * breite), (int)y1 + S(1), (int)breite - (spuren[k].Anzahl > 1 ? S(2) : 0),
                     Math.Max(S(20), (int)(y2 - y1) - S(2)));
             }
-            var marke = t.Quelle switch { TerminQuelle.Therapie => Stil.Unterwegs, TerminQuelle.Kalender => Stil.Hinweis, _ => Stil.Zimmer };
-            bool weg = t.Teilnahme is Teilnahme.Abgesagt or Teilnahme.Ausgefallen;
+            var marke = t.Quelle == TerminQuelle.Therapie ? Stil.Unterwegs : Stil.Zimmer;
             Stil.FlaecheZeichnen(g, feld, Stil.RadiusKnopf * Stil.Skala(this), marke.Flaeche, marke.Rand ?? Stil.Mischen(marke.Flaeche, marke.Text, 0.25));
-            // Titel, Uhrzeit, dann die Teilnahme (falls eingetragen) oder der Ort – passt auch in ein Stunden-Kästchen.
-            string dritte = t.Quelle == TerminQuelle.Therapie && t.Teilnahme != Teilnahme.Offen ? WochenplanRegeln.TeilnahmeText(t.Teilnahme) : t.Ort;
-            // „\r\n“: Mit TextBoxControl gilt nur dieser Zeilenumbruch.
-            string text = t.Titel + (t.Ganztags ? "" : $"\r\n{t.ZeitText}") + (dritte.Length > 0 ? $"\r\n{dritte}" : "");
+            // Titel, Uhrzeit, Ort – passt auch in ein Stunden-Kästchen. „\r\n“: Mit TextBoxControl gilt nur dieser Umbruch.
+            string text = t.Titel + (t.Ganztags ? "" : $"\r\n{t.ZeitText}") + (t.Ort.Length > 0 ? $"\r\n{t.Ort}" : "");
             // TextBoxControl: keine halb abgeschnittene letzte Zeile.
-            TextRenderer.DrawText(g, text, Stil.Klein, Rectangle.Inflate(feld, -S(4), -S(2)), weg ? Stil.TextLeise : marke.Text,
+            TextRenderer.DrawText(g, text, Stil.Klein, Rectangle.Inflate(feld, -S(4), -S(2)), marke.Text,
                 TextFormatFlags.WordBreak | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding | TextFormatFlags.TextBoxControl);
             kaestchen.Add((feld, t));
         }
@@ -398,8 +356,8 @@ public sealed class PlanEintragFenster : Form
 }
 
 // Ausdruck: A4 quer, große Schrift, nur Name und Plan (keine Allergien, Medikation oder andere
-// Angaben aus der Akte). Je Tag eine Spalte mit den Terminen untereinander.
-public sealed class WochenplanDruck(Bewohner bewohner, DateOnly montag, IReadOnlyList<Termin> termine)
+// Angaben aus der Akte), ohne Datum. Je Wochentag eine Spalte mit den Terminen untereinander.
+public sealed class WochenplanDruck(Bewohner bewohner, IReadOnlyList<Termin> termine)
 {
     public PrintDocument DokumentBauen()
     {
@@ -421,17 +379,15 @@ public sealed class WochenplanDruck(Bewohner bewohner, DateOnly montag, IReadOnl
         using var klein = new Font("Segoe UI", 8F);
         using var linie = new Pen(Color.Gray, 0.3f);
         g.DrawString($"Wochenplan – {bewohner.Name}", titel, Brushes.Black, links, oben);
-        g.DrawString(WochenplanRegeln.WochenText(montag), textSchrift, Brushes.Black, links, oben + 10f);
-        float y0 = oben + 20f, spalte = breite / 7f;
+        float y0 = oben + 14f, spalte = breite / 7f;
         for (int i = 0; i < 7; i++)
         {
-            var tag = montag.AddDays(i);
+            var wochentag = TherapieRegeln.Woche[i];
             float x = links + i * spalte;
             g.DrawRectangle(linie, x, y0, spalte, hoehe - y0 + oben - 6f);
-            g.DrawString(tag.ToString("dddd", de), tagSchrift, Brushes.Black, x + 1.5f, y0 + 1.5f);
-            g.DrawString(tag.ToString("dd.MM.", de), textSchrift, Brushes.DimGray, x + 1.5f, y0 + 8f);
-            float y = y0 + 16f;
-            foreach (var t in termine.Where(t => t.Tag == tag))
+            g.DrawString(de.DateTimeFormat.GetDayName(wochentag), tagSchrift, Brushes.Black, x + 1.5f, y0 + 1.5f);
+            float y = y0 + 10f;
+            foreach (var t in termine.Where(t => t.Tag.DayOfWeek == wochentag))
             {
                 g.DrawString(t.ZeitText, zeitSchrift, Brushes.Black, x + 1.5f, y);
                 y += 5.5f;

@@ -121,10 +121,20 @@ public sealed partial class Speicher
         return ergebnis;
     }
 
+    private List<(Angebot, Zuteilung)> Therapien(long bewohnerId) =>
+        Angebote().SelectMany(a => a.Zuteilungen.Where(z => z.BewohnerId == bewohnerId).Select(z => (a, z))).ToList();
+
+    // Der heute gültige Wochenplan (ohne Datum) und seit wann er so gilt.
+    public List<Termin> Regelwoche(long bewohnerId, DateOnly heute) =>
+        WochenplanRegeln.Regelwoche(heute, PlanEintraege(bewohnerId), Therapien(bewohnerId));
+
+    public DateOnly? PlanGueltigSeit(long bewohnerId, DateOnly heute) =>
+        WochenplanRegeln.GueltigSeit(heute, PlanEintraege(bewohnerId), Therapien(bewohnerId));
+
     // Die Termine einer Woche (Montag bis Sonntag) für einen Bewohner.
     public List<Termin> Woche(long bewohnerId, DateOnly montag)
     {
-        var therapien = Angebote().SelectMany(a => a.Zuteilungen.Where(z => z.BewohnerId == bewohnerId).Select(z => (a, z))).ToList();
+        var therapien = Therapien(bewohnerId);
         // Einzelne Termine aus dem Kalender (Arzttermine, Heimfahrten, Ausflüge) zusätzlich.
         var kalender = Kalender(montag, montag.AddDays(6), bewohnerId);
         var einzelne = Enumerable.Range(0, 7).Select(montag.AddDays)
@@ -134,11 +144,8 @@ public sealed partial class Speicher
         return WochenplanRegeln.Woche(montag, PlanEintraege(bewohnerId), therapien, Teilnahmen(), einzelne);
     }
 
-    public List<string> PlanUeberschneidungen(PlanEintrag neu)
-    {
-        var therapien = Angebote().SelectMany(a => a.Zuteilungen.Where(z => z.BewohnerId == neu.BewohnerId).Select(z => (a, z))).ToList();
-        return WochenplanRegeln.Ueberschneidungen(neu, PlanEintraege(neu.BewohnerId), therapien);
-    }
+    public List<string> PlanUeberschneidungen(PlanEintrag neu) =>
+        WochenplanRegeln.Ueberschneidungen(neu, PlanEintraege(neu.BewohnerId), Therapien(neu.BewohnerId));
 
     // Demo: freie Einträge der Regelwoche (eine Änderung, ein entfernter) und Teilnahmen der
     // letzten vier Wochen.

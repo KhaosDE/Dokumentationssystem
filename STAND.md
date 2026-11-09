@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.14** (Bauplan Schritt 29h: Übergabe nach Schichten, kompakt).
+Stand: 09.11.2026. Version: **0.33.15** (Bauplan Schritt 29i: Wochenplan ohne Datum).
 
 ## Aktuell
 
@@ -264,8 +264,13 @@ Schicht; ein Klick auf den Text klappt den ganzen Bericht auf, dort steht „Ver
 „Wohnbereich allgemein“ ist eine aufklappbare Zeile oben. „Übergabeliste drucken …“ druckt alles auf eine A4-Seite, nach
 Schicht. In der Übersicht sind die Übergaben ebenfalls in der Farbe ihrer Schicht umrandet.
 
+Neu in 0.33.15: Der **Wochenplan** ist ein fester Plan Montag bis Sonntag **ohne Datum**: keine Daten in den
+Spaltenköpfen, kein Blättern, kein „Diese Woche“. Angezeigt wird der heute gültige Plan, darüber klein „gültig seit …“
+und „Verlauf …“. Die Teilnahme an Therapien steht nur noch im Tagesplan; einzelne Termine aus dem Kalender stehen nicht
+mehr im Wochenplan. Der Ausdruck ist ebenfalls ohne Datum.
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 29i „Wochenplan ohne Datum“ (0.33.15).
+als Nächstes 29j „Ausgangsliste: alle Bewohner auf einen Blick“ (0.33.16).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1238,6 +1243,12 @@ als Nächstes 29i „Wochenplan ohne Datum“ (0.33.15).
     jetzt in der Aktionsleiste wie in den anderen Bereichen. `DauerFenster` und `UebergabeDruck` in eigenen Dateien.
   - Übersicht: `HeuteEintrag.Rahmen` (Übergaben in der Schichtfarbe umrandet).
 
+- 0.33.15 — Bauplan Schritt 29i:
+  - Kern: `WochenplanRegeln.Regelwoche` (heute gültige Einträge und Therapien an ihren Wochentagen, ohne Teilnahme)
+    und `GueltigSeit` (letzte Änderung bis heute: Eintrag, Ende, Zuteilung, Angebot); `Speicher.Regelwoche`,
+    `PlanGueltigSeit`.
+  - Akte → Wochenplan: Blättern, „Diese Woche“ und Teilnahme-Menü entfernt; „gültig seit …“; Ausdruck ohne Datum.
+
 ## Offene Punkte
 
 - Aufräumen (29s): 45 Dateien beginnen noch mit vier bis sieben Kommentarzeilen statt höchstens drei; rund 2.000
@@ -1319,6 +1330,11 @@ als Nächstes 29i „Wochenplan ohne Datum“ (0.33.15).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.15): Einzelne Termine aus dem Kalender (Arzttermine, Heimfahrten, Fahrten) stehen nicht mehr im
+  Wochenplan: Ein Plan ohne Datum kann keinen Termin an einem bestimmten Tag zeigen. Sie stehen im Kalender und am
+  jeweiligen Tag im Tagesplan. Der heutige Wochentag bleibt im Raster hell hinterlegt (ohne Datum), damit man ihn
+  findet.
 
 - 09.11.2026 (0.33.14): Eingeklappt zeigt jede Übergabe-Zeile **eine** Textzeile (mit „…“), nicht zwei: Mit zwei Zeilen
   wären bei 1366 × 768 nur etwa neun Einträge ohne Bildlauf zu sehen, das Ziel waren zwölf. Ein Klick zeigt den ganzen
@@ -2100,6 +2116,9 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.15: Akte → Wochenplan: Spalten nur „Montag“ … „Sonntag“, kein Blättern, darüber „gültig seit …“ und
+„Verlauf …“. Klick auf eine Therapie öffnet nichts mehr (Teilnahme im Tagesplan). „Drucken …“ ohne Datum.
 
 Version 0.33.14:
 

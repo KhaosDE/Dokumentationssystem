@@ -2,7 +2,7 @@ using DokuLine.Kern;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Reiter „Wochenplan“: Regelwoche mit Therapien, Blättern, Teilnahme, neuer Eintrag mit Warnung,
+// Reiter „Wochenplan“: fester Plan ohne Datum mit Therapien, „gültig seit“, neuer Eintrag mit Warnung,
 // ändern ab Datum, entfernen, Verlauf, Ausdruck.
 [Collection("Oberflaeche")]
 public class WochenplanOberflaechenTests
@@ -18,44 +18,22 @@ public class WochenplanOberflaechenTests
         return (u, f, f.Bewohner.Akte.Wochenplan);
     }
 
-    private static DateOnly DieserMontag => WochenplanRegeln.Montag(DateOnly.FromDateTime(DateTime.Today));
+    private static DateOnly Heute => DateOnly.FromDateTime(DateTime.Today);
 
     [Fact]
-    public void Regelwoche_mit_Therapien_und_Blaettern() => Hilfe.Sta(() =>
+    public void Fester_Plan_ohne_Datum_mit_Therapien() => Hilfe.Sta(() =>
     {
         var (u, f, w) = Oeffnen();
         using (u)
         using (f)
         {
-            Assert.Equal(DieserMontag, w.Montag);
-            Assert.StartsWith("KW ", w.WocheText.Text);
+            Assert.StartsWith("gültig seit ", w.GueltigText.Text);
             Assert.Contains(w.Raster.Termine, t => t.Titel == "Holzwerkstatt" && t.Quelle == TerminQuelle.Therapie);
             Assert.Contains(w.Raster.Termine, t => t.Titel == "Spaziergang mit der Wohngruppe" && t.Quelle == TerminQuelle.Plan);
+            Assert.All(w.Raster.Termine, t => Assert.Equal(Teilnahme.Offen, t.Teilnahme));   // Teilnahme steht im Tagesplan
             Assert.Contains("Holzwerkstatt", w.Raster.AccessibleName);
-            w.VorKnopf.PerformClick();
-            Assert.Equal(DieserMontag.AddDays(7), w.Montag);
-            w.ZurueckKnopf.PerformClick();
-            w.ZurueckKnopf.PerformClick();
-            Assert.Equal(DieserMontag.AddDays(-7), w.Montag);
-            w.DieseWocheKnopf.PerformClick();
-            Assert.Equal(DieserMontag, w.Montag);
+            Assert.DoesNotContain("(offen)", w.Raster.AccessibleName);
             Assert.True(w.Raster.Height > 400);
-        }
-    });
-
-    [Fact]
-    public void Teilnahme_eintragen() => Hilfe.Sta(() =>
-    {
-        var (u, f, w) = Oeffnen();
-        using (u)
-        using (f)
-        {
-            w.WocheZeigen(DieserMontag.AddDays(7));
-            var holz = w.Raster.Termine.First(t => t.Titel == "Holzwerkstatt");
-            Assert.Equal(Teilnahme.Offen, holz.Teilnahme);
-            w.TeilnahmeSetzen(holz, Teilnahme.Abgesagt);
-            Assert.Equal(Teilnahme.Abgesagt, w.Raster.Termine.First(t => t.Titel == "Holzwerkstatt").Teilnahme);
-            Assert.Contains("(abgesagt)", w.Raster.AccessibleName);
         }
     });
 
@@ -78,7 +56,7 @@ public class WochenplanOberflaechenTests
                 warnung = neu.Warnung.Text;
                 neu.Von.Text = "18:00";
                 neu.Bis.Text = "19:00";
-                neu.Ab.Text = Datum.Text(DieserMontag);
+                neu.Ab.Text = Datum.Text(Heute);
                 return neu.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 w.NeuKnopf.PerformClick();
@@ -92,24 +70,27 @@ public class WochenplanOberflaechenTests
                 Assert.Equal("Chor", aendern.Titel.Text);
                 aendern.Von.Text = "19:00";
                 aendern.Bis.Text = "20:00";
-                aendern.Ab.Text = Datum.Text(DieserMontag.AddDays(7));
+                aendern.Ab.Text = Datum.Text(Heute.AddDays(7));
                 return aendern.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 w.Bearbeiten(chor);
-            Assert.Equal("18:00–19:00", w.Raster.Termine.Single(t => t.Titel == "Chor").ZeitText);
-            w.VorKnopf.PerformClick();
+            Assert.Equal("18:00–19:00", w.Raster.Termine.Single(t => t.Titel == "Chor").ZeitText);   // heute gilt noch der alte
+            w.Jetzt = () => DateTime.Now.AddDays(7);
+            w.Aktualisieren();
             var spaeter = w.Raster.Termine.Single(t => t.Titel == "Chor");
             Assert.Equal("19:00–20:00", spaeter.ZeitText);
+            Assert.Equal($"gültig seit {Datum.Text(Heute.AddDays(7))}", w.GueltigText.Text);
 
             using (new DialogErsatz(fenster =>
             {
                 var ende = Assert.IsType<DatumFenster>(fenster);
-                ende.Datumsfeld.Text = Datum.Text(DieserMontag.AddDays(14));
+                ende.Datumsfeld.Text = Datum.Text(Heute.AddDays(14));
                 return ende.Speichern() ? DialogResult.OK : DialogResult.Cancel;
             }))
                 w.Entfernen(spaeter);
             Assert.Contains(w.Raster.Termine, t => t.Titel == "Chor");
-            w.VorKnopf.PerformClick();
+            w.Jetzt = () => DateTime.Now.AddDays(14);
+            w.Aktualisieren();
             Assert.DoesNotContain(w.Raster.Termine, t => t.Titel == "Chor");
 
             string? verlauf = null;
@@ -135,7 +116,7 @@ public class WochenplanOberflaechenTests
             }
             using var bild = new Bitmap(1130, 800);
             using var g = Graphics.FromImage(bild);
-            new WochenplanDruck(u.Demo("Ahorn"), w.Montag, w.Termine).SeiteZeichnen(g);
+            new WochenplanDruck(u.Demo("Ahorn"), w.Termine).SeiteZeichnen(g);
         }
     });
 }

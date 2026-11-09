@@ -71,6 +71,22 @@ public sealed class WochenplanTests : IDisposable
     }
 
     [Fact]
+    public void Regelwoche_ohne_Datum_gilt_heute_und_nennt_gueltig_seit()
+    {
+        var e = s.PlanEintragAnlegen(Neu(B("Birke"), DayOfWeek.Thursday, "17:00", "18:00", ab: "04.11.2026", titel: "Chor"));
+        s.PlanEintragAendern(e.Id, Neu(B("Birke"), DayOfWeek.Thursday, "18:00", "19:00", ab: "09.11.2026", titel: "Chor"));
+        var plan = s.Regelwoche(B("Birke"), Heute);
+        Assert.Equal("17:00–18:00", plan.Single(t => t.Titel == "Chor").ZeitText);   // die Änderung gilt erst ab Montag
+        Assert.All(plan, t => Assert.InRange(t.Tag, Montag, Montag.AddDays(6)));
+        Assert.All(plan, t => Assert.Equal(Teilnahme.Offen, t.Teilnahme));             // Teilnahme steht im Tagesplan
+        Assert.Contains(s.Regelwoche(B("Ahorn"), Heute), t => t.Titel == "Holzwerkstatt" && t.Tag.DayOfWeek == DayOfWeek.Monday);
+        Assert.DoesNotContain(s.Regelwoche(B("Ahorn"), Heute), t => t.Quelle is TerminQuelle.Kalender or TerminQuelle.Fahrt);
+        Assert.Equal("18:00–19:00", s.Regelwoche(B("Birke"), Heute.AddDays(2)).Single(t => t.Titel == "Chor").ZeitText);
+        Assert.True(s.PlanGueltigSeit(B("Birke"), Heute) >= new DateOnly(2026, 11, 4));
+        Assert.Equal(new DateOnly(2026, 11, 9), s.PlanGueltigSeit(B("Birke"), Heute.AddDays(2)));
+    }
+
+    [Fact]
     public void Aendern_ab_Datum_frueheres_bleibt()
     {
         var e = s.PlanEintragAnlegen(Neu(B("Birke"), DayOfWeek.Thursday, "17:00", "18:00", titel: "Chor"));
