@@ -599,7 +599,7 @@ public static class Demodaten
             Name = a.Name, Fachrichtung = a.Fachrichtung, Praxis = a.Praxis, Telefon = a.Telefon, Email = a.Email, Aktiv = a.Aktiv,
         }).ToList();
 
-    // ----- Personenverzeichnis (Schritt 29a) -----
+    // ----- Personenverzeichnis -----
 
     private sealed class PersonenDatei
     {

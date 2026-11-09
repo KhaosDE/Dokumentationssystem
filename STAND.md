@@ -1146,8 +1146,11 @@ als Nächstes 29b „Bereich Dokumentation“ (0.33.5).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
-- 09.11.2026 (0.33.4): Die Versionsnummern des Bauplans ab 29a rücken um eins (29a = 0.33.4 … 29p = 0.33.19), weil
-  0.33.3 schon die Korrekturen der Fehlersuche trägt; ab Schritt 30 (0.34.0) wie geplant.
+- 09.11.2026 (0.33.4): Versionsnummern werden fortlaufend vergeben (jede Auslieferung die nächste: 29a = 0.33.4,
+  29b = 0.33.5 …), weil 0.33.3 schon die Korrekturen der Fehlersuche trägt und 29s in mehreren Pull Requests kommt; die
+  Spalte „Version“ im Bauplan ist nur noch ein Richtwert. Ab Schritt 30 beginnt 0.34.0.
+- 09.11.2026 (0.33.4): Neuer Code folgt `docs/code-regeln.md` (Kommentare ohne Verlauf, Dateiköpfe höchstens drei
+  Zeilen). Einzelne Zeilen liegen knapp über 120 Zeichen (lange SQL- und Parameterlisten); das Messskript kommt mit 29s.
 - 09.11.2026 (0.33.4): Personenverzeichnis technisch in der bisherigen Tabelle `aerzte` mit Feld „Gruppe“ (vom Eintrag
   erlaubt, einfacher); im Programm heißt der Datensatz `Person`. Ärzte werden weiter mit dem Namen eingetragen.
 - 09.11.2026 (0.33.4): Bis Schritt 30 („Reiter Betreuung“) zeigt die Akte den Betreuer weiter aus ihren eigenen

@@ -738,8 +738,8 @@ public sealed partial class Speicher : IDisposable
         """
         ALTER TABLE betreuer ADD COLUMN keine INTEGER NOT NULL DEFAULT 0;
         """,
-        // 30 – Personenverzeichnis (Schritt 29a): Das Ärzteverzeichnis nimmt auch Betreuer, Angehörige, Forensik, FOSA und
-        // sonstige Stellen auf (Feld „gruppe“); Namen je Verzeichnis eindeutig; Zuordnung zu Bewohnern mit Rolle.
+        // 30 – Personenverzeichnis: Die Ärzte-Tabelle nimmt alle Verzeichnisse auf (Feld „gruppe“, Namen je Verzeichnis
+        // eindeutig); Zuordnung zu Bewohnern mit Rolle.
         """
         ALTER TABLE aerzte ADD COLUMN gruppe TEXT NOT NULL DEFAULT 'arzt'
             CHECK (gruppe IN ('arzt', 'betreuer', 'angehoerige', 'forensik', 'fosa', 'sonstige'));

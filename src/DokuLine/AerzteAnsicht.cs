@@ -3,10 +3,8 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Ärzte aus dem Personenverzeichnis (Bauplan Schritt 26b, seit 29a „Verzeichnisse → Ärzte“): Auswahl statt
-// Freitext, wo ein Arzt eingetragen wird (Verordnung, Anordnung, Visite, Facharzttermin, Termin). Fehlt
-// jemand: „Arzt anlegen …“ direkt daneben (Recht „Personenverzeichnis verwalten“). Ein Name, der nicht (mehr) im Verzeichnis steht –
-// z. B. aus älteren Einträgen –, bleibt wählbar und ist so gekennzeichnet.
+// Arztauswahl statt Freitext (Verordnung, Anordnung, Visite, Termin) mit „Arzt anlegen …“ daneben. Ein Name,
+// der nicht (mehr) im Verzeichnis steht – z. B. aus älteren Einträgen –, bleibt wählbar und ist so gekennzeichnet.
 public sealed class ArztWahl : FlowLayoutPanel
 {
     private readonly Speicher speicher;

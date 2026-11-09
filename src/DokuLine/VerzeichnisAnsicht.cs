@@ -2,23 +2,24 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Personenverzeichnis (Bauplan Schritt 29a) in den Einstellungen, Gruppe „Verzeichnisse“: oben die Verzeichnisse
-// mit Zähler (Ärzte · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stellen), darunter die Suche und die Liste
-// des gewählten Verzeichnisses mit eigenen Spalten. Doppelklick öffnet die Person; dort „zugeordnet zu …“ mit
-// Sprung in die Akte. Ansehen dürfen alle; ändern nur mit Recht (Angehörige: „Bewohner anlegen und bearbeiten“,
-// sonst „Personenverzeichnis verwalten“). Gelöscht wird nicht, nur inaktiv gesetzt.
+// Einstellungen → „Verzeichnisse“: die Verzeichnisse mit Zähler, Suche und Liste mit Spalten je Verzeichnis;
+// dazu das Formular einer Person (mit „zugeordnet zu …“) und die Wahl eines Bewohners mit Rolle.
+// Ansehen dürfen alle (Telefonnummern nachschlagen), ändern nur mit Recht.
 public sealed class VerzeichnisAnsicht : Panel
 {
     private readonly Speicher speicher;
-    private readonly FlowLayoutPanel gruppenLeiste = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite, Margin = new Padding(0) };
+    private readonly FlowLayoutPanel gruppenLeiste = new() { AutoSize = true, WrapContents = true,
+        BackColor = Stil.Seite, Margin = new Padding(0) };
     private List<Person> gezeigt = [];
 
     public Dictionary<PersonGruppe, FilterKnopf> GruppenKnoepfe { get; } = [];
     public PersonGruppe Gruppe { get; private set; } = PersonGruppe.Arzt;
-    public TextBox Suche { get; } = new() { Width = 260, PlaceholderText = "Name, Stelle oder Telefon suchen", Font = Stil.Standard, AccessibleName = "Im Verzeichnis suchen" };
+    public TextBox Suche { get; } = new() { Width = 260, PlaceholderText = "Name, Stelle oder Telefon suchen",
+        Font = Stil.Standard, AccessibleName = "Im Verzeichnis suchen" };
     public ListView Liste { get; } = new()
     {
-        View = View.Details, FullRowSelect = true, MultiSelect = false, HideSelection = false, Font = Stil.Standard, AccessibleName = "Personen",
+        View = View.Details, FullRowSelect = true, MultiSelect = false, HideSelection = false, Font = Stil.Standard,
+            AccessibleName = "Personen",
     };
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neu …");
     public Button AendernKnopf { get; } = Stil.NebenKnopf("Öffnen …");
@@ -69,7 +70,8 @@ public sealed class VerzeichnisAnsicht : Panel
         Liste.BeginUpdate();
         Liste.Columns.Clear();
         foreach (var titel in PersonRegeln.Spalten(g))
-            Liste.Columns.Add(titel, titel switch { "Name" => 200, "zugeordnet zu" => 280, "Bewohner" or "Status" => 70, "E-Mail" => 170, _ => 140 });
+            Liste.Columns.Add(titel, titel switch { "Name" => 200, "zugeordnet zu" => 280,
+                "Bewohner" or "Status" => 70, "E-Mail" => 170, _ => 140 });
         Liste.EndUpdate();
         Fehler.Visible = false;
         Aktualisieren();
@@ -90,11 +92,13 @@ public sealed class VerzeichnisAnsicht : Panel
         long? vorher = Gewaehlt?.Id;
         var zuordnungen = speicher.Zuordnungen();
         var namen = speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
-        gezeigt = [.. alle.Where(p => p.Gruppe == Gruppe && PersonRegeln.Passt(p, Suche.Text)).OrderBy(p => p.Aktiv ? 0 : 1).ThenBy(p => p.Name, StringComparer.CurrentCulture)];
+        gezeigt = [.. alle.Where(p => p.Gruppe == Gruppe && PersonRegeln.Passt(p,
+            Suche.Text)).OrderBy(p => p.Aktiv ? 0 : 1).ThenBy(p => p.Name, StringComparer.CurrentCulture)];
         Liste.BeginUpdate();
         Liste.Items.Clear();
         foreach (var p in gezeigt)
-            Liste.Items.Add(new ListViewItem(PersonRegeln.Zeile(p, zuordnungen, namen)) { ForeColor = p.Aktiv ? Stil.TextNormal : Stil.TextLeise });
+            Liste.Items.Add(new ListViewItem(PersonRegeln.Zeile(p, zuordnungen,
+                namen)) { ForeColor = p.Aktiv ? Stil.TextNormal : Stil.TextLeise });
         Liste.EndUpdate();
         int i = gezeigt.FindIndex(p => p.Id == vorher);
         if (i >= 0) Liste.Items[i].Selected = true;
@@ -118,8 +122,10 @@ public sealed class VerzeichnisAnsicht : Panel
     {
         string? grund = speicher.PersonGrund(Recht.Kuerzel, Gruppe);
         Stil.Sperren(NeuKnopf, grund);
-        Stil.Sperren(AendernKnopf, Gewaehlt is null ? "Bitte zuerst eine Person in der Liste wählen." : null);   // ansehen dürfen alle
-        Stil.Sperren(UmschaltenKnopf, grund ?? (Gewaehlt is null ? "Bitte zuerst eine Person in der Liste wählen." : null));
+        Stil.Sperren(AendernKnopf,
+            Gewaehlt is null ? "Bitte zuerst eine Person in der Liste wählen." : null);   // ansehen dürfen alle
+        Stil.Sperren(UmschaltenKnopf,
+            grund ?? (Gewaehlt is null ? "Bitte zuerst eine Person in der Liste wählen." : null));
     }
 
     public bool Neu()
@@ -147,7 +153,8 @@ public sealed class VerzeichnisAnsicht : Panel
     {
         if (Gewaehlt is not Person p) return false;
         try { speicher.PersonAktiv(p.Id, !p.Aktiv, Recht.Kuerzel, Jetzt()); }
-        catch (Eingabefehler e) { Fehler.Text = string.Join(" ", e.Fehler); Fehler.Visible = true; PerformLayout(); return false; }
+        catch (Eingabefehler e) { Fehler.Text = string.Join(" ",
+            e.Fehler); Fehler.Visible = true; PerformLayout(); return false; }
         Fehler.Visible = false;
         Aktualisieren();
         return true;
@@ -191,7 +198,8 @@ public sealed class PersonFenster : Form
     public TextBox Anschrift { get; } = new() { Width = 320 };
     public TextBox Erreichbarkeit { get; } = new() { Width = 320, PlaceholderText = "z. B. Mo–Fr 8–12 Uhr" };
     public TextBox Hinweis { get; } = new() { Width = 320 };
-    public ListBox Zugeordnet { get; } = new() { Width = 420, Height = 110, IntegralHeight = false, AccessibleName = "zugeordnet zu" };
+    public ListBox Zugeordnet { get; } = new() { Width = 420, Height = 110, IntegralHeight = false,
+        AccessibleName = "zugeordnet zu" };
     public Button ZuordnenKnopf { get; } = Stil.NebenKnopf("Bewohner zuordnen …");
     public Button EntfernenKnopf { get; } = Stil.NebenKnopf("Zuordnung entfernen");
     public Button AkteKnopf { get; } = Stil.NebenKnopf("Akte öffnen");
@@ -217,12 +225,16 @@ public sealed class PersonFenster : Form
         if (bisher is not null)
         {
             var e = PersonRegeln.AlsEingabe(bisher);
-            (NameFeld.Text, Art.Text, Funktion.Text, Stelle.Text, Telefon.Text, Mobil.Text) = (e.Name, e.Art, e.Fachrichtung, e.Praxis, e.Telefon, e.Mobil);
-            (Email.Text, Anschrift.Text, Erreichbarkeit.Text, Hinweis.Text) = (e.Email, e.Anschrift, e.Erreichbarkeit, e.Hinweis);
+            (NameFeld.Text, Art.Text, Funktion.Text, Stelle.Text, Telefon.Text, Mobil.Text) = (e.Name, e.Art,
+                e.Fachrichtung, e.Praxis, e.Telefon, e.Mobil);
+            (Email.Text, Anschrift.Text, Erreichbarkeit.Text, Hinweis.Text) = (e.Email, e.Anschrift, e.Erreichbarkeit,
+                e.Hinweis);
         }
         var raster = Formular.Raster(out var zeile);
-        zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0, Stil.AbstandKlein) });
-        zeile("Verzeichnis", new Label { Text = PersonRegeln.GruppeText(gruppe), AutoSize = true, Font = Stil.Fett, UseMnemonic = false });
+        zeile(null, new MarkenFeld(Stil.DemoHinweis, Stil.Achtung) { Margin = new Padding(0, 0, 0,
+            Stil.AbstandKlein) });
+        zeile("Verzeichnis", new Label { Text = PersonRegeln.GruppeText(gruppe), AutoSize = true, Font = Stil.Fett,
+            UseMnemonic = false });
         zeile("Name", NameFeld);
         if (gruppe == PersonGruppe.Betreuer) zeile("Art", Art);
         if (PersonRegeln.FunktionText(gruppe) is string funktion) zeile(funktion, Funktion);
@@ -249,7 +261,8 @@ public sealed class PersonFenster : Form
         Zugeordnet.SelectedIndexChanged += (_, _) => Sperren();
         // Ohne Recht nur ansehen.
         if (Sperrgrund is not null)
-            foreach (var c in new Control[] { NameFeld, Art, Funktion, Stelle, Telefon, Mobil, Email, Anschrift, Erreichbarkeit, Hinweis })
+            foreach (var c in new Control[] { NameFeld, Art, Funktion, Stelle, Telefon, Mobil, Email, Anschrift,
+                Erreichbarkeit, Hinweis })
                 if (c is TextBox t) t.ReadOnly = true; else c.Enabled = false;
         ZuordnungenFuellen();
         Stil.DpiSkalierungEinschalten(this);
@@ -260,19 +273,22 @@ public sealed class PersonFenster : Form
         zuordnungen = bisher is null ? [] : speicher.Zuordnungen(personId: bisher.Id);
         Zugeordnet.Items.Clear();
         foreach (var z in zuordnungen)
-            Zugeordnet.Items.Add(namen.GetValueOrDefault(z.BewohnerId, "?") + (z.Rolle.Length > 0 ? $" ({z.Rolle})" : ""));
+            Zugeordnet.Items.Add(namen.GetValueOrDefault(z.BewohnerId,
+                "?") + (z.Rolle.Length > 0 ? $" ({z.Rolle})" : ""));
         if (zuordnungen.Count == 0) Zugeordnet.Items.Add(bisher is null ? "(erst speichern, dann zuordnen)" : "(noch niemand)");
         Sperren();
     }
 
     private PersonZuordnung? GewaehlteZuordnung =>
-        Zugeordnet.SelectedIndex >= 0 && Zugeordnet.SelectedIndex < zuordnungen.Count ? zuordnungen[Zugeordnet.SelectedIndex] : null;
+        Zugeordnet.SelectedIndex >= 0
+            && Zugeordnet.SelectedIndex < zuordnungen.Count ? zuordnungen[Zugeordnet.SelectedIndex] : null;
 
     private void Sperren()
     {
         Stil.Sperren(SpeichernKnopf, Sperrgrund);
         Stil.Sperren(ZuordnenKnopf, Sperrgrund ?? (bisher is null ? "Bitte zuerst speichern." : null));
-        Stil.Sperren(EntfernenKnopf, Sperrgrund ?? (GewaehlteZuordnung is null ? "Bitte zuerst einen Bewohner in der Liste wählen." : null));
+        Stil.Sperren(EntfernenKnopf,
+            Sperrgrund ?? (GewaehlteZuordnung is null ? "Bitte zuerst einen Bewohner in der Liste wählen." : null));
         Stil.Sperren(AkteKnopf, GewaehlteZuordnung is null ? "Bitte zuerst einen Bewohner in der Liste wählen." : null);
     }
 
@@ -286,8 +302,10 @@ public sealed class PersonFenster : Form
 
     public PersonEingabe Eingabe() => new()
     {
-        Gruppe = gruppe, Name = NameFeld.Text, Art = Art.Text, Fachrichtung = Funktion.Text, Praxis = Stelle.Text, Telefon = Telefon.Text,
-        Mobil = Mobil.Text, Email = Email.Text, Anschrift = Anschrift.Text, Erreichbarkeit = Erreichbarkeit.Text, Hinweis = Hinweis.Text,
+        Gruppe = gruppe, Name = NameFeld.Text, Art = Art.Text, Fachrichtung = Funktion.Text, Praxis = Stelle.Text,
+            Telefon = Telefon.Text,
+        Mobil = Mobil.Text, Email = Email.Text, Anschrift = Anschrift.Text, Erreichbarkeit = Erreichbarkeit.Text,
+            Hinweis = Hinweis.Text,
     };
 
     public bool Speichern()
@@ -352,15 +370,18 @@ public sealed class ZuordnungFenster : Form
 {
     private readonly List<Bewohner> bewohner;
 
-    public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 320, AccessibleName = "Bewohner" };
-    public ComboBox Rolle { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 320, AccessibleName = "Rolle" };
+    public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 320,
+        AccessibleName = "Bewohner" };
+    public ComboBox Rolle { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 320,
+        AccessibleName = "Rolle" };
     public Label Fehler { get; } = Fenster.Fehlerfeld();
     public long? Gewaehlt => BewohnerWahl.SelectedIndex >= 0 ? bewohner[BewohnerWahl.SelectedIndex].Id : null;
 
     public ZuordnungFenster(Speicher speicher, Person person)
     {
         Fenster.Grundform(this, $"{person.Name} zuordnen");
-        bewohner = [.. speicher.AlleBewohner().OrderBy(b => b.Nachname, StringComparer.CurrentCulture).ThenBy(b => b.Vorname, StringComparer.CurrentCulture)];
+        bewohner = [.. speicher.AlleBewohner().OrderBy(b => b.Nachname,
+            StringComparer.CurrentCulture).ThenBy(b => b.Vorname, StringComparer.CurrentCulture)];
         BewohnerWahl.Items.AddRange([.. bewohner.Select(b => (object)$"{b.Nachname}, {b.Vorname} (Zi. {b.Zimmer}, {b.Wohnbereich})")]);
         Rolle.Items.AddRange([.. PersonRegeln.RolleAuswahl(person.Gruppe)]);
         Rolle.Text = PersonRegeln.RolleVorschlag(person);

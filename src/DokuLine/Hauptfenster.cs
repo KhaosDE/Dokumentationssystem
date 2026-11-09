@@ -115,7 +115,7 @@ public sealed class Hauptfenster : Form
         {
             if (AktiverBereich != "Einstellungen") return;
             Kopf.TexteSetzen(Einstellungsseite.KopfText, "Einstellungen");
-            Kopf.KnoepfeSetzen(Einstellungsseite.Knoepfe);   // Schritt 29a: „Verzeichnisse“ hat eine Aktionsleiste
+            Kopf.KnoepfeSetzen(Einstellungsseite.Knoepfe);   // „Verzeichnisse“ hat eine Aktionsleiste
         };
         Einstellungsseite.AkteGewuenscht += id => { BereichWaehlen("Bewohner"); Bewohner.AkteZeigen(id); };
         Einstellungsseite.LogoGeaendert += () => Kopf.LogoSetzen(Einstellungen.LogoPfad());

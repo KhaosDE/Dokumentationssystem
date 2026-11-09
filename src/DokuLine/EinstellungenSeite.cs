@@ -33,7 +33,7 @@ public sealed class EinstellungenSeite : Panel
     public List<EinstellungKarte> Karten { get; } = [];
     public string AktiveGruppe { get; private set; } = "Persönlich";
     public string KopfText => AktiveGruppe == VerzeichnisGruppe ? Verzeichnis.KopfText : $"{AktiveGruppe} · Änderungen gelten sofort";
-    // Schritt 29a: „Verzeichnisse“ zeigt statt Karten das Personenverzeichnis; dessen Knöpfe stehen in der Aktionsleiste.
+    // „Verzeichnisse“ zeigt statt Karten das Personenverzeichnis; dessen Knöpfe stehen in der Aktionsleiste.
     public const string VerzeichnisGruppe = "Verzeichnisse";
     public VerzeichnisAnsicht Verzeichnis { get; }
     public Button[] Knoepfe => AktiveGruppe == VerzeichnisGruppe ? Verzeichnis.Knoepfe : [];

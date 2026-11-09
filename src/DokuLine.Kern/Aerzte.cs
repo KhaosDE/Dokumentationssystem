@@ -2,12 +2,9 @@ using System.Globalization;
 
 namespace DokuLine.Kern;
 
-// Personenverzeichnis (Bauplan Schritt 29a; bis 0.33.3 „Ärzteverzeichnis“, Schritt 26b): Ärzte, Betreuer,
-// Angehörige, die Zuständigen aus Forensik und FOSA und sonstige Stellen – für den Nutzer getrennte
-// Verzeichnisse, technisch eine Tabelle mit dem Feld „Gruppe“. Überall Auswahl statt Freitext. Gelöscht
-// wird nicht – wer nicht mehr gebraucht wird, wird inaktiv gesetzt (frühere Einträge behalten den Namen).
-// Eine Person kann vielen Bewohnern zugeordnet sein, je mit Rolle („Mutter“, „Betreuer“ …). Nur
-// ausgedachte Angaben; E-Mail-Adressen in der Demo nur mit @example.org.
+// Personenverzeichnis: Ärzte, Betreuer, Angehörige, Forensik, FOSA und sonstige Stellen, je Bewohner mit Rolle
+// zugeordnet. Für den Nutzer getrennte Verzeichnisse, technisch eine Tabelle mit Feld „Gruppe“; nie löschen, nur
+// inaktiv setzen (frühere Einträge behalten den Namen). Nur ausgedachte Angaben, E-Mail nur @example.org.
 public enum PersonGruppe { Arzt, Betreuer, Angehoerige, Forensik, Fosa, Sonstige }
 
 public sealed record Person
@@ -31,7 +28,8 @@ public sealed record Person
 }
 
 // Eine Person bei einem Bewohner, mit Rolle (z. B. „Mutter“, „Betreuer“, „zuständige Psychologin Forensik“).
-public sealed record PersonZuordnung(long Id, long PersonId, long BewohnerId, string Rolle, DateTime Geaendert, string Kuerzel);
+public sealed record PersonZuordnung(long Id, long PersonId, long BewohnerId, string Rolle, DateTime Geaendert,
+    string Kuerzel);
 
 public sealed class PersonEingabe
 {
@@ -83,7 +81,8 @@ public static class PersonRegeln
         _ => "sonstige",
     };
 
-    public static PersonGruppe AusSchluessel(string s) => Gruppen.FirstOrDefault(g => Schluessel(g) == s, PersonGruppe.Sonstige);
+    public static PersonGruppe AusSchluessel(string s) => Gruppen.FirstOrDefault(g => Schluessel(g) == s,
+        PersonGruppe.Sonstige);
 
     // Bezeichnung der Felder „Fachrichtung“ und „Praxis“ je Gruppe; null = gibt es in dieser Gruppe nicht.
     public static string? FunktionText(PersonGruppe g) => g switch
@@ -103,9 +102,12 @@ public static class PersonRegeln
         _ => null,
     };
 
-    public static readonly string[] BetreuerArten = ["Berufsbetreuer", "ehrenamtlich", "Angehörige", "Vorsorgebevollmächtigte", "Betreuungsverein"];
-    public static readonly string[] FunktionAuswahl = ["Psychologe/Psychologin", "Arzt/Ärztin", "Pflege", "Sozialdienst"];
-    public static readonly string[] Beziehungen = ["Mutter", "Vater", "Schwester", "Bruder", "Tochter", "Sohn", "Partnerin", "Partner", "Tante", "Onkel", "Freundin", "Freund"];
+    public static readonly string[] BetreuerArten = ["Berufsbetreuer", "ehrenamtlich", "Angehörige",
+        "Vorsorgebevollmächtigte", "Betreuungsverein"];
+    public static readonly string[] FunktionAuswahl = ["Psychologe/Psychologin", "Arzt/Ärztin", "Pflege",
+        "Sozialdienst"];
+    public static readonly string[] Beziehungen = ["Mutter", "Vater", "Schwester", "Bruder", "Tochter", "Sohn",
+        "Partnerin", "Partner", "Tante", "Onkel", "Freundin", "Freund"];
 
     // Vorschlag für die Rolle bei einem Bewohner.
     public static string RolleVorschlag(Person p) => p.Gruppe switch
@@ -133,30 +135,35 @@ public static class PersonRegeln
     {
         var fehler = new List<string>();
         if (e.Name.Trim().Length == 0) fehler.Add("Name fehlt (ausgedacht, z. B. „Dr. Ulme“).");
-        if (e.Email.Trim().Length > 0 && !EmailGueltig(e.Email.Trim())) fehler.Add("E-Mail-Adresse bitte so: name@beispiel.de (ohne Leerzeichen).");
+        if (e.Email.Trim().Length > 0
+            && !EmailGueltig(e.Email.Trim())) fehler.Add("E-Mail-Adresse bitte so: name@beispiel.de (ohne Leerzeichen).");
         if (fehler.Count > 0) throw new Eingabefehler(fehler);
         bool funktion = FunktionText(e.Gruppe) is not null, stelle = StelleText(e.Gruppe) is not null;
         return new Person
         {
-            Id = id, Gruppe = e.Gruppe, Name = e.Name.Trim(), Art = e.Gruppe == PersonGruppe.Betreuer ? e.Art.Trim() : "",
-            Fachrichtung = funktion ? e.Fachrichtung.Trim() : "", Praxis = stelle ? e.Praxis.Trim() : "", Telefon = e.Telefon.Trim(), Mobil = e.Mobil.Trim(),
-            Email = e.Email.Trim(), Anschrift = e.Anschrift.Trim(), Erreichbarkeit = e.Erreichbarkeit.Trim(), Hinweis = e.Hinweis.Trim(), Aktiv = aktiv,
+            Id = id, Gruppe = e.Gruppe, Name = e.Name.Trim(),
+                Art = e.Gruppe == PersonGruppe.Betreuer ? e.Art.Trim() : "",
+            Fachrichtung = funktion ? e.Fachrichtung.Trim() : "", Praxis = stelle ? e.Praxis.Trim() : "",
+                Telefon = e.Telefon.Trim(), Mobil = e.Mobil.Trim(),
+            Email = e.Email.Trim(), Anschrift = e.Anschrift.Trim(), Erreichbarkeit = e.Erreichbarkeit.Trim(),
+                Hinweis = e.Hinweis.Trim(), Aktiv = aktiv,
         };
     }
 
     public static PersonEingabe AlsEingabe(Person a) => new()
     {
-        Gruppe = a.Gruppe, Name = a.Name, Art = a.Art, Fachrichtung = a.Fachrichtung, Praxis = a.Praxis, Telefon = a.Telefon, Mobil = a.Mobil,
+        Gruppe = a.Gruppe, Name = a.Name, Art = a.Art, Fachrichtung = a.Fachrichtung, Praxis = a.Praxis,
+            Telefon = a.Telefon, Mobil = a.Mobil,
         Email = a.Email, Anschrift = a.Anschrift, Erreichbarkeit = a.Erreichbarkeit, Hinweis = a.Hinweis,
     };
 
-    // Einfache Prüfung: ein @, davor etwas, danach ein Name mit Punkt; keine Leerzeichen und nichts, was eine
-    // mailto-Adresse verändert (wie beim Betreuer, 0.33.3).
+    // Dieselbe Prüfung wie beim Betreuer: nichts, was eine mailto-Adresse verändert.
     public static bool EmailGueltig(string email) => BetreuerRegeln.EmailGueltig(email);
 
     // Für den Hinweis eines Termins: „Dr. Esche (ausgedacht), Praxis am Markt, Tel. 0000 …“
     public static string Kontakt(Person a) =>
-        string.Join(", ", new[] { a.Name, a.Praxis, a.Telefon.Length > 0 ? $"Tel. {a.Telefon}" : "" }.Where(t => t.Length > 0));
+        string.Join(", ", new[] { a.Name, a.Praxis,
+            a.Telefon.Length > 0 ? $"Tel. {a.Telefon}" : "" }.Where(t => t.Length > 0));
 
     // Spalten der Liste je Verzeichnis (Vorgabe Tobi, 09.11.2026).
     public static string[] Spalten(PersonGruppe g) => g switch
@@ -170,14 +177,16 @@ public static class PersonRegeln
     };
 
     // Eine Zeile der Liste; namen: Bewohner-Id → Name.
-    public static string[] Zeile(Person p, IEnumerable<PersonZuordnung> zuordnungen, IReadOnlyDictionary<long, string> namen)
+    public static string[] Zeile(Person p, IEnumerable<PersonZuordnung> zuordnungen, IReadOnlyDictionary<long,
+        string> namen)
     {
         var meine = zuordnungen.Where(z => z.PersonId == p.Id).ToList();
         string anzahl = meine.Count.ToString(CultureInfo.InvariantCulture);
         string status = p.Aktiv ? "aktiv" : "inaktiv";
         return p.Gruppe switch
         {
-            PersonGruppe.Arzt or PersonGruppe.Forensik or PersonGruppe.Fosa => [p.Name, p.Fachrichtung, p.Praxis, p.Telefon, p.Email, anzahl, status],
+            PersonGruppe.Arzt or PersonGruppe.Forensik or PersonGruppe.Fosa => [p.Name, p.Fachrichtung, p.Praxis,
+                p.Telefon, p.Email, anzahl, status],
             PersonGruppe.Betreuer => [p.Name, p.Art, p.Praxis, p.Telefon, p.Email, anzahl, status],
             PersonGruppe.Angehoerige => [p.Name, p.Telefon, p.Mobil, ZugeordnetText(meine, namen), status],
             _ => [p.Name, p.Praxis, p.Telefon, p.Email, status],
@@ -185,8 +194,10 @@ public static class PersonRegeln
     }
 
     // „Anton Ahorn (Mutter), Berta Birke (Tante)“
-    public static string ZugeordnetText(IEnumerable<PersonZuordnung> zuordnungen, IReadOnlyDictionary<long, string> namen) =>
-        string.Join(", ", zuordnungen.Select(z => namen.GetValueOrDefault(z.BewohnerId, "?") + (z.Rolle.Length > 0 ? $" ({z.Rolle})" : "")));
+    public static string ZugeordnetText(IEnumerable<PersonZuordnung> zuordnungen, IReadOnlyDictionary<long,
+        string> namen) =>
+        string.Join(", ", zuordnungen.Select(z => namen.GetValueOrDefault(z.BewohnerId,
+            "?") + (z.Rolle.Length > 0 ? $" ({z.Rolle})" : "")));
 
     // Suche über Name, Stelle, Funktion, Art und Telefon.
     public static bool Passt(Person p, string suche) =>
