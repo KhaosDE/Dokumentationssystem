@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.39.0** (Bauplan Schritt 35: Schweigepflichtentbindungen).
+Stand: 09.11.2026. Version: **0.40.0** (Bauplan Schritt 36: Vitalwerte).
 
 ## Aktuell
 
@@ -379,8 +379,20 @@ Aktionsleiste und per Rechtsklick: Name eintippen, Antwort mit Wort und Farbe. I
 („2 entbunden · 1 keine Auskunft“, Namen im Hinweis) und die Frist „Entbindung endet …“ 4 Wochen vorher. Der
 Überleitungsbogen zeigt den Abschnitt „Schweigepflicht“ mit allen Einträgen.
 
+Neu in 0.40.0: Reiter **„Vitalwerte“** nach „Medikamentenplan“: Verlaufslinie je Wert (Blutdruck mit zwei Linien,
+angeordneter Bereich als grünes Band) und Tabelle (neueste oben) für 30 Tage, 3 Monate, 12 Monate oder alle.
+**„Vitalwerte erfassen …“**: Datum und Uhrzeit vorbelegt, mehrere Werte in einem Schritt, Bemerkung, Kürzel von selbst;
+Doppelklick auf eine Zeile korrigiert – nur mit Grund, der alte Wert bleibt gespeichert. **Grenzen nur nach ärztlicher
+Anordnung** (Arzt und Datum Pflicht): dann „außerhalb des angeordneten Bereichs“ in Gefahr-Farbe, auch als Marke im
+Akte-Kopf; ohne Anordnung ein leiser Hinweis „über/unter dem allgemeinen Richtwert“ (Tooltip: kein ärztlicher Grenzwert).
+BMI aus Gewicht und Größe (Personenbeschreibung). **Messaufträge** (täglich, wöchentlich, monatlich, je Schicht)
+erscheinen als Aufgabe im Dienst. Die letzten Werte stehen im Visiten-Rundgang und im Überleitungsbogen; „Drucken …“ für
+den Arztbesuch. Einstellungen: Richtwerte (Lehrbuchwerte, **nicht ärztlich geprüft**) mit Einheit des Blutzuckers
+(mg/dl oder mmol/l), Liste der Werte erweiterbar. Rechte: „Vitalwerte erfassen“ (alle), „Grenzen und Messaufträge
+festlegen“ (nur Fachkräfte).
+
 **Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
-als Nächstes 36 „Vitalwerte“ (0.40.0).
+als Nächstes 37 „Betriebsmodus Terminalserver“ (0.41.0).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1465,6 +1477,12 @@ als Nächstes 36 „Vitalwerte“ (0.40.0).
   Arten, umkopiert), Demo mit eigenem Nachhol-Schlüssel, Auskunftsleiste in `AkteAnsicht`, `AngabeFenster` mit
   Eintragsliste, `AuskunftFenster`, Spalte „Auskunft“ in der Übersicht, durchgestrichene Marken (`MarkenFeld`).
 
+- 0.40.0 — Bauplan Schritt 36: `Vitalwerte.cs` (`VitalRegeln`: Einheiten, Bewerten, BMI, Letzte, Fällig), Datenbank-Schritt
+  39 (`vitalwerte` unveränderlich, `vital_grenzen`, `messauftraege`, `messauftrag_aufgaben`, `vitalarten`),
+  `SpeicherVitalwerte.cs`, Richtwerte in der Datenbank (alle Rechner), Demo über vier Monate, `VitalwerteAnsicht` mit
+  `VerlaufBild`, `VitalwertFenster`, `VitalGrenzenFenster`, `RichtwerteFenster`, Rechte `vitalwerte_erfassen` und
+  `vital_grenzen`.
+
 ## Offene Punkte
 
 - 09.11.2026 (0.35.0): Die Ablage liegt neben der Datenbank (im Mehrplatzbetrieb im gemeinsamen Ordner); eine Sicherung
@@ -1559,6 +1577,16 @@ als Nächstes 36 „Vitalwerte“ (0.40.0).
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.40.0): Vitalwerte – die Richtwerte stehen in der Datenbank (gelten auf allen Rechnern), nicht in der Datei
+  der Einstellungen. Blutzucker wird in mg/dl gespeichert und nur in der Anzeige umgerechnet (Faktor 18), damit ein
+  Umschalten keine Werte verfälscht. Ein Messauftrag erzeugt je Schicht höchstens eine Aufgabe (eigene Tabelle statt einer
+  neuen Spalte an den Aufgaben, weil die Datenbank-Schritte wiederholbar bleiben müssen); er wird nicht von selbst erledigt,
+  wenn ein Wert erfasst wird – das bleibt ein Handgriff. Ein angeordneter Bereich hebt sich durch eine neue Anordnung ohne
+  Werte auf (Verlauf bleibt). Neue Werte aus der Liste haben keine Einheit und keine Richtwerte; die sechs festen lassen
+  sich stilllegen, nicht umbenennen. „Grenzen und Messaufträge festlegen“ ist vorbelegt für alle Positionen außer Therapie
+  und Verwaltung, dazu „nur Fachkräfte“. Die Marke im Akte-Kopf erscheint nur bei ärztlich angeordneten Bereichen und nur
+  für den neuesten Wert je Art; allgemeine Richtwerte bleiben leise in der Tabelle.
 
 - 09.11.2026 (0.39.0): Schweigepflicht – gespeichert als Fassung der ganzen Liste (wie Angehörige); ein Widerruf ist eine
   neue Fassung mit „widerrufen am“, die alte bleibt im Verlauf. Die Datenbank-Regel mit der festen Liste der Reiter-Arten
@@ -2437,6 +2465,11 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.40.0: Akte (z. B. des ersten Bewohners) → oben die Marke „Blutdruck …: außerhalb des angeordneten Bereichs“;
+Reiter „Vitalwerte“: Verlauf und Tabelle ansehen, Zeitraum wechseln, „Vitalwerte erfassen …“, eine Zeile doppelklicken
+und mit Grund korrigieren, „Grenzen und Messaufträge …“ (nur als Fachkraft), „Drucken …“. Aufgaben: Messaufträge im
+Frühdienst. Einstellungen → „Vitalwerte: allgemeine Richtwerte“.
 
 Version 0.39.0: Akte öffnen – unter dem Allergiehinweis die Auskunftsleiste ansehen; „Auskunft prüfen …“ → einen Namen
 eintippen. Reiter „Schweigepflicht“ → „Ändern …“: Eintrag hinzufügen, einen anderen widerrufen (Datum), speichern – er

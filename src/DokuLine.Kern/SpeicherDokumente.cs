@@ -261,8 +261,13 @@ public sealed partial class Speicher
         var personen = Personen().ToDictionary(p => p.Id);
         string Person(long? id) => id is long x && personen.TryGetValue(x, out var p)
             ? string.Join(", ", new[] { p.Name, p.Praxis, p.Telefon.Length > 0 ? $"Tel. {p.Telefon}" : "" }.Where(s => s.Length > 0)) : AngabenRegeln.NichtErfasst;
+        var angaben = Angaben(bewohnerId, heute);
         return new UeberleitungDaten(b, Einrichtung.Laden(), Diagnosen(bewohnerId), Notfallhinweise(bewohnerId),
-            [.. Verordnungen(bewohnerId).Select(v => MedikationRegeln.Stand(v, heute))], Angaben(bewohnerId, heute), Person, heute);
+            [.. Verordnungen(bewohnerId).Select(v => MedikationRegeln.Stand(v, heute))], angaben, Person, heute)
+        {
+            Vitalwerte = VitalRegeln.Letzte(Vitalwerte(bewohnerId), Richtwerte(),
+                angaben.GetValueOrDefault(Angabe.Personenbeschreibung)?.Lesen<Personenbeschreibung>()?.Groesse),
+        };
     }
 
     // Kopie mit Datum in die Dokumente (Kategorie „Ärztliches und Befunde“); im Protokoll steht der Anlass.

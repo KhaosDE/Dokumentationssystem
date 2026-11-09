@@ -221,7 +221,7 @@ public sealed class ListenFenster : Form
     public List<Button> Knoepfe { get; } = [];
 
     public static readonly Liste[] Verwaltung = [Liste.Bereiche, Liste.Positionen, Liste.Berichtsarten];
-    public static readonly Liste[] Akte = [Liste.Krankenkassen, Liste.Kostentraeger, Liste.Betreuungsaufgaben, Liste.Dokumentkategorien];
+    public static readonly Liste[] Akte = [Liste.Krankenkassen, Liste.Kostentraeger, Liste.Betreuungsaufgaben, Liste.Dokumentkategorien, Liste.Vitalarten];
 
     // arten: welche Listen das Fenster zeigt (Vorgabe: Bereiche, Positionen, Berichtsarten).
     public ListenFenster(Speicher speicher, Liste[]? arten = null)

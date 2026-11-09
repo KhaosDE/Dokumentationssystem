@@ -156,7 +156,8 @@ public sealed partial class Speicher
                 ("$fb", Zeit(AufgabenRegeln.FaelligIn(v, schicht))), ("$e", Zeit(schicht.Beginn)), ("$v", v.Kuerzel), ("$vo", v.Id));
             neu += Convert.ToInt32(Wert("SELECT changes()"), CultureInfo.InvariantCulture);
         }
-        if (neu > 0) AufgabenGeaendert?.Invoke();
+        int messungen = MessauftraegeErzeugen(jetzt);   // zählen nicht als Standardaufgaben
+        if (neu + messungen > 0) AufgabenGeaendert?.Invoke();
         return neu;
     }
 

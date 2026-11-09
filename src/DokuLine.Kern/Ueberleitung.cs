@@ -20,7 +20,10 @@ public sealed record UeberleitungAbschnitt(string Titel, IReadOnlyList<string> Z
 
 // Was das Programm über den Bewohner weiß (vom Speicher zusammengestellt).
 public sealed record UeberleitungDaten(Bewohner Bewohner, EinrichtungWerte Einrichtung, IReadOnlyList<Diagnose> Diagnosen, string Notfallhinweise,
-    IReadOnlyList<Tagesstand> Medikation, IReadOnlyDictionary<Angabe, AngabeFassung> Angaben, Func<long?, string> Person, DateOnly Heute);
+    IReadOnlyList<Tagesstand> Medikation, IReadOnlyDictionary<Angabe, AngabeFassung> Angaben, Func<long?, string> Person, DateOnly Heute)
+{
+    public IReadOnlyList<string> Vitalwerte { get; init; } = [];   // die letzten Werte je Art (Bauplan 36)
+}
 
 public sealed record EinrichtungWerte(string Name = "Wohnheim am Musterpark (ausgedacht)", string Anschrift = "Musterweg 1, 00000 Musterstadt (ausgedacht)",
     string Telefon = "0000 555 000");
@@ -37,7 +40,7 @@ public static class UeberleitungRegeln
 
     public static string Titel(Bewohner b) => $"Überleitungsbogen {b.Name}";
 
-    // Weitere Abschnitte (Schweigepflicht, Vitalwerte) liefern spätere Schritte über „zusatz“.
+    // zusatz: ersetzt einzelne Abschnitte (z. B. in Tests).
     public static List<UeberleitungAbschnitt> Zusammenstellen(UeberleitungDaten d, UeberleitungEingabe e,
         IReadOnlyDictionary<string, IReadOnlyList<string>>? zusatz = null)
     {
@@ -68,7 +71,7 @@ public static class UeberleitungRegeln
         Abschnitt(Unterbringung, [$"Beschluss: {BewohnerRegeln.BeschlussText(b)}"]);
         Abschnitt(Schweigepflicht, zusatz?.GetValueOrDefault(Schweigepflicht)
             ?? SchweigepflichtRegeln.FuerUeberleitung(d.Angaben.GetValueOrDefault(Angabe.Schweigepflicht), d.Person, d.Heute));
-        Abschnitt(Vitalwerte, zusatz?.GetValueOrDefault(Vitalwerte) ?? [Nicht]);
+        Abschnitt(Vitalwerte, zusatz?.GetValueOrDefault(Vitalwerte) ?? (d.Vitalwerte.Count > 0 ? d.Vitalwerte : [Nicht]));
         Abschnitt(Besonderheiten, e.Besonderheiten.Trim().Length > 0 ? [e.Besonderheiten.Trim()] : ["keine eingetragen"]);
         return liste;
     }

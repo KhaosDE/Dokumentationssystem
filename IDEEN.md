@@ -1711,7 +1711,7 @@ Umfang:
 - Der Überleitungsbogen (Schritt 33) zeigt den Eintrag zur jeweiligen Klinik.
 
 ## Vitalwerte
-Status: freigegeben (Bauplan Schritt 36; Auswahl Tobi 09.11.2026)
+Status: erledigt (09.11.2026, 0.40.0; Bauplan Schritt 36, Auswahl Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Vitalwerte je Bewohner erfassen, als Tabelle und Verlauf ansehen und ausdrucken.
 Warum: Wunsch Tobi (09.11.2026).

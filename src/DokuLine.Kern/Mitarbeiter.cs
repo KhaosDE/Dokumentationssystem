@@ -51,6 +51,8 @@ public static class Funktionen
     public const string DokumenteAnsehen = "dokumente_ansehen";           // Akte, Reiter „Dokumente“
     public const string DokumenteHinzufuegen = "dokumente_hinzufuegen";
     public const string DokumenteLoeschen = "dokumente_loeschen";
+    public const string VitalwerteErfassen = "vitalwerte_erfassen";
+    public const string VitalGrenzen = "vital_grenzen";   // angeordnete Bereiche, Messaufträge, Richtwerte
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -82,6 +84,8 @@ public static class Funktionen
         (DokumenteAnsehen, "Dokumente ansehen"),
         (DokumenteHinzufuegen, "Dokumente hinzufügen und in den Papierkorb legen"),
         (DokumenteLoeschen, "Dokumente endgültig löschen"),
+        (VitalwerteErfassen, "Vitalwerte erfassen"),
+        (VitalGrenzen, "Grenzen und Messaufträge festlegen"),
         (BereicheAlle, "Alle Bereiche zusammen ansehen (Übersicht)"),
         (DemoZuruecksetzen, "Demo-Daten zurücksetzen"),
     ];
@@ -121,7 +125,8 @@ public static partial class RechteRegeln
          "Psychologischer Fachdienst", "Pädagogischer Fachdienst", "Therapie"];
 
     // Assistenzkräfte machen keine Visiten.
-    public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten];
+    public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten,
+        Funktionen.VitalGrenzen];
 
     // „Nur Fachkräfte“, das nach der ersten Vorbelegung dazukam: in bestehenden Datenbanken einmal setzen.
     public static readonly string[] NurFachkraftNachtraeglich = [Funktionen.Visiten];
@@ -165,12 +170,16 @@ public static partial class RechteRegeln
     // Datenbanken einmal nachträglich vorbelegt.
     public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten,
         Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
-        Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen];
+        Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
+        Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
+    // Vitalwerte erfassen alle; Grenzen und Messaufträge alle mit Fachaufgaben (dazu „nur Fachkräfte“), nicht Therapie.
     public static bool Vorbelegt(string position, string funktion) =>
         funktion is Funktionen.AerztlicheAnsehen or Funktionen.AerztlicheBearbeiten ? position != "Verwaltung" :
+        funktion == Funktionen.VitalwerteErfassen ? true :
+        funktion == Funktionen.VitalGrenzen ? position is not ("Therapie" or "Verwaltung") :
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||
         (Vorgabe.TryGetValue(position, out var f) && f.Contains(funktion));
 

@@ -33,6 +33,7 @@ public sealed class AkteAnsicht : Panel
     // Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger (Bauplan 30): eine Ansicht für alle fünf Reiter.
     public AngabenAnsicht Angaben { get; }
     public DokumenteAnsicht Dokumente { get; }
+    public VitalwerteAnsicht Vital { get; }
     public Label KrankenkasseText { get; } = new() { Cursor = Cursors.Hand };
     public Label KostentraegerText { get; } = new() { Cursor = Cursors.Hand };
     // Personenbeschreibung (Bauplan 34): für das Meldeblatt; Marke, wenn älter als 12 Monate.
@@ -79,6 +80,8 @@ public sealed class AkteAnsicht : Panel
         Heb = new HebAnsicht(speicher) { Visible = false };
         Angaben = new AngabenAnsicht(speicher) { Visible = false };
         Dokumente = new DokumenteAnsicht(speicher) { Visible = false };
+        Vital = new VitalwerteAnsicht(speicher) { Visible = false };
+        Vital.Geaendert += () => { if (Bewohner is not null) Fuellen(Bewohner); };
         Angaben.DokumenteGewuenscht += kategorie => { Reiter.Waehlen("Dokumente"); if (Bewohner is not null) Dokumente.Zeigen(Bewohner, kategorie); };
         Angaben.Geaendert += () => { if (Bewohner is not null) BetreuerZeigen(Bewohner); };
         KrankenkasseText.Click += (_, _) => Reiter.Waehlen("Krankenkasse");
@@ -162,7 +165,7 @@ public sealed class AkteAnsicht : Panel
 
         Reiter.Gewechselt += _ => ReiterZeigen();
         AuskunftKnopf.Click += (_, _) => { if (Bewohner is not null) AuskunftGewuenscht?.Invoke(Bewohner); };
-        Controls.AddRange([kopfKarte, Allergie, Auskunft, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente]);
+        Controls.AddRange([kopfKarte, Allergie, Auskunft, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital]);
         ModuleAktualisieren();
     }
 
@@ -196,7 +199,10 @@ public sealed class AkteAnsicht : Panel
         bool reflexion = Reiter.Aktiv == "Reflexion";
         bool heb = Reiter.Aktiv == "HEB";
         bool dokumente = Reiter.Aktiv == "Dokumente";
+        bool vital = Reiter.Aktiv == "Vitalwerte";
         Dokumente.Visible = dokumente;
+        Vital.Visible = vital;
+        if (vital && Bewohner is not null) Vital.Zeigen(Bewohner);
         if (dokumente && Bewohner is not null) Dokumente.Zeigen(Bewohner);
         Angabe? angabe = Enum.GetValues<Angabe>().Cast<Angabe?>().FirstOrDefault(a => AngabenRegeln.Name(a!.Value) == Reiter.Aktiv);
         Angaben.Visible = angabe is not null;
@@ -215,7 +221,7 @@ public sealed class AkteAnsicht : Panel
         if (biografie && Bewohner is not null) Biografie.Zeigen(Bewohner);
         if (reflexion && Bewohner is not null) Reflexion.Zeigen(Bewohner);
         if (heb && Bewohner is not null) Heb.Zeigen(Bewohner);
-        ReiterPlatzhalter.Visible = !stamm && !medikation && !wochenplan && !biografie && !reflexion && !heb && modul is null && angabe is null && !dokumente;
+        ReiterPlatzhalter.Visible = !stamm && !medikation && !wochenplan && !biografie && !reflexion && !heb && modul is null && angabe is null && !dokumente && !vital;
         if (!stamm && Bauplan.Reiter.TryGetValue(Reiter.Aktiv, out var vorhaben))
             ReiterPlatzhalter.Setzen(vorhaben.Version, vorhaben.Beschreibung);
         PerformLayout();
@@ -302,6 +308,17 @@ public sealed class AkteAnsicht : Panel
         Auskunft.ResumeLayout();
     }
 
+    // Nur nach ärztlicher Anordnung: der neueste Wert je Art außerhalb des angeordneten Bereichs (Gefahr-Farbe, mit Wort).
+    private IEnumerable<Marke> VitalMarken(long id)
+    {
+        var grenzen = speicher.Grenzen(id);
+        if (grenzen.Count == 0) yield break;
+        var r = speicher.Richtwerte();
+        foreach (var w in speicher.Vitalwerte(id).GroupBy(w => w.Art).Select(g => g.First()))
+            if (VitalRegeln.Bewerten(w, grenzen.GetValueOrDefault(w.Art), r) is { Angeordnet: true })
+                yield return new Marke(MarkenArt.Vital, $"{w.Art} {VitalRegeln.WertText(w, r)}: {VitalRegeln.Ausserhalb}");
+    }
+
     public void BeschreibungBearbeiten()
     {
         if (Bewohner is null || Recht.Grund(speicher, Funktionen.BewohnerBearbeiten) is not null) return;
@@ -371,6 +388,7 @@ public sealed class AkteAnsicht : Panel
         marken.AddRange(Modulverwaltung.Marken(speicher, b, jetzt));
         if (speicher.OffeneAbgaengigkeit(b.Id!.Value) is Abgaengigkeit ab && !marken.Any(m => m.Art == MarkenArt.Abgaengig))
             marken.Insert(0, AbgaengigkeitRegeln.Marke(ab));
+        marken.AddRange(VitalMarken(b.Id!.Value));
         foreach (var m in marken)
             kopfMarken.Controls.Add(new MarkenFeld(m.Text, Stil.MarkeFuer(m.Art)) { Margin = new Padding(0, 0, Stil.AbstandMini, Stil.AbstandMini) });
         StatusText = speicher.Statusmeldung(b.Id!.Value, jetzt) is Statusmeldung status ? "Status: " + StatusmeldungRegeln.Langtext(status, jetzt) : null;
@@ -454,7 +472,7 @@ public sealed class AkteAnsicht : Panel
         Reiter.Bounds = new Rectangle(x, y, breite, Reiter.HoeheFuer(breite));
         y += Reiter.Height + S(Stil.AbstandGross);
 
-        foreach (Control ansicht in new Control[] { Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente }.Concat(ModulAnsichten))
+        foreach (Control ansicht in new Control[] { Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital }.Concat(ModulAnsichten))
         {
             if (!ansicht.Visible) continue;
             // Der Wochenplan füllt die Höhe bis zum unteren Rand.

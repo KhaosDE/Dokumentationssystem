@@ -151,6 +151,7 @@ public static class Stil
         Kern.MarkenArt.Medikation => MedikationGeaendert,
         Kern.MarkenArt.Zustaendig => Hinweis,   // Forensik, FOSA
         Kern.MarkenArt.Abgaengig => MedikationGeaendert,   // Gefahr-Farbe, immer mit Wort
+        Kern.MarkenArt.Vital => MedikationGeaendert,       // außerhalb des angeordneten Bereichs
         _ => Achtung,
     };
 

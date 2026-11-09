@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-public enum Liste { Bereiche, Positionen, Berichtsarten, Krankenkassen, Kostentraeger, Betreuungsaufgaben, Dokumentkategorien, Meldestellen }
+public enum Liste { Bereiche, Positionen, Berichtsarten, Krankenkassen, Kostentraeger, Betreuungsaufgaben, Dokumentkategorien, Meldestellen, Vitalarten }
 
 // Mitarbeiter, Bereiche, Positionen und Rechte im Speicher. Die Mitarbeiter stehen in der Tabelle
 // „kollegen“ (seit den Nachrichten), ihre Bereiche in „team_mitglieder“ – so gehen Nachrichten an
@@ -117,6 +117,8 @@ public sealed partial class Speicher
     {
         if (art == Liste.Berichtsarten && DokuRegeln.FesteArten.Contains(name))
             throw new Eingabefehler([$"„{name}“ vergibt das Programm selbst – bitte nicht ändern."]);
+        if (art == Liste.Vitalarten && VitalRegeln.Feste.Contains(name))
+            throw new Eingabefehler([$"„{name}“ hat feste Einheiten und Richtwerte – bitte nicht umbenennen (stilllegen geht)."]);
     }
 
     private List<Listeneintrag> Liste_(Liste art)
@@ -133,6 +135,7 @@ public sealed partial class Speicher
                                    "AND json_extract(x.inhalt, '$.Name') = k.name) FROM kostentraeger k ORDER BY nr, name",
             Liste.Dokumentkategorien => "SELECT name, aktiv, (SELECT COUNT(*) FROM dokumente d WHERE d.kategorie = k.name) FROM dokumentkategorien k ORDER BY nr, name",
             Liste.Meldestellen => "SELECT name, aktiv, 0 FROM meldestellen ORDER BY nr, name",
+            Liste.Vitalarten => "SELECT name, aktiv, (SELECT COUNT(*) FROM vitalwerte w WHERE w.art = a.name) FROM vitalarten a ORDER BY nr, name",
             _ => "SELECT name, aktiv, 0 FROM betreuungsaufgaben ORDER BY nr, name",
         };
         var liste = new List<Listeneintrag>();
@@ -151,6 +154,7 @@ public sealed partial class Speicher
         Liste.Betreuungsaufgaben => "betreuungsaufgaben",
         Liste.Dokumentkategorien => "dokumentkategorien",
         Liste.Meldestellen => "meldestellen",
+        Liste.Vitalarten => "vitalarten",
         _ => "berichtsarten",
     };
 
@@ -163,6 +167,7 @@ public sealed partial class Speicher
         Liste.Kostentraeger => "Kostenträger",
         Liste.Dokumentkategorien => "Kategorien der Dokumente",
         Liste.Meldestellen => "Stellen bei Abgängigkeit",
+        Liste.Vitalarten => "Vitalwerte",
         _ => "Aufgabenbereiche der Betreuung",
     };
 

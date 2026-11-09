@@ -58,6 +58,8 @@ public sealed class VisitenRundgang : Panel
     public DataGridView BedarfTabelle { get; } = MedikationAnsicht.BedarfTabelleBauen();
     public Label KeineMedikation { get; } = new() { AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite, Text = "Keine Medikation." };
     public Label LetzteVisite { get; } = new() { AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite, UseMnemonic = false };
+    // Die letzten Vitalwerte je Art (Bauplan 36).
+    public Label Vitalwerte { get; } = new() { AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite, UseMnemonic = false };
     public Label OffeneAufgaben { get; } = new() { AutoSize = true, ForeColor = Stil.Achtung.Text, BackColor = Stil.Seite, UseMnemonic = false };
     public Label Fehler { get; } = new() { AutoSize = true, ForeColor = Stil.Beschluss.Text, BackColor = Stil.Beschluss.Flaeche, Padding = new Padding(Stil.AbstandKlein), Visible = false };
     public VisiteEintragFeld? Feld { get; private set; }
@@ -105,7 +107,7 @@ public sealed class VisitenRundgang : Panel
         Liste.SelectedIndexChanged += (_, _) => { if (!fuellt && Liste.SelectedIndices.Count == 1 && Liste.SelectedIndices[0] != Aktuell) Waehlen(Liste.SelectedIndices[0]); };
         Tabelle.AccessibleName = "Aktuelle Medikation";
         BedarfTabelle.AccessibleName = "Medikation bei Bedarf";
-        rechts.Controls.AddRange([Name_, Allergie, MedikationGeaendert, Diagnosen, Fehler, medikationTitel, Tabelle, KeineMedikation, bedarfTitel, BedarfTabelle, LetzteVisite, OffeneAufgaben, eingabeTitel, weiter]);
+        rechts.Controls.AddRange([Name_, Allergie, MedikationGeaendert, Diagnosen, Fehler, medikationTitel, Tabelle, KeineMedikation, bedarfTitel, BedarfTabelle, LetzteVisite, Vitalwerte, OffeneAufgaben, eingabeTitel, weiter]);
         rechts.Layout += (_, _) => RechtsAnordnen();
         Controls.AddRange([kopfleiste, Liste, rechts]);
         ListeFuellen();
@@ -209,6 +211,9 @@ public sealed class VisitenRundgang : Panel
         var letzte = speicher.Visiten(id).FirstOrDefault();
         var eintrag = letzte?.Eintraege.FirstOrDefault(e => e.BewohnerId == id);
         LetzteVisite.Text = letzte is null ? "Letzte Visite: noch keine." : $"Letzte Visite: {Datum.Text(letzte.Datum)} ({letzte.Arzt}): {eintrag?.Besprochen}";
+        var groesse = speicher.Angaben(id, heute).GetValueOrDefault(Angabe.Personenbeschreibung)?.Lesen<Personenbeschreibung>()?.Groesse;
+        var vital = VitalRegeln.Letzte(speicher.Vitalwerte(id), speicher.Richtwerte(), groesse);
+        Vitalwerte.Text = vital.Count == 0 ? "Vitalwerte: noch keine." : "Letzte Vitalwerte: " + string.Join(" · ", vital);
         var offen = speicher.Aufgaben(Jetzt()).Where(a => a.BewohnerId == id && (a.VisiteAnordnungId is not null || a.Text.Contains("Medik", StringComparison.Ordinal))).ToList();
         OffeneAufgaben.Text = offen.Count == 0 ? "" : "Offen zur Medikation: " + string.Join(" · ", offen.Select(a => a.Text));
         OffeneAufgaben.Visible = offen.Count > 0;
@@ -363,6 +368,7 @@ public sealed class VisitenRundgang : Panel
         }
         if (Tabelle.Rows.Count == 0 && BedarfTabelle.Rows.Count == 0) Setzen(KeineMedikation);
         Setzen(LetzteVisite, Stil.AbstandMini);
+        Setzen(Vitalwerte, Stil.AbstandMini);
         if (OffeneAufgaben.Text.Length > 0) Setzen(OffeneAufgaben);
         y += Stil.Px(this, Stil.AbstandKlein);
         Setzen(eingabeTitel, Stil.AbstandMini);

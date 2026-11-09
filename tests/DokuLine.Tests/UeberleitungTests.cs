@@ -41,7 +41,8 @@ public sealed class UeberleitungTests : IDisposable
         var betreuung = inhalt.Single(a => a.Titel == UeberleitungRegeln.Betreuung).Zeilen;
         Assert.Contains(betreuung, z => z.StartsWith("Zuständig (Forensik"));
         Assert.Contains(betreuung, z => z.Contains(ZustaendigkeitRegeln.BetreuerNichtZustaendig) || z.Contains(AngabenRegeln.NichtErfasst) || z.StartsWith("keine"));
-        Assert.Equal([AngabenRegeln.NichtErfasst], inhalt.Single(a => a.Titel == UeberleitungRegeln.Vitalwerte).Zeilen);   // kommt mit Schritt 36
+        var vital = inhalt.Single(a => a.Titel == UeberleitungRegeln.Vitalwerte).Zeilen;   // Schritt 36: die letzten Werte je Art
+        Assert.True(vital.SequenceEqual([AngabenRegeln.NichtErfasst]) || vital.All(z => z.Contains(':')));
         Assert.All(inhalt, a => Assert.NotEmpty(a.Zeilen));   // nie leer
         // Nur Angehaktes.
         var wenig = UeberleitungRegeln.Zusammenstellen(s.UeberleitungDaten(b.Id!.Value, Jetzt), E(UeberleitungRegeln.Person, UeberleitungRegeln.Allergien));

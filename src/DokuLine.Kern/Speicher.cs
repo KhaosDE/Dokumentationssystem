@@ -912,6 +912,57 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER IF NOT EXISTS akte_angaben_bleiben BEFORE UPDATE ON akte_angaben
             BEGIN SELECT RAISE(ABORT, 'Angaben der Akte werden nicht überschrieben – jede Änderung ist eine neue Fassung.'); END;
         """,
+        // 39 – Vitalwerte: Werte (nie überschrieben; Korrektur = neuer Eintrag mit Vorgänger und Grund), angeordnete Bereiche,
+        // Messaufträge (je Auftrag und Schicht höchstens eine Aufgabe), die Liste der Werte.
+        """
+        CREATE TABLE IF NOT EXISTS vitalarten (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO vitalarten (name, nr) VALUES ('Blutdruck', 1), ('Puls', 2), ('Temperatur', 3), ('Gewicht', 4), ('Blutzucker', 5),
+            ('Sauerstoffsättigung', 6);
+        CREATE TABLE IF NOT EXISTS vitalwerte (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            zeit        TEXT NOT NULL,
+            art         TEXT NOT NULL,
+            wert        REAL NOT NULL,
+            wert2       REAL,
+            bemerkung   TEXT NOT NULL DEFAULT '',
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL,
+            vorgaenger  INTEGER REFERENCES vitalwerte(id),
+            grund       TEXT NOT NULL DEFAULT ''
+        );
+        CREATE INDEX IF NOT EXISTS vitalwerte_bewohner ON vitalwerte (bewohner_id, zeit);
+        CREATE TRIGGER IF NOT EXISTS vitalwerte_bleiben BEFORE UPDATE ON vitalwerte
+            BEGIN SELECT RAISE(ABORT, 'Vitalwerte werden nicht überschrieben – eine Korrektur ist ein neuer Eintrag mit Grund.'); END;
+        CREATE TABLE IF NOT EXISTS vital_grenzen (
+            id            INTEGER PRIMARY KEY,
+            bewohner_id   INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art           TEXT NOT NULL,
+            von REAL, bis REAL, von2 REAL, bis2 REAL,
+            arzt_id       INTEGER REFERENCES aerzte(id) ON DELETE SET NULL,
+            angeordnet_am TEXT NOT NULL,
+            kuerzel       TEXT NOT NULL,
+            erfasst       TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS messauftraege (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL,
+            rhythmus    TEXT NOT NULL CHECK (rhythmus IN ('taeglich', 'woechentlich', 'monatlich')),
+            tag         INTEGER NOT NULL DEFAULT 0,
+            schicht     TEXT NOT NULL CHECK (schicht IN ('frueh', 'spaet', 'nacht')),
+            ab          TEXT NOT NULL,
+            beendet     TEXT,
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS messauftrag_aufgaben (
+            messauftrag_id INTEGER NOT NULL REFERENCES messauftraege(id) ON DELETE CASCADE,
+            schicht_tag    TEXT NOT NULL,
+            schicht        TEXT NOT NULL,
+            PRIMARY KEY (messauftrag_id, schicht_tag, schicht)
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1085,10 +1136,11 @@ public sealed partial class Speicher : IDisposable
              aerztlich = Meta(DemoAerztlich) is null, betreuer = Meta(DemoBetreuer) is null, personen = Meta(DemoPersonen) is null, bedarf = Meta(DemoBedarf) is null,
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
-             akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null;
+             akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
+             vital = Meta(DemoVital) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1112,6 +1164,7 @@ public sealed partial class Speicher : IDisposable
         if (personen || betreuer) DemoPersonenEinfuegen(transaktion);   // übernimmt auch die Betreuer
         if (akte || personen || betreuer || aerzte) DemoAkteAngabenEinfuegen(transaktion);   // hängt an Personen und Betreuern
         if (schweigepflicht || akte || personen || betreuer || aerzte) DemoSchweigepflichtEinfuegen(transaktion);   // hängt an den Angaben der Akte
+        if (vital || aerzte) DemoVitalEinfuegen(transaktion);   // die Grenzen nennen einen Arzt
         if (dokumente) DemoDokumenteEinfuegen(transaktion);
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
@@ -1167,6 +1220,7 @@ public sealed partial class Speicher : IDisposable
             DemoPersonenEinfuegen(transaktion);
             DemoAkteAngabenEinfuegen(transaktion);
             DemoSchweigepflichtEinfuegen(transaktion);
+            DemoVitalEinfuegen(transaktion);
             DemoDokumenteEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);

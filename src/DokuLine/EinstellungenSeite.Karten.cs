@@ -72,6 +72,9 @@ public sealed partial class EinstellungenSeite
         MeldestellenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Meldestellen]));
         Karte("Wohnbereich", "Abgängigkeit: wer wird informiert", "Die Liste zum Abhaken bei einer Abgängigkeitsmeldung; Telefonnummern gehören mit in den Namen, z. B. „Rufbereitschaft (0000 000000)“.",
             MeldestellenKnopf, Funktionen.EinstellungenBereich);
+        RichtwerteKnopf.Click += (_, _) => FensterZeigen(new RichtwerteFenster(speicher));
+        Karte("Wohnbereich", "Vitalwerte: allgemeine Richtwerte", $"Hinweis „über/unter dem allgemeinen Richtwert“, wenn keine ärztliche Anordnung gilt. {VitalRegeln.RichtwertVermerk}",
+            RichtwerteKnopf, Funktionen.VitalGrenzen);
         logoVorschau.Paint += (_, e) => LogoZeichnen(e.Graphics);
         LogoKnopf.Click += (_, _) => LogoWaehlen();
         LogoWeg.Click += (_, _) => LogoEntfernen();
@@ -158,7 +161,7 @@ public sealed partial class EinstellungenSeite
         Karte("Verwaltung", "Bereiche, Positionen und Berichtsarten",
             "Listen zum Zuordnen; stilllegen statt löschen, solange etwas zugeordnet ist.", ListenKnopf);
         AkteListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, ListenFenster.Akte));
-        Karte("Verwaltung", "Listen für die Akte", "Auswahl in den Reitern Krankenkasse, Kostenträger, Betreuung und Dokumente (Demo: ausgedachte Namen).",
+        Karte("Verwaltung", "Listen für die Akte", "Auswahl in den Reitern Krankenkasse, Kostenträger, Betreuung, Dokumente und Vitalwerte (Demo: ausgedachte Namen).",
             AkteListenKnopf);
         UebernahmeKnopf.Click += (_, _) => { using var f = new AkteUebernahmeFenster(speicher); Dialog.Zeigen(f, FindForm()); Geaendert?.Invoke(); };
         Karte("Verwaltung", "Digitale Akte übernehmen", "Vorhandene Ordner (ein Unterordner je Bewohner) in die Ablage „Dokumente“ kopieren – mit Vorschau; " +
