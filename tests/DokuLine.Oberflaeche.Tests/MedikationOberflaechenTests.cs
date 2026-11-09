@@ -70,9 +70,11 @@ public class MedikationOberflaechenTests
         {
             Assert.Single(m.Eintraege);
             Assert.StartsWith("pausiert bis ", Zelle(m.Tabelle, "status"));
-            Assert.Equal(Stil.Achtung.Flaeche, m.Tabelle.Rows[0].Cells["status"].Style.BackColor);
+            // Eine Pause der letzten sieben Tage ist eine frische Änderung (29l): rot statt Achtung-Farbe.
+            bool frisch = MedikationsAenderungen.ZeilenText(m.Eintraege[0].Verordnung, DateOnly.FromDateTime(DateTime.Now)) is not null;
+            Assert.Equal(frisch ? Stil.MedikationGeaendert.Flaeche : Stil.Achtung.Flaeche, m.Tabelle.Rows[0].Cells["status"].Style.BackColor);
             m.TagFeld.Text = Heute(5);   // nach der Pause
-            Assert.Equal("aktiv", Zelle(m.Tabelle, "status"));
+            Assert.EndsWith("aktiv", Zelle(m.Tabelle, "status"));
             m.TagFeld.Text = "irgendwann";
             Assert.True(m.TagFehler.Visible);
             Assert.False(m.Tabelle.Visible);
@@ -89,7 +91,7 @@ public class MedikationOberflaechenTests
         using (u)
         using (f)
         {
-            Assert.StartsWith("Stufe 2 von 3 · nächste Stufe ab ", Zelle(m.Tabelle, "status"));
+            Assert.Contains("Stufe 2 von 3 · nächste Stufe ab ", Zelle(m.Tabelle, "status"));   // davor ggf. die frische Änderung (29l)
             Assert.Equal("1", Zelle(m.Tabelle, "morgens"));
         }
         var (u2, f2, m2) = Oeffnen("Holunder");
@@ -152,7 +154,7 @@ public class MedikationOberflaechenTests
             Assert.Equal(vorher + 1, m.Eintraege.Count);
             Tagesstand Stand() => m.Eintraege.Single(s => s.Verordnung.Medikament.StartsWith("Citalopram"));
             int Zeile() => m.Eintraege.IndexOf(Stand());
-            Assert.Equal("aktiv", Zelle(m.Tabelle, "status", Zeile()));
+            Assert.Equal($"neu seit {DateTime.Today:dd.MM.} · aktiv", Zelle(m.Tabelle, "status", Zeile()));   // frisch verordnet (29l)
             Assert.Equal("Dr. Test (ausgedacht)", Zelle(m.Tabelle, "arzt", Zeile()));
 
             // Klick auf die Zeile: Einzelheiten, dort „Pause …“ – danach öffnet sich die Pause.

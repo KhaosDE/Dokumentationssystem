@@ -19,7 +19,7 @@ public class VisitenRundgangTests
         var seite = f.Visiten;
         Assert.Equal("Visite beginnen …", seite.BeginnenKnopf.Text);
         Assert.Contains(seite.BeginnenKnopf, f.Kopf.Knoepfe);
-        long ahorn = u.Demo("Ahorn").Id!.Value, birke = u.Demo("Birke").Id!.Value;
+        long ahorn = u.Demo("Ahorn").Id!.Value, holunder = u.Demo("Holunder").Id!.Value;   // beide Zi. 101 (Fenster, Tür)
         int imBereich = u.Speicher.AlleBewohner().Count(b => b.Wohnbereich == "R1");
 
         string? fehler = null;
@@ -63,7 +63,7 @@ public class VisitenRundgangTests
         Assert.Equal("1 Aufgabe vorgemerkt", r.VorgemerktText.Text);
         Assert.True(r.Liste.Items[0].Checked);   // Häkchen „besprochen“
         Assert.Equal("Schläft gut, Abenddosis bleibt.", u.Speicher.VisitenEntwurf("R1")!.Eintrag(ahorn).Besprochen);   // schon gespeichert
-        Assert.Equal(birke, r.Bewohner[r.Aktuell].Id);
+        Assert.Equal(holunder, r.Bewohner[r.Aktuell].Id);   // nach Zimmer: dasselbe Zimmer, Bett an der Tür
         r.Feld!.Besprochen.Text = "Herzklopfen beim Treppensteigen.";
         r.Feld.FacharztNoetig.Checked = true;
         r.Feld.Fachrichtung.Text = "Kardiologie";
@@ -80,7 +80,7 @@ public class VisitenRundgangTests
         Assert.Equal("Visite Psychiater fortsetzen", seite.BeginnenKnopf.Text);   // ein Entwurf je Bereich, mit seiner Art
         Assert.True(seite.Beginnen());   // ohne Fenster: der Entwurf geht weiter
         r = seite.Rundgang!;
-        Assert.Equal("Herzklopfen beim Treppensteigen.", r.Entwurf.Eintrag(birke).Besprochen);
+        Assert.Equal("Herzklopfen beim Treppensteigen.", r.Entwurf.Eintrag(holunder).Besprochen);
         Assert.Equal(imBereich, r.Bewohner.Count);   // der Bewohner aus R2 ist wieder dabei
         seite.ArtWaehlen(VisitenRegeln.Psychiater);
 

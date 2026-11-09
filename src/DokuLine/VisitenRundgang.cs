@@ -76,7 +76,7 @@ public sealed class VisitenRundgang : Panel
         WeitereWaehlen = texte => Eingabe.Waehlen(FindForm(), "Weitere Bewohner", "Wer kommt dazu?", texte);
         // Dazu, wer schon im Entwurf steht (auch aus anderen Bereichen, über „Weitere Bewohner …“).
         alle = speicher.AlleBewohner().Where(b => b.Wohnbereich == entwurf.Bereich || entwurf.Eintraege.Any(e => e.BewohnerId == b.Id)).ToList();
-        Bewohner = [.. alle];
+        Bewohner = NachZimmer(alle);
         titel.Text = $"Visite {entwurf.Art} {Datum.Text(entwurf.Datum)} · {entwurf.Arzt}" + (entwurf.Teilnehmer.Length > 0 ? $" · dabei: {entwurf.Teilnehmer}" : "");
         Sortierung.Items.AddRange(["nach Zimmer", "nach Name"]);
         Sortierung.SelectedIndex = 0;
@@ -134,11 +134,15 @@ public sealed class VisitenRundgang : Panel
     {
         Merken();
         long? id = Aktuell >= 0 ? Bewohner[Aktuell].Id : null;
-        Bewohner = Sortierung.SelectedIndex == 1 ? [.. alle.OrderBy(b => b.Nachname).ThenBy(b => b.Vorname)] : [.. alle.OrderBy(b => b.Zimmer, StringComparer.Ordinal)];
+        Bewohner = Sortierung.SelectedIndex == 1 ? [.. alle.OrderBy(b => b.Nachname).ThenBy(b => b.Vorname)] : NachZimmer(alle);
         ListeFuellen();
         Aktuell = -1;
         Waehlen(Math.Max(0, Bewohner.FindIndex(b => b.Id == id)));
     }
+
+    // Wie auf der Station: Zimmer für Zimmer, im Doppelzimmer erst das Bett am Fenster.
+    private static List<Bewohner> NachZimmer(IEnumerable<Bewohner> liste) =>
+        [.. liste.OrderBy(b => b.Zimmer, StringComparer.Ordinal).ThenBy(b => b.Bett == ZimmerRegeln.Tuer ? 1 : 0)];
 
     private void ListeFuellen()
     {

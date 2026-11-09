@@ -34,7 +34,7 @@ public class NachrichtenOberflaechenTests
         f.BenutzerWaehlen("OP");
         Assert.Equal("Angemeldet: OP – Olga Pirol", f.Kopf.BenutzerText);
         Assert.Equal("Nachrichten", f.AktiverBereich);
-        Assert.Empty(f.Nachrichten.Karten);                                        // OP hat nichts bekommen
+        Assert.Single(f.Nachrichten.Karten);                                       // OP: nur die gelesene Team-Nachricht der Therapie (29n)
         Assert.True(f.Kopf.Kuvert.Visible);
         Assert.Equal(0, f.Kopf.Kuvert.Ungelesen);
         Assert.Equal("Keine ungelesenen Nachrichten", f.Kopf.Kuvert.HinweisText);
