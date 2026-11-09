@@ -70,7 +70,25 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 28 | E-Mail und Kalender über externe Programme | 0.31.0 |
 | 29 | Einstellungen neu gegliedert | 0.32.0 |
 | 29a | Personenverzeichnis (Ärzte, Betreuer, Angehörige, Forensik, FOSA) | 0.33.3 |
-| 30 | Akte: Reiter Betreuung, Krankenkasse, Kostenträger | 0.34.0 |
+| 29b | Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter | 0.33.4 |
+| 29c | Rechte: Fehlendes ausblenden statt ausgrauen | 0.33.5 |
+| 29d | Wohnbereich einmal in der Übersicht wählen, gilt überall | 0.33.6 |
+| 29q | Aufgaben gehören zu einem Bewohner oder einem Bereich | 0.33.6 |
+| 29r | Übersicht: Überschriften der Kästen eingerahmt | 0.33.6 |
+| 29s | Aufräumen nach den Code-Regeln (ohne neue Funktionen) | 0.33.7 |
+| 29e | Nachrichten: Kuvert in der Kopfzeile statt Hinweis in jedem Fenster | 0.33.7 |
+| 29f | Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation) | 0.33.8 |
+| 29g | Tagesplan im normalen Programmstil, kleiner und übersichtlicher | 0.33.9 |
+| 29h | Übergabe nach Schichten, kompakt und schneller zu bearbeiten | 0.33.10 |
+| 29i | Wochenplan ohne Datum | 0.33.11 |
+| 29j | Ausgangsliste: alle Bewohner auf einen Blick, ohne Unterbringung | 0.33.12 |
+| 29k | Visite: Psychiater und Hausarzt getrennt, Berichte in der Dokumentation | 0.33.13 |
+| 29l | Medikamentenänderung auffällig markieren und in die Übergabe | 0.33.14 |
+| 29m | Schnellerer Wechsel zwischen den Bereichen | 0.33.15 |
+| 29n | Therapie als eigener Bereich (Dokumentation, Nachrichten, Aufgaben, Wochenpläne) | 0.33.16 |
+| 29o | Therapie-Anzeige für den Fernseher im Wohnbereich | 0.33.17 |
+| 29p | Nachschlagen beim BfArM absichern | 0.33.18 |
+| 30 | Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger | 0.34.0 |
 | 30a | Zuständigkeit Forensik und FOSA, Bestellweg der Medikamente | 0.34.1 |
 | 31 | Akte: Reiter „Dokumente“ – digitale Akte in DokuLine | 0.35.0 |
 | 32 | Vorhandene digitale Akte übernehmen | 0.36.0 |
@@ -78,6 +96,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 34 | Abgängigkeitsmeldung | 0.38.0 |
 | 35 | Schweigepflichtentbindungen | 0.39.0 |
 | 36 | Vitalwerte | 0.40.0 |
+| 37 | Betriebsmodus für den Terminalserver | 0.41.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -1478,7 +1497,7 @@ Umsetzung (Vorschlag von Claude Code, von Tobi bestätigt):
   Assistenzkraft Pflichtfeld „in Absprache mit“ (Fachkraft aus der Liste); erscheint als Bericht in der Akte.
 
 
-## Akte: Reiter Betreuer, Krankenkasse, Kostenträger
+## Akte: Reiter Betreuung, Angehörige, Ärzte, Krankenkasse, Kostenträger
 Status: freigegeben (Bauplan Schritt 30; OK Tobi 09.11.2026)
 Datum: 09.11.2026
 Was: Die Bewohnerakte bekommt drei neue Reiter für die Verwaltungsangaben.
@@ -1486,17 +1505,18 @@ Warum: Vorgabe Tobi (09.11.2026): Das Bewohnerstammblatt muss weiter ausgebaut w
 Daten, die auch durch die Biografie ergänzt werden, gehören Reiter für Krankenkasse,
 Kostenträger, Betreuer und Dokumente hinein.
 Umfang (Vorschlag):
-- **Reihenfolge der Reiter:** Stammdaten · Betreuung · Krankenkasse · Kostenträger · Dokumente ·
-  Berichte · Medikamentenplan · Wochenplan · Biografie · Reflexion · HEB (Modul-Reiter wie
+- **Reihenfolge der Reiter** (Ergänzung 09.11.2026): Stammdaten · Betreuung · Angehörige · Ärzte ·
+  Krankenkasse · Kostenträger · Schweigepflicht (Schritt 35) · Dokumente ·
+  Medikamentenplan · Wochenplan · Biografie · Reflexion · HEB (Modul-Reiter wie
   „Ausgang“ danach). Die Stammdaten zeigen je eine Kurzzeile („Betreuer: …“, „Krankenkasse: …“,
   „Kostenträger: … bis …“), ein Klick springt in den Reiter.
 - **Drei Zustände** für jede Angabe (`CLAUDE.md`, Regel 5): eingetragen · „keine“ (z. B. keine
   gesetzliche Betreuung) · „nicht erfasst“ (in Achtung-Farbe).
 - **Jede Änderung ist eine neue Fassung** mit Kürzel und Datum, der Verlauf bleibt sichtbar
   („ab Datum …“). Bearbeiten mit dem Recht „Bewohner anlegen und bearbeiten“.
-- **Reiter „Betreuung“** (Ergänzung 09.11.2026: heißt „Betreuung“, weil darin auch Angehörige
-  und die Zuständigen aus Forensik bzw. FOSA stehen, Schritt 30a). Abschnitt **Betreuer** (die
-  bisherige Zeile aus den Stammdaten zieht hierher um):
+- **Reiter „Betreuung“** (heißt so, weil darin auch die Zuständigen aus Forensik bzw. FOSA
+  stehen, Schritt 30a). Abschnitt **Betreuer** (die bisherige Zeile aus den Stammdaten zieht
+  hierher um):
   - Art: Berufsbetreuer · ehrenamtlich · Angehörige · Vorsorgebevollmächtigte.
   - Person aus dem **Personenverzeichnis** (Schritt 29a), dort Name, Büro, Telefon, E-Mail,
     Anschrift. Fehlt sie: „Person anlegen …“ direkt aus der Auswahl.
@@ -1504,10 +1524,30 @@ Umfang (Vorschlag):
     Vermögenssorge, Behörden und Ämter, Wohnungsangelegenheiten, Post, Unterbringung) plus
     Freitext. Liste in den Einstellungen änderbar.
   - Bestellt am, **Überprüfung bis** → Marke „Betreuung endet …“ 8 Wochen vorher.
-  - Weitere Personen: Ersatzbetreuer. Abschnitt **Angehörige und Kontakte** darunter: Personen
-    aus dem Personenverzeichnis mit Beziehung (Mutter, Bruder …), je mit Schweigepflicht-Zustand
-    (Schritt 35).
+  - Weitere Personen: Ersatzbetreuer.
   - Knöpfe „E-Mail an Betreuer …“ (wie bisher) und „Betreuerausweis öffnen“ (aus „Dokumente“).
+- **Reiter „Angehörige“** (Vorgabe Tobi, 09.11.2026: eigener Reiter):
+  - Liste der Angehörigen aus dem Verzeichnis „Angehörige“ (Schritt 29a): Name, **Beziehung**
+    (Mutter, Bruder, Partnerin …), Telefon, Mobil, E-Mail, Anschrift.
+  - Kennzeichen „Hauptkontakt“ und „im Notfall benachrichtigen“ (je ja/nein).
+  - Je Person der **Schweigepflicht-Zustand** als Marke mit Wort und Farbe (Schritt 35), ein
+    Klick öffnet den Eintrag im Reiter „Schweigepflicht“.
+  - Hinweis je Person (Freitext, z. B. „Besuch nur nach Absprache“).
+  - „Angehörigen hinzufügen …“: aus dem Verzeichnis wählen oder neu anlegen. Drei Zustände für
+    den Reiter: Angehörige eingetragen · „keine Angehörigen bekannt“ · „nicht erfasst“.
+- **Reiter „Ärzte“** (Vorgabe Tobi, 09.11.2026): Zuteilung der Ärzte zum Bewohner.
+  - Feste Zeilen **Hausarzt** und **Psychiater**, je mit drei Zuständen: Arzt aus dem
+    Verzeichnis „Ärzte“ · „keiner“ · „nicht erfasst“ (Achtung-Farbe).
+  - **Weitere Ärzte** frei ergänzbar: Arzt aus dem Verzeichnis und Rolle (Fachrichtung des Arztes
+    vorbelegt, z. B. Zahnarzt, Neurologe, Gynäkologin), Hinweis.
+  - Je Zeile Praxis, Telefon und „seit“; Wechsel als neue Fassung mit Datum.
+  - Die zugeteilten Ärzte stehen in Visite, Medikamentenplan („verordnet von“), Kalender und
+    Überleitungsbogen **oben in der Auswahl**, alle übrigen Ärzte darunter.
+  - **Arztzuteilung schon bei der Aufnahme** (Vorgabe Tobi, 09.11.2026): Das Formular „Neuer
+    Bewohner …“ bekommt den Abschnitt **„Ärzte“** mit **Hausarzt** und **Psychiater** (Auswahl aus
+    „Verzeichnisse → Ärzte“, „Arzt anlegen …“ direkt aus der Auswahl). Für beide muss ein Zustand
+    gewählt sein — Arzt · „keiner“ · „noch nicht bekannt“ (= nicht erfasst) —, sonst lässt sich
+    die Aufnahme nicht abschließen. Weitere Ärzte optional. Die Angaben landen im Reiter „Ärzte“.
 - **Krankenkasse:**
   - Kasse (Auswahl aus einer Liste in den Einstellungen, Demo: ausgedachte Kassen wie
     „Musterkasse Süd“), Versichertennummer (Demo: ausgedacht), Status (Mitglied,
@@ -1599,7 +1639,7 @@ Umfang:
   „Hinweise für den Notfall“ (Ärztliche Informationen); **aktueller Medikamentenplan** mit Stand
   heute, auch Bedarf und Pausen; Betreuer mit Aufgabenbereichen und Telefon (bei Forensik:
   „nicht zuständig“, dafür die Zuständigen der Forensik bzw. FOSA, Schritt 30a); Krankenkasse und
-  Versichertennummer; Haus- und Fachärzte (Ärzteverzeichnis); Unterbringung bzw. Beschluss;
+  Versichertennummer; Hausarzt, Psychiater und weitere Ärzte (Reiter „Ärzte“); Unterbringung bzw. Beschluss;
   Schweigepflichtentbindung gegenüber der Klinik (Schritt 35); letzte Vitalwerte (Schritt 36);
   Freitext „Besonderheiten“ (Kommunikation, Hilfsmittel, was beruhigt).
 - Fehlende Angaben stehen als „nicht erfasst“ auf dem Blatt, nie als leeres Feld.
@@ -1720,8 +1760,23 @@ Warum: Vorgabe Tobi (09.11.2026): Die Personendatenbank, in der aktuell nur Ärz
 um Angehörige und Betreuer erweitert werden. Für Forensik und FOSA gibt es immer Kontaktdaten zu
 den Zuständigen, auch wegen der Medikamentenbestellung.
 Umfang:
-- Einstellungen → Verwaltung: „Ärzteverzeichnis“ heißt „Personenverzeichnis“. Filter nach
-  **Art:** Arzt/Ärztin · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stelle.
+- **Ein eigenes Verzeichnis je Gruppe** (Vorgabe Tobi, 09.11.2026: „Seitenmenü links, ich klicke
+  auf Ärzte und sehe eine Liste von allen Ärzten“): **„Verzeichnisse“ in den Einstellungen**
+  (Vorgabe Tobi, 09.11.2026: „Verzeichnisse kommt in die Einstellungen hinein“), als eigene Gruppe
+  im Seitenmenü der Einstellungen (Schritt 29). Darunter die Gruppen mit Zähler:
+  **Ärzte · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stellen**. Ein Klick zeigt rechts
+  die Liste dieser Gruppe mit eigenen Spalten, Suchfeld und „Neu …“ in der Aktionsleiste:
+  - Ärzte: Name, Fachrichtung, Praxis, Telefon, E-Mail, zugeordnete Bewohner (Anzahl).
+  - Betreuer: Name, Art (Berufsbetreuer, ehrenamtlich …), Büro, Telefon, E-Mail, Bewohner.
+  - Angehörige: Name, Telefon, Mobil, zugeordnet zu (Bewohner mit Beziehung).
+  - Forensik und FOSA: Name, Funktion, Klinik bzw. Ambulanz, Telefon, E-Mail, Bewohner.
+  - Sonstige Stellen: Name, Stelle, Telefon, E-Mail.
+  Doppelklick öffnet die Person; dort „zugeordnet zu …“ mit Sprung in die Akte.
+- Technisch darf es eine gemeinsame Tabelle mit dem Feld „Gruppe“ bleiben (einfacher); für den
+  Nutzer sind es getrennte Verzeichnisse. Das bisherige „Ärzteverzeichnis“ in den Einstellungen
+  wird zu „Verzeichnisse → Ärzte“. Kein eigener Bereich in der Seitenleiste des Programms.
+- Ansehen dürfen alle (Telefonnummern nachschlagen); ändern nur mit Recht (siehe unten). Wer kein
+  Recht für andere Teile der Einstellungen hat, sieht dort nur „Verzeichnisse“ (Schritt 29c).
 - Felder: Name, Art, Stelle (Praxis, Büro, Klinik, Ambulanz), **Funktion** (bei Forensik und
   FOSA: Psychologe/Psychologin, Arzt/Ärztin, Pflege, Sozialdienst; bei Ärzten die Fachrichtung),
   Telefon, Mobil, E-Mail (Demo nur `@example.org`), Anschrift, Erreichbarkeit, Hinweis,
@@ -1775,3 +1830,500 @@ Umfang:
 - Demo-Daten: je Bereich zwei Bewohner mit Forensik, drei mit FOSA-Nachsorge (davon einer
   zusätzlich Forensik); ausgedachte Klinik „Forensische Klinik Musterstadt“ und „FOSA
   Musterstadt“.
+
+## Bereich „Dokumentation“: alle Berichte an einem Ort, kompakt, mit Filter
+Status: freigegeben (Bauplan Schritt 29b; Entwurf 1 „Zeilen nach Tagen“ mit Änderungen, Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Alle Berichte stehen im Bereich **„Dokumentation“**. Links eine Seitenleiste mit den
+Bewohnern, rechts die Berichte: viele auf einmal, trotzdem übersichtlich, mit Filter. Der Reiter
+„Berichte“ in der Akte entfällt.
+Warum: Vorgabe Tobi (09.11.2026): Den Reiter „Berichte“ braucht es nicht bei jedem Bewohner extra.
+Unter „Dokumentation“ sollen alle Berichte stehen; in einer Seitenleiste kann man jeden Bewohner
+anklicken und sieht alle Berichte zu ihm. Es sollen viele Berichte auf einmal zu sehen sein,
+ohne dass es unübersichtlich wird, und es braucht eine Filterfunktion für besondere Berichte.
+Umfang:
+- **Seitenleiste des Programms:** „Bewohner“ heißt künftig **„Dokumentation“** (gleiche Stelle).
+  Sonst gäbe es wieder zwei fast gleiche Bereiche (Rückmeldung Tobi zu Übersicht/Bewohner,
+  08.11.2026). Die Akte öffnet man weiter per Doppelklick in Übersicht und Dokumentation oder
+  über „Akte öffnen“.
+- **Links die Bewohner-Seitenleiste** (schmal, etwa 240 px, einklappbar). Ergänzung Tobi
+  (09.11.2026): **kein Eintrag „Alle Bewohner“**; aufgeführt wird nur jeder Bewohner mit
+  **„Nachname, Vorname“**, alphabetisch nach Nachname, ohne Zimmer, Zähler oder Marken.
+  Darüber Bereichswahl und Suchfeld. Pfeiltasten blättern, die Berichte wechseln mit. Beim
+  Öffnen ist der erste Bewohner gewählt (bzw. der zuletzt gewählte).
+- **Rechts die Berichte als dichte Liste** — Entwurf 1 „Zeilen nach Tagen“ (Auswahl Tobi,
+  09.11.2026), mit diesen Änderungen:
+  - **Wochentage deutlich abgegrenzt:** Tagesüberschrift als eigener Balken über die ganze
+    Breite (heller Akzent 238, 242, 251, Radius 6 px, Schrift 11,5 pt Semibold, z. B. „Montag,
+    09.11.2026 · 3 Berichte“), mit 12–16 px Abstand zum vorigen Tag. Neueste oben.
+  - **Keine Schicht-Marke.** Stattdessen ist **jeder Bericht in der Farbe seiner Schicht
+    umrandet** (1,5 px, Radius 8 px): Früh Orange (238, 166, 60), Spät Blau (45, 84, 156),
+    Nacht Violett (91, 58, 153) — dieselben Farben wie in der Übergabe (29h). Das gilt auch für
+    Visitenberichte. Damit Farbe nicht allein steht: unter der Uhrzeit klein das Wort „Früh“,
+    „Spät“ bzw. „Nacht“ in Schichtfarbe, und ein Farbschlüssel „Rand: Früh · Spät · Nacht“ in
+    der Filterleiste.
+  - **Nur drei Marken bleiben:** „Wichtig“ (Gefahr-Fläche hell), **„Medikation geändert“**
+    (kräftiges Rot, weiße Schrift, Zeile leicht rot hinterlegt) und neu **„Bedarfsgabe“**
+    (Hinweis-Farbe). Keine Marken mehr für Übergabe, Berichtsart oder Lebensbereich in der
+    Liste (die Angaben bleiben gespeichert und filterbar).
+  - **Bedarfsgabe:** Jeder Bericht, der über „Bedarf gegeben …“ (Medikamentenplan, seit 0.33.0)
+    entsteht, trägt die Marke automatisch. In der Aktionsleiste der Dokumentation zusätzlich
+    „Bedarf gegeben …“ für den gewählten Bewohner (gleiches Recht wie im Medikamentenplan).
+  - **Visiten** erkennt man am fetten Anfang „Visite Psychiater – Dr. …“ bzw. „Visite Hausarzt –
+    Dr. …“ (keine eigene Marke).
+  - Eine Zeile: Uhrzeit (darunter das Schichtwort) · Marken · Text · Kürzel.
+  - Der Text zeigt **höchstens zwei Zeilen**, dann „… mehr“. Ein Klick klappt den Bericht in
+    der Liste auf (kein neues Fenster). Umschalter in der Aktionsleiste: **„kompakt“** (zwei
+    Zeilen, Vorgabe) · **„vollständig“** (ganzer Text).
+  - Nachträge stehen eingerückt direkt unter ihrem Bericht.
+  - „Wichtig“ bekommt am Zeilenanfang ein Wort-Zeichen in Gefahr-Farbe, „Übergabe“ in
+    Hinweis-Farbe; der übrige Bericht bleibt neutral (Farbe sparsam, `docs/gestaltung.md`).
+  - Richtwert: Bei 1920 × 1080 mindestens 15 Berichte im Kompaktmodus ohne Bildlauf.
+- **Filterleiste über der Liste** (gilt für den gewählten Bewohner; bleibt beim Wechsel des
+  Bewohners eingestellt):
+  - Zeitraum: Heute · 7 Tage (Vorgabe) · 30 Tage · frei wählbar.
+  - Knöpfe: Wichtig · Medikation geändert · Bedarfsgabe · Visite; dazu „Übergabe“ und „mit
+    Nachtrag“ in den weiteren Filtern.
+  - **Berichtsart** (neu, siehe unten), Lebensbereich, Schicht, Verfasser (Kürzel).
+  - Suche im Text mit Hervorhebung der Fundstellen.
+  - Gesetzte Filter stehen als kleine Marken mit „×“ über der Liste, dazu „Filter zurücksetzen“.
+  - **Gespeicherte Filter** mit eigenem Namen (z. B. „Krisen der letzten 30 Tage“), als Knöpfe
+    oben in der Filterleiste.
+- **Berichtsart (neu)** beim Schreiben, eine Auswahl, Vorgabe „Alltag“: Alltag · Krise ·
+  Arztkontakt · Visite · Medikation · Konflikt · Ausgang/Abgängigkeit · Angehörigenkontakt ·
+  Betreuer/Behörde · Besonderes Vorkommnis. Liste in den Einstellungen änderbar. Berichte aus
+  Visite und Abgängigkeitsmeldung bekommen ihre Art automatisch. Vorhandene Demo-Berichte
+  erhalten passende Arten.
+- **Aktionsleiste:** „Neuer Bericht …“ (Hauptaktion, für den gewählten Bewohner), „Bedarf gegeben …“, „Akte öffnen“, kompakt/vollständig, „Drucken …“ (druckt, was der
+  Filter zeigt).
+- **Akte:** Der Reiter „Berichte“ entfällt. Im Akte-Kopf ein Knopf „Berichte ansehen“, der die
+  Dokumentation mit diesem Bewohner öffnet. HEB, Reflexion, Visite und Übergabe lesen die
+  Berichte weiter wie bisher.
+- Gilt anstelle der rechten Seite aus Schritt 26j (Bewohnerliste mit Berichten); die Liste links
+  wird zur schmalen Seitenleiste.
+
+## Rechte: Fehlendes ausblenden statt ausgrauen
+Status: freigegeben (Bauplan Schritt 29c; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Was ein Mitarbeiter nicht darf, sieht er nicht.
+Warum: Vorgabe Tobi (09.11.2026): Elemente, für die der Mitarbeiter keine Berechtigung hat, sollen
+ausgeblendet werden. Viele Kollegen sind technisch wenig bewandert; das Programm muss übersichtlich
+bleiben.
+Umfang:
+- Knöpfe, Menüeinträge, Reiter, Bereiche der Seitenleiste und Abschnitte der Einstellungen ohne
+  Recht werden **ausgeblendet**, nicht ausgegraut. Die übrigen rücken zusammen, keine Lücken.
+- Ein Bereich ohne jedes Recht verschwindet aus der Seitenleiste.
+- Ausgegraut bleibt nur, was der Mitarbeiter darf, aber gerade nicht geht (z. B. „Nächster
+  Bewohner ▶“ in der Visite ohne Bericht), mit Hinweis beim Darüberfahren.
+- Nach An- und Abmelden sofort neu aufbauen.
+- Test: je Position ein Bildschirmfoto der Seitenleiste und einer Akte.
+
+## Wohnbereich einmal in der Übersicht wählen, gilt überall
+Status: freigegeben (Bauplan Schritt 29d; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Der Wohnbereich wird an einer Stelle gewählt, in der Übersicht. Alle Bereiche des Programms
+zeigen danach nur diesen Wohnbereich.
+Warum: Vorgabe Tobi (09.11.2026): In der Übersicht soll der Wohnbereich eingestellt werden können,
+damit Kollegen auf einem anderen Bereich einspringen können. „Stelle ich hier auf R1, sehe ich
+alles, was die R1 betrifft.“ Die Auswahl in den einzelnen Fenstern wird dadurch überflüssig.
+Umfang:
+- In der Übersicht gut sichtbar oben: **„Wohnbereich: R1 · R2 · R3“** als drei große
+  Umschaltknöpfe (kein Klappmenü). **Wer welche Knöpfe sieht** (Ergänzung Tobi, 09.11.2026):
+  - **Personal der Wohnbereiche:** R1 · R2 · R3 — alle Wohnbereiche, damit man einspringen kann.
+    **Kein Knopf „Therapie“**, damit vom Wohnbereich aus keine Therapien geändert werden.
+  - **Therapie:** R1 · R2 · R3 · **Therapie** — die Therapie kann auf den Wohnbereichen
+    einspringen. Dort arbeitet sie mit den Rechten ihrer Position; Therapieangebote ändert sie nur
+    im Bereich Therapie.
+  - **Leitung und Administrator:** alle Knöpfe und zusätzlich „Alle“.
+  - Die Knöpfe hängen am Recht (Rechte-Tabelle: „Wohnbereiche“, „Bereich Therapie“, „Alle
+    Bereiche“), Vorbelegung wie oben; ohne Recht ist ein Knopf ausgeblendet (Schritt 29c).
+- Die Wahl gilt für **alle Bereiche**: Dokumentation, Übergabe, Tagesplan, Visiten, Aufgaben,
+  Kalender (Bereichskalender), Therapie (Laufende Therapien), Ausgangsliste, Nachrichten an Teams.
+- Die **Bereichswahl in den einzelnen Fenstern entfällt** (z. B. Dokumentation, Übersicht-Liste,
+  Ausgangsliste, Visite).
+- Der gewählte Bereich steht immer in der kleinen Zeile der Kopfzeile („R1 · Dokumentation“),
+  damit man nie vergisst, wo man gerade arbeitet. Ist es nicht der Bereich des Rechners, zusätzlich
+  die Marke „eingesprungen“ (Hinweis-Farbe, mit Wort).
+- Vorgabe beim Start: Bereich des Rechners (Bereichskennung). Die Wahl gilt bis zum Abmelden; nach
+  dem Abmelden wieder die Vorgabe.
+- Rechte bleiben unverändert.
+
+## Nachrichten: Kuvert in der Kopfzeile statt Hinweis in jedem Fenster
+Status: freigegeben (Bauplan Schritt 29e; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Ungelesene Nachrichten zeigt ein Kuvert in der Kopfzeile an, nicht mehr ein Hinweis in den
+Fenstern.
+Warum: Vorgabe Tobi (09.11.2026): Es muss nicht in jedem Fenster die Info über Nachrichten kommen;
+besser in der Kopfzeile ein Kuvert mit rotem Ausrufezeichen.
+Umfang:
+- Kopfzeile, links neben „Angemeldet: …“: **Kuvert-Symbol** (Segoe Fluent Icons). Bei ungelesenen
+  Nachrichten mit rotem Ausrufezeichen und Zahl („3“), Tooltip „3 ungelesene Nachrichten“. Ohne
+  ungelesene: Kuvert ohne Zeichen, leise. Klick öffnet „Nachrichten“.
+- Der Hinweis über den Listen (z. B. im Bereich „Bewohner“/„Dokumentation“) entfällt überall.
+- Der Zähler an „Nachrichten“ in der Seitenleiste bleibt.
+- Sonst bleibt die Kopfzeile wie in Schritt 26i.
+
+## Kleine Korrekturen (Demo-Übergaben, Angebot, Dokumentation)
+Status: freigegeben (Bauplan Schritt 29f; Vorgaben Tobi 09.11.2026)
+Datum: 09.11.2026
+Umfang:
+- **Demo-Daten:** Berichte wie „Keine Besonderheiten“ oder „Ruhiger Dienst“ bekommen nie
+  „Übergabe“ (Tobi: „Keine Besonderheiten ist nicht übergaberelevant“). Übergaben in den
+  Demo-Daten nur bei Texten, die wirklich etwas für die nächste Schicht enthalten.
+- **Therapie → „Neues Angebot“:** Das Feld heißt **„Teilnehmer“**, darunter klein in Klammern
+  „(Anzahl)“; nicht mehr „höchstens“.
+- **Dokumentation/Bewohner:** Die Aufgaben-Kurzliste (und der Nachrichten-Hinweis, Schritt 29e)
+  über der Liste entfällt (Tobi: „Die Aufgaben müssen nicht unter Dokumentation angezeigt
+  werden“).
+- **Bewohnerleiste der Dokumentation:** ohne Hinweise, schmal und übersichtlich, in einer Fläche
+  mit abgerundeten Ecken (8 px) wie das übrige Programm; die gewählte Zeile ebenfalls abgerundet
+  hervorgehoben (heller Akzent, `docs/gestaltung.md`). Gilt schon für die heutige Liste, nicht erst
+  mit Schritt 29b.
+
+## Tagesplan im normalen Programmstil, kleiner und übersichtlicher
+Status: freigegeben (Bauplan Schritt 29g; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Der Tagesplan verliert die dunkle Flughafen-Optik und bekommt das Aussehen des übrigen
+Programms.
+Warum: Rückmeldung Tobi (09.11.2026): „Wie am Flughafen“ war zu wörtlich genommen. Das Design
+bleibt wie im restlichen Programm, die Liste etwas kleiner und übersichtlicher.
+Umfang:
+- Helle Fläche, Schrift und Farben wie überall (`docs/gestaltung.md`); keine dunkle Tafel, keine
+  Großschrift, keine feste Zeichenbreite.
+- Was bleibt (die Idee, nicht die Optik): oben „Jetzt und gleich“, darunter „Später heute“, unten
+  „Erledigt“ (blasser); Status als Wort mit Farbe; Knöpfe „gegangen“, „abgesagt“, „ausgefallen“.
+- Eine Zeile je Termin, normale Zeilenhöhe der Listen im Programm; Spalten: Zeit · Bewohner ·
+  Termin · Ort · Begleitung · Status.
+- Uhrzeit und Datum oben rechts in normaler Größe.
+
+## Übergabe nach Schichten mit eigener Umrandung
+Status: freigegeben (Bauplan Schritt 29h; Vorgabe Tobi 09.11.2026; ergänzt: „Die Übergabeseite muss
+effektiver gestaltet werden“)
+Datum: 09.11.2026
+Was: Die Übergabe ist nach Schichten unterteilt; jede Schicht hat eine eigene farbige Umrandung.
+Warum: Vorgabe Tobi (09.11.2026).
+Umfang:
+- Drei Abschnitte untereinander, je mit Überschrift und Zähler: **Frühdienst · Spätdienst ·
+  Nachtdienst** (Schicht, in der der Eintrag entstanden ist). Die laufende Schicht steht oben,
+  dann die vorherige usw.
+- Jeder Abschnitt in einer Fläche mit **farbiger Umrandung** (2 px) und farbigem Wort in der
+  Überschrift — Farbe nie allein: Früh **Orange** (238, 166, 60), Spät **Blau** (45, 84, 156),
+  Nacht **Violett** (91, 58, 153). Statt einer Schicht-Marke ist jeder Eintrag in der Farbe
+  seiner Schicht umrandet, wie die Berichte in der Dokumentation (29b), auch in der Übersicht
+  unter „Heute wichtig“.
+- Einträge „bis erledigt“ bleiben in ihrer Ursprungsschicht und tragen „seit <Tag>“.
+- **Effektiver (Ergänzung 09.11.2026)** — heute ist jeder Eintrag eine große Karte; bei
+  1366 × 768 passen nur zwei von neun auf den Bildschirm (`STAND.md`, offene Punkte):
+  - **Kompakte Zeilen** wie in der Dokumentation: Bewohner (Nachname, Vorname, Zimmer) ·
+    Übergabe-Satz bzw. die ersten zwei Zeilen des Berichts · gültig bis · Kürzel · Knöpfe.
+    Ziel: mindestens 12 Einträge bei 1366 × 768 ohne Bildlauf.
+  - **Reihenfolge innerhalb der Schicht:** Medikamentenänderungen (29l) zuerst, dann „Wichtig“,
+    dann der Rest nach Zimmer. Mehrere Einträge eines Bewohners stehen untereinander unter
+    einem Namen.
+  - **Vorgabe „nur ungelesene“** (von mir noch nicht als gelesen bestätigt), umschaltbar auf
+    „alle offenen“; Zähler an beiden.
+  - **Ein Klick je Handgriff:** „Gelesen“ und „Erledigt“ als kleine Knöpfe mit Wort direkt in
+    der Zeile. Nach „Gelesen“ rutscht die Zeile leise weg (bei „nur ungelesene“). Ein Klick auf
+    den Text klappt den ganzen Bericht in der Zeile auf (kein Meldungsfenster mehr).
+    „Verlängern …“ beim aufgeklappten Eintrag.
+  - **„Alle in diesem Abschnitt gelesen“** je Schicht, mit einer Rückfrage („9 Einträge als
+    gelesen bestätigen?“).
+  - „Wohnbereich allgemein“ als eine kompakte Zeile oben, aufklappbar.
+  - **„Übergabeliste drucken“**: alle offenen Einträge auf einer A4-Seite, nach Schicht.
+
+## Wochenplan ohne Datum
+Status: freigegeben (Bauplan Schritt 29i; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Der Wochenplan ist ein fester Plan Montag bis Sonntag für den ganzen Aufenthalt, ohne Datum.
+Warum: Vorgabe Tobi (09.11.2026): Der Wochenplan gilt für den gesamten Zeitraum des Aufenthaltes;
+ein festes Datum und „Diese Woche“ sind überflüssig.
+Umfang:
+- Keine Datumsangaben in den Spaltenköpfen (nur „Montag“ … „Sonntag“), kein Wochenwechsel, kein
+  Knopf „Diese Woche“.
+- Änderungen gelten weiter „ab Datum …“ im Hintergrund (Verlauf); angezeigt wird der heute
+  gültige Plan, darüber klein „gültig seit <Datum der letzten Änderung>“ und „Verlauf …“.
+- Teilnahme je Tag (gegangen, abgesagt) steht nicht im Wochenplan, sondern im Tagesplan.
+- Ausdruck ebenfalls ohne Datum.
+
+## Ausgangsliste: alle Bewohner auf einen Blick, ohne Unterbringung
+Status: freigegeben (Bauplan Schritt 29j; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Die Ausgangsliste zeigt alle Bewohner des Bereichs auf einmal, ohne Angaben zur Unterbringung.
+Warum: Vorgabe Tobi (09.11.2026): Die Anzeige der Unterbringung ist hier überflüssig; man muss alle
+Bewohner auf einmal im Blick haben.
+Umfang:
+- Unterbringung, Beschluss und Fristen erscheinen in der Liste der Ausgangsliste nicht mehr (sie
+  bleiben in der Akte und im Unterbringungs-Fenster).
+- **Alle 23 Bewohner ohne Bildlauf:** bei 1920 × 1080 in einer Liste; reicht die Höhe nicht
+  (z. B. 1366 × 768), in zwei Spalten nebeneinander. Zeile: Zimmer · Name · Status (im Haus,
+  Ausgang bis …, abwesend …) · Rückkehrzeit.
+- Knöpfe (Ausgang eintragen, zurück) bleiben in der Zeile bzw. per Doppelklick.
+- Abgleich mit der eigenständigen Ausgangsliste: Änderung in
+  `src/DokuLine.Modul.Ausgangsliste/AENDERUNGEN.md` vermerken.
+
+## Visite: Psychiater und Hausarzt getrennt, Berichte in der Dokumentation
+Status: freigegeben (Bauplan Schritt 29k; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Die Visitenseite unterscheidet Psychiater-Visite und Hausarzt-Visite. Visitenberichte stehen
+hervorgehoben in der Dokumentation.
+Warum: Vorgabe Tobi (09.11.2026): Berichte aus Visiten müssen in die Dokumentation übernommen und
+hervorgehoben werden. Auf der Visitenseite gibt es eine Unterteilung zwischen Psychiater und
+Hausarzt.
+Umfang:
+- Visitenseite oben zwei Reiter bzw. Umschalter: **Psychiater** · **Hausarzt**. Gewählt wird dann
+  der Arzt; die Liste zeigt die Bewohner, denen dieser Arzt als Psychiater bzw. Hausarzt zugeteilt
+  ist (Reiter „Ärzte“, Schritt 30; bis dahin alle Bewohner des Bereichs). „Weitere Bewohner …“
+  nimmt andere dazu.
+- Jeder Visitenbericht ist ein Bericht in der Dokumentation mit Berichtsart **„Visite“** und
+  Zusatz „Psychiater“ bzw. „Hausarzt“ und Arztname. In der Berichtsliste hervorgehoben durch den
+  fetten Anfang „Visite Psychiater – Dr. …“ und den Rand in Schichtfarbe wie alle Berichte (keine
+  eigene Marke, Ergänzung Tobi 09.11.2026). Filter „Visite“.
+- Medikamentenänderungen aus der Visite lösen Schritt 29l aus.
+
+## Medikamentenänderung auffällig markieren und in die Übergabe
+Status: freigegeben (Bauplan Schritt 29l; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Jede Änderung am Medikamentenplan ist sofort und auffällig sichtbar und geht automatisch in
+die Übergabe.
+Warum: Vorgabe Tobi (09.11.2026): Gibt es bei einem Bewohner eine Medikamentenänderung, muss das
+auffällig markiert werden; sehr wichtig für die Übergabe.
+Umfang:
+- Als Änderung zählt: neues Medikament, abgesetzt, Dosis oder Uhrzeit geändert, Pause, Stufe eines
+  Stufenplans, neue Bedarfsmedikation.
+- **Marke „Medikation geändert“** (Gefahr-Farbe mit Wort) für 7 Tage: im Akte-Kopf, in der
+  Bewohnerliste der Übersicht, in der Visite und im Medikamentenplan. Im Medikamentenplan ist die
+  geänderte Zeile selbst hervorgehoben („neu seit 09.11.“, „Dosis geändert: 5 mg → 10 mg“).
+- **Automatischer Übergabe-Eintrag** „Medikamentenänderung: <was> ab <Datum>, angeordnet von
+  <Arzt>“ mit Kennzeichen „Wichtig“. Er bleibt in der Übergabe, bis **jede der drei Schichten** ihn
+  mit Kürzel als gelesen bestätigt hat (höchstens 7 Tage).
+- In „Heute wichtig“ der Übersicht ein eigener Kasten „Medikamentenänderungen“, wenn es welche
+  gibt.
+
+## Schnellerer Wechsel zwischen den Bereichen
+Status: freigegeben (Bauplan Schritt 29m; Rückmeldung Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Der Wechsel zwischen den Bereichen soll sofort und ohne Flackern gehen.
+Warum: Rückmeldung Tobi (09.11.2026): Der Wechsel zu manchen Fenstern ist sehr zaghaft; er muss
+schneller und sauber gehen.
+Umfang:
+- **Zuerst messen:** Zeit je Wechsel in `Hauptfenster.BereichWaehlen` mit `Stopwatch` messen und
+  im Protokoll ausgeben (nur bei `--messen`); Ergebnis je Bereich in `STAND.md`. Zielwert: unter
+  150 ms bis zur fertigen Anzeige.
+- Verdächtige Stellen aus der Durchsicht im Chat (09.11.2026, nicht gemessen):
+  - Jeder Wechsel ruft `Aktualisieren()`/`Zeigen()` auf und liest alles neu aus der Datenbank,
+    auch wenn sich nichts geändert hat. Besser: Seite zeigen, neu lesen nur, wenn sich die Daten
+    geändert haben (Änderungszähler aus dem Mehrplatz-Abgleich) oder Tag/Schicht gewechselt hat.
+  - `Einstellungen.Laden()` liest bei jedem Aufruf die Datei von der Platte (in vielen Seiten
+    mehrfach). Einmal laden, im Speicher halten, nach Änderung neu laden.
+  - Listen werden nur an wenigen Stellen mit `BeginUpdate`/`EndUpdate` gefüllt; Aufbau ohne
+    `SuspendLayout`/`ResumeLayout` löst viele Neuberechnungen aus.
+  - `Visible` aller Seiten wird bei jedem Wechsel gesetzt; nur alte ausblenden, neue einblenden.
+  - Eigene Zeichnungen (Kopf mit Verlauf, Karten) bei jedem Neuzeichnen neu berechnen; Verlauf
+    einmal als Bild zwischenspeichern, neu nur bei Größenänderung.
+  - Gegen Flackern: Doppelpufferung für die ganze Fläche (z. B. `WS_EX_COMPOSITED` für den
+    Inhaltsbereich), sofern es messbar hilft.
+- Nichts am Verhalten ändern; vorher/nachher messen und in `STAND.md` festhalten.
+
+## Therapie als eigener Bereich (Dokumentation, Nachrichten, Aufgaben, Wochenpläne)
+Status: freigegeben (Bauplan Schritt 29n; Vorgaben Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Die Therapie ist ein eigener Bereich neben R1, R2 und R3, mit einer schlanken, eigenen
+Seitenleiste.
+Warum: Vorgaben Tobi (09.11.2026): Die Ansicht für die Therapie anders gestalten, da hier weniger
+Infos nötig sind als auf den Wohnbereichen. „Therapie als eigenen Bereich machen. Sie brauchen auch
+den Bereich Dokumentation, Nachrichten, Aufgaben und eine extra Seite, in der sie eine
+Bewohnerliste haben; mit Klick auf den Bewohner sieht man den Wochenplan.“
+Umfang:
+- **Bereich „Therapie“** in der Bereichswahl der Übersicht (Schritt 29d): R1 · R2 · R3 ·
+  **Therapie**. Der Knopf erscheint nur mit dem Recht „Bereich Therapie“ (Vorbelegung: Position
+  Therapie, Leitungen, Administrator); das Personal der Wohnbereiche sieht ihn nicht (Schritt 29d). Rechner der Therapie haben „Therapie“ als
+  Bereichskennung und starten dort.
+- **Seitenleiste im Bereich Therapie** (nur diese Einträge, in dieser Reihenfolge):
+  1. **Laufende Therapien** (Startseite, wie Schritt 26m)
+  2. **Angebote** (bisheriger Reiter „Angebote“)
+  3. **Wochenpläne** (neu, siehe unten)
+  4. **Dokumentation** (wie Schritt 29b)
+  5. **Aufgaben** (Aufgaben des Teams Therapie)
+  6. **Nachrichten** (Team Therapie und eigene)
+  7. **Einstellungen** (soweit Rechte; darin die Verzeichnisse)
+  Übersicht, Übergabe, Visiten, Medikamentenplan und Ausgangsliste erscheinen dort nicht.
+- **Bewohner im Bereich Therapie:** alle Bewohner aus R1–R3, die mindestens ein Angebot der
+  Therapie haben; in den Bewohnerleisten nach Wohnbereich gruppiert (kleine Überschrift „R1“,
+  „R2“, „R3“), darunter „Nachname, Vorname“. Schalter „alle Bewohner des Hauses“ für die übrigen.
+- **Neue Seite „Wochenpläne“:** links die Bewohnerleiste (wie in der Dokumentation, schmal,
+  abgerundet), rechts beim Klick der **Wochenplan** des Bewohners (Montag bis Sonntag, ohne Datum,
+  Schritt 29i). Angebote der Therapie sind hervorgehoben; ändern kann die Therapie nur ihre eigenen
+  Angebote (Schritt „Therapien: Zuordnung und Rechte“), alles andere ist nur zu lesen. Drucken.
+- **Dokumentation der Therapie:** Berichte aus dem Bereich Therapie bekommen die Berichtsart
+  **„Therapie“** (neu in der Liste der Berichtsarten, 29b) und den Namen des Angebots. Sie stehen
+  in derselben Dokumentation des Bewohners und sind damit auch im Wohnbereich zu lesen. Die
+  Therapie sieht die Berichte der Wohnbereiche ebenfalls (lesen), soweit die Rechte es erlauben.
+- **Laufende Therapien in der Therapie-Fassung** ohne Angaben, die nur der Wohnbereich braucht
+  (Bezugspflege, Marken wie Beschluss oder Medikation): je Teilnehmer Name, Bereich, Teilnahme.
+- **Aufgaben und Nachrichten:** neues Team „Therapie“ als Empfänger; Aufgaben ohne
+  Schichtbezug (die Therapie arbeitet tagsüber), mit Fälligkeitsdatum.
+- Demo: zwei ausgedachte Mitarbeitende der Position Therapie, Aufgaben und Nachrichten für das
+  Team Therapie, Therapie-Berichte bei mehreren Bewohnern.
+
+## Therapie-Anzeige für den Fernseher im Wohnbereich
+Status: freigegeben (Bauplan Schritt 29o; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Die laufenden Therapien lassen sich über das Netzwerk auf einem Fernseher im Wohnbereich
+zeigen, damit die Bewohner sehen, was gerade läuft.
+Warum: Vorgabe Tobi (09.11.2026): Den Plan über das Netzwerk an einen Fernseher senden, um den
+Bewohnern im Wohnbereich eine aktuelle Einblendung der laufenden Therapien zu zeigen. Nur die
+Namen der Bewohner des Wohnbereichs; hat kein Bewohner der R3 eine Therapie, wird sie für die R3
+nicht angezeigt. „Noch offen“ nur für das Personal.
+Umfang:
+- **Weg:** DokuLine stellt im **lokalen Netzwerk** eine schlichte, nur lesende Seite bereit
+  (eingebauter kleiner Webserver von .NET, keine neue Abhängigkeit). Der Fernseher öffnet sie im
+  eigenen Browser bzw. über einen Streaming-Stick mit Browser, z. B.
+  `http://<Rechner>:8080/anzeige/R3?code=<Zugangscode>`. Ohne Netzwerk-Fernseher geht dieselbe
+  Anzeige als Vollbildfenster auf einem zweiten Bildschirm (HDMI).
+- **Absicherung** (`CLAUDE.md`, Regel 6, Ergänzung 09.11.2026): nur Adressen aus privaten
+  Netzbereichen (LAN), keine Verbindung ins Internet; Zugangscode je Wohnbereich (in den
+  Einstellungen, neu erzeugbar); nur lesend; Port einstellbar; **standardmäßig aus**, Einschalten
+  mit Recht „Anzeige verwalten“. Beim ersten Start fragt die Windows-Firewall nach (im README
+  erklären).
+- **Inhalt je Wohnbereich:** nur Therapien, an denen mindestens ein Bewohner dieses Bereichs
+  teilnimmt; je Therapie Name, Uhrzeit von–bis, Ort und die Namen der Teilnehmer **nur aus diesem
+  Bereich**. Keine Zimmer, keine Marken, keine Bezugspflege, kein Teilnahmestatus („noch offen“,
+  „abgesagt“ sieht nur das Personal im Programm).
+- **Namen:** Vorgabe „Vorname und erster Buchstabe des Nachnamens“ (Datenschutz, auf dem
+  Fernseher sehen es auch Besucher); in den Einstellungen umschaltbar auf „voller Name“.
+- Aussehen: helles Programmdesign, gut lesbar auf Abstand (große Schrift nur hier), oben Uhrzeit;
+  „Jetzt“ und „Gleich“ (nächste 60 Minuten). Aktualisiert sich jede Minute von selbst.
+- Hinweis für den Echtbetrieb (`STAND.md`): Namen auf einem Bildschirm im Gemeinschaftsbereich
+  vorher mit Leitung und Datenschutz klären.
+
+## Nachschlagen beim BfArM absichern
+Status: freigegeben (Bauplan Schritt 29p; „Alles freigeben“, Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Die eingebettete BfArM-Ansicht (WebView2) gibt so wenig wie möglich nach außen.
+Warum: Frage Tobi (09.11.2026): Kann die Medikamentenschnittstelle ins Internet ein
+Datenschutzproblem geben?
+Umfang (Vorschlag):
+- Nur Adressen des BfArM laden; **alle Anfragen an andere Adressen blockieren**
+  (`WebResourceRequested`), auch eingebettete Schriften, Statistik- oder Werbedienste. Blockierte
+  Adressen im Protokoll zählen.
+- WebView2: SmartScreen-Prüfung aus (sonst gehen aufgerufene Adressen an Microsoft),
+  automatisches Ausfüllen und Passwortspeicher aus, eigener Datenordner, Cookies und Verlauf beim
+  Schließen löschen.
+- Suchbegriff nur aus dem Feld „Medikamentenname“; nie Bewohner- oder Arztangaben (wie bisher).
+- Hinweis in den Einstellungen bei „Nachschlagen beim BfArM“: welche Daten das Programm dabei
+  sendet (Suchbegriff, IP-Adresse der Einrichtung, Uhrzeit).
+
+## Aufgaben gehören zu einem Bewohner oder einem Bereich
+Status: freigegeben (Bauplan Schritt 29q; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Jede Aufgabe gehört entweder zu einem Bewohner oder zu einem Bereich. Man sieht nur die
+Aufgaben des gewählten Bereichs.
+Warum: Vorgabe Tobi (09.11.2026): Aufgaben können bewohnerbezogen oder bereichsbezogen sein. Jemand
+von der R2 muss die Aufgaben der R3 nicht sehen. Aufgaben sind ein wichtiges Übergabeinstrument
+unter Kollegen. Bisher (bis 0.33.3) stehen Aufgaben ohne Bewohner in allen drei Bereichen.
+Umfang:
+- Neue Aufgabe: Auswahl **„Bewohner“** (dann gehört sie zu dessen Bereich, wechselt bei einem
+  Umzug mit) oder **„Bereich“** (R1, R2, R3 oder Therapie; Vorgabe: der in der Übersicht gewählte
+  Bereich, Schritt 29d). Kein „ganzes Haus“.
+- Aufgaben-Seite, Übersicht („Laufender Dienst“) und Zähler zeigen nur Aufgaben des gewählten
+  Bereichs.
+- **Standardaufgaben (Vorlagen)** ebenfalls je Bereich; Schichtzeiten sind schon je Bereich.
+- Bestehende Aufgaben ohne Bewohner: beim Update einmalig dem Bereich des Rechners zuordnen, auf
+  dem sie angelegt wurden; ist der unbekannt, R1 und in `STAND.md` vermerken.
+- Demo-Daten: Bereichsaufgaben für jeden Bereich getrennt.
+
+## Betriebsmodus für den Terminalserver
+Status: freigegeben (Bauplan Schritt 37; OK Tobi 09.11.2026; `CLAUDE.md` Regel 4 ist geändert)
+Datum: 09.11.2026
+Was: Neben der Demo eine Betriebsfassung desselben Programms für den echten Einsatz auf dem Server
+der Einrichtung. Gebaut und getestet wird nur mit ausgedachten Daten.
+Warum: Tobi (09.11.2026): Die Demo ist für die Präsentation, gebraucht wird auch schon eine Version
+für den echten Betrieb. Es gibt **einen Server**, auf den **beide Häuser** zugreifen; alle
+Arbeitsplätze sind kleine Remote-Geräte (Thin Clients) mit Remotedesktop-Sitzung auf diesem
+Server (Terminalserver). Eine eigene IT gibt es nicht; die Verwaltung übernimmt Tobi.
+Folge für die Technik: DokuLine läuft für alle auf **einem** Rechner. Die SQLite-Datei liegt
+dort lokal (kein Netzlaufwerk) — das ist der von SQLite vorgesehene Fall „mehrere Programme, ein
+Rechner“. Ein eigener Datenbankserver ist vorerst nicht nötig.
+Umfang (Vorschlag):
+- **Ein Programm, zwei Modi.** Demo wie bisher. Betriebsmodus über eine Datei `betrieb.json`
+  im Programmordner (legt nur der Verwalter an, nie im Repository). Im Betriebsmodus: keine
+  Demo-Daten, kein „Demo-Daten zurücksetzen“, kein Anmelden ohne Passwort, kein Selbst-Update,
+  kein Demo-Hinweis; stattdessen in der Statusleiste „Betrieb“.
+- **Ordner auf dem Server:** Programm in einem Ordner, den nur der Verwalter ändern darf (z. B.
+  `C:\Programme\DokuLine\`); Daten in einem gemeinsamen Ordner (z. B. `D:\DokuLine\Daten\`)
+  statt `%APPDATA%` (das ist je Benutzer getrennt). Datenbank im WAL-Modus. Anleitung für die
+  Ordnerrechte (Windows-Gruppe „DokuLine-Benutzer“ ändern, alle anderen nichts).
+- **Anmeldung mit eigenem Passwort** je Mitarbeiter: Passwort nur als sicherer Hash
+  (PBKDF2 aus .NET, keine neue Abhängigkeit); erstes Anmelden mit Einmalpasswort und Pflicht zum
+  Ändern; Sperre nach 5 Fehlversuchen (Entsperren durch Leitung/Verwalter); **automatische
+  Sperre** nach einstellbarer Zeit ohne Eingabe (Vorgabe 10 Minuten); F12 sperrt sofort.
+- **Zugriffsprotokoll:** wer wann welche Akte geöffnet, gedruckt oder geändert hat; einsehbar nur
+  mit eigenem Recht (Leitung, Datenschutz); Aufbewahrungsdauer einstellbar.
+- **Sicherung:** automatisch jede Nacht (Sicherungsfunktion von SQLite, auch bei laufendem
+  Betrieb), 30 tägliche und 12 monatliche Stände, Sicherungsordner einstellbar (möglichst auf
+  einem anderen Laufwerk); Prüfung jeder Sicherung; Rücksicherung mit Assistent. Warnung in der
+  Kopfzeile für Verwalter, wenn die letzte Sicherung älter als 2 Tage ist.
+- **Update im Betrieb:** kein Selbst-Update beim Start. Stattdessen „Update vorbereiten …“ für
+  den Verwalter: Datei herunterladen (oder von einem USB-Stick wählen), Prüfsumme prüfen, Einspielen
+  zu einer festgelegten Zeit (z. B. nachts), danach alte Fassung als Rückweg behalten.
+- **Mehrere Häuser:** Bereiche gehören zu einem Haus (Einstellungen: Häuser und ihre Bereiche);
+  Kalender „Haus“ je Haus; Bereichswahl zeigt die Bereiche des eigenen Hauses, andere nur mit
+  Recht.
+- **Technischer Schutz der Datei:** Vorschlag Laufwerksverschlüsselung des Servers (BitLocker) und
+  Ordnerrechte; eine Verschlüsselung der Datenbank selbst (z. B. SQLCipher, BSD-Lizenz) erst,
+  wenn der Datenschutz sie fordert — Begründung in `STAND.md`.
+- **Windows-Server-Version:** unbekannt (offener Punkt im Vault). Claude Code prüft, welche
+  Windows-Server-Versionen .NET 10 unterstützt, und schreibt das Ergebnis in `docs/betrieb.md`.
+- **`docs/betrieb.md` (neu)**, in einfachen Worten für Tobi: Installation Schritt für Schritt,
+  Ordnerrechte, erste Benutzer anlegen, Sicherung prüfen und zurücksichern, Update einspielen,
+  was tun bei Störungen. Dazu eine **Liste der Freigaben** vor dem ersten echten Datensatz:
+  Einrichtung/Träger, Datenschutzbeauftragter (Datenschutz-Folgenabschätzung, technische und
+  organisatorische Maßnahmen), Mitarbeitervertretung, Prüfung „Medizinprodukt ja/nein“ für den
+  Medikamentenplan.
+- Tests: alles im Betriebsmodus mit ausgedachten Daten; eine „Betriebsprobe“ auf einem
+  Test-Rechner, bevor der echte Server berührt wird.
+
+Änderung von `CLAUDE.md`, Regel 4 (eingetragen 09.11.2026 nach Tobis OK): „**Kein
+Echtbetrieb ohne Freigabe.** Die Demo zeigt dauerhaft ‚Demo — ausgedachte Daten‘. Echte Daten nur
+im Betriebsmodus und erst nach schriftlicher Freigabe durch Einrichtung, Datenschutz und
+Mitarbeitervertretung. Im Repository, in Tests und Commits nie echte Daten — auch nicht aus dem
+Betrieb.“
+
+## Übersicht: Überschriften der Kästen eingerahmt
+Status: freigegeben (Bauplan Schritt 29r; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Die Überschriften der Kästen in der Übersicht heben sich deutlich von ihren Einträgen ab.
+Warum: Vorgabe Tobi (09.11.2026): In der Übersicht sollen die einzelnen Fensterbenennungen
+eingerahmt werden, damit sie sich besser von den Punkten abheben.
+Umfang:
+- Jeder Kasten („Übergaben offen“, „Termine heute“, „Laufender Dienst“, „Nachrichten“,
+  „Medikamentenänderungen“ und der Kopf der Bewohnerliste) bekommt eine **eigene Kopfleiste**:
+  helle Akzentfläche (238, 242, 251), oben abgerundet wie der Kasten (8 px), darunter eine
+  Trennlinie (217, 224, 236). Darin links die Überschrift (Semibold), rechts der Zähler.
+- Die Einträge darunter auf weißer Fläche mit etwas Abstand zur Kopfleiste (8 px).
+- Klick auf die Kopfleiste öffnet wie bisher den Bereich; Mauszeiger als Hand, Kopfleiste beim
+  Darüberfahren etwas kräftiger.
+- Dieselbe Kopfleiste überall, wo es solche Kästen gibt (z. B. Laufende Therapien, Wochenpläne),
+  damit es im Programm einheitlich bleibt (`docs/gestaltung.md` ergänzen).
+
+## Aufräumen nach den Code-Regeln (ohne neue Funktionen)
+Status: freigegeben (Bauplan Schritt 29s; Vorgabe Tobi 09.11.2026)
+Datum: 09.11.2026
+Was: Der vorhandene Code wird nach `docs/code-regeln.md` aufgeräumt. Das Programm verhält sich
+danach genau wie vorher.
+Warum: Vorgabe Tobi (09.11.2026): Der Code soll effektiver werden und für jemanden, der ihn sich
+ansieht, ersichtlich sein; kürzere Kommentare machen die Dateien kleiner.
+Umfang (in mehreren kleinen Pull Requests, jeder mit grünen Tests):
+1. `.editorconfig` und `dotnet format --verify-no-changes` im Windows-Build; Skript in
+   `werkzeuge/`, das Dateien über 400 Zeilen, Methoden über 40 Zeilen und Zeilen über 120 Zeichen
+   auflistet (Hinweis im Build, kein Fehler).
+2. `docs/aufbau.md` mit Überblick und Glossar (Code-Regeln, Abschnitt 4).
+3. Kommentare: Verlauf („Schritt …“, „0.xx: vorher …“) entfernen, Dateiköpfe auf höchstens drei
+   Zeilen, auskommentierten Code löschen.
+4. Gemeinsame Schnittstelle für die Bereichsseiten; `Hauptfenster.BereichWaehlen` ohne
+   `if`-Kette.
+5. Die größten Dateien teilen (zuerst `Hauptfenster`, `KalenderSeite`, `MedikationAnsicht`,
+   `BewohnerBereich`, `VisitenSeite`, `EinstellungenSeite`).
+6. **Vorher/nachher in `STAND.md`:** Zeilen gesamt, Kommentarzeilen, Dateien über 400 Zeilen,
+   Zeilen über 120 Zeichen (Ausgangswerte stehen in `docs/code-regeln.md`).
+- Kann mit Schritt 29m (schnellerer Wechsel) zusammen geplant werden, aber getrennte Pull Requests.

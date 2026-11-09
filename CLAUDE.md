@@ -11,7 +11,8 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
   Dokumentation.
 - **Später dazu** (eigene Einträge in `IDEEN.md`, erst bauen, wenn freigegeben):
   Ausgang, Medikation, Wochenplan, Biografie, Monatsreflexion, HEB-Bogen.
-- **Nutzer:** Tobi zum Vorführen. Kein Echtbetrieb.
+- **Nutzer:** Tobi zum Vorführen. Daneben ein Betriebsmodus für den Terminalserver des Hauses
+  (Schritt 37); echter Einsatz erst nach den Freigaben aus Regel 4.
 
 ## Unverhandelbar
 
@@ -24,9 +25,12 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 2. **Bewohnerbilder:** In den Demo-Daten nur Platzhalter (Initialen oder Silhouette),
    keine Fotos von Menschen und keine KI-Gesichter.
 3. **Keine Geheimnisse** im Repository (Passwörter, Tokens, Schlüssel).
-4. **Kein Echtbetrieb.** Die Oberfläche zeigt dauerhaft sichtbar „Demo — ausgedachte
-   Daten“. Echte Daten wären Gesundheitsdaten (Art. 9 DSGVO) und bräuchten Freigaben,
-   die es nicht gibt.
+4. **Kein Echtbetrieb ohne Freigabe** (geändert 09.11.2026, Entscheidung Tobi). Die Demo zeigt
+   dauerhaft sichtbar „Demo — ausgedachte Daten“. Echte Daten nur im **Betriebsmodus**
+   (`IDEEN.md`, Schritt 37) und erst nach schriftlicher Freigabe durch Einrichtung,
+   Datenschutz und Mitarbeitervertretung — echte Daten sind Gesundheitsdaten (Art. 9 DSGVO).
+   Im Repository, in Tests und Commits nie echte Daten, auch nicht aus dem Betrieb. Gebaut und
+   getestet wird der Betriebsmodus nur mit ausgedachten Daten.
 5. **Leere Felder sind nicht „nichts“.** Bei Sicherheitsangaben (z. B. Allergien) gibt es
    drei Zustände: *eingetragen*, *keine bekannt*, *nicht erfasst*. Ein leeres Feld darf nie
    wie „keine Allergie“ aussehen.
@@ -40,6 +44,10 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
    **Einzige eingebettete Webansicht:** im Formular „Medikament anlegen/ändern“ zum
    Nachschlagen beim BfArM (Entscheidung Tobi, 08.11.2026). Nur dessen Adressen, gesucht wird
    nur mit dem Medikamentennamen — nie mit Angaben zu Bewohnern. Abschaltbar.
+   **Anzeige im lokalen Netzwerk** (Entscheidung Tobi, 09.11.2026): DokuLine darf eine nur lesende
+   Seite mit den laufenden Therapien für einen Fernseher im Wohnbereich bereitstellen — nur für
+   Adressen im LAN, mit Zugangscode, standardmäßig aus, ohne Verbindung ins Internet (Eintrag
+   „Therapie-Anzeige für den Fernseher im Wohnbereich“ in `IDEEN.md`).
 7. **Fremde Vorlagen bleiben draußen.** PDF-Bögen des Kostenträgers, Logos und Namen der
    Einrichtung kommen nie ins Repository; das Programm lässt sie in den Einstellungen
    zuteilen und speichert sie im Datenordner.
@@ -54,6 +62,8 @@ zeigt, wie die Arbeit des Wohnbereichs in **einem** Programm zusammenläuft.
 - Anhalten und fragen nur, wenn eine Regel aus „Unverhandelbar“ verletzt würde oder
   etwas Unumkehrbares nötig ist.
 - Kleine, lauffähige Schritte: ändern, testen, committen, `STAND.md` aktualisieren.
+- **Code-Regeln:** `docs/code-regeln.md` gilt für jede Änderung (Kommentare nur „warum“, kein
+  Verlauf im Code, Größen, Namen, Tempo, Datenschutz). Abweichungen begründen in `STAND.md`.
 - Zweig: Arbeitszweig mit Pull Request. Zusammenführen nach `main` erst, wenn Tests und
   Windows-Build grün sind; dann darfst du selbst zusammenführen. Jeder Push nach `main`
   erzeugt ein Release, das Tobis Programm als Update bekommt.

@@ -87,3 +87,14 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Schritte 30–32 freigegeben; Dokumente in eigener Ablage von DokuLine (Entscheidung Tobi) (Chat „Programme/Apps“).
 - 09.11.2026 — Schritte 33–36 freigegeben: Überleitungsbogen, Abgängigkeitsmeldung, Schweigepflichtentbindungen, Vitalwerte (Chat „Programme/Apps“).
 - 09.11.2026 — Neu 29a Personenverzeichnis und 30a Zuständigkeit Forensik/FOSA mit Bestellweg; 30 Reiter heißt „Betreuung“; 35 Auskunftsleiste im Akte-Kopf; 36 ohne Bauchumfang, mit allgemeinen Richtwerten (Chat „Programme/Apps“).
+- 09.11.2026 — Schritt 30: eigene Reiter „Angehörige“ und „Ärzte“ (Hausarzt, Psychiater, weitere); 29a: Bereich „Verzeichnisse“ mit eigener Liste je Gruppe (Chat „Programme/Apps“).
+- 09.11.2026 — Schritt 29b freigegeben: Bereich „Dokumentation“ mit Bewohner-Seitenleiste, kompakter Berichtsliste und Filter; Reiter „Berichte“ in der Akte entfällt (Chat „Programme/Apps“).
+- 09.11.2026 — Schritt 29b: Bewohnerleiste ohne „Alle Bewohner“, nur „Nachname, Vorname“ (Chat „Programme/Apps“).
+- 09.11.2026 — Schritte 29c–29o freigegeben (Rechte ausblenden, Bereichswahl zentral, Kuvert, Korrekturen, Tagesplan, Übergabe nach Schichten, Wochenplan, Ausgangsliste, Visite, Medikamentenänderung, Tempo, Therapie-Ansicht, Fernseher-Anzeige), 29p offen; 29b wartet auf Entwurfsauswahl; CLAUDE.md Regel 6 um die LAN-Anzeige ergänzt (Chat „Programme/Apps“).
+- 09.11.2026 — 29b freigegeben nach Entwurf 1 (Tage abgegrenzt, Rand in Schichtfarbe statt Schicht-Marke, nur Marken Wichtig, Medikation geändert, Bedarfsgabe); 29h um kompakte, schnellere Übergabe ergänzt; 29p freigegeben (Chat „Programme/Apps“).
+- 09.11.2026 — 29n neu gefasst: Therapie als eigener Bereich mit Laufende Therapien, Angebote, Wochenpläne (neu), Dokumentation, Aufgaben, Nachrichten (Chat „Programme/Apps“).
+- 09.11.2026 — Neu 29q: Aufgaben je Bewohner oder Bereich; 29a: Verzeichnisse in die Einstellungen; 30: Arztzuteilung (Hausarzt, Psychiater) bei der Aufnahme (Chat „Programme/Apps“).
+- 09.11.2026 — Vorschlag 37 (offen): Betriebsmodus für den Terminalserver (ein Server für beide Häuser, Thin Clients) (Chat „Programme/Apps“).
+- 09.11.2026 — Schritt 37 Betriebsmodus freigegeben, CLAUDE.md Regel 4 geändert (echte Daten nur im Betriebsmodus nach schriftlicher Freigabe); Bereichswahl nach Personal getrennt (Wohnbereich ohne „Therapie“) (Chat „Programme/Apps“).
+- 09.11.2026 — Schritt 29r freigegeben: Überschriften der Kästen in der Übersicht als eingerahmte Kopfleiste (Chat „Programme/Apps“).
+- 09.11.2026 — Code-Regeln in docs/code-regeln.md, Verweis in CLAUDE.md, Schritt 29s „Aufräumen nach den Code-Regeln“ freigegeben (Chat „Programme/Apps“).
