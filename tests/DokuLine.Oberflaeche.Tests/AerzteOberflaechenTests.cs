@@ -2,8 +2,9 @@ using DokuLine.Kern;
 
 namespace DokuLine.Oberflaeche.Tests;
 
-// Bauplan Schritt 26b: Ärzteverzeichnis in den Einstellungen, Auswahl statt Freitext, „Arzt anlegen …“
-// direkt aus der Auswahl (mit Recht), Termin beim Arzt füllt Ort und Hinweis.
+// Bauplan Schritt 26b/29a: Ärzte im Personenverzeichnis (Einstellungen → Verzeichnisse), Auswahl statt Freitext,
+// „Arzt anlegen …“ direkt aus der Auswahl (mit Recht), Termin beim Arzt füllt Ort und Hinweis; die übrigen
+// Verzeichnisse mit Zuordnung zu Bewohnern und Sprung in die Akte.
 [Collection("Oberflaeche")]
 public class AerzteOberflaechenTests
 {
@@ -22,9 +23,9 @@ public class AerzteOberflaechenTests
         Hilfe.Zeigen(neu);
         using (new DialogErsatz(f =>
         {
-            var a = Assert.IsType<ArztFenster>(f);
+            var a = Assert.IsType<PersonFenster>(f);
             a.NameFeld.Text = "Dr. Kastanie (ausgedacht)";
-            a.Fachrichtung.Text = "Orthopädie";
+            a.Funktion.Text = "Orthopädie";
             a.Email.Text = "kastanie@example.org";
             Hilfe.Foto(a, "93_arzt_anlegen");
             return a.Speichern() ? DialogResult.OK : DialogResult.Cancel;
@@ -42,31 +43,84 @@ public class AerzteOberflaechenTests
     });
 
     [Fact]
-    public void Verzeichnis_in_den_Einstellungen_und_Termin_beim_Arzt() => Hilfe.Sta(() =>
+    public void Verzeichnisse_in_den_Einstellungen_und_Termin_beim_Arzt() => Hilfe.Sta(() =>
     {
         using var u = new Umgebung();
-        Einstellungen.Aendern(w => w with { Kuerzel = "CD" });
-        using (var ohne = new AerzteFenster(u.Speicher))
-            Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(ohne.NeuKnopf));
+        Einstellungen.Aendern(w => w with { Kuerzel = "CD" });   // Mitarbeiter Wohnbereich: ansehen
+        using (var ohne = new EinstellungenSeite(u.Speicher))
+        {
+            ohne.GruppeWaehlen(EinstellungenSeite.VerzeichnisGruppe);
+            Assert.Equal(RechteRegeln.FehltText, Stil.Sperrgrund(ohne.Verzeichnis.NeuKnopf));
+            Assert.Same(ohne.Verzeichnis.NeuKnopf, ohne.Knoepfe[0]);   // in der Aktionsleiste
+        }
         Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
-        using (var seite = new EinstellungenSeite(u.Speicher))   // seit Schritt 29: Gruppe „Verwaltung“
-        {
-            var karte = Assert.Single(seite.Suchen("Ärzte"));
-            Assert.Equal("Verwaltung", karte.Gruppe);
-            Assert.Equal("Ärzteverzeichnis …", seite.AerzteKnopf.Text);
-        }
-        using (var fenster = new AerzteFenster(u.Speicher))
-        {
-            Hilfe.Zeigen(fenster);
-            Assert.Equal(u.Speicher.Aerzte().Count, fenster.Liste.Items.Count);
-            Assert.Contains(fenster.Liste.Items.Cast<ListViewItem>(), i => i.SubItems[4].Text == "inaktiv");
-            Hilfe.Foto(fenster, "94_aerzteverzeichnis");
-            int esche = u.Speicher.Aerzte().FindIndex(a => a.Name.StartsWith("Dr. Esche"));
-            fenster.Waehlen(esche);
-            Assert.True(fenster.Umschalten());
-            Assert.Equal("inaktiv", fenster.Liste.Items[esche].SubItems[4].Text);
-        }
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        f.WindowState = FormWindowState.Maximized;
+        Assert.True(f.EinstellungenOeffnen(EinstellungenSeite.VerzeichnisGruppe));
+        var v = f.Einstellungsseite.Verzeichnis;
+        Assert.True(v.Visible);
+        Assert.Equal(f.Einstellungsseite.Knoepfe, f.Kopf.Knoepfe.ToArray());
+        Assert.StartsWith("Verzeichnisse · Ärzte · ", f.Kopf.KleinText);
+        Assert.Equal(["Ärzte", "Betreuer", "Angehörige", "Forensik", "FOSA", "Sonstige Stellen"], v.GruppenKnoepfe.Values.Select(k => k.Text));
+        Assert.Equal(u.Speicher.Aerzte().Count, v.Liste.Items.Count);
+        Assert.Equal(PersonRegeln.Spalten(PersonGruppe.Arzt), v.Liste.Columns.Cast<ColumnHeader>().Select(c => c.Text));
+        Assert.Contains(v.Liste.Items.Cast<ListViewItem>(), i => i.SubItems[6].Text == "inaktiv");
+        Hilfe.Foto(f, "120_verzeichnisse");
+        Assert.True(v.Waehlen("Dr. Esche (ausgedacht)"));
+        Assert.True(v.Umschalten());
         Assert.DoesNotContain(u.Speicher.Aerzte(nurAktive: true), a => a.Name.StartsWith("Dr. Esche"));
+
+        // Angehörige: Spalten, Suche, eine Person öffnen, „Akte öffnen“ springt in die Akte.
+        v.GruppeWaehlen(PersonGruppe.Angehoerige);
+        Assert.Equal(PersonGruppe.Angehoerige, v.Gruppe);
+        Assert.Equal(["Name", "Telefon", "Mobil", "zugeordnet zu", "Status"], v.Liste.Columns.Cast<ColumnHeader>().Select(c => c.Text));
+        Assert.Equal(u.Speicher.Personen(PersonGruppe.Angehoerige).Count, v.Liste.Items.Count);
+        Assert.Equal(v.Liste.Items.Count, v.GruppenKnoepfe[PersonGruppe.Angehoerige].Anzahl);
+        v.Suche.Text = "Ahorn";
+        var hanna = Assert.Single(v.Liste.Items.Cast<ListViewItem>());
+        Assert.Equal("Anton Ahorn (Mutter)", hanna.SubItems[3].Text);
+        Assert.True(v.Waehlen(hanna.Text));
+        using (new DialogErsatz(fenster =>
+        {
+            var p = Assert.IsType<PersonFenster>(fenster);
+            Assert.Null(p.Sperrgrund);
+            Assert.Equal("Anton Ahorn (Mutter)", p.Zugeordnet.Items[0]);
+            Hilfe.Foto(p, "121_person_angehoerige");
+            Assert.True(p.ZuordnungWaehlen(0));
+            Assert.True(p.AkteOeffnen());
+            return DialogResult.Cancel;
+        }))
+            v.AendernKnopf.PerformClick();
+        Assert.Equal("Bewohner", f.AktiverBereich);
+        Assert.True(f.Bewohner.AkteSichtbar);
+        Assert.Equal("Ahorn", f.Bewohner.Akte.Bewohner!.Nachname);
+
+        // Neue zuständige Person der FOSA anlegen und einem Bewohner zuordnen.
+        f.EinstellungenOeffnen(EinstellungenSeite.VerzeichnisGruppe);
+        v.GruppeWaehlen(PersonGruppe.Fosa);
+        v.Suche.Text = "";
+        var birke = u.Demo("Birke").Id!.Value;
+        using (new DialogErsatz(fenster =>
+        {
+            var p = Assert.IsType<PersonFenster>(fenster);
+            p.NameFeld.Text = "Herr Brasse (ausgedacht)";
+            p.Funktion.Text = "Pflege";
+            p.Stelle.Text = "FOSA Musterstadt (ausgedacht)";
+            return p.Speichern() ? DialogResult.OK : DialogResult.Cancel;
+        }))
+            Assert.True(v.Neu());
+        Assert.Equal("Herr Brasse (ausgedacht)", v.Gewaehlt!.Name);
+        using (new DialogErsatz(fenster =>
+        {
+            var p = Assert.IsType<PersonFenster>(fenster);
+            p.ZuordnungAuswahl = _ => (birke, "Pflege FOSA");
+            Assert.True(p.Zuordnen());
+            Assert.Equal("Berta Birke (Pflege FOSA)", p.Zugeordnet.Items[0]);
+            return DialogResult.OK;
+        }))
+            v.Oeffnen();
+        Assert.Contains(u.Speicher.Zuordnungen(bewohnerId: birke), z => z.Rolle == "Pflege FOSA");
 
         using var termin = new KalenderFenster(u.Speicher, null, DateOnly.FromDateTime(DateTime.Today.AddDays(2)), u.Demo("Birke").Id);
         termin.Arzt.Text = "Dr. Pappel (ausgedacht)";

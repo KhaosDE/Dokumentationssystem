@@ -546,7 +546,7 @@ public sealed class KalenderFenster : Form
         {
             if (a is null) return;
             if (Ort.Text.Trim().Length == 0) Ort.Text = a.Praxis;
-            string kontakt = ArztRegeln.Kontakt(a);
+            string kontakt = PersonRegeln.Kontakt(a);
             if (!Hinweis.Text.Contains(a.Name, StringComparison.Ordinal)) Hinweis.Text = Hinweis.Text.Trim().Length == 0 ? kontakt : $"{kontakt} · {Hinweis.Text.Trim()}";
         };
         Text = (bisher is null ? "Neuer Termin" : "Termin ändern") + $" ({KopfBereich.DemoHinweis})";

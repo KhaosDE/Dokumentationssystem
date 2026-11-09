@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.33.3** (Korrekturen: Betreuer, .ics, Einstellungen, Dialoge; Fehlersuche abgeschlossen).
+Stand: 09.11.2026. Version: **0.33.4** (Bauplan Schritt 29a: Personenverzeichnis).
 
 ## Aktuell
 
@@ -208,7 +208,13 @@ eine Betreuung endet). Das Einlesen von **.ics-Dateien** übersteht kaputte Term
 mehrere Termine werden in einem Zug übernommen. **Dialoge** zeigen das Programmsymbol. In den **Einstellungen** bleiben
 Untermodule gesperrt, solange das Modul aus ist. Die Bereichswahl verdeckt nie „Drucken …“.
 
-**Nächster Schritt:** Die Fehlersuche vom 08.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
+Neu in 0.33.4: Das Ärzteverzeichnis ist jetzt das **Personenverzeichnis** – Einstellungen → **„Verzeichnisse“** mit
+Ärzte · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stellen (je mit Zähler, eigenen Spalten und Suche). Eine
+Person kann mehreren Bewohnern zugeordnet sein, je mit Rolle (z. B. „Mutter“, „Betreuer“); aus der Person springt
+„Akte öffnen“ in die Akte. Die Betreuer aus den Stammdaten stehen jetzt auch im Verzeichnis.
+
+**Nächster Schritt:** Bauplan der Reihe nach (Auftrag Tobi, 09.11.2026: „alle Schritte, danach Fehlersuche“) –
+als Nächstes 29b „Bereich Dokumentation“ (0.33.5).
 
 **Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
 
@@ -1046,6 +1052,23 @@ Untermodule gesperrt, solange das Modul aus ist. Die Bereichswahl verdeckt nie �
   - Dialoge zeigen das Programmsymbol (`Stil.Dialogsymbol`, gesetzt in `Fenster.Grundform`, `Dialog.Zeigen`, beim
     Anmelden und im Bewohnerformular).
 
+- 0.33.4 — Bauplan Schritt 29a „Personenverzeichnis“:
+  - Datenbank-Schritt 30: Tabelle `aerzte` mit Feld `gruppe` (arzt, betreuer, angehoerige, forensik, fosa, sonstige),
+    dazu Art, Mobil, Anschrift, Erreichbarkeit, Hinweis; Namen je Verzeichnis eindeutig; neue Tabelle
+    `person_zuordnungen` (Person, Bewohner, Rolle).
+  - Einstellungen → „Verzeichnisse“ (eigene Gruppe): oben die Verzeichnisse mit Zähler (aktive), Suche, Liste mit
+    Spalten je Verzeichnis; „Neu …“, „Öffnen …“, „Inaktiv / wieder aktiv“ in der Aktionsleiste. Doppelklick öffnet die
+    Person: Felder je Verzeichnis, darunter „zugeordnet zu …“ mit „Bewohner zuordnen …“ (Bewohner und Rolle bzw.
+    Beziehung, Vorschläge), „Zuordnung entfernen“, „Akte öffnen“. Ohne Recht nur ansehen.
+  - Rechte: Angehörige mit „Bewohner anlegen und bearbeiten“, alles Übrige mit „Personenverzeichnis verwalten“
+    (bisher „Ärzteverzeichnis verwalten“, gleiche Vorbelegung); auch im Kern geprüft.
+  - Übernahme: die Betreuer aus den Stammdaten (neueste Fassung, nicht „keine gesetzliche Betreuung“) werden Personen
+    „Betreuer“ mit Zuordnung – einmal je Datenbank, gleicher Name = dieselbe Person.
+  - Demo (`daten/demo/personen.json`): 35 Angehörige (etwa jeder zweite Bewohner, eine Person bei zwei Bewohnern),
+    je eine ausgedachte Forensik-Klinik und FOSA mit drei Zuständigen, drei sonstige Stellen; Betreuer aus
+    `betreuer.json` (Heike Hecht und Bernd Barsch je für zwei Bewohner).
+  - Die Karte „Ärzteverzeichnis“ unter „Verwaltung“ entfällt; „Arzt anlegen …“ an jeder Arztauswahl bleibt.
+
 ## Offene Punkte
 
 - Fehlersuche vom 08.11.2026: abgearbeitet in 0.33.1–0.33.3. Bewusst nicht geändert: Die Übersicht liest die
@@ -1122,6 +1145,21 @@ Untermodule gesperrt, solange das Modul aus ist. Die Bereichswahl verdeckt nie �
 - 06.11.2026 (Tobi): Gestaltung nach Vorbild der Ausgangsliste (`docs/gestaltung.md`).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
+
+- 09.11.2026 (0.33.4): Versionsnummern werden fortlaufend vergeben (jede Auslieferung die nächste: 29a = 0.33.4,
+  29b = 0.33.5 …), weil 0.33.3 schon die Korrekturen der Fehlersuche trägt und 29s in mehreren Pull Requests kommt; die
+  Spalte „Version“ im Bauplan ist nur noch ein Richtwert. Ab Schritt 30 beginnt 0.34.0.
+- 09.11.2026 (0.33.4): Neuer Code folgt `docs/code-regeln.md` (Kommentare ohne Verlauf, Dateiköpfe höchstens drei
+  Zeilen). Einzelne Zeilen liegen knapp über 120 Zeichen (lange SQL- und Parameterlisten); das Messskript kommt mit 29s.
+- 09.11.2026 (0.33.4): Personenverzeichnis technisch in der bisherigen Tabelle `aerzte` mit Feld „Gruppe“ (vom Eintrag
+  erlaubt, einfacher); im Programm heißt der Datensatz `Person`. Ärzte werden weiter mit dem Namen eingetragen.
+- 09.11.2026 (0.33.4): Bis Schritt 30 („Reiter Betreuung“) zeigt die Akte den Betreuer weiter aus ihren eigenen
+  Fassungen; das Verzeichnis hat sie einmal übernommen. Ein in der Akte geänderter Betreuer erscheint erst mit
+  Schritt 30 automatisch im Verzeichnis.
+- 09.11.2026 (0.33.4): „Öffnen …“ statt „Ändern …“: Ansehen dürfen alle (Telefonnummern nachschlagen), ändern nur mit
+  Recht. Zugeordnete Personen werden nie gelöscht, nur inaktiv gesetzt.
+- 09.11.2026 (0.33.4): Forensik- und FOSA-Zuständige ohne Zuordnung in der Demo; die Zuständigkeit je Bewohner kommt
+  mit Schritt 30a.
 
 - 09.11.2026 (0.33.3): „Keine gesetzliche Betreuung“ ist eine eigene Fassung mit Merkmal (Datenbank-Schritt 29), kein
   leerer Name – so bleiben die drei Zustände unterscheidbar (Regel 5).
@@ -1820,6 +1858,17 @@ Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.33.4:
+
+1. Einstellungen → „Verzeichnisse“: oben Ärzte · Betreuer · Angehörige · Forensik · FOSA · Sonstige Stellen mit Zahl.
+   Ein Klick zeigt die Liste mit eigenen Spalten; oben in der Leiste „Neu …“, „Öffnen …“, „Inaktiv / wieder aktiv“.
+2. „Angehörige“, Suche „Ahorn“ → „Hanna Ahorn“, zugeordnet zu „Anton Ahorn (Mutter)“. Doppelklick → Person; unten
+   „Anton Ahorn (Mutter)“ wählen → „Akte öffnen“ → die Akte von Anton Ahorn.
+3. „Betreuer“ → „Heike Hecht“ steht bei zwei Bewohnern (Spalte „Bewohner“ = 2).
+4. „FOSA“ → „Neue zuständige Person …“ → Name, Funktion, Ambulanz → Speichern; öffnen → „Bewohner zuordnen …“.
+5. Als „CD“: „Verzeichnisse“ ansehen geht; bei „Ärzte“ ist „Neu …“ grau, bei „Angehörige“ geht es.
+6. Medikamentenplan → Verordnung → „Arzt anlegen …“ öffnet das neue Formular (Verzeichnis „Ärzte“).
 
 Version 0.33.3:
 
