@@ -97,6 +97,10 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 35 | Schweigepflichtentbindungen | 0.39.0 |
 | 36 | Vitalwerte | 0.40.0 |
 | 37 | Betriebsmodus für den Terminalserver | 0.41.0 |
+| 38 | Wohnbereich als Auswahlliste in der Seitenleiste (über „Übersicht“) | 0.42.0 |
+| 39 | Maßnahmen je Bewohner mit Zeitwert (offen) | 0.43.0 |
+| 40 | Übersicht: Kasten „Maßnahmen heute“ als Arbeitscheckliste (offen) | 0.44.0 |
+| 41 | Zeitauswertung je Bewohner (offen) | 0.45.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2327,3 +2331,118 @@ Umfang (in mehreren kleinen Pull Requests, jeder mit grünen Tests):
 6. **Vorher/nachher in `STAND.md`:** Zeilen gesamt, Kommentarzeilen, Dateien über 400 Zeilen,
    Zeilen über 120 Zeichen (Ausgangswerte stehen in `docs/code-regeln.md`).
 - Kann mit Schritt 29m (schnellerer Wechsel) zusammen geplant werden, aber getrennte Pull Requests.
+
+## Wohnbereich als Auswahlliste in der Seitenleiste (über „Übersicht“)
+Status: freigegeben (Bauplan Schritt 38; Korrektur Tobi 10.11.2026)
+Datum: 10.11.2026
+Was: Die Wahl des Wohnbereichs zieht von der Seite „Übersicht“ in die Seitenleiste des Programms:
+eine Auswahlliste (Dropdown) direkt über dem Eintrag „Übersicht“.
+Warum: Korrektur Tobi (10.11.2026): Die Auswahl ist aktuell direkt im Blatt Übersicht angelegt. So
+war es nicht gedacht. Gewünscht ist ein Dropdown im Seitenmenü über „Übersicht“, in dem nur die
+Bereiche erscheinen, für die man zuständig ist. Ersetzt die Umschaltknöpfe aus Schritt 29d.
+Umfang:
+- Seitenleiste, oberhalb von „Übersicht“: Beschriftung „Wohnbereich“ und Auswahlliste mit dem
+  gewählten Bereich. In jedem Bereich des Programms sichtbar und änderbar, nicht nur in der
+  Übersicht.
+- Die Liste enthält **nur die Bereiche, für die der Mitarbeiter zuständig ist** (Rechte aus 29d:
+  Personal der Wohnbereiche R1–R3 ohne „Therapie“; Therapie zusätzlich „Therapie“; Leitung und
+  Administrator alle und „Alle“). Hat jemand nur einen Bereich, steht dort der Name ohne Auswahl.
+- Die Umschaltknöpfe auf der Seite „Übersicht“ entfallen.
+- Bei eingeklappter Seitenleiste: Kürzel des Bereichs („R2“) als Knopf, ein Klick öffnet die Liste.
+- Alles Übrige aus 29d bleibt: Die Wahl gilt überall, steht in der kleinen Zeile der Kopfzeile,
+  Marke „eingesprungen“, Vorgabe Bereich des Rechners, Rücksetzen beim Abmelden.
+- Beim Wechsel bleibt man im selben Bereich des Programms (z. B. Dokumentation), nur mit den
+  Daten des neuen Wohnbereichs; ist er dort nicht vorhanden (Therapie ↔ Wohnbereich), öffnet die
+  jeweilige Startseite.
+
+## Maßnahmen je Bewohner mit Zeitwert
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 10.11.2026
+Was: Ein Reiter „Maßnahmen“ in der Akte. Er zeigt die fünf Lebensbereiche mit ihren Berichten und
+die regelmäßigen Maßnahmen des Bewohners. Jede Durchführung wird bestätigt, mit Zeit.
+Warum: Tobi (10.11.2026): Im bisherigen Programm werden Maßnahmen angelegt — die Lebensbereiche
+des HEB-Bogens als Sammelstelle für Berichte (alle drei Monate Reflexion je Lebensbereich) und
+Regelmäßiges wie „morgens ein Beutel Movicol“. Die Kollegen sind das gewohnt. Der Zeitwert wird
+wichtig, weil der Bezirk Oberbayern die Vergütung irgendwann von der Pauschale je Bewohner auf
+erfasste Zeiten umstellen will; dann muss jede Tätigkeit am Bewohner mit Zeit belegt sein.
+Grundsatz: Das Wort und die Gewohnheit bleiben, aber zwei Dinge werden getrennt. Der
+**Lebensbereich gehört zum Bericht** (wie bisher, kein Anlegen nötig, nichts kann verloren gehen).
+Eine **Maßnahme ist etwas Regelmäßiges, das zu tun ist**.
+Umfang (Vorschlag):
+- **Reiter „Maßnahmen“** in der Akte (nach „Medikamentenplan“).
+- **Oben die fünf Lebensbereiche** (Wortlaut aus `docs/heb-wissen.md`), bei jedem Bewohner
+  automatisch: Zahl der Berichte im laufenden Quartal, letzter Bericht, nächste Reflexion fällig
+  am. Marke „seit <n> Wochen kein Bericht“ (Schwelle einstellbar, Vorgabe 4 Wochen). Klick öffnet
+  die Dokumentation mit diesem Filter.
+- **Darunter die Maßnahmen des Bewohners.** Felder: Titel, Beschreibung, **Lebensbereich**
+  (Pflicht), Ziel aus dem HEB-Bogen (optional), Art (Anleitung, Begleitung, Gespräch, Kontrolle,
+  Übernahme, Sonstiges; Liste änderbar), **Rhythmus** (täglich, Wochentage, alle n Wochen,
+  monatlich, bei Bedarf), Schicht oder Uhrzeit, **Zeitwert geplant in Minuten**, gültig von–bis,
+  angelegt von (Kürzel). Ändern als neue Fassung „ab Datum“, Beenden mit Grund; der Verlauf bleibt.
+- **Vorlagen** für häufige Maßnahmen je Bereich (Einstellungen), damit nicht jeder anders benennt.
+- **Durchführen:** Jede fällige Maßnahme erscheint als Zeile im passenden Dienst (Aufgaben,
+  Übersicht Schritt 40). Bestätigen mit einem Klick: **durchgeführt** · **abgelehnt** · **nicht
+  möglich** (mit kurzem Grund), Kürzel und Uhrzeit automatisch. **Zeit tatsächlich** ist mit dem
+  geplanten Zeitwert vorbelegt und änderbar. Optional ein Satz Bemerkung.
+- **Dokumentation:** Jede Bestätigung ist ein kurzer Eintrag mit Berichtsart „Maßnahme“ im
+  Lebensbereich der Maßnahme. In der Berichtsliste zusammengefasst („Maßnahmen heute: 3
+  durchgeführt, 1 abgelehnt“, aufklappbar), damit sie die geschriebenen Berichte nicht
+  verdrängen. Filter „Maßnahmen“ ein/aus.
+- **Reflexion:** je Lebensbereich zusätzlich eine Zeile je Maßnahme, z. B. „Zimmerhygiene: 11 von
+  13 durchgeführt, 2 abgelehnt, 3 Std. 40 Min.“ Das Programm zählt nur, es bewertet nicht
+  (`CLAUDE.md`, Regel 6).
+- **Abgrenzung Medikamente:** Verordnete Medikamente stehen nur im Medikamentenplan. Der Reiter
+  zeigt sie lesend unter „Aus dem Medikamentenplan“; angelegt wird dort nichts doppelt. Legt jemand
+  eine Maßnahme an, deren Titel ein Medikament aus der Medikamentendatenbank enthält, fragt das
+  Programm: „Ist das ärztlich verordnet? Dann bitte im Medikamentenplan eintragen.“
+- **Abgrenzung Aufgaben:** Aufgaben bleiben für Einmaliges und für Bereichsaufgaben. Regelmäßiges
+  am Bewohner ist eine Maßnahme. Vorhandene wiederkehrende Aufgaben mit Bewohner lassen sich mit
+  einem Klick in eine Maßnahme umwandeln.
+- **Therapie:** Teilnahmen an Therapieangeboten zählen mit ihrer Dauer in die Zeitauswertung
+  (Schritt 41), ohne dass sie als Maßnahme angelegt werden.
+- Rechte: „Maßnahmen bestätigen“ (alle), „Maßnahmen anlegen und ändern“ (Vorbelegung
+  Fachkräfte und Bezugspflege).
+- Demo-Daten: je Bewohner zwei bis fünf Maßnahmen quer über die Lebensbereiche, Bestätigungen
+  über mehrere Wochen, einige abgelehnt.
+
+## Übersicht: Kasten „Maßnahmen heute“ als Arbeitscheckliste
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 10.11.2026
+Was: In der Übersicht ein Kasten, der zeigt, welche Maßnahmen im laufenden Dienst noch offen und
+welche erledigt sind, zum direkten Abhaken.
+Warum: Tobi (10.11.2026): Die Bestätigung dient auch als Arbeitscheckliste — was habe ich schon
+gemacht, worum habe ich mich noch nicht gekümmert. Eine Darstellung auf der Übersicht ist wichtig.
+Umfang (Vorschlag):
+- Unter „Heute wichtig“ ein Kasten **„Maßnahmen · <laufender Dienst>“** mit Kopfleiste (29r) und
+  Zähler „7 von 12 erledigt“ samt Fortschrittsbalken.
+- Offene Maßnahmen oben, nach Uhrzeit, dann nach Zimmer: Uhrzeit · Bewohner · Titel · Knöpfe
+  „durchgeführt“, „abgelehnt“, „nicht möglich“. Überfällige (Uhrzeit vorbei) mit Marke
+  „überfällig“ in Achtung-Farbe.
+- Erledigte darunter, blasser, mit Kürzel und Uhrzeit; einklappbar.
+- Umschalter „alle“ · „meine Bezugsbewohner“.
+- In der Bewohnerliste der Übersicht eine schmale Spalte „Maßnahmen“ („2 offen“ bzw. Haken).
+- Nicht bestätigte Maßnahmen am Dienstende gehen als ein Sammeleintrag in die Übergabe
+  („3 Maßnahmen aus dem Frühdienst offen“), nicht einzeln.
+- Zusammenführen mit „Laufender Dienst · noch offen“ (Aufgaben): zwei Abschnitte in einem Kasten,
+  damit es nur eine Checkliste gibt.
+
+## Zeitauswertung je Bewohner
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 10.11.2026
+Was: Eine Auswertung der erfassten Zeiten je Bewohner und Zeitraum.
+Warum: Tobi (10.11.2026): Der Bezirk Oberbayern will die Vergütung künftig nach erbrachter Zeit
+statt als Pauschale berechnen. Wie genau, ist noch nicht bekannt. Deshalb jetzt schon sauber
+erfassen und flexibel auswerten, ohne ein Abrechnungsverfahren vorwegzunehmen.
+Umfang (Vorschlag):
+- Bereich „Auswertung“ (nur mit Recht, Vorbelegung Leitung und Verwaltung): Zeitraum wählen,
+  Tabelle je Bewohner mit Minuten nach **Lebensbereich**, nach **Art** (Maßnahmen, Therapie,
+  Gespräche/Sonstiges) und Summe; geplant gegenüber tatsächlich.
+- Quellen: bestätigte Maßnahmen (Schritt 39), Therapie-Teilnahmen mit Status „gegangen“ (Dauer
+  des Angebots), optional eine Zeitangabe an frei geschriebenen Berichten (Feld „Dauer in
+  Minuten“, freiwillig).
+- Drucken und Export als CSV-Datei (Übergabe an Excel, kein Netz).
+- Hinweis im Programm und in `STAND.md`: Es ist eine Zählung erfasster Zeiten, keine
+  Abrechnung; das Verfahren des Bezirks wird nachgezogen, sobald es feststeht.
+- **Beteiligung der Mitarbeitervertretung:** Die Zeiten hängen an Kürzeln. Eine Auswertung nach
+  Mitarbeiter gibt es deshalb ausdrücklich nicht; ausgewertet wird nur je Bewohner. In die Liste
+  der Freigaben (`docs/betrieb.md`) aufnehmen.
