@@ -128,3 +128,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 09.11.2026 — Claude Code: 0.41.0 Betriebsmodus für den Terminalserver: betrieb.json, Passwörter, Sperre, Zugriffsprotokoll, Sicherung, Update durch den Verwalter, Häuser, docs/betrieb.md (Bauplan 37).
 - 09.11.2026 — Claude Code: 0.41.1 abschließende Fehlersuche (Speicher, Regeln, Oberfläche, Sicherheit): Betrieb gehärtet (Sitzung, Passwörter, Sicherung als ZIP mit Ablage, Rücksicherung per Befehl), Regel-5-Korrekturen, Mitternacht, Tests.
 - 10.11.2026 — Schritt 38 freigegeben: Wohnbereich als Auswahlliste in der Seitenleiste über „Übersicht“. Vorschläge 39–41 (offen): Maßnahmen mit Zeitwert, Kasten „Maßnahmen heute“ in der Übersicht, Zeitauswertung je Bewohner (Chat „Programme/Apps“).
+- 10.11.2026 — Vorschläge 42–44 (offen): Medikamentenausgabe abhaken, Ziele der Bewohner (Leitziel, Nahziele), Position QMB mit Prüfseite; 39 an die Ziele gebunden (Chat „Programme/Apps“).

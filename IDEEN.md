@@ -101,6 +101,9 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 39 | Maßnahmen je Bewohner mit Zeitwert (offen) | 0.43.0 |
 | 40 | Übersicht: Kasten „Maßnahmen heute“ als Arbeitscheckliste (offen) | 0.44.0 |
 | 41 | Zeitauswertung je Bewohner (offen) | 0.45.0 |
+| 42 | Medikamentenausgabe abhaken (offen) | 0.46.0 |
+| 43 | Ziele der Bewohner: Leitziel und Nahziele (offen) | 0.47.0 |
+| 44 | Qualitätsmanagement: Position QMB mit eigener Prüfseite (offen) | 0.48.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2375,7 +2378,8 @@ Umfang (Vorschlag):
   am. Marke „seit <n> Wochen kein Bericht“ (Schwelle einstellbar, Vorgabe 4 Wochen). Klick öffnet
   die Dokumentation mit diesem Filter.
 - **Darunter die Maßnahmen des Bewohners.** Felder: Titel, Beschreibung, **Lebensbereich**
-  (Pflicht), Ziel aus dem HEB-Bogen (optional), Art (Anleitung, Begleitung, Gespräch, Kontrolle,
+  (Pflicht), **Ziel des Bewohners** (Leitziel oder Nahziel aus Schritt 43; Auswahl, „ohne Ziel“
+  ist möglich, wird aber gekennzeichnet), Art (Anleitung, Begleitung, Gespräch, Kontrolle,
   Übernahme, Sonstiges; Liste änderbar), **Rhythmus** (täglich, Wochentage, alle n Wochen,
   monatlich, bei Bedarf), Schicht oder Uhrzeit, **Zeitwert geplant in Minuten**, gültig von–bis,
   angelegt von (Kürzel). Ändern als neue Fassung „ab Datum“, Beenden mit Grund; der Verlauf bleibt.
@@ -2446,3 +2450,94 @@ Umfang (Vorschlag):
 - **Beteiligung der Mitarbeitervertretung:** Die Zeiten hängen an Kürzeln. Eine Auswertung nach
   Mitarbeiter gibt es deshalb ausdrücklich nicht; ausgewertet wird nur je Bewohner. In die Liste
   der Freigaben (`docs/betrieb.md`) aufnehmen.
+
+## Medikamentenausgabe abhaken
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 10.11.2026
+Was: Eine Ausgabeliste je Einnahmezeit, in der für jeden Bewohner abgehakt wird, ob die
+Medikamente ausgegeben wurden.
+Warum: Tobi (10.11.2026): Bisher wird bei jedem Bewohner abgeklickt, ob die Medikamente ausgeteilt
+wurden — oft schon während der Ausgabe, spätestens am Schichtende. So sieht man auch, wer seine
+Medikamente noch nicht geholt hat.
+Umfang (Vorschlag):
+- Seite **„Medikamentenausgabe“** (Seitenleiste, nur Wohnbereiche): Einnahmezeiten als
+  Umschalter (morgens · mittags · abends · nachts, wie im Medikamentenplan), vorgewählt die
+  aktuelle. Liste aller Bewohner des Bereichs, die zu dieser Zeit etwas bekommen: Zimmer · Name ·
+  Medikamente dieser Zeit (Name, Stärke, Menge) · Status.
+- Je Bewohner ein Klick: **ausgegeben** · **nicht abgeholt** · **abgelehnt** · **abwesend**
+  (bei Abwesenheit laut Ausgangsliste vorbelegt, z. B. „mitgegeben“ wählbar). Kürzel und Uhrzeit
+  automatisch. Einzelne Medikamente lassen sich aufklappen und getrennt kennzeichnen (z. B. eines
+  abgelehnt).
+- Oben Zähler „18 von 21 ausgegeben“. **„Noch nicht abgeholt“** steht oben in der Liste und in
+  der Übersicht im Kasten der Arbeitscheckliste (Schritt 40).
+- Am Schichtende: Hinweis, wenn Einträge der eigenen Schicht offen sind; offene gehen als
+  Sammeleintrag in die Übergabe.
+- „Abgelehnt“ und „nicht abgeholt“ erzeugen einen kurzen Eintrag in der Dokumentation
+  (Berichtsart „Medikation“); „ausgegeben“ nur in der Ausgabeliste, damit die Dokumentation nicht
+  überläuft. Verlauf je Bewohner im Medikamentenplan („Ausgabe der letzten 14 Tage“).
+- Pausierte und abgesetzte Medikamente erscheinen nicht; Bedarfsgaben bleiben bei „Bedarf
+  gegeben …“.
+- Das Programm bestätigt nur die Ausgabe; es prüft keine Einnahme und rechnet nichts.
+- Recht „Medikamente ausgeben“ (Vorbelegung wie bisher beim Medikamentenplan).
+
+## Ziele der Bewohner: Leitziel und Nahziele
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 10.11.2026
+Was: Jeder Bewohner hat ein Leitziel und zwei Nahziele. Sie stehen gut sichtbar bei der Akte und
+in der Dokumentation, und Maßnahmen hängen an ihnen.
+Warum: Tobi (10.11.2026): Die Ziele fehlen im Programm bisher ganz. Jeder Bewohner braucht drei
+Ziele — ein Leitziel und zwei Nahziele, die er selbst setzt —, und zu den Zielen Maßnahmen, mit
+denen das Personal sie mit ihm erarbeitet. Die Heimaufsicht will das sehen. Beim Durchgehen der
+Bewohner in der Dokumentation muss klar erkennbar sein, was jemand erreichen will.
+Annahme: **1 Leitziel + 2 Nahziele** (Tobi nannte einmal „mindestens 3 Nahziele“; die
+Mindestzahlen sind deshalb in den Einstellungen änderbar).
+Umfang (Vorschlag):
+- Reiter **„Ziele und Maßnahmen“** (ersetzt den Reiter „Maßnahmen“ aus Schritt 39): oben das
+  **Leitziel**, darunter die **Nahziele**, unter jedem Ziel seine Maßnahmen; am Ende „Maßnahmen
+  ohne Ziel“ und die fünf Lebensbereiche.
+- Felder je Ziel: Wortlaut **in den Worten des Bewohners**, Art (Leitziel/Nahziel),
+  Lebensbereich, vereinbart am, mit wem (Kürzel), **überprüfen bis** (Vorgabe Nahziel 3 Monate,
+  Leitziel 12 Monate), Stand (aktiv · erreicht · geändert · beendet, mit Datum und kurzem Satz).
+  Änderungen als neue Fassung; frühere Ziele bleiben im Verlauf.
+- **Sichtbar ohne Suchen:** in der Dokumentation über der Berichtsliste eine schmale Zielleiste
+  („Leitziel: … · Nahziel 1: … · Nahziel 2: …“, einklappbar); dieselbe Zeile im Akte-Kopf unter
+  der Auskunftsleiste.
+- **Bericht einem Ziel zuordnen** (optional, Auswahl beim Schreiben); Filter „Berichte zu diesem
+  Ziel“. Der HEB-Bogen und die Reflexion zeigen je Ziel die zugeordneten Berichte und Maßnahmen.
+- **Vollständigkeit:** drei Zustände wie überall — Ziele eingetragen · „Bewohner möchte derzeit
+  kein Ziel benennen“ (mit Datum und Grund) · nicht erfasst. Marken: „Ziel fehlt“, „Nahziel ohne
+  Maßnahme“, „Überprüfung fällig“.
+- **Später (eigener Auftrag, sobald Tobi das Verfahren einbringt):** eine geführte Maske, um die
+  Ziele gemeinsam mit dem Bewohner zu erarbeiten.
+- Demo-Daten: Ziele für alle Bewohner, einige unvollständig, damit die Prüfseite (Schritt 44)
+  etwas zeigt.
+
+## Qualitätsmanagement: Position QMB mit eigener Prüfseite
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 10.11.2026
+Was: Eine Position „Qualitätsmanagement (QMB)“ mit einer eigenen Startseite, die zeigt, wo bei
+Zielen, Maßnahmen und Fristen etwas fehlt.
+Warum: Tobi (10.11.2026): Der QMB prüft Ziele und Maßnahmen der Bewohner und meldet sich bei den
+Wohnbereichen, wenn etwas nicht passt — die Heimaufsicht will das vollständig sehen. Er soll einen
+eigenen Zugang und eine Seite mit gutem Überblick bekommen.
+Umfang (Vorschlag):
+- Position **QMB** in den Mitarbeiter-Einstellungen; Vorbelegung der Rechte: **lesen** in allen
+  Bereichen (Akte, Ziele, Maßnahmen, Dokumentation, Reflexion, HEB), **nichts ändern**, außer
+  Prüfvermerken und Nachrichten. Eigene Bereichswahl „QM“ in der Auswahlliste (Schritt 38).
+- Startseite **„Qualität“**: oben Kennzahlen je Wohnbereich („Ziele vollständig 21 von 23“,
+  „Nahziele mit Maßnahme“, „Überprüfungen fällig“, „Reflexion fällig“, „HEB fällig“). Darunter die
+  **Prüfliste**: eine Zeile je Bewohner mit Haken oder Marke je Prüfpunkt; Filter „nur mit
+  Mängeln“, je Bereich.
+- Prüfpunkte (in den Einstellungen ein- und ausschaltbar): Leitziel vorhanden · zwei Nahziele
+  vorhanden · jedes Nahziel hat mindestens eine aktive Maßnahme · Ziel-Überprüfung nicht
+  überfällig · Maßnahmen werden bestätigt (keine seit n Tagen unbestätigt) · Berichte je
+  Lebensbereich im Quartal · Reflexion aktuell · HEB aktuell · Sicherheitsangaben erfasst
+  (Allergien, Ärzte, Schweigepflicht nicht „nicht erfasst“).
+- **Rückmeldung an den Wohnbereich:** aus einer Zeile heraus „Hinweis senden …“ — erzeugt eine
+  Aufgabe für den Bereich (Schritt 29q) mit dem Mangel als Text; die Prüfliste zeigt „Hinweis
+  gesendet am …“ und „erledigt am …“.
+- **Prüfvermerk:** „geprüft am … von …“ je Bewohner, mit Verlauf.
+- **Ausdruck „Nachweis Ziele und Maßnahmen“** je Bereich oder Bewohner (für die Heimaufsicht):
+  Ziele, zugehörige Maßnahmen, letzte Überprüfung.
+- Geprüft werden Unterlagen der Bewohner, nicht einzelne Mitarbeiter: keine Auswertung nach
+  Kürzel (Liste der Freigaben, `docs/betrieb.md`).
