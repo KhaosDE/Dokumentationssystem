@@ -107,7 +107,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 45 | Küchendienst im Tagesplan (offen) | 0.49.0 |
 | 46 | Archiv für ehemalige Bewohner mit Aufbewahrungsfrist (offen) | 0.50.0 |
 | 47 | Hilfeplangespräche: Termine planen und vergeben (offen) | 0.51.0 |
-| 48 | Schlüsselwörter verknüpfen Arbeitswege (offen, Bedeutung noch zu klären) | 0.52.0 |
+| 48 | Schlüsselwörter bieten den nächsten Arbeitsschritt an (offen) | 0.52.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2612,16 +2612,42 @@ Umfang (Vorschlag):
   Protokoll als Dokument, nächste Fälligkeit setzen.
 - Die Prüfseite des QMB (Schritt 44) bekommt den Prüfpunkt „Hilfeplangespräch nicht überfällig“.
 
-## Schlüsselwörter verknüpfen Arbeitswege
-Status: offen (Bedeutung noch nicht geklärt; Rückfrage an Tobi am 12.11.2026 gestellt)
+## Schlüsselwörter bieten den nächsten Arbeitsschritt an
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK; Lesart von Tobi bestätigt 12.11.2026)
 Datum: 12.11.2026
-Was: Notiz Tobi (12.11.2026): „Arbeitswege verknüpfen durch Schlüsselwörter“.
-Stand: Im Chat ist offen, was gemeint ist. Zwei mögliche Lesarten, noch nicht entschieden:
-- **(a) Schlagwörter an Einträgen:** Berichte, Aufgaben, Maßnahmen, Termine und Dokumente bekommen
-  frei wählbare Schlagwörter aus einer gepflegten Liste (z. B. „Zahnarzt“, „Kostenzusage“); ein
-  Klick auf ein Schlagwort zeigt alles Zugehörige eines Bewohners quer durch die Bereiche.
-- **(b) Auslöser beim Schreiben:** Bestimmte Wörter bzw. Berichtsarten bieten den passenden
-  nächsten Schritt an (z. B. Bericht „Arzttermin vereinbart“ → „Termin im Kalender anlegen?“,
-  „Sturz“ → „Besonderes Vorkommnis anlegen?“). Nur als Angebot, feste Wortliste, keine KI
-  (`CLAUDE.md`, Regel 6).
-Nicht bauen, bevor Tobi die Lesart bestätigt hat.
+Was: Erkennt das Programm beim Schreiben ein Schlüsselwort, bietet es den passenden nächsten
+Schritt an. So hängen Arbeitswege zusammen, ohne dass man den Bereich wechseln und alles neu
+eintippen muss.
+Warum: Notiz Tobi (12.11.2026): „Arbeitswege verknüpfen durch Schlüsselwörter“; auf Rückfrage
+bestätigt: Auslöser beim Schreiben (nicht Schlagwörter).
+Umfang (Vorschlag):
+- **Feste Regelliste, keine KI** (`CLAUDE.md`, Regel 6): je Regel Schlüsselwörter (auch
+  Wortanfänge, Groß-/Kleinschreibung egal) bzw. eine Berichtsart → ein Angebot. Das Programm
+  **bietet nur an**, es legt nie von selbst etwas an und ändert keinen Text.
+- **Wo:** im Fenster „Neuer Bericht“, in der Visite und bei Übergabe-Einträgen. Unter dem
+  Textfeld erscheint eine leise Zeile, z. B. „Arzttermin erkannt — Termin im Kalender
+  anlegen?“ mit Knopf **„Anlegen …“** und „×“ zum Wegklicken. Nie ein Fenster, das beim
+  Schreiben unterbricht.
+- **Anlegen öffnet das Zielformular vorbelegt:** Bewohner, Datum (erkannte Datums- und
+  Uhrzeitangaben im Text werden vorgeschlagen), Bezug zum Bericht. Nach dem Speichern trägt der
+  Bericht einen Verweis „→ Termin 14.11. 10:30“, das Ziel einen Verweis zurück auf den Bericht.
+- **Startregeln (Vorschlag, alle ein- und ausschaltbar):**
+  - Arzttermin, Termin bei, Überweisung → Termin im Kalender
+  - Blutabnahme, Labor, „Ergebnis nachfragen“ → Aufgabe mit Fälligkeit
+  - Medikament geändert, abgesetzt, neu verordnet, Dosis → Medikamentenplan öffnen
+  - Bedarf gegeben, Bedarfsmedikation → „Bedarf gegeben …“
+  - Blutdruck, Gewicht, Temperatur, Blutzucker → Vitalwerte erfassen
+  - Sturz, Verletzung, Gewalt, Polizei → Bericht als „Besonderes Vorkommnis“ kennzeichnen
+  - nicht zurück, abgängig, vermisst → Abgängigkeit melden
+  - Klinik, Einweisung, Notarzt → Überleitungsbogen
+  - Betreuer angerufen, Rückruf, Kostenzusage → Aufgabe bzw. Wiedervorlage
+  - Angehörige, Auskunft gegeben → Schweigepflicht prüfen (zeigt die Auskunftsleiste)
+  - Hilfeplangespräch → Termin vergeben (Schritt 47)
+  - Ziel erreicht, Nahziel → Ziele öffnen (Schritt 43)
+- **Einstellungen → „Schlüsselwörter“:** Regeln ansehen, Wörter ergänzen, Regeln abschalten
+  (Recht „Schlüsselwörter verwalten“, Vorbelegung Leitung und Administrator). Je Mitarbeiter
+  abschaltbar („keine Vorschläge anzeigen“).
+- Höchstens zwei Angebote gleichzeitig; ein weggeklicktes Angebot kommt für diesen Text nicht
+  wieder.
+- Tests je Regel mit Beispieltexten, auch Gegenbeispiele („kein Arzttermin nötig“ löst trotzdem
+  aus — das ist hingenommen, weil nur angeboten wird; in `STAND.md` vermerken).
