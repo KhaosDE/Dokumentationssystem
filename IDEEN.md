@@ -104,6 +104,10 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 42 | Medikamentenausgabe abhaken (offen) | 0.46.0 |
 | 43 | Ziele der Bewohner: Leitziel und Nahziele (offen) | 0.47.0 |
 | 44 | Qualitätsmanagement: Position QMB mit eigener Prüfseite (offen) | 0.48.0 |
+| 45 | Küchendienst im Tagesplan (offen) | 0.49.0 |
+| 46 | Archiv für ehemalige Bewohner mit Aufbewahrungsfrist (offen) | 0.50.0 |
+| 47 | Hilfeplangespräche: Termine planen und vergeben (offen) | 0.51.0 |
+| 48 | Schlüsselwörter verknüpfen Arbeitswege (offen, Bedeutung noch zu klären) | 0.52.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2541,3 +2545,83 @@ Umfang (Vorschlag):
   Ziele, zugehörige Maßnahmen, letzte Überprüfung.
 - Geprüft werden Unterlagen der Bewohner, nicht einzelne Mitarbeiter: keine Auswertung nach
   Kürzel (Liste der Freigaben, `docs/betrieb.md`).
+
+## Küchendienst im Tagesplan
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 12.11.2026
+Was: Der Küchendienst des Tages erscheint im Tagesplan.
+Warum: Notiz Tobi (12.11.2026): „Küchendienst auf den Tagesplan“.
+Umfang (Vorschlag):
+- Der Tagesplan liest den Küchendienst aus dem Untermodul Küchendienst (Modul Ausgangsliste) —
+  ein Datensatz, kein zweiter. Ist das Untermodul abgeschaltet, erscheint nichts.
+- Oben im Tagesplan eine eigene Zeile „Küchendienst heute: <Namen bzw. Zimmergruppe>“ je
+  Mahlzeit bzw. Dienst, wie im Küchendienstplan hinterlegt; getauschte Dienste mit Hinweis
+  „getauscht mit …“.
+- Bei den betroffenen Bewohnern zusätzlich ein Eintrag zur passenden Uhrzeit, bestätigbar wie
+  andere Termine (gemacht · nicht gemacht · vertreten durch …).
+- Ist jemand mit Küchendienst abwesend (Ausgangsliste), Marke „Küchendienst unbesetzt“ in
+  Achtung-Farbe im Tagesplan und in der Übersicht.
+- Abgleich mit der eigenständigen Ausgangsliste in `AENDERUNGEN.md` vermerken.
+
+## Archiv für ehemalige Bewohner mit Aufbewahrungsfrist
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 12.11.2026
+Was: Ausgezogene oder verstorbene Bewohner wandern mit ihrer ganzen Akte in ein Archiv. Dort
+bleibt sie lesbar, bis die Aufbewahrungsfrist endet.
+Warum: Notiz Tobi (12.11.2026): „Archiv für ehemalige Bewohner, Archivierungspflicht Gesetzgeber“.
+Umfang (Vorschlag):
+- **Entlassung** (vorhandener Ablauf) fragt Datum und Grund (Auszug, Verlegung, verstorben,
+  Sonstiges) und verschiebt die Akte ins Archiv: nicht mehr in Übersicht, Dokumentation, Listen
+  und Zählern; Bett wird frei; offene Aufgaben, Maßnahmen und Termine werden beendet (Liste zum
+  Bestätigen).
+- **Bereich „Archiv“** (Einstellungen bzw. eigener Eintrag, nur mit Recht „Archiv einsehen“,
+  Vorbelegung Leitung, Verwaltung, QMB): Liste mit Name, Bereich, von–bis, Grund, **Aufbewahrung
+  bis**; Suche. Die Akte öffnet **nur lesend**, mit allen Reitern, Berichten und Dokumenten;
+  Drucken möglich; jeder Zugriff im Zugriffsprotokoll.
+- **Wiederaufnahme:** „Wieder aufnehmen …“ holt die Akte zurück (neuer Aufenthalt, alter Verlauf
+  bleibt sichtbar).
+- **Aufbewahrungsfrist:** in den Einstellungen in Jahren, ab Entlassdatum. **Vorbelegung leer** —
+  das Programm verlangt die Eingabe, weil die Frist rechtlich geklärt sein muss (im Chat nicht
+  geprüft; mit Träger und Datenschutz klären, in `docs/betrieb.md` in die Liste der Freigaben).
+- **Nach Ablauf:** Liste „Aufbewahrung abgelaufen“. Löschen nie automatisch, nur durch zwei
+  Personen mit Recht „Archiv löschen“ (Vier-Augen), mit Löschprotokoll (Bewohner-Nr., Zeitraum,
+  wer, wann — ohne Inhalte). Gelöscht werden Akte, Berichte und Dokumente; Sicherungen laufen
+  nach ihrer eigenen Aufbewahrung aus.
+- Demo: einige ausgedachte ehemalige Bewohner, einer mit abgelaufener Frist.
+
+## Hilfeplangespräche: Termine planen und vergeben
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 12.11.2026
+Was: Eine Übersicht, für welchen Bewohner wann ein Hilfeplangespräch fällig ist, mit Vergabe des
+Termins und Einladung der Beteiligten.
+Warum: Notiz Tobi (12.11.2026): „Vergabe für Termine Hilfeplangespräche“.
+Umfang (Vorschlag):
+- Je Bewohner im Reiter „Kostenträger“: letztes Hilfeplangespräch am, **nächstes fällig bis**
+  (Vorschlag aus dem Ende der Bewilligung, änderbar), Stand: offen · Termin vergeben · geführt.
+- Seite **„Hilfeplangespräche“** (Kalender-Bereich): Liste aller Bewohner des Bereichs nach
+  Fälligkeit, Marke „fällig in <n> Wochen“ bzw. „überfällig“. „Termin vergeben …“: Datum, Uhrzeit,
+  Ort, **Teilnehmer** aus der Akte vorgeschlagen (Bewohner, Bezugspflege, Betreuer bzw. Forensik/
+  FOSA, Sachbearbeiter des Kostenträgers, Angehörige nur mit Entbindung), weitere wählbar.
+- Der Termin steht im Kalender des Bereichs und im Tagesplan; Warnung bei Überschneidung
+  (Therapie, andere Gespräche, Fahrzeug).
+- **Einladen:** `mailto:` mit Termin und `.ics`-Datei (wie Schritt 28), ohne Gesundheitsangaben
+  im Text.
+- **Vorbereitung als Checkliste** am Termin (HEB-Bogen aktuell, Reflexion, Ziele überprüft,
+  Unterlagen); erzeugt Aufgaben für den Bereich.
+- Nach dem Gespräch: „geführt am …“, Ergebnis als Bericht (Berichtsart „Hilfeplangespräch“),
+  Protokoll als Dokument, nächste Fälligkeit setzen.
+- Die Prüfseite des QMB (Schritt 44) bekommt den Prüfpunkt „Hilfeplangespräch nicht überfällig“.
+
+## Schlüsselwörter verknüpfen Arbeitswege
+Status: offen (Bedeutung noch nicht geklärt; Rückfrage an Tobi am 12.11.2026 gestellt)
+Datum: 12.11.2026
+Was: Notiz Tobi (12.11.2026): „Arbeitswege verknüpfen durch Schlüsselwörter“.
+Stand: Im Chat ist offen, was gemeint ist. Zwei mögliche Lesarten, noch nicht entschieden:
+- **(a) Schlagwörter an Einträgen:** Berichte, Aufgaben, Maßnahmen, Termine und Dokumente bekommen
+  frei wählbare Schlagwörter aus einer gepflegten Liste (z. B. „Zahnarzt“, „Kostenzusage“); ein
+  Klick auf ein Schlagwort zeigt alles Zugehörige eines Bewohners quer durch die Bereiche.
+- **(b) Auslöser beim Schreiben:** Bestimmte Wörter bzw. Berichtsarten bieten den passenden
+  nächsten Schritt an (z. B. Bericht „Arzttermin vereinbart“ → „Termin im Kalender anlegen?“,
+  „Sturz“ → „Besonderes Vorkommnis anlegen?“). Nur als Angebot, feste Wortliste, keine KI
+  (`CLAUDE.md`, Regel 6).
+Nicht bauen, bevor Tobi die Lesart bestätigt hat.
