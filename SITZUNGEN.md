@@ -135,3 +135,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 13.11.2026 — Vorschlag 49 (offen): Rechtschreibprüfung über Windows mit Fachwörterbuch und den eigenen Namen/Medikamenten aus DokuLine (Chat „Programme/Apps“).
 - 13.11.2026 — Vorschlag 50 (offen): Abwesenheit in der Dokumentation sichtbar machen (Chat „Programme/Apps“).
 - 13.11.2026 — Schritt 50 freigegeben (Abwesenheit in der Dokumentation). Vorschlag 51 (offen): Medikamentenbestellung mit Reichweite, Rezeptanforderung und Lieferung (Chat „Programme/Apps“).
+- 13.11.2026 — Schritt 51 freigegeben: Medikamentenbestellung an die heimversorgende Apotheke per E-Mail, Bestandsführung als zuschaltbare Option (Chat „Programme/Apps“).

@@ -110,7 +110,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 48 | Schlüsselwörter bieten den nächsten Arbeitsschritt an (offen) | 0.52.0 |
 | 49 | Rechtschreibprüfung mit Fachwörterbuch (offen) | 0.53.0 |
 | 50 | Abwesenheit in der Dokumentation sichtbar machen | 0.54.0 |
-| 51 | Medikamentenbestellung: Reichweite, Rezeptanforderung, Lieferung (offen) | 0.55.0 |
+| 51 | Medikamentenbestellung: Anforderung, Lieferung, Bestand als Option | 0.55.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2732,7 +2732,7 @@ Umfang (Vorschlag):
   Überleitungsbogen tragen dort ein, damit es keine zwei Wahrheiten gibt.
 
 ## Medikamentenbestellung: Reichweite, Rezeptanforderung, Lieferung
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Bauplan Schritt 51; OK Tobi 13.11.2026, Bestandsführung als zuschaltbare Option)
 Datum: 13.11.2026
 Was: DokuLine zeigt, welche Medikamente bald ausgehen, sammelt daraus Rezeptanforderungen an die
 Ärzte und Bestellungen an die Apotheke und verfolgt sie bis zur Lieferung.
@@ -2746,13 +2746,20 @@ direkt an die heimversorgende Apotheke schicken — die KBV nennt dafür Heime m
 Heimversorgungsvertrag nach § 12a ApoG; ob das für Einrichtungen der Eingliederungshilfe gilt, ist
 nicht geklärt. Die Krankenkassendaten kommen dabei über das E-Rezept zur Apotheke, nicht über
 DokuLine.
-Umfang (Vorschlag):
-- **Bestand je Medikament und Bewohner** (Medikamentenplan): Packungsgröße, Stück vorhanden,
+Angaben Tobi (13.11.2026): Die Einrichtung hat einen **Heimversorgungsvertrag** mit einer
+Apotheke; Bestellungen gehen bisher **per E-Mail** raus. Die Bestandsführung kommt mit, aber
+**als zuschaltbare Option**.
+Umfang:
+- **Bestandsführung zuschaltbar** (Einstellungen → Medikation → „Bestand führen“, Vorgabe
+  **aus**, je Bereich). Ohne Bestand wählt man auf der Seite „Bestellung“ Bewohner und
+  Medikamente aus dem Plan selbst aus; alles Übrige (Anforderung, Verlauf, Lieferung) funktioniert
+  gleich. Mit Bestand gilt zusätzlich der folgende Punkt.
+- **Bestand je Medikament und Bewohner** (Medikamentenplan, nur wenn eingeschaltet): Packungsgröße, Stück vorhanden,
   zuletzt gezählt am. Aus dem Verbrauch laut Plan errechnet das Programm „**reicht bis**“
   (reine Zählung, keine medizinische Berechnung). Abgehakte Ausgaben (Schritt 42) ziehen ab;
   „Bestand zählen …“ setzt neu.
-- **Seite „Bestellung“** (Bereich Medikation): alles, was in den nächsten n Tagen ausgeht
-  (Vorgabe 7, einstellbar), gruppiert nach **Bestellweg** (Hausarzt bzw. Arzt der Verordnung,
+- **Seite „Bestellung“** (Bereich Medikation): mit Bestandsführung alles, was in den nächsten n
+  Tagen ausgeht (Vorgabe 7, einstellbar), sonst die Auswahl von Hand, gruppiert nach **Bestellweg** (Hausarzt bzw. Arzt der Verordnung,
   Forensik, FOSA, Apotheke für nicht verschreibungspflichtige Mittel). Häkchen setzen, Menge
   anpassen, „Anforderung erstellen …“.
 - **Anforderung**: je Empfänger eine Liste (Bewohner, Geburtsdatum, Medikament, Stärke, Form,
@@ -2760,7 +2767,11 @@ Umfang (Vorschlag):
   (`mailto:`, `CLAUDE.md` Regel 6). Hinweis im Programm: Normale E-Mail ist nicht
   verschlüsselt; für Gesundheitsdaten nur einen Weg nutzen, den Einrichtung und Datenschutz
   freigegeben haben (z. B. verschlüsselte E-Mail, Fax, KIM falls vorhanden). Weg je Empfänger in
-  den Verzeichnissen einstellbar.
+  den Verzeichnissen einstellbar. **E-Mail ist der heutige Weg** der Einrichtung zur Apotheke: Hat
+  der Verwalter in den Einstellungen bestätigt „E-Mail-Versand an diesen Empfänger ist von der
+  Einrichtung freigegeben“, erscheint der Hinweis nicht mehr bei jeder Bestellung.
+- **Heimversorgende Apotheke** als fester Empfänger (Einstellungen), vorgewählt für Bestellungen,
+  die nicht über einen Arzt bzw. Forensik/FOSA laufen.
 - **Verlauf je Anforderung:** angefordert → Rezept/Bestätigung da → geliefert (Menge einbuchen,
   Bestand steigt) → erledigt; Erinnerung als Aufgabe, wenn nach n Tagen nichts kam.
 - **Apotheke** als Eintrag in den Verzeichnissen (Sonstige Stellen) mit Bestellweg.
