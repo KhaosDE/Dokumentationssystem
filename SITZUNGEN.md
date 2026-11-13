@@ -131,3 +131,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 10.11.2026 — Vorschläge 42–44 (offen): Medikamentenausgabe abhaken, Ziele der Bewohner (Leitziel, Nahziele), Position QMB mit Prüfseite; 39 an die Ziele gebunden (Chat „Programme/Apps“).
 - 12.11.2026 — Vorschläge 45–48 (offen): Küchendienst im Tagesplan, Archiv für ehemalige Bewohner, Hilfeplangespräche, Schlüsselwörter (Bedeutung zu klären). Server bestätigt: Terminalserver (Chat „Programme/Apps“).
 - 12.11.2026 — Vorschlag 48 ausgearbeitet (offen): Schlüsselwörter bieten beim Schreiben den nächsten Arbeitsschritt an, feste Regelliste ohne KI (Chat „Programme/Apps“).
+- 13.11.2026 — Vorschlag 48 ergänzt: Menüpunkt „Schlüsselwörter“ mit Option je einzelnem Wort (ein/aus, Angebot, Art des Treffers, Probefeld) (Chat „Programme/Apps“).

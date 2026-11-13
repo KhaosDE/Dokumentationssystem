@@ -2644,9 +2644,20 @@ Umfang (Vorschlag):
   - Angehörige, Auskunft gegeben → Schweigepflicht prüfen (zeigt die Auskunftsleiste)
   - Hilfeplangespräch → Termin vergeben (Schritt 47)
   - Ziel erreicht, Nahziel → Ziele öffnen (Schritt 43)
-- **Einstellungen → „Schlüsselwörter“:** Regeln ansehen, Wörter ergänzen, Regeln abschalten
-  (Recht „Schlüsselwörter verwalten“, Vorbelegung Leitung und Administrator). Je Mitarbeiter
-  abschaltbar („keine Vorschläge anzeigen“).
+- **Menüpunkt „Schlüsselwörter“ in den Einstellungen mit einer Option je Wort** (Ergänzung Tobi,
+  13.11.2026): links die Angebote (z. B. „Termin im Kalender“), rechts die **einzelnen Wörter**
+  dieses Angebots als Liste. Je Wort:
+  - **ein/aus** (Häkchen) — ein Wort lässt sich abschalten, ohne die ganze Regel abzuschalten;
+  - **Angebot ändern** (Auswahl, welches Angebot das Wort auslöst; ein Wort kann auch mehrere
+    Angebote auslösen);
+  - **Art des Treffers:** ganzes Wort · Wortanfang (z. B. „Blutabnahm…“) · Wortgruppe
+    („Ergebnis nachfragen“);
+  - **Entfernen**; mitgelieferte Wörter werden nur abgeschaltet, nicht gelöscht
+    („Werkseinstellung wiederherstellen“ je Angebot).
+  - Darüber „Wort hinzufügen …“ und ein **Probefeld**: Satz eintippen, das Programm zeigt, welche
+    Wörter treffen und welches Angebot erscheinen würde.
+  Ändern mit Recht „Schlüsselwörter verwalten“ (Vorbelegung Leitung und Administrator); ansehen
+  dürfen alle. Je Mitarbeiter abschaltbar („keine Vorschläge anzeigen“).
 - Höchstens zwei Angebote gleichzeitig; ein weggeklicktes Angebot kommt für diesen Text nicht
   wieder.
 - Tests je Regel mit Beispieltexten, auch Gegenbeispiele („kein Arzttermin nötig“ löst trotzdem
