@@ -133,3 +133,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 12.11.2026 — Vorschlag 48 ausgearbeitet (offen): Schlüsselwörter bieten beim Schreiben den nächsten Arbeitsschritt an, feste Regelliste ohne KI (Chat „Programme/Apps“).
 - 13.11.2026 — Vorschlag 48 ergänzt: Menüpunkt „Schlüsselwörter“ mit Option je einzelnem Wort (ein/aus, Angebot, Art des Treffers, Probefeld) (Chat „Programme/Apps“).
 - 13.11.2026 — Vorschlag 49 (offen): Rechtschreibprüfung über Windows mit Fachwörterbuch und den eigenen Namen/Medikamenten aus DokuLine (Chat „Programme/Apps“).
+- 13.11.2026 — Vorschlag 50 (offen): Abwesenheit in der Dokumentation sichtbar machen (Chat „Programme/Apps“).

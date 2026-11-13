@@ -109,6 +109,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 47 | Hilfeplangespräche: Termine planen und vergeben (offen) | 0.51.0 |
 | 48 | Schlüsselwörter bieten den nächsten Arbeitsschritt an (offen) | 0.52.0 |
 | 49 | Rechtschreibprüfung mit Fachwörterbuch (offen) | 0.53.0 |
+| 50 | Abwesenheit in der Dokumentation sichtbar machen (offen) | 0.54.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2697,3 +2698,34 @@ Umfang (Vorschlag):
   oder KI (`CLAUDE.md`, Regel 6). Deshalb nur Rechtschreibung.
 - Tests mit ausgedachten Texten: Fachwörter, Bewohnernamen und Medikamente werden nicht
   angestrichen, echte Tippfehler schon.
+
+## Abwesenheit in der Dokumentation sichtbar machen
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 13.11.2026
+Was: Ist ein Bewohner abwesend (Klinik, Heimfahrt, Urlaub, unterwegs), sieht man das in der
+Dokumentation, und Lücken in den Berichten sind erklärt.
+Warum: Frage Tobi (13.11.2026): Wie werden Berichte bei Abwesenheit von Bewohnern behandelt bzw.
+angezeigt? Stand 0.41.1: Abwesenheit (Ausgangsliste, Heimfahrt im Kalender, Fahrten, „in der Klinik
+seit …“ aus dem Überleitungsbogen) erscheint als Marke „abwesend: …“ in der Übersicht und im
+Akte-Kopf. Die Dokumentation zeigt davon nichts; Berichte lassen sich normal schreiben, leere Tage
+sind nicht erklärt.
+Umfang (Vorschlag):
+- **Über der Berichtsliste** (Dokumentation) eine Zeile, solange die Abwesenheit läuft:
+  „abwesend: Klinik seit 03.11. · voraussichtlich zurück 20.11.“ (Marke Abwesend, mit Wort).
+- **In der Tagesliste** statt leerer Tage ein schmaler grauer Balken über den Zeitraum:
+  „06.11.–09.11. abwesend: Heimfahrt“. Berichte aus dieser Zeit (z. B. Telefonat mit der Klinik)
+  stehen trotzdem an ihrem Tag.
+- **Beginn und Ende** einer Abwesenheit erzeugen je einen kurzen Eintrag (Berichtsart
+  „Ausgang/Abwesenheit“): „abwesend ab 06.11. 14:00 (Heimfahrt)“ bzw. „zurück am 09.11. 17:30“,
+  mit Kürzel — einmal, nicht täglich. Bei der Rückkehr bietet das Programm „Rückkehrbericht
+  schreiben …“ an (nur Angebot).
+- **Schreiben während der Abwesenheit** bleibt möglich; das Formular zeigt oben „Bewohner ist
+  abwesend (Klinik seit 03.11.)“, damit klar ist, worüber geschrieben wird.
+- **Folgen in anderen Teilen:** Abwesenheitstage zählen nicht als „kein Bericht“ (Marken der
+  Lebensbereiche, Schritt 39; Prüfseite QMB, Schritt 44); Maßnahmen und Medikamentenausgabe
+  stehen in dieser Zeit auf „abwesend“ (Schritte 39, 42); die Zeitauswertung (41) kennzeichnet
+  Abwesenheitstage.
+- **Bewohnerleiste** der Dokumentation bleibt ohne Hinweise (Vorgabe Tobi 09.11.2026); nur der
+  Name abwesender Bewohner in leiserer Schrift — Tobi entscheidet, ob auch das entfallen soll.
+- Eine Quelle für Abwesenheit: das Modul Ausgangsliste; Kalender (Heimfahrt), Fahrten und
+  Überleitungsbogen tragen dort ein, damit es keine zwei Wahrheiten gibt.
