@@ -108,6 +108,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 46 | Archiv für ehemalige Bewohner mit Aufbewahrungsfrist (offen) | 0.50.0 |
 | 47 | Hilfeplangespräche: Termine planen und vergeben (offen) | 0.51.0 |
 | 48 | Schlüsselwörter bieten den nächsten Arbeitsschritt an (offen) | 0.52.0 |
+| 49 | Rechtschreibprüfung mit Fachwörterbuch (offen) | 0.53.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2662,3 +2663,37 @@ Umfang (Vorschlag):
   wieder.
 - Tests je Regel mit Beispieltexten, auch Gegenbeispiele („kein Arzttermin nötig“ löst trotzdem
   aus — das ist hingenommen, weil nur angeboten wird; in `STAND.md` vermerken).
+
+## Rechtschreibprüfung mit Fachwörterbuch
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 13.11.2026
+Was: Beim Schreiben von Berichten werden Tippfehler rot unterschlängelt, mit Vorschlägen per
+Rechtsklick — und Fachwörter, Namen und Medikamente gelten nicht als Fehler.
+Warum: Frage Tobi (13.11.2026): Rechtschreibprüfung, besser als der Standard möglich?
+Grundlage: die **Rechtschreibprüfung von Windows** (Windows Spell Checking API, `ISpellChecker`;
+ab Windows 8 bzw. Windows Server 2012). Läuft ohne Internet, ohne KI, ohne neue Abhängigkeit
+und ohne Lizenzfrage. Deutsch braucht das deutsche Sprachpaket von Windows; fehlt es, zeigt das
+Programm das an und läuft ohne Prüfung weiter (Hinweis in `docs/betrieb.md` für den
+Terminalserver).
+Umfang (Vorschlag):
+- **Wo:** alle längeren Textfelder (Bericht, Nachtrag, Übergabe, Visite, Reflexion, HEB,
+  Biografie, Ziele). Rote Wellenlinie unter unbekannten Wörtern; Rechtsklick zeigt bis zu fünf
+  Vorschläge, „Ignorieren“ und „Zum Fachwörterbuch hinzufügen“ (mit Recht).
+- **Besser als der Standard — das Programm kennt seine eigenen Wörter:** automatisch als
+  richtig gelten Bewohnernamen, Namen aus den Verzeichnissen (Ärzte, Betreuer, Angehörige),
+  Kürzel der Mitarbeiter, alle Wirkstoff- und Handelsnamen der Medikamentendatenbank, Namen der
+  Therapieangebote und Orte. Diese Wörter gibt DokuLine nur **für die laufende Sitzung** an die
+  Prüfung weiter („Ignorieren“), sie werden **nicht** in Windows-Wörterbuchdateien geschrieben
+  (keine Personennamen außerhalb von DokuLine).
+- **Fachwörterbuch der Einrichtung** (Einstellungen → „Fachwörter“): gemeinsame Liste für alle,
+  z. B. „Bezugspflege“, „Nahziel“, „FOSA“, „Bedarfsmedikation“, „Exazerbation“; mitgeliefert eine
+  Grundliste psychiatrischer und sozialpädagogischer Fachbegriffe (selbst zusammengestellt, ohne
+  fremde Wörterbuchdateien). Ergänzen mit Recht „Fachwörter verwalten“.
+- **Autokorrektur (optional, aus):** Liste typischer Vertipper → richtiges Wort (z. B. „udn“ →
+  „und“), nur nach Leerzeichen, rückgängig mit Strg+Z. Je Mitarbeiter abschaltbar.
+- **Vor dem Speichern** kein Zwang: höchstens ein leiser Hinweis „2 Wörter unbekannt“ am Feld.
+- **Nicht möglich (ehrlich):** Grammatik- und Stilprüfung. Dafür bräuchte es ein großes
+  Zusatzprogramm (z. B. LanguageTool, Java, Lizenz LGPL — nicht in der erlaubten Lizenzliste)
+  oder KI (`CLAUDE.md`, Regel 6). Deshalb nur Rechtschreibung.
+- Tests mit ausgedachten Texten: Fachwörter, Bewohnernamen und Medikamente werden nicht
+  angestrichen, echte Tippfehler schon.
