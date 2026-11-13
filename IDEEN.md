@@ -111,6 +111,7 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 49 | Rechtschreibprüfung mit Fachwörterbuch (offen) | 0.53.0 |
 | 50 | Abwesenheit in der Dokumentation sichtbar machen | 0.54.0 |
 | 51 | Medikamentenbestellung: Anforderung, Lieferung, Bestand als Option | 0.55.0 |
+| 52 | HEB-Fälligkeit vermerken und rechtzeitig erinnern | 0.56.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2780,3 +2781,34 @@ Umfang:
   aus).
 - Verwandt: Excel-Werkzeug „Zurück an die Apotheke“ (Vault, Projekt Medikamentenliste) — Rückgabe
   von Medikamenten könnte später hier dazukommen.
+
+## HEB-Fälligkeit vermerken und rechtzeitig erinnern
+Status: freigegeben (Bauplan Schritt 52; Vorgabe Tobi 13.11.2026)
+Datum: 13.11.2026
+Was: Je Bewohner steht, bis wann der nächste HEB-Bogen beim Kostenträger sein muss. Das Programm
+erinnert rechtzeitig vorher, nicht erst, wenn es zu spät ist.
+Warum: Vorgabe Tobi (13.11.2026): „Fälligkeit der HEB-Bögen vermerken, erinnern.“ Stand 0.41.1:
+„HEB fällig“ erscheint erst, wenn der letzte Bogen älter als die Frist ist (`Heb.Faellig`);
+ein festes Fälligkeitsdatum und eine Vorwarnung gibt es nicht.
+Umfang:
+- **Feld „nächster HEB fällig am“** je Bewohner (Reiter „HEB“ oben, Kurzzeile in den
+  Stammdaten): Vorschlag aus dem Ende der Bewilligung (Reiter „Kostenträger“) bzw. aus dem
+  letzten Bogen plus Frist; von Hand änderbar mit Grund (z. B. „Schreiben des Bezirks vom …“).
+  Drei Zustände (`CLAUDE.md`, Regel 5): Datum eingetragen · „kein HEB nötig“ (mit Grund) ·
+  nicht erfasst (Achtung-Farbe).
+- **Stand des Bogens:** offen · in Arbeit (Entwurf angelegt) · fertig · **abgegeben am …** (mit
+  Kürzel). „Abgegeben“ schließt die Fälligkeit und schlägt die nächste vor.
+- **Erinnerung in Stufen** (Wochen in den Einstellungen änderbar):
+  - **8 Wochen vorher:** Aufgabe für den Bereich bzw. die Bezugspflege „HEB-Bogen für <Name>
+    beginnen (fällig <Datum>)“ und Marke „HEB fällig in 8 Wochen“ (Hinweis-Farbe).
+  - **4 Wochen vorher:** Marke in Achtung-Farbe; steht unter „Heute wichtig“ in der Übersicht.
+  - **Überfällig:** Marke in Gefahr-Farbe mit Wort, ebenfalls in der Übersicht.
+  Ist ein Entwurf angelegt, wird die erste Aufgabe als erledigt markiert.
+- **Liste „HEB-Fristen“** (Bereich HEB bzw. Reiter in der Übersicht der HEB-Bögen): alle Bewohner
+  des gewählten Bereichs nach Fälligkeit, mit Stand, Bezugspflege und Knopf „Bogen öffnen“ bzw.
+  „Neuer HEB-Bogen …“. Drucken.
+- **Kalender:** Fälligkeit als Ganztagseintrag im Bereichskalender (nur Name und „HEB fällig“).
+- **Zusammenhang:** Hilfeplangespräch (Schritt 47) und Kostenzusage (Reiter „Kostenträger“)
+  zeigen dieselbe Frist; die Prüfseite des QMB (Schritt 44) nutzt sie für „HEB aktuell“.
+- Demo-Daten: Fälligkeiten verteilt über die nächsten Monate, je Bereich eine überfällig und
+  eine in den nächsten 4 Wochen.
