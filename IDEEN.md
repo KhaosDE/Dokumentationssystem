@@ -109,7 +109,8 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 47 | Hilfeplangespräche: Termine planen und vergeben (offen) | 0.51.0 |
 | 48 | Schlüsselwörter bieten den nächsten Arbeitsschritt an (offen) | 0.52.0 |
 | 49 | Rechtschreibprüfung mit Fachwörterbuch (offen) | 0.53.0 |
-| 50 | Abwesenheit in der Dokumentation sichtbar machen (offen) | 0.54.0 |
+| 50 | Abwesenheit in der Dokumentation sichtbar machen | 0.54.0 |
+| 51 | Medikamentenbestellung: Reichweite, Rezeptanforderung, Lieferung (offen) | 0.55.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2700,7 +2701,7 @@ Umfang (Vorschlag):
   angestrichen, echte Tippfehler schon.
 
 ## Abwesenheit in der Dokumentation sichtbar machen
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Bauplan Schritt 50; OK Tobi 13.11.2026: „Abwesenheitshinweise sind wichtig, das passt so“)
 Datum: 13.11.2026
 Was: Ist ein Bewohner abwesend (Klinik, Heimfahrt, Urlaub, unterwegs), sieht man das in der
 Dokumentation, und Lücken in den Berichten sind erklärt.
@@ -2725,7 +2726,46 @@ Umfang (Vorschlag):
   Lebensbereiche, Schritt 39; Prüfseite QMB, Schritt 44); Maßnahmen und Medikamentenausgabe
   stehen in dieser Zeit auf „abwesend“ (Schritte 39, 42); die Zeitauswertung (41) kennzeichnet
   Abwesenheitstage.
-- **Bewohnerleiste** der Dokumentation bleibt ohne Hinweise (Vorgabe Tobi 09.11.2026); nur der
-  Name abwesender Bewohner in leiserer Schrift — Tobi entscheidet, ob auch das entfallen soll.
+- **Bewohnerleiste** der Dokumentation bleibt ohne Marken (Vorgabe Tobi 09.11.2026); der Name
+  abwesender Bewohner steht in leiserer Schrift (bestätigt Tobi 13.11.2026).
 - Eine Quelle für Abwesenheit: das Modul Ausgangsliste; Kalender (Heimfahrt), Fahrten und
   Überleitungsbogen tragen dort ein, damit es keine zwei Wahrheiten gibt.
+
+## Medikamentenbestellung: Reichweite, Rezeptanforderung, Lieferung
+Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Datum: 13.11.2026
+Was: DokuLine zeigt, welche Medikamente bald ausgehen, sammelt daraus Rezeptanforderungen an die
+Ärzte und Bestellungen an die Apotheke und verfolgt sie bis zur Lieferung.
+Warum: Tobi (13.11.2026): Eine Möglichkeit zur Medikamentenbestellung fehlt noch; eine Übermittlung
+an die Apotheke wäre praktisch. Bisher gibt es nur den Bestellweg je Bewohner mit „Bestellung per
+E-Mail …“ (Schritt 30a).
+Hintergrund (Recherche im Chat, 13.11.2026): Verschreibungspflichtige Medikamente bestellt die
+Einrichtung nicht bei der Apotheke, sondern fordert das Rezept bei der Arztpraxis an. Seit dem
+ApoVWG (Juli 2026, befristet bis Ende 2028) dürfen Praxen E-Rezepte für Heimbewohner per KIM
+direkt an die heimversorgende Apotheke schicken — die KBV nennt dafür Heime mit
+Heimversorgungsvertrag nach § 12a ApoG; ob das für Einrichtungen der Eingliederungshilfe gilt, ist
+nicht geklärt. Die Krankenkassendaten kommen dabei über das E-Rezept zur Apotheke, nicht über
+DokuLine.
+Umfang (Vorschlag):
+- **Bestand je Medikament und Bewohner** (Medikamentenplan): Packungsgröße, Stück vorhanden,
+  zuletzt gezählt am. Aus dem Verbrauch laut Plan errechnet das Programm „**reicht bis**“
+  (reine Zählung, keine medizinische Berechnung). Abgehakte Ausgaben (Schritt 42) ziehen ab;
+  „Bestand zählen …“ setzt neu.
+- **Seite „Bestellung“** (Bereich Medikation): alles, was in den nächsten n Tagen ausgeht
+  (Vorgabe 7, einstellbar), gruppiert nach **Bestellweg** (Hausarzt bzw. Arzt der Verordnung,
+  Forensik, FOSA, Apotheke für nicht verschreibungspflichtige Mittel). Häkchen setzen, Menge
+  anpassen, „Anforderung erstellen …“.
+- **Anforderung**: je Empfänger eine Liste (Bewohner, Geburtsdatum, Medikament, Stärke, Form,
+  Packung); Übergabe als **Ausdruck/Fax-Vorlage** oder als **E-Mail** über das E-Mail-Programm
+  (`mailto:`, `CLAUDE.md` Regel 6). Hinweis im Programm: Normale E-Mail ist nicht
+  verschlüsselt; für Gesundheitsdaten nur einen Weg nutzen, den Einrichtung und Datenschutz
+  freigegeben haben (z. B. verschlüsselte E-Mail, Fax, KIM falls vorhanden). Weg je Empfänger in
+  den Verzeichnissen einstellbar.
+- **Verlauf je Anforderung:** angefordert → Rezept/Bestätigung da → geliefert (Menge einbuchen,
+  Bestand steigt) → erledigt; Erinnerung als Aufgabe, wenn nach n Tagen nichts kam.
+- **Apotheke** als Eintrag in den Verzeichnissen (Sonstige Stellen) mit Bestellweg.
+- **Nur Nötiges übermitteln:** keine Diagnosen, keine Berichte; Krankenkassendaten nur, wenn der
+  Empfänger sie ausdrücklich braucht (Feld je Empfänger „Versichertennummer mitsenden“, Vorgabe
+  aus).
+- Verwandt: Excel-Werkzeug „Zurück an die Apotheke“ (Vault, Projekt Medikamentenliste) — Rückgabe
+  von Medikamenten könnte später hier dazukommen.
