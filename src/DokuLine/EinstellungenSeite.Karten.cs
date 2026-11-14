@@ -73,6 +73,12 @@ public sealed partial class EinstellungenSeite
         MeldestellenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Meldestellen]));
         Karte("Wohnbereich", "Abgängigkeit: wer wird informiert", "Die Liste zum Abhaken bei einer Abgängigkeitsmeldung; Telefonnummern gehören mit in den Namen, z. B. „Rufbereitschaft (0000 000000)“.",
             MeldestellenKnopf, Funktionen.EinstellungenBereich);
+        KeinBericht.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { KeinBerichtWochen = (int)KeinBericht.Value }); };
+        Karte("Wohnbereich", "Lebensbereiche: kein Bericht seit", "Nach so vielen Wochen ohne Bericht in einem Lebensbereich zeigt die Akte (Reiter „Maßnahmen“) „seit … Wochen kein Bericht“.",
+            KeinBericht, Funktionen.EinstellungenBereich);
+        MassnahmenListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Massnahmenarten, Liste.Massnahmenvorlagen]));
+        Karte("Wohnbereich", "Maßnahmen: Arten und Vorlagen", "Arten (z. B. Anleitung, Begleitung) und Vorlagen für häufige Maßnahmen, damit nicht jeder anders benennt.",
+            MassnahmenListenKnopf, Funktionen.MassnahmenAnlegen);
         RichtwerteKnopf.Click += (_, _) => FensterZeigen(new RichtwerteFenster(speicher));
         Karte("Wohnbereich", "Vitalwerte: allgemeine Richtwerte", $"Hinweis „über/unter dem allgemeinen Richtwert“, wenn keine ärztliche Anordnung gilt. {VitalRegeln.RichtwertVermerk}",
             RichtwerteKnopf, Funktionen.VitalGrenzen);

@@ -63,6 +63,8 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public Button ZimmerKnopf { get; } = Stil.NebenKnopf("Zimmer und Betten …");
     public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
     public NumericUpDown Wartezeit { get; } = new() { Minimum = 5, Maximum = 240, Width = 80 };
+    public NumericUpDown KeinBericht { get; } = new() { Minimum = 1, Maximum = 26, Width = 80, AccessibleName = "Wochen ohne Bericht" };
+    public Button MassnahmenListenKnopf { get; } = Stil.NebenKnopf("Arten und Vorlagen …");
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");
@@ -175,6 +177,7 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
             (Frueh.Text, Spaet.Text, Nacht.Text) = (zeiten.Frueh.ToString("HH:mm"), zeiten.Spaet.ToString("HH:mm"), zeiten.Nacht.ToString("HH:mm"));
             BeschlussFrist.Value = Math.Clamp(werte.BeschlussFristTage, (int)BeschlussFrist.Minimum, (int)BeschlussFrist.Maximum);
             Wartezeit.Value = Math.Clamp(werte.WartezeitMinuten, (int)Wartezeit.Minimum, (int)Wartezeit.Maximum);
+            KeinBericht.Value = Math.Clamp(werte.KeinBerichtWochen, (int)KeinBericht.Minimum, (int)KeinBericht.Maximum);
             HebFrist.Value = Math.Clamp(werte.HebFristMonate, (int)HebFrist.Minimum, (int)HebFrist.Maximum);
             LogoLaden(Einstellungen.LogoPfad());
             foreach (var (schluessel, haken) in Module) haken.Checked = speicher.ModulAn(schluessel);

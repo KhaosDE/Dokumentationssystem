@@ -102,9 +102,12 @@ public sealed class ReflexionAnsicht : Panel
         VerlaufKnopf.Enabled = Aktuell.Fassungen.Count > 0;
         Meldung.Visible = false;
 
-        var berichte = speicher.Berichte(id, new BerichtFilter(Monat, ReflexionRegeln.MonatBis(Monat)));
+        // Geschriebene Berichte einzeln; bestätigte Maßnahmen gezählt je Maßnahme (Bauplan 39).
+        var berichte = speicher.Berichte(id, new BerichtFilter(Monat, ReflexionRegeln.MonatBis(Monat))).Where(x => x.Art != MassnahmenRegeln.ArtBericht).ToList();
+        var massnahmen = MassnahmenRegeln.ReflexionZeilen(speicher.MassnahmeBestaetigungen(id, Monat, ReflexionRegeln.MonatBis(Monat)));
         foreach (var b in Bereiche)
-            b.Setzen(Aktuell.Text(b.Nummer), fertig, berichte.Where(x => x.Bereiche.Contains(b.Nummer)).ToList());
+            b.Setzen(Aktuell.Text(b.Nummer), fertig, berichte.Where(x => x.Bereiche.Contains(b.Nummer)).ToList(),
+                [.. massnahmen.Where(m => m.Lebensbereich == b.Nummer).Select(m => m.Zeile)]);
         var therapien = ReflexionRegeln.Therapien(speicher.TermineImMonat(id, Monat));
         Therapien.Text = therapien.Count == 0
             ? "Keine Therapien im Wochenplan dieses Monats."
@@ -202,7 +205,7 @@ public sealed class ReflexionBereich : KartenFlaeche
         Controls.AddRange([titel, Feld, Zeichen, Hinweise, quellenTitel]);
     }
 
-    public void Setzen(string text, bool fertig, IReadOnlyList<Bericht> berichte)
+    public void Setzen(string text, bool fertig, IReadOnlyList<Bericht> berichte, IReadOnlyList<string>? massnahmen = null)
     {
         Feld.Text = text;
         Feld.ReadOnly = fertig;
@@ -212,6 +215,8 @@ public sealed class ReflexionBereich : KartenFlaeche
         quellenTitel.Text = $"BERICHTE IM MONAT ({berichte.Count})";
         if (berichte.Count == 0)
             quellen.Add(new Label { Text = "Keine Berichte zu diesem Bereich im Monat.", ForeColor = Stil.Achtung.Text, Font = Stil.FettKursiv });
+        foreach (string m in massnahmen ?? [])
+            quellen.Add(new Label { Text = $"Maßnahme {m}", ForeColor = Stil.TextNormal, Font = Stil.Klein });
         foreach (var b in berichte.OrderBy(b => b.Zeitpunkt))
         {
             string t = b.Text.ReplaceLineEndings(" ");

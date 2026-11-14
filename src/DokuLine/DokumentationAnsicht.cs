@@ -4,6 +4,7 @@ namespace DokuLine;
 
 // Rechts im Bereich „Dokumentation“: Filterleiste, gesetzte Filter als Marken mit „×“, gespeicherte Filter und die
 // Berichte des gewählten Bewohners nach Tagen (neueste oben). Der Filter bleibt beim Wechsel des Bewohners stehen.
+// Die kurzen Einträge bestätigter Maßnahmen stehen je Tag in einer Zeile zusammengefasst, zum Aufklappen.
 public sealed class DokumentationAnsicht : Panel
 {
     private readonly Speicher speicher;
@@ -29,6 +30,7 @@ public sealed class DokumentationAnsicht : Panel
     public List<Bericht> Berichte { get; private set; } = [];
     public List<BerichtZeile> Zeilen { get; } = [];
     public List<TagKopf> Tage { get; } = [];
+    public List<MassnahmenTagZeile> MassnahmenZeilen { get; } = [];
 
     public ComboBox Zeitraum { get; } = Auswahl(140, "Zeitraum", "Heute", "7 Tage", "30 Tage", "frei …");
     public DatumFeld Von { get; } = new() { Width = 100, PlaceholderText = "von", Visible = false };
@@ -39,6 +41,7 @@ public sealed class DokumentationAnsicht : Panel
     public FilterKnopf VisiteKnopf { get; } = new("Visite", mitZahl: false);
     public CheckBox Uebergabe { get; } = new() { Text = "Übergabe", AutoSize = true, BackColor = Stil.Seite };
     public CheckBox MitNachtrag { get; } = new() { Text = "mit Nachtrag", AutoSize = true, BackColor = Stil.Seite };
+    public CheckBox Massnahmen { get; } = new() { Text = "Maßnahmen", AutoSize = true, BackColor = Stil.Seite, Checked = true };
     public ComboBox Art { get; } = Auswahl(190, "Berichtsart", "alle Berichtsarten");
     public ComboBox Bereich { get; } = Auswahl(190, "Lebensbereich",
         ["alle Lebensbereiche", .. Enumerable.Range(1, 5).Select(BerichtRegeln.BereichText), "allgemein"]);
@@ -69,7 +72,7 @@ public sealed class DokumentationAnsicht : Panel
             Eingabe.Fragen(FindForm(), "Filter speichern", "Name des Filters (z. B. „Krisen der letzten 30 Tage“)");
         Art.Items.AddRange([.. speicher.Berichtsarten()]);
         Control[] oben = [Zeitraum, Von, Bis, WichtigKnopf, MedikationKnopf, BedarfKnopf, VisiteKnopf, Suche, Farbschluessel];
-        Control[] unten = [Uebergabe, MitNachtrag, Art, Bereich, Schichtwahl, Verfasser];
+        Control[] unten = [Uebergabe, MitNachtrag, Massnahmen, Art, Bereich, Schichtwahl, Verfasser];
         foreach (var c in oben.Concat(unten)) c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
         leiste.Controls.AddRange(oben);
         weitere.Controls.AddRange(unten);
@@ -77,7 +80,7 @@ public sealed class DokumentationAnsicht : Panel
         ZuruecksetzenKnopf.Click += (_, _) => FilterSetzen(new DokuFilter());
         foreach (var box in new[] { Zeitraum, Art, Bereich, Schichtwahl, Verfasser })
             box.SelectedIndexChanged += (_, _) => AusFeldern();
-        foreach (var c in new[] { Uebergabe, MitNachtrag }) c.CheckedChanged += (_, _) => AusFeldern();
+        foreach (var c in new[] { Uebergabe, MitNachtrag, Massnahmen }) c.CheckedChanged += (_, _) => AusFeldern();
         foreach (var k in new[] { WichtigKnopf, MedikationKnopf, BedarfKnopf, VisiteKnopf })
             k.Click += (_, _) => { k.Aktiv = !k.Aktiv; AusFeldern(); };
         Suche.TextChanged += (_, _) => AusFeldern();
@@ -132,7 +135,7 @@ public sealed class DokumentationAnsicht : Panel
             Bis.Text = f.Bis is DateOnly bis ? Datum.Text(bis) : "";
             (WichtigKnopf.Aktiv, MedikationKnopf.Aktiv, BedarfKnopf.Aktiv, VisiteKnopf.Aktiv) =
                 (f.Wichtig, f.MedikationGeaendert, f.Bedarfsgabe, f.Visite);
-            (Uebergabe.Checked, MitNachtrag.Checked) = (f.Uebergabe, f.MitNachtrag);
+            (Uebergabe.Checked, MitNachtrag.Checked, Massnahmen.Checked) = (f.Uebergabe, f.MitNachtrag, !f.OhneMassnahmen);
             Art.SelectedIndex = f.Art is string art && Art.Items.IndexOf(art) is int i && i > 0 ? i : 0;
             Bereich.SelectedIndex = f.Bereich switch { null => 0, BerichtFilter.Allgemein => 6, int n => n };
             Schichtwahl.SelectedIndex = f.Schicht switch
@@ -162,7 +165,7 @@ public sealed class DokumentationAnsicht : Panel
         {
             Zeitraum = (Kern.Zeitraum)Math.Max(0, Zeitraum.SelectedIndex), Von = Lesen(Von), Bis = Lesen(Bis),
             Wichtig = WichtigKnopf.Aktiv, MedikationGeaendert = MedikationKnopf.Aktiv, Bedarfsgabe = BedarfKnopf.Aktiv,
-            Visite = VisiteKnopf.Aktiv, Uebergabe = Uebergabe.Checked, MitNachtrag = MitNachtrag.Checked,
+            Visite = VisiteKnopf.Aktiv, Uebergabe = Uebergabe.Checked, MitNachtrag = MitNachtrag.Checked, OhneMassnahmen = !Massnahmen.Checked,
             Art = Art.SelectedIndex > 0 ? Art.SelectedItem as string : null,
             Bereich = Bereich.SelectedIndex switch { 0 => null, 6 => BerichtFilter.Allgemein, int n => n },
             Schicht = Schichtwahl.SelectedIndex switch
@@ -193,21 +196,31 @@ public sealed class DokumentationAnsicht : Panel
             fuellt = false;
         }
         liste.SuspendLayout();
-        foreach (Control c in Zeilen.Cast<Control>().Concat(Tage)) { liste.Controls.Remove(c); c.Dispose(); }
+        foreach (Control c in Zeilen.Cast<Control>().Concat(Tage).Concat(MassnahmenZeilen)) { liste.Controls.Remove(c); c.Dispose(); }
         Zeilen.Clear();
         Tage.Clear();
+        MassnahmenZeilen.Clear();
+        BerichtZeile Zeile(Bericht bericht, bool sichtbar)
+        {
+            var zeile = new BerichtZeile(bericht, Filter.Suche, Kompakt) { ContextMenuStrip = Menue(bericht), Visible = sichtbar };
+            zeile.Umgeschaltet += _ => liste.PerformLayout();
+            Zeilen.Add(zeile);
+            liste.Controls.Add(zeile);
+            return zeile;
+        }
         foreach (var (tag, berichte) in DokuRegeln.NachTagen(Berichte))
         {
-            var kopf = new TagKopf(tag, berichte.Count);
+            var (geschrieben, massnahmen) = DokuRegeln.Teilen(berichte);
+            var kopf = new TagKopf(tag, geschrieben.Count);
             Tage.Add(kopf);
             liste.Controls.Add(kopf);
-            foreach (var bericht in berichte)
-            {
-                var zeile = new BerichtZeile(bericht, Filter.Suche, Kompakt) { ContextMenuStrip = Menue(bericht) };
-                zeile.Umgeschaltet += _ => liste.PerformLayout();
-                Zeilen.Add(zeile);
-                liste.Controls.Add(zeile);
-            }
+            foreach (var bericht in geschrieben) Zeile(bericht, true);
+            if (massnahmen.Count == 0) continue;
+            var summe = new MassnahmenTagZeile(MassnahmenRegeln.Zusammenfassung(massnahmen.Select(b => b.Text)));
+            MassnahmenZeilen.Add(summe);
+            liste.Controls.Add(summe);
+            var einzeln = massnahmen.Select(b => Zeile(b, false)).ToList();
+            summe.Umgeschaltet += offen => { foreach (var z in einzeln) z.Visible = offen; liste.PerformLayout(); };
         }
         leer.Visible = Berichte.Count == 0;
         liste.ResumeLayout(false);
@@ -332,7 +345,13 @@ public sealed class DokumentationAnsicht : Panel
         leer.Location = new Point(0, y);
         foreach (Control c in liste.Controls)
         {
-            if (c is TagKopf t)
+            if (!c.Visible && c != leer) continue;
+            if (c is MassnahmenTagZeile m)
+            {
+                m.SetBounds(Stil.Px(this, Stil.AbstandMittel), y, breite - Stil.Px(this, Stil.AbstandMittel), m.PreferredHeight);
+                y = m.Bottom + abstand;
+            }
+            else if (c is TagKopf t)
             {
                 if (c != liste.Controls.OfType<TagKopf>().FirstOrDefault()) y += tagAbstand;
                 t.SetBounds(0, y, breite, t.Hoehe);

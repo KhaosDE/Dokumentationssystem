@@ -3,7 +3,11 @@ using Microsoft.Data.Sqlite;
 
 namespace DokuLine.Kern;
 
-public enum Liste { Bereiche, Positionen, Berichtsarten, Krankenkassen, Kostentraeger, Betreuungsaufgaben, Dokumentkategorien, Meldestellen, Vitalarten }
+public enum Liste
+{
+    Bereiche, Positionen, Berichtsarten, Krankenkassen, Kostentraeger, Betreuungsaufgaben, Dokumentkategorien, Meldestellen, Vitalarten,
+    Massnahmenarten, Massnahmenvorlagen
+}
 
 // Mitarbeiter, Bereiche, Positionen und Rechte im Speicher. Die Mitarbeiter stehen in der Tabelle
 // „kollegen“ (seit den Nachrichten), ihre Bereiche in „team_mitglieder“ – so gehen Nachrichten an
@@ -136,6 +140,8 @@ public sealed partial class Speicher
             Liste.Dokumentkategorien => "SELECT name, aktiv, (SELECT COUNT(*) FROM dokumente d WHERE d.kategorie = k.name) FROM dokumentkategorien k ORDER BY nr, name",
             Liste.Meldestellen => "SELECT name, aktiv, 0 FROM meldestellen ORDER BY nr, name",
             Liste.Vitalarten => "SELECT name, aktiv, (SELECT COUNT(*) FROM vitalwerte w WHERE w.art = a.name) FROM vitalarten a ORDER BY nr, name",
+            Liste.Massnahmenarten => "SELECT name, aktiv, (SELECT COUNT(*) FROM massnahme_fassungen f WHERE f.art = a.name) FROM massnahmenarten a ORDER BY nr, name",
+            Liste.Massnahmenvorlagen => "SELECT name, aktiv, (SELECT COUNT(*) FROM massnahme_fassungen f WHERE f.titel = v.name) FROM massnahmenvorlagen v ORDER BY nr, name",
             _ => "SELECT name, aktiv, 0 FROM betreuungsaufgaben ORDER BY nr, name",
         };
         var liste = new List<Listeneintrag>();
@@ -155,6 +161,8 @@ public sealed partial class Speicher
         Liste.Dokumentkategorien => "dokumentkategorien",
         Liste.Meldestellen => "meldestellen",
         Liste.Vitalarten => "vitalarten",
+        Liste.Massnahmenarten => "massnahmenarten",
+        Liste.Massnahmenvorlagen => "massnahmenvorlagen",
         _ => "berichtsarten",
     };
 
@@ -168,6 +176,8 @@ public sealed partial class Speicher
         Liste.Dokumentkategorien => "Kategorien der Dokumente",
         Liste.Meldestellen => "Stellen bei Abgängigkeit",
         Liste.Vitalarten => "Vitalwerte",
+        Liste.Massnahmenarten => "Arten der Maßnahmen",
+        Liste.Massnahmenvorlagen => "Vorlagen für Maßnahmen",
         _ => "Aufgabenbereiche der Betreuung",
     };
 

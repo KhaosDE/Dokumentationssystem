@@ -17,11 +17,12 @@ public class BerichteOberflaechenTests
         var d = f.Bewohner.Dokumentation;
         d.Zeitraum.SelectedIndex = (int)Zeitraum.DreissigTage;
         Assert.Equal(Zeitraum.DreissigTage, d.Filter.Zeitraum);
-        var zeilen = d.Zeilen;
+        // Die kurzen Einträge bestätigter Maßnahmen stehen je Tag gesammelt unter den geschriebenen Berichten.
+        var zeilen = d.Zeilen.Where(z => z.Bericht.Art != MassnahmenRegeln.ArtBericht).ToList();
         Assert.True(zeilen.Count >= 28);
         Assert.Equal(zeilen.Select(z => z.Bericht.Zeitpunkt).OrderDescending(),
             zeilen.Select(z => z.Bericht.Zeitpunkt));
-        int alle = zeilen.Count;
+        int alle = d.Zeilen.Count;
 
         d.Bereich.SelectedIndex = 1;   // Lebensbereich 1
         Assert.NotEmpty(d.Zeilen);

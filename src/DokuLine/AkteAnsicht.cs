@@ -34,6 +34,7 @@ public sealed class AkteAnsicht : Panel
     public AngabenAnsicht Angaben { get; }
     public DokumenteAnsicht Dokumente { get; }
     public VitalwerteAnsicht Vital { get; }
+    public MassnahmenAnsicht Massnahmen { get; }
     public Label KrankenkasseText { get; } = new() { Cursor = Cursors.Hand };
     public Label KostentraegerText { get; } = new() { Cursor = Cursors.Hand };
     // Personenbeschreibung (Bauplan 34): für das Meldeblatt; Marke, wenn älter als 12 Monate.
@@ -82,6 +83,7 @@ public sealed class AkteAnsicht : Panel
         Dokumente = new DokumenteAnsicht(speicher) { Visible = false };
         Vital = new VitalwerteAnsicht(speicher) { Visible = false };
         Vital.Geaendert += () => { if (Bewohner is not null) Fuellen(Bewohner); };
+        Massnahmen = new MassnahmenAnsicht(speicher) { Visible = false };
         Angaben.DokumenteGewuenscht += kategorie => { Reiter.Waehlen("Dokumente"); if (Bewohner is not null) Dokumente.Zeigen(Bewohner, kategorie); };
         Angaben.Geaendert += () => { if (Bewohner is not null) BetreuerZeigen(Bewohner); };
         KrankenkasseText.Click += (_, _) => Reiter.Waehlen("Krankenkasse");
@@ -165,7 +167,7 @@ public sealed class AkteAnsicht : Panel
 
         Reiter.Gewechselt += _ => ReiterZeigen();
         AuskunftKnopf.Click += (_, _) => { if (Bewohner is not null) AuskunftGewuenscht?.Invoke(Bewohner); };
-        Controls.AddRange([kopfKarte, Allergie, Auskunft, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital]);
+        Controls.AddRange([kopfKarte, Allergie, Auskunft, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital, Massnahmen]);
         ModuleAktualisieren();
     }
 
@@ -200,8 +202,11 @@ public sealed class AkteAnsicht : Panel
         bool heb = Reiter.Aktiv == "HEB";
         bool dokumente = Reiter.Aktiv == "Dokumente";
         bool vital = Reiter.Aktiv == "Vitalwerte";
+        bool massnahmen = Reiter.Aktiv == "Maßnahmen";
         Dokumente.Visible = dokumente;
         Vital.Visible = vital;
+        Massnahmen.Visible = massnahmen;
+        if (massnahmen && Bewohner is not null) Massnahmen.Zeigen(Bewohner);
         if (vital && Bewohner is not null) Vital.Zeigen(Bewohner);
         if (dokumente && Bewohner is not null) Dokumente.Zeigen(Bewohner);
         Angabe? angabe = Enum.GetValues<Angabe>().Cast<Angabe?>().FirstOrDefault(a => AngabenRegeln.Name(a!.Value) == Reiter.Aktiv);
@@ -221,7 +226,7 @@ public sealed class AkteAnsicht : Panel
         if (biografie && Bewohner is not null) Biografie.Zeigen(Bewohner);
         if (reflexion && Bewohner is not null) Reflexion.Zeigen(Bewohner);
         if (heb && Bewohner is not null) Heb.Zeigen(Bewohner);
-        ReiterPlatzhalter.Visible = !stamm && !medikation && !wochenplan && !biografie && !reflexion && !heb && modul is null && angabe is null && !dokumente && !vital;
+        ReiterPlatzhalter.Visible = !stamm && !medikation && !wochenplan && !biografie && !reflexion && !heb && modul is null && angabe is null && !dokumente && !vital && !massnahmen;
         if (!stamm && Bauplan.Reiter.TryGetValue(Reiter.Aktiv, out var vorhaben))
             ReiterPlatzhalter.Setzen(vorhaben.Version, vorhaben.Beschreibung);
         PerformLayout();
@@ -473,7 +478,7 @@ public sealed class AkteAnsicht : Panel
         Reiter.Bounds = new Rectangle(x, y, breite, Reiter.HoeheFuer(breite));
         y += Reiter.Height + S(Stil.AbstandGross);
 
-        foreach (Control ansicht in new Control[] { Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital }.Concat(ModulAnsichten))
+        foreach (Control ansicht in new Control[] { Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital, Massnahmen }.Concat(ModulAnsichten))
         {
             if (!ansicht.Visible) continue;
             // Der Wochenplan füllt die Höhe bis zum unteren Rand.

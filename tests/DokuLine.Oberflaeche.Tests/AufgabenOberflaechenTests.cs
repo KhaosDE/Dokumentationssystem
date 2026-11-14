@@ -49,7 +49,7 @@ public class AufgabenOberflaechenTests
             Assert.Equal($"R1 · {Offen(u)} offene Aufgaben · 1 überfällig", f.Kopf.KleinText);
             Assert.Equal("Neue Aufgabe …", Assert.Single(f.Kopf.Knoepfe).Text);
             // Gruppiert nach Schicht (Summe wie oben), oben die laufende.
-            Assert.Equal(Offen(u), seite.Abschnitte.Sum(a => int.Parse(a[(a.LastIndexOf('(') + 1)..^1])));
+            Assert.Equal(Offen(u), seite.Abschnitte.Where(a => !a.StartsWith("MASSNAHMEN", StringComparison.Ordinal)).Sum(a => int.Parse(a[(a.LastIndexOf('(') + 1)..^1])));
             Assert.Contains(seite.Abschnitte, a => a.StartsWith("JETZT: "));
             var erste = seite.Karten.Single(k => k.MarkenTexte[0].StartsWith("überfällig seit "));
             Assert.StartsWith("überfällig seit ", erste.MarkenTexte[0]);

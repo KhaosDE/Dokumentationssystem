@@ -56,6 +56,8 @@ public static class Funktionen
     public const string Zugriffsprotokoll = "zugriffsprotokoll";   // Betrieb: wer hat welche Akte geöffnet, gedruckt, geändert
     public const string BetriebVerwalten = "betrieb_verwalten";   // Sicherung, Rücksicherung, Update, Häuser
     public const string AndereHaeuser = "andere_haeuser";         // Bereiche anderer Häuser wählen
+    public const string MassnahmenBestaetigen = "massnahmen_bestaetigen";
+    public const string MassnahmenAnlegen = "massnahmen_anlegen";   // dazu die Bezugspflege des Bewohners
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -89,6 +91,8 @@ public static class Funktionen
         (DokumenteLoeschen, "Dokumente endgültig löschen"),
         (VitalwerteErfassen, "Vitalwerte erfassen"),
         (VitalGrenzen, "Grenzen und Messaufträge festlegen"),
+        (MassnahmenBestaetigen, "Maßnahmen bestätigen"),
+        (MassnahmenAnlegen, "Maßnahmen anlegen und ändern"),
         (Zugriffsprotokoll, "Zugriffsprotokoll ansehen"),
         (BetriebVerwalten, "Betrieb verwalten (Sicherung, Update, Häuser)"),
         (AndereHaeuser, "Bereiche anderer Häuser wählen"),
@@ -132,10 +136,10 @@ public static partial class RechteRegeln
 
     // Assistenzkräfte machen keine Visiten.
     public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten,
-        Funktionen.VitalGrenzen];
+        Funktionen.VitalGrenzen, Funktionen.MassnahmenAnlegen];
 
     // „Nur Fachkräfte“, das nach der ersten Vorbelegung dazukam: in bestehenden Datenbanken einmal setzen.
-    public static readonly string[] NurFachkraftNachtraeglich = [Funktionen.Visiten];
+    public static readonly string[] NurFachkraftNachtraeglich = [Funktionen.Visiten, Funktionen.MassnahmenAnlegen];
 
     private static readonly Dictionary<string, string[]> Vorgabe = new()
     {
@@ -177,14 +181,16 @@ public static partial class RechteRegeln
     public static readonly string[] Nachtraeglich = [Funktionen.TherapienBereich, Funktionen.Aerzte, Funktionen.AerztlicheAnsehen, Funktionen.AerztlicheBearbeiten,
         Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
         Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
-        Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen, Funktionen.Zugriffsprotokoll, Funktionen.BetriebVerwalten, Funktionen.AndereHaeuser];
+        Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen, Funktionen.Zugriffsprotokoll, Funktionen.BetriebVerwalten, Funktionen.AndereHaeuser,
+        Funktionen.MassnahmenBestaetigen, Funktionen.MassnahmenAnlegen];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
     // Vitalwerte erfassen alle; Grenzen und Messaufträge alle mit Fachaufgaben (dazu „nur Fachkräfte“), nicht Therapie.
     public static bool Vorbelegt(string position, string funktion) =>
         funktion is Funktionen.AerztlicheAnsehen or Funktionen.AerztlicheBearbeiten ? position != "Verwaltung" :
-        funktion == Funktionen.VitalwerteErfassen ? true :
+        funktion is Funktionen.VitalwerteErfassen or Funktionen.MassnahmenBestaetigen ? true :
+        funktion == Funktionen.MassnahmenAnlegen ? position is not ("Therapie" or "Verwaltung") :
         funktion == Funktionen.VitalGrenzen ? position is not ("Therapie" or "Verwaltung") :
         funktion == Funktionen.Zugriffsprotokoll ? position is Administrator or "Geschäftsführung" or "Hausleitung" :
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||
