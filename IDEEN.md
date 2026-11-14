@@ -112,6 +112,9 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 50 | Abwesenheit in der Dokumentation sichtbar machen | 0.54.0 |
 | 51 | Medikamentenbestellung: Anforderung, Lieferung, Bestand als Option | 0.55.0 |
 | 52 | HEB-Fälligkeit vermerken und rechtzeitig erinnern | 0.56.0 |
+| 53 | Bereiche und Schichten frei einstellbar, Übergabe nur je Bereich, Korrekturen aus 0.56.1 | 0.57.0 |
+| 54 | Ziele in Reflexion und HEB: Stand im Zeitraum (offen, zu durchdenken) | 0.58.0 |
+| 55 | Kleinere Punkte aus der Fehlersuche 0.56.1 (offen, zu klären) | 0.59.0 |
 
 Für alle Schritte gilt:
 - Endet eine Sitzung mitten im Plan, beginnt die nächste beim ersten Schritt, der noch nicht
@@ -2812,3 +2815,102 @@ Umfang:
   zeigen dieselbe Frist; die Prüfseite des QMB (Schritt 44) nutzt sie für „HEB aktuell“.
 - Demo-Daten: Fälligkeiten verteilt über die nächsten Monate, je Bereich eine überfällig und
   eine in den nächsten 4 Wochen.
+
+## Bereiche und Schichten frei einstellbar, Übergabe nur je Bereich, Korrekturen aus 0.56.1
+Status: freigegeben (Bauplan Schritt 53; Antworten Tobi 14.11.2026 auf die offenen Punkte aus 0.56.1)
+Datum: 14.11.2026
+Was: Bereiche und Schichten werden in den Einstellungen angelegt statt fest im Programm zu stehen;
+alles Weitere richtet sich danach. Dazu vier Korrekturen aus der Fehlersuche 0.56.1.
+Umfang:
+**A · Bereiche anlegen** (Tobi: „In Einstellungen können Bereiche, Stationen etc. angelegt werden.“)
+- Einstellungen → „Bereiche“: anlegen, umbenennen, Reihenfolge, **abschalten statt löschen**
+  (abgeschaltete bleiben im Verlauf lesbar). Felder: Name, Kürzel (z. B. „R2“), Haus, **Art**:
+  Wohnbereich offen · Wohnbereich beschützend · Therapie · Leitung/Verwaltung · Sonstige Station.
+- Nirgends mehr feste Namen R1–R3 im Code; Bereichswahl (Schritt 38), Rechte, Aufgaben,
+  Kalender, Übergabe, Demo-Daten lesen die Liste. Die Demo legt R1 (offen), R2, R3
+  (beschützend), Therapie und Leitung an.
+- Recht „Bereiche verwalten“ (Leitung, Administrator).
+**B · Ausgangsliste nur in beschützenden Wohnbereichen** (Tobi, 14.11.2026)
+- Das Modul Ausgangsliste (Ausgänge mit Rückkehrzeit, Beschränkungen, Unterbringung, Tagesliste,
+  Digitaler Ausgang) erscheint nur in Bereichen der Art „Wohnbereich beschützend“: Seitenleiste,
+  Akte-Reiter „Ausgang“, Marken, Ausdrucke. In offenen Bereichen nicht.
+- **Abwesenheit** (Klinik, Heimfahrt, Urlaub) gilt in **allen** Wohnbereichen weiter (Schritt 50):
+  sie wird dafür aus dem Modul in den Kern gelöst, das Modul nutzt sie mit.
+- **Küchendienst** bleibt je Bereich zuschaltbar, auch in offenen Bereichen (Annahme; Tobi kann
+  ändern).
+- Abgleich mit der eigenständigen Ausgangsliste in `AENDERUNGEN.md` vermerken.
+**C · Rechte für Aufgaben und Ausgangsliste**
+- Neue Rechte „Aufgaben bearbeiten“ (abhaken, weitergeben, schließen) und „Ausgangsliste
+  bearbeiten“; bisher prüfte das Programm dort nur das Kürzel. Vorbelegung: alle Positionen der
+  Wohnbereiche und Leitungen; **nicht** der QMB (er liest nur, Schritt 44).
+**D · Maßnahmen nachtragen** (Tobi: „Guter Vorschlag“)
+- Eine Maßnahme lässt sich bis zum **Ende des folgenden Dienstes** bestätigen, mit Vermerk
+  „nachgetragen“ und tatsächlicher Uhrzeit der Durchführung. Danach nur noch als Bericht.
+**E · Übergabe nur bereichsbezogen** (Tobi: „Die Übergabe darf nur bereichsbezogen sein.“)
+- **Jeder** Übergabe-Eintrag gehört zu genau einem Bereich — auch „Wohnbereich allgemein“ und die
+  Sammeleinträge („3 Maßnahmen aus dem Frühdienst offen“, „Medikamente offen“). Einträge ohne
+  Bereich gibt es nicht mehr; die Übergabe zeigt nur den gewählten Bereich.
+- Bestehende Einträge ohne Bereich: einmalig dem Bereich zuordnen, in dem sie angelegt wurden
+  (Bereich des Rechners bzw. des Verfassers); geht das nicht, dem ersten Wohnbereich und in
+  `STAND.md` vermerken.
+**F · Schichten frei einstellbar, ohne Überschneidung, aktueller Dienst sichtbar** (Tobi: „Die
+Dienstzeiten sollten über die Einstellungen einzustellen sein. Das Programm achtet darauf, dass
+die Zeiten sich nicht überschneiden.“ — „Schichtdienste unterteilen. Schichtzeiten beachten.
+Dienst-Anzeige aktuell.“)
+- Einstellungen → Bereich → „Schichten“: **beliebig viele Schichten** je Bereich (Vorgabe Früh,
+  Spät, Nacht; z. B. auch Früh, Zwischendienst, Spät, Nacht). Je Schicht: Name, Kürzel, Beginn,
+  Ende (über Mitternacht erlaubt), Farbe (aus einer festen Auswahl gut unterscheidbarer Farben,
+  `docs/gestaltung.md`).
+- **Prüfung beim Speichern:** Die Schichten müssen den Tag **lückenlos und ohne Überschneidung**
+  abdecken (24 Stunden). Sonst roter Hinweis mit der Stelle („Spät endet 22:00, Nacht beginnt
+  21:30 — 30 Minuten doppelt“), Speichern erst, wenn alles stimmt.
+- Die feste Dreiteilung im Code (`enum Schicht { Frueh, Spaet, Nacht }`) wird durch diese Liste
+  ersetzt. Daran richten sich: Aufgaben und Standardaufgaben, Maßnahmen, Übergabe-Abschnitte und
+  ihre Farben (29h), Rand der Berichte (29b), Medikamentenausgabe, Sammeleinträge am
+  Schichtende, Ausdrucke.
+- **Medikamentenausgabe:** Jede Einnahmezeit (morgens, mittags, abends, nachts) wird einer
+  Schicht zugeordnet (Einstellungen, Vorschlag nach Uhrzeit). Der Sammeleintrag „offen“ entsteht
+  erst am **Ende dieser Schicht** — nicht mehr um 15:00 bei Dienstende 14:00.
+- **Gleichzeitige Eingabe:** Hat ein anderer Platz einen Ausgabe-Eintrag inzwischen geändert,
+  erscheint „bereits von <Kürzel> um 08:12 als ausgegeben markiert“ statt stillem Überschreiben.
+- **Aktueller Dienst sichtbar:** in der kleinen Zeile der Kopfzeile, z. B. „R2 · Frühdienst
+  06:00–14:00“, in der Farbe der Schicht (mit Wort). Wechselt beim Schichtwechsel von selbst;
+  „Laufender Dienst“ in der Übersicht folgt.
+- Annahme: „unterteilen“ heißt mehr als drei Schichten je Tag, jede ohne Überschneidung. Dienste,
+  die sich bewusst überschneiden (z. B. ein Zwischendienst neben Früh- und Spätdienst), wären
+  eine eigene Sache — nicht Teil dieses Schritts.
+- Tests: lückenlos/ohne Überschneidung, über Mitternacht, Zuordnung der Einnahmezeiten,
+  Sammeleintrag zur richtigen Zeit, vorhandene Daten mit drei Schichten laufen weiter.
+
+## Ziele in Reflexion und HEB: Stand im Zeitraum
+Status: offen (Tobi 14.11.2026: „Muss nochmal durchdacht werden.“)
+Datum: 14.11.2026
+Problem (aus der Fehlersuche 0.56.1): Reflexion und HEB-Bogen zeigen nur die **heute** aktiven
+Ziele und ordnen Maßnahmen nach ihrer **letzten** Zielzuordnung. Ein Ziel, das im betrachteten
+Zeitraum erreicht oder geändert wurde, fehlt deshalb; eine Maßnahme, die damals zu einem anderen
+Ziel gehörte, steht beim falschen Ziel.
+Mögliche Wege (noch nicht entschieden):
+- **(a) Stand im Zeitraum:** alle Ziele, die irgendwann im Zeitraum aktiv waren, mit ihrem Verlauf
+  („Nahziel 1 erreicht am 12.10.“, „ersetzt durch …“); Maßnahmen bei dem Ziel, zu dem sie in
+  diesem Zeitraum gehörten.
+- **(b) Stand am Ende des Zeitraums** plus eine Zeile „im Zeitraum erreicht/beendet: …“.
+- **(c) Wie heute**, aber mit Hinweis „Ziele zeigen den heutigen Stand“.
+Nicht bauen, bevor Tobi entschieden hat.
+
+## Kleinere Punkte aus der Fehlersuche 0.56.1
+Status: offen (Tobi 14.11.2026: „Klären“; Erklärung und Vorschläge im Chat)
+Datum: 14.11.2026
+Je Punkt Problem und Vorschlag; Tobi entscheidet einzeln:
+1. **Zeitauswertung langsam:** wird bei jeder Änderung an einem anderen Platz neu gerechnet. —
+   Vorschlag: nur auf Knopfdruck „Neu berechnen“ und beim Öffnen.
+2. **Therapie doppelt gezählt:** Teilnahme an einem Angebot zählt, und ein Therapie-Bericht mit
+   Dauer zählt noch einmal. — Vorschlag: Bericht zählt nur, wenn keine Teilnahme am selben Tag
+   für dasselbe Angebot besteht.
+3. **Archiv, endgültig löschen:** Kalendertermine, Fahrten und Zugriffsprotokoll behalten die
+   Nummer des gelöschten Bewohners; eine neue Akte könnte dieselbe Nummer bekommen. — Vorschlag:
+   Nummern nie neu vergeben; Termine und Fahrten des Bewohners mitlöschen bzw. auf „gelöschter
+   Bewohner“ setzen; im Protokoll bleibt nur die Nummer (keine Inhalte).
+4. **Abwesenheit fehlt** in Maßnahmen-Checkliste und Zeitauswertung (Folge von Schritt 50). —
+   Vorschlag: nachziehen wie in Schritt 50 beschrieben.
+5. **Schlüsselwort-Angebot** öffnet nach dem Speichern auch, wenn das Wort wieder gelöscht wurde.
+   — Vorschlag: beim Speichern den Text erneut prüfen; Angebot nur, wenn das Wort noch da ist.
