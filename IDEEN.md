@@ -2489,7 +2489,7 @@ Umfang (Vorschlag):
 - Recht „Medikamente ausgeben“ (Vorbelegung wie bisher beim Medikamentenplan).
 
 ## Ziele der Bewohner: Leitziel und Nahziele
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.47.0; Bauplan Schritt 43)
 Datum: 10.11.2026
 Was: Jeder Bewohner hat ein Leitziel und zwei Nahziele. Sie stehen gut sichtbar bei der Akte und
 in der Dokumentation, und Maßnahmen hängen an ihnen.

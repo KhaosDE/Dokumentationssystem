@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.46.0** (Bauplan Schritt 42: Medikamentenausgabe abhaken).
+Stand: 14.11.2026. Version: **0.47.0** (Ziele der Bewohner: Leitziel und Nahziele).
 
 ## Aktuell
 
@@ -479,7 +479,9 @@ des Dienstes ein Hinweis, wenn noch etwas offen ist; was offen bleibt, geht als 
 der Dokumentation. Im Medikamentenplan „Ausgabe der letzten 14 Tage …“. Pausierte, abgesetzte und Bedarfsmedikamente
 stehen nicht in der Liste; das Programm bestätigt nur die Ausgabe.
 
-**Nächster Schritt:** Bauplan Schritt 43 (Ziele der Bewohner: Leitziel und Nahziele, 0.47.0); danach 44–52 der Reihe nach.
+Neu in 0.47.0: **Ziele der Bewohner** (Bauplan 43). Akte, Reiter **„Ziele und Maßnahmen“** (ersetzt „Maßnahmen“): oben die Ziele (Leitziel, dann Nahziele; Wortlaut in den Worten des Bewohners, Lebensbereich, vereinbart am/mit, überprüfen bis, Stand), darunter die Maßnahmen nach Ziel gruppiert, am Ende „Maßnahmen ohne Ziel“ und die Lebensbereiche. Änderungen sind neue Fassungen („Verlauf …“). Drei Zustände: Ziele eingetragen · „Bewohner möchte derzeit kein Ziel benennen“ (mit Datum und Grund) · nicht erfasst. Marken „Ziel fehlt“, „Nahziel ohne Maßnahme“, „Überprüfung der Ziele fällig“. **Zielleiste** über der Berichtsliste (einklappbar) und im Akte-Kopf. Bericht und Maßnahme einem Ziel zuordnen; Filter „Berichte zu diesem Ziel“; Reflexion und HEB-Bogen (Seite „Ziele“) zeigen je Ziel Berichte und Maßnahmen. Mindestzahl der Ziele in den Einstellungen (Vorgabe 1 + 2).
+
+**Nächster Schritt:** Bauplan Schritt 44 (Qualitätsmanagement: Position QMB mit eigener Prüfseite).
 
 ## Fertig
 
@@ -1585,6 +1587,7 @@ stehen nicht in der Liste; das Programm bestätigt nur die Ausgabe.
 - 0.44.0 — Bauplan Schritt 40: `MassnahmeKastenZeile`, Abschnitt im Kasten „Laufender Dienst“ (`UebersichtSeite.MassnahmenKasten`), Spalte „Maßnahmen“ (`BewohnerZeile`), `MassnahmenRegeln.ListenText`/`StandText`/`UebergabeText`, `Speicher.MassnahmenUebergabeErzeugen` (beim Dienstwechsel, einmal je Dienst).
 - 0.45.0 — Bauplan Schritt 41: `Zeitauswertung.cs` (Posten, Zeilen, geplant, CSV), `SpeicherZeitauswertung.cs`, Datenbank-Schritt 42 (`bericht_dauer`), `AuswertungSeite`, `TabellenDruck` (allgemeiner Druck A4 quer), Recht „Zeitauswertung ansehen“, Feld „Dauer“ im Berichtsformular.
 - 0.46.0 — Bauplan Schritt 42: `Medikamentenausgabe.cs` (Einnahmezeit, fällig, Zeilen, Texte, Verlauf), `SpeicherAusgabe.cs` (Datenbank-Schritt 43, Setzen mit Bericht, Sammeleintrag, Demo), `AusgabeSeite`, `AusgabeEinzelnFenster`, Recht „Medikamente ausgeben“, Kennzeichen `Bericht.Ausgabe`, Eintrag im Kasten der Übersicht, Verlauf im Medikamentenplan.
+- 0.47.0 — Ziele der Bewohner (Bauplan 43): Reiter „Ziele und Maßnahmen“, Zielleiste, Bericht/Maßnahme zu einem Ziel, drei Zustände, Marken, Einstellung Mindestzahl
 
 ## Offene Punkte
 
@@ -1688,6 +1691,12 @@ stehen nicht in der Liste; das Programm bestätigt nur die Ausgabe.
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.47.0): Ziele anlegen und ändern dürfen, die auch Maßnahmen anlegen dürfen (Fachkräfte und die Bezugspflege) – dieselbe Regel, weil beides zusammen mit dem Bewohner erarbeitet wird.
+- 14.11.2026 (0.47.0): „Kein Ziel benennen“ geht nur, solange kein aktives Ziel eingetragen ist, und gilt, bis danach ein Ziel eingetragen wird – so widersprechen sich Liste und Vermerk nie.
+- 14.11.2026 (0.47.0): Ein Ziel ist abgeschlossen, sobald sein Stand „erreicht“, „geändert“ oder „beendet“ ist (mit kurzem Satz); danach wird ein neues vereinbart. Den Wortlaut zu ändern ist eine neue Fassung mit Stand „aktiv“.
+- 14.11.2026 (0.47.0): Der Bericht zu einem Ziel ist freiwillig und als eigene Tabelle `bericht_ziel` gespeichert (Berichte selbst bleiben unverändert). Die kurzen Einträge bestätigter Maßnahmen tragen das Ziel ihrer Maßnahme mit.
+- 14.11.2026 (0.47.0): Marken der Ziele erscheinen in der Zielleiste und im Reiter, nicht als eigene Marken im Akte-Kopf – die volle Prüfliste kommt mit der Prüfseite (Schritt 44).
+- 14.11.2026 (0.47.0): Mindestzahl „1 Leitziel + 2 Nahziele“ als Vorgabe; in den Einstellungen 0–3 Leitziele und 0–6 Nahziele (Tobi nannte einmal „mindestens 3 Nahziele“).
 - 14.11.2026 (0.46.0): Einnahmezeiten nach der Uhr: morgens 5–11, mittags 11–15, abends 15–21, nachts 21–5 Uhr; „nachts“ nach Mitternacht gehört
   zum Vortag. Dienste: Früh gibt morgens und mittags aus, Spät abends, Nacht nachts (für Hinweis und Übergabe).
 - 14.11.2026 (0.46.0): Recht „Medikamente ausgeben“ mit derselben Vorbelegung wie „Medikation bearbeiten“, auch „nur Fachkräfte“ („wie bisher
@@ -2648,6 +2657,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.47.0: Akte eines Bewohners öffnen → unter der Auskunftsleiste die Zielleiste; Reiter „Ziele und Maßnahmen“: Ziele oben, Maßnahmen nach Ziel gruppiert. „Neues Ziel …“ (überprüfen-bis-Vorschlag folgt der Art), „Ziel ändern …“ mit Stand „erreicht“ und Satz → Ziel verschwindet, mit „frühere Ziele zeigen“ wieder sichtbar; „Verlauf …“. Ziel wählen → „Berichte zu diesem Ziel“ öffnet die Dokumentation gefiltert. Neuer Bericht: Feld „Ziel (freiwillig)“. Bewohner ohne Ziele: Zielleiste „Ziele: nicht erfasst“ in Achtung-Farbe; „Kein Ziel benennen …“ mit Grund. Reflexion: „Ziele im Monat“; HEB-Bogen, Seite „Ziele“: Ziele aus der Akte. Einstellungen → „Ziele: wie viele je Bewohner“.
 
 Version 0.46.0: Als AB (Fachkraft): Seitenleiste „Medikamentenausgabe“ → laufende Einnahmezeit vorgewählt, je Bewohner die Medikamente;
 einen wählen, „nicht abgeholt“ → steht oben, gelb; in der Übersicht im Kasten „Laufender Dienst“ „Medikamente … noch nicht

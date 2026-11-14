@@ -8,7 +8,8 @@ namespace DokuLine.Kern;
 // Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben.
 public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90, int HebFristMonate = 12,
     string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false, bool NachschlageAnsicht = true,
-    int WartezeitMinuten = AbgaengigkeitRegeln.WartezeitVorgabe, int KeinBerichtWochen = MassnahmenRegeln.KeinBerichtWochenVorgabe);
+    int WartezeitMinuten = AbgaengigkeitRegeln.WartezeitVorgabe, int KeinBerichtWochen = MassnahmenRegeln.KeinBerichtWochenVorgabe,
+    int ZieleLeitziele = ZielRegeln.LeitzieleVorgabe, int ZieleNahziele = ZielRegeln.NahzieleVorgabe);
 
 public static partial class Einstellungen
 {
@@ -64,6 +65,8 @@ public static partial class Einstellungen
                 werte = werte with { WartezeitMinuten = wartezeit };
             if (knoten["kein_bericht_wochen"] is JsonValue kb && kb.TryGetValue(out int wochen) && KeinBerichtPruefen(wochen) is null)
                 werte = werte with { KeinBerichtWochen = wochen };
+            if (knoten["ziele_leitziele"] is JsonValue zl && zl.TryGetValue(out int leit) && leit is >= 0 and <= 3) werte = werte with { ZieleLeitziele = leit };
+            if (knoten["ziele_nahziele"] is JsonValue zn && zn.TryGetValue(out int nah) && nah is >= 0 and <= 6) werte = werte with { ZieleNahziele = nah };
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
@@ -96,6 +99,8 @@ public static partial class Einstellungen
             ["nachschlage_ansicht"] = werte.NachschlageAnsicht,
             ["wartezeit_minuten"] = werte.WartezeitMinuten,
             ["kein_bericht_wochen"] = werte.KeinBerichtWochen,
+            ["ziele_leitziele"] = Math.Clamp(werte.ZieleLeitziele, 0, 3),
+            ["ziele_nahziele"] = Math.Clamp(werte.ZieleNahziele, 0, 6),
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen

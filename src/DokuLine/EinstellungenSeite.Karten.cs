@@ -74,8 +74,14 @@ public sealed partial class EinstellungenSeite
         Karte("Wohnbereich", "Abgängigkeit: wer wird informiert", "Die Liste zum Abhaken bei einer Abgängigkeitsmeldung; Telefonnummern gehören mit in den Namen, z. B. „Rufbereitschaft (0000 000000)“.",
             MeldestellenKnopf, Funktionen.EinstellungenBereich);
         KeinBericht.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { KeinBerichtWochen = (int)KeinBericht.Value }); };
-        Karte("Wohnbereich", "Lebensbereiche: kein Bericht seit", "Nach so vielen Wochen ohne Bericht in einem Lebensbereich zeigt die Akte (Reiter „Maßnahmen“) „seit … Wochen kein Bericht“.",
+        Karte("Wohnbereich", "Lebensbereiche: kein Bericht seit", "Nach so vielen Wochen ohne Bericht in einem Lebensbereich zeigt die Akte (Reiter „Ziele und Maßnahmen“) „seit … Wochen kein Bericht“.",
             KeinBericht, Funktionen.EinstellungenBereich);
+        ZieleLeit.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { ZieleLeitziele = (int)ZieleLeit.Value }); };
+        ZieleNah.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { ZieleNahziele = (int)ZieleNah.Value }); };
+        Karte("Wohnbereich", "Ziele: wie viele je Bewohner", "Weniger aktive Ziele zeigen die Marke „Ziel fehlt“. Vorgabe: 1 Leitziel und 2 Nahziele.",
+            Reihe(new Label { Text = "Leitziele", AutoSize = true, Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0) }, ZieleLeit,
+                new Label { Text = "Nahziele", AutoSize = true, Margin = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandKlein, 0) }, ZieleNah),
+            Funktionen.EinstellungenBereich);
         MassnahmenListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Massnahmenarten, Liste.Massnahmenvorlagen]));
         Karte("Wohnbereich", "Maßnahmen: Arten und Vorlagen", "Arten (z. B. Anleitung, Begleitung) und Vorlagen für häufige Maßnahmen, damit nicht jeder anders benennt.",
             MassnahmenListenKnopf, Funktionen.MassnahmenAnlegen);

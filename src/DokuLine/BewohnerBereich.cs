@@ -121,7 +121,13 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
             Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0)
         };
         listenFlaeche.Controls.Add(Dokumentation);
-        // Doppelklick auf einen Lebensbereich (Reiter „Maßnahmen“): dessen Berichte seit Beginn des Quartals.
+        // „Berichte zu diesem Ziel“: alle Berichte, die diesem Ziel zugeordnet sind.
+        Akte.Massnahmen.ZielBerichteGewuenscht += z =>
+        {
+            UebersichtZeigen();
+            Dokumentation.FilterSetzen(new DokuFilter { ZielId = z.Id, ZielText = ZielRegeln.ArtText(z.Art), Zeitraum = Kern.Zeitraum.Frei, Bis = Heute() });
+        };
+        // Doppelklick auf einen Lebensbereich (Reiter „Ziele und Maßnahmen“): dessen Berichte seit Beginn des Quartals.
         Akte.Massnahmen.LebensbereichGewuenscht += nr =>
         {
             UebersichtZeigen();

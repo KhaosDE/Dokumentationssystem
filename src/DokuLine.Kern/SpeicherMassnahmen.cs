@@ -151,6 +151,7 @@ public sealed partial class Speicher
         {
             BewohnerId = m.BewohnerId, Zeitpunkt = jetzt, Schicht = dienst.Schicht, Verfasser = kuerzel.Trim(), Bereiche = [f.Lebensbereich],
             Text = MassnahmenRegeln.BerichtText(f.Titel, ergebnis, grund, minuten, bemerkung), Erfasst = jetzt, Art = MassnahmenRegeln.ArtBericht,
+            ZielId = f.ZielId,
         }, transaktion);
         long id = BestaetigungEinfuegen(m, f, dienst, bedarf, ergebnis, grund, ergebnis == MassnahmeErgebnis.Durchgefuehrt ? minuten : 0, bemerkung,
             kuerzel.Trim(), jetzt, bericht, transaktion);
@@ -212,8 +213,12 @@ public sealed partial class Speicher
         var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
         bewohner.Sort(BewohnerRegeln.NachName);
         var dienstJetzt = SchichtTermin.Zu(jetzt);
-        foreach (var (b, fassung, nr) in Demodaten.Massnahmen(bewohner, DateOnly.FromDateTime(jetzt)))
+        var ziele = ZieleLesen(transaktion, null).Where(z => z.Aktiv).ToLookup(z => z.BewohnerId);
+        foreach (var (b, ohneZiel, nr) in Demodaten.Massnahmen(bewohner, DateOnly.FromDateTime(jetzt)))
         {
+            // Die erste Maßnahme zum ersten Nahziel, die zweite zum zweiten, die dritte zum Leitziel; weitere ohne Ziel.
+            var eigene = ziele[b.Id!.Value].OrderByDescending(z => z.Art).ThenBy(z => z.Id).ToList();
+            var fassung = ohneZiel with { ZielId = nr < eigene.Count && nr < 3 ? eigene[nr].Id : null };
             Ausfuehren("INSERT INTO massnahmen (bewohner_id, erstellt, kuerzel) VALUES ($b, $e, $k)", transaktion,
                 ("$b", b.Id), ("$e", Zeit(fassung.Erfasst)), ("$k", fassung.Kuerzel));
             long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
@@ -232,6 +237,7 @@ public sealed partial class Speicher
                 {
                     BewohnerId = m.BewohnerId, Zeitpunkt = zeit, Schicht = dienst.Schicht, Verfasser = kuerzel, Bereiche = [fassung.Lebensbereich],
                     Text = MassnahmenRegeln.BerichtText(fassung.Titel, ergebnis, grund, Math.Max(0, minuten), ""), Erfasst = zeit, Art = MassnahmenRegeln.ArtBericht,
+                    ZielId = fassung.ZielId,
                 }, transaktion);
                 BestaetigungEinfuegen(m, fassung, dienst, false, ergebnis, grund, Math.Max(0, minuten), "", kuerzel, zeit, bericht, transaktion);
             }

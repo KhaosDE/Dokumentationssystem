@@ -1092,6 +1092,44 @@ public sealed partial class Speicher : IDisposable
             BEFORE UPDATE OF bewohner_id, tag, zeit, verordnung_id, status, kuerzel, erfasst ON medikamentenausgaben
             BEGIN SELECT RAISE(ABORT, 'Einträge der Medikamentenausgabe werden nicht geändert – ein neuer Eintrag gilt.'); END;
         """,
+        // 44 – Ziele: Leitziel und Nahziele mit Fassungen (nie überschrieben), „kein Ziel benennen“, Bericht zu einem Ziel.
+        """
+        CREATE TABLE IF NOT EXISTS ziele (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('leitziel', 'nahziel')),
+            erstellt    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS ziel_fassungen (
+            id               INTEGER PRIMARY KEY,
+            ziel_id          INTEGER NOT NULL REFERENCES ziele(id) ON DELETE CASCADE,
+            wortlaut         TEXT NOT NULL CHECK (length(wortlaut) > 0),
+            lebensbereich    INTEGER NOT NULL CHECK (lebensbereich BETWEEN 1 AND 5),
+            vereinbart_am    TEXT NOT NULL,
+            mit_wem          TEXT NOT NULL,
+            ueberpruefen_bis TEXT NOT NULL,
+            stand            TEXT NOT NULL CHECK (stand IN ('aktiv', 'erreicht', 'geaendert', 'beendet')),
+            stand_am         TEXT,
+            stand_satz       TEXT NOT NULL DEFAULT '',
+            kuerzel          TEXT NOT NULL,
+            erfasst          TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS ziel_fassungen_bleiben BEFORE UPDATE ON ziel_fassungen
+            BEGIN SELECT RAISE(ABORT, 'Ziele werden nicht überschrieben – jede Änderung ist eine neue Fassung.'); END;
+        CREATE TABLE IF NOT EXISTS ziel_verzicht (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            ab          TEXT NOT NULL,
+            grund       TEXT NOT NULL CHECK (length(grund) > 0),
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS bericht_ziel (
+            bericht_id INTEGER PRIMARY KEY REFERENCES berichte(id) ON DELETE CASCADE,
+            ziel_id    INTEGER NOT NULL REFERENCES ziele(id) ON DELETE CASCADE
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1267,10 +1305,11 @@ public sealed partial class Speicher : IDisposable
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
              akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
-             vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null, ausgabe = Meta(DemoAusgabe) is null;
+             vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null, ausgabe = Meta(DemoAusgabe) is null,
+             ziele = Meta(DemoZiele) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1295,7 +1334,8 @@ public sealed partial class Speicher : IDisposable
         if (akte || personen || betreuer || aerzte) DemoAkteAngabenEinfuegen(transaktion);   // hängt an Personen und Betreuern
         if (schweigepflicht || akte || personen || betreuer || aerzte) DemoSchweigepflichtEinfuegen(transaktion);   // hängt an den Angaben der Akte
         if (vital || aerzte) DemoVitalEinfuegen(transaktion);   // die Grenzen nennen einen Arzt
-        if (massnahmen) DemoMassnahmenEinfuegen(transaktion);
+        if (ziele) DemoZieleEinfuegen(transaktion);
+        if (massnahmen || ziele) DemoMassnahmenEinfuegen(transaktion);   // die Maßnahmen hängen an den Zielen
         if (dokumente) DemoDokumenteEinfuegen(transaktion);
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
         if (ausgabe || medikamente || medikation) DemoAusgabeEinfuegen(transaktion);   // hängt an den Verordnungen
@@ -1355,6 +1395,7 @@ public sealed partial class Speicher : IDisposable
             DemoAkteAngabenEinfuegen(transaktion);
             DemoSchweigepflichtEinfuegen(transaktion);
             DemoVitalEinfuegen(transaktion);
+            DemoZieleEinfuegen(transaktion);
             DemoMassnahmenEinfuegen(transaktion);
             DemoDokumenteEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
@@ -1421,6 +1462,7 @@ public sealed partial class Speicher : IDisposable
     {
         if (Bewohner(b.BewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
         if (b.Id is not null) throw new InvalidOperationException("Berichte werden nicht überschrieben – Korrekturen sind Nachträge.");
+        if (b.ZielId is long ziel && Ziele(b.BewohnerId).All(z => z.Id != ziel)) throw new Eingabefehler(["Das gewählte Ziel gehört nicht zu diesem Bewohner."]);
         if (uebergabe is not null) UebergabeRegeln.Pruefen(uebergabe, b.Erfasst);
         using var transaktion = db.BeginTransaction();
         long id = BerichtEinfuegen(b, transaktion);
@@ -1441,6 +1483,7 @@ public sealed partial class Speicher : IDisposable
             ("$art", b.Art));
         long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
         if (b.Dauer is int dauer) Ausfuehren("INSERT INTO bericht_dauer (bericht_id, minuten) VALUES ($b, $m)", transaktion, ("$b", id), ("$m", dauer));
+        if (b.ZielId is long ziel) Ausfuehren("INSERT INTO bericht_ziel (bericht_id, ziel_id) VALUES ($b, $z)", transaktion, ("$b", id), ("$z", ziel));
         foreach (var n in b.Nachtraege)
             NachtragEinfuegen(id, n.Verfasser, n.Text, n.Erfasst, transaktion);
         return id;
@@ -1638,7 +1681,8 @@ public sealed partial class Speicher : IDisposable
                                    "EXISTS (SELECT 1 FROM uebergaben u WHERE u.bericht_id = berichte.id), art, " +
                                    "EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id), " +
                                    "(SELECT minuten FROM bericht_dauer d WHERE d.bericht_id = berichte.id), " +
-                                   $"EXISTS (SELECT 1 FROM medikamentenausgaben a WHERE a.bericht_id = berichte.id) FROM berichte {bedingung}",
+                                   "EXISTS (SELECT 1 FROM medikamentenausgaben a WHERE a.bericht_id = berichte.id), " +
+                                   $"(SELECT ziel_id FROM bericht_ziel z WHERE z.bericht_id = berichte.id) FROM berichte {bedingung}",
                                    null, parameter))
         using (var leser = befehl.ExecuteReader())
         {
@@ -1661,6 +1705,7 @@ public sealed partial class Speicher : IDisposable
                     Bedarfsgabe = leser.GetInt64(11) != 0,
                     Dauer = leser.IsDBNull(12) ? null : leser.GetInt32(12),
                     Ausgabe = leser.GetInt64(13) != 0,
+                    ZielId = leser.IsDBNull(14) ? null : leser.GetInt64(14),
                 });
             }
         }

@@ -22,6 +22,8 @@ public sealed class AkteAnsicht : Panel
     public FlowLayoutPanel Auskunft { get; } = new() { AutoSize = false, WrapContents = true, BackColor = Stil.Seite, Margin = new Padding(0) };
     public Button AuskunftKnopf { get; } = Stil.KleinerKnopf("Auskunft prüfen …");
     public IReadOnlyList<AuskunftMarke> AuskunftMarken { get; private set; } = [];
+    // Zielleiste (Bauplan 43): unter der Auskunftsleiste; ein Klick öffnet den Reiter „Ziele und Maßnahmen“.
+    public ZielLeiste Zielleiste { get; } = new();
     public event Action<Bewohner>? AuskunftGewuenscht;
     public Reiterleiste Reiter { get; } = new(Bauplan.AktenReiter);
     public PlatzhalterKarte ReiterPlatzhalter { get; } = new() { Visible = false };
@@ -84,6 +86,8 @@ public sealed class AkteAnsicht : Panel
         Vital = new VitalwerteAnsicht(speicher) { Visible = false };
         Vital.Geaendert += () => { if (Bewohner is not null) Fuellen(Bewohner); };
         Massnahmen = new MassnahmenAnsicht(speicher) { Visible = false };
+        Massnahmen.Geaendert += () => { if (Bewohner is not null) ZieleZeigen(Bewohner); };
+        Zielleiste.Geklickt += () => Reiter.Waehlen(MassnahmenAnsicht.ReiterName);
         Angaben.DokumenteGewuenscht += kategorie => { Reiter.Waehlen("Dokumente"); if (Bewohner is not null) Dokumente.Zeigen(Bewohner, kategorie); };
         Angaben.Geaendert += () => { if (Bewohner is not null) BetreuerZeigen(Bewohner); };
         KrankenkasseText.Click += (_, _) => Reiter.Waehlen("Krankenkasse");
@@ -167,7 +171,7 @@ public sealed class AkteAnsicht : Panel
 
         Reiter.Gewechselt += _ => ReiterZeigen();
         AuskunftKnopf.Click += (_, _) => { if (Bewohner is not null) AuskunftGewuenscht?.Invoke(Bewohner); };
-        Controls.AddRange([kopfKarte, Allergie, Auskunft, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital, Massnahmen]);
+        Controls.AddRange([kopfKarte, Allergie, Auskunft, Zielleiste, Reiter, abschnitt, stammdaten, ReiterPlatzhalter, Medikation, Wochenplan, Biografie, Reflexion, Heb, Angaben, Dokumente, Vital, Massnahmen]);
         ModuleAktualisieren();
     }
 
@@ -202,7 +206,7 @@ public sealed class AkteAnsicht : Panel
         bool heb = Reiter.Aktiv == "HEB";
         bool dokumente = Reiter.Aktiv == "Dokumente";
         bool vital = Reiter.Aktiv == "Vitalwerte";
-        bool massnahmen = Reiter.Aktiv == "Maßnahmen";
+        bool massnahmen = Reiter.Aktiv == MassnahmenAnsicht.ReiterName;
         Dokumente.Visible = dokumente;
         Vital.Visible = vital;
         Massnahmen.Visible = massnahmen;
@@ -312,6 +316,12 @@ public sealed class AkteAnsicht : Panel
         Auskunft.Controls.Add(AuskunftKnopf);
         Auskunft.AccessibleName = "Auskunft: " + string.Join("; ", AuskunftMarken.Select(m => m.Text));
         Auskunft.ResumeLayout();
+    }
+
+    public void ZieleZeigen(Bewohner b)
+    {
+        Zielleiste.Zeigen(speicher, b.Id!.Value, DateOnly.FromDateTime(DateTime.Now));
+        PerformLayout();
     }
 
     // Nur nach ärztlicher Anordnung: der neueste Wert je Art außerhalb des angeordneten Bereichs (Gefahr-Farbe, mit Wort).
@@ -427,6 +437,7 @@ public sealed class AkteAnsicht : Panel
         };
         Allergie.Setzen(BewohnerRegeln.AllergieText(b), marke, gestrichelt);
         AuskunftZeigen(b);
+        ZieleZeigen(b);
 
         Geburtsdatum.Text = Datum.Text(b.Geburtsdatum);
         Aufnahmedatum.Text = Datum.Text(b.Aufnahmedatum);
@@ -473,7 +484,9 @@ public sealed class AkteAnsicht : Panel
         y += Allergie.Height + S(Stil.AbstandKlein);
         var auskunftGroesse = Auskunft.GetPreferredSize(new Size(breite, 0));
         Auskunft.Bounds = new Rectangle(x, y, breite, auskunftGroesse.Height);
-        y += Auskunft.Height + S(Stil.AbstandMittel);
+        y += Auskunft.Height + S(Stil.AbstandKlein);
+        Zielleiste.Bounds = new Rectangle(x, y, breite, Zielleiste.HoeheFuer(breite));
+        y += Zielleiste.Height + S(Stil.AbstandMittel);
 
         Reiter.Bounds = new Rectangle(x, y, breite, Reiter.HoeheFuer(breite));
         y += Reiter.Height + S(Stil.AbstandGross);

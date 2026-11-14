@@ -20,6 +20,9 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     // Berichtsart „Therapie“: dazu das Angebot (dessen Name steht beim Speichern am Anfang des Textes).
     public ComboBox AngebotWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 220, AccessibleName = "Angebot der Therapie", Visible = false };
     public const string OhneAngebot = "ohne Angebot";
+    // Freiwillig: zu welchem Ziel des Bewohners (Bauplan 43).
+    public ComboBox ZielWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 420, AccessibleName = "Ziel (freiwillig)" };
+    private List<Ziel> ziele = [];
     public bool AngebotGefragt => Art.SelectedItem as string == DokuRegeln.ArtTherapie;
     public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // aus der Anmeldung
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
@@ -111,9 +114,11 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         Dauer.Margin = new Padding(Stil.AbstandGross, 0, Stil.AbstandKlein, 0);
         artReihe.Controls.AddRange([Art, AngebotWahl, new Label { Text = "Dauer (freiwillig)", AutoSize = true, Margin = new Padding(Stil.AbstandMittel, Stil.AbstandKlein, 0, 0) }, Dauer]);
         Zeile("Berichtsart", artReihe);
+        Zeile("Ziel (freiwillig)", ZielWahl);
         Art.SelectedIndexChanged += (_, _) => AngeboteFuellen();
-        BewohnerWahl.SelectedIndexChanged += (_, _) => AngeboteFuellen();
+        BewohnerWahl.SelectedIndexChanged += (_, _) => { AngeboteFuellen(); ZieleFuellen(); };
         AngeboteFuellen();
+        ZieleFuellen();
 
         // Zwei Spalten mit den kurzen Namen; der volle Name steht im Hinweis unter der Maus.
         var bereiche = new TableLayoutPanel { AutoSize = true, ColumnCount = 2, Margin = new Padding(0) };
@@ -198,6 +203,18 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         AngebotWahl.Visible = AngebotGefragt;
     }
 
+    private void ZieleFuellen(long? waehlen = null)
+    {
+        ziele = BewohnerWahl.SelectedIndex >= 0 && auswahl[BewohnerWahl.SelectedIndex].Id is long id ? ZielRegeln.Aktive(speicher.Ziele(id)) : [];
+        ZielWahl.Items.Clear();
+        ZielWahl.Items.Add(MassnahmenRegeln.OhneZiel);
+        ZielWahl.Items.AddRange([.. ziele.Select(ZielRegeln.Text)]);
+        ZielWahl.SelectedIndex = waehlen is long z ? ziele.FindIndex(x => x.Id == z) + 1 : 0;
+        ZielWahl.Enabled = ziele.Count > 0;
+    }
+
+    public void ZielWaehlen(long zielId) => ZieleFuellen(zielId);
+
     // Leerer Text bleibt leer: Sonst ginge ein Bericht nur mit dem Namen des Angebots durch die Prüfung.
     private string MitAngebot(string text) =>
         AngebotGefragt && AngebotWahl.SelectedIndex > 0 && text.Trim().Length > 0
@@ -233,6 +250,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         UebergabeBis.Text = e.UebergabeBis;
         UebergabeText.Text = e.UebergabeText;
         if (Art.Items.IndexOf(e.Art) is int i && i >= 0) Art.SelectedIndex = i;
+        ZieleFuellen(e.ZielId);
     }
 
     public void EntwurfVerwerfen()
@@ -267,6 +285,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         UebergabeBis = UebergabeBis.Text,
         UebergabeText = UebergabeText.Text,
         Art = Art.SelectedItem as string ?? DokuRegeln.ArtAlltag,
+        ZielId = ZielWahl.SelectedIndex > 0 ? ziele[ZielWahl.SelectedIndex - 1].Id : null,
     };
 
     public bool Speichern()

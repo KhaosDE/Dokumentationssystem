@@ -28,6 +28,7 @@ public sealed record Bericht
     public bool Bedarfsgabe { get; init; }                  // entstanden über „Bedarf gegeben …“ (nur lesend)
     public bool Ausgabe { get; init; }                      // entstanden in der Medikamentenausgabe (nur lesend)
     public int? Dauer { get; init; }                        // freiwillig: Minuten am Bewohner (Zeitauswertung, Bauplan 41)
+    public long? ZielId { get; init; }                      // freiwillig: zu welchem Ziel (Bauplan 43)
 
     public bool Allgemein => Bereiche.Count == 0;
 }
@@ -50,6 +51,7 @@ public sealed class BerichtEingabe
     public string UebergabeText { get; set; } = "";
     public string Art { get; set; } = DokuRegeln.ArtAlltag;
     public string Dauer { get; set; } = "";   // Minuten, freiwillig
+    public long? ZielId { get; set; }          // freiwillig
 }
 
 // Filter für die Liste der Berichte eines Bewohners.
@@ -180,6 +182,7 @@ public static partial class BerichtRegeln
         return new Bericht
         {
             Dauer = dauer,
+            ZielId = e.ZielId,
             BewohnerId = e.BewohnerId,
             Zeitpunkt = zeitpunkt!.Value,
             Schicht = e.Schicht ?? SchichtZu(zeitpunkt.Value),

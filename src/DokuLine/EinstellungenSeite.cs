@@ -64,6 +64,8 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public NumericUpDown BeschlussFrist { get; } = new() { Minimum = 1, Maximum = 365, Width = 80 };
     public NumericUpDown Wartezeit { get; } = new() { Minimum = 5, Maximum = 240, Width = 80 };
     public NumericUpDown KeinBericht { get; } = new() { Minimum = 1, Maximum = 26, Width = 80, AccessibleName = "Wochen ohne Bericht" };
+    public NumericUpDown ZieleLeit { get; } = new() { Minimum = 0, Maximum = 3, Width = 60, AccessibleName = "Mindestzahl Leitziele" };
+    public NumericUpDown ZieleNah { get; } = new() { Minimum = 0, Maximum = 6, Width = 60, AccessibleName = "Mindestzahl Nahziele" };
     public Button MassnahmenListenKnopf { get; } = Stil.NebenKnopf("Arten und Vorlagen …");
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
@@ -178,6 +180,8 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
             BeschlussFrist.Value = Math.Clamp(werte.BeschlussFristTage, (int)BeschlussFrist.Minimum, (int)BeschlussFrist.Maximum);
             Wartezeit.Value = Math.Clamp(werte.WartezeitMinuten, (int)Wartezeit.Minimum, (int)Wartezeit.Maximum);
             KeinBericht.Value = Math.Clamp(werte.KeinBerichtWochen, (int)KeinBericht.Minimum, (int)KeinBericht.Maximum);
+            ZieleLeit.Value = Math.Clamp(werte.ZieleLeitziele, 0, 3);
+            ZieleNah.Value = Math.Clamp(werte.ZieleNahziele, 0, 6);
             HebFrist.Value = Math.Clamp(werte.HebFristMonate, (int)HebFrist.Minimum, (int)HebFrist.Maximum);
             LogoLaden(Einstellungen.LogoPfad());
             foreach (var (schluessel, haken) in Module) haken.Checked = speicher.ModulAn(schluessel);

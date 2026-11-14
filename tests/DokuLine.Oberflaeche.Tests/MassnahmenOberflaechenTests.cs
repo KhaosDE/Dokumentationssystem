@@ -25,8 +25,8 @@ public class MassnahmenOberflaechenTests
         f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(id);
         var akte = f.Bewohner.Akte;
-        Assert.Contains("Maßnahmen", akte.Reiter.Namen);
-        akte.Reiter.Waehlen("Maßnahmen");
+        Assert.Contains(MassnahmenAnsicht.ReiterName, akte.Reiter.Namen);
+        akte.Reiter.Waehlen(MassnahmenAnsicht.ReiterName);
         var m = akte.Massnahmen;
         Assert.True(m.Visible);
         Assert.Equal(5, m.Lebensbereiche.Items.Count);
@@ -170,7 +170,7 @@ public class MassnahmenOberflaechenTests
         var b = u.Demo("Ahorn");
         f.BereichWaehlen("Dokumentation");
         f.Bewohner.AkteZeigen(b.Id!.Value);
-        f.Bewohner.Akte.Reiter.Waehlen("Maßnahmen");
+        f.Bewohner.Akte.Reiter.Waehlen(MassnahmenAnsicht.ReiterName);
         Assert.NotNull(Stil.Sperrgrund(f.Bewohner.Akte.Massnahmen.NeuKnopf));
         Assert.False(f.Bewohner.Akte.Massnahmen.Neu());
 
