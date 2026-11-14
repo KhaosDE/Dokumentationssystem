@@ -2367,7 +2367,7 @@ Umfang:
   jeweilige Startseite.
 
 ## Maßnahmen je Bewohner mit Zeitwert
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.43.0; Bauplan Schritt 39)
 Datum: 10.11.2026
 Was: Ein Reiter „Maßnahmen“ in der Akte. Er zeigt die fünf Lebensbereiche mit ihren Berichten und
 die regelmäßigen Maßnahmen des Bewohners. Jede Durchführung wird bestätigt, mit Zeit.

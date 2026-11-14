@@ -20,6 +20,7 @@ public sealed record DokuFilter
     public bool Visite { get; init; }
     public bool Uebergabe { get; init; }
     public bool MitNachtrag { get; init; }
+    public bool OhneMassnahmen { get; init; }   // die kurzen Einträge der bestätigten Maßnahmen ausblenden
     public string? Art { get; init; }
     public int? Bereich { get; init; }    // 0 = allgemein
     public Schicht? Schicht { get; init; }
@@ -32,14 +33,14 @@ public sealed record GespeicherterFilter(string Name, DokuFilter Filter);
 public static class DokuRegeln
 {
     public const string ArtAlltag = "Alltag", ArtVisite = "Visite", ArtMedikation = "Medikation", ArtTherapie = "Therapie",
-        ArtAbgaengigkeit = "Ausgang/Abgängigkeit";
+        ArtAbgaengigkeit = "Ausgang/Abgängigkeit", ArtMassnahme = MassnahmenRegeln.ArtBericht;
 
-    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie, ArtAbgaengigkeit];
+    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie, ArtAbgaengigkeit, ArtMassnahme];
 
     public static readonly string[] Berichtsarten =
     [
         ArtAlltag, "Krise", "Arztkontakt", ArtVisite, ArtMedikation, "Konflikt", ArtAbgaengigkeit,
-        "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis", ArtTherapie,
+        "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis", ArtTherapie, ArtMassnahme,
     ];
 
     public static string ZeitraumText(Zeitraum z) => z switch
@@ -87,6 +88,7 @@ public static class DokuRegeln
         if (f.Visite && b.Art != ArtVisite) return false;
         if (f.Uebergabe && !b.Uebergabe) return false;
         if (f.MitNachtrag && b.Nachtraege.Count == 0) return false;
+        if (f.OhneMassnahmen && b.Art == ArtMassnahme) return false;
         if (f.Art is string art && b.Art != art) return false;
         if (f.Bereich is int bereich
             && (bereich == BerichtFilter.Allgemein ? !b.Allgemein : !b.Bereiche.Contains(bereich))) return false;
@@ -95,6 +97,14 @@ public static class DokuRegeln
         string suche = f.Suche.Trim();
         return suche.Length == 0 || b.Text.Contains(suche, StringComparison.CurrentCultureIgnoreCase)
             || b.Nachtraege.Any(n => n.Text.Contains(suche, StringComparison.CurrentCultureIgnoreCase));
+    }
+
+    // Die kurzen Einträge der Maßnahmen eines Tages stehen zusammengefasst unter den geschriebenen Berichten
+    // (Bauplan 39), damit sie diese nicht verdrängen.
+    public static (List<Bericht> Geschrieben, List<Bericht> Massnahmen) Teilen(IEnumerable<Bericht> tag)
+    {
+        var liste = tag.ToList();
+        return ([.. liste.Where(b => b.Art != ArtMassnahme)], [.. liste.Where(b => b.Art == ArtMassnahme)]);
     }
 
     // Neueste oben, je Tag ein Abschnitt.
@@ -154,6 +164,7 @@ public static class DokuRegeln
         if (f.Visite) liste.Add(("Visite", f with { Visite = false }));
         if (f.Uebergabe) liste.Add(("Übergabe", f with { Uebergabe = false }));
         if (f.MitNachtrag) liste.Add(("mit Nachtrag", f with { MitNachtrag = false }));
+        if (f.OhneMassnahmen) liste.Add(("ohne Maßnahmen", f with { OhneMassnahmen = false }));
         if (f.Art is string art) liste.Add(($"Art: {art}", f with { Art = null }));
         if (f.Bereich is int b) liste.Add((b == BerichtFilter.Allgemein ? "allgemein" : $"Lebensbereich {b}",
             f with { Bereich = null }));

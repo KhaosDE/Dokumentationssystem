@@ -42,6 +42,7 @@ Fenster → Kern → Speicher → SQLite-Datei im Datenordner (`%APPDATA%\DokuLi
 | Wahl des Bereichs | `Bereichswahl.cs` | `BereichsAuswahl.cs` (Seitenleiste), `Arbeitsbereich` (Bausteine) |
 | Rechte | `Mitarbeiter.cs` (`Funktionen`, `RechteRegeln`) | `Recht.cs`, `VerwaltungFenster.cs` |
 | Medikation, Bedarf | `Medikation.cs`, `Bedarf.cs` | `MedikationAnsicht.cs`, `BedarfFenster.cs` |
+| Maßnahmen | `Massnahmen.cs`, `SpeicherMassnahmen.cs` | `MassnahmenAnsicht.cs`, `MassnahmeFenster.cs`, `MassnahmenListe.cs` |
 | Visiten | `Visiten.cs`, `VisitenEntwurf.cs` | `VisitenSeite.cs`, `VisitenRundgang.cs` |
 | Therapie, Tagesplan | `Therapie.cs`, `Tagesplan.cs`, `LaufendeTherapien.cs` | `TherapieSeite.cs`, `TagesplanSeite.cs`, `LaufendeTherapienAnsicht.cs` |
 | Kalender, .ics | `Kalender.cs`, `Ics.cs` | `KalenderSeite.cs` |
@@ -52,10 +53,12 @@ Fenster → Kern → Speicher → SQLite-Datei im Datenordner (`%APPDATA%\DokuLi
 ## Glossar
 
 - **Bereich** – ein Wohnbereich (R1, R2, R3) oder eine andere Einheit (Therapie, Leitung, Verwaltung).
-  **Wohnbereich**: ein Bereich mit Zimmern und Bewohnern. In der Übersicht wird der Bereich gewählt, der
+  **Wohnbereich**: ein Bereich mit Zimmern und Bewohnern. In der Seitenleiste wird der Bereich gewählt, der
   überall gilt; „eingesprungen“ heißt: ein anderer als der des Rechners.
 - **Bewohner** – eine Person, die im Wohnheim lebt (in der Demo ausgedacht).
 - **Akte** – alles zu einem Bewohner: Stammdaten, Medikamentenplan, Wochenplan, Biografie, Reflexion, HEB.
+- **Maßnahme** – etwas Regelmäßiges, das am Bewohner zu tun ist (Lebensbereich, Rhythmus, Dienst, Zeitwert); jede
+  Durchführung wird bestätigt und steht als kurzer Eintrag (Berichtsart „Maßnahme“) in der Dokumentation.
 - **Bericht** – ein Eintrag der täglichen Dokumentation mit Schicht, Kürzel, Lebensbereichen und Berichtsart;
   wird nie geändert, Korrekturen sind **Nachträge**.
 - **Übergabe** – was die nächste Schicht wissen muss; steht, bis es abläuft oder erledigt ist.

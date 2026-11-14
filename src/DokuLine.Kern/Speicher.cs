@@ -997,6 +997,73 @@ public sealed partial class Speicher : IDisposable
             haus      TEXT NOT NULL REFERENCES haeuser(name) ON UPDATE CASCADE ON DELETE CASCADE
         );
         """,
+        // 41 – Maßnahmen: Fassungen ab Datum (nie überschrieben), Bestätigungen je Dienst (einmal, außer „bei Bedarf“), Arten und
+        // Vorlagen, Berichtsart „Maßnahme“.
+        """
+        CREATE TABLE IF NOT EXISTS massnahmen (
+            id            INTEGER PRIMARY KEY,
+            bewohner_id   INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            erstellt      TEXT NOT NULL,
+            kuerzel       TEXT NOT NULL,
+            beendet_am    TEXT,
+            beendet_grund TEXT NOT NULL DEFAULT '',
+            beendet_von   TEXT NOT NULL DEFAULT ''
+        );
+        CREATE TABLE IF NOT EXISTS massnahme_fassungen (
+            id            INTEGER PRIMARY KEY,
+            massnahme_id  INTEGER NOT NULL REFERENCES massnahmen(id) ON DELETE CASCADE,
+            gilt_ab       TEXT NOT NULL,
+            gilt_bis      TEXT,
+            titel         TEXT NOT NULL CHECK (length(titel) > 0),
+            beschreibung  TEXT NOT NULL DEFAULT '',
+            lebensbereich INTEGER NOT NULL CHECK (lebensbereich BETWEEN 1 AND 5),
+            ziel_id       INTEGER,
+            art           TEXT NOT NULL,
+            rhythmus      TEXT NOT NULL CHECK (rhythmus IN ('taeglich', 'wochentage', 'allenwochen', 'monatlich', 'beibedarf')),
+            wochentage    TEXT NOT NULL DEFAULT '',
+            alle_wochen   INTEGER NOT NULL DEFAULT 2,
+            monatstag     INTEGER NOT NULL DEFAULT 1,
+            schicht       TEXT NOT NULL CHECK (schicht IN ('frueh', 'spaet', 'nacht')),
+            uhrzeit       TEXT,
+            minuten       INTEGER NOT NULL DEFAULT 0,
+            kuerzel       TEXT NOT NULL,
+            erfasst       TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS massnahme_fassungen_massnahme ON massnahme_fassungen (massnahme_id);
+        CREATE TRIGGER IF NOT EXISTS massnahme_fassungen_bleiben BEFORE UPDATE ON massnahme_fassungen
+            BEGIN SELECT RAISE(ABORT, 'Maßnahmen werden nicht überschrieben – jede Änderung ist eine neue Fassung.'); END;
+        CREATE TABLE IF NOT EXISTS massnahme_bestaetigungen (
+            id            INTEGER PRIMARY KEY,
+            massnahme_id  INTEGER NOT NULL REFERENCES massnahmen(id) ON DELETE CASCADE,
+            bewohner_id   INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            tag           TEXT NOT NULL,
+            schicht       TEXT NOT NULL CHECK (schicht IN ('frueh', 'spaet', 'nacht')),
+            bedarf        INTEGER NOT NULL DEFAULT 0 CHECK (bedarf IN (0, 1)),
+            ergebnis      TEXT NOT NULL CHECK (ergebnis IN ('durchgefuehrt', 'abgelehnt', 'nichtmoeglich')),
+            grund         TEXT NOT NULL DEFAULT '',
+            minuten       INTEGER NOT NULL DEFAULT 0,
+            bemerkung     TEXT NOT NULL DEFAULT '',
+            kuerzel       TEXT NOT NULL,
+            zeit          TEXT NOT NULL,
+            lebensbereich INTEGER NOT NULL,
+            titel         TEXT NOT NULL,
+            bericht_id    INTEGER REFERENCES berichte(id) ON DELETE SET NULL
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS massnahme_einmal_je_dienst ON massnahme_bestaetigungen (massnahme_id, tag, schicht) WHERE bedarf = 0;
+        CREATE INDEX IF NOT EXISTS massnahme_bestaetigungen_bewohner ON massnahme_bestaetigungen (bewohner_id, tag);
+        CREATE TRIGGER IF NOT EXISTS massnahme_bestaetigungen_bleiben
+            BEFORE UPDATE OF massnahme_id, bewohner_id, tag, schicht, bedarf, ergebnis, grund, minuten, bemerkung, kuerzel, zeit, lebensbereich, titel
+            ON massnahme_bestaetigungen
+            BEGIN SELECT RAISE(ABORT, 'Bestätigungen werden nicht geändert.'); END;
+        CREATE TABLE IF NOT EXISTS massnahmenarten (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO massnahmenarten (name, nr) VALUES ('Anleitung', 1), ('Begleitung', 2), ('Gespräch', 3), ('Kontrolle', 4), ('Übernahme', 5),
+            ('Sonstiges', 6);
+        CREATE TABLE IF NOT EXISTS massnahmenvorlagen (name TEXT PRIMARY KEY, aktiv INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)), nr INTEGER NOT NULL DEFAULT 0);
+        INSERT OR IGNORE INTO massnahmenvorlagen (name, nr) VALUES ('Zimmerhygiene', 1), ('Wäschepflege', 2), ('Körperpflege anleiten', 3),
+            ('Tagesstruktur besprechen', 4), ('Einkauf begleiten', 5), ('Geldverwaltung üben', 6);
+        INSERT INTO berichtsarten (name, nr) SELECT 'Maßnahme', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
+            WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Maßnahme');
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1172,10 +1239,10 @@ public sealed partial class Speicher : IDisposable
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
              akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
-             vital = Meta(DemoVital) is null;
+             vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1200,6 +1267,7 @@ public sealed partial class Speicher : IDisposable
         if (akte || personen || betreuer || aerzte) DemoAkteAngabenEinfuegen(transaktion);   // hängt an Personen und Betreuern
         if (schweigepflicht || akte || personen || betreuer || aerzte) DemoSchweigepflichtEinfuegen(transaktion);   // hängt an den Angaben der Akte
         if (vital || aerzte) DemoVitalEinfuegen(transaktion);   // die Grenzen nennen einen Arzt
+        if (massnahmen) DemoMassnahmenEinfuegen(transaktion);
         if (dokumente) DemoDokumenteEinfuegen(transaktion);
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
@@ -1258,6 +1326,7 @@ public sealed partial class Speicher : IDisposable
             DemoAkteAngabenEinfuegen(transaktion);
             DemoSchweigepflichtEinfuegen(transaktion);
             DemoVitalEinfuegen(transaktion);
+            DemoMassnahmenEinfuegen(transaktion);
             DemoDokumenteEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);

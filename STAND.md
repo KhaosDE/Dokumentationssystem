@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.42.0** (Bauplan Schritt 38: Wohnbereich als Auswahlliste in der Seitenleiste).
+Stand: 14.11.2026. Version: **0.43.0** (Bauplan Schritt 39: Maßnahmen je Bewohner mit Zeitwert).
 
 ## Aktuell
 
@@ -435,7 +435,22 @@ dem Kürzel („R2“), ein Klick öffnet die Liste. Beim Wechsel bleibt man in 
 der Übersicht und auf der Seite „Therapie“ entfallen; alles Übrige aus 0.33.7 bleibt (gilt überall, Kopfzeile, Marke
 „eingesprungen“, Rücksetzen beim Abmelden).
 
-**Nächster Schritt:** Bauplan Schritt 39 (Maßnahmen je Bewohner mit Zeitwert, 0.43.0); danach 40–52 der Reihe nach.
+Neu in 0.43.0: **Maßnahmen** je Bewohner: In der Akte der neue Reiter **„Maßnahmen“** (nach „Medikamentenplan“). Oben die fünf
+**Lebensbereiche** mit geschriebenen Berichten im Quartal, letztem Bericht, nächster Reflexion und der Marke „seit … Wochen
+kein Bericht“ (Schwelle in den Einstellungen, Vorgabe 4; Doppelklick öffnet die Dokumentation mit diesem Filter). Darunter die
+**Maßnahmen**: Titel (mit Vorlagen), Beschreibung, Lebensbereich (Pflicht), Ziel (bis zu den Zielen in 0.47.0 „ohne Ziel“),
+Art, Rhythmus (täglich, an Wochentagen, alle n Wochen, monatlich, bei Bedarf), Dienst oder Uhrzeit, **geplanter Zeitwert**,
+gültig von–bis. Ändern ist eine neue Fassung ab Datum, Beenden geschieht mit Grund; nichts wird gelöscht. Unten lesend, was
+im Medikamentenplan steht; ein Medikament im Titel löst die Frage „Ist das ärztlich verordnet?“ aus. **Bestätigen** im
+laufenden Dienst auf der Seite **„Aufgaben“** (oben „Maßnahmen · Frühdienst …“): „durchgeführt“ mit einem Klick (Zeit =
+Zeitwert), „abgelehnt …“ und „nicht möglich …“ mit Grund, „mit Zeit und Bemerkung …“; Kürzel und Uhrzeit setzt das Programm.
+Jede Bestätigung ist ein kurzer Eintrag in der **Dokumentation** (Berichtsart „Maßnahme“), je Tag zusammengefasst
+(„Maßnahmen: 3 durchgeführt, 1 abgelehnt“, zum Aufklappen), Häkchen „Maßnahmen“ zum Ausblenden. Die **Reflexion** zeigt je
+Lebensbereich eine Zeile je Maßnahme („11 von 13 durchgeführt, 2 abgelehnt, 3 Std. 40 Min.“) – nur gezählt. Rechte:
+„Maßnahmen bestätigen“ (alle), „Maßnahmen anlegen und ändern“ (Fachkräfte und die Bezugspflege des Bewohners). Einstellungen:
+Arten und Vorlagen. Demo: je Bewohner zwei bis fünf Maßnahmen seit drei Wochen, mit Bestätigungen (einige abgelehnt).
+
+**Nächster Schritt:** Bauplan Schritt 40 (Kasten „Maßnahmen heute“ in der Übersicht, 0.44.0); danach 41–52 der Reihe nach.
 
 ## Fertig
 
@@ -1537,6 +1552,7 @@ der Übersicht und auf der Seite „Therapie“ entfallen; alles Übrige aus 0.3
   10 Minuten (`--blame-hang-timeout`), der Windows-Job 45 Minuten (ein offener Dialog im Test „Akte übernehmen“ hatte
   einen Lauf über eine halbe Stunde aufgehalten).
 - 0.42.0 — Bauplan Schritt 38: `BereichsAuswahl` in der Seitenleiste (Auswahlliste, eingeklappt Kürzel mit Menü), `BereichswahlRegeln.Kuerzel`; `BereichUmschalter` entfernt.
+- 0.43.0 — Bauplan Schritt 39: `Massnahmen.cs` (Fassungen, Fälligkeit, Prüfen, Texte, Lebensbereiche, Reflexion), `SpeicherMassnahmen.cs` (Datenbank-Schritt 41, Bestätigen mit Bericht, Demo), `MassnahmenAnsicht`, `MassnahmeFenster`, `MassnahmeBestaetigenFenster`, `MassnahmenListe` (Aufgaben-Seite), `MassnahmenTagZeile` (Dokumentation), Reflexion, Einstellungen.
 
 ## Offene Punkte
 
@@ -1640,6 +1656,22 @@ der Übersicht und auf der Seite „Therapie“ entfallen; alles Übrige aus 0.3
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.43.0): Die Marke „seit … Wochen kein Bericht“ und die Zahl im Quartal zählen nur **geschriebene** Berichte, nicht die
+  kurzen Einträge der bestätigten Maßnahmen – sonst hielte ein täglich abgehakter Punkt einen Lebensbereich „aktuell“, in dem
+  niemand etwas geschrieben hat. Die Maßnahmen stehen daneben gezählt (Reflexion).
+- 14.11.2026 (0.43.0): Bestätigt wird in Schritt 39 auf der Seite „Aufgaben“ (eigener Abschnitt oben, getrennt von den Aufgaben), nicht als
+  erzeugte Aufgaben wie bei den Messaufträgen: Maßnahmen haben drei Ergebnisse und eine Zeit; die Übersicht bekommt den Kasten
+  in Schritt 40. Fällig ist eine Maßnahme nur in ihrem Dienst; „bei Bedarf“ wird aus der Akte bestätigt, beliebig oft.
+- 14.11.2026 (0.43.0): „Wiederkehrende Aufgaben mit Bewohner in eine Maßnahme umwandeln“ entfällt: Wiederkehrend sind nur die
+  Standardaufgaben (je Bereich, ohne Bewohner) und die Messaufträge (gehören zu den Vitalwerten). Es gibt also nichts
+  umzuwandeln.
+- 14.11.2026 (0.43.0): Vorlagen für Maßnahmen sind eine gemeinsame Liste für alle Bereiche (wie die anderen Listen der Einstellungen),
+  nicht je Bereich – einfacher, und die Benennung soll gerade bereichsübergreifend gleich sein.
+- 14.11.2026 (0.43.0): „Anlegen und ändern“: Fachkräfte (Recht mit „nur Fachkräfte“, vorbelegt für alle Positionen außer Therapie und
+  Verwaltung) und zusätzlich die **eingetragene Bezugspflege** des Bewohners, auch als Assistenzkraft. Das prüft der Speicher
+  selbst, weil „Bezugspflege“ keine Position ist.
+- 14.11.2026 (0.43.0): Der Filter heißt „Maßnahmen“ (Häkchen, Vorgabe an): aus blendet die kurzen Einträge aus. Gespeicherte Filter von
+  früher kennen das Feld nicht und zeigen sie (Vorgabe).
 - 14.11.2026 (0.42.0): Die Marke „eingesprungen“ steht nur noch in der Kopfzeile (wie bisher dort), nicht zusätzlich in der
   Seitenleiste – sie wäre dort doppelt und nähme im eingeklappten Menü Platz. Längere Bereichsnamen zeigt das eingeklappte
   Menü mit den ersten drei Buchstaben, der volle Name steht im Menü und für Bildschirmleser im Knopf.
@@ -2564,6 +2596,14 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.43.0: Akte (z. B. Ahorn) → Reiter „Maßnahmen“: oben fünf Lebensbereiche mit Zahl, letztem Bericht, „Reflexion bis“
+und Hinweis; darunter die Maßnahmen; unten „Aus dem Medikamentenplan“. „Neue Maßnahme …“: Titel „Morgens Movicol“ →
+Rückfrage „ärztlich verordnet?“; Titel aus den Vorlagen, Lebensbereich, Art, „an Wochentagen“ ohne Tag → Fehler. Ändern →
+„Neue Fassung ab“ morgen. Beenden → Grund. Doppelklick auf einen Lebensbereich → Dokumentation mit Filter. Seite „Aufgaben“:
+oben „Maßnahmen · <Dienst>“ – eine wählen, „durchgeführt“ → Stand „durchgeführt · Kürzel Uhrzeit“; „abgelehnt …“ ohne Grund →
+Fehler. Dokumentation: „▸ Maßnahmen: …“ je Tag, Klick klappt auf; Häkchen „Maßnahmen“ aus → weg. Reflexion: „Maßnahme
+Zimmerhygiene: … von … durchgeführt“. Als Therapie (OP) ist „Neue Maßnahme …“ nicht da.
 
 Version 0.42.0: Seitenleiste: über „Übersicht“ steht „Wohnbereich“ mit Auswahlliste. Als Bereichsleitung (EF) R1 · R2 · R3;
 R2 wählen → man bleibt in der Ansicht, alle Listen zeigen R2, in der Kopfzeile „eingesprungen“. In die Dokumentation

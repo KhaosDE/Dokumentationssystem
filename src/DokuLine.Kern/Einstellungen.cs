@@ -8,7 +8,7 @@ namespace DokuLine.Kern;
 // Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben.
 public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90, int HebFristMonate = 12,
     string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false, bool NachschlageAnsicht = true,
-    int WartezeitMinuten = AbgaengigkeitRegeln.WartezeitVorgabe);
+    int WartezeitMinuten = AbgaengigkeitRegeln.WartezeitVorgabe, int KeinBerichtWochen = MassnahmenRegeln.KeinBerichtWochenVorgabe);
 
 public static partial class Einstellungen
 {
@@ -62,6 +62,8 @@ public static partial class Einstellungen
                 werte = werte with { NachschlageAnsicht = ansicht };
             if (knoten["wartezeit_minuten"] is JsonValue wz && wz.TryGetValue(out int wartezeit) && AbgaengigkeitRegeln.WartezeitPruefen(wartezeit) is null)
                 werte = werte with { WartezeitMinuten = wartezeit };
+            if (knoten["kein_bericht_wochen"] is JsonValue kb && kb.TryGetValue(out int wochen) && KeinBerichtPruefen(wochen) is null)
+                werte = werte with { KeinBerichtWochen = wochen };
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
@@ -77,6 +79,7 @@ public static partial class Einstellungen
         if (HebFristPruefen(werte.HebFristMonate) is string hebFehler) throw new Eingabefehler([hebFehler]);
         if (Bereiche.Pruefen(werte.Bereich) is string bereichFehler) throw new Eingabefehler([bereichFehler]);
         if (AbgaengigkeitRegeln.WartezeitPruefen(werte.WartezeitMinuten) is string wartezeitFehler) throw new Eingabefehler([wartezeitFehler]);
+        if (KeinBerichtPruefen(werte.KeinBerichtWochen) is string keinBerichtFehler) throw new Eingabefehler([keinBerichtFehler]);
         string ziel = Pfade.ImBenutzerordner(Datei);
         Directory.CreateDirectory(Path.GetDirectoryName(ziel)!);
         string zwischen = ziel + ".neu";
@@ -92,11 +95,15 @@ public static partial class Einstellungen
             ["menue_eingeklappt"] = werte.MenueEingeklappt,
             ["nachschlage_ansicht"] = werte.NachschlageAnsicht,
             ["wartezeit_minuten"] = werte.WartezeitMinuten,
+            ["kein_bericht_wochen"] = werte.KeinBerichtWochen,
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen
         lock (Sperre) zuletzt = null;
     }
+
+    // Lebensbereiche: „seit n Wochen kein Bericht“ (Bauplan 39).
+    public static string? KeinBerichtPruefen(int wochen) => wochen is >= 1 and <= 26 ? null : "„Kein Bericht seit“: 1 bis 26 Wochen.";
 
     // Kürzel: leer oder bis zu 6 Buchstaben/Ziffern. Rückgabe: Fehlertext oder null.
     public static string? KuerzelPruefen(string? kuerzel)

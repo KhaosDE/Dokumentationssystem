@@ -121,6 +121,13 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
             Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0)
         };
         listenFlaeche.Controls.Add(Dokumentation);
+        // Doppelklick auf einen Lebensbereich (Reiter „Maßnahmen“): dessen Berichte seit Beginn des Quartals.
+        Akte.Massnahmen.LebensbereichGewuenscht += nr =>
+        {
+            UebersichtZeigen();
+            var heute = Heute();
+            Dokumentation.FilterSetzen(new DokuFilter { Bereich = nr, Zeitraum = Kern.Zeitraum.Frei, Von = MassnahmenRegeln.QuartalBeginn(heute), Bis = heute });
+        };
         listenFlaeche.Controls.Add(new Panel
         {
             Dock = DockStyle.Left, Width = Stil.AbstandGross,

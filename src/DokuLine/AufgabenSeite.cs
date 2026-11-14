@@ -5,7 +5,7 @@ namespace DokuLine;
 
 // Bereich „Aufgaben“ (Wohnbereich-ToDo): Aufgaben bleiben stehen, bis sie erledigt sind.
 // Überfällige stehen oben, rot und mit dem Wort „überfällig“. Erledigte lassen sich einblenden;
-// gelöscht wird nichts.
+// gelöscht wird nichts. Oben die Maßnahmen des laufenden Dienstes zum Abhaken (Bauplan 39).
 public sealed class AufgabenSeite : Panel, IBereichSeite
 {
     string IBereichSeite.Titel => "Aufgaben";
@@ -22,6 +22,7 @@ public sealed class AufgabenSeite : Panel, IBereichSeite
     public Label KuerzelHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini) };
     public List<AufgabeKarte> Karten { get; } = [];
     public List<string> Abschnitte { get; } = [];
+    public MassnahmenListe Massnahmen { get; }
     public int Offen { get; private set; }
     public int Ueberfaellig { get; private set; }
     public event Action? Geaendert;
@@ -47,7 +48,10 @@ public sealed class AufgabenSeite : Panel, IBereichSeite
         NeuKnopf.Click += (_, _) => NeueAufgabe();
         DruckKnopf.Click += (_, _) => Drucken();
         ErledigteZeigen.CheckedChanged += (_, _) => Aktualisieren();
+        Massnahmen = new MassnahmenListe(speicher) { Jetzt = () => Jetzt() };
+        Massnahmen.Geaendert += Aktualisieren;
         Controls.Add(leiste);
+        Controls.Add(Massnahmen);
     }
 
     private static string Kuerzel => Recht.Kuerzel;
@@ -68,7 +72,7 @@ public sealed class AufgabenSeite : Panel, IBereichSeite
         Recht.NurAngemeldet(NeuKnopf);   // ohne Anmeldung nur ansehen
 
         SuspendLayout();
-        foreach (var c in inhalt) { Controls.Remove(c); c.Dispose(); }
+        foreach (var c in inhalt.Where(c => c != Massnahmen)) { Controls.Remove(c); c.Dispose(); }
         inhalt.Clear();
         Karten.Clear();
         Abschnitte.Clear();
@@ -97,6 +101,14 @@ public sealed class AufgabenSeite : Panel, IBereichSeite
             inhalt.Add(karte);
         }
 
+        // Die Maßnahmen des laufenden Dienstes für die Bewohner des gewählten Bereichs.
+        var dienst = SchichtTermin.Zu(jetzt);
+        var bewohner = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt);
+        var termine = speicher.MassnahmenImDienst(dienst, [.. bewohner.Select(b => b.Id!.Value)]);
+        Abschnitt($"MASSNAHMEN · {dienst.Text.ToUpperInvariant()} ({termine.Count(t => !t.Offen)} VON {termine.Count} BESTÄTIGT)");
+        int massnahmenAbschnitt = inhalt.Count - 1;
+        Massnahmen.Fuellen(termine, bewohner);
+
         // Gruppiert nach Schicht, oben die laufende (Liegengebliebenes davor).
         foreach (var (titel, aufgaben) in AufgabenRegeln.Gruppen(offen, jetzt))
         {
@@ -111,7 +123,8 @@ public sealed class AufgabenSeite : Panel, IBereichSeite
             Abschnitt($"ERLEDIGT ({erledigt.Count})");
             erledigt.ForEach(Karte);
         }
-        foreach (var c in inhalt) Controls.Add(c);
+        inhalt.Insert(massnahmenAbschnitt + 1, Massnahmen);
+        foreach (var c in inhalt) if (c != Massnahmen) Controls.Add(c);
         ResumeLayout(false);
         AutoScrollPosition = Point.Empty;
         PerformLayout();
@@ -167,7 +180,12 @@ public sealed class AufgabenSeite : Panel, IBereichSeite
         y = leiste.Bottom + Stil.Px(this, Stil.AbstandKlein);
         foreach (var c in inhalt)
         {
-            if (c is AufgabeKarte karte)
+            if (c == Massnahmen)
+            {
+                Massnahmen.SetBounds(rand, y, breite, Massnahmen.Hoehe(breite));
+                y += Massnahmen.Height + Stil.Px(this, Stil.AbstandKlein);
+            }
+            else if (c is AufgabeKarte karte)
             {
                 karte.SetBounds(rand, y, breite, karte.Height);
                 karte.PerformLayout();

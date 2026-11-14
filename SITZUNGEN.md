@@ -139,3 +139,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 13.11.2026 — Schritt 52 freigegeben: HEB-Fälligkeit vermerken, Erinnerung 8 und 4 Wochen vorher, Liste „HEB-Fristen“ (Chat „Programme/Apps“).
 - 14.11.2026 — Alle offenen Vorschläge freigegeben: Schritte 39–49 (Maßnahmen, Arbeitscheckliste, Zeitauswertung, Medikamentenausgabe, Ziele, QMB, Küchendienst, Archiv, Hilfeplangespräche, Schlüsselwörter, Rechtschreibprüfung) (Chat „Programme/Apps“).
 - 14.11.2026 — Claude Code: 0.42.0 Wohnbereich als Auswahlliste in der Seitenleiste über „Übersicht“ (Bauplan 38).
+- 14.11.2026 — Claude Code: 0.43.0 Maßnahmen je Bewohner mit Zeitwert: Reiter „Maßnahmen“, Bestätigen auf der Seite „Aufgaben“, Dokumentation zusammengefasst, Reflexion gezählt (Bauplan 39).

@@ -49,6 +49,7 @@ Lesbare Datei `einstellungen.json` im Datenordner:
 | `menue_eingeklappt` | Seitenmenü nur mit Symbolen | nein |
 | `nachschlage_ansicht` | Formular „Medikament“: eingebettete Nachschlage-Ansicht des BfArM | ja |
 | `wartezeit_minuten` | Ausgangsliste: so viele Minuten nach der Rückkehrzeit „Abgängigkeit melden?“ (5–240) | 30 |
+| `kein_bericht_wochen` | Akte, Reiter „Maßnahmen“: „seit … Wochen kein Bericht“ je Lebensbereich (1–26) | 4 |
 
 Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben. Dieselbe Datei hat schon die
 Python-Version (bis 0.2.0) benutzt.
