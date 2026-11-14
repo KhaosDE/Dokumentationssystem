@@ -154,7 +154,7 @@ public sealed class BestellungSeite : Panel, IBereichSeite
     {
         if (GewaehlteAnforderung is not Anforderung a || Stil.Sperrgrund(DruckKnopf) is not null) return false;
         var zeilen = a.Posten.Select(p => new[] { p.Text, p.Menge }).ToList();
-        var druck = new TabellenDruck($"Rezeptanforderung / Bestellung an {a.Empfaenger}", $"vom {a.Erstellt:dd.MM.yyyy} · {Stil.DemoHinweis}", ["Bewohner und Medikament", "Menge"], [5f, 1.5f], zeilen);
+        var druck = new TabellenDruck($"Rezeptanforderung / Bestellung an {a.Empfaenger}", $"vom {a.Erstellt:dd.MM.yyyy}", ["Bewohner und Medikament", "Menge"], [5f, 1.5f], zeilen);
         Vorschau(druck.DokumentBauen, "Rezeptanforderung");
         return true;
     }
