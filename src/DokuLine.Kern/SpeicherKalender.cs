@@ -97,6 +97,20 @@ public sealed partial class Speicher
             .OrderBy(k => k.Aktuell.Beginn).ThenBy(k => k.Id).ToList();
 
     // Heimfahrt, die gerade läuft (für „abwesend: Heimfahrt bis …“ auf der Startseite).
+    // Abwesenheiten eines Bewohners in einem Zeitraum (Bauplan 50): die Heimfahrten aus dem Kalender.
+    public List<AbwesenheitsZeitraum> Abwesenheiten(long bewohnerId, DateOnly von, DateOnly bis) =>
+        AbwesenheitRegeln.Zeitraeume(KalenderLesen(null), bewohnerId, von, bis);
+
+    // Was der Kern über eine laufende Abwesenheit weiß: Heimfahrt, Fahrt, „in der Klinik seit …“. Die Ausgangsliste
+    // (Modul) fragt die Oberfläche über die Marken der Module.
+    public string? AbwesenheitJetzt(long bewohnerId, DateTime jetzt)
+    {
+        if (HeimfahrtJetzt(bewohnerId, jetzt) is KalenderTermin h) return $"Heimfahrt bis {h.Aktuell.Ende:dd.MM. HH:mm}";
+        if (Mitfahrende(jetzt).GetValueOrDefault(bewohnerId) is Marke m) return m.Text;
+        if (Statusmeldung(bewohnerId, jetzt) is Statusmeldung s && s.Text.Contains("Klinik", StringComparison.OrdinalIgnoreCase)) return s.Text;
+        return null;
+    }
+
     public KalenderTermin? HeimfahrtJetzt(long bewohnerId, DateTime jetzt) =>
         KalenderLesen(null).FirstOrDefault(k => !k.Aktuell.Abgesagt && k.Aktuell.Art == KalenderArt.Heimfahrt &&
                                                 k.Aktuell.Bewohner.Contains(bewohnerId) && k.Aktuell.Beginn <= jetzt && jetzt < k.Aktuell.Ende);

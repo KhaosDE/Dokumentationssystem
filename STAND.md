@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.53.0** (Rechtschreibprüfung mit Fachwörterbuch).
+Stand: 14.11.2026. Version: **0.54.0** (Abwesenheit in der Dokumentation sichtbar).
 
 ## Aktuell
 
@@ -493,7 +493,9 @@ Neu in 0.52.0: **Schlüsselwörter** (Bauplan 48). Im Fenster „Neuer Bericht�
 
 Neu in 0.53.0: **Rechtschreibprüfung** (Bauplan 49) mit der Rechtschreibprüfung von Windows (ohne Internet, ohne KI, ohne neue Abhängigkeit): **rote Wellenlinie** unter unbekannten Wörtern in Bericht, Nachtrag, Übergabe-Satz, Visite, Reflexion, HEB-Bogen, Biografie und Zielen; **Rechtsklick** mit bis zu fünf Vorschlägen, „Ignorieren“ (nur diese Sitzung) und „Zum Fachwörterbuch hinzufügen“ (Recht „Fachwörter verwalten“). **Eigene Wörter** gelten automatisch als richtig: Namen der Bewohner, Mitarbeiter und Verzeichnisse, Kürzel, Wirkstoffe und Handelsnamen, Therapieangebote und Orte – sie verlassen DokuLine nicht. **Fachwörterbuch** der Einrichtung (Einstellungen → „Fachwörter …“) mit selbst zusammengestellter Grundliste. Wahlweise **Autokorrektur** typischer Vertipper (je Mitarbeiter, aus). Unter dem Berichtstext ein leiser Hinweis „2 Wörter unbekannt“ – kein Zwang beim Speichern. Ohne deutsches Sprachpaket zeigt das Programm das an und läuft ohne Prüfung weiter.
 
-**Nächster Schritt:** Bauplan Schritt 50 (Abwesenheit in der Dokumentation sichtbar machen).
+Neu in 0.54.0: **Abwesenheit in der Dokumentation** (Bauplan 50). Über der Berichtsliste die Zeile **„abwesend: …“**, solange eine Abwesenheit läuft (Ausgangsliste, Heimfahrt, Fahrt, „in der Klinik seit …“). In der Tagesliste ein **grauer Balken** über abwesende Tage („06.11.–09.11. abwesend: Heimfahrt“); Berichte aus dieser Zeit stehen trotzdem an ihrem Tag. **Beginn und Ende** einer Abwesenheit in der Ausgangsliste erzeugen je einen kurzen Eintrag („abwesend ab 06.11. 14:00 (Klinik)“, „zurück am …“) mit Kürzel – einmal, nicht täglich. **„Neuer Bericht“** zeigt oben „Bewohner ist abwesend (…)“. In der Bewohnerleiste stehen Abwesende in **leiserer Schrift** (ohne Marke). Im Reiter „Ziele und Maßnahmen“ gibt es während einer Abwesenheit keine Marke „seit n Wochen kein Bericht“.
+
+**Nächster Schritt:** Bauplan Schritt 51 (Medikamentenbestellung: Reichweite, Rezeptanforderung, Lieferung).
 
 ## Fertig
 
@@ -1606,9 +1608,11 @@ Neu in 0.53.0: **Rechtschreibprüfung** (Bauplan 49) mit der Rechtschreibprüfun
 - 0.51.0 — Hilfeplangespräche (Bauplan 47): Seite nach Fälligkeit, Termin mit Teilnehmern im Kalender, Einladung, Vorbereitung, „geführt“ mit Bericht, Prüfpunkt QMB
 - 0.52.0 — Schlüsselwörter (Bauplan 48): Vorschlagszeile im „Neuer Bericht“, Zielformular nach dem Speichern mit Verweis, Einstellungsfenster mit Probefeld
 - 0.53.0 — Rechtschreibprüfung (Bauplan 49): Windows-Prüfung mit Wellenlinie und Vorschlägen, eigene Wörter und Fachwörterbuch, Autokorrektur wahlweise
+- 0.54.0 — Abwesenheit in der Dokumentation (Bauplan 50): Zeile über der Liste, Balken, Beginn/Ende-Einträge, Hinweis im Bericht, leise Namen
 
 ## Offene Punkte
 
+- 14.11.2026 (0.54.0): Maßnahmen-Checkliste und Zeitauswertung kennzeichnen Abwesenheitstage noch nicht (Bauplan 50, Folgen).
 - 14.11.2026 (0.50.0): Aufbewahrungsfrist des Archivs mit Träger und Datenschutz klären (in `docs/betrieb.md`, Liste der Freigaben); bis dahin bleibt sie leer und es wird nichts gelöscht.
 - 09.11.2026 (0.41.1), **Restrisiko Betrieb:** Die DokuLine-Benutzer müssen die Datenbankdatei lesen und schreiben
   können; wer am Server angemeldet ist, könnte sie an DokuLine vorbei öffnen. Gegenmaßnahmen außerhalb des Programms
@@ -1710,6 +1714,10 @@ Neu in 0.53.0: **Rechtschreibprüfung** (Bauplan 49) mit der Rechtschreibprüfun
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.54.0): Die Quellen bleiben, wo sie sind (Ausgangsliste, Heimfahrt im Kalender, Fahrten, Statusmeldung „in der Klinik seit …“); DokuLine fragt sie der Reihe nach ab, statt alles in die Ausgangsliste zu kopieren – so gibt es keine doppelte Pflege. Ein Zusammenführen in einer Quelle bleibt möglich, wenn Tobi das wünscht.
+- 14.11.2026 (0.54.0): Balken über Zeiträume gibt es für Heimfahrten aus dem Kalender (die haben Beginn und Ende); Abwesenheiten aus der Ausgangsliste stehen als Einträge „abwesend ab …“ und „zurück am …“ in der Liste, weil dort kein Ende im Voraus bekannt ist.
+- 14.11.2026 (0.54.0): „Rückkehrbericht schreiben …“ ist nicht als eigener Knopf gebaut: Der Eintrag „zurück am …“ steht in der Dokumentation, „Neuer Bericht …“ ist dort einen Klick entfernt.
+- 14.11.2026 (0.54.0): Folgen: Die Marke „seit n Wochen kein Bericht“ entfällt in der Akte, solange der Bewohner abwesend ist; die Medikamentenausgabe zeigt Abwesende schon seit 0.46.0. Maßnahmen-Checkliste und Zeitauswertung kennzeichnen Abwesenheitstage noch nicht (offener Punkt).
 - 14.11.2026 (0.53.0): Die eigenen Wörter (Namen, Medikamente, Fachwörter) werden in DokuLine herausgefiltert statt an Windows übergeben – so landet kein Personenname in einer Datei oder Sitzung von Windows; „Ignorieren“ gilt ebenfalls nur in DokuLine.
 - 14.11.2026 (0.53.0): Die Wellenlinie zeichnet DokuLine über das normale Textfeld (kein Austausch gegen ein anderes Steuerelement); geprüft wird 0,4 Sekunden nach dem letzten Tippen. Grammatik und Stil prüft das Programm nicht (dafür bräuchte es LanguageTool – nicht erlaubte Lizenz – oder KI).
 - 14.11.2026 (0.53.0): Die Anbindung an Windows (`ISpellChecker`) folgt der Schnittstelle aus `spellcheck.h`; ob sie auf einem Rechner läuft, prüft ein Oberflächentest mit Englisch. Hier unter Linux nicht ausführbar – ungetestet bis zum Windows-Test.
@@ -2709,6 +2717,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.54.0: Ausgangsliste: einen Bewohner auf „Abwesenheit“ (z. B. Klinik) setzen → Dokumentation: Zeile „abwesend: …“ über der Liste, Eintrag „abwesend ab …“, Name in der Leiste leiser; „Neuer Bericht“ zeigt oben den Hinweis. Abwesenheit aufheben → Eintrag „zurück am …“. Kalender: Heimfahrt über drei Tage anlegen → in der Dokumentation (30 Tage) ein grauer Balken über diese Tage.
 
 Version 0.53.0: „Neuer Bericht“: „Herr Ahorn wra ruhig“ tippen → „wra“ rot unterschlängelt, „Ahorn“ nicht; Rechtsklick auf „wra“ → Vorschläge, „Ignorieren“, „Zum Fachwörterbuch hinzufügen“. Unter dem Text „1 Wort unbekannt“. Medikamentennamen und Fachwörter wie „Bezugspflege“ bleiben ohne Linie. Einstellungen → „Rechtschreibung“: Stand (verfügbar/nicht), „Fachwörter …“, Autokorrektur einschalten → „udn “ wird zu „und “. Ohne deutsches Sprachpaket: Hinweis in den Einstellungen.
 

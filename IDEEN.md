@@ -2702,7 +2702,7 @@ Umfang (Vorschlag):
   angestrichen, echte Tippfehler schon.
 
 ## Abwesenheit in der Dokumentation sichtbar machen
-Status: freigegeben (Bauplan Schritt 50; OK Tobi 13.11.2026: „Abwesenheitshinweise sind wichtig, das passt so“)
+Status: erledigt (14.11.2026, 0.54.0; Bauplan Schritt 50)
 Datum: 13.11.2026
 Was: Ist ein Bewohner abwesend (Klinik, Heimfahrt, Urlaub, unterwegs), sieht man das in der
 Dokumentation, und Lücken in den Berichten sind erklärt.

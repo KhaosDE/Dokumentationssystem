@@ -27,6 +27,12 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     public VorschlagLeiste Vorschlaege { get; }
     // Rechtschreibung (Bauplan 49): leiser Hinweis „2 Wörter unbekannt“ – kein Zwang beim Speichern.
     public Unterstreichung InhaltPruefung { get; }
+    // Bauplan 50: „Bewohner ist abwesend (…)“ oben, damit klar ist, worüber geschrieben wird.
+    public Label AbwesendHinweis { get; } = new()
+    {
+        AutoSize = true, MaximumSize = new Size(580, 0), ForeColor = Stil.Abwesend.Text, BackColor = Stil.Abwesend.Flaeche,
+        Padding = new Padding(Stil.AbstandKlein), Visible = false, UseMnemonic = false
+    };
     public Label RechtschreibHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, Visible = false, UseMnemonic = false };
     public IReadOnlyList<Vorschlag> Folgeschritte => Vorschlaege.Vorgemerkt;
     public bool AngebotGefragt => Art.SelectedItem as string == DokuRegeln.ArtTherapie;
@@ -96,6 +102,9 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         BewohnerWahl.SelectedIndex = auswahl.Count == 1 ? 0 : -1;
         BewohnerWahl.Enabled = fest is null;
         Zeile("Bewohner", BewohnerWahl);
+        Zeile(null, AbwesendHinweis);
+        BewohnerWahl.SelectedIndexChanged += (_, _) => AbwesendZeigen();
+        AbwesendZeigen();
 
         var jetzt = Jetzt();
         Datum.Text = Kern.Datum.Text(DateOnly.FromDateTime(jetzt));
@@ -239,6 +248,13 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
             ? TherapieRegeln.BerichtText((string)AngebotWahl.SelectedItem!, text) : text;
 
     public void BewohnerWaehlen(long id) => BewohnerWahl.SelectedIndex = auswahl.FindIndex(b => b.Id == id);
+
+    private void AbwesendZeigen()
+    {
+        string? grund = BewohnerWahl.SelectedIndex >= 0 ? AbwesenheitAnzeige.Text(speicher, auswahl[BewohnerWahl.SelectedIndex], Jetzt()) : null;
+        AbwesendHinweis.Text = grund is null ? "" : AbwesenheitRegeln.FormularText(grund);
+        AbwesendHinweis.Visible = grund is not null;
+    }
 
     // ----- Entwurf -----
 

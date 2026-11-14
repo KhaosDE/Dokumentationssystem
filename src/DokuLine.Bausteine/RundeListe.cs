@@ -14,6 +14,9 @@ public sealed class RundeListe : ListBox
 {
     private int zuletzt = -1;
 
+    // Einträge in leiserer Schrift (z. B. abwesende Bewohner, Bauplan 50) – ohne Marke, nur die Farbe.
+    public HashSet<int> Leise { get; } = [];
+
     public RundeListe()
     {
         DrawMode = DrawMode.OwnerDrawFixed;
@@ -67,7 +70,7 @@ public sealed class RundeListe : ListBox
         }
         var text = Rectangle.FromLTRB(e.Bounds.Left + innen, e.Bounds.Top, e.Bounds.Right - innen, e.Bounds.Bottom);
         TextRenderer.DrawText(g, GetItemText(Items[e.Index]), gewaehlt ? Stil.Fett : Font, text,
-            gewaehlt ? Stil.Akzent : Stil.TextNormal,
+            gewaehlt ? Stil.Akzent : Leise.Contains(e.Index) ? Stil.TextLeise : Stil.TextNormal,
             TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
     }
 }

@@ -50,6 +50,7 @@ Fenster → Kern → Speicher → SQLite-Datei im Datenordner (`%APPDATA%\DokuLi
 | Hilfeplangespräche | `Hilfeplan.cs`, `SpeicherHilfeplan.cs` | `HilfeplanSeite.cs` (Zeile im Reiter „Kostenträger“: `AngabenAnsicht.cs`) |
 | Schlüsselwörter | `Schluesselwoerter.cs`, `SpeicherSchluesselwoerter.cs` | `VorschlagLeiste.cs`, `SchluesselwoerterFenster.cs`, Folgeschritte in `BewohnerBereich.cs` |
 | Rechtschreibung | `Rechtschreibung.cs`, `SpeicherRechtschreibung.cs` | `Rechtschreibpruefung.cs` (Windows-Prüfung, Wellenlinie, Rechtsklick), `FachwoerterFenster.cs` |
+| Abwesenheit in der Dokumentation | `Abwesenheit.cs`, `SpeicherKalender.cs` (Zeiträume), Ausgangsliste `Datenbank.cs` (Beginn/Ende) | `AbwesenheitAnzeige.cs`, `DokumentationAnsicht.cs` (Zeile, Balken) |
 | Visiten | `Visiten.cs`, `VisitenEntwurf.cs` | `VisitenSeite.cs`, `VisitenRundgang.cs` |
 | Therapie, Tagesplan | `Therapie.cs`, `Tagesplan.cs`, `LaufendeTherapien.cs` | `TherapieSeite.cs`, `TagesplanSeite.cs`, `LaufendeTherapienAnsicht.cs` |
 | Kalender, .ics | `Kalender.cs`, `Ics.cs` | `KalenderSeite.cs` |

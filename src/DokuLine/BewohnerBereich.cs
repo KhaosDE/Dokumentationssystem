@@ -227,6 +227,13 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
                 Namen.BeginUpdate();
                 Namen.Items.Clear();
                 foreach (var b in Zeilen) Namen.Items.Add($"{b.Nachname}, {b.Vorname}");
+                // Abwesende in leiserer Schrift (ohne Marken in der Leiste, Vorgabe Tobi 09.11.2026).
+                if (Namen is RundeListe runde)
+                {
+                    runde.Leise.Clear();
+                    var jetzt = DateTime.Now;
+                    for (int i = 0; i < Zeilen.Count; i++) if (AbwesenheitAnzeige.Text(speicher, Zeilen[i], jetzt) is not null) runde.Leise.Add(i);
+                }
                 Namen.EndUpdate();
             }
             int index = eintraege.FindIndex(b => b is not null && b.Id == vorher);
