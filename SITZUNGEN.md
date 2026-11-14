@@ -138,3 +138,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 13.11.2026 — Schritt 51 freigegeben: Medikamentenbestellung an die heimversorgende Apotheke per E-Mail, Bestandsführung als zuschaltbare Option (Chat „Programme/Apps“).
 - 13.11.2026 — Schritt 52 freigegeben: HEB-Fälligkeit vermerken, Erinnerung 8 und 4 Wochen vorher, Liste „HEB-Fristen“ (Chat „Programme/Apps“).
 - 14.11.2026 — Alle offenen Vorschläge freigegeben: Schritte 39–49 (Maßnahmen, Arbeitscheckliste, Zeitauswertung, Medikamentenausgabe, Ziele, QMB, Küchendienst, Archiv, Hilfeplangespräche, Schlüsselwörter, Rechtschreibprüfung) (Chat „Programme/Apps“).
+- 14.11.2026 — Claude Code: 0.42.0 Wohnbereich als Auswahlliste in der Seitenleiste über „Übersicht“ (Bauplan 38).

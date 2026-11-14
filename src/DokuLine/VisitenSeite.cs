@@ -69,7 +69,7 @@ public sealed class VisitenSeite : Panel, IBereichSeite
 
     private static Label Beschriftung(string text) => new() { Text = text, AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite };
 
-    // Visiten gehören zu einem Wohnbereich: dem in der Übersicht gewählten.
+    // Visiten gehören zu einem Wohnbereich: dem in der Seitenleiste gewählten.
     private static string Bereich => Arbeitsbereich.Gewaehlt.Length > 0 ? Arbeitsbereich.Gewaehlt : Einstellungen.Laden().Bereich;
     public const string WohnbereichWaehlenText = "Bitte zuerst in der Übersicht einen Wohnbereich wählen.";
     private string? OhneWohnbereich => speicher.AlleBewohner().Any(b => b.Wohnbereich == Bereich) ? null : WohnbereichWaehlenText;

@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 09.11.2026. Version: **0.41.1** (Korrekturen aus der abschließenden Fehlersuche).
+Stand: 14.11.2026. Version: **0.42.0** (Bauplan Schritt 38: Wohnbereich als Auswahlliste in der Seitenleiste).
 
 ## Aktuell
 
@@ -428,10 +428,14 @@ am Code nachgeprüft):
   Meldebogen und Überleitung ins Zugriffsprotokoll; Aktenübernahme ordnet „Ahorn, Berta“ nicht Anton Ahorn zu;
   gleichzeitiges Speichern bei Vitalwerten und Abgängigkeit; Haus beim Ändern eines Kalendertermins.
 
-**Nächster Schritt:** keiner offen – neue Aufträge kommen über `IDEEN.md`. Vor echtem Einsatz: Freigaben und
-Betriebsprobe (`docs/betrieb.md`, Abschnitt 10).
+Neu in 0.42.0: Der **Wohnbereich** wird in der **Seitenleiste** gewählt: über „Übersicht“ steht „Wohnbereich“ mit einer
+Auswahlliste der Bereiche, für die man zuständig ist (je nach Recht R1–R3, „Therapie“, „Alle“) – in jeder Ansicht,
+nicht nur in der Übersicht. Mit nur einem Bereich steht der Name ohne Auswahl da; bei eingeklapptem Menü ein Knopf mit
+dem Kürzel („R2“), ein Klick öffnet die Liste. Beim Wechsel bleibt man in derselben Ansicht. Die Umschaltknöpfe oben in
+der Übersicht und auf der Seite „Therapie“ entfallen; alles Übrige aus 0.33.7 bleibt (gilt überall, Kopfzeile, Marke
+„eingesprungen“, Rücksetzen beim Abmelden).
 
-**Danach:** Der Bauplan ab 07.11.2026 ist abgearbeitet; neue Aufträge kommen über `IDEEN.md`.
+**Nächster Schritt:** Bauplan Schritt 39 (Maßnahmen je Bewohner mit Zeitwert, 0.43.0); danach 40–52 der Reihe nach.
 
 ## Fertig
 
@@ -1532,6 +1536,7 @@ Betriebsprobe (`docs/betrieb.md`, Abschnitt 10).
   neue Tests dazu (Kern 435). Schutz gegen hängende Tests: jeder Oberflächentest höchstens 3 Minuten, einzelne Tests
   10 Minuten (`--blame-hang-timeout`), der Windows-Job 45 Minuten (ein offener Dialog im Test „Akte übernehmen“ hatte
   einen Lauf über eine halbe Stunde aufgehalten).
+- 0.42.0 — Bauplan Schritt 38: `BereichsAuswahl` in der Seitenleiste (Auswahlliste, eingeklappt Kürzel mit Menü), `BereichswahlRegeln.Kuerzel`; `BereichUmschalter` entfernt.
 
 ## Offene Punkte
 
@@ -1635,6 +1640,9 @@ Betriebsprobe (`docs/betrieb.md`, Abschnitt 10).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.42.0): Die Marke „eingesprungen“ steht nur noch in der Kopfzeile (wie bisher dort), nicht zusätzlich in der
+  Seitenleiste – sie wäre dort doppelt und nähme im eingeklappten Menü Platz. Längere Bereichsnamen zeigt das eingeklappte
+  Menü mit den ersten drei Buchstaben, der volle Name steht im Menü und für Bildschirmleser im Knopf.
 - 09.11.2026 (0.41.1): Aus den Sitzungen wird nicht gesichert (ersetzt „oder nächster Start“ aus 0.41.0): Die Benutzer
   sollen die Sicherungen nicht ändern können, also dürfen sie nicht in den Sicherungsordner schreiben. Die Sicherung läuft
   mit einem eigenen Konto statt als SYSTEM, weil sie die Datenbank liest, die alle Benutzer ändern dürfen; das Einspielen
@@ -2556,6 +2564,11 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.42.0: Seitenleiste: über „Übersicht“ steht „Wohnbereich“ mit Auswahlliste. Als Bereichsleitung (EF) R1 · R2 · R3;
+R2 wählen → man bleibt in der Ansicht, alle Listen zeigen R2, in der Kopfzeile „eingesprungen“. In die Dokumentation
+wechseln: Auswahl bleibt sichtbar und änderbar. Menü einklappen → Knopf „R2“, Klick öffnet die Liste. Oben in der
+Übersicht gibt es keine Umschaltknöpfe mehr. „Therapie“ wählen → laufende Therapien; zurück auf R1.
 
 Version 0.41.1: Akte → „Dokumente“ → eine `.exe` oder `.lnk` hinzufügen → wird abgelehnt. Kostenträger mit einer
 abgelaufenen und einer späteren Bewilligung → Marke „Kostenzusage: heute keine geltende (nächste ab …)“. Einstellungen →

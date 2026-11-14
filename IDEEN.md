@@ -2344,7 +2344,7 @@ Umfang (in mehreren kleinen Pull Requests, jeder mit grünen Tests):
 - Kann mit Schritt 29m (schnellerer Wechsel) zusammen geplant werden, aber getrennte Pull Requests.
 
 ## Wohnbereich als Auswahlliste in der Seitenleiste (über „Übersicht“)
-Status: freigegeben (Bauplan Schritt 38; Korrektur Tobi 10.11.2026)
+Status: erledigt (14.11.2026, 0.42.0; Bauplan Schritt 38)
 Datum: 10.11.2026
 Was: Die Wahl des Wohnbereichs zieht von der Seite „Übersicht“ in die Seitenleiste des Programms:
 eine Auswahlliste (Dropdown) direkt über dem Eintrag „Übersicht“.

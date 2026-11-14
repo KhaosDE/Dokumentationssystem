@@ -58,6 +58,8 @@ public sealed class BereichswahlTests : IDisposable
         Assert.True(BereichswahlRegeln.Eingesprungen("R2", "R1"));
         Assert.False(BereichswahlRegeln.Eingesprungen("R1", "R1"));
         Assert.False(BereichswahlRegeln.Eingesprungen(BereichswahlRegeln.Alle, "R1"));
+        // Eingeklappte Seitenleiste: kurze Namen ganz, längere gekürzt.
+        Assert.Equal(["R2", "Alle", "The", "Nor"], new[] { "R2", BereichswahlRegeln.Alle, "Therapie", "Nordflügel" }.Select(BereichswahlRegeln.Kuerzel));
     }
 
     [Fact]

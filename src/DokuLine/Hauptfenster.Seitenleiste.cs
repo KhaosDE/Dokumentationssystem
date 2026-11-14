@@ -64,6 +64,7 @@ public sealed partial class Hauptfenster
             hinweis.SetToolTip(eintrag, eingeklappt ? eintrag.Text : null);
         }
         AbmeldenEintrag.Eingeklappt = eingeklappt;
+        BereichsWahl.Eingeklappt = eingeklappt;
         programmName.Visible = LeittextAnzeige.Visible = Arbeitsplatz.Visible = VersionText.Visible = !eingeklappt;
         InfoSymbol.Visible = eingeklappt;
         InfoAktualisieren();
@@ -90,6 +91,8 @@ public sealed partial class Hauptfenster
         programmName.Location = new Point(MenueKnopf.Right + S(Stil.AbstandKlein), y + Math.Max(0, (S(36) - namensblock) / 2));
         LeittextAnzeige.Location = new Point(programmName.Left, programmName.Bottom);
         y = MenueKnopf.Bottom + S(Stil.AbstandGross);
+        BereichsWahl.Bounds = new Rectangle(x, y, breite, BereichsWahl.Hoehe(S(36)));
+        y = BereichsWahl.Bottom + S(Stil.AbstandMittel);
         foreach (var eintrag in Navigation.Where(e => e.Text != "Einstellungen" && !Ausgeblendet(e.Text)).OrderBy(e => Rang(e.Text)))
         {
             eintrag.Bounds = new Rectangle(x, y, breite, S(36));
