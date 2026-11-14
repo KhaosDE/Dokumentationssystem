@@ -3,7 +3,7 @@ namespace DokuLine.Kern;
 // Qualitätsmanagement (Bauplan 44): Prüfliste je Bewohner mit festen Prüfpunkten, Kennzahlen je Wohnbereich, Prüfvermerk
 // und Hinweis an den Wohnbereich. Geprüft werden die Unterlagen der Bewohner, nie einzelne Mitarbeiter: nichts wird nach
 // Kürzel ausgewertet (Liste der Freigaben, docs/betrieb.md).
-public enum Pruefpunkt { Leitziel, Nahziele, NahzielMassnahme, ZielUeberpruefung, MassnahmenBestaetigt, Lebensbereiche, Reflexion, Heb, Sicherheit }
+public enum Pruefpunkt { Leitziel, Nahziele, NahzielMassnahme, ZielUeberpruefung, MassnahmenBestaetigt, Lebensbereiche, Reflexion, Heb, Hilfeplan, Sicherheit }
 
 public sealed record PruefErgebnis(Pruefpunkt Punkt, bool Ok, string Text);
 
@@ -15,7 +15,7 @@ public sealed record QmHinweis(long Id, long BewohnerId, long AufgabeId, string 
 // Was die Prüfung eines Bewohners braucht (aus dem Speicher gelesen).
 public sealed record PruefDaten(Bewohner Bewohner, IReadOnlyList<Ziel> Ziele, ZielVerzicht? Verzicht, IReadOnlyList<Massnahme> Massnahmen,
     IReadOnlyList<MassnahmeBestaetigung> Bestaetigungen, IReadOnlyList<Bericht> Berichte, Reflexion LetzteReflexion, string? HebFaellig,
-    IReadOnlyDictionary<Angabe, AngabeFassung> Angaben);
+    IReadOnlyDictionary<Angabe, AngabeFassung> Angaben, HilfeplanStand? Hilfeplan = null);
 
 public sealed record PruefZeile(Bewohner Bewohner, IReadOnlyList<PruefErgebnis> Ergebnisse, Pruefvermerk? Vermerk, QmHinweis? Hinweis)
 {
@@ -47,6 +47,7 @@ public static class QualitaetRegeln
         Pruefpunkt.Lebensbereiche => "Berichte je Lebensbereich",
         Pruefpunkt.Reflexion => "Reflexion aktuell",
         Pruefpunkt.Heb => "HEB aktuell",
+        Pruefpunkt.Hilfeplan => "Hilfeplangespräch nicht überfällig",
         _ => "Sicherheitsangaben erfasst",
     };
 
@@ -60,6 +61,7 @@ public static class QualitaetRegeln
         Pruefpunkt.Lebensbereiche => "Lebensbereiche",
         Pruefpunkt.Reflexion => "Reflexion",
         Pruefpunkt.Heb => "HEB",
+        Pruefpunkt.Hilfeplan => "Hilfeplan",
         _ => "Sicherheit",
     };
 
@@ -109,6 +111,8 @@ public static class QualitaetRegeln
         Punkt(Pruefpunkt.Reflexion, spaeterAufgenommen || d.LetzteReflexion.Fertig ? null
             : $"{ReflexionRegeln.MonatText(monat)}: {ReflexionRegeln.StatusText(d.LetzteReflexion)}");
         Punkt(Pruefpunkt.Heb, d.HebFaellig);
+        Punkt(Pruefpunkt.Hilfeplan, d.Hilfeplan is { Stand: not HilfeplanStandArt.TerminVergeben, FaelligBis: DateOnly hpg } && hpg < heute
+            ? $"überfällig seit {Datum.Text(hpg)}" : null);
 
         var fehlt = new List<string>();
         if (d.Bewohner.Allergie == AllergieZustand.NichtErfasst) fehlt.Add("Allergien");

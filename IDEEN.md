@@ -2594,7 +2594,7 @@ Umfang (Vorschlag):
 - Demo: einige ausgedachte ehemalige Bewohner, einer mit abgelaufener Frist.
 
 ## Hilfeplangespräche: Termine planen und vergeben
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.51.0; Bauplan Schritt 47)
 Datum: 12.11.2026
 Was: Eine Übersicht, für welchen Bewohner wann ein Hilfeplangespräch fällig ist, mit Vergabe des
 Termins und Einladung der Beteiligten.

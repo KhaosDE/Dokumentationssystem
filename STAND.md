@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.50.0** (Archiv für ehemalige Bewohner).
+Stand: 14.11.2026. Version: **0.51.0** (Hilfeplangespräche planen und vergeben).
 
 ## Aktuell
 
@@ -487,7 +487,9 @@ Neu in 0.49.0: **Küchendienst im Tagesplan** (Bauplan 45). Oben im Tagesplan di
 
 Neu in 0.50.0: **Archiv für ehemalige Bewohner** (Bauplan 46). In der Akte **„Entlassen …“** (Datum, Grund: Auszug, Verlegung, verstorben, Sonstiges): Offene Aufgaben, laufende Maßnahmen und Therapien enden (Liste zum Bestätigen), das Bett wird frei, die Akte verschwindet aus Übersicht, Dokumentation, Listen und Zählern. Neue Seite **„Archiv“** (Recht „Archiv einsehen“): Name, Bereich, Zimmer, Aufenthalt, Grund, **Aufbewahrung bis**; Suche, „nur Aufbewahrung abgelaufen“. **Akte nur lesend** (Stammdaten mit Aufenthalten, Berichte, Ziele und Maßnahmen, Medikamentenplan, Reflexion und HEB, Dokumente) mit Drucken; Öffnen und Drucken im Zugriffsprotokoll. **„Wieder aufnehmen …“** mit freiem Bett; der alte Aufenthalt bleibt. **Aufbewahrungsfrist** in den Einstellungen, **ohne Vorgabe** (leer = nicht festgelegt). Nach Ablauf **Löschen nur zu zweit** (Freigabe und Löschen durch verschiedene Personen mit Recht „Archiv löschen“) mit Löschprotokoll ohne Inhalte. Demo: drei ehemalige Bewohner, einer mit abgelaufener Frist (Demo-Frist 10 Jahre, ausgedacht).
 
-**Nächster Schritt:** Bauplan Schritt 47 (Hilfeplangespräche: Termine planen und vergeben).
+Neu in 0.51.0: **Hilfeplangespräche** (Bauplan 47). Neue Seite **„Hilfeplangespräche“** (nach „Kalender“): Bewohner des Bereichs nach Fälligkeit, Marke „fällig in n Wochen“ bzw. „überfällig“. **„Termin vergeben …“**: Zeit, Ort, Teilnehmer aus der Akte (Bewohner, Bezugspflege, Betreuer, Forensik/FOSA, Sachbearbeiter des Kostenträgers, Angehörige nur mit wirksamer Entbindung), weitere frei; der Termin steht im Kalender, Wochen- und Tagesplan; Warnung bei Überschneidung. **„Einladen …“**: E-Mail-Programm (Betreuer, Kostenträger) mit Text ohne Gesundheitsangaben und `.ics`-Datei. **„Vorbereitung …“** erzeugt Aufgaben für den Bereich. **„Geführt …“**: Ergebnis als Bericht der neuen Art „Hilfeplangespräch“, nächste Fälligkeit. Im Reiter „Kostenträger“ die Zeile „Hilfeplangespräch: letztes · nächstes fällig bis (Vorschlag aus der Bewilligung) · Stand“. Die Prüfseite des QMB hat den Prüfpunkt „Hilfeplangespräch nicht überfällig“.
+
+**Nächster Schritt:** Bauplan Schritt 48 (Schlüsselwörter bieten den nächsten Arbeitsschritt an).
 
 ## Fertig
 
@@ -1597,6 +1599,7 @@ Neu in 0.50.0: **Archiv für ehemalige Bewohner** (Bauplan 46). In der Akte **�
 - 0.48.0 — Qualitätsmanagement (Bauplan 44): Position QMB, Seite „Qualität“ mit Kennzahlen, Prüfliste, Hinweis als Aufgabe, Prüfvermerk, Nachweis; Bereichswahl „QM“
 - 0.49.0 — Küchendienst im Tagesplan (Bauplan 45): Zeile oben mit Tausch und „unbesetzt“, bestätigen, Marke beim Bewohner
 - 0.50.0 — Archiv (Bauplan 46): Entlassen mit Folgen, Seite „Archiv“, Akte nur lesend, Wiederaufnahme, Frist ohne Vorgabe, Löschen zu zweit mit Protokoll
+- 0.51.0 — Hilfeplangespräche (Bauplan 47): Seite nach Fälligkeit, Termin mit Teilnehmern im Kalender, Einladung, Vorbereitung, „geführt“ mit Bericht, Prüfpunkt QMB
 
 ## Offene Punkte
 
@@ -1701,6 +1704,11 @@ Neu in 0.50.0: **Archiv für ehemalige Bewohner** (Bauplan 46). In der Akte **�
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.51.0): Vorschlag für „fällig bis“: das Ende der jüngsten Bewilligung im Reiter „Kostenträger“; eine eingetragene Fälligkeit geht vor. „Geführt“ ohne neue Fälligkeit zeigt „geführt“ ohne Marke.
+- 14.11.2026 (0.51.0): Der Termin ist ein Kalendereintrag des Bewohners (Art „Termin“, Dauer 60 Minuten) – so erscheint er ohne Zusatz im Wochen- und Tagesplan. Überschneidungen werden mit den Terminen der Woche des Bewohners geprüft (Therapie, Kalender, Regelwoche); Fahrzeuge braucht ein Gespräch im Haus nicht.
+- 14.11.2026 (0.51.0): Die Einladung geht an Betreuer und Kostenträger, soweit eine gültige E-Mail-Adresse eingetragen ist; Text: Anlass, Name, Zeit, Ort – keine Gesundheitsangaben. Die `.ics`-Datei wird gespeichert und von Hand angehängt (mailto kann keine Anhänge).
+- 14.11.2026 (0.51.0): Das Protokoll des Gesprächs legt man wie andere Unterlagen im Reiter „Dokumente“ ab; eine eigene Ablage dafür gibt es nicht.
+- 14.11.2026 (0.51.0): Rechte: wie „Bewohner bearbeiten“ (Termin, Fälligkeit, geführt); der QMB sieht die Fälligkeit über seine Prüfseite.
 - 14.11.2026 (0.50.0): Archiviert ist, wessen letzter Aufenthalt entlassen und nicht wieder aufgenommen ist (Datenbank-Sicht `archiviert`). `AlleBewohner()` lässt diese weg – so verschwinden sie aus allen Listen, Zählern und der Belegung, ohne jede Stelle einzeln anzupassen. `Bewohner(id)` liest sie weiter (Archiv, Protokolle).
 - 14.11.2026 (0.50.0): Beim Entlassen enden offene Aufgaben (begründet geschlossen „Entlassung“), laufende Maßnahmen und Therapie-Teilnahmen in einem Zug mit dem Archiveintrag (alles oder nichts), ohne die Einzelrechte dieser Bereiche – wer entlassen darf („Bewohner bearbeiten“), beendet das Dazugehörige mit.
 - 14.11.2026 (0.50.0): Die nur-lesende Akte zeigt die Teile als Text (je Reiter) und die Dokumente als Liste (Doppelklick öffnet); die Bearbeitungs-Reiter der lebenden Akte werden nicht wiederverwendet, damit dort nichts versehentlich änderbar ist.
@@ -2684,6 +2692,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.51.0: Seite „Hilfeplangespräche“ (Bereich R1): Liste nach Fälligkeit, überfällige orange. Bewohner wählen → „Termin vergeben …“ (TT.MM.JJJJ SS:MM, Ort, Teilnehmer ankreuzen) → im Tagesplan des Tages und im Kalender sichtbar. „Einladen …“ → .ics speichern, E-Mail-Programm öffnet sich. „Vorbereitung …“ → Aufgaben für den Bereich. „Geführt …“ → Bericht „Hilfeplangespräch“ in der Dokumentation. Akte → Reiter „Kostenträger“: Zeile „Hilfeplangespräch“. Seite „Qualität“: Spalte „Hilfeplan“.
 
 Version 0.50.0: Als EF: Akte eines Bewohners → „Entlassen …“ → Liste „Das endet“ prüfen → Entlassen → Bewohner fehlt in Übersicht und Dokumentation. Seite „Archiv“: vier Einträge, Suche, „Akte ansehen …“ (nur lesen, Reiter, Drucken), „Wieder aufnehmen …“ mit Bett. Als TST: „nur Aufbewahrung abgelaufen“ → „Löschen freigeben“; als RS anmelden → „Endgültig löschen …“ → „Löschprotokoll …“. Einstellungen → „Archiv: Aufbewahrungsfrist“ leeren → Archiv zeigt den Hinweis „nicht festgelegt“.
 

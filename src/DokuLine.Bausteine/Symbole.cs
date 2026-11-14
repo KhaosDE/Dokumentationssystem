@@ -44,6 +44,7 @@ public static class Symbole
         "Auswertung" => Auswertung,
         "Qualität" => Qualitaet,
         "Archiv" => Archiv,
+        "Hilfeplangespräche" => Kalender,
         "Medikamentenausgabe" => Medikamente,
         _ => Modul,
     };

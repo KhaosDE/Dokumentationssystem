@@ -37,12 +37,12 @@ public static class DokuRegeln
     public const string ArtAlltag = "Alltag", ArtVisite = "Visite", ArtMedikation = "Medikation", ArtTherapie = "Therapie",
         ArtAbgaengigkeit = "Ausgang/Abgängigkeit", ArtMassnahme = MassnahmenRegeln.ArtBericht;
 
-    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie, ArtAbgaengigkeit, ArtMassnahme];
+    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie, ArtAbgaengigkeit, ArtMassnahme, HilfeplanRegeln.ArtBericht];
 
     public static readonly string[] Berichtsarten =
     [
         ArtAlltag, "Krise", "Arztkontakt", ArtVisite, ArtMedikation, "Konflikt", ArtAbgaengigkeit,
-        "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis", ArtTherapie, ArtMassnahme,
+        "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis", ArtTherapie, ArtMassnahme, HilfeplanRegeln.ArtBericht,
     ];
 
     public static string ZeitraumText(Zeitraum z) => z switch

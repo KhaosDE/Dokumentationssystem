@@ -17,12 +17,15 @@ public sealed partial class Speicher
         var bestaetigungen = MassnahmeBestaetigungen(null, heute.AddDays(-tage), heute).ToLookup(b => b.BewohnerId);
         var vonBerichte = new[] { heute.AddDays(-7 * w.KeinBerichtWochen - 1), MassnahmenRegeln.QuartalBeginn(heute) }.Min();
         var liste = new List<PruefDaten>();
-        foreach (var b in bewohner)
+        var bewohnerListe = bewohner.ToList();
+        var hilfeplaene = Hilfeplaene(bewohnerListe, heute).ToDictionary(h => h.Bewohner.Id!.Value);
+        foreach (var b in bewohnerListe)
         {
             long id = b.Id!.Value;
             var berichte = Berichte(id, new BerichtFilter(vonBerichte, heute)).Where(x => x.Art != MassnahmenRegeln.ArtBericht).ToList();
             liste.Add(new PruefDaten(b, [.. ziele[id]], verzichte.GetValueOrDefault(id), [.. massnahmen[id]], [.. bestaetigungen[id]], berichte,
-                Reflexion(id, ReflexionRegeln.Vorschlag(heute)), HebRegeln.Faellig(b, HebBoegen(id), heute, w.HebFristMonate), Angaben(id, heute)));
+                Reflexion(id, ReflexionRegeln.Vorschlag(heute)), HebRegeln.Faellig(b, HebBoegen(id), heute, w.HebFristMonate), Angaben(id, heute),
+                hilfeplaene.GetValueOrDefault(id)));
         }
         return liste;
     }

@@ -1197,6 +1197,22 @@ public sealed partial class Speicher : IDisposable
             WHERE a.id = (SELECT MAX(x.id) FROM archiv x WHERE x.bewohner_id = a.bewohner_id)
               AND NOT EXISTS (SELECT 1 FROM archiv_wiederaufnahmen w WHERE w.archiv_id = a.id);
         """,
+        // 47 – Hilfeplangespräche: Fälligkeit, Termin (Kalender) und „geführt“ als Ereignisse; Berichtsart „Hilfeplangespräch“.
+        """
+        CREATE TABLE IF NOT EXISTS hilfeplan (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('faellig', 'termin', 'gefuehrt')),
+            datum       TEXT NOT NULL,
+            kalender_id INTEGER REFERENCES kalender(id) ON DELETE SET NULL,
+            teilnehmer  TEXT NOT NULL DEFAULT '',
+            bericht_id  INTEGER REFERENCES berichte(id) ON DELETE SET NULL,
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        INSERT INTO berichtsarten (name, nr) SELECT 'Hilfeplangespräch', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
+            WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Hilfeplangespräch');
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1374,10 +1390,10 @@ public sealed partial class Speicher : IDisposable
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
              akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
              vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null, ausgabe = Meta(DemoAusgabe) is null,
-             ziele = Meta(DemoZiele) is null, archiv = Meta(DemoArchiv) is null;
+             ziele = Meta(DemoZiele) is null, archiv = Meta(DemoArchiv) is null, hilfeplan = Meta(DemoHilfeplan) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !archiv && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !archiv && !hilfeplan && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1413,6 +1429,7 @@ public sealed partial class Speicher : IDisposable
         if (status) DemoStatusEinfuegen(transaktion);
         if (bezug || mitarbeiter) DemoBezugEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
+        if (hilfeplan) DemoHilfeplanEinfuegen(transaktion);
         if (archiv) DemoArchivEinfuegen(transaktion);
         transaktion.Commit();
         if (dokumente) AblageAufraeumen();
@@ -1475,6 +1492,7 @@ public sealed partial class Speicher : IDisposable
             DemoStatusEinfuegen(transaktion);
             DemoBezugEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
+            DemoHilfeplanEinfuegen(transaktion);
             DemoArchivEinfuegen(transaktion);   // zuletzt: die ehemaligen Bewohner bekommen keine Demo-Daten der Lebenden
             transaktion.Commit();
         }
