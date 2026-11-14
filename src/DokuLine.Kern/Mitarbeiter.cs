@@ -63,6 +63,7 @@ public static class Funktionen
     public const string Qualitaet = "qualitaet";                       // Prüfseite, Prüfvermerke, Hinweise (Bauplan 44)
     public const string ArchivEinsehen = "archiv_einsehen";            // ehemalige Bewohner, nur lesen (Bauplan 46)
     public const string ArchivLoeschen = "archiv_loeschen";            // nach Ablauf der Frist, nur zu zweit
+    public const string SchluesselwoerterVerwalten = "schluesselwoerter"; // Liste der Schlüsselwörter ändern (Bauplan 48)
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -103,6 +104,7 @@ public static class Funktionen
         (Qualitaet, "Qualität prüfen (Prüfseite, Prüfvermerke, Hinweise)"),
         (ArchivEinsehen, "Archiv einsehen (ehemalige Bewohner, nur lesen)"),
         (ArchivLoeschen, "Archiv löschen (nach Ablauf der Frist, zu zweit)"),
+        (SchluesselwoerterVerwalten, "Schlüsselwörter verwalten"),
         (Zugriffsprotokoll, "Zugriffsprotokoll ansehen"),
         (BetriebVerwalten, "Betrieb verwalten (Sicherung, Update, Häuser)"),
         (AndereHaeuser, "Bereiche anderer Häuser wählen"),
@@ -200,7 +202,7 @@ public static partial class RechteRegeln
         Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
         Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen, Funktionen.Zugriffsprotokoll, Funktionen.BetriebVerwalten, Funktionen.AndereHaeuser,
         Funktionen.MassnahmenBestaetigen, Funktionen.MassnahmenAnlegen, Funktionen.Zeitauswertung, Funktionen.MedikamenteAusgeben, Funktionen.Qualitaet,
-        Funktionen.ArchivEinsehen, Funktionen.ArchivLoeschen];
+        Funktionen.ArchivEinsehen, Funktionen.ArchivLoeschen, Funktionen.SchluesselwoerterVerwalten];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
@@ -213,6 +215,7 @@ public static partial class RechteRegeln
         funktion == Funktionen.MedikamenteAusgeben ? Vorbelegt(position, Funktionen.MedikationBearbeiten) :
         funktion is Funktionen.Zeitauswertung or Funktionen.ArchivEinsehen ? position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" or "Bereichsleitung" :
         funktion == Funktionen.ArchivLoeschen ? position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" :
+        funktion == Funktionen.SchluesselwoerterVerwalten ? position is Administrator or "Geschäftsführung" or "Hausleitung" or "Bereichsleitung" :
         funktion == Funktionen.VitalGrenzen ? position is not ("Therapie" or "Verwaltung") :
         funktion == Funktionen.Zugriffsprotokoll ? position is Administrator or "Geschäftsführung" or "Hausleitung" :
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||

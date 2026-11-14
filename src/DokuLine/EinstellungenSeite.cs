@@ -72,6 +72,7 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public Button ArchivFristKnopf { get; } = Stil.NebenKnopf("Übernehmen");
     public Label ArchivFristMeldung { get; } = new() { AutoSize = true, UseMnemonic = false };
     public Button MassnahmenListenKnopf { get; } = Stil.NebenKnopf("Arten und Vorlagen …");
+    public Button SchluesselwoerterKnopf { get; } = Stil.NebenKnopf("Schlüsselwörter …");
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");

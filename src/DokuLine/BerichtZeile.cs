@@ -72,6 +72,9 @@ public sealed class BerichtZeile : Control
                 AutoSize = false, Font = Stil.Klein, ForeColor = Stil.TextMittel, UseMnemonic = false,
                 Text = $"Nachtrag {BerichtRegeln.ZeitText(n.Erfasst)} · {n.Verfasser}: {n.Text}",
             });
+        // Was aus dem Bericht entstand (Bauplan 48), z. B. „→ Termin 14.11. 10:30“.
+        if (b.Verweis.Length > 0)
+            nachtraege.Add(new Label { AutoSize = false, Font = Stil.Klein, ForeColor = Stil.Akzent, UseMnemonic = false, Text = b.Verweis });
         foreach (var c in new Control[] { Zeit, SchichtWort, Kuerzel, UebergabeZeichen, Mehr }) c.BackColor = flaeche;
         foreach (var l in nachtraege) l.BackColor = flaeche;
         Controls.AddRange([Zeit, SchichtWort, UebergabeZeichen, .. Marken, TextFeld, Mehr, Kuerzel, .. nachtraege]);

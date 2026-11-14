@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.51.0** (Hilfeplangespräche planen und vergeben).
+Stand: 14.11.2026. Version: **0.52.0** (Schlüsselwörter bieten den nächsten Schritt an).
 
 ## Aktuell
 
@@ -489,7 +489,9 @@ Neu in 0.50.0: **Archiv für ehemalige Bewohner** (Bauplan 46). In der Akte **�
 
 Neu in 0.51.0: **Hilfeplangespräche** (Bauplan 47). Neue Seite **„Hilfeplangespräche“** (nach „Kalender“): Bewohner des Bereichs nach Fälligkeit, Marke „fällig in n Wochen“ bzw. „überfällig“. **„Termin vergeben …“**: Zeit, Ort, Teilnehmer aus der Akte (Bewohner, Bezugspflege, Betreuer, Forensik/FOSA, Sachbearbeiter des Kostenträgers, Angehörige nur mit wirksamer Entbindung), weitere frei; der Termin steht im Kalender, Wochen- und Tagesplan; Warnung bei Überschneidung. **„Einladen …“**: E-Mail-Programm (Betreuer, Kostenträger) mit Text ohne Gesundheitsangaben und `.ics`-Datei. **„Vorbereitung …“** erzeugt Aufgaben für den Bereich. **„Geführt …“**: Ergebnis als Bericht der neuen Art „Hilfeplangespräch“, nächste Fälligkeit. Im Reiter „Kostenträger“ die Zeile „Hilfeplangespräch: letztes · nächstes fällig bis (Vorschlag aus der Bewilligung) · Stand“. Die Prüfseite des QMB hat den Prüfpunkt „Hilfeplangespräch nicht überfällig“.
 
-**Nächster Schritt:** Bauplan Schritt 48 (Schlüsselwörter bieten den nächsten Arbeitsschritt an).
+Neu in 0.52.0: **Schlüsselwörter** (Bauplan 48). Im Fenster „Neuer Bericht“ (Text und Übergabe-Satz) erscheint unter dem Text eine **leise Zeile**, z. B. „„Arzttermin“ erkannt — Termin im Kalender?“ mit **„Nach dem Speichern anlegen …“** und **„×“** – höchstens zwei Angebote, ein weggeklicktes kommt für diesen Text nicht wieder, nie ein Fenster beim Schreiben. Nach dem Speichern öffnet das **Zielformular vorbelegt** (Bewohner, erkanntes Datum und Uhrzeit, Bezug zum Bericht); der Bericht trägt danach den Verweis „→ Termin 14.11. 10:30“ bzw. „→ Aufgabe …“. Feste Regelliste (keine KI) mit 12 Schritten: Termin, Aufgabe, Medikamentenplan, Bedarf gegeben, Vitalwerte, Besonderes Vorkommnis (kennzeichnet sofort), Abgängigkeit, Überleitungsbogen, Wiedervorlage, Schweigepflicht, Hilfeplangespräch, Ziele. Einstellungen → **„Schlüsselwörter …“**: je Schritt die Wörter mit ein/aus, Art des Treffers (ganzes Wort · Wortanfang · Wortgruppe), Schritt ändern, hinzufügen, entfernen (mitgelieferte nur aus), Werkseinstellung, **Probefeld**; „Für mich keine Vorschläge anzeigen“.
+
+**Nächster Schritt:** Bauplan Schritt 49 (Rechtschreibprüfung mit Fachwörterbuch).
 
 ## Fertig
 
@@ -1600,6 +1602,7 @@ Neu in 0.51.0: **Hilfeplangespräche** (Bauplan 47). Neue Seite **„Hilfeplange
 - 0.49.0 — Küchendienst im Tagesplan (Bauplan 45): Zeile oben mit Tausch und „unbesetzt“, bestätigen, Marke beim Bewohner
 - 0.50.0 — Archiv (Bauplan 46): Entlassen mit Folgen, Seite „Archiv“, Akte nur lesend, Wiederaufnahme, Frist ohne Vorgabe, Löschen zu zweit mit Protokoll
 - 0.51.0 — Hilfeplangespräche (Bauplan 47): Seite nach Fälligkeit, Termin mit Teilnehmern im Kalender, Einladung, Vorbereitung, „geführt“ mit Bericht, Prüfpunkt QMB
+- 0.52.0 — Schlüsselwörter (Bauplan 48): Vorschlagszeile im „Neuer Bericht“, Zielformular nach dem Speichern mit Verweis, Einstellungsfenster mit Probefeld
 
 ## Offene Punkte
 
@@ -1704,6 +1707,12 @@ Neu in 0.51.0: **Hilfeplangespräche** (Bauplan 47). Neue Seite **„Hilfeplange
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.52.0): Das Zielformular öffnet direkt nach dem Speichern des Berichts statt während des Schreibens: So kennt es den Bericht für den Rückverweis (Aufgabe „aus einem Bericht“, Termin mit Hinweis „aus dem Bericht vom …“), und der Bericht geht nicht verloren, wenn man das Zielformular abbricht. Angelegt wird erst dort, vom Menschen.
+- 14.11.2026 (0.52.0): „Besonderes Vorkommnis“ ist kein Formular: Der Knopf „Kennzeichnen“ setzt Berichtsart und „Wichtig“ im offenen Bericht – auf Klick, nie von selbst.
+- 14.11.2026 (0.52.0): Treffer auch bei Verneinung („kein Arzttermin nötig“) sind hingenommen, weil nur angeboten wird.
+- 14.11.2026 (0.52.0): In der Visite erscheint die Zeile nicht: Die Visite hat ihre eigenen Folgeschritte (Facharzttermin, Aufgaben aus der Visite, Schritt 32). Übergabe-Einträge entstehen im Bericht; ihr Satz wird mitgeprüft.
+- 14.11.2026 (0.52.0): Die Wörter gelten für das ganze Haus (Datenbank); „keine Vorschläge“ ist eine Einstellung je Kürzel. Ändern dürfen Administrator, Geschäftsführung, Hausleitung und Bereichsleitung (Recht „Schlüsselwörter verwalten“).
+- 14.11.2026 (0.52.0): Bei Medikamentenplan, Vitalwerten, Zielen, Schweigepflicht, Abgängigkeit, Überleitung und Bedarf öffnet der passende Teil der Akte bzw. das vorhandene Fenster; einen Verweis bekommt der Bericht nur, wenn dabei etwas angelegt wird (Termin, Aufgabe).
 - 14.11.2026 (0.51.0): Vorschlag für „fällig bis“: das Ende der jüngsten Bewilligung im Reiter „Kostenträger“; eine eingetragene Fälligkeit geht vor. „Geführt“ ohne neue Fälligkeit zeigt „geführt“ ohne Marke.
 - 14.11.2026 (0.51.0): Der Termin ist ein Kalendereintrag des Bewohners (Art „Termin“, Dauer 60 Minuten) – so erscheint er ohne Zusatz im Wochen- und Tagesplan. Überschneidungen werden mit den Terminen der Woche des Bewohners geprüft (Therapie, Kalender, Regelwoche); Fahrzeuge braucht ein Gespräch im Haus nicht.
 - 14.11.2026 (0.51.0): Die Einladung geht an Betreuer und Kostenträger, soweit eine gültige E-Mail-Adresse eingetragen ist; Text: Anlass, Name, Zeit, Ort – keine Gesundheitsangaben. Die `.ics`-Datei wird gespeichert und von Hand angehängt (mailto kann keine Anhänge).
@@ -2692,6 +2701,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.52.0: „Neuer Bericht“: „Arzttermin am 20.11. um 14:30, Blutdruck gemessen“ tippen → zwei Angebote unter dem Text; eines mit „×“ wegklicken; „Nach dem Speichern anlegen …“ beim Termin → Speichern → Kalenderfenster mit Titel, Datum und Uhrzeit → Speichern → im Bericht steht „→ Termin 20.11. 14:30“. „Im Flur gestürzt“ → „Kennzeichnen“ setzt „Besonderes Vorkommnis“. Einstellungen → „Schlüsselwörter …“: Probefeld ausprobieren, ein Wort abschalten, Werkseinstellung; „Für mich keine Vorschläge anzeigen“.
 
 Version 0.51.0: Seite „Hilfeplangespräche“ (Bereich R1): Liste nach Fälligkeit, überfällige orange. Bewohner wählen → „Termin vergeben …“ (TT.MM.JJJJ SS:MM, Ort, Teilnehmer ankreuzen) → im Tagesplan des Tages und im Kalender sichtbar. „Einladen …“ → .ics speichern, E-Mail-Programm öffnet sich. „Vorbereitung …“ → Aufgaben für den Bereich. „Geführt …“ → Bericht „Hilfeplangespräch“ in der Dokumentation. Akte → Reiter „Kostenträger“: Zeile „Hilfeplangespräch“. Seite „Qualität“: Spalte „Hilfeplan“.
 

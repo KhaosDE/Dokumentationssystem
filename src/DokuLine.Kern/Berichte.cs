@@ -29,6 +29,7 @@ public sealed record Bericht
     public bool Ausgabe { get; init; }                      // entstanden in der Medikamentenausgabe (nur lesend)
     public int? Dauer { get; init; }                        // freiwillig: Minuten am Bewohner (Zeitauswertung, Bauplan 41)
     public long? ZielId { get; init; }                      // freiwillig: zu welchem Ziel (Bauplan 43)
+    public string Verweis { get; init; } = "";              // „→ Termin 14.11. 10:30“ (Bauplan 48), nur gelesen
 
     public bool Allgemein => Bereiche.Count == 0;
 }

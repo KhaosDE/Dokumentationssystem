@@ -97,6 +97,9 @@ public sealed partial class EinstellungenSeite
         ArchivFristKnopf.Click += (_, _) => ArchivFristUebernehmen();
         Karte("Wohnbereich", "Archiv: Aufbewahrungsfrist", "Jahre ab Entlassung, bis eine archivierte Akte gelöscht werden darf. Keine Vorgabe: Die Frist muss mit Träger und Datenschutz geklärt werden. Leer = nicht festgelegt.",
             Reihe(ArchivFrist, ArchivFristKnopf, ArchivFristMeldung), Funktionen.ArchivLoeschen);
+        SchluesselwoerterKnopf.Click += (_, _) => FensterZeigen(new SchluesselwoerterFenster(speicher));
+        Karte("Wohnbereich", "Schlüsselwörter", "Wörter, bei denen „Neuer Bericht“ den nächsten Schritt anbietet (z. B. „Arzttermin“ → Termin im Kalender). Ansehen alle; ändern mit Recht „Schlüsselwörter verwalten“.",
+            SchluesselwoerterKnopf, null);
         MassnahmenListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Massnahmenarten, Liste.Massnahmenvorlagen]));
         Karte("Wohnbereich", "Maßnahmen: Arten und Vorlagen", "Arten (z. B. Anleitung, Begleitung) und Vorlagen für häufige Maßnahmen, damit nicht jeder anders benennt.",
             MassnahmenListenKnopf, Funktionen.MassnahmenAnlegen);

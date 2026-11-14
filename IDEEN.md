@@ -2617,7 +2617,7 @@ Umfang (Vorschlag):
 - Die Prüfseite des QMB (Schritt 44) bekommt den Prüfpunkt „Hilfeplangespräch nicht überfällig“.
 
 ## Schlüsselwörter bieten den nächsten Arbeitsschritt an
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.52.0; Bauplan Schritt 48)
 Datum: 12.11.2026
 Was: Erkennt das Programm beim Schreiben ein Schlüsselwort, bietet es den passenden nächsten
 Schritt an. So hängen Arbeitswege zusammen, ohne dass man den Bereich wechseln und alles neu

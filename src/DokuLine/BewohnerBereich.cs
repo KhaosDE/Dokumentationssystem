@@ -65,6 +65,8 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
 
     // „Neuer Bericht …“ aus der Akte; das Hauptfenster öffnet ihn.
     public event Action<long>? BerichtGewuenscht;
+    // Ein anderer Bereich soll sich öffnen (z. B. „Hilfeplangespräche“ aus einem Schlüsselwort).
+    public event Action<string>? BereichGewuenscht;
 
     // Wahl einer Bedarfsverordnung, wenn es mehrere gibt (Index oder null); zum Testen ersetzbar.
     public Func<IReadOnlyList<string>, int?> BedarfWaehlen { get; set; }
@@ -122,6 +124,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
             Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, 0)
         };
         listenFlaeche.Controls.Add(Dokumentation);
+        Dokumentation.FolgeschritteGewuenscht += (bericht, schritte) => FolgeschritteAusfuehren(bericht, schritte);
         // „Berichte zu diesem Ziel“: alle Berichte, die diesem Ziel zugeordnet sind.
         Akte.Massnahmen.ZielBerichteGewuenscht += z =>
         {
@@ -299,6 +302,50 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
     {
         if (Gewaehlt is null || Stil.Sperrgrund(BerichtNeuKnopf) is not null) return false;
         return Dokumentation.NeuerBericht();
+    }
+
+    // Schlüsselwörter (Bauplan 48): nach dem Speichern die vorgemerkten Schritte – das Zielformular vorbelegt (Bewohner,
+    // erkanntes Datum, Bezug zum Bericht); angelegt wird erst dort. Danach trägt der Bericht einen Verweis.
+    public void FolgeschritteAusfuehren(Bericht bericht, IReadOnlyList<Vorschlag> schritte)
+    {
+        if (speicher.Bewohner(bericht.BewohnerId) is not Bewohner b) return;
+        long id = b.Id!.Value;
+        foreach (var v in schritte)
+            switch (v.Folgeschritt)
+            {
+                case Folgeschritt.Termin:
+                    using (var f = new KalenderFenster(speicher, null, v.Datum ?? Heute(), id))
+                    {
+                        f.Titel.Text = v.Wort;
+                        if (v.Uhrzeit is TimeOnly u)
+                        {
+                            f.BeginnUhrzeit.Text = u.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                            f.EndeUhrzeit.Text = u.AddHours(1).ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                        }
+                        f.Hinweis.Text = $"aus dem Bericht vom {bericht.Zeitpunkt:dd.MM.yyyy HH:mm}";
+                        if (Dialog.Zeigen(f, FindForm()) == DialogResult.OK && f.Gespeichert is KalenderTermin t)
+                            speicher.VerweisEintragen(bericht.Id!.Value, SchluesselwortRegeln.VerweisText(v.Folgeschritt, $"{t.Aktuell.Beginn:dd.MM. HH:mm}"));
+                    }
+                    break;
+                case Folgeschritt.Aufgabe or Folgeschritt.Wiedervorlage:
+                    using (var f = new AufgabeFenster(speicher, id, bericht.Id))
+                    {
+                        f.Inhalt.Text = $"{v.Wort}: ";
+                        if (v.Datum is DateOnly d) f.FaelligDatum.Text = Datum.Text(d);
+                        if (Dialog.Zeigen(f, FindForm()) == DialogResult.OK && f.Gespeichert is Aufgabe a)
+                            speicher.VerweisEintragen(bericht.Id!.Value, SchluesselwortRegeln.VerweisText(v.Folgeschritt, a.Text.Length > 40 ? a.Text[..40] + "…" : a.Text));
+                    }
+                    break;
+                case Folgeschritt.Medikamentenplan: AkteZeigen(id); Akte.Reiter.Waehlen("Medikamentenplan"); break;
+                case Folgeschritt.Vitalwerte: AkteZeigen(id); Akte.Reiter.Waehlen("Vitalwerte"); break;
+                case Folgeschritt.Ziele: AkteZeigen(id); Akte.Reiter.Waehlen(MassnahmenAnsicht.ReiterName); break;
+                case Folgeschritt.Schweigepflicht: AuskunftOeffnen(b); break;
+                case Folgeschritt.Abgaengigkeit: AbgaengigkeitOeffnen(b); break;
+                case Folgeschritt.Ueberleitung: UeberleitungOeffnen(b); break;
+                case Folgeschritt.Bedarf: if (Gewaehlt?.Id == id) BedarfGeben(); break;
+                case Folgeschritt.Hilfeplan: BereichGewuenscht?.Invoke("Hilfeplangespräche"); break;
+            }
+        Dokumentation.Aktualisieren();
     }
 
     // „Bedarf gegeben …“ wie im Medikamentenplan; bei mehreren Bedarfsverordnungen erst wählen.

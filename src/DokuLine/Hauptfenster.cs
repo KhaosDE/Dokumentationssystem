@@ -199,6 +199,7 @@ public sealed partial class Hauptfenster : Form
         Uebersicht.AuskunftGewuenscht += b => Bewohner.AuskunftOeffnen(b);
         Modul.Ausgangsliste.Aktionen.AbgaengigkeitMelden = id => { if (speicher.Bewohner(id) is Kern.Bewohner b) Bewohner.AbgaengigkeitOeffnen(b); };
         Bewohner.BerichtGewuenscht += id => NeuerBericht(id);
+        Bewohner.BereichGewuenscht += bereich => BereichWaehlen(bereich);
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false, Titel = name };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);

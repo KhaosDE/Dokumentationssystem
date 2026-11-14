@@ -300,12 +300,16 @@ public sealed class DokumentationAnsicht : Panel
         return true;
     }
 
+    // Vorgemerkte nächste Schritte aus dem Bericht (Bauplan 48); die Akte bzw. das Zielformular öffnet der Bereich.
+    public event Action<Bericht, IReadOnlyList<Vorschlag>>? FolgeschritteGewuenscht;
+
     public bool NeuerBericht()
     {
         if (Bewohner is null || Recht.Grund(speicher, Funktionen.BerichteSchreiben) is not null) return false;
         using var formular = new BerichtFormular(speicher, Bewohner);
         bool ok = Dialog.Zeigen(formular, FindForm()) == DialogResult.OK;
         if (ok) Aktualisieren();
+        if (ok && formular.Gespeichert is Bericht b && formular.Folgeschritte.Count > 0) FolgeschritteGewuenscht?.Invoke(b, [.. formular.Folgeschritte]);
         return ok;
     }
 

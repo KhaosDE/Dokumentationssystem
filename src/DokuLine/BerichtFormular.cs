@@ -23,6 +23,9 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     // Freiwillig: zu welchem Ziel des Bewohners (Bauplan 43).
     public ComboBox ZielWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 420, AccessibleName = "Ziel (freiwillig)" };
     private List<Ziel> ziele = [];
+    // Schlüsselwörter (Bauplan 48): die leise Zeile unter dem Text; vorgemerkte Schritte öffnen nach dem Speichern.
+    public VorschlagLeiste Vorschlaege { get; }
+    public IReadOnlyList<Vorschlag> Folgeschritte => Vorschlaege.Vorgemerkt;
     public bool AngebotGefragt => Art.SelectedItem as string == DokuRegeln.ArtTherapie;
     public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // aus der Anmeldung
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
@@ -56,6 +59,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     {
         this.speicher = speicher;
         auswahl = fest is null ? speicher.AlleBewohner() : [fest];
+        Vorschlaege = new VorschlagLeiste(speicher.Schluesselwoerter(), speicher.VorschlaegeAus(Recht.Kuerzel));
         Text = $"Neuer Bericht ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
@@ -134,6 +138,14 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
 
         Inhalt.Dock = DockStyle.Fill;
         Zeile("Text", Inhalt);
+        Zeile(null, Vorschlaege);
+        Inhalt.TextChanged += (_, _) => Vorschlaege.Pruefen(Inhalt.Text + "\n" + UebergabeText.Text);
+        UebergabeText.TextChanged += (_, _) => Vorschlaege.Pruefen(Inhalt.Text + "\n" + UebergabeText.Text);
+        Vorschlaege.Sofort += _ =>
+        {
+            if (Art.Items.IndexOf("Besonderes Vorkommnis") is int i && i >= 0) Art.SelectedIndex = i;
+            Wichtig.Checked = true;
+        };
         Zeile(null, new Label
         {
             Text = "Merkhilfe: wertneutral beschreiben, nicht bewerten. Aussagen des Bewohners kennzeichnen („gibt an, dass …“). " +

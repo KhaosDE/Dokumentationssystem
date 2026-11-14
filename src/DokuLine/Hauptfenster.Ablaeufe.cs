@@ -107,6 +107,7 @@ public sealed partial class Hauptfenster
         if (Dialog.Zeigen(formular, this) != DialogResult.OK || formular.Gespeichert is not Bericht bericht) return null;
         BereichWaehlen("Dokumentation");
         Bewohner.DokumentationZeigen(bericht.BewohnerId);
+        if (formular.Folgeschritte.Count > 0) Bewohner.FolgeschritteAusfuehren(bericht, [.. formular.Folgeschritte]);
         return bericht;
     }
 

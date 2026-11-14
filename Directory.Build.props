@@ -2,7 +2,7 @@
   <!-- Gemeinsame Einstellungen für alle Projekte. -->
   <PropertyGroup>
     <!-- Versionsnummer des Programms; bei jeder ausgelieferten Änderung erhöhen (siehe STAND.md). -->
-    <Version>0.51.0</Version>
+    <Version>0.52.0</Version>
     <!-- Build-Nummer = Laufnummer von GitHub Actions. 0 heißt: Entwicklerversion (kein Selbst-Update). -->
     <BuildNummer Condition="'$(BuildNummer)' == ''">0</BuildNummer>
     <Nullable>enable</Nullable>

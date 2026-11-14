@@ -1213,6 +1213,23 @@ public sealed partial class Speicher : IDisposable
         INSERT INTO berichtsarten (name, nr) SELECT 'Hilfeplangespräch', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
             WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Hilfeplangespräch');
         """,
+        // 48 – Schlüsselwörter (eine Liste für das Haus) und Verweise vom Bericht auf das, was daraus entstand.
+        """
+        CREATE TABLE IF NOT EXISTS schluesselwoerter (
+            id           INTEGER PRIMARY KEY,
+            wort         TEXT NOT NULL,
+            folgeschritt TEXT NOT NULL,
+            art          TEXT NOT NULL,
+            aktiv        INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)),
+            mitgeliefert INTEGER NOT NULL DEFAULT 0 CHECK (mitgeliefert IN (0, 1))
+        );
+        CREATE TABLE IF NOT EXISTS bericht_verweise (
+            id        INTEGER PRIMARY KEY,
+            bericht_id INTEGER NOT NULL REFERENCES berichte(id) ON DELETE CASCADE,
+            text      TEXT NOT NULL,
+            erfasst   TEXT NOT NULL
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1770,7 +1787,8 @@ public sealed partial class Speicher : IDisposable
                                    "EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id), " +
                                    "(SELECT minuten FROM bericht_dauer d WHERE d.bericht_id = berichte.id), " +
                                    "EXISTS (SELECT 1 FROM medikamentenausgaben a WHERE a.bericht_id = berichte.id), " +
-                                   $"(SELECT ziel_id FROM bericht_ziel z WHERE z.bericht_id = berichte.id) FROM berichte {bedingung}",
+                                   "(SELECT ziel_id FROM bericht_ziel z WHERE z.bericht_id = berichte.id), " +
+                                   $"(SELECT group_concat(text, ' · ') FROM bericht_verweise v WHERE v.bericht_id = berichte.id) FROM berichte {bedingung}",
                                    null, parameter))
         using (var leser = befehl.ExecuteReader())
         {
@@ -1794,6 +1812,7 @@ public sealed partial class Speicher : IDisposable
                     Dauer = leser.IsDBNull(12) ? null : leser.GetInt32(12),
                     Ausgabe = leser.GetInt64(13) != 0,
                     ZielId = leser.IsDBNull(14) ? null : leser.GetInt64(14),
+                    Verweis = leser.IsDBNull(15) ? "" : leser.GetString(15),
                 });
             }
         }
