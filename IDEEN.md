@@ -2617,7 +2617,7 @@ Umfang (Vorschlag):
 - Die Prüfseite des QMB (Schritt 44) bekommt den Prüfpunkt „Hilfeplangespräch nicht überfällig“.
 
 ## Schlüsselwörter bieten den nächsten Arbeitsschritt an
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.52.0; Bauplan Schritt 48)
 Datum: 12.11.2026
 Was: Erkennt das Programm beim Schreiben ein Schlüsselwort, bietet es den passenden nächsten
 Schritt an. So hängen Arbeitswege zusammen, ohne dass man den Bereich wechseln und alles neu
@@ -2668,7 +2668,7 @@ Umfang (Vorschlag):
   aus — das ist hingenommen, weil nur angeboten wird; in `STAND.md` vermerken).
 
 ## Rechtschreibprüfung mit Fachwörterbuch
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.53.0; Bauplan Schritt 49)
 Datum: 13.11.2026
 Was: Beim Schreiben von Berichten werden Tippfehler rot unterschlängelt, mit Vorschlägen per
 Rechtsklick — und Fachwörter, Namen und Medikamente gelten nicht als Fehler.
@@ -2702,7 +2702,7 @@ Umfang (Vorschlag):
   angestrichen, echte Tippfehler schon.
 
 ## Abwesenheit in der Dokumentation sichtbar machen
-Status: freigegeben (Bauplan Schritt 50; OK Tobi 13.11.2026: „Abwesenheitshinweise sind wichtig, das passt so“)
+Status: erledigt (14.11.2026, 0.54.0; Bauplan Schritt 50)
 Datum: 13.11.2026
 Was: Ist ein Bewohner abwesend (Klinik, Heimfahrt, Urlaub, unterwegs), sieht man das in der
 Dokumentation, und Lücken in den Berichten sind erklärt.
@@ -2733,7 +2733,7 @@ Umfang (Vorschlag):
   Überleitungsbogen tragen dort ein, damit es keine zwei Wahrheiten gibt.
 
 ## Medikamentenbestellung: Reichweite, Rezeptanforderung, Lieferung
-Status: freigegeben (Bauplan Schritt 51; OK Tobi 13.11.2026, Bestandsführung als zuschaltbare Option)
+Status: erledigt (14.11.2026, 0.55.0; Bauplan Schritt 51)
 Datum: 13.11.2026
 Was: DokuLine zeigt, welche Medikamente bald ausgehen, sammelt daraus Rezeptanforderungen an die
 Ärzte und Bestellungen an die Apotheke und verfolgt sie bis zur Lieferung.
@@ -2783,7 +2783,7 @@ Umfang:
   von Medikamenten könnte später hier dazukommen.
 
 ## HEB-Fälligkeit vermerken und rechtzeitig erinnern
-Status: freigegeben (Bauplan Schritt 52; Vorgabe Tobi 13.11.2026)
+Status: erledigt (14.11.2026, 0.56.0; Bauplan Schritt 52)
 Datum: 13.11.2026
 Was: Je Bewohner steht, bis wann der nächste HEB-Bogen beim Kostenträger sein muss. Das Programm
 erinnert rechtzeitig vorher, nicht erst, wenn es zu spät ist.

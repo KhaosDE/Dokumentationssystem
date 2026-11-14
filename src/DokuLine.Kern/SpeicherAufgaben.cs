@@ -146,7 +146,8 @@ public sealed partial class Speicher
     {
         var schicht = SchichtTermin.Zu(jetzt);
         int neu = 0;
-        foreach (var v in Vorlagen().Where(v => AufgabenRegeln.Gilt(v, schicht)))
+        var aktive = AlleBewohner().Select(b => b.Id!.Value).ToHashSet();   // Entlassene bekommen keine Aufgaben mehr
+        foreach (var v in Vorlagen().Where(v => AufgabenRegeln.Gilt(v, schicht) && (v.BewohnerId is not long b || aktive.Contains(b))))
         {
             Ausfuehren("""
                 INSERT OR IGNORE INTO aufgaben (bewohner_id, text, fuer, schicht_tag, schicht, faellig_bis, erstellt, verfasser, vorlage_id, bereich)
@@ -156,7 +157,7 @@ public sealed partial class Speicher
                 ("$fb", Zeit(AufgabenRegeln.FaelligIn(v, schicht))), ("$e", Zeit(schicht.Beginn)), ("$v", v.Kuerzel), ("$vo", v.Id));
             neu += Convert.ToInt32(Wert("SELECT changes()"), CultureInfo.InvariantCulture);
         }
-        int messungen = MessauftraegeErzeugen(jetzt);   // zählen nicht als Standardaufgaben
+        int messungen = MessauftraegeErzeugen(jetzt, aktive);   // zählen nicht als Standardaufgaben
         MassnahmenUebergabeErzeugen(jetzt);             // was im vorigen Dienst offen blieb (Bauplan 40)
         AusgabeUebergabeErzeugen(jetzt);                // Medikamente, die im vorigen Dienst nicht ausgegeben wurden (42)
         if (neu + messungen > 0) AufgabenGeaendert?.Invoke();

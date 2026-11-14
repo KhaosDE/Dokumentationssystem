@@ -104,15 +104,30 @@ public static class MassnahmenRegeln
     public static string WannText(MassnahmeFassung f) =>
         f.Rhythmus == MassnahmeRhythmus.BeiBedarf ? "bei Bedarf" : f.Uhrzeit is TimeOnly u ? $"{u:HH\\:mm} Uhr" : $"im {BerichtRegeln.SchichtText(f.Schicht)}";
 
-    // Ist die Fassung an diesem Tag dran (ohne Blick auf Dienst und Ende)?
-    public static bool AmTag(MassnahmeFassung f, DateOnly tag) => f.Rhythmus switch
+    // Ist die Fassung an diesem Tag dran (ohne Blick auf Dienst und Ende)? „Alle n Wochen“ zählt ab dem Anker (sonst ab GiltAb).
+    public static bool AmTag(MassnahmeFassung f, DateOnly tag, DateOnly? anker = null) => f.Rhythmus switch
     {
         MassnahmeRhythmus.Taeglich => true,
         MassnahmeRhythmus.Wochentage => f.Wochentage.Contains(tag.DayOfWeek),
-        MassnahmeRhythmus.AlleNWochen => f.Wochentage.Count > 0 && tag.DayOfWeek == f.Wochentage[0] && WochenSeit(f.GiltAb, tag) % Math.Max(1, f.AlleWochen) == 0,
+        MassnahmeRhythmus.AlleNWochen => f.Wochentage.Count > 0 && tag.DayOfWeek == f.Wochentage[0]
+                                         && WochenSeit(anker ?? f.GiltAb, tag) % Math.Max(1, f.AlleWochen) == 0,
         MassnahmeRhythmus.Monatlich => tag.Day == f.MonatsTag,
         _ => false,
     };
+
+    // Mit der Maßnahme: Eine Änderung (z. B. nur der Minuten) verschiebt den Takt „alle n Wochen“ nicht – er zählt ab der ersten
+    // Fassung in Folge mit gleichem Rhythmus, Wochentag und Abstand.
+    public static bool AmTag(Massnahme m, MassnahmeFassung f, DateOnly tag)
+    {
+        var anker = f.GiltAb;
+        if (f.Rhythmus == MassnahmeRhythmus.AlleNWochen)
+            foreach (var x in m.Fassungen.Where(x => x.GiltAb < f.GiltAb).OrderByDescending(x => x.GiltAb))
+            {
+                if (x.Rhythmus != MassnahmeRhythmus.AlleNWochen || x.AlleWochen != f.AlleWochen || !x.Wochentage.SequenceEqual(f.Wochentage)) break;
+                anker = x.GiltAb;
+            }
+        return AmTag(f, tag, anker);
+    }
 
     // Ganze Wochen zwischen den Montagen der beiden Wochen (so zählt auch eine Woche mit, die mitten drin beginnt).
     private static int WochenSeit(DateOnly ab, DateOnly tag)
@@ -129,7 +144,7 @@ public static class MassnahmenRegeln
         foreach (var m in massnahmen)
         {
             if (!m.Laeuft(dienst.Tag) || m.Am(dienst.Tag) is not MassnahmeFassung f) continue;
-            if (f.Rhythmus == MassnahmeRhythmus.BeiBedarf || f.Schicht != dienst.Schicht || !AmTag(f, dienst.Tag)) continue;
+            if (f.Rhythmus == MassnahmeRhythmus.BeiBedarf || f.Schicht != dienst.Schicht || !AmTag(m, f, dienst.Tag)) continue;
             liste.Add(new MassnahmeTermin(m, f, dienst, bestaetigt[m.Id].FirstOrDefault()));
         }
         return [.. liste.OrderBy(t => t.Offen ? 0 : 1).ThenBy(t => t.Uhrzeit ?? DateTime.MaxValue).ThenBy(t => t.Fassung.Titel, StringComparer.Create(De, true))];

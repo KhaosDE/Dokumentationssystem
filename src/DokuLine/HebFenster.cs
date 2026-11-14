@@ -142,6 +142,7 @@ public sealed class HebFenster : Form, IEntwurfFenster
     {
         var titel = new Label { Text = feld.Titel, AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false };
         var box = new TextBox { Multiline = true, ScrollBars = ScrollBars.Vertical, AcceptsReturn = true, Height = feld.Grenze is int g ? Math.Clamp(g / 6, 90, 180) : 90 };
+        Rechtschreibpruefung.Anbinden(box, speicher);
         var zaehler = new Label { AutoSize = true, Font = Stil.Klein, BackColor = Stil.Seite };
         var hinweise = new Label { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini), Visible = false };
         box.Enter += (_, _) => zuletzt = box;
@@ -218,7 +219,7 @@ public sealed class HebFenster : Form, IEntwurfFenster
         }
         var ziele = ZielRegeln.Zusammenfassung(speicher.Ziele(id), speicher.Berichte(id, new BerichtFilter(Bogen.Von, Bogen.Bis)),
             speicher.Massnahmen(id, auchBeendete: true), speicher.MassnahmeBestaetigungen(id, Bogen.Von, Bogen.Bis));
-        ZielQuellen.Text = ziele.Count == 0 ? "In der Akte sind keine aktiven Ziele eingetragen." : string.Join(Environment.NewLine, ziele);
+        ZielQuellen.Text = ziele.Count == 0 ? ZielRegeln.Leiste(speicher.Ziele(id), speicher.Verzicht(id)) : string.Join(Environment.NewLine, ziele);
     }
 
     public void SeiteZeigen()

@@ -73,10 +73,14 @@ public sealed class AusgabeSeite : Panel, IBereichSeite
 
     public AusgabeZeile? Gewaehlt => Liste.SelectedItems.Count == 1 ? Liste.SelectedItems[0].Tag as AusgabeZeile : null;
 
+    // Die eigene Wahl gilt nur, solange dieselbe Einnahmezeit läuft; danach springt die Seite wieder auf die laufende.
+    private (DateOnly Tag, Einnahmezeit Zeit)? gewaehltBei;
+
     public void ZeitWaehlen(Einnahmezeit z)
     {
         Zeit = z;
         zeitGewaehlt = true;
+        gewaehltBei = AusgabeRegeln.Jetzt(Jetzt());
         Aktualisieren();
     }
 
@@ -85,6 +89,7 @@ public sealed class AusgabeSeite : Panel, IBereichSeite
         var jetzt = Jetzt();
         var (tag, laufend) = AusgabeRegeln.Jetzt(jetzt);
         Ausgabetag = tag;
+        if (zeitGewaehlt && gewaehltBei != (tag, laufend)) zeitGewaehlt = false;
         if (!zeitGewaehlt) Zeit = laufend;
         foreach (var k in ZeitKnoepfe) k.Aktiv = k.Text == AusgabeRegeln.ZeitText(Zeit);
         var bewohner = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt);

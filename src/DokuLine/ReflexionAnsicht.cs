@@ -60,6 +60,7 @@ public sealed class ReflexionAnsicht : Panel
         {
             var b = new ReflexionBereich(i);
             Bereiche.Add(b);
+            Rechtschreibpruefung.Anbinden(b.Feld, speicher);
             Controls.Add(b);
         }
         therapieKarte.Controls.AddRange([therapieTitel, Therapien, ZieleText]);
@@ -116,7 +117,7 @@ public sealed class ReflexionAnsicht : Panel
             : string.Join(Environment.NewLine, therapien.Select(ReflexionRegeln.TherapieText));
         var ziele = ZielRegeln.Zusammenfassung(speicher.Ziele(id), speicher.Berichte(id, new BerichtFilter(Monat, ReflexionRegeln.MonatBis(Monat))),
             speicher.Massnahmen(id, auchBeendete: true), speicher.MassnahmeBestaetigungen(id, Monat, ReflexionRegeln.MonatBis(Monat)));
-        ZieleText.Text = "Ziele im Monat: " + (ziele.Count == 0 ? "keine aktiven Ziele eingetragen." : Environment.NewLine + string.Join(Environment.NewLine, ziele));
+        ZieleText.Text = "Ziele im Monat: " + (ziele.Count == 0 ? ZielRegeln.Leiste(speicher.Ziele(id), speicher.Verzicht(id)) : Environment.NewLine + string.Join(Environment.NewLine, ziele));
         PerformLayout();
     }
 

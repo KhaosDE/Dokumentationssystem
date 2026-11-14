@@ -149,13 +149,27 @@ public sealed class Datenbank(Speicher speicher, SqliteTransaction? transaktion 
             if (!platz.HatStatus) return platz;
             AngabenSpeichern(bewohnerId, Angaben(bewohnerId) with { Status = AnwesenheitsStatus.Keiner, StatusGrund = "" });
             VerlaufSchreiben(bewohnerId, $"Status aufgehoben (war: {Verlauf.Status(platz.Status)} – {platz.StatusGrund})", kuerzel);
+            if (platz.Status == AnwesenheitsStatus.Abwesenheit) AbwesenheitEintragen(bewohnerId, AbwesenheitRegeln.EndeText(Jetzt()), kuerzel);
         }
         else
         {
             AngabenSpeichern(bewohnerId, Angaben(bewohnerId) with { Status = status, StatusGrund = grund });
             VerlaufSchreiben(bewohnerId, $"Status: {Verlauf.Status(status)} – {grund}", kuerzel);
+            if (status == AnwesenheitsStatus.Abwesenheit) AbwesenheitEintragen(bewohnerId, AbwesenheitRegeln.BeginnText(Jetzt(), grund), kuerzel);
         }
         return Pflicht(bewohnerId);
+    }
+
+    // Beginn und Ende einer Abwesenheit als je ein kurzer Eintrag in der Dokumentation (Bauplan 50) – einmal, nicht täglich.
+    private void AbwesenheitEintragen(long bewohnerId, string text, string kuerzel)
+    {
+        if (transaktion is not null) return;   // beim Laden der Demo nicht
+        var jetzt = Jetzt();
+        speicher.BerichtSpeichern(new Bericht
+        {
+            BewohnerId = bewohnerId, Zeitpunkt = jetzt, Schicht = BerichtRegeln.SchichtZu(jetzt), Verfasser = kuerzel.Trim(), Text = text, Bereiche = [],
+            Erfasst = jetzt, Art = DokuRegeln.ArtAbgaengigkeit,
+        });
     }
 
     // Unterbringung (UnterbringungFenster). Beschluss: datum = Ablaufdatum, steht danach in der

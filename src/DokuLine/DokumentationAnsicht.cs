@@ -33,6 +33,9 @@ public sealed class DokumentationAnsicht : Panel
     public List<MassnahmenTagZeile> MassnahmenZeilen { get; } = [];
     // Zielleiste (Bauplan 43): beim Durchgehen der Bewohner sofort sehen, was jemand erreichen will.
     public ZielLeiste Zielleiste { get; } = new();
+    // Laufende Abwesenheit über der Berichtsliste und Balken über abwesende Tage (Bauplan 50).
+    public MarkenFeld AbwesendZeile { get; } = new("abwesend", Stil.Abwesend) { Visible = false };
+    public List<Label> Balken { get; } = [];
 
     public ComboBox Zeitraum { get; } = Auswahl(140, "Zeitraum", "Heute", "7 Tage", "30 Tage", "frei …");
     public DatumFeld Von { get; } = new() { Width = 100, PlaceholderText = "von", Visible = false };
@@ -90,7 +93,7 @@ public sealed class DokumentationAnsicht : Panel
         Farbschluessel.Paint += (_, e) => FarbschluesselZeichnen(e.Graphics);
         liste.Controls.Add(leer);
         liste.Layout += (_, _) => ListeAnordnen();
-        Controls.AddRange([leiste, weitere, gespeichert, gesetzt, Zielleiste, liste]);
+        Controls.AddRange([leiste, weitere, gespeichert, gesetzt, AbwesendZeile, Zielleiste, liste]);
         FelderSetzen();
     }
 
@@ -105,8 +108,10 @@ public sealed class DokumentationAnsicht : Panel
         return box;
     }
 
+    // Der Filter „Berichte zu diesem Ziel“ gehört zu einem Bewohner: beim Wechsel fällt er weg.
     public void Zeigen(Bewohner b)
     {
+        if (Bewohner?.Id != b.Id && Filter.ZielId is not null) Filter = Filter with { ZielId = null, ZielText = "" };
         Bewohner = b;
         Aktualisieren();
     }
@@ -178,7 +183,7 @@ public sealed class DokumentationAnsicht : Panel
                 _ => null
             },
             Verfasser = Verfasser.SelectedIndex > 0 ? Verfasser.SelectedItem as string : null,
-            Suche = Suche.Text,
+            Suche = Suche.Text, ZielId = Filter.ZielId, ZielText = Filter.ZielText,
         };
         Von.Visible = Bis.Visible = Filter.Zeitraum == Kern.Zeitraum.Frei;
         Aktualisieren();
@@ -190,6 +195,17 @@ public sealed class DokumentationAnsicht : Panel
         Berichte = Bewohner?.Id is long id ? speicher.Berichte(id, Filter, heute) : [];
         Zielleiste.Visible = Bewohner is not null;
         if (Bewohner?.Id is long bid) Zielleiste.Zeigen(speicher, bid, heute);
+        string? abwesend = Bewohner is null ? null : AbwesenheitAnzeige.Text(speicher, Bewohner, Jetzt());
+        AbwesendZeile.Text = abwesend is null ? "" : AbwesenheitRegeln.ZeileText(abwesend);
+        AbwesendZeile.Visible = abwesend is not null;
+        var (spanneVon, spanneBis) = DokuRegeln.Spanne(Filter, heute);
+        if (Berichte.Count > 0)
+        {
+            if (spanneVon == DateOnly.MinValue) spanneVon = DateOnly.FromDateTime(Berichte.Min(x => x.Zeitpunkt));
+            if (spanneBis == DateOnly.MaxValue) spanneBis = heute;
+        }
+        var zeitraeume = Bewohner?.Id is long aid && spanneVon <= spanneBis && spanneVon != DateOnly.MinValue
+            ? speicher.Abwesenheiten(aid, spanneVon, spanneBis > heute ? heute : spanneBis) : [];
         if (Bewohner?.Id is long b)
         {
             fuellt = true;
@@ -200,7 +216,22 @@ public sealed class DokumentationAnsicht : Panel
             fuellt = false;
         }
         liste.SuspendLayout();
-        foreach (Control c in Zeilen.Cast<Control>().Concat(Tage).Concat(MassnahmenZeilen)) { liste.Controls.Remove(c); c.Dispose(); }
+        foreach (Control c in Zeilen.Cast<Control>().Concat(Tage).Concat(MassnahmenZeilen).Concat(Balken)) { liste.Controls.Remove(c); c.Dispose(); }
+        Balken.Clear();
+        var offen = new Queue<AbwesenheitsZeitraum>(zeitraeume.OrderByDescending(z => z.Bis));
+        void BalkenBis(DateOnly tag)
+        {
+            while (offen.Count > 0 && offen.Peek().Bis >= tag)
+            {
+                var b = new Label
+                {
+                    Text = AbwesenheitRegeln.BalkenText(offen.Dequeue()), AutoSize = false, BackColor = Stil.Abwesend.Flaeche, ForeColor = Stil.TextMittel,
+                    Font = Stil.Klein, Padding = new Padding(Stil.AbstandKlein, Stil.AbstandMini, 0, Stil.AbstandMini), UseMnemonic = false
+                };
+                Balken.Add(b);
+                liste.Controls.Add(b);
+            }
+        }
         Zeilen.Clear();
         Tage.Clear();
         MassnahmenZeilen.Clear();
@@ -214,6 +245,7 @@ public sealed class DokumentationAnsicht : Panel
         }
         foreach (var (tag, berichte) in DokuRegeln.NachTagen(Berichte))
         {
+            BalkenBis(tag);
             var (geschrieben, massnahmen) = DokuRegeln.Teilen(berichte);
             var kopf = new TagKopf(tag, geschrieben.Count);
             Tage.Add(kopf);
@@ -226,6 +258,7 @@ public sealed class DokumentationAnsicht : Panel
             var einzeln = massnahmen.Select(b => Zeile(b, false)).ToList();
             summe.Umgeschaltet += offen => { foreach (var z in einzeln) z.Visible = offen; liste.PerformLayout(); };
         }
+        BalkenBis(DateOnly.MinValue);
         leer.Visible = Berichte.Count == 0;
         liste.ResumeLayout(false);
         liste.PerformLayout();
@@ -288,7 +321,7 @@ public sealed class DokumentationAnsicht : Panel
     public bool FilterSpeichern()
     {
         if (!Recht.Angemeldet || NameFragen() is not string name || name.Trim().Length == 0) return false;
-        try { speicher.FilterSpeichern(Recht.Kuerzel, name, Filter); }
+        try { speicher.FilterSpeichern(Recht.Kuerzel, name, Filter with { ZielId = null, ZielText = "" }); }   // das Ziel gilt nur für einen Bewohner
         catch (Eingabefehler e)
         {
             MessageBox.Show(FindForm(), string.Join("\n", e.Fehler), "Filter speichern", MessageBoxButtons.OK,
@@ -300,12 +333,16 @@ public sealed class DokumentationAnsicht : Panel
         return true;
     }
 
+    // Vorgemerkte nächste Schritte aus dem Bericht (Bauplan 48); die Akte bzw. das Zielformular öffnet der Bereich.
+    public event Action<Bericht, IReadOnlyList<Vorschlag>>? FolgeschritteGewuenscht;
+
     public bool NeuerBericht()
     {
         if (Bewohner is null || Recht.Grund(speicher, Funktionen.BerichteSchreiben) is not null) return false;
         using var formular = new BerichtFormular(speicher, Bewohner);
         bool ok = Dialog.Zeigen(formular, FindForm()) == DialogResult.OK;
         if (ok) Aktualisieren();
+        if (ok && formular.Gespeichert is Bericht b && formular.Folgeschritte.Count > 0) FolgeschritteGewuenscht?.Invoke(b, [.. formular.Folgeschritte]);
         return ok;
     }
 
@@ -361,6 +398,11 @@ public sealed class DokumentationAnsicht : Panel
                 t.SetBounds(0, y, breite, t.Hoehe);
                 y = t.Bottom + abstand;
             }
+            else if (c is Label b && Balken.Contains(b))
+            {
+                b.SetBounds(0, y + tagAbstand / 2, breite, b.PreferredHeight + Stil.Px(this, Stil.AbstandMini));
+                y = b.Bottom + abstand;
+            }
             else if (c is BerichtZeile z)
             {
                 int h = z.Anordnen(breite);
@@ -375,7 +417,7 @@ public sealed class DokumentationAnsicht : Panel
     {
         base.OnLayout(levent);
         int breite = ClientSize.Width, y = 0;
-        foreach (var teil in new Control[] { leiste, weitere, gespeichert, gesetzt })
+        foreach (var teil in new Control[] { leiste, weitere, gespeichert, gesetzt, AbwesendZeile })
         {
             if (!teil.Visible) continue;
             teil.MaximumSize = new Size(breite, 0);

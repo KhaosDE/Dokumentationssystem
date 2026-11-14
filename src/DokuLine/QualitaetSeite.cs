@@ -182,7 +182,7 @@ public sealed class QualitaetSeite : Panel, IBereichSeite
     {
         var heute = DateOnly.FromDateTime(Jetzt());
         var zeilen = QualitaetRegeln.Nachweis(speicher.PruefDatenLesen(GewaehlteBewohner(), heute), heute);
-        var druck = new TabellenDruck("Nachweis Ziele und Maßnahmen", $"{BereichWahl.SelectedItem} · Stand {Datum.Text(heute)} · {Stil.DemoHinweis}",
+        var druck = new TabellenDruck("Nachweis Ziele und Maßnahmen", $"{BereichWahl.SelectedItem} · Stand {Datum.Text(heute)}",
             QualitaetRegeln.NachweisSpalten, [0.6f, 1.6f, 3.2f, 1.6f, 0.9f, 0.9f, 0.9f, 3f], zeilen);
         Vorschau(druck.DokumentBauen, "Nachweis Ziele und Maßnahmen");
         return true;

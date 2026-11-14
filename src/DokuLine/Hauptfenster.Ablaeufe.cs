@@ -56,6 +56,8 @@ public sealed partial class Hauptfenster
             case "Qualität": Qualitaet.Aktualisieren(filterBehalten: true); break;
             case "Archiv": Archiv.Aktualisieren(); break;
             case "Hilfeplangespräche": Hilfeplan.Aktualisieren(); break;
+            case "HEB-Fristen": HebFristen.Aktualisieren(); break;
+            case "Bestellung": Bestellung.Aktualisieren(); break;
             case "Medikamentenausgabe": Ausgabe.Aktualisieren(); break;
             case "Aufgaben": Aufgaben.Aktualisieren(); break;
             case "Nachrichten": Nachrichten.Aktualisieren(); break;
@@ -107,6 +109,7 @@ public sealed partial class Hauptfenster
         if (Dialog.Zeigen(formular, this) != DialogResult.OK || formular.Gespeichert is not Bericht bericht) return null;
         BereichWaehlen("Dokumentation");
         Bewohner.DokumentationZeigen(bericht.BewohnerId);
+        if (formular.Folgeschritte.Count > 0) Bewohner.FolgeschritteAusfuehren(bericht, [.. formular.Folgeschritte]);
         return bericht;
     }
 

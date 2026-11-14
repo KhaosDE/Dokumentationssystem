@@ -97,8 +97,8 @@ public sealed partial class Hauptfenster
 
     // Bereiche mit eigenem Recht; ohne dieses Recht verschwinden sie aus der Seitenleiste.
     private static readonly (string Bereich, string Funktion)[] BereichsRechte = [("Visiten", Funktionen.Visiten), ("Auswertung", Funktionen.Zeitauswertung),
-        ("Medikamentenausgabe", Funktionen.MedikamenteAusgeben), ("Qualität", Funktionen.Qualitaet),
-        ("Archiv", Funktionen.ArchivEinsehen)];
+        ("Medikamentenausgabe", Funktionen.MedikamenteAusgeben), ("Bestellung", Funktionen.MedikamenteAusgeben), ("Qualität", Funktionen.Qualitaet),
+        ("Archiv", Funktionen.ArchivEinsehen), ("HEB-Fristen", Funktionen.Heb)];
 
     public HashSet<string> OhneRechtAusgeblendet { get; } = [];
 

@@ -67,7 +67,13 @@ public sealed partial class EinstellungenSeite
         BeschlussFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { BeschlussFristTage = (int)BeschlussFrist.Value }); };
         Karte("Wohnbereich", "Beschluss endet bald", "So viele Tage vorher zeigt die Übersicht „Beschluss endet in …“.", BeschlussFrist, Funktionen.EinstellungenBereich);
         HebFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { HebFristMonate = (int)HebFrist.Value }); };
-        Karte("Wohnbereich", "HEB fällig", "So viele Monate nach dem letzten Bogen gilt der HEB-Bogen als fällig.", HebFrist, Funktionen.EinstellungenBereich);
+        Karte("Wohnbereich", "HEB fällig", "Vorschlag für die nächste Fälligkeit, wenn keine Bewilligung eingetragen ist: so viele Monate nach dem letzten Bogen.",
+            HebFrist, Funktionen.EinstellungenBereich);
+        HebErinnern.ValueChanged += (_, _) => HebStufenUebernehmen();
+        HebAchtung.ValueChanged += (_, _) => HebStufenUebernehmen();
+        Karte("Wohnbereich", "HEB-Frist: Erinnerung", "So viele Wochen vor der Fälligkeit: erste Stufe (Aufgabe, Hinweis) und zweite Stufe (Achtung-Farbe, Übersicht).",
+            Reihe(new Label { Text = "erste Stufe", AutoSize = true, Margin = new Padding(0, 6, 4, 0) }, HebErinnern,
+                  new Label { Text = "zweite Stufe", AutoSize = true, Margin = new Padding(12, 6, 4, 0) }, HebAchtung), Funktionen.EinstellungenBereich);
         Wartezeit.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { WartezeitMinuten = (int)Wartezeit.Value }); };
         Karte("Wohnbereich", "Abgängigkeit: Wartezeit", "So viele Minuten nach der Rückkehrzeit fragt die Ausgangsliste „Abgängigkeit melden?“.", Wartezeit, Funktionen.EinstellungenBereich);
         MeldestellenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Meldestellen]));
@@ -97,6 +103,17 @@ public sealed partial class EinstellungenSeite
         ArchivFristKnopf.Click += (_, _) => ArchivFristUebernehmen();
         Karte("Wohnbereich", "Archiv: Aufbewahrungsfrist", "Jahre ab Entlassung, bis eine archivierte Akte gelöscht werden darf. Keine Vorgabe: Die Frist muss mit Träger und Datenschutz geklärt werden. Leer = nicht festgelegt.",
             Reihe(ArchivFrist, ArchivFristKnopf, ArchivFristMeldung), Funktionen.ArchivLoeschen);
+        SchluesselwoerterKnopf.Click += (_, _) => FensterZeigen(new SchluesselwoerterFenster(speicher));
+        FachwoerterKnopf.Click += (_, _) => FensterZeigen(new FachwoerterFenster(speicher));
+        BestellungKnopf.Click += (_, _) => BestellungUebernehmen();
+        Karte("Wohnbereich", "Medikamentenbestellung", "Bestand führen (Vorgabe aus), wie viele Tage im Voraus, die heimversorgende Apotheke. E-Mail ist nicht verschlüsselt: " +
+            "nur freigeben, wenn Einrichtung und Datenschutz diesen Weg erlaubt haben.",
+            Reihe(BestandFuehren, BestellTage, Apotheke, ApothekeEmail, ApothekeFrei, BestellungKnopf, BestellungMeldung), Funktionen.EinstellungenBereich);
+        Autokorrektur.CheckedChanged += (_, _) => { if (!laedt) speicher.AutokorrekturSetzen(Recht.Kuerzel, Autokorrektur.Checked); };
+        Karte("Wohnbereich", "Rechtschreibung", "Rote Wellenlinie unter unbekannten Wörtern, Vorschläge per Rechtsklick. Namen, Medikamente und Fachwörter gelten als richtig. Grammatik und Stil prüft das Programm nicht.",
+            Reihe(FachwoerterKnopf, Autokorrektur, RechtschreibStand), null);
+        Karte("Wohnbereich", "Schlüsselwörter", "Wörter, bei denen „Neuer Bericht“ den nächsten Schritt anbietet (z. B. „Arzttermin“ → Termin im Kalender). Ansehen alle; ändern mit Recht „Schlüsselwörter verwalten“.",
+            SchluesselwoerterKnopf, null);
         MassnahmenListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Massnahmenarten, Liste.Massnahmenvorlagen]));
         Karte("Wohnbereich", "Maßnahmen: Arten und Vorlagen", "Arten (z. B. Anleitung, Begleitung) und Vorlagen für häufige Maßnahmen, damit nicht jeder anders benennt.",
             MassnahmenListenKnopf, Funktionen.MassnahmenAnlegen);

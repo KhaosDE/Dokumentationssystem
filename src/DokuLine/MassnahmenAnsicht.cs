@@ -92,14 +92,15 @@ public sealed class MassnahmenAnsicht : KartenFlaeche
         var jetzt = Jetzt();
         var heute = DateOnly.FromDateTime(jetzt);
         int wochen = Einstellungen.Laden().KeinBerichtWochen;
+        bool abwesend = AbwesenheitAnzeige.Text(speicher, b, jetzt) is not null;   // abwesende Tage zählen nicht als „kein Bericht“ (Bauplan 50)
         Lebensbereiche.BeginUpdate();
         Lebensbereiche.Items.Clear();
         foreach (var lb in MassnahmenRegeln.Lebensbereiche(speicher.Berichte(id), jetzt, wochen))
         {
             var zeile = new ListViewItem([$"{lb.Nr} {BerichtRegeln.Lebensbereiche[lb.Nr - 1]}", lb.BerichteImQuartal.ToString(CultureInfo.InvariantCulture),
-                lb.LetzterBericht is DateTime l ? Datum.Text(DateOnly.FromDateTime(l)) : "–", Datum.Text(lb.NaechsteReflexion), lb.Marke?.Text ?? ""])
+                lb.LetzterBericht is DateTime l ? Datum.Text(DateOnly.FromDateTime(l)) : "–", Datum.Text(lb.NaechsteReflexion), abwesend ? "" : lb.Marke?.Text ?? ""])
             { ToolTipText = "Doppelklick: Berichte dieses Lebensbereichs in der Dokumentation" };
-            if (lb.Marke is not null) zeile.SubItems[4].ForeColor = Stil.Achtung.Text;
+            if (lb.Marke is not null && !abwesend) zeile.SubItems[4].ForeColor = Stil.Achtung.Text;
             zeile.UseItemStyleForSubItems = false;
             Lebensbereiche.Items.Add(zeile);
         }
@@ -167,7 +168,7 @@ public sealed class MassnahmenAnsicht : KartenFlaeche
         ZielStand.Font = achtung ? Stil.FettKursiv : Stil.Standard;
         ZieleGezeigt = [.. ZielRegeln.Aktive(alle), .. FruehereZiele.Checked ? alle.Where(z => !z.Aktiv) : []];
         var massnahmenJe = laufende.ToLookup(m => m.Am(heute)?.ZielId);
-        var berichteJe = berichte.ToLookup(b => b.ZielId);
+        var berichteJe = berichte.Where(b => b.Art != MassnahmenRegeln.ArtBericht).ToLookup(b => b.ZielId);   // ohne die Einträge der Bestätigungen
         Ziele.BeginUpdate();
         Ziele.Items.Clear();
         foreach (var z in ZieleGezeigt)

@@ -103,6 +103,7 @@ public sealed class VisiteFenster : Form
     {
         if (Eintraege.FirstOrDefault(e => e.Bewohner.Id == b.Id) is VisiteEintragFeld schon) return schon;
         var feld = new VisiteEintragFeld(b, medikamente) { Margin = new Padding(0, 0, 0, Stil.AbstandMittel) };
+        Rechtschreibpruefung.Anbinden(feld.Besprochen, speicher);
         feld.EntfernenGeklickt += () =>
         {
             Eintraege.Remove(feld);

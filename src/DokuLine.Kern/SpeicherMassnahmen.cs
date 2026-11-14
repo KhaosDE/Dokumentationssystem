@@ -140,7 +140,7 @@ public sealed partial class Speicher
         var f = m.Laeuft(dienst.Tag) ? m.Am(dienst.Tag) : null;
         if (f is null) throw new Eingabefehler(["Die Maßnahme gilt an diesem Tag nicht."]);
         bool bedarf = f.Rhythmus == MassnahmeRhythmus.BeiBedarf;
-        if (!bedarf && (f.Schicht != dienst.Schicht || !MassnahmenRegeln.AmTag(f, dienst.Tag)))
+        if (!bedarf && (f.Schicht != dienst.Schicht || !MassnahmenRegeln.AmTag(m, f, dienst.Tag)))
             throw new Eingabefehler([$"Die Maßnahme ist im {dienst.Text} nicht fällig."]);
         if (MassnahmenRegeln.BestaetigungPruefen(ergebnis, grund, minuten) is string fehler) throw new Eingabefehler([fehler]);
         using var transaktion = db.BeginTransaction();

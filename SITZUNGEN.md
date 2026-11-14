@@ -148,3 +148,9 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 14.11.2026 — Claude Code: 0.49.0 Küchendienst im Tagesplan (Bauplan 45): Zeile mit Tausch und „unbesetzt“, bestätigen, Marke beim Bewohner.
 - 14.11.2026 — Claude Code: 0.50.0 Archiv (Bauplan 46): Entlassen, Seite „Archiv“, Akte nur lesend, Wiederaufnahme, Löschen zu zweit mit Protokoll.
 - 14.11.2026 — Claude Code: 0.51.0 Hilfeplangespräche (Bauplan 47): Seite nach Fälligkeit, Termin, Einladung, Vorbereitung, „geführt“, Prüfpunkt QMB.
+- 14.11.2026 — Claude Code: 0.52.0 Schlüsselwörter (Bauplan 48): Vorschlagszeile, Zielformular nach dem Speichern mit Verweis, Einstellungsfenster mit Probefeld.
+- 14.11.2026 — Claude Code: 0.53.0 Rechtschreibprüfung (Bauplan 49): Windows-Prüfung mit Wellenlinie, eigene Wörter, Fachwörterbuch, Autokorrektur.
+- 14.11.2026 — Claude Code: 0.54.0 Abwesenheit in der Dokumentation (Bauplan 50): Zeile, Balken, Beginn/Ende-Einträge, Hinweis im Bericht, leise Namen.
+- 14.11.2026 — Claude Code: 0.55.0 Medikamentenbestellung (Bauplan 51): Seite „Bestellung“, Anforderung, Ausdruck/E-Mail, Verlauf, Bestand zuschaltbar.
+- 14.11.2026 — Claude Code: 0.56.0 HEB-Fälligkeit (Bauplan 52): Frist je Bewohner, Erinnerung in Stufen, Seite „HEB-Fristen“, Kalender, Prüfseite; Bauplan 38–52 gebaut.
+- 14.11.2026 — Claude Code: 0.56.1 Fehlersuche nach Bauplan 52 (vier Prüfer): Funde behoben, offene Punkte in STAND.

@@ -23,6 +23,18 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     // Freiwillig: zu welchem Ziel des Bewohners (Bauplan 43).
     public ComboBox ZielWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Font = Stil.Standard, Width = 420, AccessibleName = "Ziel (freiwillig)" };
     private List<Ziel> ziele = [];
+    // Schlüsselwörter (Bauplan 48): die leise Zeile unter dem Text; vorgemerkte Schritte öffnen nach dem Speichern.
+    public VorschlagLeiste Vorschlaege { get; }
+    // Rechtschreibung (Bauplan 49): leiser Hinweis „2 Wörter unbekannt“ – kein Zwang beim Speichern.
+    public Unterstreichung InhaltPruefung { get; }
+    // Bauplan 50: „Bewohner ist abwesend (…)“ oben, damit klar ist, worüber geschrieben wird.
+    public Label AbwesendHinweis { get; } = new()
+    {
+        AutoSize = true, MaximumSize = new Size(580, 0), ForeColor = Stil.Abwesend.Text, BackColor = Stil.Abwesend.Flaeche,
+        Padding = new Padding(Stil.AbstandKlein), Visible = false, UseMnemonic = false
+    };
+    public Label RechtschreibHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, Visible = false, UseMnemonic = false };
+    public IReadOnlyList<Vorschlag> Folgeschritte => Vorschlaege.Vorgemerkt;
     public bool AngebotGefragt => Art.SelectedItem as string == DokuRegeln.ArtTherapie;
     public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // aus der Anmeldung
     public CheckBox[] Bereiche { get; } = Enumerable.Range(1, 5).Select(n => new CheckBox
@@ -56,6 +68,7 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     {
         this.speicher = speicher;
         auswahl = fest is null ? speicher.AlleBewohner() : [fest];
+        Vorschlaege = new VorschlagLeiste(speicher.Schluesselwoerter(), speicher.VorschlaegeAus(Recht.Kuerzel));
         Text = $"Neuer Bericht ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
@@ -89,6 +102,9 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         BewohnerWahl.SelectedIndex = auswahl.Count == 1 ? 0 : -1;
         BewohnerWahl.Enabled = fest is null;
         Zeile("Bewohner", BewohnerWahl);
+        Zeile(null, AbwesendHinweis);
+        BewohnerWahl.SelectedIndexChanged += (_, _) => AbwesendZeigen();
+        AbwesendZeigen();
 
         var jetzt = Jetzt();
         Datum.Text = Kern.Datum.Text(DateOnly.FromDateTime(jetzt));
@@ -134,6 +150,17 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
 
         Inhalt.Dock = DockStyle.Fill;
         Zeile("Text", Inhalt);
+        Zeile(null, Vorschlaege);
+        Zeile(null, RechtschreibHinweis);
+        InhaltPruefung = Rechtschreibpruefung.Anbinden(Inhalt, speicher, RechtschreibHinweis);
+        Rechtschreibpruefung.Anbinden(UebergabeText, speicher);
+        Inhalt.TextChanged += (_, _) => Vorschlaege.Pruefen(Inhalt.Text + "\n" + UebergabeText.Text);
+        UebergabeText.TextChanged += (_, _) => Vorschlaege.Pruefen(Inhalt.Text + "\n" + UebergabeText.Text);
+        Vorschlaege.Sofort += _ =>
+        {
+            if (Art.Items.IndexOf("Besonderes Vorkommnis") is int i && i >= 0) Art.SelectedIndex = i;
+            Wichtig.Checked = true;
+        };
         Zeile(null, new Label
         {
             Text = "Merkhilfe: wertneutral beschreiben, nicht bewerten. Aussagen des Bewohners kennzeichnen („gibt an, dass …“). " +
@@ -221,6 +248,13 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
             ? TherapieRegeln.BerichtText((string)AngebotWahl.SelectedItem!, text) : text;
 
     public void BewohnerWaehlen(long id) => BewohnerWahl.SelectedIndex = auswahl.FindIndex(b => b.Id == id);
+
+    private void AbwesendZeigen()
+    {
+        string? grund = BewohnerWahl.SelectedIndex >= 0 ? AbwesenheitAnzeige.Text(speicher, auswahl[BewohnerWahl.SelectedIndex], Jetzt()) : null;
+        AbwesendHinweis.Text = grund is null ? "" : AbwesenheitRegeln.FormularText(grund);
+        AbwesendHinweis.Visible = grund is not null;
+    }
 
     // ----- Entwurf -----
 
@@ -339,6 +373,7 @@ public sealed class NachtragFormular : Form
     public NachtragFormular(Speicher speicher, Bericht bericht)
     {
         this.speicher = speicher;
+        Rechtschreibpruefung.Anbinden(Inhalt, speicher);
         this.bericht = bericht;
         Text = $"Nachtrag ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;

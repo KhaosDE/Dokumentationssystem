@@ -97,8 +97,8 @@ public static class QualitaetRegeln
         // Unbestätigt: in den letzten n Tagen fällig gewesen (ohne heute), aber in dieser Zeit nie bestätigt.
         var von = heute.AddDays(-e.TageUnbestaetigt);
         int unbestaetigt = laufend.Count(m => m.Am(heute) is MassnahmeFassung f && f.Rhythmus != MassnahmeRhythmus.BeiBedarf && f.GiltAb <= von
-            && Enumerable.Range(1, e.TageUnbestaetigt).Any(i => MassnahmenRegeln.AmTag(f, heute.AddDays(-i)))
-            && !d.Bestaetigungen.Any(b => b.MassnahmeId == m.Id && b.Tag > von));
+            && Enumerable.Range(1, e.TageUnbestaetigt).Any(i => MassnahmenRegeln.AmTag(m, f, heute.AddDays(-i)))
+            && !d.Bestaetigungen.Any(b => b.MassnahmeId == m.Id && b.Tag >= von));
         Punkt(Pruefpunkt.MassnahmenBestaetigt, unbestaetigt == 0 ? null
             : $"{unbestaetigt} {(unbestaetigt == 1 ? "Maßnahme" : "Maßnahmen")} seit {e.TageUnbestaetigt} Tagen nicht bestätigt");
 
@@ -111,7 +111,7 @@ public static class QualitaetRegeln
         Punkt(Pruefpunkt.Reflexion, spaeterAufgenommen || d.LetzteReflexion.Fertig ? null
             : $"{ReflexionRegeln.MonatText(monat)}: {ReflexionRegeln.StatusText(d.LetzteReflexion)}");
         Punkt(Pruefpunkt.Heb, d.HebFaellig);
-        Punkt(Pruefpunkt.Hilfeplan, d.Hilfeplan is { Stand: not HilfeplanStandArt.TerminVergeben, FaelligBis: DateOnly hpg } && hpg < heute
+        Punkt(Pruefpunkt.Hilfeplan, d.Hilfeplan is { FaelligBis: DateOnly hpg } hp && !HilfeplanRegeln.TerminSteht(hp, heute) && hpg < heute
             ? $"überfällig seit {Datum.Text(hpg)}" : null);
 
         var fehlt = new List<string>();

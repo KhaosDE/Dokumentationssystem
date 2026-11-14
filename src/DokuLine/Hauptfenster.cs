@@ -22,8 +22,8 @@ public sealed partial class Hauptfenster : Form
 
     // Die Einträge des Bereichs „Therapie“ stehen nur dort in der Seitenleiste, in eigener Reihenfolge.
     public static readonly string[] Bereiche =
-        ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Medikamentenausgabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Hilfeplangespräche", "Therapie",
-         .. TherapieBereiche, "Auswertung", "Qualität", "Archiv", "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
+        ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Medikamentenausgabe", "Bestellung", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Hilfeplangespräche", "HEB-Fristen",
+         "Therapie", .. TherapieBereiche, "Auswertung", "Qualität", "Archiv", "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
 
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
@@ -49,6 +49,8 @@ public sealed partial class Hauptfenster : Form
     public QualitaetSeite Qualitaet { get; }
     public ArchivSeite Archiv { get; }
     public HilfeplanSeite Hilfeplan { get; }
+    public HebFristenSeite HebFristen { get; }
+    public BestellungSeite Bestellung { get; }
     public AusgabeSeite Ausgabe { get; }
     public EinstellungenSeite Einstellungsseite { get; }
     public AnzeigeDienst Anzeige { get; }
@@ -142,6 +144,12 @@ public sealed partial class Hauptfenster : Form
         Hilfeplan = new HilfeplanSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Hilfeplangespräche"] = Hilfeplan;
         Hilfeplan.Geaendert += () => { if (AktiverBereich == "Hilfeplangespräche") Kopf.TexteSetzen(Hilfeplan.KopfText, "Hilfeplangespräche"); };
+        HebFristen = new HebFristenSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["HEB-Fristen"] = HebFristen;
+        HebFristen.Geaendert += () => { if (AktiverBereich == "HEB-Fristen") Kopf.TexteSetzen(HebFristen.KopfText, "HEB-Fristen"); };
+        Bestellung = new BestellungSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Bestellung"] = Bestellung;
+        Bestellung.Geaendert += () => { if (AktiverBereich == "Bestellung") Kopf.TexteSetzen(Bestellung.KopfText, "Bestellung"); };
         Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
         Anzeige = new AnzeigeDienst(speicher);
         Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false, Anzeige = Anzeige };
@@ -199,6 +207,7 @@ public sealed partial class Hauptfenster : Form
         Uebersicht.AuskunftGewuenscht += b => Bewohner.AuskunftOeffnen(b);
         Modul.Ausgangsliste.Aktionen.AbgaengigkeitMelden = id => { if (speicher.Bewohner(id) is Kern.Bewohner b) Bewohner.AbgaengigkeitOeffnen(b); };
         Bewohner.BerichtGewuenscht += id => NeuerBericht(id);
+        Bewohner.BereichGewuenscht += bereich => BereichWaehlen(bereich);
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false, Titel = name };
         foreach (var seite in seiten.Values) bereichsFlaeche.Controls.Add(seite);

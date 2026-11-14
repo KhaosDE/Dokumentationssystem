@@ -45,7 +45,9 @@ public static class Symbole
         "Qualität" => Qualitaet,
         "Archiv" => Archiv,
         "Hilfeplangespräche" => Kalender,
+        "HEB-Fristen" => Qualitaet,
         "Medikamentenausgabe" => Medikamente,
+        "Bestellung" => Medikamente,
         _ => Modul,
     };
 }

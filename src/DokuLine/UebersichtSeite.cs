@@ -147,7 +147,9 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         gezeigtSchicht = SchichtTermin.Zu(jetzt);
         var werte = Einstellungen.Laden();
         string gewaehlt = Arbeitsbereich.Gewaehlt.Length > 0 ? Arbeitsbereich.Gewaehlt : werte.Bereich;
-        var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
+        speicher.HebErinnerungen(jetzt);
+        speicher.BestellErinnerungen(jetzt);
+        var jeder = speicher.Heute(jetzt);
         // Der gewählte Bereich; „Alle“ und Bereiche ohne eigene Bewohner (z. B. „Therapie“) zeigen alle, mit Hinweis.
         var eigene = jeder.Where(h => h.Bewohner.Wohnbereich == gewaehlt).ToList();
         bool allesZeigen = BereichswahlRegeln.GanzesHaus(gewaehlt) || eigene.Count == 0;

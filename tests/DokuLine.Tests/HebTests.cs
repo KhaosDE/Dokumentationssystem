@@ -7,7 +7,7 @@ using PdfSharp.Pdf.IO;
 namespace DokuLine.Tests;
 
 // HEB-Bogen: Felder und Grenzen, Zeitraum, Nummer, Planungszeitraum, Fortschreiben, Fassungen,
-// „HEB fällig“, Stilregeln für Ziele, PDF zuteilen, zuordnen und ausfüllen (Test-PDF), Demo.
+// Stilregeln für Ziele, PDF zuteilen, zuordnen und ausfüllen (Test-PDF), Demo.
 [Collection("Datenordner")]
 public sealed class HebTests : IDisposable
 {
@@ -108,22 +108,6 @@ public sealed class HebTests : IDisposable
     }
 
     [Fact]
-    public void HEB_faellig()
-    {
-        HebBogen Bogen(DateOnly bis, Bogenart art = Bogenart.B) => new(1, 1, art, bis.AddMonths(-12), bis, null, bis,
-            [new HebFassung { Fertig = true }]);
-        var ahorn = B("Ahorn");
-        Assert.StartsWith("HEB fällig (letzter ", HebRegeln.Faellig(ahorn, s.HebBoegen(ahorn.Id!.Value), Heute, 12));
-        Assert.Null(HebRegeln.Faellig(B("Birke"), s.HebBoegen(B("Birke").Id!.Value), Heute, 12));
-        Assert.NotNull(HebRegeln.Faellig(B("Immergrün"), s.HebBoegen(B("Immergrün").Id!.Value), Heute, 12));
-        var neu = ahorn with { Aufnahmedatum = Heute.AddMonths(-1) };
-        Assert.Null(HebRegeln.Faellig(neu, [], Heute, 12));
-        Assert.Equal("HEB fällig (kein HEB A)", HebRegeln.Faellig(neu with { Aufnahmedatum = Heute.AddMonths(-4) }, [], Heute, 12));
-        Assert.Null(HebRegeln.Faellig(ahorn, [Bogen(Heute.AddMonths(-5))], Heute, 6));
-        Assert.NotNull(HebRegeln.Faellig(ahorn, [Bogen(Heute.AddMonths(-7))], Heute, 6));
-    }
-
-    [Fact]
     public void Stilregeln_fuer_Ziele()
     {
         Assert.Contains(Stilpruefung.Pruefen("1. Ich lerne, mein Zimmer aufzuräumen.", FeldArt.Rahmenziel), h => h.Regel.StartsWith("Rahmenziel in der 3. Person"));
@@ -180,8 +164,6 @@ public sealed class HebTests : IDisposable
         Assert.Equal(kiefer[0].Bis, kiefer[1].Von);   // Zeitraum schließt an
         Assert.Equal(2, s.HebBoegen(B("Ginster").Id!.Value).Count);
         Assert.Equal(Bogenart.A, s.HebBoegen(B("Ginster").Id!.Value)[0].Art);
-        int faellig = s.AlleBewohner().Count(b => HebRegeln.Faellig(b, s.HebBoegen(b.Id!.Value), Heute, 12) is not null);
-        Assert.Equal(2, faellig);   // Ahorn und Immergrün
     }
 
     [Fact]

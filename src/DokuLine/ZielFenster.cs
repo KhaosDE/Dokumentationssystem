@@ -29,6 +29,7 @@ public sealed class ZielFenster : Form
         bewohnerId = bewohner.Id!.Value;
         this.alt = alt;
         Fenster.Grundform(this, alt is null ? $"Neues Ziel: {bewohner.Name}" : $"Ziel ändern: {bewohner.Name}");
+        Rechtschreibpruefung.Anbinden(Wortlaut, speicher);
         var heute = DateOnly.FromDateTime(Jetzt());
         var f = alt?.Aktuell;
         Art.SelectedIndex = (int)(alt?.Art ?? art);

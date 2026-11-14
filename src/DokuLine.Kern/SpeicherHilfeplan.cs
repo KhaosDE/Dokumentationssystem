@@ -43,6 +43,7 @@ public sealed partial class Speicher
     {
         if (Grund(kuerzel, Funktionen.BewohnerBearbeiten) is string grund) throw new Eingabefehler([grund]);
         if (Bewohner(bewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        if (Archiviert(bewohnerId)) throw new Eingabefehler(["Dieser Bewohner ist entlassen."]);
     }
 
     public void HilfeplanFaelligSetzen(long bewohnerId, DateOnly bis, string kuerzel, DateTime jetzt)
@@ -115,7 +116,7 @@ public sealed partial class Speicher
         });
         using var transaktion = db.BeginTransaction();
         HilfeplanEreignisEinfuegen(bewohnerId, "gefuehrt", am, null, "", bericht.Id, kuerzel, jetzt, transaktion);
-        if (naechstes is DateOnly bis) HilfeplanEreignisEinfuegen(bewohnerId, "faellig", bis, null, "", null, kuerzel, jetzt.AddSeconds(1), transaktion);
+        if (naechstes is DateOnly bis) HilfeplanEreignisEinfuegen(bewohnerId, "faellig", bis, null, "", null, kuerzel, jetzt, transaktion);   // Reihenfolge über die Nummer
         transaktion.Commit();
         HilfeplanGeaendert?.Invoke();
         return bericht;

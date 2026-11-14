@@ -38,7 +38,7 @@ public class HebOberflaechenTests
         {
             Assert.True(h.Visible);
             Assert.True(h.Faellig.Visible);
-            Assert.StartsWith("HEB fällig", h.Faellig.AccessibleName);
+            Assert.Contains("HEB überfällig seit", h.Faellig.AccessibleName);
             var karte = Assert.Single(h.Karten);
             Assert.Equal("fertig", karte.StatusText);
 
@@ -153,8 +153,8 @@ public class HebOberflaechenTests
             }
             f.BereichWaehlen("Übersicht");
             var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
-            Assert.Contains(s.Zeilen.Single(k => k.Bewohner.Nachname == "Ahorn").Marken, m => m.Text.StartsWith("HEB fällig"));
-            Assert.DoesNotContain(s.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Marken, m => m.Text.StartsWith("HEB fällig"));
+            Assert.Contains(s.Zeilen.Single(k => k.Bewohner.Nachname == "Ahorn").Marken, m => m.Text.StartsWith("HEB überfällig seit"));
+            Assert.Contains(s.Zeilen.Single(k => k.Bewohner.Nachname == "Birke").Marken, m => m.Text.StartsWith("HEB fällig in"));
         }
     });
 }

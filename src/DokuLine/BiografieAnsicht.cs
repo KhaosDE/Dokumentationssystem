@@ -177,6 +177,7 @@ public sealed class BiografieFenster : Form
     public BiografieFenster(Speicher speicher, Bewohner bewohner, BiografieAbschnitt abschnitt)
     {
         this.speicher = speicher;
+        Rechtschreibpruefung.Anbinden(Inhalt, speicher);
         this.bewohner = bewohner;
         this.abschnitt = abschnitt;
         Text = $"Biografie: {abschnitt.Titel} – {bewohner.Name} ({Stil.DemoHinweis})";

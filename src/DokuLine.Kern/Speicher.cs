@@ -1213,6 +1213,82 @@ public sealed partial class Speicher : IDisposable
         INSERT INTO berichtsarten (name, nr) SELECT 'Hilfeplangespräch', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
             WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Hilfeplangespräch');
         """,
+        // 48 – Schlüsselwörter (eine Liste für das Haus) und Verweise vom Bericht auf das, was daraus entstand.
+        """
+        CREATE TABLE IF NOT EXISTS schluesselwoerter (
+            id           INTEGER PRIMARY KEY,
+            wort         TEXT NOT NULL,
+            folgeschritt TEXT NOT NULL,
+            art          TEXT NOT NULL,
+            aktiv        INTEGER NOT NULL DEFAULT 1 CHECK (aktiv IN (0, 1)),
+            mitgeliefert INTEGER NOT NULL DEFAULT 0 CHECK (mitgeliefert IN (0, 1))
+        );
+        CREATE TABLE IF NOT EXISTS bericht_verweise (
+            id        INTEGER PRIMARY KEY,
+            bericht_id INTEGER NOT NULL REFERENCES berichte(id) ON DELETE CASCADE,
+            text      TEXT NOT NULL,
+            erfasst   TEXT NOT NULL
+        );
+        """,
+        // 49 – Fachwörterbuch der Einrichtung (Rechtschreibung).
+        """
+        CREATE TABLE IF NOT EXISTS fachwoerter (
+            wort         TEXT PRIMARY KEY COLLATE NOCASE,
+            mitgeliefert INTEGER NOT NULL DEFAULT 0 CHECK (mitgeliefert IN (0, 1))
+        );
+        """,
+        // 50 – Medikamentenbestellung: Bestand (gezählt, geliefert), Anforderungen mit Posten und Verlauf (nie geändert).
+        """
+        CREATE TABLE IF NOT EXISTS med_bestand (
+            id            INTEGER PRIMARY KEY,
+            verordnung_id INTEGER NOT NULL REFERENCES verordnungen(id) ON DELETE CASCADE,
+            art           TEXT NOT NULL CHECK (art IN ('gezaehlt', 'geliefert')),
+            menge         TEXT NOT NULL,
+            packung       INTEGER NOT NULL DEFAULT 0,
+            zeit          TEXT NOT NULL,
+            kuerzel       TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS med_anforderungen (
+            id         INTEGER PRIMARY KEY,
+            empfaenger TEXT NOT NULL,
+            email      TEXT NOT NULL DEFAULT '',
+            erstellt   TEXT NOT NULL,
+            kuerzel    TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS med_anforderung_posten (
+            id             INTEGER PRIMARY KEY,
+            anforderung_id INTEGER NOT NULL REFERENCES med_anforderungen(id) ON DELETE CASCADE,
+            verordnung_id  INTEGER NOT NULL,
+            bewohner_id    INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            text           TEXT NOT NULL,
+            menge          TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS med_anforderung_stand (
+            id             INTEGER PRIMARY KEY,
+            anforderung_id INTEGER NOT NULL REFERENCES med_anforderungen(id) ON DELETE CASCADE,
+            stand          TEXT NOT NULL CHECK (stand IN ('bestaetigt', 'geliefert', 'erledigt')),
+            zeit           TEXT NOT NULL,
+            kuerzel        TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS med_bestand_bleibt BEFORE UPDATE ON med_bestand
+            BEGIN SELECT RAISE(ABORT, 'Bestandseinträge werden nicht geändert.'); END;
+        """,
+        // 51 – HEB-Fristen: fällig am, kein HEB nötig, abgegeben, Erinnerung als Aufgabe (nie geändert).
+        """
+        CREATE TABLE IF NOT EXISTS heb_frist (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('faellig', 'kein', 'abgegeben', 'aufgabe')),
+            datum       TEXT,
+            grund       TEXT NOT NULL DEFAULT '',
+            bogen_id    INTEGER,
+            aufgabe_id  INTEGER,
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS heb_frist_bleibt BEFORE UPDATE ON heb_frist
+            BEGIN SELECT RAISE(ABORT, 'Einträge zur HEB-Frist werden nicht geändert.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1390,10 +1466,11 @@ public sealed partial class Speicher : IDisposable
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
              akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
              vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null, ausgabe = Meta(DemoAusgabe) is null,
-             ziele = Meta(DemoZiele) is null, archiv = Meta(DemoArchiv) is null, hilfeplan = Meta(DemoHilfeplan) is null;
+             ziele = Meta(DemoZiele) is null, archiv = Meta(DemoArchiv) is null, hilfeplan = Meta(DemoHilfeplan) is null,
+             hebfrist = Meta(DemoHebFrist) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !archiv && !hilfeplan && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !archiv && !hilfeplan && !hebfrist && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1430,6 +1507,7 @@ public sealed partial class Speicher : IDisposable
         if (bezug || mitarbeiter) DemoBezugEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
         if (hilfeplan) DemoHilfeplanEinfuegen(transaktion);
+        if (hebfrist || heb) DemoHebFristEinfuegen(transaktion);   // hängt an den HEB-Bögen
         if (archiv) DemoArchivEinfuegen(transaktion);
         transaktion.Commit();
         if (dokumente) AblageAufraeumen();
@@ -1493,6 +1571,7 @@ public sealed partial class Speicher : IDisposable
             DemoBezugEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
             DemoHilfeplanEinfuegen(transaktion);
+            DemoHebFristEinfuegen(transaktion);
             DemoArchivEinfuegen(transaktion);   // zuletzt: die ehemaligen Bewohner bekommen keine Demo-Daten der Lebenden
             transaktion.Commit();
         }
@@ -1549,6 +1628,7 @@ public sealed partial class Speicher : IDisposable
     public Bericht BerichtSpeichern(Bericht b, UebergabeWunsch? uebergabe = null)
     {
         if (Bewohner(b.BewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        if (Archiviert(b.BewohnerId)) throw new Eingabefehler(["Dieser Bewohner ist entlassen; seine Akte im Archiv wird nur gelesen."]);
         if (b.Id is not null) throw new InvalidOperationException("Berichte werden nicht überschrieben – Korrekturen sind Nachträge.");
         if (b.ZielId is long ziel && Ziele(b.BewohnerId).All(z => z.Id != ziel)) throw new Eingabefehler(["Das gewählte Ziel gehört nicht zu diesem Bewohner."]);
         if (uebergabe is not null) UebergabeRegeln.Pruefen(uebergabe, b.Erfasst);
@@ -1770,7 +1850,8 @@ public sealed partial class Speicher : IDisposable
                                    "EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id), " +
                                    "(SELECT minuten FROM bericht_dauer d WHERE d.bericht_id = berichte.id), " +
                                    "EXISTS (SELECT 1 FROM medikamentenausgaben a WHERE a.bericht_id = berichte.id), " +
-                                   $"(SELECT ziel_id FROM bericht_ziel z WHERE z.bericht_id = berichte.id) FROM berichte {bedingung}",
+                                   "(SELECT ziel_id FROM bericht_ziel z WHERE z.bericht_id = berichte.id), " +
+                                   $"(SELECT group_concat(text, ' · ') FROM bericht_verweise v WHERE v.bericht_id = berichte.id) FROM berichte {bedingung}",
                                    null, parameter))
         using (var leser = befehl.ExecuteReader())
         {
@@ -1794,6 +1875,7 @@ public sealed partial class Speicher : IDisposable
                     Dauer = leser.IsDBNull(12) ? null : leser.GetInt32(12),
                     Ausgabe = leser.GetInt64(13) != 0,
                     ZielId = leser.IsDBNull(14) ? null : leser.GetInt64(14),
+                    Verweis = leser.IsDBNull(15) ? "" : leser.GetString(15),
                 });
             }
         }

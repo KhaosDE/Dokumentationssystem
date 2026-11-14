@@ -45,6 +45,26 @@ public sealed partial class EinstellungenSeite
         return true;
     }
 
+    // Medikamentenbestellung (Bauplan 51): Bestand je Bereich, Tage, Apotheke und ihre E-Mail-Freigabe.
+    public bool BestellungUebernehmen()
+    {
+        if (!Darf(Funktionen.EinstellungenBereich)) return false;
+        try
+        {
+            speicher.BestellEinstellungen(Einstellungen.Laden().Bereich, BestandFuehren.Checked, (int)BestellTage.Value, Apotheke.Text, ApothekeEmail.Text, Recht.Kuerzel);
+            if (Apotheke.Text.Trim().Length > 0) speicher.EmailFreigeben(Apotheke.Text, ApothekeFrei.Checked, Recht.Kuerzel);
+        }
+        catch (Eingabefehler e)
+        {
+            BestellungMeldung.Text = string.Join(" ", e.Fehler);
+            BestellungMeldung.ForeColor = Stil.Beschluss.Text;
+            return false;
+        }
+        BestellungMeldung.Text = "übernommen";
+        BestellungMeldung.ForeColor = Stil.TextMittel;
+        return true;
+    }
+
     public bool SchichtzeitenUebernehmen()
     {
         if (laedt) return false;
@@ -220,5 +240,13 @@ public sealed partial class EinstellungenSeite
         Fehler.Visible = fehlerZeigen = true;
         rechts.PerformLayout();
         return false;
+    }
+
+    // Die zweite Stufe hat höchstens so viele Wochen wie die erste.
+    private void HebStufenUebernehmen()
+    {
+        if (laedt || !Darf(Funktionen.EinstellungenBereich)) return;
+        if (HebAchtung.Value > HebErinnern.Value) HebAchtung.Value = HebErinnern.Value;
+        Einstellungen.Aendern(w => w with { HebErinnernWochen = (int)HebErinnern.Value, HebAchtungWochen = (int)HebAchtung.Value });
     }
 }

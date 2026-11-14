@@ -13,7 +13,7 @@ public class HauptfensterTests
         Assert.Contains("Demo — ausgedachte Daten", fenster.Text);
         Assert.Equal("Demo — ausgedachte Daten", KopfBereich.DemoHinweis);
         Assert.Equal(KopfBereich.DemoHinweis, fenster.Kopf.AccessibleName);
-        Assert.Equal(["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Medikamentenausgabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Hilfeplangespräche", "Therapie",
+        Assert.Equal(["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Medikamentenausgabe", "Bestellung", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Hilfeplangespräche", "HEB-Fristen", "Therapie",
                       "Laufende Therapien", "Angebote", "Wochenpläne", "Auswertung", "Qualität", "Archiv", "Ausgangsliste", "Einstellungen"],
             fenster.Navigation.Select(n => n.Text));
         Assert.All(Hauptfenster.TherapieBereiche, b => Assert.True(fenster.Ausgeblendet(b)));   // nur im Bereich Therapie (29n)
