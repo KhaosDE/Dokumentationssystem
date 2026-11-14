@@ -145,13 +145,13 @@ public class FehlersucheOberflaechenTests
         b.UebersichtZeigen();
         Assert.Equal(anderer.Id, b.Gewaehlt!.Id);
 
-        // Bereich umbenannt: die Bereichswahl in der Übersicht zeigt den neuen Namen, alle folgen ihr.
+        // Bereich umbenannt: die Bereichswahl in der Seitenleiste zeigt den neuen Namen, alle folgen ihr.
         u.Speicher.ListeneintragUmbenennen(Liste.Bereiche, "R2", "Nord");
-        var s = Assert.IsType<UebersichtSeite>(f.Seite("Übersicht"));
-        s.Aktualisieren();
-        Assert.Contains("Nord", s.Umschalter.Knoepfe.Select(k => k.Text));
-        Assert.DoesNotContain("R2", s.Umschalter.Knoepfe.Select(k => k.Text));
-        f.ArbeitsbereichWaehlen("Nord");
+        f.ArbeitsbereichWaehlen("R1");
+        Assert.Contains("Nord", f.BereichsWahl.Bereiche);
+        Assert.DoesNotContain("R2", f.BereichsWahl.Bereiche);
+        f.BereichsWahl.Waehlen("Nord");
+        Assert.Equal("Nord", Arbeitsbereich.Gewaehlt);
         b.UebersichtZeigen();
         Assert.NotEmpty(b.Zeilen);
         Assert.All(b.Zeilen, z => Assert.Equal("Nord", z.Wohnbereich));
@@ -172,14 +172,14 @@ public class FehlersucheOberflaechenTests
         Assert.True(ungelesen > s.Nachrichten.Zeilen.Count, "Demo: mehrere ungelesene in einem Verlauf");
         Assert.Equal(ungelesen, s.Nachrichten.Anzahl);   // wie die Seitenleiste (vorher: Zahl der Verläufe)
 
-        // Schmal: die Bereichswahl oben bleibt ganz sichtbar und liegt über den Kästen, nicht auf ihnen.
+        // Schmal: die Kästen beginnen oben auf der Seite und ragen nicht heraus (die Bereichswahl steht in der Seitenleiste).
         foreach (int breite in new[] { 1600, 1000, 800, 640 })
         {
             f.WindowState = FormWindowState.Normal;
             f.Size = new Size(breite, 700);
             Application.DoEvents();
-            Assert.True(s.Umschalter.Right <= s.ClientSize.Width, $"{breite}: Bereichswahl ragt heraus");
-            Assert.True(s.Umschalter.Bottom <= s.Uebergaben.Parent!.Top, $"{breite}: Bereichswahl über den Kästen");
+            Assert.True(s.Uebergaben.Parent!.Right <= s.ClientSize.Width, $"{breite}: Kästen ragen heraus");
+            Assert.True(s.Uebergaben.Parent!.Top <= Stil.Px(s, Stil.AbstandGross) + 1, $"{breite}: Lücke über den Kästen");
         }
         f.WindowState = FormWindowState.Maximized;
         Application.DoEvents();

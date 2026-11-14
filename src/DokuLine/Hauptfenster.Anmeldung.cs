@@ -40,11 +40,11 @@ public sealed partial class Hauptfenster
         else if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
     }
 
-    // Die Knöpfe der Bereichswahl in der Übersicht, je nach Recht.
+    // Die Bereiche der Auswahl in der Seitenleiste, je nach Recht.
     public List<string> BereichKnoepfe() =>
         BereichswahlRegeln.Knoepfe(speicher.SichtbareWohnbereiche(Recht.Kuerzel), f => Recht.Darf(speicher, f));
 
-    // Den Bereich wählen, der überall gilt (Übersicht); die gezeigte Ansicht und die Zähler folgen sofort.
+    // Den Bereich wählen, der überall gilt (Seitenleiste); die gezeigte Ansicht und die Zähler folgen sofort.
     public void ArbeitsbereichWaehlen(string bereich)
     {
         bool vorher = TherapieListe.Aktiv;
@@ -90,6 +90,8 @@ public sealed partial class Hauptfenster
     {
         string bereich = Arbeitsbereich.Gewaehlt;
         Kopf.BereichSetzen(bereich, BereichswahlRegeln.Eingesprungen(bereich, Einstellungen.Laden().Bereich));
+        BereichsWahl.Setzen(BereichKnoepfe(), bereich);
+        leiste.PerformLayout();   // mit einem Bereich ohne Auswahl ändert sich die Höhe nicht, eingeklappt das Kürzel
     }
 
     // Bereiche mit eigenem Recht; ohne dieses Recht verschwinden sie aus der Seitenleiste.

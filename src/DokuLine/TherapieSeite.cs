@@ -31,8 +31,6 @@ public sealed class TherapieSeite : Panel, IBereichSeite
     public Reiterleiste Reiter { get; } = new([LaufendReiter, AngeboteReiter]);
     public LaufendeTherapienAnsicht Laufend { get; }
     public bool LaufendAktiv => Reiter.Aktiv == LaufendReiter;
-    public BereichUmschalter Umschalter { get; } = new() { Visible = false };
-    public event Action<string>? BereichGewechselt;
     private bool stumm;   // Reiter von außen gesetzt: nur umschalten, gelesen wird danach in Zeigen()
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
@@ -64,9 +62,7 @@ public sealed class TherapieSeite : Panel, IBereichSeite
             if (Karten.FirstOrDefault(k => k.Angebot.Id == a.Id) is AngebotKarte karte) ScrollControlIntoView(karte);
         };
         Reiter.Gewechselt += _ => AnsichtWechseln();
-        Umschalter.Gewaehlt += b => BereichGewechselt?.Invoke(b);
         Controls.Add(Reiter);
-        Controls.Add(Umschalter);
         Controls.Add(Laufend);
         SichtbarkeitSetzen();
     }
@@ -151,14 +147,7 @@ public sealed class TherapieSeite : Panel, IBereichSeite
     public void Zeigen()
     {
         bool therapie = TherapieListe.Aktiv;
-        Reiter.Visible = !therapie;
-        Umschalter.Visible = therapie;
-        if (therapie)
-        {
-            string rechner = Einstellungen.Laden().Bereich;
-            Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.SichtbareWohnbereiche(Recht.Kuerzel), f => Recht.Darf(speicher, f)),
-                Arbeitsbereich.Gewaehlt, BereichswahlRegeln.Eingesprungen(Arbeitsbereich.Gewaehlt, rechner));
-        }
+        Reiter.Visible = !therapie;   // im Bereich Therapie sind die Reiter Einträge der Seitenleiste
         string heute = Datum.Text(DateOnly.FromDateTime(Jetzt()));
         if (TagFeld.Text != heute) TagFeld.Text = heute;
         else Aktualisieren();
@@ -227,13 +216,7 @@ public sealed class TherapieSeite : Panel, IBereichSeite
         int breite = Math.Max(100, ClientSize.Width - 2 * rand);
         int y = rand + AutoScrollPosition.Y;
         if (Laufend is null) return;   // Layout schon im Konstruktor (AutoScroll), bevor die Tafel angelegt ist
-        if (TherapieListe.Aktiv)
-        {
-            Umschalter.MaximumSize = new Size(breite, 0);
-            Umschalter.Bounds = new Rectangle(new Point(rand, y), Umschalter.GetPreferredSize(new Size(breite, 0)));
-            y = Umschalter.Bottom + Stil.Px(this, Stil.AbstandMittel);
-        }
-        else
+        if (!TherapieListe.Aktiv)
         {
             Reiter.SetBounds(rand, y, breite, Reiter.Height);
             y = Reiter.Bottom + Stil.Px(this, Stil.AbstandKlein);

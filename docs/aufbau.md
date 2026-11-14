@@ -39,7 +39,7 @@ Fenster → Kern → Speicher → SQLite-Datei im Datenordner (`%APPDATA%\DokuLi
 | Dokumentation (Berichte) | `Berichte.cs`, `Dokumentation.cs` | `BewohnerBereich.cs`, `DokumentationAnsicht.cs`, `BerichtZeile.cs` |
 | Übergabe | `Uebergabe.cs` | `UebergabeSeite.cs` |
 | Aufgaben, Standardaufgaben | `Aufgaben.cs`, `SpeicherAufgaben.cs` | `AufgabenSeite.cs`, `StandardaufgabenFenster.cs` |
-| Wahl des Bereichs | `Bereichswahl.cs` | `BereichUmschalter.cs`, `Arbeitsbereich` (Bausteine) |
+| Wahl des Bereichs | `Bereichswahl.cs` | `BereichsAuswahl.cs` (Seitenleiste), `Arbeitsbereich` (Bausteine) |
 | Rechte | `Mitarbeiter.cs` (`Funktionen`, `RechteRegeln`) | `Recht.cs`, `VerwaltungFenster.cs` |
 | Medikation, Bedarf | `Medikation.cs`, `Bedarf.cs` | `MedikationAnsicht.cs`, `BedarfFenster.cs` |
 | Visiten | `Visiten.cs`, `VisitenEntwurf.cs` | `VisitenSeite.cs`, `VisitenRundgang.cs` |

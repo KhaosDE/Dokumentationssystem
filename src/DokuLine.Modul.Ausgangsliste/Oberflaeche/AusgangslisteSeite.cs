@@ -103,7 +103,7 @@ public sealed class AusgangslisteSeite : ModulSeite
         inhalt.Clear();
         Zeilen.Clear();
         hinweis.RemoveAll();
-        // Gezeigt wird der in der Übersicht gewählte Bereich (geplant wird der Küchendienst weiter für alle).
+        // Gezeigt wird der in der Seitenleiste gewählte Bereich (geplant wird der Küchendienst weiter für alle).
         var imBereich = BereichswahlRegeln.Bewohner(db.Speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt)
             .Select(b => b.Id!.Value).ToHashSet();
         var abgaengig = db.Speicher.OffeneAbgaengigkeiten();

@@ -348,7 +348,7 @@ public sealed partial class Speicher
             ("$b", bereich), ("$h", haus));
     }
 
-    // Die Wohnbereiche, die jemand in der Übersicht wählen kann (eigenes Haus; andere Häuser nur mit Recht).
+    // Die Wohnbereiche, die jemand in der Seitenleiste wählen kann (eigenes Haus; andere Häuser nur mit Recht).
     public List<string> SichtbareWohnbereiche(string kuerzel)
     {
         var alle = Wohnbereiche().Select(w => w.Name).ToList();

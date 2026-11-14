@@ -32,7 +32,8 @@ public class TherapieBereichOberflaechenTests
             Assert.Equal(sichtbar[i - 1].Bottom + Stil.Px(f, Stil.AbstandMini), sichtbar[i].Top);   // ohne Lücke
         Assert.True(f.Navigation.Single(n => n.Text == "Einstellungen").Visible);
         Assert.Equal(TherapieSeite.LaufendReiter, f.Kopf.TitelText);
-        Assert.True(f.Therapie.Umschalter.Visible);   // oben die Bereichswahl statt der Reiter
+        Assert.Contains(TherapieRegeln.AnbieterTherapie, f.BereichsWahl.Bereiche);   // die Bereichswahl steht in der Seitenleiste
+        Assert.Equal(TherapieRegeln.AnbieterTherapie, f.BereichsWahl.Liste.SelectedItem);
         Assert.False(f.Therapie.Reiter.Visible);
         Hilfe.Foto(f, "130_therapie_laufend");
 
@@ -52,7 +53,7 @@ public class TherapieBereichOberflaechenTests
 
         // Zurück in einen Wohnbereich: die gewohnte Seitenleiste; die Therapie-Seite bleibt offen.
         f.Navigation.Single(n => n.Text == TherapieSeite.LaufendReiter).Ausloesen();
-        f.Therapie.Umschalter.Knoepfe.Single(k => k.Text == "R2").Ausloesen();
+        f.BereichsWahl.Waehlen("R2");
         Assert.Equal("R2", Arbeitsbereich.Gewaehlt);
         Assert.Equal("Therapie", f.AktiverBereich);
         Assert.True(f.Navigation.Single(n => n.Text == "Übersicht").Visible);

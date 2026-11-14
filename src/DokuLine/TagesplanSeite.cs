@@ -78,7 +78,7 @@ public sealed class TagesplanSeite : Panel, IBereichSeite
         var jetzt = Jetzt();
         letzteMinute = new DateTime(jetzt.Year, jetzt.Month, jetzt.Day, jetzt.Hour, jetzt.Minute, 0);
         var heute = DateOnly.FromDateTime(jetzt);
-        // Der in der Übersicht gewählte Bereich („Alle“ und Bereiche ohne Bewohner: alle).
+        // Der in der Seitenleiste gewählte Bereich („Alle“ und Bereiche ohne Bewohner: alle).
         var alle = speicher.AlleBewohner();
         var gezeigt = BereichswahlRegeln.Bewohner(alle, Arbeitsbereich.Gewaehlt);
         bereichText = gezeigt.Count == alle.Count ? "alle Bereiche" : Arbeitsbereich.Gewaehlt;

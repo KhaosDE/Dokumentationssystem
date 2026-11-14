@@ -63,6 +63,7 @@ public sealed partial class Hauptfenster : Form
     internal IMessageFilter F12 { get; }
     public bool MenueEingeklappt { get; private set; }
     public Label Arbeitsplatz { get; } = new();   // Bereich und Ort der Datenbank
+    public BereichsAuswahl BereichsWahl { get; } = new();   // über „Übersicht“: der Wohnbereich, der überall gilt
     private readonly ToolTip hinweis = new();
     private readonly System.Windows.Forms.Timer abgleich = new() { Interval = 30_000 };
     private long? datenstand;
@@ -106,7 +107,6 @@ public sealed partial class Hauptfenster : Form
         Therapie = new TherapieSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Therapie"] = Therapie;
         Therapie.Geaendert += () => { if (Schluessel(AktiverBereich) == "Therapie") Kopf.TexteSetzen(Therapie.KopfText, ((IBereichSeite)Therapie).Titel); };
-        Therapie.BereichGewechselt += ArbeitsbereichWaehlen;
         Therapie.Reiter.Gewechselt += TherapieReiterGewechselt;
         Wochenplaene = new WochenplaeneSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Wochenpläne"] = Wochenplaene;
@@ -177,7 +177,6 @@ public sealed partial class Hauptfenster : Form
         Uebersicht.AbgaengigkeitGewuenscht += b => { Bewohner.AbgaengigkeitOeffnen(b); Uebersicht.Aktualisieren(); };
         Uebersicht.AuskunftGewuenscht += b => Bewohner.AuskunftOeffnen(b);
         Modul.Ausgangsliste.Aktionen.AbgaengigkeitMelden = id => { if (speicher.Bewohner(id) is Kern.Bewohner b) Bewohner.AbgaengigkeitOeffnen(b); };
-        Uebersicht.BereichGewechselt += ArbeitsbereichWaehlen;
         Bewohner.BerichtGewuenscht += id => NeuerBericht(id);
         foreach (var (name, vorhaben) in Bauplan.Bereiche)
             seiten[name] = new PlatzhalterSeite(vorhaben) { Dock = DockStyle.Fill, Visible = false, Titel = name };
@@ -221,7 +220,8 @@ public sealed partial class Hauptfenster : Form
         Arbeitsplatz.AutoSize = true;
         Arbeitsplatz.UseMnemonic = false;
 
-        leiste.Controls.AddRange([MenueKnopf, programmName, LeittextAnzeige]);
+        BereichsWahl.Gewaehlt += ArbeitsbereichWaehlen;
+        leiste.Controls.AddRange([MenueKnopf, programmName, LeittextAnzeige, BereichsWahl]);
         foreach (var eintrag in Navigation) leiste.Controls.Add(eintrag);
         leiste.Controls.AddRange([AbmeldenEintrag, Arbeitsplatz, VersionText, InfoSymbol]);
         leiste.Layout += (_, _) => LeisteAnordnen();

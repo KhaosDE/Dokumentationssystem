@@ -40,7 +40,7 @@ public sealed class LaufendeTherapienAnsicht : Panel
 
     public void Zeigen() => Aktualisieren();
 
-    // Der in der Übersicht gewählte Wohnbereich; „Alle“ und Bereiche ohne Bewohner (Therapie) zeigen alle.
+    // Der in der Seitenleiste gewählte Wohnbereich; „Alle“ und Bereiche ohne Bewohner (Therapie) zeigen alle.
     public string? Bereich => speicher.AlleBewohner().Any(b => b.Wohnbereich == Arbeitsbereich.Gewaehlt) ? Arbeitsbereich.Gewaehlt : null;
 
     public string KopfText => Tafel is null ? "Laufende Therapien"

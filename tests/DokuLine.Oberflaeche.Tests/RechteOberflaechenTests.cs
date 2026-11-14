@@ -69,7 +69,7 @@ public class RechteOberflaechenTests
         f.BenutzerWaehlen("PR");
         Assert.Equal(23, f.Uebersicht.Zeilen.Count);
         Assert.StartsWith("R1 · 23 Bewohner · 2 Betten frei · ", f.Kopf.KleinText);
-        f.Uebersicht.Umschalter.Knoepfe.Single(k => k.Text == "R2").Ausloesen();
+        f.BereichsWahl.Waehlen("R2");
         Assert.All(f.Uebersicht.Zeilen, z => Assert.Equal("R2", z.Bewohner.Wohnbereich));
         f.BenutzerWaehlen("MN");
         Assert.Equal(23, f.Uebersicht.Zeilen.Count);   // die Wahl gilt bis zum Abmelden

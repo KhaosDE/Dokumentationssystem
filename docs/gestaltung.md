@@ -29,9 +29,10 @@ Code, **kein Logo und kein Name der Einrichtung**.
       in der Leiste darunter, Hauptaktion links, Drucken rechts.
     - Knöpfe immer mit Wort, nie nur Symbol (Ausnahme: Kuvert und Einklappen mit Tooltip).
     - Keine versteckten Klappmenüs für Wichtiges; Umschalter statt Auswahllisten, wo es wenige
-      Möglichkeiten gibt (z. B. Wohnbereich R1 · R2 · R3).
+      Möglichkeiten gibt. Ausnahme: der Wohnbereich in der Seitenleiste (Auswahlliste, Wunsch Tobi
+      10.11.2026), weil er dort in jeder Ansicht steht, ohne Platz zu nehmen.
     - Einfache Wörter aus dem Alltag des Wohnbereichs, keine Fachbegriffe aus der Technik.
-    - Der Wohnbereich wird einmal gewählt (Übersicht) und gilt überall.
+    - Der Wohnbereich wird einmal gewählt (Seitenleiste) und gilt überall.
 
 ## Farben, helle Darstellung (RGB)
 
@@ -99,9 +100,11 @@ Bewohnerliste; Laufende Therapien: die Spalten) haben überall dieselbe Kopfleis
 - Die Einträge darunter auf weißer Fläche, 8 px Abstand zur Kopfleiste.
 - Führt ein Klick an eine Stelle (z. B. „Übergaben offen“ → Übergabe), zeigt der Mauszeiger eine Hand.
 
-## Wahl des Wohnbereichs (Bauplan Schritt 29d)
+## Wahl des Wohnbereichs (Bauplan Schritte 29d und 38)
 
-Oben in der Übersicht „Wohnbereich:“ mit großen Umschaltknöpfen (R1 · R2 · R3, je nach Recht
-„Therapie“ und „Alle“). Der gewählte Bereich steht in jeder Ansicht vorn in der kleinen Zeile der
+In der Seitenleiste über „Übersicht“: die Beschriftung „Wohnbereich“ und eine Auswahlliste mit den
+Bereichen, für die man zuständig ist (R1 · R2 · R3, je nach Recht „Therapie“ und „Alle“). Mit nur einem
+Bereich steht der Name ohne Auswahl da; eingeklappt ein Knopf mit dem Kürzel („R2“), ein Klick öffnet die
+Liste. Der gewählte Bereich steht in jeder Ansicht vorn in der kleinen Zeile der
 Kopfzeile („R1 · …“); ist es nicht der Bereich des Rechners, daneben die Marke „eingesprungen“
 (Hinweis-Farbe, mit Wort).

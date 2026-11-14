@@ -3,8 +3,8 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Startseite: oben die Wahl des Wohnbereichs (gilt überall), links „Heute wichtig“ mit vier Kästen, rechts die
-// Bewohner des Bereichs als Liste; Doppelklick öffnet die Akte. Unter 1100 px steht „Heute wichtig“ über der Liste.
+// Startseite: links „Heute wichtig“ mit vier Kästen, rechts die Bewohner des Wohnbereichs (gewählt in der Seitenleiste)
+// als Liste; Doppelklick öffnet die Akte. Unter 1100 px steht „Heute wichtig“ über der Liste.
 public sealed class UebersichtSeite : Panel, IBereichSeite
 {
     string IBereichSeite.Titel => "Übersicht";
@@ -49,9 +49,6 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     public BewohnerZeile? Gewaehlt => Liste.SelectedItems.Count == 1 ? Liste.SelectedItems[0].Tag as BewohnerZeile : null;
     public string ListenKopfText => ListenKopf.Text;
     public TextBox Suche { get; } = new() { Width = 220, PlaceholderText = "Name oder Zimmer suchen", Font = Stil.Standard, AccessibleName = "Bewohner suchen" };
-    // Wohnbereich: R1 · R2 · R3 … (gilt für alle Bereiche des Programms).
-    public BereichUmschalter Umschalter { get; } = new();
-    public event Action<string>? BereichGewechselt;
     // Nur die eigenen Bezugsbewohner bzw. Einzeltrainings (aus allen Bereichen).
     public CheckBox MeineBezugsbewohner { get; } = new() { Text = "Meine Bezugsbewohner", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
     public CheckBox MeineEinzeltrainings { get; } = new() { Text = "Meine Einzeltrainings", AutoSize = true, BackColor = Stil.Flaeche, Font = Stil.Standard };
@@ -87,7 +84,6 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        Umschalter.Gewaehlt += b => BereichGewechselt?.Invoke(b);
         foreach (var c in new[] { MeineBezugsbewohner, MeineEinzeltrainings }) c.CheckedChanged += (_, _) => Aktualisieren();
         Suche.TextChanged += (_, _) => ListeFuellen();
 
@@ -122,7 +118,6 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         BewohnerNeuKnopf.Click += (_, _) => BewohnerNeuGewuenscht?.Invoke();
         DruckKnopf.Click += (_, _) => Drucken();
 
-        Controls.Add(Umschalter);
         Controls.Add(links);
         Controls.Add(rechts);
         // Immer aktuell: Datums- und Schichtwechsel (jede Minute prüfen, nur wenn sichtbar neu bauen).
@@ -144,8 +139,6 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         gezeigtSchicht = SchichtTermin.Zu(jetzt);
         var werte = Einstellungen.Laden();
         string gewaehlt = Arbeitsbereich.Gewaehlt.Length > 0 ? Arbeitsbereich.Gewaehlt : werte.Bereich;
-        Umschalter.Setzen(BereichswahlRegeln.Knoepfe(speicher.SichtbareWohnbereiche(Recht.Kuerzel), f => Recht.Darf(speicher, f)), gewaehlt,
-            BereichswahlRegeln.Eingesprungen(gewaehlt, werte.Bereich));
         var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
         // Der gewählte Bereich; „Alle“ und Bereiche ohne eigene Bewohner (z. B. „Therapie“) zeigen alle, mit Hinweis.
         var eigene = jeder.Where(h => h.Bewohner.Wohnbereich == gewaehlt).ToList();
@@ -395,9 +388,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         base.OnLayout(levent);
         int rand = Stil.Px(this, Stil.AbstandGross), abstand = Stil.Px(this, Stil.AbstandMittel);
         int breite = Math.Max(300, ClientSize.Width - 2 * rand);
-        Umschalter.MaximumSize = new Size(breite, 0);
-        Umschalter.Location = new Point(rand, rand);
-        int oben = Umschalter.Bottom + abstand;
+        int oben = rand;
         int hoehe = Math.Max(200, ClientSize.Height - oben - rand);
         Schmal = ClientSize.Width < Stil.Px(this, SchmalAb);
         int linksBreite = Schmal ? breite : Stil.Px(this, LinksBreite);

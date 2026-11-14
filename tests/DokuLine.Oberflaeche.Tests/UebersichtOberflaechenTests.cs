@@ -34,9 +34,12 @@ public class UebersichtOberflaechenTests
         Assert.Equal(1, AktionsLeiste.Gruppe(s.BerichtNeuKnopf));
         Assert.Equal(Stil.Erfolg.ToArgb(), s.BewohnerNeuKnopf.BackColor.ToArgb());
         Assert.Null(f.Kopf.Leiste.Zusatz);
-        Assert.Equal(["R1", "R2", "R3"], s.Umschalter.Knoepfe.Select(k => k.Text));   // Bereichsleitung: die Wohnbereiche
-        Assert.Equal("R1", Assert.Single(s.Umschalter.Knoepfe, k => k.Aktiv).Text);
-        Assert.False(s.Umschalter.Eingesprungen.Visible);
+        // Die Wahl des Wohnbereichs steht in der Seitenleiste über „Übersicht“ (Bereichsleitung: die Wohnbereiche).
+        Assert.Equal(["R1", "R2", "R3"], f.BereichsWahl.Bereiche);
+        Assert.Equal("R1", f.BereichsWahl.Liste.SelectedItem);
+        Assert.True(f.BereichsWahl.Liste.Visible);
+        Assert.True(f.BereichsWahl.Bottom <= f.Navigation.Single(n => n.Text == "Übersicht").Top);
+        Assert.False(f.Kopf.Eingesprungen.Visible);
         Assert.StartsWith("DEMO — ausgedachte Daten · ", f.Statusleiste.StatusText);
         Assert.Contains("dienst · Stand ", f.Statusleiste.StatusText);
 
@@ -110,12 +113,18 @@ public class UebersichtOberflaechenTests
         s.Suche.Text = "Birke";
         Assert.Equal("Birke", Assert.Single(s.Zeilen).Bewohner.Nachname);
         s.Suche.Text = "";
-        s.Umschalter.Knoepfe.Single(k => k.Text == "R2").Ausloesen();   // gilt überall, „eingesprungen“
+        f.BereichsWahl.Liste.SelectedItem = "R2";   // gilt überall, „eingesprungen“
         Assert.All(s.Zeilen, z => Assert.Equal("R2", z.Bewohner.Wohnbereich));
         Assert.StartsWith("BEWOHNER R2 · 23 · ", s.ListenKopfText);
         Assert.Equal("R2", Arbeitsbereich.Gewaehlt);
-        Assert.True(s.Umschalter.Eingesprungen.Visible);
+        Assert.Equal("Übersicht", f.AktiverBereich);   // man bleibt, wo man war
         Assert.True(f.Kopf.Eingesprungen.Visible);
+        f.MenueUmschalten();   // eingeklappt: das Kürzel als Knopf, ein Klick öffnet die Liste
+        Assert.True(f.BereichsWahl.Kurz.Visible);
+        Assert.False(f.BereichsWahl.Liste.Visible);
+        Assert.Equal("R2", f.BereichsWahl.Kurz.Text);
+        Assert.Equal(["R2"], f.BereichsWahl.Menue.Items.Cast<ToolStripMenuItem>().Where(m => m.Checked).Select(m => m.Text));
+        f.MenueUmschalten();
         f.BereichWaehlen("Dokumentation");
         Assert.All(f.Bewohner.Zeilen, b => Assert.Equal("R2", b.Wohnbereich));
         Assert.StartsWith("R2 · 23 Bewohner", f.Kopf.KleinText);

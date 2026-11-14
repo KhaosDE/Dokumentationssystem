@@ -12,7 +12,7 @@ public sealed class AufgabeFenster : Form
 
     public TextBox Inhalt { get; } = new() { Multiline = true, Width = 420, Height = 54, AcceptsReturn = false };
     public ComboBox BewohnerWahl { get; } = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 300 };
-    // Ohne Bewohner gehört die Aufgabe zu einem Bereich (Vorgabe: der in der Übersicht gewählte).
+    // Ohne Bewohner gehört die Aufgabe zu einem Bereich (Vorgabe: der in der Seitenleiste gewählte).
     public ComboBox BereichWahl { get; } = new()
     { DropDownStyle = ComboBoxStyle.DropDownList, Width = 160, AccessibleName = "Bereich" };
     public const string FuerBereich = "– für einen Bereich –";
