@@ -157,6 +157,7 @@ public sealed partial class Speicher
             neu += Convert.ToInt32(Wert("SELECT changes()"), CultureInfo.InvariantCulture);
         }
         int messungen = MessauftraegeErzeugen(jetzt);   // zählen nicht als Standardaufgaben
+        MassnahmenUebergabeErzeugen(jetzt);             // was im vorigen Dienst offen blieb (Bauplan 40)
         if (neu + messungen > 0) AufgabenGeaendert?.Invoke();
         return neu;
     }

@@ -38,6 +38,12 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     public Label DienstText { get; } = new() { AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
     public LinkLabel AlleAufgaben { get; } = new() { Text = "Alle Aufgaben …", AutoSize = true, BackColor = Stil.Flaeche, LinkColor = Stil.Akzent };
     public DienstStand? DienstStand { get; private set; }
+    // Maßnahmen im Kasten „Laufender Dienst“ (Bauplan 40): offene zum Abhaken, erledigte einklappbar, „alle“ oder nur die
+    // eigenen Bezugsbewohner.
+    public List<MassnahmeTermin> MassnahmenTermine { get; private set; } = [];
+    public List<MassnahmeKastenZeile> MassnahmenZeilen { get; } = [];
+    public bool NurMeineMassnahmen { get; private set; }
+    public bool ErledigteMassnahmenZeigen { get; private set; }
 
     // Bewohnerliste
     public ListView Liste { get; } = new()
@@ -99,7 +105,8 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         Fristen.Visible = false;
         links.Controls.AddRange([Medikation, Fristen, Uebergaben, Termine, Dienst, Nachrichten]);
 
-        foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Auskunft", 170), ("Hinweise", 300) }) Liste.Columns.Add(titel, breite);
+        foreach (var (titel, breite) in new[] { ("Zimmer", 100), ("Name", 170), ("Bezug", 60), ("Wo", 230), ("Auskunft", 170), ("Maßnahmen", 90), ("Hinweise", 300) })
+            Liste.Columns.Add(titel, breite);
         Liste.DoubleClick += (_, _) => AkteOeffnen();
         Liste.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { e.Handled = true; AkteOeffnen(); } };
         Liste.SelectedIndexChanged += (_, _) => KnoepfeSperren();
@@ -167,6 +174,10 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         var medikation = speicher.Medikamentenaenderungen(heute).Where(a => ids.Contains(a.BewohnerId)).ToList();
         var medikationGeaendert = medikation.Select(a => a.BewohnerId).ToHashSet();
 
+        // Maßnahmen des laufenden Dienstes für die gezeigten Bewohner (Kasten „Laufender Dienst“ und Spalte der Liste).
+        MassnahmenTermine = speicher.MassnahmenImDienst(SchichtTermin.Zu(jetzt), ids);
+        var massnahmenJe = MassnahmenTermine.ToLookup(t => t.Massnahme.BewohnerId);
+
         // Bewohnerliste: Marken wie bisher auf den Karten, dazu Übergabe und Geburtstag; „Wo“ eigene Spalte.
         var status = speicher.GeltendeStatusmeldungen(jetzt);
         var inTherapie = speicher.InTherapie(jetzt);   // Tagesplan
@@ -196,7 +207,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
             var zeile = new BewohnerZeile(h.Bewohner, heute, marken,
                 bezug?.Bezugspflege is { } bp ? (bp.Kuerzel, BezugAnzeige.Farbe(farben, bp.Kuerzel)) : null,
                 bezug?.Einzeltrainer is { } tr ? (BezugRegeln.TrainerText(tr), BezugAnzeige.Farbe(farben, tr.Kuerzel)) : null,
-                HeuteWichtigRegeln.Wo(marken, h.Termine, jetzt), h.Auskunft);
+                HeuteWichtigRegeln.Wo(marken, h.Termine, jetzt), h.Auskunft, MassnahmenRegeln.ListenText(massnahmenJe[id]));
             zeile.Gewaehlt += b => AkteGewuenscht?.Invoke(b.Id!.Value);
             alleZeilen.Add(zeile);
         }
@@ -205,7 +216,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         ListenKopf.Text = $"BEWOHNER {kurz.ToUpperInvariant()} · {alleZeilen.Count} · {alleZeilen.Count(z => z.ImHaus)} IM HAUS";
         ListeFuellen();
 
-        HeuteFuellen(jetzt, alle, offeneUebergaben, werte.Kuerzel);
+        HeuteFuellen(jetzt, alle, offeneUebergaben, werte.Kuerzel, bezuege);
         MedikationFuellen(medikation, alle);
         FristenFuellen(alle);
 
@@ -260,7 +271,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         FristenZeigen = Fristen.Visible = zeilen.Count > 0;
     }
 
-    private void HeuteFuellen(DateTime jetzt, List<HeuteFuer> alle, List<Uebergabe> offen, string kuerzel)
+    private void HeuteFuellen(DateTime jetzt, List<HeuteFuer> alle, List<Uebergabe> offen, string kuerzel, IReadOnlyDictionary<long, Bezug> bezuege)
     {
         var bewohner = alle.ToDictionary(h => h.Bewohner.Id!.Value, h => h.Bewohner);
         var ids = bewohner.Keys.ToHashSet();
@@ -288,7 +299,12 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         DienstBalken.Maximum = Math.Max(1, dienst.Gesamt);
         DienstBalken.Value = Math.Min(DienstBalken.Maximum, dienst.Erledigt);
         string? sperre = kuerzel.Length == 0 ? RechteRegeln.NichtAngemeldetText : null;
-        Dienst.Setzen(dienst.Offen.Count, dienst.Offen.Select(a =>
+        var massnahmen = NurMeineMassnahmen
+            ? MassnahmenTermine.Where(t => bezuege.GetValueOrDefault(t.Massnahme.BewohnerId)?.Bezugspflege?.Kuerzel.Equals(kuerzel, StringComparison.OrdinalIgnoreCase) == true).ToList()
+            : MassnahmenTermine;
+        var massnahmenZeilen = MassnahmenKasten(massnahmen, bewohner, jetzt);
+        int massnahmenOffen = massnahmen.Count(t => t.Offen);
+        Dienst.Setzen(dienst.Offen.Count + massnahmenOffen, dienst.Offen.Select(a =>
         {
             string name = a.BewohnerId is long id && bewohner.TryGetValue(id, out var b) ? $" ({b.Name})" : "";
             string faellig = AufgabenRegeln.Ueberfaellig(a, jetzt) ? " · überfällig" : "";
@@ -306,7 +322,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
                 else haken.Checked = false;
             };
             return (Control)haken;
-        }), leer: dienst.Gesamt > 0 ? "Alles erledigt" : HeuteWichtigRegeln.NichtsOffen);
+        }).Concat(massnahmenZeilen), leer: dienst.Gesamt > 0 ? "Alles erledigt" : HeuteWichtigRegeln.NichtsOffen);
 
         // 4. Nachrichten ungelesen (an den Angemeldeten).
         if (kuerzel.Length == 0) Nachrichten.Setzen(0, [], leer: "Nicht angemeldet");
@@ -322,6 +338,88 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
                 return Eintrag(HeuteWichtigRegeln.NachrichtText(n), BerichtRegeln.ZeitText(n.Gesendet), null, () => VerlaufGewuenscht?.Invoke(v));
             }));
         }
+    }
+
+    // Der zweite Abschnitt des Kastens: Überschrift mit Stand und Balken, Umschalter, offene Maßnahmen zum Abhaken, darunter
+    // die bestätigten (einklappbar).
+    private List<Control> MassnahmenKasten(List<MassnahmeTermin> termine, Dictionary<long, Bewohner> bewohner, DateTime jetzt)
+    {
+        MassnahmenZeilen.Clear();
+        if (MassnahmenTermine.Count == 0) return [];
+        var teile = new List<Control>
+        {
+            new Label { Text = MassnahmenRegeln.StandText(termine), AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false },
+            new ProgressBar { Height = 10, Minimum = 0, Maximum = Math.Max(1, termine.Count), Value = Math.Min(Math.Max(1, termine.Count), termine.Count(t => !t.Offen)),
+                Style = ProgressBarStyle.Continuous, AccessibleName = "Bestätigte Maßnahmen" },
+        };
+        // Die Knöpfe entstehen bei jedem Aufbau neu (der Kasten entsorgt seine Zeilen); gemerkt wird nur die Wahl.
+        var umschalter = new FlowLayoutPanel { AutoSize = true, BackColor = Stil.Flaeche, Margin = new Padding(0) };
+        foreach (var (text, meine) in new[] { ("alle", false), ("meine Bezugsbewohner", true) })
+        {
+            var k = new FilterKnopf(text, mitZahl: false) { Aktiv = NurMeineMassnahmen == meine, Margin = new Padding(0, 0, Stil.AbstandKlein, 0) };
+            k.Click += (_, _) => MassnahmenFiltern(meine);
+            umschalter.Controls.Add(k);
+        }
+        teile.Add(umschalter);
+        string? sperre = Recht.Grund(speicher, Funktionen.MassnahmenBestaetigen);
+        string Name(MassnahmeTermin t) => bewohner.GetValueOrDefault(t.Massnahme.BewohnerId)?.Name ?? "";
+        foreach (var t in termine.Where(t => t.Offen))
+        {
+            var zeile = new MassnahmeKastenZeile(t, Name(t), jetzt, sperre);
+            zeile.Gewaehlt += MassnahmeBestaetigen;
+            MassnahmenZeilen.Add(zeile);
+            teile.Add(zeile);
+        }
+        var erledigt = termine.Where(t => !t.Offen).ToList();
+        if (erledigt.Count > 0)
+        {
+            var link = new LinkLabel
+            {
+                Text = $"{(ErledigteMassnahmenZeigen ? "▾" : "▸")} Bestätigt ({erledigt.Count})", AutoSize = true, BackColor = Stil.Flaeche, LinkColor = Stil.Akzent,
+                UseMnemonic = false,
+            };
+            link.LinkClicked += (_, _) => ErledigteUmschalten();
+            teile.Add(link);
+            if (ErledigteMassnahmenZeigen)
+                foreach (var t in erledigt)
+                {
+                    var zeile = new MassnahmeKastenZeile(t, Name(t), jetzt, sperre);
+                    MassnahmenZeilen.Add(zeile);
+                    teile.Add(zeile);
+                }
+        }
+        return teile;
+    }
+
+    public void MassnahmenFiltern(bool nurMeine)
+    {
+        NurMeineMassnahmen = nurMeine;
+        if (IsHandleCreated) BeginInvoke(Aktualisieren);
+        else Aktualisieren();
+    }
+
+    public void ErledigteUmschalten()
+    {
+        ErledigteMassnahmenZeigen = !ErledigteMassnahmenZeigen;
+        if (IsHandleCreated) BeginInvoke(Aktualisieren);   // der Klick kam aus einem Teil des Kastens, der dabei neu entsteht
+        else Aktualisieren();
+    }
+
+    // Abhaken einer Maßnahme: „durchgeführt“ sofort (Zeit = Zeitwert), sonst das kleine Fenster mit Grund.
+    public void MassnahmeBestaetigen(MassnahmeTermin t, MassnahmeErgebnis ergebnis, bool mitFenster)
+    {
+        if (!Schutz.Frei()) return;
+        if (mitFenster)
+        {
+            string name = speicher.Bewohner(t.Massnahme.BewohnerId)?.Name ?? "";
+            using var fenster = new MassnahmeBestaetigenFenster(speicher, t.Massnahme, t.Dienst, name, ergebnis) { Jetzt = Jetzt };
+            if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK) return;
+        }
+        else
+            try { speicher.MassnahmeBestaetigen(t.Massnahme.Id, t.Dienst, ergebnis, "", t.Fassung.Minuten, "", Recht.Kuerzel, Jetzt()); }
+            catch (Eingabefehler e) { MessageBox.Show(FindForm(), string.Join("\n", e.Fehler), "Maßnahme bestätigen", MessageBoxButtons.OK, MessageBoxIcon.Information); }
+        if (IsHandleCreated) BeginInvoke(Aktualisieren);
+        else Aktualisieren();
     }
 
     // Abhaken im Kasten „Laufender Dienst“: Kürzel und Uhrzeit wie in „Aufgaben“; Visiten-Aufgaben

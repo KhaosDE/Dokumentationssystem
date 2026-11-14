@@ -58,6 +58,7 @@ public sealed class HeuteKasten : KartenFlaeche
                     k.SetBounds(innen, y, breite, Math.Max(Stil.Px(this, 24), hoch));
                     break;
                 case HeuteEintrag e: e.Width = breite; e.Location = new Point(innen, y); e.PerformLayout(); break;
+                case MassnahmeKastenZeile m: m.Width = breite; m.Location = new Point(innen, y); m.PerformLayout(); break;
                 default: c.SetBounds(innen, y, c is ProgressBar ? breite : c.Width, c.Height); break;
             }
             y = c.Bottom + mini;

@@ -121,6 +121,45 @@ public class MassnahmenOberflaechenTests
         Assert.Contains(r.Bereiche[1].QuellenTexte, t => t.StartsWith("Maßnahme Zimmer lüften (Test): 1 von 1 durchgeführt", StringComparison.Ordinal));
     });
 
+    // Bauplan 40: Kasten „Laufender Dienst“ der Übersicht mit den Maßnahmen, Spalte der Bewohnerliste, Umschalter.
+    [Fact]
+    public void Uebersicht_Kasten_abhaken_erledigte_und_Spalte() => Hilfe.Sta(() =>
+    {
+        using var u = new Umgebung();
+        Einstellungen.Aendern(w => w with { Kuerzel = "EF" });
+        var b = u.Demo("Ahorn");
+        long id = b.Id!.Value;
+        var dienst = SchichtTermin.Zu(DateTime.Now);
+        var neu = u.Speicher.MassnahmeAnlegen(id, Jetzt("Fenster öffnen (Test)") with { Uhrzeit = TimeOnly.FromDateTime(dienst.Beginn) }, "EF", DateTime.Now);
+        using var f = new Hauptfenster(u.Speicher);
+        Hilfe.Zeigen(f);
+        f.ArbeitsbereichWaehlen(b.Wohnbereich);
+        f.BereichWaehlen("Übersicht");
+        var s = f.Uebersicht;
+        Assert.Contains(s.MassnahmenTermine, t => t.Massnahme.Id == neu.Id && t.Offen);
+        var zeile = s.MassnahmenZeilen.Single(z => z.Termin.Massnahme.Id == neu.Id);
+        Assert.NotNull(zeile.Ueberfaellig);   // die Uhrzeit (Dienstbeginn) ist vorbei
+        Assert.EndsWith("offen", s.Zeilen.Single(z => z.Bewohner.Id == id).MassnahmenText);
+        Assert.True(s.Dienst.Anzahl >= 1);
+        Hilfe.Foto(f, "158_uebersicht_massnahmen");
+
+        s.MassnahmeBestaetigen(zeile.Termin, MassnahmeErgebnis.Durchgefuehrt, false);
+        Application.DoEvents();
+        Assert.Single(u.Speicher.MassnahmeBestaetigungen(id), x => x.MassnahmeId == neu.Id && x.Kuerzel == "EF");
+        Assert.DoesNotContain(s.MassnahmenZeilen, z => z.Termin.Massnahme.Id == neu.Id);   // bestätigte sind eingeklappt
+        s.ErledigteUmschalten();
+        Application.DoEvents();
+        Assert.StartsWith("✓", s.MassnahmenZeilen.Single(z => z.Termin.Massnahme.Id == neu.Id).Text1.Text);
+        Assert.Null(s.MassnahmenZeilen.Single(z => z.Termin.Massnahme.Id == neu.Id).DurchgefuehrtKnopf);
+
+        // Nur die eigenen Bezugsbewohner.
+        s.MassnahmenFiltern(true);
+        Application.DoEvents();
+        var bezuege = u.Speicher.Bezuege();
+        Assert.All(s.MassnahmenZeilen, z => Assert.Equal("EF", bezuege.GetValueOrDefault(z.Termin.Massnahme.BewohnerId)?.Bezugspflege?.Kuerzel));
+        s.MassnahmenFiltern(false);
+    });
+
     [Fact]
     public void Ohne_Recht_kein_Anlegen_Einstellungen_mit_Arten() => Hilfe.Sta(() =>
     {

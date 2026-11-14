@@ -2418,7 +2418,7 @@ Umfang (Vorschlag):
   über mehrere Wochen, einige abgelehnt.
 
 ## Übersicht: Kasten „Maßnahmen heute“ als Arbeitscheckliste
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.44.0; Bauplan Schritt 40)
 Datum: 10.11.2026
 Was: In der Übersicht ein Kasten, der zeigt, welche Maßnahmen im laufenden Dienst noch offen und
 welche erledigt sind, zum direkten Abhaken.

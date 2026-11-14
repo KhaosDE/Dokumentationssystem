@@ -172,6 +172,31 @@ public sealed partial class Speicher
         return Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
     }
 
+    // Nach dem Dienstwechsel einmal: Was im vorigen Dienst offen blieb, geht als Sammeleintrag je Wohnbereich in die
+    // Übergabe (bis zum Ende des nächsten Dienstes). Der Eintrag in „meta“ sorgt dafür, dass es auch an mehreren Rechnern
+    // nur einmal geschieht. Rückgabe: Zahl der Einträge.
+    public int MassnahmenUebergabeErzeugen(DateTime jetzt)
+    {
+        var vorher = SchichtTermin.Zu(SchichtTermin.Zu(jetzt).Beginn.AddMinutes(-1));
+        string schluessel = $"massnahmen_uebergabe:{Iso(vorher.Tag)}:{BerichtRegeln.Kuerzel(vorher.Schicht)}";
+        if (Meta(schluessel) is not null) return 0;
+        var offen = MassnahmenImDienst(vorher).Where(t => t.Offen).ToList();
+        var bewohner = AlleBewohner().ToDictionary(b => b.Id!.Value);
+        using var transaktion = db.BeginTransaction();
+        Ausfuehren("INSERT OR IGNORE INTO meta (schluessel, wert) VALUES ($s, '1')", transaktion, ("$s", schluessel));
+        if (Convert.ToInt32(WertIn(transaktion, "SELECT changes()"), CultureInfo.InvariantCulture) == 0) return 0;   // ein anderer Rechner war schneller
+        int neu = 0;
+        foreach (var gruppe in offen.Where(t => bewohner.ContainsKey(t.Massnahme.BewohnerId)).GroupBy(t => bewohner[t.Massnahme.BewohnerId].Wohnbereich).OrderBy(g => g.Key))
+        {
+            string text = MassnahmenRegeln.UebergabeText(gruppe.Key, vorher, [.. gruppe.Select(t => (bewohner[t.Massnahme.BewohnerId].Name, t.Fassung.Titel))]);
+            UebergabeEinfuegen(null, null, text, jetzt, MassnahmenRegeln.UebergabeVerfasser,
+                UebergabeRegeln.GiltBis(UebergabeDauer.NaechsteSchicht, jetzt, null), transaktion);
+            neu++;
+        }
+        transaktion.Commit();
+        return neu;
+    }
+
     // Für die Frage „Ist das ärztlich verordnet?“: Wirkstoffe und Handelsnamen der Medikamentendatenbank.
     public List<string> MedikamentNamen() =>
         [.. Medikamente().SelectMany(m => m.Aktuell.Handelsnamen.Append(m.Aktuell.Wirkstoff)).Where(n => n.Trim().Length > 0).Distinct(StringComparer.OrdinalIgnoreCase)];

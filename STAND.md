@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.43.0** (Bauplan Schritt 39: Maßnahmen je Bewohner mit Zeitwert).
+Stand: 14.11.2026. Version: **0.44.0** (Bauplan Schritt 40: Kasten „Maßnahmen“ als Arbeitscheckliste in der Übersicht).
 
 ## Aktuell
 
@@ -450,7 +450,15 @@ Lebensbereich eine Zeile je Maßnahme („11 von 13 durchgeführt, 2 abgelehnt, 
 „Maßnahmen bestätigen“ (alle), „Maßnahmen anlegen und ändern“ (Fachkräfte und die Bezugspflege des Bewohners). Einstellungen:
 Arten und Vorlagen. Demo: je Bewohner zwei bis fünf Maßnahmen seit drei Wochen, mit Bestätigungen (einige abgelehnt).
 
-**Nächster Schritt:** Bauplan Schritt 40 (Kasten „Maßnahmen heute“ in der Übersicht, 0.44.0); danach 41–52 der Reihe nach.
+Neu in 0.44.0: In der **Übersicht** ist der Kasten **„Laufender Dienst · noch offen“** jetzt die eine Arbeitscheckliste: oben wie bisher
+die Aufgaben, darunter die **Maßnahmen** des Dienstes mit „Maßnahmen: 7 von 12 bestätigt“ und Balken, Umschalter **„alle“ ·
+„meine Bezugsbewohner“**. Offene stehen nach Uhrzeit, je Zeile „08:30 · Name · Maßnahme“ mit den Knöpfen „durchgeführt“
+(ein Klick), „abgelehnt …“ und „nicht möglich …“; ist die Uhrzeit vorbei, die Marke **„überfällig“**. Bestätigte stehen
+blass darunter („✓ 08:31 AB · … (durchgeführt)“), einklappbar. Die **Bewohnerliste** hat eine schmale Spalte „Maßnahmen“
+(„2 offen“ bzw. „✓“). Was am **Dienstende** offen bleibt, geht als **ein Sammeleintrag je Wohnbereich** in die Übergabe
+(„R1 · 3 Maßnahmen aus dem Frühdienst … offen: …“), nicht jede einzeln.
+
+**Nächster Schritt:** Bauplan Schritt 41 (Zeitauswertung je Bewohner, 0.45.0); danach 42–52 der Reihe nach.
 
 ## Fertig
 
@@ -1553,6 +1561,7 @@ Arten und Vorlagen. Demo: je Bewohner zwei bis fünf Maßnahmen seit drei Wochen
   einen Lauf über eine halbe Stunde aufgehalten).
 - 0.42.0 — Bauplan Schritt 38: `BereichsAuswahl` in der Seitenleiste (Auswahlliste, eingeklappt Kürzel mit Menü), `BereichswahlRegeln.Kuerzel`; `BereichUmschalter` entfernt.
 - 0.43.0 — Bauplan Schritt 39: `Massnahmen.cs` (Fassungen, Fälligkeit, Prüfen, Texte, Lebensbereiche, Reflexion), `SpeicherMassnahmen.cs` (Datenbank-Schritt 41, Bestätigen mit Bericht, Demo), `MassnahmenAnsicht`, `MassnahmeFenster`, `MassnahmeBestaetigenFenster`, `MassnahmenListe` (Aufgaben-Seite), `MassnahmenTagZeile` (Dokumentation), Reflexion, Einstellungen.
+- 0.44.0 — Bauplan Schritt 40: `MassnahmeKastenZeile`, Abschnitt im Kasten „Laufender Dienst“ (`UebersichtSeite.MassnahmenKasten`), Spalte „Maßnahmen“ (`BewohnerZeile`), `MassnahmenRegeln.ListenText`/`StandText`/`UebergabeText`, `Speicher.MassnahmenUebergabeErzeugen` (beim Dienstwechsel, einmal je Dienst).
 
 ## Offene Punkte
 
@@ -1656,6 +1665,12 @@ Arten und Vorlagen. Demo: je Bewohner zwei bis fünf Maßnahmen seit drei Wochen
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.44.0): Der Sammeleintrag am Dienstende ist eine **allgemeine** Übergabe-Notiz je Wohnbereich (der Bereich steht vorn im Text):
+  Übergaben haben keinen eigenen Bereich, nur einen Bewohner oder „allgemein“. Verfasser ist „AUTO“ – sonst stünde das
+  Kürzel dessen da, der zufällig als Erster nach dem Dienstwechsel die Übersicht öffnet. Er gilt bis zum Ende des nächsten
+  Dienstes; ein Eintrag in „meta“ sorgt dafür, dass er auch an mehreren Rechnern nur einmal entsteht.
+- 14.11.2026 (0.44.0): Kasten statt eigener Kasten: Die Maßnahmen sind der zweite Abschnitt von „Laufender Dienst · noch offen“ (Wunsch
+  „nur eine Checkliste“); der Zähler im Kopf zählt offene Aufgaben und offene Maßnahmen zusammen.
 - 14.11.2026 (0.43.0): Die Marke „seit … Wochen kein Bericht“ und die Zahl im Quartal zählen nur **geschriebene** Berichte, nicht die
   kurzen Einträge der bestätigten Maßnahmen – sonst hielte ein täglich abgehakter Punkt einen Lebensbereich „aktuell“, in dem
   niemand etwas geschrieben hat. Die Maßnahmen stehen daneben gezählt (Reflexion).
@@ -2596,6 +2611,12 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.44.0: Übersicht: Im Kasten „Laufender Dienst · noch offen“ unter den Aufgaben „Maßnahmen: … von … bestätigt“ mit Balken,
+„alle“ · „meine Bezugsbewohner“, darunter die offenen Maßnahmen mit drei Knöpfen; eine mit vergangener Uhrzeit trägt
+„überfällig“. „durchgeführt“ → Zeile verschwindet, „▸ Bestätigt (n)“ klappt sie blass mit Kürzel auf. „abgelehnt …“ → Fenster
+mit Grund. In der Bewohnerliste Spalte „Maßnahmen“ („2 offen“, „✓“). Nach dem Dienstwechsel steht in „Übergabe“ unter
+„allgemein“ ein Eintrag „R1 · … Maßnahmen aus dem … offen: …“ von „AUTO“.
 
 Version 0.43.0: Akte (z. B. Ahorn) → Reiter „Maßnahmen“: oben fünf Lebensbereiche mit Zahl, letztem Bericht, „Reflexion bis“
 und Hinweis; darunter die Maßnahmen; unten „Aus dem Medikamentenplan“. „Neue Maßnahme …“: Titel „Morgens Movicol“ →

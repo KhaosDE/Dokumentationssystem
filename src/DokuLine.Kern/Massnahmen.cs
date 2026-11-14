@@ -218,6 +218,24 @@ public static class MassnahmenRegeln
         })];
     }
 
+    // Übersicht (Bauplan 40): Spalte „Maßnahmen“ der Bewohnerliste – „2 offen“, „✓“ (alle bestätigt) oder leer.
+    public static string ListenText(IEnumerable<MassnahmeTermin> termine)
+    {
+        var liste = termine.ToList();
+        int offen = liste.Count(t => t.Offen);
+        return liste.Count == 0 ? "" : offen > 0 ? $"{offen} offen" : "✓";
+    }
+
+    // „Maßnahmen: 7 von 12 bestätigt“
+    public static string StandText(IReadOnlyCollection<MassnahmeTermin> termine) =>
+        termine.Count == 0 ? "Maßnahmen: keine in diesem Dienst" : $"Maßnahmen: {termine.Count(t => !t.Offen)} von {termine.Count} bestätigt";
+
+    // Am Dienstende ein Sammeleintrag je Wohnbereich in die Übergabe, nicht jede Maßnahme einzeln.
+    public const string UebergabeVerfasser = "AUTO";
+    public static string UebergabeText(string bereich, SchichtTermin dienst, IReadOnlyList<(string Name, string Titel)> offen) =>
+        $"{bereich} · {offen.Count} {(offen.Count == 1 ? "Maßnahme" : "Maßnahmen")} aus dem {dienst.Text} offen: " +
+        string.Join("; ", offen.OrderBy(o => o.Name, StringComparer.Create(De, true)).Select(o => $"{o.Name} – {o.Titel}"));
+
     public static DateOnly QuartalBeginn(DateOnly tag) => new(tag.Year, (tag.Month - 1) / 3 * 3 + 1, 1);
 
     // Enthält der Titel ein Medikament aus der Datenbank (Wirkstoff oder Handelsname, ganzes Wort)? Dann nachfragen.
