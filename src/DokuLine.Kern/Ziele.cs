@@ -121,7 +121,7 @@ public static class ZielRegeln
         IEnumerable<MassnahmeBestaetigung> bestaetigungen)
     {
         var liste = new List<string>();
-        var berichteJe = berichte.Where(b => b.ZielId is not null).ToLookup(b => b.ZielId!.Value);
+        var berichteJe = berichte.Where(b => b.ZielId is not null && b.Art != MassnahmenRegeln.ArtBericht).ToLookup(b => b.ZielId!.Value);
         var massnahmenJe = massnahmen.ToLookup(m => m.Fassungen.Select(f => f.ZielId).LastOrDefault(z => z is not null));
         var bestaetigtJe = bestaetigungen.ToLookup(b => b.MassnahmeId);
         foreach (var z in Aktive(ziele))

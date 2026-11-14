@@ -65,7 +65,7 @@ public sealed class ZieleTests : IDisposable
         Assert.Equal([1L, 9L], ZielRegeln.Waehlbar([leit, spaeter], 9).Select(z => z.Id));   // schon zugeordnet, inzwischen beendet
 
         static Bericht B(long? ziel) => new() { BewohnerId = 1, Zeitpunkt = Jetzt, Schicht = Schicht.Frueh, Verfasser = "AB", Text = "x", ZielId = ziel };
-        var berichte = new[] { B(2), B(2), B(null) };
+        var berichte = new[] { B(2), B(2), B(null), B(2) with { Art = MassnahmenRegeln.ArtBericht } };   // der Eintrag einer Bestätigung zählt nicht
         var bestaetigt = new MassnahmeBestaetigung(1, 5, 1, Heute, Schicht.Frueh, MassnahmeErgebnis.Durchgefuehrt, "", 20, "", "AB", Jetzt, 2, "Zimmer (Test)");
         var zusammen = ZielRegeln.Zusammenfassung([leit, nah1], berichte, [massnahme], [bestaetigt]);
         Assert.Equal("Nahziel: Ich räume mein Zimmer auf (Test). – 2 Berichte, 1 Maßnahme (1× durchgeführt)", zusammen[1]);

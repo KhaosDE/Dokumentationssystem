@@ -168,7 +168,7 @@ public sealed class MassnahmenAnsicht : KartenFlaeche
         ZielStand.Font = achtung ? Stil.FettKursiv : Stil.Standard;
         ZieleGezeigt = [.. ZielRegeln.Aktive(alle), .. FruehereZiele.Checked ? alle.Where(z => !z.Aktiv) : []];
         var massnahmenJe = laufende.ToLookup(m => m.Am(heute)?.ZielId);
-        var berichteJe = berichte.ToLookup(b => b.ZielId);
+        var berichteJe = berichte.Where(b => b.Art != MassnahmenRegeln.ArtBericht).ToLookup(b => b.ZielId);   // ohne die Einträge der Bestätigungen
         Ziele.BeginUpdate();
         Ziele.Items.Clear();
         foreach (var z in ZieleGezeigt)

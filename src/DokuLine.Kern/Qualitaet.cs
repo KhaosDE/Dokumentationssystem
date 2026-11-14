@@ -98,7 +98,7 @@ public static class QualitaetRegeln
         var von = heute.AddDays(-e.TageUnbestaetigt);
         int unbestaetigt = laufend.Count(m => m.Am(heute) is MassnahmeFassung f && f.Rhythmus != MassnahmeRhythmus.BeiBedarf && f.GiltAb <= von
             && Enumerable.Range(1, e.TageUnbestaetigt).Any(i => MassnahmenRegeln.AmTag(f, heute.AddDays(-i)))
-            && !d.Bestaetigungen.Any(b => b.MassnahmeId == m.Id && b.Tag > von));
+            && !d.Bestaetigungen.Any(b => b.MassnahmeId == m.Id && b.Tag >= von));
         Punkt(Pruefpunkt.MassnahmenBestaetigt, unbestaetigt == 0 ? null
             : $"{unbestaetigt} {(unbestaetigt == 1 ? "Maßnahme" : "Maßnahmen")} seit {e.TageUnbestaetigt} Tagen nicht bestätigt");
 

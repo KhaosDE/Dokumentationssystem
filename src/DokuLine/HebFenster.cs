@@ -219,7 +219,7 @@ public sealed class HebFenster : Form, IEntwurfFenster
         }
         var ziele = ZielRegeln.Zusammenfassung(speicher.Ziele(id), speicher.Berichte(id, new BerichtFilter(Bogen.Von, Bogen.Bis)),
             speicher.Massnahmen(id, auchBeendete: true), speicher.MassnahmeBestaetigungen(id, Bogen.Von, Bogen.Bis));
-        ZielQuellen.Text = ziele.Count == 0 ? "In der Akte sind keine aktiven Ziele eingetragen." : string.Join(Environment.NewLine, ziele);
+        ZielQuellen.Text = ziele.Count == 0 ? ZielRegeln.Leiste(speicher.Ziele(id), speicher.Verzicht(id)) : string.Join(Environment.NewLine, ziele);
     }
 
     public void SeiteZeigen()

@@ -108,8 +108,10 @@ public sealed class DokumentationAnsicht : Panel
         return box;
     }
 
+    // Der Filter „Berichte zu diesem Ziel“ gehört zu einem Bewohner: beim Wechsel fällt er weg.
     public void Zeigen(Bewohner b)
     {
+        if (Bewohner?.Id != b.Id && Filter.ZielId is not null) Filter = Filter with { ZielId = null, ZielText = "" };
         Bewohner = b;
         Aktualisieren();
     }
@@ -181,7 +183,7 @@ public sealed class DokumentationAnsicht : Panel
                 _ => null
             },
             Verfasser = Verfasser.SelectedIndex > 0 ? Verfasser.SelectedItem as string : null,
-            Suche = Suche.Text,
+            Suche = Suche.Text, ZielId = Filter.ZielId, ZielText = Filter.ZielText,
         };
         Von.Visible = Bis.Visible = Filter.Zeitraum == Kern.Zeitraum.Frei;
         Aktualisieren();
@@ -319,7 +321,7 @@ public sealed class DokumentationAnsicht : Panel
     public bool FilterSpeichern()
     {
         if (!Recht.Angemeldet || NameFragen() is not string name || name.Trim().Length == 0) return false;
-        try { speicher.FilterSpeichern(Recht.Kuerzel, name, Filter); }
+        try { speicher.FilterSpeichern(Recht.Kuerzel, name, Filter with { ZielId = null, ZielText = "" }); }   // das Ziel gilt nur für einen Bewohner
         catch (Eingabefehler e)
         {
             MessageBox.Show(FindForm(), string.Join("\n", e.Fehler), "Filter speichern", MessageBoxButtons.OK,

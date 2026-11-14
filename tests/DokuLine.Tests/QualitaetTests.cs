@@ -56,6 +56,11 @@ public sealed class QualitaetTests : IDisposable
         var bestaetigt = new MassnahmeBestaetigung(1, 5, 1, Heute.AddDays(-2), Schicht.Frueh, MassnahmeErgebnis.Durchgefuehrt, "", 20, "", "AB", Jetzt, 2, "Zimmer (Test)");
         Assert.True(QualitaetRegeln.Pruefen(Leer(b) with { Massnahmen = [m], Bestaetigungen = [bestaetigt] }, Heute, Vorgabe)
             .Single(e => e.Punkt == Pruefpunkt.MassnahmenBestaetigt).Ok);
+        // Bestätigt am ersten Tag des Zeitraums (vor genau 14 Tagen) zählt mit.
+        var amRand = bestaetigt with { Tag = Heute.AddDays(-Vorgabe.TageUnbestaetigt) };
+        var alle14 = new Massnahme(5, 1, [m.Fassungen[0] with { Rhythmus = MassnahmeRhythmus.Monatlich, MonatsTag = Heute.AddDays(-Vorgabe.TageUnbestaetigt).Day }]);
+        Assert.True(QualitaetRegeln.Pruefen(Leer(b) with { Massnahmen = [alle14], Bestaetigungen = [amRand] }, Heute, Vorgabe)
+            .Single(e => e.Punkt == Pruefpunkt.MassnahmenBestaetigt).Ok);
 
         var zeile = new PruefZeile(b, leer, null, null);
         Assert.True(zeile.Maengel);
