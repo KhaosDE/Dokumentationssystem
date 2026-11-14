@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.56.0** (HEB-Fälligkeit).
+Stand: 14.11.2026. Version: **0.56.1** (Fehlersuche nach Bauplan 52).
 
 ## Aktuell
 
@@ -499,7 +499,9 @@ Neu in 0.55.0: **Medikamentenbestellung** (Bauplan 51). Neue Seite **„Bestellu
 
 Neu in 0.56.0: **HEB-Fälligkeit vermerken und rechtzeitig erinnern** (Bauplan 52). Je Bewohner **„nächster HEB fällig am“** mit drei Zuständen: Datum eingetragen (mit Grund) · „kein HEB nötig“ (mit Grund) · nicht erfasst (Achtung-Farbe, Vorschlag aus dem Ende der Bewilligung bzw. letzter Bogen plus Frist). **Stand des Bogens**: offen · in Arbeit · fertig · abgegeben am … (Kürzel); **„Abgegeben …“** schließt die Fälligkeit und setzt die nächste (Vorschlag). **Erinnerung in Stufen** (Wochen in den Einstellungen): 8 Wochen vorher Aufgabe „HEB-Bogen für … beginnen“ und Marke in Hinweis-Farbe; 4 Wochen vorher Achtung-Farbe und Kasten „Fristen“ der Übersicht; überfällig in Gefahr-Farbe mit Wort. Mit Entwurf wird die Aufgabe erledigt. Neue Seite **„HEB-Fristen“** (nach „Hilfeplangespräche“): alle Bewohner nach Fälligkeit, „Bogen öffnen …“ bzw. „Neuer HEB-Bogen …“, ändern, abgegeben, drucken. Reiter „HEB“ der Akte mit Fristzeile und Knöpfen, Zeile „Nächster HEB“ in den Stammdaten und im Reiter „Kostenträger“, Spalte auf der Seite „Hilfeplangespräche“, Ganztagseintrag „HEB fällig“ im Bereichskalender, Prüfseite des QMB („HEB aktuell“).
 
-**Nächster Schritt:** Abschließende Fehlersuche; Auslieferung 0.52.0–0.56.0.
+Neu in 0.56.1: Abschließende **Fehlersuche** über 0.42–0.56 (vier Prüfer, jeder Fund selbst nachgeprüft). Behoben: Absturz im Kasten „Laufender Dienst“ beim Neuaufbau; Ziele zählen keine Maßnahmen-Einträge als Berichte; Prüfseite (Bestätigung am ersten Tag, vergangener Hilfeplan-Termin); Ziel-Filter der Dokumentation; drei Zustände bei fehlenden Zielen in HEB und Reflexion; HEB-Frist nach der Abgabe (Vorschlag, Erinnerung); Vorrat der Bestellung (letzter Status je Gabe, „mitgegeben“, ab der Zählung) und atomare Erinnerung; Strg+Z nach Rechtschreib-Korrektur; Entlassene (keine Berichte, Hilfeplan, HEB-Frist, keine erzeugten Aufgaben, Akte nur im Archiv); Archiv-Medikamentenplan zum Entlasstag; „alle n Wochen“ bleibt im Takt; .ics-Einladung ohne Teilnehmer; Schlüsselwörter (Wortgruppen, Datum ohne Jahr); Druck/CSV der Zeitauswertung; Einnahmezeit der Ausgabe; doppelter Demo-Hinweis auf zwei Ausdrucken. Oberflächentests nennen bei Zeitüberschreitung die offenen Fenster und schließen sie.
+
+**Nächster Schritt:** Entscheidungen zu den offenen Punkten der Fehlersuche (unten); weitere Aufträge aus `IDEEN.md`.
 
 ## Fertig
 
@@ -1615,9 +1617,18 @@ Neu in 0.56.0: **HEB-Fälligkeit vermerken und rechtzeitig erinnern** (Bauplan 5
 - 0.54.0 — Abwesenheit in der Dokumentation (Bauplan 50): Zeile über der Liste, Balken, Beginn/Ende-Einträge, Hinweis im Bericht, leise Namen
 - 0.55.0 — Medikamentenbestellung (Bauplan 51): Seite „Bestellung“, Anforderung je Empfänger, Ausdruck/E-Mail, Verlauf mit Erinnerung, Bestand zuschaltbar
 - 0.56.0 — HEB-Fälligkeit (Bauplan 52): Frist je Bewohner, Erinnerung in Stufen, Seite „HEB-Fristen“, Kalender, Prüfseite
+- 0.56.1 — Fehlersuche nach Bauplan 52: Funde behoben, Rest unter „Offene Punkte“
 
 ## Offene Punkte
 
+- 14.11.2026 (0.56.1): Rechte: Aufgaben abhaken und das Modul Ausgangsliste prüfen kein Recht (nur das Kürzel). Die QMB soll laut Auftrag nichts ändern, kann es dort aber. Entscheidung nötig, welches Recht das Abhaken bzw. die Ausgangsliste verlangt.
+- 14.11.2026 (0.56.1): Ziele in Reflexion und HEB: Die Zusammenfassung ordnet Maßnahmen nach ihrer letzten Ziel-Zuordnung und zeigt nur heute aktive Ziele, nicht den Stand im Zeitraum (ein im Zeitraum erreichtes Ziel fehlt).
+- 14.11.2026 (0.56.1): Maßnahmen: Nach dem Dienstwechsel lässt sich eine Maßnahme des vorigen Dienstes nicht mehr bestätigen (kein Nachtrag). Vorschlag: bis zum Ende des Folgedienstes zulassen.
+- 14.11.2026 (0.56.1): Übergabe: Die Sammeleinträge „offen“ (Maßnahmen, Medikamente) je Wohnbereich sind allgemeine Übergaben ohne Bereich und erscheinen in allen Bereichen. Braucht eine Bereichsangabe an der Übergabe.
+- 14.11.2026 (0.56.1): Medikamentenausgabe: „mittags“ reicht bis 15:00, der Frühdienst endet um 14:00 (Sammeleintrag „offen“ zu früh); zwei Plätze können denselben Eintrag ohne Konflikt-Hinweis überschreiben; der Kern lehnt eine spätere Einnahmezeit desselben Tages nicht ab.
+- 14.11.2026 (0.56.1): Zeitauswertung: wird bei jeder Änderung eines anderen Platzes neu gerechnet (bei langen Zeiträumen langsam); ein Therapie-Bericht mit Dauer zählt neben der Teilnahme zusätzlich.
+- 14.11.2026 (0.56.1): Archiv, endgültig löschen: Kalendertermine (Hinweis mit Teilnehmern), Fahrten und Zugriffsprotokoll behalten Verweise auf die gelöschte Nummer; eine neue Bewohner-Nummer kann die gelöschte wieder belegen. Ein noch geöffnetes Dokument bleibt in der Ablage liegen.
+- 14.11.2026 (0.56.1): Schlüsselwörter: Ein vorgemerkter Schritt öffnet nach dem Speichern auch, wenn das Wort wieder gelöscht wurde.
 - 14.11.2026 (0.54.0): Maßnahmen-Checkliste und Zeitauswertung kennzeichnen Abwesenheitstage noch nicht (Bauplan 50, Folgen).
 - 14.11.2026 (0.50.0): Aufbewahrungsfrist des Archivs mit Träger und Datenschutz klären (in `docs/betrieb.md`, Liste der Freigaben); bis dahin bleibt sie leer und es wird nichts gelöscht.
 - 09.11.2026 (0.41.1), **Restrisiko Betrieb:** Die DokuLine-Benutzer müssen die Datenbankdatei lesen und schreiben
@@ -2736,6 +2747,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.56.1: Übersicht mehrmals neu aufbauen (Bereich wechseln) – kein Absturz im Kasten „Laufender Dienst“. Einen Bewohner entlassen und über Einstellungen → Verzeichnis „Akte öffnen“ – es öffnet die Archiv-Akte, nur lesend. Rechtschreibung: Vorschlag per Rechtsklick übernehmen, dann Strg+Z. HEB-Fristen: „Abgegeben …“ – die nächste Fälligkeit liegt ein Jahr später, nicht am Ende der laufenden Bewilligung.
 
 Version 0.56.0: Seite „HEB-Fristen“ (R1): überfällig oben (rot mit Wort), „4 Wochen“ in Achtung-Farbe; Zeile wählen → „Fälligkeit ändern …“ (Datum, Grund), „Neuer HEB-Bogen …“, nach „fertig“ „Abgegeben …“ (leer = heute, nächste aus dem Vorschlag), „Drucken …“. Übersicht: Kasten „Fristen“ zeigt HEB überfällig/bald fällig. Akte → Stammdaten „Nächster HEB“, Reiter „HEB“ mit Fristzeile und Knöpfen, Reiter „Kostenträger“ mit Zeile „Nächster HEB“. Kalender (Monat): „HEB fällig (Vorname)“ am Fälligkeitstag. Aufgaben: „HEB-Bogen für … beginnen (fällig …)“. Einstellungen → „HEB-Frist: Erinnerung“ (Wochen der beiden Stufen).
 

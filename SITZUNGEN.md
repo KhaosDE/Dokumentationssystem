@@ -153,3 +153,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 14.11.2026 — Claude Code: 0.54.0 Abwesenheit in der Dokumentation (Bauplan 50): Zeile, Balken, Beginn/Ende-Einträge, Hinweis im Bericht, leise Namen.
 - 14.11.2026 — Claude Code: 0.55.0 Medikamentenbestellung (Bauplan 51): Seite „Bestellung“, Anforderung, Ausdruck/E-Mail, Verlauf, Bestand zuschaltbar.
 - 14.11.2026 — Claude Code: 0.56.0 HEB-Fälligkeit (Bauplan 52): Frist je Bewohner, Erinnerung in Stufen, Seite „HEB-Fristen“, Kalender, Prüfseite; Bauplan 38–52 gebaut.
+- 14.11.2026 — Claude Code: 0.56.1 Fehlersuche nach Bauplan 52 (vier Prüfer): Funde behoben, offene Punkte in STAND.
