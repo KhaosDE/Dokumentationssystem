@@ -59,7 +59,9 @@ public class FlaecheUndMenueTests
             Assert.All(f.Navigation, n => Assert.NotEmpty(n.Symbol));
             Assert.True(f.Navigation[0].Width < eintragBreit);
             Assert.True(f.Kopf.Width > kopfBreit);                      // die Inhalte nutzen die Fläche sofort
-            Assert.Equal(5, f.Navigation.Single(n => n.Text == "Aufgaben").Anzahl);   // Zähler bleibt am Symbol
+            // Zähler bleibt am Symbol (wie viele offen sind, hängt vom Dienst ab: Standardaufgaben je Schicht).
+            Assert.Equal(u.Speicher.Aufgaben(DateTime.Now, bereich: Arbeitsbereich.Gewaehlt).Count, f.Navigation.Single(n => n.Text == "Aufgaben").Anzahl);
+            Assert.True(f.Navigation.Single(n => n.Text == "Aufgaben").Anzahl > 0);
             Assert.True(f.InfoSymbol.Visible);
             Assert.False(f.VersionText.Visible);
             Assert.StartsWith("Version ", f.InfoSymbol.Text);
