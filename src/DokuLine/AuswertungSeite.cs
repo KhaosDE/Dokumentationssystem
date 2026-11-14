@@ -75,11 +75,15 @@ public sealed class AuswertungSeite : Panel, IBereichSeite
         PerformLayout();
     }
 
+    // Drucken und CSV nehmen den Zeitraum, zu dem die Zeilen berechnet wurden – nicht ein inzwischen getipptes Datum.
+    private (DateOnly Von, DateOnly Bis)? ausgewertet;
+
     public void Aktualisieren()
     {
         Recht.Anwenden(speicher, Funktionen.Zeitauswertung, AuswertenKnopf, DruckKnopf, CsvKnopf);
         Tabelle.Items.Clear();
         Zeilen = [];
+        ausgewertet = null;
         if (Stil.Sperrgrund(AuswertenKnopf) is string grund) { Melden(grund); return; }
         if (Zeitraum() is not var (von, bis)) return;
         var bewohner = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt);
@@ -87,6 +91,7 @@ public sealed class AuswertungSeite : Panel, IBereichSeite
         try { Zeilen = speicher.Zeitauswertung(bewohner, von, bis, Recht.Kuerzel); }
         catch (Eingabefehler e) { Melden(string.Join(" ", e.Fehler)); return; }
         Melden(null);
+        ausgewertet = (von, bis);
         Tabelle.BeginUpdate();
         foreach (var z in Zeilen) Tabelle.Items.Add(new ListViewItem(ZeitauswertungRegeln.Werte(z)) { Tag = z });
         Tabelle.EndUpdate();
@@ -98,7 +103,7 @@ public sealed class AuswertungSeite : Panel, IBereichSeite
 
     public bool Drucken()
     {
-        if (Stil.Sperrgrund(DruckKnopf) is not null || Zeitraum() is not var (von, bis)) return false;
+        if (Stil.Sperrgrund(DruckKnopf) is not null || ausgewertet is not var (von, bis)) return false;
         float[] breiten = [.. ZeitauswertungRegeln.Spalten.Select((_, i) => i switch { 0 => 0.7f, 1 => 2f, 10 => 1.4f, 12 => 1.3f, _ => 0.8f })];
         var druck = new TabellenDruck("Zeitauswertung (Minuten)", $"{Arbeitsbereich.Gewaehlt} · {Datum.Text(von)} – {Datum.Text(bis)} · {ZeitauswertungRegeln.Hinweis}",
             ZeitauswertungRegeln.Spalten, breiten, [.. Zeilen.Select(ZeitauswertungRegeln.Werte)]);
@@ -108,7 +113,7 @@ public sealed class AuswertungSeite : Panel, IBereichSeite
 
     public bool CsvSpeichern()
     {
-        if (Stil.Sperrgrund(CsvKnopf) is not null || Zeitraum() is not var (von, bis) || DateiWaehlen() is not string datei) return false;
+        if (Stil.Sperrgrund(CsvKnopf) is not null || ausgewertet is not var (von, bis) || DateiWaehlen() is not string datei) return false;
         try { File.WriteAllText(datei, ZeitauswertungRegeln.Csv(Zeilen, von, bis), new System.Text.UTF8Encoding(true)); }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException) { Melden(e.Message); return false; }
         return true;

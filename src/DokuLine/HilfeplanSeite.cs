@@ -130,7 +130,7 @@ public sealed class HilfeplanSeite : Panel, IBereichSeite
         if (Gewaehlt is not { Termin: KalenderTermin t } z || Stil.Sperrgrund(EinladenKnopf) is not null) return false;
         var namen = new Dictionary<long, string> { [z.Bewohner.Id!.Value] = z.Bewohner.Name };
         if (IcsSpeichern($"Hilfeplangespräch {z.Bewohner.Nachname} {t.Aktuell.Beginn:yyyy-MM-dd}.ics") is string pfad)
-            KalenderAustausch.Schreiben(pfad, Ics.Schreiben([t], namen, Jetzt(), speicher.IcsKennung()));
+            KalenderAustausch.Schreiben(pfad, Ics.Schreiben([HilfeplanRegeln.FuerEinladung(t)], namen, Jetzt(), speicher.IcsKennung()));
         var empfaenger = new List<string>();
         if (speicher.Betreuer(z.Bewohner.Id!.Value) is { Keine: false } b) empfaenger.Add(b.Email);
         if (speicher.Angaben(z.Bewohner.Id!.Value, DateOnly.FromDateTime(Jetzt())).GetValueOrDefault(Angabe.Kostentraeger)?.Lesen<Kostentraeger>() is Kostentraeger k)

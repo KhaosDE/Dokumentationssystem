@@ -43,6 +43,7 @@ public sealed partial class Speicher
     {
         if (Grund(kuerzel, Funktionen.BewohnerBearbeiten) is string grund) throw new Eingabefehler([grund]);
         if (Bewohner(bewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        if (Archiviert(bewohnerId)) throw new Eingabefehler(["Dieser Bewohner ist entlassen."]);
     }
 
     public void HilfeplanFaelligSetzen(long bewohnerId, DateOnly bis, string kuerzel, DateTime jetzt)

@@ -51,6 +51,7 @@ public sealed partial class Speicher
     {
         if (Grund(kuerzel, Funktionen.Heb) is string grund) throw new Eingabefehler([grund]);
         if (Bewohner(bewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        if (Archiviert(bewohnerId)) throw new Eingabefehler(["Dieser Bewohner ist entlassen."]);
     }
 
     // Von Hand: Datum mit Grund (z. B. „Schreiben des Bezirks vom …“).

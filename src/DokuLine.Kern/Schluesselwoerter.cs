@@ -62,7 +62,8 @@ public static class SchluesselwortRegeln
     {
         var w = Regex.Escape(wort.Trim()).Replace("\\ ", "\\s+");
         if (w.Length == 0) return false;
-        string muster = art == Treffer.Wortanfang ? $@"(?<![\p{{L}}\d]){w}" : $@"(?<![\p{{L}}\d]){w}(?![\p{{L}}\d])";
+        // Eine Wortgruppe endet wie ein Wortanfang: „nicht zurück“ trifft „nicht zurückgekommen“, „Termin bei“ auch „Termin beim“.
+        string muster = art == Treffer.Wort ? $@"(?<![\p{{L}}\d]){w}(?![\p{{L}}\d])" : $@"(?<![\p{{L}}\d]){w}";
         return Regex.IsMatch(text, muster, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
     }
 
@@ -92,6 +93,9 @@ public static class SchluesselwortRegeln
             int j = d.Groups[3].Success ? int.Parse(d.Groups[3].Value, CultureInfo.InvariantCulture) : jahr ?? DateTime.Today.Year;
             if (j < 100) j += 2000;
             if (monat is >= 1 and <= 12 && tag >= 1 && tag <= DateTime.DaysInMonth(j, monat)) datum = new DateOnly(j, monat, tag);
+            // Ohne Jahr ist ein Tag, der dieses Jahr schon vorbei ist, im nächsten Jahr gemeint (am 20.12.: „am 05.01.“).
+            if (datum is DateOnly dd && !d.Groups[3].Success && jahr is null && dd < DateOnly.FromDateTime(DateTime.Today)
+                && tag <= DateTime.DaysInMonth(j + 1, monat)) datum = new DateOnly(j + 1, monat, tag);
         }
         var u = Regex.Match(text, @"(?<!\d)(\d{1,2}):(\d{2})(?!\d)");
         if (u.Success && int.Parse(u.Groups[1].Value, CultureInfo.InvariantCulture) < 24 && int.Parse(u.Groups[2].Value, CultureInfo.InvariantCulture) < 60)

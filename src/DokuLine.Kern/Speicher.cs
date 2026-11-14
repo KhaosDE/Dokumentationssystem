@@ -1628,6 +1628,7 @@ public sealed partial class Speicher : IDisposable
     public Bericht BerichtSpeichern(Bericht b, UebergabeWunsch? uebergabe = null)
     {
         if (Bewohner(b.BewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
+        if (Archiviert(b.BewohnerId)) throw new Eingabefehler(["Dieser Bewohner ist entlassen; seine Akte im Archiv wird nur gelesen."]);
         if (b.Id is not null) throw new InvalidOperationException("Berichte werden nicht überschrieben – Korrekturen sind Nachträge.");
         if (b.ZielId is long ziel && Ziele(b.BewohnerId).All(z => z.Id != ziel)) throw new Eingabefehler(["Das gewählte Ziel gehört nicht zu diesem Bewohner."]);
         if (uebergabe is not null) UebergabeRegeln.Pruefen(uebergabe, b.Erfasst);

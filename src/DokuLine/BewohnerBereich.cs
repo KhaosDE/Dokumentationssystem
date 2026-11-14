@@ -401,6 +401,18 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
             UebersichtZeigen();
             return;
         }
+        // Entlassene: nur lesend im Archiv (mit Recht), nie die bearbeitbare Akte.
+        if (speicher.Archiviert(id))
+        {
+            if (Recht.Grund(speicher, Funktionen.ArchivEinsehen) is null)
+            {
+                using var archiv = new ArchivAkteFenster(speicher, b);
+                Dialog.Zeigen(archiv, FindForm());
+            }
+            else MessageBox.Show(FindForm(), $"{b.Name} ist entlassen; die Akte steht im Archiv.", "Archiv", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            UebersichtZeigen();
+            return;
+        }
         Akte.Zeigen(b);
         listenFlaeche.Visible = false;
         Akte.Visible = true;

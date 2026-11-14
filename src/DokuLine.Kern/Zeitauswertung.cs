@@ -46,7 +46,7 @@ public static class ZeitauswertungRegeln
         int summe = 0;
         foreach (var m in massnahmen)
             for (var tag = von; tag <= bis; tag = tag.AddDays(1))
-                if (m.Laeuft(tag) && m.Am(tag) is MassnahmeFassung f && f.Rhythmus != MassnahmeRhythmus.BeiBedarf && MassnahmenRegeln.AmTag(f, tag))
+                if (m.Laeuft(tag) && m.Am(tag) is MassnahmeFassung f && f.Rhythmus != MassnahmeRhythmus.BeiBedarf && MassnahmenRegeln.AmTag(m, f, tag))
                     summe += f.Minuten;
         return summe;
     }

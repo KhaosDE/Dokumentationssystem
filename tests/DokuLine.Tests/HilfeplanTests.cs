@@ -38,7 +38,7 @@ public sealed class HilfeplanTests : IDisposable
         };
         var ohne = HilfeplanRegeln.Stand(B, [], k, new Dictionary<long, KalenderTermin>());
         Assert.Equal((null, Heute.AddDays(40), true, HilfeplanStandArt.Offen), (ohne.LetztesAm, ohne.FaelligBis, ohne.Vorschlag, ohne.Stand));
-        Assert.Equal("Hilfeplangespräch fällig in 5 Wochen", HilfeplanRegeln.Marke(ohne, Heute));
+        Assert.Equal("Hilfeplangespräch fällig in 6 Wochen", HilfeplanRegeln.Marke(ohne, Heute));   // 40 Tage, aufgerundet
         Assert.Contains("(Vorschlag aus der Bewilligung)", HilfeplanRegeln.KurzText(ohne));
 
         var gefuehrt = HilfeplanRegeln.Stand(B, [E("gefuehrt", Heute.AddDays(-5), 1)], null, new Dictionary<long, KalenderTermin>());
@@ -47,7 +47,8 @@ public sealed class HilfeplanTests : IDisposable
         var faellig = HilfeplanRegeln.Stand(B, [E("gefuehrt", Heute.AddYears(-1), 1), E("faellig", Heute.AddDays(-3), 2)], k, new Dictionary<long, KalenderTermin>());
         Assert.Equal((Heute.AddDays(-3), false), (faellig.FaelligBis, faellig.Vorschlag));
         Assert.Equal("Hilfeplangespräch überfällig", HilfeplanRegeln.Marke(faellig, Heute));
-        Assert.Null(HilfeplanRegeln.Marke(faellig with { Stand = HilfeplanStandArt.TerminVergeben }, Heute));
+        var termin = new KalenderTermin { Id = 9, Fassungen = [new KalenderFassung { Titel = HilfeplanRegeln.Titel, Beginn = Jetzt.AddDays(2), Ende = Jetzt.AddDays(2).AddHours(1) }] };
+        Assert.Null(HilfeplanRegeln.Marke(faellig with { Stand = HilfeplanStandArt.TerminVergeben, Termin = termin }, Heute));   // Termin steht noch bevor
         Assert.Null(HilfeplanRegeln.Marke(faellig with { FaelligBis = Heute.AddDays(200) }, Heute));
 
         var teilnehmer = HilfeplanRegeln.TeilnehmerVorschlag(B, "Emma Fink", new Betreuer { Name = "Herr Treu (Test)" },

@@ -53,11 +53,18 @@ public static class HilfeplanRegeln
     // „überfällig“ oder „fällig in n Wochen“ (ab 12 Wochen vorher); mit vergebenem Termin keine Marke.
     public static string? Marke(HilfeplanStand s, DateOnly heute)
     {
-        if (s.Stand == HilfeplanStandArt.TerminVergeben || s.FaelligBis is not DateOnly bis) return null;
+        if (TerminSteht(s, heute) || s.FaelligBis is not DateOnly bis) return null;
         if (bis < heute) return "Hilfeplangespräch überfällig";
-        int wochen = (bis.DayNumber - heute.DayNumber) / 7;
+        int wochen = (bis.DayNumber - heute.DayNumber + 6) / 7;
         return wochen <= HinweisWochen ? $"Hilfeplangespräch fällig in {wochen} {(wochen == 1 ? "Woche" : "Wochen")}" : null;
     }
+
+    // Für die .ics-Einladung nur Titel, Zeit und Ort: Die Teilnehmer im Hinweis (z. B. Forensik, FOSA) sind Gesundheitsangaben.
+    public static KalenderTermin FuerEinladung(KalenderTermin t) => t with { Fassungen = [t.Aktuell with { Hinweis = "" }] };
+
+    // Ein vergebener Termin zählt, solange er nicht vorbei ist; danach ohne „geführt“ wieder als offen.
+    public static bool TerminSteht(HilfeplanStand s, DateOnly heute) =>
+        s.Stand == HilfeplanStandArt.TerminVergeben && s.Termin is KalenderTermin t && DateOnly.FromDateTime(t.Aktuell.Beginn) >= heute;
 
     // Teilnehmer aus der Akte: Bewohner, Bezugspflege, Betreuer bzw. Forensik/FOSA, Sachbearbeiter des Kostenträgers,
     // Angehörige nur mit Entbindung von der Schweigepflicht.

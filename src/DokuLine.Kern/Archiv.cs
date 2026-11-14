@@ -101,7 +101,10 @@ public static class ArchivRegeln
         var zielZeilen = ziele.OrderBy(z => z.Art).ThenBy(z => z.Id).Select(z =>
             $"{ZielRegeln.Text(z)} ({BerichtRegeln.BereichText(z.Aktuell.Lebensbereich)}, vereinbart {Datum.Text(z.Aktuell.VereinbartAm)}, {ZielRegeln.StandText(z.Aktuell.Stand)})").ToList();
         var massnahmeZeilen = massnahmen.Select(m => m.Fassungen[^1]).Select(f => $"Maßnahme: {f.Titel} ({BerichtRegeln.BereichText(f.Lebensbereich)}, ab {Datum.Text(f.GiltAb)})").ToList();
-        var verordnet = verordnungen.Select(v => $"{v.Medikament} {v.Staerke} {(v.Bedarf ? "bei Bedarf" : v.Dosis.Text)} · ab {Datum.Text(v.Beginn)}").ToList();
+        var bis = aufenthalte.Count > 0 ? aufenthalte[^1].Entlassen : DateOnly.FromDateTime(DateTime.Today);
+        var verordnet = verordnungen.Select(v => MedikationRegeln.Stand(v, bis)).Where(s => s.Zustand != Zustand.NochNicht).Select(s =>
+            $"{s.Verordnung.Medikament} {s.Verordnung.Staerke} {(s.Verordnung.Bedarf ? "bei Bedarf" : s.Dosis.Text)} · ab {Datum.Text(s.Verordnung.Beginn)}" +
+            (s.Zustand == Zustand.Abgesetzt ? " · abgesetzt" : s.Zustand == Zustand.Pausiert ? " · pausiert" : "")).ToList();
         var refl = reflexionen.Where(r => r.Aktuell is not null).Select(r => $"Reflexion {ReflexionRegeln.MonatText(r.Monat)}: {ReflexionRegeln.StatusText(r)}")
             .Concat(heb.Select(h => $"{HebRegeln.ArtKurz(h.Art)} {HebRegeln.ZeitraumText(h)}: {(h.Fertig ? "fertig" : "Entwurf")}")).ToList();
         return

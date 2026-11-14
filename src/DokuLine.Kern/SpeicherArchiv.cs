@@ -100,7 +100,8 @@ public sealed partial class Speicher
                         ("$a", Iso(datum.AddDays(1))), ("$g", ArchivRegeln.EntlassenText), ("$k", kuerzel.Trim()), ("$i", f.Id));
                     break;
                 default:
-                    var ab = new[] { datum.AddDays(1), zuteilungen[f.Id].Ab.AddDays(1) }.Max();
+                    // Beginnt die Zuteilung erst nach dem Entlasstag, endet sie, bevor sie beginnt (kein Tag bleibt übrig).
+                    var ab = new[] { datum.AddDays(1), zuteilungen[f.Id].Ab }.Max();
                     Ausfuehren("INSERT INTO zuteilung_ende (zuteilung_id, ab, erstellt, kuerzel) VALUES ($z, $ab, $e, $k)", transaktion,
                         ("$z", f.Id), ("$ab", Iso(ab)), ("$e", Zeit(jetzt)), ("$k", kuerzel.Trim()));
                     break;
@@ -169,7 +170,9 @@ public sealed partial class Speicher
             transaktion.Commit();
         }
         string ablage = Ablage(bewohnerId);
-        if (Directory.Exists(ablage)) Directory.Delete(ablage, recursive: true);
+        // Ist ein Dokument gerade geöffnet, bleibt die Datei liegen, statt nach dem Löschen in der Datenbank abzustürzen.
+        try { if (Directory.Exists(ablage)) Directory.Delete(ablage, recursive: true); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
         Bilder.Loeschen(z.Bewohner.Bild);
         ArchivGeaendert?.Invoke();
         return Loeschprotokolle().Single(p => p.Id == id);

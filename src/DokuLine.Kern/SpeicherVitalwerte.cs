@@ -189,11 +189,11 @@ public sealed partial class Speicher
     }
 
     // Zu Beginn jeder Schicht: aus den fälligen Messaufträgen Aufgaben – je Auftrag nur einmal je Schicht.
-    private int MessauftraegeErzeugen(DateTime jetzt)
+    private int MessauftraegeErzeugen(DateTime jetzt, IReadOnlySet<long> aktive)
     {
         var schicht = SchichtTermin.Zu(jetzt);
         int neu = 0;
-        foreach (var m in Messauftraege().Where(m => VitalRegeln.Faellig(m, schicht)))
+        foreach (var m in Messauftraege().Where(m => VitalRegeln.Faellig(m, schicht) && aktive.Contains(m.BewohnerId)))
         {
             using var transaktion = db.BeginTransaction();
             Ausfuehren("INSERT OR IGNORE INTO messauftrag_aufgaben (messauftrag_id, schicht_tag, schicht) VALUES ($m, $st, $s)", transaktion,
