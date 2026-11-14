@@ -74,7 +74,7 @@ public sealed partial class Speicher
     // Demo: ausgedachte, kurze Reflexionen für den vergangenen Monat (einige fertig, eine Entwurf).
     private void DemoReflexionEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM reflexionen", transaktion);
         foreach (var f in Demodaten.Reflexionen(bewohner, Uhr()))
             ReflexionEinfuegen(f, transaktion);

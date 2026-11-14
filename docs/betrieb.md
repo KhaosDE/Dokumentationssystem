@@ -269,6 +269,10 @@ Wer wann welche Akte **geöffnet**, **gedruckt** oder **geändert** hat (nie Inh
       Die erfassten Zeiten hängen an Kürzeln; DokuLine wertet nur je Bewohner aus, nie je Mitarbeiter. Ebenso die
       **Prüfseite „Qualität“**: Sie prüft die Unterlagen der Bewohner; Prüfvermerke und Hinweise tragen das Kürzel
       des QMB, eine Auswertung nach Mitarbeiter gibt es nicht.
+- [ ] **Aufbewahrungsfrist des Archivs** (Bauplan 46): mit Träger und Datenschutz klären und in den Einstellungen
+      („Archiv: Aufbewahrungsfrist“) eintragen. DokuLine hat bewusst keine Vorgabe; ohne Frist wird nichts gelöscht.
+      Gelöscht wird nur von zwei Personen mit dem Recht „Archiv löschen“; Sicherungen laufen nach ihrer eigenen
+      Aufbewahrung aus.
 - [ ] **Medizinprodukt ja/nein**: prüfen lassen, ob der Medikamentenplan (Stand, Stufenpläne, Hinweise) und die
       Vitalwerte (Hinweise auf Bereiche) als Medizinprodukt gelten.
 - [ ] **Betriebsprobe** auf einem Test-Rechner mit ausgedachten Daten: Installation, Rechte, Anmeldung, Sperre,

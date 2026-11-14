@@ -169,7 +169,7 @@ public sealed partial class Speicher
         Ausfuehren("DELETE FROM messauftrag_aufgaben; DELETE FROM messauftraege; DELETE FROM vital_grenzen; DELETE FROM vitalwerte", transaktion);
         var jetzt = Uhr();
         var heute = DateOnly.FromDateTime(jetzt);
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         bewohner.Sort(BewohnerRegeln.NachName);
         foreach (var w in Demodaten.Vitalwerte(bewohner, jetzt))
             VitalwertEinfuegen(w.BewohnerId, w.Zeit, w.Art, w.Wert, w.Wert2, w.Bemerkung, w.Kuerzel, w.Zeit.AddMinutes(5), null, "", transaktion);

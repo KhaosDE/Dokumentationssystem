@@ -263,7 +263,7 @@ public sealed partial class Speicher
     // Demo: ausgedachte Aufgaben relativ zu jetzt (eine überfällig und weitergereicht, eine erledigt).
     private void DemoAufgabenEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM aufgaben WHERE bewohner_id IS NULL", transaktion);   // Aufgaben ohne Bewohner aus der Demo
         foreach (var d in Demodaten.Aufgaben(bewohner, Uhr()))
         {

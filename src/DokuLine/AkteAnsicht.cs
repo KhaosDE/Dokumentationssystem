@@ -42,6 +42,9 @@ public sealed class AkteAnsicht : Panel
     // Personenbeschreibung (Bauplan 34): für das Meldeblatt; Marke, wenn älter als 12 Monate.
     public Label BeschreibungText { get; } = new() { Cursor = Cursors.Hand };
     public Button BeschreibungKnopf { get; } = Stil.NebenKnopf("Personenbeschreibung …");
+    // Entlassen (Bauplan 46): die Akte wandert ins Archiv.
+    public Button EntlassenKnopf { get; } = Stil.NebenKnopf("Entlassen …");
+    public event Action? Entlassen;
     public List<ModulReiter> ModulAnsichten { get; } = [];
     public Label Geburtsdatum { get; } = new();
     public Label Aufnahmedatum { get; } = new();
@@ -160,8 +163,9 @@ public sealed class AkteAnsicht : Panel
             tabelle.Controls.Add(zelle);
         }
         stammdaten.Controls.Add(tabelle);
-        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf, BeschreibungKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini); }
-        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf, BeschreibungKnopf]);
+        foreach (var k in new[] { BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf, BeschreibungKnopf, EntlassenKnopf }) { k.AutoSize = true; k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandMini); }
+        bezugKnoepfe.Controls.AddRange([BezugKnopf, BezugVerlaufKnopf, BetreuerKnopf, EmailKnopf, BeschreibungKnopf, EntlassenKnopf]);
+        EntlassenKnopf.Click += (_, _) => EntlassenOeffnen();
         BetreuerKnopf.Click += (_, _) => BetreuerBearbeiten();
         EmailKnopf.Click += (_, _) => EmailSchreiben();
         EmailBestaetigen = text => MessageBox.Show(FindForm(), text, "E-Mail an Betreuer", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
@@ -296,7 +300,7 @@ public sealed class AkteAnsicht : Panel
         BeschreibungText.Font = marke is not null ? Stil.FettKursiv : Stil.Fett;
         BeschreibungText.MaximumSize = new Size(S(560), 0);
         BeschreibungText.AccessibleName = $"Personenbeschreibung: {BeschreibungText.Text} (öffnet das Formular)";
-        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BeschreibungKnopf);
+        Recht.Anwenden(speicher, Funktionen.BewohnerBearbeiten, BeschreibungKnopf, EntlassenKnopf);
     }
 
     // Je Eintrag eine Marke mit Zeichen, Wort und Farbe; widerrufene durchgestrichen. Am Ende „Auskunft prüfen …“.
@@ -333,6 +337,15 @@ public sealed class AkteAnsicht : Panel
         foreach (var w in speicher.Vitalwerte(id).GroupBy(w => w.Art).Select(g => g.First()))
             if (VitalRegeln.Bewerten(w, grenzen.GetValueOrDefault(w.Art), r) is { Angeordnet: true })
                 yield return new Marke(MarkenArt.Vital, $"{w.Art} {VitalRegeln.WertText(w, r)}: {VitalRegeln.Ausserhalb}");
+    }
+
+    public bool EntlassenOeffnen()
+    {
+        if (Bewohner is null || Recht.Grund(speicher, Funktionen.BewohnerBearbeiten) is not null) return false;
+        using var fenster = new EntlassenFenster(speicher, Bewohner);
+        if (Dialog.Zeigen(fenster, FindForm()) != DialogResult.OK) return false;
+        Entlassen?.Invoke();
+        return true;
     }
 
     public void BeschreibungBearbeiten()

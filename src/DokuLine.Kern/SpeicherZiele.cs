@@ -117,7 +117,7 @@ public sealed partial class Speicher
     {
         Ausfuehren("DELETE FROM bericht_ziel; DELETE FROM ziel_verzicht; DELETE FROM ziel_fassungen; DELETE FROM ziele", transaktion);
         var jetzt = Uhr();
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         bewohner.Sort(BewohnerRegeln.NachName);
         var heute = DateOnly.FromDateTime(jetzt);
         for (int i = 0; i < bewohner.Count; i++)

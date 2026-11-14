@@ -94,6 +94,9 @@ public sealed partial class EinstellungenSeite
         Karte("Wohnbereich", "Qualität: Prüfpunkte", "Welche Punkte die Prüfliste der Seite „Qualität“ zeigt. „Maßnahmen werden bestätigt“: keine fällige Maßnahme so viele Tage ohne Bestätigung.",
             Reihe(Pruefpunkte, new Label { Text = "Tage", AutoSize = true, Margin = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandKlein, 0) }, QmTage),
             Funktionen.Qualitaet);
+        ArchivFristKnopf.Click += (_, _) => ArchivFristUebernehmen();
+        Karte("Wohnbereich", "Archiv: Aufbewahrungsfrist", "Jahre ab Entlassung, bis eine archivierte Akte gelöscht werden darf. Keine Vorgabe: Die Frist muss mit Träger und Datenschutz geklärt werden. Leer = nicht festgelegt.",
+            Reihe(ArchivFrist, ArchivFristKnopf, ArchivFristMeldung), Funktionen.ArchivLoeschen);
         MassnahmenListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Massnahmenarten, Liste.Massnahmenvorlagen]));
         Karte("Wohnbereich", "Maßnahmen: Arten und Vorlagen", "Arten (z. B. Anleitung, Begleitung) und Vorlagen für häufige Maßnahmen, damit nicht jeder anders benennt.",
             MassnahmenListenKnopf, Funktionen.MassnahmenAnlegen);

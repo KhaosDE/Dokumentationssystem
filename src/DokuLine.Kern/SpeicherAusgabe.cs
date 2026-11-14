@@ -102,7 +102,7 @@ public sealed partial class Speicher
             """, transaktion);
         var jetzt = Uhr();
         var (heute, laufend) = AusgabeRegeln.Jetzt(jetzt);
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         foreach (var b in bewohner)
         {
             var plan = VerordnungenIn(b.Id!.Value, transaktion);

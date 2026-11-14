@@ -103,7 +103,7 @@ public sealed partial class Speicher
     // Demo: frühere Bögen (die meisten aktuell, zwei fällig) und ein Entwurf.
     private void DemoHebEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM heb_boegen", transaktion);
         foreach (var d in Demodaten.HebBoegen(bewohner, Uhr()))
         {

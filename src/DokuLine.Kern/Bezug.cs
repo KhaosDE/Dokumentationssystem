@@ -155,7 +155,7 @@ public sealed partial class Speicher
     // Demo: Bezugspflege und Einzeltrainer aus daten/demo/bezug.json, Datum relativ zu heute.
     private void DemoBezugEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM bezugspflege; DELETE FROM einzeltrainer; DELETE FROM einzeltrainer_arten;", transaktion);
         for (int i = 0; i < BezugRegeln.ArtenVorgabe.Length; i++)
             Ausfuehren("INSERT INTO einzeltrainer_arten (name, nr) VALUES ($n, $i)", transaktion, ("$n", BezugRegeln.ArtenVorgabe[i]), ("$i", i + 1));

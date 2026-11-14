@@ -102,7 +102,7 @@ public sealed partial class Speicher
     // Die Demo-Angaben, wie sie aus Personen, Zuordnungen und Betreuern entstehen (immer gleich, daher auch zum Nachholen).
     private (List<Bewohner> Bewohner, List<(Angabe Art, long BewohnerId, object? Inhalt)> Angaben) DemoAkteDaten(SqliteTransaction transaktion, DateOnly heute)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         bewohner.Sort(BewohnerRegeln.NachName);
         var personen = new List<Person>();
         using (var befehl = Befehl("SELECT id, gruppe, name, fachrichtung FROM aerzte WHERE aktiv = 1 ORDER BY id", transaktion, []))

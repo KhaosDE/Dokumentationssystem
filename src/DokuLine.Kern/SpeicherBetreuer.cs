@@ -40,7 +40,7 @@ public sealed partial class Speicher
     private void DemoBetreuerEinfuegen(SqliteTransaction transaktion)
     {
         Ausfuehren("DELETE FROM betreuer", transaktion);
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         foreach (var (nachname, b) in Demodaten.Betreuer(Uhr()))
             if (bewohner.FirstOrDefault(x => x.Nachname == nachname) is Bewohner x) BetreuerEinfuegen(x.Id!.Value, b, transaktion);
         SetzeMeta(DemoBetreuer, "1", transaktion);

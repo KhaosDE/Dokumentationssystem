@@ -98,6 +98,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
         BedarfWaehlen = texte => Eingabe.Waehlen(FindForm(), "Bedarf gegeben", "Welche Bedarfsmedikation?", texte);
         Akte = new AkteAnsicht(speicher) { Dock = DockStyle.Fill, Visible = false };
         Akte.BezugGewuenscht += id => BezugOeffnen(id);
+        Akte.Entlassen += () => { NeuLesen(); UebersichtZeigen(); };   // die Akte ist jetzt im Archiv
         BackColor = Stil.Seite;
         Suche.TextChanged += (_, _) => UebersichtZeigen();
         AlleKnopf.CheckedChanged += (_, _) => UebersichtZeigen();

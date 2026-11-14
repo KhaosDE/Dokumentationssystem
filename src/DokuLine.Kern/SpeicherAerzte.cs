@@ -208,7 +208,7 @@ public sealed partial class Speicher
     {
         Ausfuehren("DELETE FROM aerzte WHERE gruppe <> 'arzt'", transaktion);   // Zuordnungen folgen (CASCADE)
         var bewohner = LesenIn(transaktion,
-            $"SELECT id, {Spalten} FROM bewohner").GroupBy(b => b.Nachname).ToDictionary(g => g.Key,
+            AktiveBewohnerSql).GroupBy(b => b.Nachname).ToDictionary(g => g.Key,
                 g => g.First().Id!.Value);
         var jetzt = Uhr();
         foreach (var (p, zuordnungen) in Demodaten.Personen())

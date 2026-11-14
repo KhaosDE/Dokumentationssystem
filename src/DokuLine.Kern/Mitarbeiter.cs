@@ -61,6 +61,8 @@ public static class Funktionen
     public const string Zeitauswertung = "zeitauswertung";          // nur je Bewohner, nie je Mitarbeiter
     public const string MedikamenteAusgeben = "medikamente_ausgeben";   // Ausgabe abhaken (Bauplan 42)
     public const string Qualitaet = "qualitaet";                       // Prüfseite, Prüfvermerke, Hinweise (Bauplan 44)
+    public const string ArchivEinsehen = "archiv_einsehen";            // ehemalige Bewohner, nur lesen (Bauplan 46)
+    public const string ArchivLoeschen = "archiv_loeschen";            // nach Ablauf der Frist, nur zu zweit
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -99,6 +101,8 @@ public static class Funktionen
         (Zeitauswertung, "Zeitauswertung ansehen"),
         (MedikamenteAusgeben, "Medikamente ausgeben (abhaken)"),
         (Qualitaet, "Qualität prüfen (Prüfseite, Prüfvermerke, Hinweise)"),
+        (ArchivEinsehen, "Archiv einsehen (ehemalige Bewohner, nur lesen)"),
+        (ArchivLoeschen, "Archiv löschen (nach Ablauf der Frist, zu zweit)"),
         (Zugriffsprotokoll, "Zugriffsprotokoll ansehen"),
         (BetriebVerwalten, "Betrieb verwalten (Sicherung, Update, Häuser)"),
         (AndereHaeuser, "Bereiche anderer Häuser wählen"),
@@ -144,7 +148,8 @@ public static partial class RechteRegeln
     public static readonly string[] PositionenNachtraeglich = [QualitaetRegeln.Position];
 
     // QMB (Bauplan 44): liest überall, ändert nichts außer Prüfvermerken und Hinweisen (und Nachrichten, die jeder schreibt).
-    private static readonly string[] QmbVorgabe = [Funktionen.Qualitaet, Funktionen.BereicheWohnbereiche, Funktionen.BereicheAlle, Funktionen.DokumenteAnsehen];
+    private static readonly string[] QmbVorgabe = [Funktionen.Qualitaet, Funktionen.BereicheWohnbereiche, Funktionen.BereicheAlle, Funktionen.DokumenteAnsehen,
+        Funktionen.ArchivEinsehen];
 
     // Assistenzkräfte machen keine Visiten.
     public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten,
@@ -194,7 +199,8 @@ public static partial class RechteRegeln
         Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
         Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
         Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen, Funktionen.Zugriffsprotokoll, Funktionen.BetriebVerwalten, Funktionen.AndereHaeuser,
-        Funktionen.MassnahmenBestaetigen, Funktionen.MassnahmenAnlegen, Funktionen.Zeitauswertung, Funktionen.MedikamenteAusgeben, Funktionen.Qualitaet];
+        Funktionen.MassnahmenBestaetigen, Funktionen.MassnahmenAnlegen, Funktionen.Zeitauswertung, Funktionen.MedikamenteAusgeben, Funktionen.Qualitaet,
+        Funktionen.ArchivEinsehen, Funktionen.ArchivLoeschen];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
@@ -205,7 +211,8 @@ public static partial class RechteRegeln
         funktion is Funktionen.VitalwerteErfassen or Funktionen.MassnahmenBestaetigen ? true :
         funktion == Funktionen.MassnahmenAnlegen ? position is not ("Therapie" or "Verwaltung") :
         funktion == Funktionen.MedikamenteAusgeben ? Vorbelegt(position, Funktionen.MedikationBearbeiten) :
-        funktion == Funktionen.Zeitauswertung ? position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" or "Bereichsleitung" :
+        funktion is Funktionen.Zeitauswertung or Funktionen.ArchivEinsehen ? position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" or "Bereichsleitung" :
+        funktion == Funktionen.ArchivLoeschen ? position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" :
         funktion == Funktionen.VitalGrenzen ? position is not ("Therapie" or "Verwaltung") :
         funktion == Funktionen.Zugriffsprotokoll ? position is Administrator or "Geschäftsführung" or "Hausleitung" :
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||

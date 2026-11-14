@@ -150,7 +150,7 @@ public sealed partial class Speicher
     // Demo: „VW Bus“ und „Caddy“, eine Fahrt gerade unterwegs, eine gestern erledigt, eine geplant.
     private void DemoFahrtenEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM fahrten; DELETE FROM fahrzeuge;", transaktion);
         var demo = Demodaten.Fahrten(bewohner, Uhr());
         for (int i = 0; i < demo.Fahrzeuge.Count; i++)

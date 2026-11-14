@@ -23,7 +23,7 @@ public sealed partial class Hauptfenster : Form
     // Die Einträge des Bereichs „Therapie“ stehen nur dort in der Seitenleiste, in eigener Reihenfolge.
     public static readonly string[] Bereiche =
         ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Medikamentenausgabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
-         .. TherapieBereiche, "Auswertung", "Qualität", "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
+         .. TherapieBereiche, "Auswertung", "Qualität", "Archiv", "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
 
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
@@ -47,6 +47,7 @@ public sealed partial class Hauptfenster : Form
     public VisitenSeite Visiten { get; }
     public AuswertungSeite Auswertung { get; }
     public QualitaetSeite Qualitaet { get; }
+    public ArchivSeite Archiv { get; }
     public AusgabeSeite Ausgabe { get; }
     public EinstellungenSeite Einstellungsseite { get; }
     public AnzeigeDienst Anzeige { get; }
@@ -134,6 +135,9 @@ public sealed partial class Hauptfenster : Form
         seiten["Qualität"] = Qualitaet;
         Qualitaet.Geaendert += () => { if (AktiverBereich == "Qualität") Kopf.TexteSetzen(Qualitaet.KopfText, "Qualität"); };
         Qualitaet.AkteGewuenscht += id => { BereichWaehlen("Dokumentation"); Bewohner.AkteZeigen(id); };
+        Archiv = new ArchivSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Archiv"] = Archiv;
+        Archiv.Geaendert += () => { if (AktiverBereich == "Archiv") Kopf.TexteSetzen(Archiv.KopfText, "Archiv"); };
         Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
         Anzeige = new AnzeigeDienst(speicher);
         Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false, Anzeige = Anzeige };

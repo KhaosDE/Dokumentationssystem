@@ -127,7 +127,7 @@ public sealed partial class Speicher
     // Demo: Termine relativ zu heute (Arzttermine, Wohnbereich, eine laufende Heimfahrt, Ausflug).
     private void DemoKalenderEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM kalender", transaktion);
         foreach (var d in Demodaten.Kalender(bewohner, Uhr()))
         {

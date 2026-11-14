@@ -68,6 +68,9 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public NumericUpDown ZieleNah { get; } = new() { Minimum = 0, Maximum = 6, Width = 60, AccessibleName = "Mindestzahl Nahziele" };
     public CheckedListBox Pruefpunkte { get; } = new() { Width = 340, Height = 170, CheckOnClick = true, IntegralHeight = false, AccessibleName = "Prüfpunkte der Qualität" };
     public NumericUpDown QmTage { get; } = new() { Minimum = 1, Maximum = 90, Width = 60, AccessibleName = "Tage ohne Bestätigung" };
+    public TextBox ArchivFrist { get; } = new() { Width = 60, PlaceholderText = "Jahre", AccessibleName = "Aufbewahrungsfrist in Jahren" };
+    public Button ArchivFristKnopf { get; } = Stil.NebenKnopf("Übernehmen");
+    public Label ArchivFristMeldung { get; } = new() { AutoSize = true, UseMnemonic = false };
     public Button MassnahmenListenKnopf { get; } = Stil.NebenKnopf("Arten und Vorlagen …");
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
@@ -187,6 +190,9 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
             var aus = QualitaetRegeln.AusLesen(werte.QmAus);
             for (int i = 0; i < QualitaetRegeln.Alle.Length; i++) Pruefpunkte.SetItemChecked(i, !aus.Contains(QualitaetRegeln.Alle[i]));
             QmTage.Value = Math.Clamp(werte.QmTage, 1, 90);
+            ArchivFrist.Text = speicher.ArchivFrist()?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "";
+            ArchivFristMeldung.Text = ArchivFrist.Text.Length == 0 ? "nicht festgelegt" : "";
+            ArchivFristMeldung.ForeColor = Stil.Achtung.Text;
             HebFrist.Value = Math.Clamp(werte.HebFristMonate, (int)HebFrist.Minimum, (int)HebFrist.Maximum);
             LogoLaden(Einstellungen.LogoPfad());
             foreach (var (schluessel, haken) in Module) haken.Checked = speicher.ModulAn(schluessel);

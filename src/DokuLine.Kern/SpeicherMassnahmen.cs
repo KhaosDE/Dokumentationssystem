@@ -210,7 +210,7 @@ public sealed partial class Speicher
             DELETE FROM massnahme_bestaetigungen; DELETE FROM massnahme_fassungen; DELETE FROM massnahmen;
             """, transaktion);
         var jetzt = Uhr();
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         bewohner.Sort(BewohnerRegeln.NachName);
         var dienstJetzt = SchichtTermin.Zu(jetzt);
         var ziele = ZieleLesen(transaktion, null).Where(z => z.Aktiv).ToLookup(z => z.BewohnerId);

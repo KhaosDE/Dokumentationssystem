@@ -151,7 +151,7 @@ public sealed partial class Speicher
     // letzten vier Wochen.
     private void DemoWochenplanEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM plan_eintraege; DELETE FROM teilnahmen;", transaktion);
         foreach (var d in Demodaten.Wochenplan(bewohner, Uhr()))
         {

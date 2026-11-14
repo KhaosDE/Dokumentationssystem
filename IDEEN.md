@@ -2568,7 +2568,7 @@ Umfang (Vorschlag):
 - Abgleich mit der eigenständigen Ausgangsliste in `AENDERUNGEN.md` vermerken.
 
 ## Archiv für ehemalige Bewohner mit Aufbewahrungsfrist
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.50.0; Bauplan Schritt 46)
 Datum: 12.11.2026
 Was: Ausgezogene oder verstorbene Bewohner wandern mit ihrer ganzen Akte in ein Archiv. Dort
 bleibt sie lesbar, bis die Aufbewahrungsfrist endet.

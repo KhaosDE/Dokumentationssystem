@@ -1152,6 +1152,51 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER IF NOT EXISTS qm_hinweise_bleiben BEFORE UPDATE ON qm_hinweise
             BEGIN SELECT RAISE(ABORT, 'Hinweise werden nicht geändert.'); END;
         """,
+        // 46 – Archiv: Entlassung und Wiederaufnahme als eigene Einträge, Löschfreigabe (Vier-Augen) und Löschprotokoll ohne Inhalte.
+        """
+        CREATE TABLE IF NOT EXISTS archiv (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            aufgenommen TEXT NOT NULL,
+            entlassen   TEXT NOT NULL,
+            grund       TEXT NOT NULL CHECK (grund IN ('auszug', 'verlegung', 'verstorben', 'sonstiges')),
+            bemerkung   TEXT NOT NULL DEFAULT '',
+            wohnbereich TEXT NOT NULL,
+            zimmer      TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS archiv_wiederaufnahmen (
+            archiv_id INTEGER PRIMARY KEY REFERENCES archiv(id) ON DELETE CASCADE,
+            datum     TEXT NOT NULL,
+            kuerzel   TEXT NOT NULL,
+            erfasst   TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS archiv_loeschfreigaben (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            kuerzel     TEXT NOT NULL,
+            zeit        TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS loeschprotokoll (
+            id          INTEGER PRIMARY KEY,
+            bewohner_nr INTEGER NOT NULL,
+            zeitraum    TEXT NOT NULL,
+            freigabe    TEXT NOT NULL,
+            geloescht   TEXT NOT NULL,
+            zeit        TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS archiv_bleibt BEFORE UPDATE ON archiv
+            BEGIN SELECT RAISE(ABORT, 'Archiveinträge werden nicht geändert.'); END;
+        CREATE TRIGGER IF NOT EXISTS loeschprotokoll_bleibt BEFORE UPDATE ON loeschprotokoll
+            BEGIN SELECT RAISE(ABORT, 'Das Löschprotokoll wird nicht geändert.'); END;
+        CREATE TRIGGER IF NOT EXISTS loeschprotokoll_nicht_loeschen BEFORE DELETE ON loeschprotokoll
+            BEGIN SELECT RAISE(ABORT, 'Das Löschprotokoll wird nicht gelöscht.'); END;
+        CREATE VIEW IF NOT EXISTS archiviert AS
+            SELECT a.bewohner_id FROM archiv a
+            WHERE a.id = (SELECT MAX(x.id) FROM archiv x WHERE x.bewohner_id = a.bewohner_id)
+              AND NOT EXISTS (SELECT 1 FROM archiv_wiederaufnahmen w WHERE w.archiv_id = a.id);
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1222,9 +1267,10 @@ public sealed partial class Speicher : IDisposable
 
     // ------------------------------------------------------------------ Bewohner
 
+    // Ohne die archivierten (Bauplan 46); das Archiv liest sie über Bewohner(id).
     public List<Bewohner> AlleBewohner()
     {
-        var liste = Lesen($"SELECT id, {Spalten} FROM bewohner");
+        var liste = Lesen($"SELECT id, {Spalten} FROM bewohner WHERE id NOT IN (SELECT bewohner_id FROM archiviert)");
         liste.Sort(BewohnerRegeln.NachName);
         return liste;
     }
@@ -1232,7 +1278,7 @@ public sealed partial class Speicher : IDisposable
     // Für Module, die innerhalb einer eigenen Transaktion lesen (z. B. beim Laden der Demo-Daten).
     public List<Bewohner> AlleBewohner(SqliteTransaction transaktion)
     {
-        var liste = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var liste = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner WHERE id NOT IN (SELECT bewohner_id FROM archiviert)");
         liste.Sort(BewohnerRegeln.NachName);
         return liste;
     }
@@ -1328,10 +1374,10 @@ public sealed partial class Speicher : IDisposable
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
              akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
              vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null, ausgabe = Meta(DemoAusgabe) is null,
-             ziele = Meta(DemoZiele) is null;
+             ziele = Meta(DemoZiele) is null, archiv = Meta(DemoArchiv) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !archiv && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1367,6 +1413,7 @@ public sealed partial class Speicher : IDisposable
         if (status) DemoStatusEinfuegen(transaktion);
         if (bezug || mitarbeiter) DemoBezugEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
+        if (archiv) DemoArchivEinfuegen(transaktion);
         transaktion.Commit();
         if (dokumente) AblageAufraeumen();
         if (modulNeu) ModuleGeaendert?.Invoke();
@@ -1389,7 +1436,7 @@ public sealed partial class Speicher : IDisposable
     {
         if (Betrieb.Aktiv || IstBetriebsdatenbank) throw new SpeicherFehler(Betrieb.DemoVerbotenText);
         var demo = Demodaten.Bewohner();   // erst lesen: Ist etwas kaputt, bleibt alles, wie es war
-        var alteBilder = AlleBewohner().Select(b => b.Bild).Where(b => b is not null).ToList();
+        var alteBilder = Lesen($"SELECT id, {Spalten} FROM bewohner").Select(b => b.Bild).Where(b => b is not null).ToList();   // auch die archivierten
         using (var transaktion = db.BeginTransaction())
         {
             Ausfuehren("DELETE FROM bewohner", transaktion);   // Berichte und Nachträge folgen (CASCADE)
@@ -1428,6 +1475,7 @@ public sealed partial class Speicher : IDisposable
             DemoStatusEinfuegen(transaktion);
             DemoBezugEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
+            DemoArchivEinfuegen(transaktion);   // zuletzt: die ehemaligen Bewohner bekommen keine Demo-Daten der Lebenden
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
@@ -1446,7 +1494,7 @@ public sealed partial class Speicher : IDisposable
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         bewohner.Sort(BewohnerRegeln.NachName);
         Ausfuehren("DELETE FROM uebergaben WHERE bewohner_id IS NULL", transaktion);   // allgemeine Notizen der Demo
         var demo = Demodaten.Berichte(bewohner, Uhr());
@@ -1751,6 +1799,9 @@ public sealed partial class Speicher : IDisposable
     private static DateTime AusZeit(string s) => DateTime.ParseExact(s, ["yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm"], CultureInfo.InvariantCulture);
 
     // ------------------------------------------------------------------ Hilfen
+
+    // Die nicht archivierten Bewohner in Reihenfolge der Anlage (Demo-Daten verteilen sich danach).
+    private static string AktiveBewohnerSql => $"SELECT id, {Spalten} FROM bewohner WHERE id NOT IN (SELECT bewohner_id FROM archiviert)";
 
     private static string Platzhalter => string.Join(", ", Spalten.Split(", ").Select(s => "$" + s));
 

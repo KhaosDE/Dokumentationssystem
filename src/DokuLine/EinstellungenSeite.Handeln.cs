@@ -25,6 +25,26 @@ public sealed partial class EinstellungenSeite
         return true;
     }
 
+    // Aufbewahrungsfrist des Archivs (Bauplan 46): leer = nicht festgelegt; gilt für das ganze Haus.
+    public bool ArchivFristUebernehmen()
+    {
+        if (!Darf(Funktionen.ArchivLoeschen)) return false;
+        var fehler = new List<string>();
+        int? jahre = ArchivRegeln.FristLesen(ArchivFrist.Text, fehler);
+        try
+        {
+            if (fehler.Count > 0) throw new Eingabefehler(fehler);
+            speicher.ArchivFristSetzen(jahre, Recht.Kuerzel);
+        }
+        catch (Eingabefehler e)
+        {
+            ArchivFristMeldung.Text = string.Join(" ", e.Fehler);
+            return false;
+        }
+        ArchivFristMeldung.Text = jahre is null ? "nicht festgelegt" : "übernommen";
+        return true;
+    }
+
     public bool SchichtzeitenUebernehmen()
     {
         if (laedt) return false;

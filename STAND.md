@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.49.0** (Küchendienst im Tagesplan).
+Stand: 14.11.2026. Version: **0.50.0** (Archiv für ehemalige Bewohner).
 
 ## Aktuell
 
@@ -485,7 +485,9 @@ Neu in 0.48.0: **Qualitätsmanagement** (Bauplan 44). Neue Position **„Qualit�
 
 Neu in 0.49.0: **Küchendienst im Tagesplan** (Bauplan 45). Oben im Tagesplan die Zeile **„Küchendienst heute: … (Zi. …)“** aus dem Küchendienstplan des Moduls Ausgangsliste (ein Datensatz, kein zweiter); getauschte Dienste mit „getauscht mit Zi. …“, Abwesende mit Namen. Ist niemand vom Dienst da: **„Küchendienst unbesetzt“** in Achtung-Farbe, auch als Marke beim Bewohner (Übersicht, Akte). Bestätigen wie andere Termine: **gemacht · nicht gemacht · vertreten durch …** mit Kürzel und Uhrzeit. Untermodul Küchendienst aus: keine Zeile, keine Marke.
 
-**Nächster Schritt:** Bauplan Schritt 46 (Archiv für ehemalige Bewohner mit Aufbewahrungsfrist).
+Neu in 0.50.0: **Archiv für ehemalige Bewohner** (Bauplan 46). In der Akte **„Entlassen …“** (Datum, Grund: Auszug, Verlegung, verstorben, Sonstiges): Offene Aufgaben, laufende Maßnahmen und Therapien enden (Liste zum Bestätigen), das Bett wird frei, die Akte verschwindet aus Übersicht, Dokumentation, Listen und Zählern. Neue Seite **„Archiv“** (Recht „Archiv einsehen“): Name, Bereich, Zimmer, Aufenthalt, Grund, **Aufbewahrung bis**; Suche, „nur Aufbewahrung abgelaufen“. **Akte nur lesend** (Stammdaten mit Aufenthalten, Berichte, Ziele und Maßnahmen, Medikamentenplan, Reflexion und HEB, Dokumente) mit Drucken; Öffnen und Drucken im Zugriffsprotokoll. **„Wieder aufnehmen …“** mit freiem Bett; der alte Aufenthalt bleibt. **Aufbewahrungsfrist** in den Einstellungen, **ohne Vorgabe** (leer = nicht festgelegt). Nach Ablauf **Löschen nur zu zweit** (Freigabe und Löschen durch verschiedene Personen mit Recht „Archiv löschen“) mit Löschprotokoll ohne Inhalte. Demo: drei ehemalige Bewohner, einer mit abgelaufener Frist (Demo-Frist 10 Jahre, ausgedacht).
+
+**Nächster Schritt:** Bauplan Schritt 47 (Hilfeplangespräche: Termine planen und vergeben).
 
 ## Fertig
 
@@ -1594,9 +1596,11 @@ Neu in 0.49.0: **Küchendienst im Tagesplan** (Bauplan 45). Oben im Tagesplan di
 - 0.47.0 — Ziele der Bewohner (Bauplan 43): Reiter „Ziele und Maßnahmen“, Zielleiste, Bericht/Maßnahme zu einem Ziel, drei Zustände, Marken, Einstellung Mindestzahl
 - 0.48.0 — Qualitätsmanagement (Bauplan 44): Position QMB, Seite „Qualität“ mit Kennzahlen, Prüfliste, Hinweis als Aufgabe, Prüfvermerk, Nachweis; Bereichswahl „QM“
 - 0.49.0 — Küchendienst im Tagesplan (Bauplan 45): Zeile oben mit Tausch und „unbesetzt“, bestätigen, Marke beim Bewohner
+- 0.50.0 — Archiv (Bauplan 46): Entlassen mit Folgen, Seite „Archiv“, Akte nur lesend, Wiederaufnahme, Frist ohne Vorgabe, Löschen zu zweit mit Protokoll
 
 ## Offene Punkte
 
+- 14.11.2026 (0.50.0): Aufbewahrungsfrist des Archivs mit Träger und Datenschutz klären (in `docs/betrieb.md`, Liste der Freigaben); bis dahin bleibt sie leer und es wird nichts gelöscht.
 - 09.11.2026 (0.41.1), **Restrisiko Betrieb:** Die DokuLine-Benutzer müssen die Datenbankdatei lesen und schreiben
   können; wer am Server angemeldet ist, könnte sie an DokuLine vorbei öffnen. Gegenmaßnahmen außerhalb des Programms
   (AppLocker, Ordner ausblenden) stehen in `docs/betrieb.md`, Abschnitt 8; ganz schließt es erst ein eigener Serverdienst.
@@ -1697,6 +1701,12 @@ Neu in 0.49.0: **Küchendienst im Tagesplan** (Bauplan 45). Oben im Tagesplan di
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.50.0): Archiviert ist, wessen letzter Aufenthalt entlassen und nicht wieder aufgenommen ist (Datenbank-Sicht `archiviert`). `AlleBewohner()` lässt diese weg – so verschwinden sie aus allen Listen, Zählern und der Belegung, ohne jede Stelle einzeln anzupassen. `Bewohner(id)` liest sie weiter (Archiv, Protokolle).
+- 14.11.2026 (0.50.0): Beim Entlassen enden offene Aufgaben (begründet geschlossen „Entlassung“), laufende Maßnahmen und Therapie-Teilnahmen in einem Zug mit dem Archiveintrag (alles oder nichts), ohne die Einzelrechte dieser Bereiche – wer entlassen darf („Bewohner bearbeiten“), beendet das Dazugehörige mit.
+- 14.11.2026 (0.50.0): Die nur-lesende Akte zeigt die Teile als Text (je Reiter) und die Dokumente als Liste (Doppelklick öffnet); die Bearbeitungs-Reiter der lebenden Akte werden nicht wiederverwendet, damit dort nichts versehentlich änderbar ist.
+- 14.11.2026 (0.50.0): Die Aufbewahrungsfrist gilt für das ganze Haus und liegt in der Datenbank (nicht je Rechner). In neuen Datenbanken leer; in der Demo 10 Jahre (ausgedacht, rechtlich nicht geprüft). Eintragen dürfen, die auch löschen dürfen.
+- 14.11.2026 (0.50.0): Rechte: „Archiv einsehen“ vorbelegt für Leitungen, Verwaltung, Bereichsleitung und QMB; „Archiv löschen“ für Geschäftsführung, Hausleitung und Verwaltung.
+- 14.11.2026 (0.50.0): Das Löschprotokoll enthält nur Bewohner-Nummer, Zeitraum, Freigabe, Löschung und Zeit; es lässt sich weder ändern noch löschen (auch nicht über „Demo-Daten zurücksetzen“).
 - 14.11.2026 (0.49.0): Der Küchendienstplan hat einen Dienst je Tag (keine Mahlzeiten); deshalb eine Zeile je Tag. Bestätigt wird in dieser Zeile statt in einem eigenen Termin je Bewohner – der Dienst gehört dem Zimmer bzw. der Zimmergruppe, nicht einer Person.
 - 14.11.2026 (0.49.0): Die Bestätigung liegt in einer eigenen Tabelle des Moduls (`al_kuechendienst_erledigt`, nie geändert, der neueste Eintrag gilt); Recht wie bei der Therapie-Teilnahme („Therapie-Teilnahme bestätigen“).
 - 14.11.2026 (0.49.0): „Küchendienst unbesetzt“ nur, wenn niemand aus dem Zimmer bzw. der Gruppe anwesend ist; ist der Zimmer-Partner da, übernimmt er (wie im Plan der Ausgangsliste).
@@ -2674,6 +2684,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.50.0: Als EF: Akte eines Bewohners → „Entlassen …“ → Liste „Das endet“ prüfen → Entlassen → Bewohner fehlt in Übersicht und Dokumentation. Seite „Archiv“: vier Einträge, Suche, „Akte ansehen …“ (nur lesen, Reiter, Drucken), „Wieder aufnehmen …“ mit Bett. Als TST: „nur Aufbewahrung abgelaufen“ → „Löschen freigeben“; als RS anmelden → „Endgültig löschen …“ → „Löschprotokoll …“. Einstellungen → „Archiv: Aufbewahrungsfrist“ leeren → Archiv zeigt den Hinweis „nicht festgelegt“.
 
 Version 0.49.0: Tagesplan öffnen → oben „Küchendienst heute: … (Zi. …)“, rechts „noch offen“ und die Knöpfe „gemacht“, „nicht gemacht“, „vertreten durch …“ → danach Stand mit Kürzel und Uhrzeit. In der Ausgangsliste einen Tausch für übermorgen setzen → am Tag „getauscht mit Zi. …“. Alle Bewohner des Dienst-Zimmers abwesend melden → „Küchendienst unbesetzt“ (orange) im Tagesplan und als Marke auf der Übersicht. Einstellungen → Module → Küchendienst aus → Zeile verschwindet.
 
