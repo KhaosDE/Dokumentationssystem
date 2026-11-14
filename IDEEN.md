@@ -2733,7 +2733,7 @@ Umfang (Vorschlag):
   Überleitungsbogen tragen dort ein, damit es keine zwei Wahrheiten gibt.
 
 ## Medikamentenbestellung: Reichweite, Rezeptanforderung, Lieferung
-Status: freigegeben (Bauplan Schritt 51; OK Tobi 13.11.2026, Bestandsführung als zuschaltbare Option)
+Status: erledigt (14.11.2026, 0.55.0; Bauplan Schritt 51)
 Datum: 13.11.2026
 Was: DokuLine zeigt, welche Medikamente bald ausgehen, sammelt daraus Rezeptanforderungen an die
 Ärzte und Bestellungen an die Apotheke und verfolgt sie bis zur Lieferung.

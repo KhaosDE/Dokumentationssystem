@@ -46,6 +46,7 @@ public static class Symbole
         "Archiv" => Archiv,
         "Hilfeplangespräche" => Kalender,
         "Medikamentenausgabe" => Medikamente,
+        "Bestellung" => Medikamente,
         _ => Modul,
     };
 }

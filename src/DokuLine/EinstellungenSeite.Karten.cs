@@ -99,6 +99,10 @@ public sealed partial class EinstellungenSeite
             Reihe(ArchivFrist, ArchivFristKnopf, ArchivFristMeldung), Funktionen.ArchivLoeschen);
         SchluesselwoerterKnopf.Click += (_, _) => FensterZeigen(new SchluesselwoerterFenster(speicher));
         FachwoerterKnopf.Click += (_, _) => FensterZeigen(new FachwoerterFenster(speicher));
+        BestellungKnopf.Click += (_, _) => BestellungUebernehmen();
+        Karte("Wohnbereich", "Medikamentenbestellung", "Bestand führen (Vorgabe aus), wie viele Tage im Voraus, die heimversorgende Apotheke. E-Mail ist nicht verschlüsselt: " +
+            "nur freigeben, wenn Einrichtung und Datenschutz diesen Weg erlaubt haben.",
+            Reihe(BestandFuehren, BestellTage, Apotheke, ApothekeEmail, ApothekeFrei, BestellungKnopf, BestellungMeldung), Funktionen.EinstellungenBereich);
         Autokorrektur.CheckedChanged += (_, _) => { if (!laedt) speicher.AutokorrekturSetzen(Recht.Kuerzel, Autokorrektur.Checked); };
         Karte("Wohnbereich", "Rechtschreibung", "Rote Wellenlinie unter unbekannten Wörtern, Vorschläge per Rechtsklick. Namen, Medikamente und Fachwörter gelten als richtig. Grammatik und Stil prüft das Programm nicht.",
             Reihe(FachwoerterKnopf, Autokorrektur, RechtschreibStand), null);

@@ -1237,6 +1237,42 @@ public sealed partial class Speicher : IDisposable
             mitgeliefert INTEGER NOT NULL DEFAULT 0 CHECK (mitgeliefert IN (0, 1))
         );
         """,
+        // 50 – Medikamentenbestellung: Bestand (gezählt, geliefert), Anforderungen mit Posten und Verlauf (nie geändert).
+        """
+        CREATE TABLE IF NOT EXISTS med_bestand (
+            id            INTEGER PRIMARY KEY,
+            verordnung_id INTEGER NOT NULL REFERENCES verordnungen(id) ON DELETE CASCADE,
+            art           TEXT NOT NULL CHECK (art IN ('gezaehlt', 'geliefert')),
+            menge         TEXT NOT NULL,
+            packung       INTEGER NOT NULL DEFAULT 0,
+            zeit          TEXT NOT NULL,
+            kuerzel       TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS med_anforderungen (
+            id         INTEGER PRIMARY KEY,
+            empfaenger TEXT NOT NULL,
+            email      TEXT NOT NULL DEFAULT '',
+            erstellt   TEXT NOT NULL,
+            kuerzel    TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS med_anforderung_posten (
+            id             INTEGER PRIMARY KEY,
+            anforderung_id INTEGER NOT NULL REFERENCES med_anforderungen(id) ON DELETE CASCADE,
+            verordnung_id  INTEGER NOT NULL,
+            bewohner_id    INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            text           TEXT NOT NULL,
+            menge          TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS med_anforderung_stand (
+            id             INTEGER PRIMARY KEY,
+            anforderung_id INTEGER NOT NULL REFERENCES med_anforderungen(id) ON DELETE CASCADE,
+            stand          TEXT NOT NULL CHECK (stand IN ('bestaetigt', 'geliefert', 'erledigt')),
+            zeit           TEXT NOT NULL,
+            kuerzel        TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS med_bestand_bleibt BEFORE UPDATE ON med_bestand
+            BEGIN SELECT RAISE(ABORT, 'Bestandseinträge werden nicht geändert.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;

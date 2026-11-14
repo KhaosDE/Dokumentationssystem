@@ -74,6 +74,13 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public Button MassnahmenListenKnopf { get; } = Stil.NebenKnopf("Arten und Vorlagen …");
     public Button SchluesselwoerterKnopf { get; } = Stil.NebenKnopf("Schlüsselwörter …");
     public Button FachwoerterKnopf { get; } = Stil.NebenKnopf("Fachwörter …");
+    public CheckBox BestandFuehren { get; } = new() { Text = "Bestand führen (dieser Bereich)", AutoSize = true };
+    public NumericUpDown BestellTage { get; } = new() { Minimum = 1, Maximum = 60, Value = 7, Width = 60, AccessibleName = "Tage bis zum Ausgehen" };
+    public TextBox Apotheke { get; } = new() { Width = 220, PlaceholderText = "heimversorgende Apotheke", AccessibleName = "Apotheke" };
+    public TextBox ApothekeEmail { get; } = new() { Width = 200, PlaceholderText = "E-Mail (…@example.org)", AccessibleName = "E-Mail der Apotheke" };
+    public CheckBox ApothekeFrei { get; } = new() { Text = "E-Mail an die Apotheke ist von der Einrichtung freigegeben", AutoSize = true };
+    public Button BestellungKnopf { get; } = Stil.NebenKnopf("Übernehmen");
+    public Label BestellungMeldung { get; } = new() { AutoSize = true, UseMnemonic = false };
     public CheckBox Autokorrektur { get; } = new() { Text = "Autokorrektur typischer Vertipper (für mich)", AutoSize = true };
     public Label RechtschreibStand { get; } = new() { AutoSize = true, MaximumSize = new Size(420, 0), UseMnemonic = false };
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
@@ -195,6 +202,10 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
             for (int i = 0; i < QualitaetRegeln.Alle.Length; i++) Pruefpunkte.SetItemChecked(i, !aus.Contains(QualitaetRegeln.Alle[i]));
             QmTage.Value = Math.Clamp(werte.QmTage, 1, 90);
             Autokorrektur.Checked = speicher.AutokorrekturAn(Recht.Kuerzel);
+            BestandFuehren.Checked = speicher.BestandFuehren(werte.Bereich);
+            BestellTage.Value = speicher.BestellTage();
+            (Apotheke.Text, ApothekeEmail.Text) = speicher.HeimApotheke();
+            ApothekeFrei.Checked = Apotheke.Text.Length > 0 && speicher.EmailFreigegeben(Apotheke.Text);
             Autokorrektur.Enabled = Recht.Angemeldet;
             RechtschreibStand.Text = Rechtschreibpruefung.Verfuegbar ? "Rechtschreibprüfung von Windows (Deutsch): verfügbar." : RechtschreibRegeln.NichtVerfuegbar;
             RechtschreibStand.ForeColor = Rechtschreibpruefung.Verfuegbar ? Stil.TextMittel : Stil.Achtung.Text;

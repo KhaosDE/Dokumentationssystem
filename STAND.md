@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.54.0** (Abwesenheit in der Dokumentation sichtbar).
+Stand: 14.11.2026. Version: **0.55.0** (Medikamentenbestellung).
 
 ## Aktuell
 
@@ -495,7 +495,9 @@ Neu in 0.53.0: **Rechtschreibprüfung** (Bauplan 49) mit der Rechtschreibprüfun
 
 Neu in 0.54.0: **Abwesenheit in der Dokumentation** (Bauplan 50). Über der Berichtsliste die Zeile **„abwesend: …“**, solange eine Abwesenheit läuft (Ausgangsliste, Heimfahrt, Fahrt, „in der Klinik seit …“). In der Tagesliste ein **grauer Balken** über abwesende Tage („06.11.–09.11. abwesend: Heimfahrt“); Berichte aus dieser Zeit stehen trotzdem an ihrem Tag. **Beginn und Ende** einer Abwesenheit in der Ausgangsliste erzeugen je einen kurzen Eintrag („abwesend ab 06.11. 14:00 (Klinik)“, „zurück am …“) mit Kürzel – einmal, nicht täglich. **„Neuer Bericht“** zeigt oben „Bewohner ist abwesend (…)“. In der Bewohnerleiste stehen Abwesende in **leiserer Schrift** (ohne Marke). Im Reiter „Ziele und Maßnahmen“ gibt es während einer Abwesenheit keine Marke „seit n Wochen kein Bericht“.
 
-**Nächster Schritt:** Bauplan Schritt 51 (Medikamentenbestellung: Reichweite, Rezeptanforderung, Lieferung).
+Neu in 0.55.0: **Medikamentenbestellung** (Bauplan 51). Neue Seite **„Bestellung“** (nach „Medikamentenausgabe“, Recht „Medikamente ausgeben“): die regelmäßigen Verordnungen der Bewohner nach **Empfänger** gruppiert (Arzt der Verordnung bzw. Hausarzt, Forensik, FOSA, sonst die heimversorgende Apotheke), ankreuzen, Menge anpassen, **„Anforderung erstellen …“** – je Empfänger eine Liste mit Name, Geburtsdatum, Medikament, Stärke und Menge (keine Diagnosen, keine Berichte). Übergabe als **Ausdruck/Fax-Vorlage** oder **E-Mail** über das E-Mail-Programm, vorher der Hinweis zum Datenschutz – außer der Empfänger ist in den Einstellungen freigegeben. **Verlauf**: angefordert → Rezept/Bestätigung da → geliefert (mit Bestand: Mengen einbuchen) → erledigt; nach 5 Tagen ohne Lieferung eine **Erinnerung** als Aufgabe. **Bestandsführung zuschaltbar** (Einstellungen, je Bereich, Vorgabe aus): „Bestand zählen …“, Vorrat aus Zählung, Lieferungen und abgehakten Ausgaben, **„reicht bis“** (reine Zählung); gezeigt wird dann, was in den nächsten 7 Tagen (einstellbar) ausgeht.
+
+**Nächster Schritt:** Bauplan Schritt 52 (HEB-Fälligkeit vermerken und rechtzeitig erinnern).
 
 ## Fertig
 
@@ -1609,6 +1611,7 @@ Neu in 0.54.0: **Abwesenheit in der Dokumentation** (Bauplan 50). Über der Beri
 - 0.52.0 — Schlüsselwörter (Bauplan 48): Vorschlagszeile im „Neuer Bericht“, Zielformular nach dem Speichern mit Verweis, Einstellungsfenster mit Probefeld
 - 0.53.0 — Rechtschreibprüfung (Bauplan 49): Windows-Prüfung mit Wellenlinie und Vorschlägen, eigene Wörter und Fachwörterbuch, Autokorrektur wahlweise
 - 0.54.0 — Abwesenheit in der Dokumentation (Bauplan 50): Zeile über der Liste, Balken, Beginn/Ende-Einträge, Hinweis im Bericht, leise Namen
+- 0.55.0 — Medikamentenbestellung (Bauplan 51): Seite „Bestellung“, Anforderung je Empfänger, Ausdruck/E-Mail, Verlauf mit Erinnerung, Bestand zuschaltbar
 
 ## Offene Punkte
 
@@ -1714,6 +1717,12 @@ Neu in 0.54.0: **Abwesenheit in der Dokumentation** (Bauplan 50). Über der Beri
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.55.0): Bestand wird auf der Seite „Bestellung“ gezählt (nicht im Medikamentenplan): Dort steht alles, was man dafür braucht, und der Plan bleibt übersichtlich.
+- 14.11.2026 (0.55.0): Empfänger: Arzt der Verordnung (sonst „Hausarzt“), Forensik bzw. FOSA aus dem Bestellweg der Akte, sonst die heimversorgende Apotheke aus den Einstellungen. Die E-Mail-Adresse kommt aus dem Personenverzeichnis bzw. den Einstellungen.
+- 14.11.2026 (0.55.0): „Versichertennummer mitsenden“ gibt es nicht: DokuLine übermittelt keine Krankenkassendaten (die kommen über das E-Rezept zur Apotheke).
+- 14.11.2026 (0.55.0): „Geliefert“ bucht die gelieferte Stückzahl je Posten gleich ein (eine Zahl für alle Posten der Anforderung); Abweichungen über „Bestand zählen …“.
+- 14.11.2026 (0.55.0): Die Erinnerung ist eine Aufgabe „wer Zeit hat“ des Bereichs (Verfasser AUTO), einmal je Anforderung, wenn nach 5 Tagen weder geliefert noch erledigt.
+- 14.11.2026 (0.55.0): Ein eigener Eintrag „Apotheke“ im Personenverzeichnis ist nicht nötig: Die heimversorgende Apotheke steht mit Name und E-Mail in den Einstellungen.
 - 14.11.2026 (0.54.0): Die Quellen bleiben, wo sie sind (Ausgangsliste, Heimfahrt im Kalender, Fahrten, Statusmeldung „in der Klinik seit …“); DokuLine fragt sie der Reihe nach ab, statt alles in die Ausgangsliste zu kopieren – so gibt es keine doppelte Pflege. Ein Zusammenführen in einer Quelle bleibt möglich, wenn Tobi das wünscht.
 - 14.11.2026 (0.54.0): Balken über Zeiträume gibt es für Heimfahrten aus dem Kalender (die haben Beginn und Ende); Abwesenheiten aus der Ausgangsliste stehen als Einträge „abwesend ab …“ und „zurück am …“ in der Liste, weil dort kein Ende im Voraus bekannt ist.
 - 14.11.2026 (0.54.0): „Rückkehrbericht schreiben …“ ist nicht als eigener Knopf gebaut: Der Eintrag „zurück am …“ steht in der Dokumentation, „Neuer Bericht …“ ist dort einen Klick entfernt.
@@ -2717,6 +2726,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.55.0: Seite „Bestellung“ (Bereich R1): Medikamente nach Empfänger, ankreuzen, „Menge ändern …“, „Anforderung erstellen …“ → unten die Anforderung; „Ausdruck …“ (Druckvorschau), „E-Mail …“ (erst Hinweis zum Datenschutz, dann E-Mail-Programm), „Weiter im Verlauf …“ bis erledigt. Einstellungen → „Medikamentenbestellung“: Bestand führen einschalten, Apotheke mit E-Mail (…@example.org) eintragen, Freigabe setzen → „Bestand zählen …“ erscheint, „reicht bis“ wird gerechnet; die E-Mail an die Apotheke kommt ohne Hinweis.
 
 Version 0.54.0: Ausgangsliste: einen Bewohner auf „Abwesenheit“ (z. B. Klinik) setzen → Dokumentation: Zeile „abwesend: …“ über der Liste, Eintrag „abwesend ab …“, Name in der Leiste leiser; „Neuer Bericht“ zeigt oben den Hinweis. Abwesenheit aufheben → Eintrag „zurück am …“. Kalender: Heimfahrt über drei Tage anlegen → in der Dokumentation (30 Tage) ein grauer Balken über diese Tage.
 
