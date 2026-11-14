@@ -67,7 +67,7 @@ public sealed class MassnahmeKastenZeile : Panel
             k.Location = new Point(x, y);
             x += k.Width + mini;
         }
-        int hoehe = (DurchgefuehrtKnopf is null ? Text1.Bottom : Controls.OfType<Button>().Max(k => k.Bottom)) + mini;
+        int hoehe = Controls.OfType<Button>().Select(k => k.Bottom).DefaultIfEmpty(Text1.Bottom).Max() + mini;
         if (Height != hoehe) Height = hoehe;
     }
 }

@@ -28,11 +28,15 @@ public sealed class HeuteKasten : KartenFlaeche
 
     public void Setzen(int anzahl, IEnumerable<Control> zeilen, string leer = HeuteWichtigRegeln.NichtsOffen)
     {
+        // Erst die Liste leeren, dann entfernen: Jedes Entfernen löst ein Layout aus, das sonst schon entsorgte Zeilen anfasst.
+        SuspendLayout();
         foreach (var c in Oben.Concat(Unten)) if (c.Parent != this) Controls.Add(c);
-        foreach (var z in Zeilen) { Controls.Remove(z); z.Dispose(); }
+        var alte = Zeilen.ToList();
         Zeilen.Clear();
+        foreach (var z in alte) { Controls.Remove(z); z.Dispose(); }
         Zeilen.AddRange(zeilen);
         foreach (var z in Zeilen) Controls.Add(z);
+        ResumeLayout(false);
         Anzahl = anzahl;
         Kopf.ZaehlerSetzen(anzahl.ToString(System.Globalization.CultureInfo.InvariantCulture));
         Leer.Text = leer;
