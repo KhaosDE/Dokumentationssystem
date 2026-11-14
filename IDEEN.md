@@ -2551,7 +2551,7 @@ Umfang (Vorschlag):
   Kürzel (Liste der Freigaben, `docs/betrieb.md`).
 
 ## Küchendienst im Tagesplan
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.49.0; Bauplan Schritt 45)
 Datum: 12.11.2026
 Was: Der Küchendienst des Tages erscheint im Tagesplan.
 Warum: Notiz Tobi (12.11.2026): „Küchendienst auf den Tagesplan“.

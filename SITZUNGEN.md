@@ -145,3 +145,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 14.11.2026 — Claude Code: 0.46.0 Medikamentenausgabe abhaken: Bereich mit Einnahmezeiten, Status je Bewohner oder Medikament, Übersicht, Übergabe, Verlauf (Bauplan 42).
 - 14.11.2026 — Claude Code: 0.47.0 Ziele der Bewohner (Bauplan 43): Reiter „Ziele und Maßnahmen“, Zielleiste, Bericht zu einem Ziel, drei Zustände, Marken.
 - 14.11.2026 — Claude Code: 0.48.0 Qualitätsmanagement (Bauplan 44): Position QMB, Seite „Qualität“, Hinweis an den Wohnbereich, Prüfvermerk, Nachweis.
+- 14.11.2026 — Claude Code: 0.49.0 Küchendienst im Tagesplan (Bauplan 45): Zeile mit Tausch und „unbesetzt“, bestätigen, Marke beim Bewohner.

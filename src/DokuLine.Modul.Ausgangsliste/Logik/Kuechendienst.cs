@@ -10,6 +10,18 @@ public class KuechendienstTag
     public string Wirksam => Tausch != "" ? Tausch : Zimmer;
 }
 
+public enum KuechendienstStatus { Gemacht, NichtGemacht, Vertreten }
+
+// Bestätigung des Tages im Tagesplan; der neueste Eintrag gilt.
+public sealed record KuechendienstErledigt(KuechendienstStatus Status, string Vertretung, string Kuerzel, DateTime Zeit);
+
+// Der Küchendienst eines Tages für den Tagesplan: wer dran ist, ob getauscht wurde, wer davon abwesend ist.
+public sealed record KuechendienstHeute(string Zimmer, string Geplant, IReadOnlyList<string> Namen, IReadOnlyList<string> Abwesend)
+{
+    public bool Getauscht => Geplant != Zimmer;
+    public bool Unbesetzt => Namen.Count == 0;
+}
+
 // Untermodul „Küchendienst“ (übernommen aus der Ausgangsliste): reihum nach Zimmern, Zimmergruppen
 // machen den Dienst gemeinsam. Wer abwesend ist oder erst seit weniger als 4 Tagen da ist
 // (Karenz), wird übersprungen. Vergangene Tage und heute bleiben fest; geplant wird bis zum Ende
@@ -167,6 +179,61 @@ public static class Kuechendienst
     }
 
     public const string KeinDienst = "Kein Küchendienst";
+    public const string Unbesetzt = "Küchendienst unbesetzt";
+
+    // Wer heute dran ist (nach Tausch), wer davon da ist und wer abwesend (Ausgangsliste). Ohne Plan für den Tag: null.
+    public static KuechendienstHeute? Heute(List<KuechendienstTag> plan, DateTime datum, List<Platz> plaetze)
+    {
+        var tag = plan.FirstOrDefault(t => t.Datum == datum.Date);
+        if (tag is null || tag.Wirksam.Trim().Length == 0) return null;
+        var zimmer = tag.Wirksam.Split('/').Select(z => z.Trim()).Where(z => z != "").ToList();
+        var dabei = zimmer.SelectMany(z => plaetze.Where(p => p.Zimmernummer == z)).ToList();
+        return new KuechendienstHeute(tag.Wirksam, tag.Zimmer, [.. dabei.Where(p => p.Anwesend).Select(p => p.Bewohnername)],
+            [.. dabei.Where(p => !p.Anwesend).Select(p => p.Bewohnername)]);
+    }
+
+    // „Küchendienst heute: A + B (Zi. 109/110) · getauscht (geplant: Zi. 105) · abwesend: C“.
+    public static string ZeileText(KuechendienstHeute? h)
+    {
+        if (h is null) return $"{KeinDienst} heute.";
+        var teile = new List<string> { $"Küchendienst heute: {(h.Unbesetzt ? "niemand da" : string.Join(" + ", h.Namen))} (Zi. {h.Zimmer})" };
+        if (h.Getauscht) teile.Add($"getauscht mit Zi. {h.Geplant}");
+        if (h.Abwesend.Count > 0) teile.Add($"abwesend: {string.Join(", ", h.Abwesend)}");
+        return string.Join(" · ", teile);
+    }
+
+    public static string StatusSchluessel(KuechendienstStatus s) => s switch
+    {
+        KuechendienstStatus.Gemacht => "gemacht",
+        KuechendienstStatus.NichtGemacht => "nicht_gemacht",
+        _ => "vertreten",
+    };
+
+    public static KuechendienstStatus StatusAus(string text) => text switch
+    {
+        "gemacht" => KuechendienstStatus.Gemacht,
+        "nicht_gemacht" => KuechendienstStatus.NichtGemacht,
+        _ => KuechendienstStatus.Vertreten,
+    };
+
+    public static string StatusText(KuechendienstStatus s, string vertretung) => s switch
+    {
+        KuechendienstStatus.Gemacht => "gemacht",
+        KuechendienstStatus.NichtGemacht => "nicht gemacht",
+        _ => $"vertreten durch {vertretung}",
+    };
+
+    public static string ErledigtText(KuechendienstErledigt? e) =>
+        e is null ? "noch offen" : $"{StatusText(e.Status, e.Vertretung)} · {e.Kuerzel} {e.Zeit:HH:mm}";
+
+    // Bestätigen wie andere Termine: nur für einen Tag mit Plan, nicht für die Zukunft; „vertreten“ braucht einen Namen.
+    public static string? BestaetigenPruefen(KuechendienstHeute? h, DateTime datum, DateTime jetzt, KuechendienstStatus status, string vertretung)
+    {
+        if (h is null) return "Für diesen Tag ist kein Küchendienst geplant.";
+        if (datum.Date > jetzt.Date) return "Der Küchendienst lässt sich erst am Tag selbst bestätigen.";
+        if (status == KuechendienstStatus.Vertreten && vertretung.Trim().Length == 0) return "Bitte angeben, wer vertreten hat.";
+        return null;
+    }
 
     public static string AnzeigeFuer(List<KuechendienstTag> plan, DateTime datum, List<Platz> plaetze)
     {

@@ -19,6 +19,8 @@ public sealed class AusgangslisteModul : IModul
 
     public ModulReiter? ReiterBauen(Speicher speicher) => new AusgangReiter(speicher);
 
+    public TagesplanTeil? TagesplanBauen(Speicher speicher) => new KuechendienstTagesplan(speicher);
+
     // Marken auf den Bewohnerkarten des Kerns: nur, was Aufmerksamkeit braucht.
     public IEnumerable<Marke> Marken(Speicher speicher, Bewohner bewohner, DateTime jetzt)
     {
@@ -28,6 +30,14 @@ public sealed class AusgangslisteModul : IModul
         var stand = speicher.ModulAn(DigitalerAusgang.Schluessel)
             ? DigitalerAusgang.StandFuer(p, db.AusgaengeLaden(jetzt), jetzt)
             : null;
-        return AusgangsMarken.Fuer(p, jetzt, stand, wartezeit: Einstellungen.Laden().WartezeitMinuten, abgaengig: speicher.OffeneAbgaengigkeit(bewohner.Id!.Value));
+        var marken = AusgangsMarken.Fuer(p, jetzt, stand, wartezeit: Einstellungen.Laden().WartezeitMinuten, abgaengig: speicher.OffeneAbgaengigkeit(bewohner.Id!.Value));
+        // Küchendienst (Bauplan 45): wer heute dran ist; ist niemand vom Dienst da, „Küchendienst unbesetzt“ in Achtung-Farbe.
+        if (speicher.ModulAn(Kuechendienst.Schluessel) && Kuechendienst.Heute(db.KuechendienstLaden(), jetzt, db.Laden()) is KuechendienstHeute heute
+            && heute.Zimmer.Split('/').Select(z => z.Trim()).Contains(p.Zimmernummer))
+        {
+            if (p.Anwesend) marken.Add(new Marke(MarkenArt.Ausgang, "Küchendienst heute"));
+            else if (heute.Unbesetzt) marken.Add(new Marke(MarkenArt.NichtErfasst, Kuechendienst.Unbesetzt));
+        }
+        return marken;
     }
 }

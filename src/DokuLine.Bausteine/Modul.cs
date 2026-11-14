@@ -16,6 +16,26 @@ public interface IModul
     ModulSeite SeiteBauen(Speicher speicher);
     ModulReiter? ReiterBauen(Speicher speicher);
     IEnumerable<Marke> Marken(Speicher speicher, Bewohner bewohner, DateTime jetzt);
+
+    // Eine Zeile oben im Tagesplan (z. B. der Küchendienst des Tages); null = keine.
+    TagesplanTeil? TagesplanBauen(Speicher speicher) => null;
+}
+
+// Ein Teil eines Moduls oben im Tagesplan; er liest seine Daten selbst (ein Datensatz, kein zweiter).
+public abstract class TagesplanTeil : FlowLayoutPanel
+{
+    protected TagesplanTeil()
+    {
+        AutoSize = true;
+        WrapContents = true;
+        Dock = DockStyle.Top;
+        BackColor = Stil.Seite;
+        Padding = new Padding(Stil.AbstandGross, 0, Stil.AbstandGross, Stil.AbstandKlein);
+    }
+
+    public abstract void Zeigen(DateTime jetzt);
+    public event Action? Geaendert;
+    protected void Melden() => Geaendert?.Invoke();
 }
 
 // Schluessel ist der volle Schlüssel für Speicher.ModulAn, z. B. „ausgangsliste.kuechendienst“.

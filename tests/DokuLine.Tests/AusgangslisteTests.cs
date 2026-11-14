@@ -35,7 +35,7 @@ public sealed class AusgangslisteTests : IDisposable
     [Fact]
     public void Modul_anmelden_ein_und_ausschalten()
     {
-        Assert.Equal("1", s.Meta("modul_ausgangsliste_stand"));
+        Assert.Equal(new AusgangslisteDaten().Schritte.Count.ToString(System.Globalization.CultureInfo.InvariantCulture), s.Meta("modul_ausgangsliste_stand"));
         Assert.True(s.ModulAn("ausgangsliste"));
         Assert.True(s.ModulAn(Kuechendienst.Schluessel));
         int gemeldet = 0;
@@ -209,6 +209,41 @@ public sealed class AusgangslisteTests : IDisposable
         var neuer = new Platz { Zimmernummer = "999", Aufnahmedatum = heute.AddDays(-2) };
         Assert.True(Kuechendienst.InKarenz(neuer, heute));
         Assert.False(Kuechendienst.ZimmerKannDienst("999", [neuer], heute));
+    }
+
+    // Bauplan 45: der Küchendienst des Tages für den Tagesplan – getauscht, abwesend, unbesetzt, bestätigen.
+    [Fact]
+    public void Kuechendienst_im_Tagesplan_getauscht_unbesetzt_und_bestaetigt()
+    {
+        var plan = db.KuechendienstLaden();
+        var heute = Jetzt.Date;
+        var h = Kuechendienst.Heute(plan, heute, db.Laden())!;
+        Assert.False(h.Getauscht);
+        Assert.StartsWith($"Küchendienst heute: {string.Join(" + ", h.Namen)} (Zi. {h.Zimmer})", Kuechendienst.ZeileText(h));
+        var getauscht = Kuechendienst.Heute(plan, heute.AddDays(2), db.Laden())!;
+        Assert.True(getauscht.Getauscht);
+        Assert.Contains($"getauscht mit Zi. {getauscht.Geplant}", Kuechendienst.ZeileText(getauscht));
+        Assert.Equal("Kein Küchendienst heute.", Kuechendienst.ZeileText(Kuechendienst.Heute(plan, heute.AddYears(1), db.Laden())));
+
+        // Alle vom Dienst abwesend: unbesetzt.
+        var zimmer = h.Zimmer.Split('/');
+        var abwesend = db.Laden().Where(p => zimmer.Contains(p.Zimmernummer))
+            .Select(p => new Platz { Zimmernummer = p.Zimmernummer, Bewohnername = p.Bewohnername, Status = AnwesenheitsStatus.Abwesenheit }).ToList();
+        var leer = Kuechendienst.Heute(plan, heute, [.. db.Laden().Where(p => !zimmer.Contains(p.Zimmernummer)), .. abwesend])!;
+        Assert.True(leer.Unbesetzt);
+        Assert.Contains("niemand da", Kuechendienst.ZeileText(leer));
+        Assert.Contains("abwesend: ", Kuechendienst.ZeileText(leer));
+
+        Assert.NotNull(Kuechendienst.BestaetigenPruefen(h, heute.AddDays(1), Jetzt, KuechendienstStatus.Gemacht, ""));   // Zukunft
+        Assert.NotNull(Kuechendienst.BestaetigenPruefen(h, heute, Jetzt, KuechendienstStatus.Vertreten, " "));
+        Assert.Null(db.KuechendienstErledigtLaden(heute));
+        db.KuechendienstErledigtSetzen(heute, KuechendienstStatus.NichtGemacht, "", "AB", Jetzt);
+        db.KuechendienstErledigtSetzen(heute, KuechendienstStatus.Vertreten, "Zi. 105 (Test)", "CD", Jetzt.AddMinutes(10));
+        var e = db.KuechendienstErledigtLaden(heute)!;
+        Assert.Equal("vertreten durch Zi. 105 (Test) · CD 15:30", Kuechendienst.ErledigtText(e));
+        using var befehl = s.Verbindung.CreateCommand();
+        befehl.CommandText = "UPDATE al_kuechendienst_erledigt SET kuerzel = 'XX'";
+        Assert.Throws<SqliteException>(() => befehl.ExecuteNonQuery());
     }
 
     [Fact]

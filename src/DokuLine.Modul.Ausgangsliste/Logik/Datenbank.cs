@@ -50,6 +50,19 @@ public sealed class Datenbank(Speicher speicher, SqliteTransaction? transaktion 
             hdz_ende    TEXT NOT NULL DEFAULT ''
         );
         """,
+        // Küchendienst im Tagesplan bestätigen (Bauplan 45): gemacht · nicht gemacht · vertreten durch …; nie geändert, der neueste gilt.
+        """
+        CREATE TABLE IF NOT EXISTS al_kuechendienst_erledigt (
+            id         INTEGER PRIMARY KEY,
+            datum      TEXT NOT NULL,
+            status     TEXT NOT NULL CHECK (status IN ('gemacht', 'nicht_gemacht', 'vertreten')),
+            vertretung TEXT NOT NULL DEFAULT '',
+            kuerzel    TEXT NOT NULL,
+            zeit       TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS al_kuechendienst_erledigt_bleibt BEFORE UPDATE ON al_kuechendienst_erledigt
+            BEGIN SELECT RAISE(ABORT, 'Bestätigungen des Küchendienstes werden nicht geändert.'); END;
+        """,
     ];
 
     // ------------------------------------------------------------------ Plätze
@@ -225,6 +238,22 @@ public sealed class Datenbank(Speicher speicher, SqliteTransaction? transaktion 
 
     public void KuechendienstTauschSetzen(DateTime datum, string tausch) =>
         Ausfuehren("UPDATE al_kuechendienst SET tausch = $t WHERE datum = $d", ("$d", Tag(datum)), ("$t", tausch.Trim()));
+
+    // Die geltende Bestätigung eines Tages (der neueste Eintrag) oder null.
+    public KuechendienstErledigt? KuechendienstErledigtLaden(DateTime datum)
+    {
+        using var befehl = Befehl("SELECT status, vertretung, kuerzel, zeit FROM al_kuechendienst_erledigt WHERE datum = $d ORDER BY zeit DESC, id DESC LIMIT 1",
+            ("$d", Tag(datum)));
+        using var leser = befehl.ExecuteReader();
+        return leser.Read()
+            ? new KuechendienstErledigt(Kuechendienst.StatusAus(leser.GetString(0)), leser.GetString(1), leser.GetString(2), DateTime.Parse(leser.GetString(3), CultureInfo.InvariantCulture))
+            : null;
+    }
+
+    public void KuechendienstErledigtSetzen(DateTime datum, KuechendienstStatus status, string vertretung, string kuerzel, DateTime zeit) =>
+        Ausfuehren("INSERT INTO al_kuechendienst_erledigt (datum, status, vertretung, kuerzel, zeit) VALUES ($d, $s, $v, $k, $z)",
+            ("$d", Tag(datum)), ("$s", Kuechendienst.StatusSchluessel(status)),
+            ("$v", vertretung.Trim()), ("$k", kuerzel.Trim()), ("$z", zeit.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)));
 
     // ------------------------------------------------------------------ Digitaler Ausgang
 

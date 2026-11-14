@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.48.0** (Qualitätsmanagement: Position QMB mit Prüfseite).
+Stand: 14.11.2026. Version: **0.49.0** (Küchendienst im Tagesplan).
 
 ## Aktuell
 
@@ -483,7 +483,9 @@ Neu in 0.47.0: **Ziele der Bewohner** (Bauplan 43). Akte, Reiter **„Ziele und 
 
 Neu in 0.48.0: **Qualitätsmanagement** (Bauplan 44). Neue Position **„Qualitätsmanagement (QMB)“**: liest überall, ändert nichts außer Prüfvermerken und Hinweisen (Demo: QS, Quirin Specht). Neue Seite **„Qualität“** (Recht „Qualität prüfen“): oben die Kennzahlen je Wohnbereich (Ziele vollständig, Nahziele mit Maßnahme, Überprüfung/Reflexion/HEB fällig), darunter die **Prüfliste** je Bewohner mit Haken oder Mangel je Prüfpunkt, Filter Bereich und „nur mit Mängeln“. **„Hinweis senden …“** legt eine Aufgabe für den Wohnbereich an; die Liste zeigt „Hinweis gesendet am … / erledigt am …“. **„Als geprüft vermerken“** mit Verlauf. **Nachweis Ziele und Maßnahmen** zum Drucken. In der Bereichswahl gibt es **„QM“** (ganzes Haus, beginnt mit der Prüfseite). Prüfpunkte und die Tage für „Maßnahmen werden bestätigt“ in den Einstellungen.
 
-**Nächster Schritt:** Bauplan Schritt 45 (Küchendienst im Tagesplan).
+Neu in 0.49.0: **Küchendienst im Tagesplan** (Bauplan 45). Oben im Tagesplan die Zeile **„Küchendienst heute: … (Zi. …)“** aus dem Küchendienstplan des Moduls Ausgangsliste (ein Datensatz, kein zweiter); getauschte Dienste mit „getauscht mit Zi. …“, Abwesende mit Namen. Ist niemand vom Dienst da: **„Küchendienst unbesetzt“** in Achtung-Farbe, auch als Marke beim Bewohner (Übersicht, Akte). Bestätigen wie andere Termine: **gemacht · nicht gemacht · vertreten durch …** mit Kürzel und Uhrzeit. Untermodul Küchendienst aus: keine Zeile, keine Marke.
+
+**Nächster Schritt:** Bauplan Schritt 46 (Archiv für ehemalige Bewohner mit Aufbewahrungsfrist).
 
 ## Fertig
 
@@ -1591,6 +1593,7 @@ Neu in 0.48.0: **Qualitätsmanagement** (Bauplan 44). Neue Position **„Qualit�
 - 0.46.0 — Bauplan Schritt 42: `Medikamentenausgabe.cs` (Einnahmezeit, fällig, Zeilen, Texte, Verlauf), `SpeicherAusgabe.cs` (Datenbank-Schritt 43, Setzen mit Bericht, Sammeleintrag, Demo), `AusgabeSeite`, `AusgabeEinzelnFenster`, Recht „Medikamente ausgeben“, Kennzeichen `Bericht.Ausgabe`, Eintrag im Kasten der Übersicht, Verlauf im Medikamentenplan.
 - 0.47.0 — Ziele der Bewohner (Bauplan 43): Reiter „Ziele und Maßnahmen“, Zielleiste, Bericht/Maßnahme zu einem Ziel, drei Zustände, Marken, Einstellung Mindestzahl
 - 0.48.0 — Qualitätsmanagement (Bauplan 44): Position QMB, Seite „Qualität“ mit Kennzahlen, Prüfliste, Hinweis als Aufgabe, Prüfvermerk, Nachweis; Bereichswahl „QM“
+- 0.49.0 — Küchendienst im Tagesplan (Bauplan 45): Zeile oben mit Tausch und „unbesetzt“, bestätigen, Marke beim Bewohner
 
 ## Offene Punkte
 
@@ -1694,6 +1697,10 @@ Neu in 0.48.0: **Qualitätsmanagement** (Bauplan 44). Neue Position **„Qualit�
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.49.0): Der Küchendienstplan hat einen Dienst je Tag (keine Mahlzeiten); deshalb eine Zeile je Tag. Bestätigt wird in dieser Zeile statt in einem eigenen Termin je Bewohner – der Dienst gehört dem Zimmer bzw. der Zimmergruppe, nicht einer Person.
+- 14.11.2026 (0.49.0): Die Bestätigung liegt in einer eigenen Tabelle des Moduls (`al_kuechendienst_erledigt`, nie geändert, der neueste Eintrag gilt); Recht wie bei der Therapie-Teilnahme („Therapie-Teilnahme bestätigen“).
+- 14.11.2026 (0.49.0): „Küchendienst unbesetzt“ nur, wenn niemand aus dem Zimmer bzw. der Gruppe anwesend ist; ist der Zimmer-Partner da, übernimmt er (wie im Plan der Ausgangsliste).
+- 14.11.2026 (0.49.0): Module steuern Zeilen im Tagesplan über `IModul.TagesplanBauen` bei; der Kern kennt den Küchendienst nicht.
 - 14.11.2026 (0.48.0): „QM“ in der Bereichswahl zeigt wie „Alle“ das ganze Haus und öffnet die Seite „Qualität“; die Prüfliste hat dazu einen eigenen Bereichsfilter. Ein eigener Seitenleisten-Satz wie bei „Therapie“ wäre mehr Aufwand ohne Nutzen.
 - 14.11.2026 (0.48.0): Prüfpunkt „Maßnahmen werden bestätigt“: eine laufende, regelmäßige Maßnahme, die in den letzten n Tagen (Vorgabe 14) fällig war und in dieser Zeit nie bestätigt wurde. Bedarfsmaßnahmen zählen nicht.
 - 14.11.2026 (0.48.0): Prüfpunkt „Berichte je Lebensbereich“ nutzt dieselbe Regel wie die Akte („seit n Wochen kein Bericht“), damit Prüfseite und Akte dasselbe sagen.
@@ -2667,6 +2674,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.49.0: Tagesplan öffnen → oben „Küchendienst heute: … (Zi. …)“, rechts „noch offen“ und die Knöpfe „gemacht“, „nicht gemacht“, „vertreten durch …“ → danach Stand mit Kürzel und Uhrzeit. In der Ausgangsliste einen Tausch für übermorgen setzen → am Tag „getauscht mit Zi. …“. Alle Bewohner des Dienst-Zimmers abwesend melden → „Küchendienst unbesetzt“ (orange) im Tagesplan und als Marke auf der Übersicht. Einstellungen → Module → Küchendienst aus → Zeile verschwindet.
 
 Version 0.48.0: Als TST oder QS anmelden → in der Bereichswahl „QM“ → Seite „Qualität“: Kennzahlen je Bereich, Prüfliste mit Haken und Mängeln (orange). „nur mit Mängeln“ und Bereich „R1“ filtern. Bewohner wählen → „Hinweis senden …“ (Mängel auswählen) → Aufgaben-Seite des Bereichs zeigt die Aufgabe; nach „erledigt“ steht in der Prüfliste „erledigt am …“. „Als geprüft vermerken“, „Prüfverlauf …“, „Nachweis Ziele und Maßnahmen …“ (Druckvorschau). Als QS: keine Berichte schreiben, keine Maßnahmen bestätigen. Einstellungen → „Qualität: Prüfpunkte“: einen Punkt abwählen → Spalte verschwindet.
 
