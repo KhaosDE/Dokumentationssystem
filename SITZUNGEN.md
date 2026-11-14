@@ -141,3 +141,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 14.11.2026 — Claude Code: 0.42.0 Wohnbereich als Auswahlliste in der Seitenleiste über „Übersicht“ (Bauplan 38).
 - 14.11.2026 — Claude Code: 0.43.0 Maßnahmen je Bewohner mit Zeitwert: Reiter „Maßnahmen“, Bestätigen auf der Seite „Aufgaben“, Dokumentation zusammengefasst, Reflexion gezählt (Bauplan 39).
 - 14.11.2026 — Claude Code: 0.44.0 Maßnahmen in der Übersicht: zweiter Abschnitt im Kasten „Laufender Dienst“, Spalte „Maßnahmen“, Sammeleintrag in die Übergabe (Bauplan 40).
+- 14.11.2026 — Claude Code: 0.45.0 Zeitauswertung je Bewohner: Bereich „Auswertung“ mit Druck und CSV, Dauer an Berichten (Bauplan 41).

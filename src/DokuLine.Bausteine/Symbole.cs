@@ -18,6 +18,7 @@ public static class Symbole
     public const string Wochenplaene = "\uE8BF";   // CalendarWeek
     public const string Medikamente = "\uE95E";    // Health
     public const string Einstellungen = "\uE713";  // Setting
+    public const string Auswertung = "\uE9D2";     // AreaChart
     public const string Zuruecksetzen = "\uE72C";  // Refresh
     public const string Info = "\uE946";           // Info
     public const string Modul = "\uE74C";          // OEM (Baustein)
@@ -38,6 +39,7 @@ public static class Symbole
         "Wochenpläne" => Wochenplaene,
         "Medikamente" => Medikamente,
         "Einstellungen" => Einstellungen,
+        "Auswertung" => Auswertung,
         _ => Modul,
     };
 }

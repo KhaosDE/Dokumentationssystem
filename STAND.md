@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.44.0** (Bauplan Schritt 40: Kasten „Maßnahmen“ als Arbeitscheckliste in der Übersicht).
+Stand: 14.11.2026. Version: **0.45.0** (Bauplan Schritt 41: Zeitauswertung je Bewohner).
 
 ## Aktuell
 
@@ -458,7 +458,16 @@ blass darunter („✓ 08:31 AB · … (durchgeführt)“), einklappbar. Die **B
 („2 offen“ bzw. „✓“). Was am **Dienstende** offen bleibt, geht als **ein Sammeleintrag je Wohnbereich** in die Übergabe
 („R1 · 3 Maßnahmen aus dem Frühdienst … offen: …“), nicht jede einzeln.
 
-**Nächster Schritt:** Bauplan Schritt 41 (Zeitauswertung je Bewohner, 0.45.0); danach 42–52 der Reihe nach.
+Neu in 0.45.0: Neuer Bereich **„Auswertung“** (nur mit dem Recht „Zeitauswertung ansehen“, vorbelegt für Leitungen und Verwaltung):
+Zeitraum wählen, je Bewohner des gewählten Bereichs die erfassten **Minuten nach Lebensbereich** (LB 1–5, ohne LB), **nach Art**
+(Maßnahmen, Therapie, Gespräche/Sonstiges) und die **Summe**, dazu **„Maßnahmen geplant“** zum Vergleich. Quellen:
+bestätigte Maßnahmen (durchgeführt), Therapie-Teilnahmen „gegangen“ (Dauer des Termins) und Berichte mit der neuen,
+freiwilligen **„Dauer“** (Feld im Berichtsformular). **Drucken** (A4 quer) und **„Als CSV speichern …“** für Excel. Hinweis im
+Programm: eine Zählung, keine Abrechnung. Eine Auswertung nach Mitarbeiter gibt es ausdrücklich nicht (steht in der Liste
+der Freigaben, `docs/betrieb.md`). Die Berichtsart „Maßnahme“ ist im Berichtsformular nicht mehr wählbar (vergibt das
+Programm).
+
+**Nächster Schritt:** Bauplan Schritt 42 (Medikamentenausgabe abhaken, 0.46.0); danach 43–52 der Reihe nach.
 
 ## Fertig
 
@@ -1562,6 +1571,7 @@ blass darunter („✓ 08:31 AB · … (durchgeführt)“), einklappbar. Die **B
 - 0.42.0 — Bauplan Schritt 38: `BereichsAuswahl` in der Seitenleiste (Auswahlliste, eingeklappt Kürzel mit Menü), `BereichswahlRegeln.Kuerzel`; `BereichUmschalter` entfernt.
 - 0.43.0 — Bauplan Schritt 39: `Massnahmen.cs` (Fassungen, Fälligkeit, Prüfen, Texte, Lebensbereiche, Reflexion), `SpeicherMassnahmen.cs` (Datenbank-Schritt 41, Bestätigen mit Bericht, Demo), `MassnahmenAnsicht`, `MassnahmeFenster`, `MassnahmeBestaetigenFenster`, `MassnahmenListe` (Aufgaben-Seite), `MassnahmenTagZeile` (Dokumentation), Reflexion, Einstellungen.
 - 0.44.0 — Bauplan Schritt 40: `MassnahmeKastenZeile`, Abschnitt im Kasten „Laufender Dienst“ (`UebersichtSeite.MassnahmenKasten`), Spalte „Maßnahmen“ (`BewohnerZeile`), `MassnahmenRegeln.ListenText`/`StandText`/`UebergabeText`, `Speicher.MassnahmenUebergabeErzeugen` (beim Dienstwechsel, einmal je Dienst).
+- 0.45.0 — Bauplan Schritt 41: `Zeitauswertung.cs` (Posten, Zeilen, geplant, CSV), `SpeicherZeitauswertung.cs`, Datenbank-Schritt 42 (`bericht_dauer`), `AuswertungSeite`, `TabellenDruck` (allgemeiner Druck A4 quer), Recht „Zeitauswertung ansehen“, Feld „Dauer“ im Berichtsformular.
 
 ## Offene Punkte
 
@@ -1665,6 +1675,14 @@ blass darunter („✓ 08:31 AB · … (durchgeführt)“), einklappbar. Die **B
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.45.0): Ein Bericht mit Dauer zählt in der Spalte seines **ersten** Lebensbereichs; mehrere Lebensbereiche zu teilen hieße,
+  Minuten zu erfinden. Therapie-Teilnahmen haben keinen Lebensbereich („ohne LB“).
+- 14.11.2026 (0.45.0): „Maßnahmen geplant“ zählt die fälligen Termine bis heute (nicht in der Zukunft) mit dem Zeitwert der jeweils geltenden
+  Fassung; „bei Bedarf“ ist nicht geplant. Abgelehnte und nicht mögliche Durchführungen zählen nicht als Zeit.
+- 14.11.2026 (0.45.0): Die Dauer eines Berichts steht in einer eigenen Tabelle (`bericht_dauer`), nicht als neue Spalte: Berichte werden nie
+  geändert, und der Datenbank-Schritt bleibt wiederholbar.
+- 14.11.2026 (0.45.0): Das Recht ist vorbelegt für Administrator, Geschäftsführung, Hausleitung, Verwaltung und Bereichsleitung („Leitung und
+  Verwaltung“).
 - 14.11.2026 (0.44.0): Der Sammeleintrag am Dienstende ist eine **allgemeine** Übergabe-Notiz je Wohnbereich (der Bereich steht vorn im Text):
   Übergaben haben keinen eigenen Bereich, nur einen Bewohner oder „allgemein“. Verfasser ist „AUTO“ – sonst stünde das
   Kürzel dessen da, der zufällig als Erster nach dem Dienstwechsel die Übersicht öffnet. Er gilt bis zum Ende des nächsten
@@ -2611,6 +2629,11 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.45.0: Als EF (Bereichsleitung): Seitenleiste „Auswertung“ → Zeitraum, „Auswerten“: je Bewohner Minuten nach LB, Art,
+Summe, „Maßnahmen geplant“; oben der Hinweis „keine Abrechnung“. „Drucken …“ (quer) und „Als CSV speichern …“ → in Excel
+öffnen. Als KL (Assistenzkraft) fehlt „Auswertung“. Neuer Bericht mit „Dauer (freiwillig)“ 20 → zählt unter
+„Gespräche/Sonstiges“; „abc“ → Fehler. „Maßnahme“ ist als Berichtsart nicht wählbar.
 
 Version 0.44.0: Übersicht: Im Kasten „Laufender Dienst · noch offen“ unter den Aufgaben „Maßnahmen: … von … bestätigt“ mit Balken,
 „alle“ · „meine Bezugsbewohner“, darunter die offenen Maßnahmen mit drei Knöpfen; eine mit vergangener Uhrzeit trägt

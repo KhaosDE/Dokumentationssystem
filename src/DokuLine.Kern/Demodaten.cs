@@ -1151,6 +1151,8 @@ public static partial class Demodaten
             Wichtig = wichtig,
             Erfasst = zeit.AddMinutes(zufall.Next(5, 40)) is var e && e <= jetzt ? e : jetzt,
             Nachtraege = nachtraege,
+            // Etwa jeder vierte Bericht mit Dauer (Zeitauswertung); aus der Uhrzeit, damit die Zufallsfolge gleich bleibt.
+            Dauer = bereich != 0 && zeit.Minute % 4 == 0 ? 15 + zeit.Hour % 3 * 15 : null,
         };
     }
 

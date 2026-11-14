@@ -2439,7 +2439,7 @@ Umfang (Vorschlag):
   damit es nur eine Checkliste gibt.
 
 ## Zeitauswertung je Bewohner
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.45.0; Bauplan Schritt 41)
 Datum: 10.11.2026
 Was: Eine Auswertung der erfassten Zeiten je Bewohner und Zeitraum.
 Warum: Tobi (10.11.2026): Der Bezirk Oberbayern will die Vergütung künftig nach erbrachter Zeit

@@ -26,6 +26,7 @@ public sealed record Bericht
     public IReadOnlyList<Nachtrag> Nachtraege { get; init; } = [];
     public string Art { get; init; } = DokuRegeln.ArtAlltag;   // Berichtsart (Liste in den Einstellungen)
     public bool Bedarfsgabe { get; init; }                  // entstanden über „Bedarf gegeben …“ (nur lesend)
+    public int? Dauer { get; init; }                        // freiwillig: Minuten am Bewohner (Zeitauswertung, Bauplan 41)
 
     public bool Allgemein => Bereiche.Count == 0;
 }
@@ -47,6 +48,7 @@ public sealed class BerichtEingabe
     public string UebergabeBis { get; set; } = "";
     public string UebergabeText { get; set; } = "";
     public string Art { get; set; } = DokuRegeln.ArtAlltag;
+    public string Dauer { get; set; } = "";   // Minuten, freiwillig
 }
 
 // Filter für die Liste der Berichte eines Bewohners.
@@ -171,10 +173,12 @@ public static partial class BerichtRegeln
             }
             catch (FormatException ex) { fehler.Add(ex.Message); }
         }
+        int? dauer = ZeitauswertungRegeln.DauerLesen(e.Dauer, fehler);
         if (fehler.Count > 0) throw new Eingabefehler(fehler);
 
         return new Bericht
         {
+            Dauer = dauer,
             BewohnerId = e.BewohnerId,
             Zeitpunkt = zeitpunkt!.Value,
             Schicht = e.Schicht ?? SchichtZu(zeitpunkt.Value),

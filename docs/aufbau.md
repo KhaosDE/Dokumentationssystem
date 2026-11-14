@@ -43,6 +43,7 @@ Fenster → Kern → Speicher → SQLite-Datei im Datenordner (`%APPDATA%\DokuLi
 | Rechte | `Mitarbeiter.cs` (`Funktionen`, `RechteRegeln`) | `Recht.cs`, `VerwaltungFenster.cs` |
 | Medikation, Bedarf | `Medikation.cs`, `Bedarf.cs` | `MedikationAnsicht.cs`, `BedarfFenster.cs` |
 | Maßnahmen | `Massnahmen.cs`, `SpeicherMassnahmen.cs` | `MassnahmenAnsicht.cs`, `MassnahmeFenster.cs`, `MassnahmenListe.cs` |
+| Zeitauswertung | `Zeitauswertung.cs`, `SpeicherZeitauswertung.cs` | `AuswertungSeite.cs`, `TabellenDruck.cs` |
 | Visiten | `Visiten.cs`, `VisitenEntwurf.cs` | `VisitenSeite.cs`, `VisitenRundgang.cs` |
 | Therapie, Tagesplan | `Therapie.cs`, `Tagesplan.cs`, `LaufendeTherapien.cs` | `TherapieSeite.cs`, `TagesplanSeite.cs`, `LaufendeTherapienAnsicht.cs` |
 | Kalender, .ics | `Kalender.cs`, `Ics.cs` | `KalenderSeite.cs` |

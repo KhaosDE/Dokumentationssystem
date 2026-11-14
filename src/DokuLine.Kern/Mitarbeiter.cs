@@ -58,6 +58,7 @@ public static class Funktionen
     public const string AndereHaeuser = "andere_haeuser";         // Bereiche anderer Häuser wählen
     public const string MassnahmenBestaetigen = "massnahmen_bestaetigen";
     public const string MassnahmenAnlegen = "massnahmen_anlegen";   // dazu die Bezugspflege des Bewohners
+    public const string Zeitauswertung = "zeitauswertung";          // nur je Bewohner, nie je Mitarbeiter
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -93,6 +94,7 @@ public static class Funktionen
         (VitalGrenzen, "Grenzen und Messaufträge festlegen"),
         (MassnahmenBestaetigen, "Maßnahmen bestätigen"),
         (MassnahmenAnlegen, "Maßnahmen anlegen und ändern"),
+        (Zeitauswertung, "Zeitauswertung ansehen"),
         (Zugriffsprotokoll, "Zugriffsprotokoll ansehen"),
         (BetriebVerwalten, "Betrieb verwalten (Sicherung, Update, Häuser)"),
         (AndereHaeuser, "Bereiche anderer Häuser wählen"),
@@ -182,7 +184,7 @@ public static partial class RechteRegeln
         Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
         Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
         Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen, Funktionen.Zugriffsprotokoll, Funktionen.BetriebVerwalten, Funktionen.AndereHaeuser,
-        Funktionen.MassnahmenBestaetigen, Funktionen.MassnahmenAnlegen];
+        Funktionen.MassnahmenBestaetigen, Funktionen.MassnahmenAnlegen, Funktionen.Zeitauswertung];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
@@ -191,6 +193,7 @@ public static partial class RechteRegeln
         funktion is Funktionen.AerztlicheAnsehen or Funktionen.AerztlicheBearbeiten ? position != "Verwaltung" :
         funktion is Funktionen.VitalwerteErfassen or Funktionen.MassnahmenBestaetigen ? true :
         funktion == Funktionen.MassnahmenAnlegen ? position is not ("Therapie" or "Verwaltung") :
+        funktion == Funktionen.Zeitauswertung ? position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" or "Bereichsleitung" :
         funktion == Funktionen.VitalGrenzen ? position is not ("Therapie" or "Verwaltung") :
         funktion == Funktionen.Zugriffsprotokoll ? position is Administrator or "Geschäftsführung" or "Hausleitung" :
         position is Administrator or "Geschäftsführung" or "Hausleitung" or "Verwaltung" ||

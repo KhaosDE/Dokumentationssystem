@@ -265,7 +265,8 @@ Wer wann welche Akte **geöffnet**, **gedruckt** oder **geändert** hat (nie Inh
       technische und organisatorische Maßnahmen (Abschnitte 2, 5, 7, 8), Verzeichnis der Verarbeitungstätigkeiten,
       Löschfristen.
 - [ ] **Mitarbeitervertretung**: Zugriffsprotokoll und Anmeldung sind technische Einrichtungen, die Verhalten
-      erfassen können – Zustimmung bzw. Dienstvereinbarung.
+      erfassen können – Zustimmung bzw. Dienstvereinbarung. Ebenso die **Zeitauswertung** (Bereich „Auswertung“):
+      Die erfassten Zeiten hängen an Kürzeln; DokuLine wertet nur je Bewohner aus, nie je Mitarbeiter.
 - [ ] **Medizinprodukt ja/nein**: prüfen lassen, ob der Medikamentenplan (Stand, Stufenpläne, Hinweise) und die
       Vitalwerte (Hinweise auf Bereiche) als Medizinprodukt gelten.
 - [ ] **Betriebsprobe** auf einem Test-Rechner mit ausgedachten Daten: Installation, Rechte, Anmeldung, Sperre,

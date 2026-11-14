@@ -1064,6 +1064,15 @@ public sealed partial class Speicher : IDisposable
         INSERT INTO berichtsarten (name, nr) SELECT 'Maßnahme', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
             WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Maßnahme');
         """,
+        // 42 – Zeitauswertung: freiwillige Dauer eines Berichts in Minuten (eigene Tabelle: Berichte werden nie geändert).
+        """
+        CREATE TABLE IF NOT EXISTS bericht_dauer (
+            bericht_id INTEGER PRIMARY KEY REFERENCES berichte(id) ON DELETE CASCADE,
+            minuten    INTEGER NOT NULL CHECK (minuten BETWEEN 1 AND 600)
+        );
+        CREATE TRIGGER IF NOT EXISTS bericht_dauer_bleibt BEFORE UPDATE ON bericht_dauer
+            BEGIN SELECT RAISE(ABORT, 'Die Dauer eines Berichts wird nicht geändert.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1410,6 +1419,7 @@ public sealed partial class Speicher : IDisposable
             ("$bereiche", string.Join(",", b.Bereiche)), ("$t", b.Text), ("$w", b.Wichtig ? 1 : 0), ("$e", Zeit(b.Erfasst)),
             ("$art", b.Art));
         long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
+        if (b.Dauer is int dauer) Ausfuehren("INSERT INTO bericht_dauer (bericht_id, minuten) VALUES ($b, $m)", transaktion, ("$b", id), ("$m", dauer));
         foreach (var n in b.Nachtraege)
             NachtragEinfuegen(id, n.Verfasser, n.Text, n.Erfasst, transaktion);
         return id;
@@ -1605,7 +1615,8 @@ public sealed partial class Speicher : IDisposable
         var berichte = new List<Bericht>();
         using (var befehl = Befehl("SELECT id, bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst, " +
                                    "EXISTS (SELECT 1 FROM uebergaben u WHERE u.bericht_id = berichte.id), art, " +
-                                   $"EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id) FROM berichte {bedingung}",
+                                   "EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id), " +
+                                   $"(SELECT minuten FROM bericht_dauer d WHERE d.bericht_id = berichte.id) FROM berichte {bedingung}",
                                    null, parameter))
         using (var leser = befehl.ExecuteReader())
         {
@@ -1626,6 +1637,7 @@ public sealed partial class Speicher : IDisposable
                     Uebergabe = leser.GetInt64(9) != 0,
                     Art = leser.GetString(10),
                     Bedarfsgabe = leser.GetInt64(11) != 0,
+                    Dauer = leser.IsDBNull(12) ? null : leser.GetInt32(12),
                 });
             }
         }
