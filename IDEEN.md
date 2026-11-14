@@ -2460,7 +2460,7 @@ Umfang (Vorschlag):
   der Freigaben (`docs/betrieb.md`) aufnehmen.
 
 ## Medikamentenausgabe abhaken
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.46.0; Bauplan Schritt 42)
 Datum: 10.11.2026
 Was: Eine Ausgabeliste je Einnahmezeit, in der für jeden Bewohner abgehakt wird, ob die
 Medikamente ausgegeben wurden.

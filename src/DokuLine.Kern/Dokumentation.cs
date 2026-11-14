@@ -64,7 +64,7 @@ public static class DokuRegeln
     {
         var marken = new List<DokuMarke>();
         if (b.Wichtig) marken.Add(DokuMarke.Wichtig);
-        if (b.Art == ArtMedikation && !b.Bedarfsgabe) marken.Add(DokuMarke.MedikationGeaendert);
+        if (b.Art == ArtMedikation && !b.Bedarfsgabe && !b.Ausgabe) marken.Add(DokuMarke.MedikationGeaendert);
         if (b.Bedarfsgabe) marken.Add(DokuMarke.Bedarfsgabe);
         return marken;
     }

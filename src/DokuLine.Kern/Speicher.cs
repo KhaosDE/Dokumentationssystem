@@ -1073,6 +1073,25 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER IF NOT EXISTS bericht_dauer_bleibt BEFORE UPDATE ON bericht_dauer
             BEGIN SELECT RAISE(ABORT, 'Die Dauer eines Berichts wird nicht geändert.'); END;
         """,
+        // 43 – Medikamentenausgabe: je Medikament, Tag und Einnahmezeit ein Eintrag (nie geändert; der neueste gilt).
+        """
+        CREATE TABLE IF NOT EXISTS medikamentenausgaben (
+            id            INTEGER PRIMARY KEY,
+            bewohner_id   INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            tag           TEXT NOT NULL,
+            zeit          TEXT NOT NULL CHECK (zeit IN ('morgens', 'mittags', 'abends', 'nachts')),
+            verordnung_id INTEGER NOT NULL REFERENCES verordnungen(id) ON DELETE CASCADE,
+            status        TEXT NOT NULL CHECK (status IN ('ausgegeben', 'nichtabgeholt', 'abgelehnt', 'abwesend', 'mitgegeben')),
+            kuerzel       TEXT NOT NULL,
+            erfasst       TEXT NOT NULL,
+            bericht_id    INTEGER REFERENCES berichte(id) ON DELETE SET NULL
+        );
+        CREATE INDEX IF NOT EXISTS medikamentenausgaben_tag ON medikamentenausgaben (tag, zeit);
+        CREATE INDEX IF NOT EXISTS medikamentenausgaben_bewohner ON medikamentenausgaben (bewohner_id, tag);
+        CREATE TRIGGER IF NOT EXISTS medikamentenausgaben_bleiben
+            BEFORE UPDATE OF bewohner_id, tag, zeit, verordnung_id, status, kuerzel, erfasst ON medikamentenausgaben
+            BEGIN SELECT RAISE(ABORT, 'Einträge der Medikamentenausgabe werden nicht geändert – ein neuer Eintrag gilt.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1248,10 +1267,10 @@ public sealed partial class Speicher : IDisposable
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
              akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
-             vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null;
+             vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null, ausgabe = Meta(DemoAusgabe) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1279,6 +1298,7 @@ public sealed partial class Speicher : IDisposable
         if (massnahmen) DemoMassnahmenEinfuegen(transaktion);
         if (dokumente) DemoDokumenteEinfuegen(transaktion);
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
+        if (ausgabe || medikamente || medikation) DemoAusgabeEinfuegen(transaktion);   // hängt an den Verordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
         if (heb) DemoHebEinfuegen(transaktion);
@@ -1338,6 +1358,7 @@ public sealed partial class Speicher : IDisposable
             DemoMassnahmenEinfuegen(transaktion);
             DemoDokumenteEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
+            DemoAusgabeEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);
             DemoHebEinfuegen(transaktion);
@@ -1616,7 +1637,8 @@ public sealed partial class Speicher : IDisposable
         using (var befehl = Befehl("SELECT id, bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst, " +
                                    "EXISTS (SELECT 1 FROM uebergaben u WHERE u.bericht_id = berichte.id), art, " +
                                    "EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id), " +
-                                   $"(SELECT minuten FROM bericht_dauer d WHERE d.bericht_id = berichte.id) FROM berichte {bedingung}",
+                                   "(SELECT minuten FROM bericht_dauer d WHERE d.bericht_id = berichte.id), " +
+                                   $"EXISTS (SELECT 1 FROM medikamentenausgaben a WHERE a.bericht_id = berichte.id) FROM berichte {bedingung}",
                                    null, parameter))
         using (var leser = befehl.ExecuteReader())
         {
@@ -1638,6 +1660,7 @@ public sealed partial class Speicher : IDisposable
                     Art = leser.GetString(10),
                     Bedarfsgabe = leser.GetInt64(11) != 0,
                     Dauer = leser.IsDBNull(12) ? null : leser.GetInt32(12),
+                    Ausgabe = leser.GetInt64(13) != 0,
                 });
             }
         }

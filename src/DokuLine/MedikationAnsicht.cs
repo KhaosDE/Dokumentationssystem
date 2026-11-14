@@ -20,6 +20,7 @@ public sealed class MedikationAnsicht : Panel
     public Button HeuteKnopf { get; } = Stil.NebenKnopf("Heute");
     public Button NeuKnopf { get; } = Stil.NebenKnopf("Neue Verordnung …");
     public Button DruckKnopf { get; } = Stil.NebenKnopf("Drucken …");
+    public Button AusgabeKnopf { get; } = Stil.NebenKnopf("Ausgabe der letzten 14 Tage …");
     // Bestellweg (Bauplan 30a): „Bestellung über: FOSA · Name, Telefon“, ändern und per E-Mail-Programm bestellen.
     private readonly FlowLayoutPanel bestellung = new() { AutoSize = true, WrapContents = true, BackColor = Stil.Seite };
     public Label BestellungText { get; } = new() { AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false };
@@ -83,7 +84,7 @@ public sealed class MedikationAnsicht : Panel
         this.speicher = speicher;
         BackColor = Stil.Seite;
         var beschriftung = new Label { Text = "Was gilt am", AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite, Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0) };
-        foreach (var c in new Control[] { beschriftung, TagFeld, HeuteKnopf, NeuKnopf, DruckKnopf, AbgesetzteZeigen, Hinweis, TagFehler })
+        foreach (var c in new Control[] { beschriftung, TagFeld, HeuteKnopf, NeuKnopf, DruckKnopf, AusgabeKnopf, AbgesetzteZeigen, Hinweis, TagFehler })
         {
             if (c != beschriftung) c.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
             leiste.Controls.Add(c);
@@ -95,6 +96,7 @@ public sealed class MedikationAnsicht : Panel
         HeuteKnopf.Click += (_, _) => TagFeld.Text = Datum.Text(DateOnly.FromDateTime(Jetzt()));
         NeuKnopf.Click += (_, _) => NeueVerordnung();
         DruckKnopf.Click += (_, _) => Drucken();
+        AusgabeKnopf.Click += (_, _) => AusgabeZeigen();
         AbgesetzteZeigen.CheckedChanged += (_, _) => Aktualisieren();
         EmailBestaetigen = text => MessageBox.Show(FindForm(), text, "Bestellung per E-Mail", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK;
         MedikamenteWaehlen = namen => MehrfachWahl.Zeigen(FindForm(), "Medikamente bestellen", "Welche Medikamente sollen bestellt werden?", namen);
@@ -121,6 +123,23 @@ public sealed class MedikationAnsicht : Panel
     private static Label Titel(string text) => new() { Text = text, AutoSize = true, Font = Stil.Abschnitt, ForeColor = Stil.TextLeise, BackColor = Stil.Seite };
 
     private static Label Leer(string text) => new() { Text = text, AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite, Visible = false };
+
+    // Verlauf der Medikamentenausgabe (Bauplan 42): wer wann was ausgegeben, nicht abgeholt, abgelehnt … hat.
+    public string AusgabeText()
+    {
+        if (bewohner?.Id is not long id) return "";
+        var heute = DateOnly.FromDateTime(Jetzt());
+        var namen = speicher.Verordnungen(id).ToDictionary(v => v.Id, v => $"{v.Medikament} {v.Staerke}".Trim());
+        var zeilen = AusgabeRegeln.Verlauf(speicher.AusgabeEintraege(heute.AddDays(-13), heute, id), namen);
+        return zeilen.Count == 0 ? "In den letzten 14 Tagen ist keine Ausgabe eingetragen." : string.Join(Environment.NewLine, zeilen);
+    }
+
+    private void AusgabeZeigen()
+    {
+        if (bewohner is null) return;
+        using var fenster = new TextFenster($"Ausgabe der letzten 14 Tage: {bewohner.Name}", AusgabeText());
+        Dialog.Zeigen(fenster, FindForm());
+    }
 
     public void Zeigen(Bewohner b)
     {

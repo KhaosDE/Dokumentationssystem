@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.45.0** (Bauplan Schritt 41: Zeitauswertung je Bewohner).
+Stand: 14.11.2026. Version: **0.46.0** (Bauplan Schritt 42: Medikamentenausgabe abhaken).
 
 ## Aktuell
 
@@ -467,7 +467,19 @@ Programm: eine Zählung, keine Abrechnung. Eine Auswertung nach Mitarbeiter gibt
 der Freigaben, `docs/betrieb.md`). Die Berichtsart „Maßnahme“ ist im Berichtsformular nicht mehr wählbar (vergibt das
 Programm).
 
-**Nächster Schritt:** Bauplan Schritt 42 (Medikamentenausgabe abhaken, 0.46.0); danach 43–52 der Reihe nach.
+Neu in 0.46.0: Neuer Bereich **„Medikamentenausgabe“** (Seitenleiste, nur Wohnbereiche, nur mit dem Recht „Medikamente ausgeben“):
+Einnahmezeit **morgens · mittags · abends · nachts** (vorgewählt die laufende; nachts nach Mitternacht gehört zum Vortag), je
+Bewohner des Bereichs Zimmer, Name, die **Medikamente dieser Zeit** (Name, Stärke, Menge laut Tagesstand des Plans) und der
+Stand. Ein Klick: **ausgegeben** · **nicht abgeholt** · **abgelehnt** · **abwesend** · **mitgegeben**; „Einzeln …“ kennzeichnet
+einzelne Medikamente getrennt. Kürzel und Uhrzeit setzt das Programm; ein späterer Eintrag gilt, nichts wird überschrieben.
+Oben „18 von 21 ausgegeben“; **„nicht abgeholt“ steht oben** in der Liste und im Kasten „Laufender Dienst“ der Übersicht
+(„Medikamente morgens: 2 noch nicht abgeholt“). Abwesende laut Ausgangsliste sind gekennzeichnet. In der letzten Stunde
+des Dienstes ein Hinweis, wenn noch etwas offen ist; was offen bleibt, geht als **Sammeleintrag je Wohnbereich** in die
+Übergabe. „Abgelehnt“ und „nicht abgeholt“ stehen als kurzer Bericht (Art „Medikation“, ohne Marke „Medikation geändert“) in
+der Dokumentation. Im Medikamentenplan „Ausgabe der letzten 14 Tage …“. Pausierte, abgesetzte und Bedarfsmedikamente
+stehen nicht in der Liste; das Programm bestätigt nur die Ausgabe.
+
+**Nächster Schritt:** Bauplan Schritt 43 (Ziele der Bewohner: Leitziel und Nahziele, 0.47.0); danach 44–52 der Reihe nach.
 
 ## Fertig
 
@@ -1572,6 +1584,7 @@ Programm).
 - 0.43.0 — Bauplan Schritt 39: `Massnahmen.cs` (Fassungen, Fälligkeit, Prüfen, Texte, Lebensbereiche, Reflexion), `SpeicherMassnahmen.cs` (Datenbank-Schritt 41, Bestätigen mit Bericht, Demo), `MassnahmenAnsicht`, `MassnahmeFenster`, `MassnahmeBestaetigenFenster`, `MassnahmenListe` (Aufgaben-Seite), `MassnahmenTagZeile` (Dokumentation), Reflexion, Einstellungen.
 - 0.44.0 — Bauplan Schritt 40: `MassnahmeKastenZeile`, Abschnitt im Kasten „Laufender Dienst“ (`UebersichtSeite.MassnahmenKasten`), Spalte „Maßnahmen“ (`BewohnerZeile`), `MassnahmenRegeln.ListenText`/`StandText`/`UebergabeText`, `Speicher.MassnahmenUebergabeErzeugen` (beim Dienstwechsel, einmal je Dienst).
 - 0.45.0 — Bauplan Schritt 41: `Zeitauswertung.cs` (Posten, Zeilen, geplant, CSV), `SpeicherZeitauswertung.cs`, Datenbank-Schritt 42 (`bericht_dauer`), `AuswertungSeite`, `TabellenDruck` (allgemeiner Druck A4 quer), Recht „Zeitauswertung ansehen“, Feld „Dauer“ im Berichtsformular.
+- 0.46.0 — Bauplan Schritt 42: `Medikamentenausgabe.cs` (Einnahmezeit, fällig, Zeilen, Texte, Verlauf), `SpeicherAusgabe.cs` (Datenbank-Schritt 43, Setzen mit Bericht, Sammeleintrag, Demo), `AusgabeSeite`, `AusgabeEinzelnFenster`, Recht „Medikamente ausgeben“, Kennzeichen `Bericht.Ausgabe`, Eintrag im Kasten der Übersicht, Verlauf im Medikamentenplan.
 
 ## Offene Punkte
 
@@ -1675,6 +1688,12 @@ Programm).
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.46.0): Einnahmezeiten nach der Uhr: morgens 5–11, mittags 11–15, abends 15–21, nachts 21–5 Uhr; „nachts“ nach Mitternacht gehört
+  zum Vortag. Dienste: Früh gibt morgens und mittags aus, Spät abends, Nacht nachts (für Hinweis und Übergabe).
+- 14.11.2026 (0.46.0): Recht „Medikamente ausgeben“ mit derselben Vorbelegung wie „Medikation bearbeiten“, auch „nur Fachkräfte“ („wie bisher
+  beim Medikamentenplan“). Wenn Assistenzkräfte ausgeben sollen: in der Rechte-Tabelle das Häkchen „nur Fachkräfte“ abnehmen.
+- 14.11.2026 (0.46.0): „Abwesend laut Ausgangsliste“ wird angezeigt, aber nicht von selbst gesetzt: Gesetzt wird nur, was jemand anklickt.
+- 14.11.2026 (0.46.0): Ausgabe-Berichte tragen ein eigenes Kennzeichen; sonst erschienen sie als „Medikation geändert“ oder als „Bedarfsgabe“.
 - 14.11.2026 (0.45.0): Ein Bericht mit Dauer zählt in der Spalte seines **ersten** Lebensbereichs; mehrere Lebensbereiche zu teilen hieße,
   Minuten zu erfinden. Therapie-Teilnahmen haben keinen Lebensbereich („ohne LB“).
 - 14.11.2026 (0.45.0): „Maßnahmen geplant“ zählt die fälligen Termine bis heute (nicht in der Zukunft) mit dem Zeitwert der jeweils geltenden
@@ -2629,6 +2648,12 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.46.0: Als AB (Fachkraft): Seitenleiste „Medikamentenausgabe“ → laufende Einnahmezeit vorgewählt, je Bewohner die Medikamente;
+einen wählen, „nicht abgeholt“ → steht oben, gelb; in der Übersicht im Kasten „Laufender Dienst“ „Medikamente … noch nicht
+abgeholt“. „Einzeln …“: eines ankreuzen, „abgelehnt“ → Stand „teilweise …“, in der Dokumentation ein Bericht „Medikamente …:
+abgelehnt (…)“ ohne Marke „Medikation geändert“. Akte → Medikamentenplan → „Ausgabe der letzten 14 Tage …“. Als KL
+(Assistenzkraft) fehlt der Bereich. Nach dem Dienstwechsel in „Übergabe“ (allgemein) „R1 · Medikamente aus dem … offen: …“.
 
 Version 0.45.0: Als EF (Bereichsleitung): Seitenleiste „Auswertung“ → Zeitraum, „Auswerten“: je Bewohner Minuten nach LB, Art,
 Summe, „Maßnahmen geplant“; oben der Hinweis „keine Abrechnung“. „Drucken …“ (quer) und „Als CSV speichern …“ → in Excel

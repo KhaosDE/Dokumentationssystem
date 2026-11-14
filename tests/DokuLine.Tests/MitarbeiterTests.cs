@@ -28,7 +28,7 @@ public sealed class MitarbeiterTests : IDisposable
             RechteRegeln.Positionen.Where(rechte[Funktionen.MitarbeiterBereich].Contains));
         Assert.Contains("Psychologischer Fachdienst", rechte[Funktionen.MedikamenteVerwalten]);
         Assert.DoesNotContain("Mitarbeiter Wohnbereich", rechte[Funktionen.MedikamenteVerwalten]);
-        Assert.Equal([Funktionen.AerztlicheBearbeiten, Funktionen.MassnahmenAnlegen, Funktionen.MedikamentAnlegen, Funktionen.MedikationBearbeiten, Funktionen.Visiten, Funktionen.VitalGrenzen],
+        Assert.Equal([Funktionen.AerztlicheBearbeiten, Funktionen.MassnahmenAnlegen, Funktionen.MedikamentAnlegen, Funktionen.MedikamenteAusgeben, Funktionen.MedikationBearbeiten, Funktionen.Visiten, Funktionen.VitalGrenzen],
             s.NurFachkraft().Order());   // Visiten seit 0.33.0 (Assistenzkräfte machen keine Visiten), Grenzen der Vitalwerte seit 0.40.0
         Assert.Equal(["Administrator", "Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung", "Mitarbeiter Wohnbereich"],
             RechteRegeln.Positionen.Where(rechte[Funktionen.BedarfGeben].Contains));

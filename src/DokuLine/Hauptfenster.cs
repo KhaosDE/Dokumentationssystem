@@ -22,7 +22,7 @@ public sealed partial class Hauptfenster : Form
 
     // Die Einträge des Bereichs „Therapie“ stehen nur dort in der Seitenleiste, in eigener Reihenfolge.
     public static readonly string[] Bereiche =
-        ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
+        ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Medikamentenausgabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
          .. TherapieBereiche, "Auswertung", "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
 
     private readonly Speicher speicher;
@@ -46,6 +46,7 @@ public sealed partial class Hauptfenster : Form
     public TagesplanSeite Tagesplan { get; }
     public VisitenSeite Visiten { get; }
     public AuswertungSeite Auswertung { get; }
+    public AusgabeSeite Ausgabe { get; }
     public EinstellungenSeite Einstellungsseite { get; }
     public AnzeigeDienst Anzeige { get; }
 
@@ -122,6 +123,9 @@ public sealed partial class Hauptfenster : Form
         seiten["Visiten"] = Visiten;
         Visiten.Geaendert += () => { if (AktiverBereich == "Visiten") Kopf.TexteSetzen(Visiten.KopfText, "Visiten"); };
         Visiten.AufgabeGewuenscht += a => VisitenAufgabe(a);
+        Ausgabe = new AusgabeSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Medikamentenausgabe"] = Ausgabe;
+        Ausgabe.Geaendert += () => { if (AktiverBereich == "Medikamentenausgabe") Kopf.TexteSetzen(Ausgabe.KopfText, "Medikamentenausgabe"); };
         Auswertung = new AuswertungSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
         seiten["Auswertung"] = Auswertung;
         Auswertung.Geaendert += () => { if (AktiverBereich == "Auswertung") Kopf.TexteSetzen(Auswertung.KopfText, "Auswertung"); };

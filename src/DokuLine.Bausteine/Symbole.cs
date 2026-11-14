@@ -40,6 +40,7 @@ public static class Symbole
         "Medikamente" => Medikamente,
         "Einstellungen" => Einstellungen,
         "Auswertung" => Auswertung,
+        "Medikamentenausgabe" => Medikamente,
         _ => Modul,
     };
 }

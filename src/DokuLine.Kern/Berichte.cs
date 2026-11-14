@@ -26,6 +26,7 @@ public sealed record Bericht
     public IReadOnlyList<Nachtrag> Nachtraege { get; init; } = [];
     public string Art { get; init; } = DokuRegeln.ArtAlltag;   // Berichtsart (Liste in den Einstellungen)
     public bool Bedarfsgabe { get; init; }                  // entstanden über „Bedarf gegeben …“ (nur lesend)
+    public bool Ausgabe { get; init; }                      // entstanden in der Medikamentenausgabe (nur lesend)
     public int? Dauer { get; init; }                        // freiwillig: Minuten am Bewohner (Zeitauswertung, Bauplan 41)
 
     public bool Allgemein => Bereiche.Count == 0;

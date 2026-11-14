@@ -158,6 +158,7 @@ public sealed partial class Speicher
         }
         int messungen = MessauftraegeErzeugen(jetzt);   // zählen nicht als Standardaufgaben
         MassnahmenUebergabeErzeugen(jetzt);             // was im vorigen Dienst offen blieb (Bauplan 40)
+        AusgabeUebergabeErzeugen(jetzt);                // Medikamente, die im vorigen Dienst nicht ausgegeben wurden (42)
         if (neu + messungen > 0) AufgabenGeaendert?.Invoke();
         return neu;
     }

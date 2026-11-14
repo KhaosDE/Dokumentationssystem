@@ -44,6 +44,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
     public List<MassnahmeKastenZeile> MassnahmenZeilen { get; } = [];
     public bool NurMeineMassnahmen { get; private set; }
     public bool ErledigteMassnahmenZeigen { get; private set; }
+    public int NichtAbgeholt { get; private set; }   // Medikamente der laufenden Einnahmezeit (Bauplan 42)
 
     // Bewohnerliste
     public ListView Liste { get; } = new()
@@ -303,8 +304,15 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
             ? MassnahmenTermine.Where(t => bezuege.GetValueOrDefault(t.Massnahme.BewohnerId)?.Bezugspflege?.Kuerzel.Equals(kuerzel, StringComparison.OrdinalIgnoreCase) == true).ToList()
             : MassnahmenTermine;
         var massnahmenZeilen = MassnahmenKasten(massnahmen, bewohner, jetzt);
+        // Medikamentenausgabe (Bauplan 42): wer seine Medikamente der laufenden Einnahmezeit noch nicht abgeholt hat.
+        var (ausgabeTag, ausgabeZeit) = AusgabeRegeln.Jetzt(jetzt);
+        var nichtAbgeholt = speicher.Ausgabeliste(bewohner.Values, ausgabeTag, ausgabeZeit).Where(z => z.NichtAbgeholt).ToList();
+        NichtAbgeholt = nichtAbgeholt.Count;
+        if (nichtAbgeholt.Count > 0)
+            massnahmenZeilen.Insert(0, Eintrag($"Medikamente {AusgabeRegeln.ZeitText(ausgabeZeit)}: {nichtAbgeholt.Count} noch nicht abgeholt",
+                string.Join(", ", nichtAbgeholt.Select(z => z.Bewohner.Name)), ("nicht abgeholt", Stil.Achtung), () => StelleGewuenscht?.Invoke("Medikamentenausgabe")));
         int massnahmenOffen = massnahmen.Count(t => t.Offen);
-        Dienst.Setzen(dienst.Offen.Count + massnahmenOffen, dienst.Offen.Select(a =>
+        Dienst.Setzen(dienst.Offen.Count + massnahmenOffen + NichtAbgeholt, dienst.Offen.Select(a =>
         {
             string name = a.BewohnerId is long id && bewohner.TryGetValue(id, out var b) ? $" ({b.Name})" : "";
             string faellig = AufgabenRegeln.Ueberfaellig(a, jetzt) ? " · überfällig" : "";
