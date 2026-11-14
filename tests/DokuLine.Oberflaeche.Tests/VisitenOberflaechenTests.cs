@@ -17,7 +17,7 @@ public class VisitenOberflaechenTests
         using var f = new Hauptfenster(u.Speicher);
         Hilfe.Zeigen(f);
         var namen = f.Navigation.Select(n => n.Text).ToList();
-        Assert.Equal(namen.IndexOf("Übergabe") + 1, namen.IndexOf("Visiten"));
+        Assert.InRange(namen.IndexOf("Visiten"), namen.IndexOf("Übergabe") + 1, namen.IndexOf("Aufgaben") - 1);   // dazwischen die Medikamente
         f.BereichWaehlen("Visiten");
         var seite = f.Visiten;
         Assert.Equal(VisitenRegeln.Psychiater, seite.Art);   // Vorgabe

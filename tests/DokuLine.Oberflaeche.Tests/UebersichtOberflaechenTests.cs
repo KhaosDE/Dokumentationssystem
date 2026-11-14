@@ -72,7 +72,7 @@ public class UebersichtOberflaechenTests
         Assert.StartsWith("seit ", notiz.Text2!.Text);
         Assert.EndsWith(" · AB", notiz.Text2.Text);
         var dienst = s.DienstStand!;
-        Assert.Equal(dienst.Offen.Count, s.Dienst.Zeilen.Count);
+        Assert.Equal(dienst.Offen.Count, s.Dienst.Zeilen.OfType<CheckBox>().Count());   // dazu Maßnahmen und Medikamente (Bauplan 40, 42)
         Assert.EndsWith(dienst.Text, s.DienstText.Text);
         Assert.Equal(dienst.Erledigt, s.DienstBalken.Value);
         Hilfe.Foto(f, "114_uebersicht");
