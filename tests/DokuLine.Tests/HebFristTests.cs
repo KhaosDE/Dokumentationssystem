@@ -60,9 +60,13 @@ public sealed class HebFristTests : IDisposable
         var fertig = entwurf with { Fassungen = [new HebFassung { Fertig = true }] };
         Assert.Equal(HebBogenStand.Fertig, HebFristRegeln.Stand(B, [E("faellig", f, 1)], [alt, fertig], k, 12).Stand);
 
-        // Abgegeben schließt die Fälligkeit; ohne nächste gilt der Vorschlag (hier das spätere Ende der Bewilligung).
+        // Abgegeben schließt die Fälligkeit; ohne nächste gilt der Vorschlag. Die laufende Bewilligung zählt dann nicht mehr (der
+        // HEB wird vor ihrem Ende abgegeben), sondern der Bogen plus Frist – oder eine Bewilligung, die nach der Abgabe beginnt.
         var abgegeben = HebFristRegeln.Stand(B, [E("faellig", f, 1), E("abgegeben", Heute, 2, bogen: 11)], [alt, fertig], k, 12);
-        Assert.Equal((HebFristZustand.NichtErfasst, HebBogenStand.Abgegeben, Heute.AddDays(100)), (abgegeben.Zustand, abgegeben.Stand, abgegeben.FaelligAm));
+        Assert.Equal((HebFristZustand.NichtErfasst, HebBogenStand.Abgegeben, f.AddMonths(12)), (abgegeben.Zustand, abgegeben.Stand, abgegeben.FaelligAm));
+        var folge = k with { Bewilligungen = [.. k.Bewilligungen, new Bewilligung("Wohnen", null, Heute.AddDays(101), Heute.AddDays(500))] };
+        Assert.Equal(Heute.AddDays(500), HebFristRegeln.Stand(B, [E("faellig", f, 1), E("abgegeben", Heute, 2, bogen: 11)], [alt, fertig], folge, 12).FaelligAm);
+        Assert.True(HebFristRegeln.AufgabeNoetig(abgegeben with { FaelligAm = Heute.AddDays(20) }, Heute, 8, 4));   // auch ohne nächste Fälligkeit
         Assert.Equal($"abgegeben am {Datum.Text(Heute)} (RS)", HebFristRegeln.StandText(abgegeben));
         var naechste = HebFristRegeln.Stand(B, [E("faellig", f, 1), E("abgegeben", Heute, 2, bogen: 11), E("faellig", Heute.AddYears(1), 3)], [alt, fertig], k, 12);
         Assert.Equal((HebFristZustand.Eingetragen, HebBogenStand.Offen, Heute.AddYears(1)), (naechste.Zustand, naechste.Stand, naechste.FaelligAm));

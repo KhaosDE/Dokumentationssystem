@@ -39,6 +39,11 @@ public sealed class BestellungTests : IDisposable
         AusgabeEintrag A(int tageVorher, Einnahmezeit z) => new(0, 1, Heute.AddDays(-tageVorher), z, 7, AusgabeStatus.Ausgegeben, "AB", Jetzt.AddDays(-tageVorher));
         var vorrat = BestellRegeln.Vorrat(zaehlung, [(Jetzt.AddDays(-1), 50m), (Jetzt.AddDays(-10), 99m)], [A(2, Einnahmezeit.Morgens), A(2, Einnahmezeit.Abends), A(5, Einnahmezeit.Morgens)], v);
         Assert.Equal(68m, vorrat);   // 20 + 50 − 2 (vor der Zählung zählt nicht)
+        // Je Gabe zählt der zuletzt gesetzte Status: korrigiert auf „abgelehnt“ zieht nicht ab, doppelt abgehakt einmal, „mitgegeben“ zieht ab.
+        var korrigiert = A(1, Einnahmezeit.Morgens) with { Id = 2, Status = AusgabeStatus.Abgelehnt };
+        var mitgegeben = A(1, Einnahmezeit.Abends) with { Id = 3, Status = AusgabeStatus.Mitgegeben };
+        Assert.Equal(68m, BestellRegeln.Vorrat(zaehlung, [(Jetzt.AddDays(-1), 50m)],   // 20 + 50 − 1 (mitgegeben) − 1 (doppelt, einmal gezählt)
+            [A(1, Einnahmezeit.Morgens) with { Id = 1 }, korrigiert, mitgegeben, A(2, Einnahmezeit.Morgens) with { Id = 4 }, A(2, Einnahmezeit.Morgens) with { Id = 5 }], v));
         Assert.Null(BestellRegeln.Vorrat(null, [], [], v));
         Assert.Equal("Dr. Test (ausgedacht)", BestellRegeln.Empfaenger(Bestellweg.Hausarzt, null, v, "Apotheke Sonnenschein"));
         Assert.Equal("Ambulanz (Test)", BestellRegeln.Empfaenger(Bestellweg.Fosa, "Ambulanz (Test)", v, ""));

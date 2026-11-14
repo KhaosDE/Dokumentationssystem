@@ -36,13 +36,15 @@ public static class BestellRegeln
     public static DateOnly? ReichtBis(decimal vorrat, decimal proTag, DateOnly heute) =>
         proTag <= 0 ? null : heute.AddDays((int)Math.Floor(Math.Max(0, vorrat) / proTag));
 
-    // Vorrat: letzte Zählung + Lieferungen danach − abgehakte Ausgaben danach (je Einnahmezeit die Menge laut Plan).
+    // Vorrat: letzte Zählung + Lieferungen danach − abgehakte Ausgaben danach (je Einnahmezeit die Menge laut Plan). Je Gabe gilt
+    // der zuletzt gesetzte Status wie in der Ausgabeliste; „mitgegeben“ verlässt den Vorrat wie „ausgegeben“.
     public static decimal? Vorrat(Bestandszaehlung? zaehlung, IEnumerable<(DateTime Zeit, decimal Menge)> lieferungen, IEnumerable<AusgabeEintrag> ausgaben,
         Verordnung v)
     {
         if (zaehlung is null) return null;
         decimal geliefert = lieferungen.Where(l => l.Zeit > zaehlung.Gezaehlt).Sum(l => l.Menge);
-        decimal gegeben = ausgaben.Where(a => a.VerordnungId == v.Id && a.Status == AusgabeStatus.Ausgegeben && a.Erfasst > zaehlung.Gezaehlt)
+        decimal gegeben = ausgaben.Where(a => a.VerordnungId == v.Id).GroupBy(a => (a.Tag, a.Zeit)).Select(g => g.MaxBy(a => a.Id)!)
+            .Where(a => (a.Status is AusgabeStatus.Ausgegeben or AusgabeStatus.Mitgegeben) && a.Erfasst > zaehlung.Gezaehlt)
             .Sum(a => MedikationRegeln.Menge(AusgabeRegeln.Faellig(v, a.Tag, a.Zeit) ?? "0") ?? 0m);
         return zaehlung.Stueck + geliefert - gegeben;
     }

@@ -148,6 +148,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         var werte = Einstellungen.Laden();
         string gewaehlt = Arbeitsbereich.Gewaehlt.Length > 0 ? Arbeitsbereich.Gewaehlt : werte.Bereich;
         speicher.HebErinnerungen(jetzt);
+        speicher.BestellErinnerungen(jetzt);
         var jeder = speicher.Heute(jetzt);
         // Der gewählte Bereich; „Alle“ und Bereiche ohne eigene Bewohner (z. B. „Therapie“) zeigen alle, mit Hinweis.
         var eigene = jeder.Where(h => h.Bewohner.Wohnbereich == gewaehlt).ToList();

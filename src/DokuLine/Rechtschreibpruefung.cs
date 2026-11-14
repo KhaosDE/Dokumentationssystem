@@ -151,7 +151,7 @@ public sealed class Unterstreichung : NativeWindow
     {
         if (f.Start + f.Laenge > feld.TextLength || feld.Text.Substring(f.Start, f.Laenge) != f.Wort) return;
         feld.Select(f.Start, f.Laenge);
-        feld.SelectedText = neu;   // so bleibt Strg+Z möglich
+        feld.Paste(neu);   // anders als SelectedText bleibt so Strg+Z möglich
     }
 
     // Wahlweise: nach einem Leerzeichen das Wort davor aus der Liste typischer Vertipper ersetzen.
@@ -163,7 +163,7 @@ public sealed class Unterstreichung : NativeWindow
         while (anfang > 0 && char.IsLetter(feld.Text[anfang - 1])) anfang--;
         if (ende - anfang < 2 || RechtschreibRegeln.Korrektur(feld.Text[anfang..ende]) is not string richtig) return;
         feld.Select(anfang, ende - anfang);
-        feld.SelectedText = richtig;
+        feld.Paste(richtig);
     }
 }
 

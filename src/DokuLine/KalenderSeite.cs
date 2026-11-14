@@ -197,6 +197,7 @@ public sealed class KalenderSeite : Panel, IBereichSeite
                 {
                     var karte = new KalenderKarte(k, namen);
                     if (k.Aktuell.Haus) foreach (var knopf in new[] { karte.AendernKnopf, karte.AbsagenKnopf }) Stil.Sperren(knopf, hausGrund);
+                    if (k.Id < 0) foreach (var knopf in new[] { karte.AendernKnopf, karte.AbsagenKnopf }) Stil.Sperren(knopf, "Aus der HEB-Frist – bitte dort ändern.");
                     karte.AendernKnopf.Click += (_, _) => Bearbeiten(k);
                     karte.AbsagenKnopf.Click += (_, _) => Absagen(k);
                     karte.VerlaufKnopf.Click += (_, _) => VerlaufZeigen(k);

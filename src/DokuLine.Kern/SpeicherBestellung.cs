@@ -42,6 +42,11 @@ public sealed partial class Speicher
             : null;
     }
 
+    // Der früheste Tag, an dem eine noch geltende (jeweils letzte) Zählung stattfand: ab dort zählen die Ausgaben.
+    private DateOnly? FruehesteZaehlung() =>
+        WertIn(null, "SELECT MIN(zeit) FROM (SELECT MAX(zeit) AS zeit FROM med_bestand WHERE art = 'gezaehlt' GROUP BY verordnung_id)") is string z
+            ? DateOnly.FromDateTime(AusZeit(z)) : null;
+
     private List<(DateTime Zeit, decimal Menge)> Lieferungen(long verordnungId)
     {
         var liste = new List<(DateTime, decimal)>();
@@ -67,7 +72,7 @@ public sealed partial class Speicher
         int tage = BestellTage();
         var (apotheke, apoEmail) = HeimApotheke();
         var personen = Personen().ToDictionary(p => p.Id);
-        var ausgaben = bestand ? AusgabeEintraege(heute.AddDays(-120), heute) : [];
+        var ausgaben = bestand && FruehesteZaehlung() is DateOnly ab ? AusgabeEintraege(ab, heute) : [];
         var liste = new List<BestellPosten>();
         foreach (var b in bewohner)
         {
@@ -163,15 +168,20 @@ public sealed partial class Speicher
         int neu = 0;
         foreach (var a in Anforderungen(auchErledigte: false).Where(a => BestellRegeln.ErinnernNoetig(a, jetzt)))
         {
-            if (Meta($"bestell_erinnert:{a.Id}") is not null || a.Posten.Count == 0 || Bewohner(a.Posten[0].BewohnerId) is not Bewohner b) continue;
-            SetzeMeta($"bestell_erinnert:{a.Id}", "1", null);
-            AufgabeSpeichern(new Aufgabe
+            if (a.Posten.Count == 0 || Bewohner(a.Posten[0].BewohnerId) is not Bewohner b) continue;
+            // Sperre und Aufgabe in einer Transaktion: zwei Plätze zugleich erzeugen nur eine Aufgabe, ein Fehler keine Sperre.
+            using var transaktion = db.BeginTransaction();
+            Ausfuehren("INSERT OR IGNORE INTO meta (schluessel, wert) VALUES ($s, '1')", transaktion, ("$s", $"bestell_erinnert:{a.Id}"));
+            if (Convert.ToInt64(WertIn(transaktion, "SELECT changes()"), CultureInfo.InvariantCulture) == 0) continue;
+            AufgabeEinfuegenIn(new Aufgabe
             {
                 Bereich = b.Wohnbereich, Text = $"Bestellung bei {a.Empfaenger} vom {a.Erstellt:dd.MM.} ist noch nicht geliefert – bitte nachfragen.",
                 Fuer = AufgabeFuer.WerZeitHat, Erstellt = jetzt, Verfasser = "AUTO",
-            });
+            }, transaktion);
+            transaktion.Commit();
             neu++;
         }
+        if (neu > 0) AufgabenGeaendert?.Invoke();
         return neu;
     }
 }

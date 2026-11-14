@@ -37,12 +37,14 @@ public static class HebFristRegeln
         _ => "offen",
     };
 
-    // Vorschlag: Ende der jüngsten Bewilligung, sonst der letzte fertige Bogen plus Frist – jeweils nur, wenn er nach der
-    // letzten Abgabe liegt; danach die Abgabe plus Frist; ohne Bogen und Abgabe der Erstbericht drei Monate nach der Aufnahme.
+    // Vorschlag: Ende der jüngsten Bewilligung (nach einer Abgabe nur einer, die danach beginnt – der HEB wird vor dem Ende der
+    // laufenden abgegeben), sonst der letzte fertige Bogen plus Frist, wenn er nach der Abgabe liegt; danach die Abgabe plus
+    // Frist; ohne Bogen und Abgabe der Erstbericht drei Monate nach der Aufnahme.
     public static DateOnly Vorschlag(Bewohner b, Kostentraeger? k, IReadOnlyList<HebBogen> boegen, DateOnly? letzteAbgabe, int fristMonate)
     {
         var grenze = letzteAbgabe ?? DateOnly.MinValue;
-        if (HilfeplanRegeln.Vorschlag(k) is DateOnly bewilligung && bewilligung > grenze) return bewilligung;
+        var bewilligungen = (k?.Bewilligungen ?? []).Where(x => letzteAbgabe is not DateOnly a || x.Von > a).ToList();
+        if (bewilligungen.Count > 0 && bewilligungen.Max(x => x.Bis) is var bewilligung && bewilligung > grenze) return bewilligung;
         if (boegen.Where(x => x.Fertig).OrderBy(x => x.Bis).LastOrDefault() is HebBogen letzter && letzter.Bis.AddMonths(fristMonate) > grenze)
             return letzter.Bis.AddMonths(fristMonate);
         return letzteAbgabe is DateOnly a ? a.AddMonths(fristMonate) : b.Aufnahmedatum.AddMonths(ErstberichtMonate);
@@ -118,7 +120,7 @@ public static class HebFristRegeln
 
     // Aufgabe der ersten Stufe: einmal je Abschnitt, solange kein Bogen angelegt ist.
     public static bool AufgabeNoetig(HebFristStand s, DateOnly heute, int erinnernWochen, int achtungWochen) =>
-        s.AufgabeId is null && s.Stand == HebBogenStand.Offen && Stufe(s, heute, erinnernWochen, achtungWochen) != HebStufe.Keine;
+        s.AufgabeId is null && (s.Stand is HebBogenStand.Offen or HebBogenStand.Abgegeben) && Stufe(s, heute, erinnernWochen, achtungWochen) != HebStufe.Keine;
 
     public static string AufgabeText(Bewohner b, DateOnly faellig, string? bezugspflege) =>
         $"HEB-Bogen für {b.Name} beginnen (fällig {Datum.Text(faellig)})" + (bezugspflege is null ? "" : $" – Bezugspflege {bezugspflege}");

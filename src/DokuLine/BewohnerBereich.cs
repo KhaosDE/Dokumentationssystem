@@ -220,6 +220,7 @@ public sealed class BewohnerBereich : Panel, IBereichSeite
             Zeilen = [.. imBereich.Where(Passt)
                 .OrderBy(b => b.Nachname, StringComparer.CurrentCulture)
                 .ThenBy(b => b.Vorname, StringComparer.CurrentCulture)];
+            if (Namen is RundeListe leise) leise.Leise.Clear();   // gilt nur für die Reihenfolge der Bewohnerliste
             if (therapie) eintraege = TherapieListe.Fuellen(Namen, Zeilen, speicher);
             else
             {
