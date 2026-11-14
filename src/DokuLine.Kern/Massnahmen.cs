@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace DokuLine.Kern;
 
@@ -220,9 +221,8 @@ public static class MassnahmenRegeln
     public static DateOnly QuartalBeginn(DateOnly tag) => new(tag.Year, (tag.Month - 1) / 3 * 3 + 1, 1);
 
     // Enthält der Titel ein Medikament aus der Datenbank (Wirkstoff oder Handelsname, ganzes Wort)? Dann nachfragen.
-    public static string? MedikamentImTitel(string titel, IEnumerable<string> namen)
-    {
-        var woerter = titel.Split([' ', ',', '.', '(', ')', '/', '-'], StringSplitOptions.RemoveEmptyEntries).Select(w => w.ToLower(De)).ToHashSet();
-        return namen.Where(n => n.Trim().Length >= 4).FirstOrDefault(n => woerter.Contains(n.Trim().ToLower(De)));
-    }
+    // Ganze Namen, auch aus mehreren Wörtern („… AL“, „…-ratiopharm“); nicht als Teil eines längeren Wortes.
+    public static string? MedikamentImTitel(string titel, IEnumerable<string> namen) =>
+        namen.Select(n => n.Trim()).Where(n => n.Length >= 4).FirstOrDefault(n =>
+            Regex.IsMatch(titel, $@"(?<![\p{{L}}\d]){Regex.Escape(n)}(?![\p{{L}}\d])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
 }

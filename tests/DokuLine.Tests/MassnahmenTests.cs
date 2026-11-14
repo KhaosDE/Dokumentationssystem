@@ -94,6 +94,8 @@ public sealed class MassnahmenTests : IDisposable
             MassnahmenRegeln.BerichtText("C", MassnahmeErgebnis.Abgelehnt, "müde", 0, "")]));
         Assert.Equal("Movicol", MassnahmenRegeln.MedikamentImTitel("Morgens ein Beutel Movicol", ["Movicol", "Macrogol"]));
         Assert.Null(MassnahmenRegeln.MedikamentImTitel("Zimmerhygiene", ["Movicol"]));
+        Assert.Equal("Testmittel-ratio AL", MassnahmenRegeln.MedikamentImTitel("Abends testmittel-ratio al geben", ["Testmittel-ratio AL"]));   // mehrere Wörter
+        Assert.Null(MassnahmenRegeln.MedikamentImTitel("Movicolbeutel holen", ["Movicol"]));   // nur ganze Namen
 
         // Reflexion: nur gezählt, je Maßnahme eine Zeile.
         MassnahmeBestaetigung B(MassnahmeErgebnis e, int min) => new(0, 7, 1, Heute, Schicht.Frueh, e, "", min, "", "AB", Jetzt, 2, "Zimmerhygiene");
