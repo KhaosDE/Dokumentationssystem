@@ -98,17 +98,17 @@ Request mit eigener Version und Testliste in `STAND.md` (Schritte 4 und 5 am
 | 36 | Vitalwerte | 0.40.0 |
 | 37 | Betriebsmodus für den Terminalserver | 0.41.0 |
 | 38 | Wohnbereich als Auswahlliste in der Seitenleiste (über „Übersicht“) | 0.42.0 |
-| 39 | Maßnahmen je Bewohner mit Zeitwert (offen) | 0.43.0 |
-| 40 | Übersicht: Kasten „Maßnahmen heute“ als Arbeitscheckliste (offen) | 0.44.0 |
-| 41 | Zeitauswertung je Bewohner (offen) | 0.45.0 |
-| 42 | Medikamentenausgabe abhaken (offen) | 0.46.0 |
-| 43 | Ziele der Bewohner: Leitziel und Nahziele (offen) | 0.47.0 |
-| 44 | Qualitätsmanagement: Position QMB mit eigener Prüfseite (offen) | 0.48.0 |
-| 45 | Küchendienst im Tagesplan (offen) | 0.49.0 |
-| 46 | Archiv für ehemalige Bewohner mit Aufbewahrungsfrist (offen) | 0.50.0 |
-| 47 | Hilfeplangespräche: Termine planen und vergeben (offen) | 0.51.0 |
-| 48 | Schlüsselwörter bieten den nächsten Arbeitsschritt an (offen) | 0.52.0 |
-| 49 | Rechtschreibprüfung mit Fachwörterbuch (offen) | 0.53.0 |
+| 39 | Maßnahmen je Bewohner mit Zeitwert | 0.43.0 |
+| 40 | Übersicht: Kasten „Maßnahmen heute“ als Arbeitscheckliste | 0.44.0 |
+| 41 | Zeitauswertung je Bewohner | 0.45.0 |
+| 42 | Medikamentenausgabe abhaken | 0.46.0 |
+| 43 | Ziele der Bewohner: Leitziel und Nahziele | 0.47.0 |
+| 44 | Qualitätsmanagement: Position QMB mit eigener Prüfseite | 0.48.0 |
+| 45 | Küchendienst im Tagesplan | 0.49.0 |
+| 46 | Archiv für ehemalige Bewohner mit Aufbewahrungsfrist | 0.50.0 |
+| 47 | Hilfeplangespräche: Termine planen und vergeben | 0.51.0 |
+| 48 | Schlüsselwörter bieten den nächsten Arbeitsschritt an | 0.52.0 |
+| 49 | Rechtschreibprüfung mit Fachwörterbuch | 0.53.0 |
 | 50 | Abwesenheit in der Dokumentation sichtbar machen | 0.54.0 |
 | 51 | Medikamentenbestellung: Anforderung, Lieferung, Bestand als Option | 0.55.0 |
 | 52 | HEB-Fälligkeit vermerken und rechtzeitig erinnern | 0.56.0 |
@@ -2367,7 +2367,7 @@ Umfang:
   jeweilige Startseite.
 
 ## Maßnahmen je Bewohner mit Zeitwert
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 10.11.2026
 Was: Ein Reiter „Maßnahmen“ in der Akte. Er zeigt die fünf Lebensbereiche mit ihren Berichten und
 die regelmäßigen Maßnahmen des Bewohners. Jede Durchführung wird bestätigt, mit Zeit.
@@ -2418,7 +2418,7 @@ Umfang (Vorschlag):
   über mehrere Wochen, einige abgelehnt.
 
 ## Übersicht: Kasten „Maßnahmen heute“ als Arbeitscheckliste
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 10.11.2026
 Was: In der Übersicht ein Kasten, der zeigt, welche Maßnahmen im laufenden Dienst noch offen und
 welche erledigt sind, zum direkten Abhaken.
@@ -2439,7 +2439,7 @@ Umfang (Vorschlag):
   damit es nur eine Checkliste gibt.
 
 ## Zeitauswertung je Bewohner
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 10.11.2026
 Was: Eine Auswertung der erfassten Zeiten je Bewohner und Zeitraum.
 Warum: Tobi (10.11.2026): Der Bezirk Oberbayern will die Vergütung künftig nach erbrachter Zeit
@@ -2460,7 +2460,7 @@ Umfang (Vorschlag):
   der Freigaben (`docs/betrieb.md`) aufnehmen.
 
 ## Medikamentenausgabe abhaken
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 10.11.2026
 Was: Eine Ausgabeliste je Einnahmezeit, in der für jeden Bewohner abgehakt wird, ob die
 Medikamente ausgegeben wurden.
@@ -2489,7 +2489,7 @@ Umfang (Vorschlag):
 - Recht „Medikamente ausgeben“ (Vorbelegung wie bisher beim Medikamentenplan).
 
 ## Ziele der Bewohner: Leitziel und Nahziele
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 10.11.2026
 Was: Jeder Bewohner hat ein Leitziel und zwei Nahziele. Sie stehen gut sichtbar bei der Akte und
 in der Dokumentation, und Maßnahmen hängen an ihnen.
@@ -2521,7 +2521,7 @@ Umfang (Vorschlag):
   etwas zeigt.
 
 ## Qualitätsmanagement: Position QMB mit eigener Prüfseite
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 10.11.2026
 Was: Eine Position „Qualitätsmanagement (QMB)“ mit einer eigenen Startseite, die zeigt, wo bei
 Zielen, Maßnahmen und Fristen etwas fehlt.
@@ -2551,7 +2551,7 @@ Umfang (Vorschlag):
   Kürzel (Liste der Freigaben, `docs/betrieb.md`).
 
 ## Küchendienst im Tagesplan
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 12.11.2026
 Was: Der Küchendienst des Tages erscheint im Tagesplan.
 Warum: Notiz Tobi (12.11.2026): „Küchendienst auf den Tagesplan“.
@@ -2568,7 +2568,7 @@ Umfang (Vorschlag):
 - Abgleich mit der eigenständigen Ausgangsliste in `AENDERUNGEN.md` vermerken.
 
 ## Archiv für ehemalige Bewohner mit Aufbewahrungsfrist
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 12.11.2026
 Was: Ausgezogene oder verstorbene Bewohner wandern mit ihrer ganzen Akte in ein Archiv. Dort
 bleibt sie lesbar, bis die Aufbewahrungsfrist endet.
@@ -2594,7 +2594,7 @@ Umfang (Vorschlag):
 - Demo: einige ausgedachte ehemalige Bewohner, einer mit abgelaufener Frist.
 
 ## Hilfeplangespräche: Termine planen und vergeben
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 12.11.2026
 Was: Eine Übersicht, für welchen Bewohner wann ein Hilfeplangespräch fällig ist, mit Vergabe des
 Termins und Einladung der Beteiligten.
@@ -2617,7 +2617,7 @@ Umfang (Vorschlag):
 - Die Prüfseite des QMB (Schritt 44) bekommt den Prüfpunkt „Hilfeplangespräch nicht überfällig“.
 
 ## Schlüsselwörter bieten den nächsten Arbeitsschritt an
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK; Lesart von Tobi bestätigt 12.11.2026)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 12.11.2026
 Was: Erkennt das Programm beim Schreiben ein Schlüsselwort, bietet es den passenden nächsten
 Schritt an. So hängen Arbeitswege zusammen, ohne dass man den Bereich wechseln und alles neu
@@ -2668,7 +2668,7 @@ Umfang (Vorschlag):
   aus — das ist hingenommen, weil nur angeboten wird; in `STAND.md` vermerken).
 
 ## Rechtschreibprüfung mit Fachwörterbuch
-Status: offen (Vorschlag aus dem Chat, wartet auf Tobis OK)
+Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
 Datum: 13.11.2026
 Was: Beim Schreiben von Berichten werden Tippfehler rot unterschlängelt, mit Vorschlägen per
 Rechtsklick — und Fachwörter, Namen und Medikamente gelten nicht als Fehler.
