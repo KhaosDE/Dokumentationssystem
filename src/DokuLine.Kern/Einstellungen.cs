@@ -9,7 +9,8 @@ namespace DokuLine.Kern;
 public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = "", string? Logo = null, int BeschlussFristTage = 90, int HebFristMonate = 12,
     string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false, bool NachschlageAnsicht = true,
     int WartezeitMinuten = AbgaengigkeitRegeln.WartezeitVorgabe, int KeinBerichtWochen = MassnahmenRegeln.KeinBerichtWochenVorgabe,
-    int ZieleLeitziele = ZielRegeln.LeitzieleVorgabe, int ZieleNahziele = ZielRegeln.NahzieleVorgabe);
+    int ZieleLeitziele = ZielRegeln.LeitzieleVorgabe, int ZieleNahziele = ZielRegeln.NahzieleVorgabe,
+    string QmAus = "", int QmTage = QualitaetRegeln.TageVorgabe);
 
 public static partial class Einstellungen
 {
@@ -67,6 +68,8 @@ public static partial class Einstellungen
                 werte = werte with { KeinBerichtWochen = wochen };
             if (knoten["ziele_leitziele"] is JsonValue zl && zl.TryGetValue(out int leit) && leit is >= 0 and <= 3) werte = werte with { ZieleLeitziele = leit };
             if (knoten["ziele_nahziele"] is JsonValue zn && zn.TryGetValue(out int nah) && nah is >= 0 and <= 6) werte = werte with { ZieleNahziele = nah };
+            if (knoten["qm_aus"] is JsonValue qa && qa.TryGetValue(out string? aus)) werte = werte with { QmAus = QualitaetRegeln.AusText(QualitaetRegeln.AusLesen(aus ?? "")) };
+            if (knoten["qm_tage"] is JsonValue qt && qt.TryGetValue(out int qtage) && qtage is >= 1 and <= 90) werte = werte with { QmTage = qtage };
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
@@ -101,6 +104,8 @@ public static partial class Einstellungen
             ["kein_bericht_wochen"] = werte.KeinBerichtWochen,
             ["ziele_leitziele"] = Math.Clamp(werte.ZieleLeitziele, 0, 3),
             ["ziele_nahziele"] = Math.Clamp(werte.ZieleNahziele, 0, 6),
+            ["qm_aus"] = QualitaetRegeln.AusText(QualitaetRegeln.AusLesen(werte.QmAus)),
+            ["qm_tage"] = Math.Clamp(werte.QmTage, 1, 90),
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen

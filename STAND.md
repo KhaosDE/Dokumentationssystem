@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.47.0** (Ziele der Bewohner: Leitziel und Nahziele).
+Stand: 14.11.2026. Version: **0.48.0** (Qualitätsmanagement: Position QMB mit Prüfseite).
 
 ## Aktuell
 
@@ -481,7 +481,9 @@ stehen nicht in der Liste; das Programm bestätigt nur die Ausgabe.
 
 Neu in 0.47.0: **Ziele der Bewohner** (Bauplan 43). Akte, Reiter **„Ziele und Maßnahmen“** (ersetzt „Maßnahmen“): oben die Ziele (Leitziel, dann Nahziele; Wortlaut in den Worten des Bewohners, Lebensbereich, vereinbart am/mit, überprüfen bis, Stand), darunter die Maßnahmen nach Ziel gruppiert, am Ende „Maßnahmen ohne Ziel“ und die Lebensbereiche. Änderungen sind neue Fassungen („Verlauf …“). Drei Zustände: Ziele eingetragen · „Bewohner möchte derzeit kein Ziel benennen“ (mit Datum und Grund) · nicht erfasst. Marken „Ziel fehlt“, „Nahziel ohne Maßnahme“, „Überprüfung der Ziele fällig“. **Zielleiste** über der Berichtsliste (einklappbar) und im Akte-Kopf. Bericht und Maßnahme einem Ziel zuordnen; Filter „Berichte zu diesem Ziel“; Reflexion und HEB-Bogen (Seite „Ziele“) zeigen je Ziel Berichte und Maßnahmen. Mindestzahl der Ziele in den Einstellungen (Vorgabe 1 + 2).
 
-**Nächster Schritt:** Bauplan Schritt 44 (Qualitätsmanagement: Position QMB mit eigener Prüfseite).
+Neu in 0.48.0: **Qualitätsmanagement** (Bauplan 44). Neue Position **„Qualitätsmanagement (QMB)“**: liest überall, ändert nichts außer Prüfvermerken und Hinweisen (Demo: QS, Quirin Specht). Neue Seite **„Qualität“** (Recht „Qualität prüfen“): oben die Kennzahlen je Wohnbereich (Ziele vollständig, Nahziele mit Maßnahme, Überprüfung/Reflexion/HEB fällig), darunter die **Prüfliste** je Bewohner mit Haken oder Mangel je Prüfpunkt, Filter Bereich und „nur mit Mängeln“. **„Hinweis senden …“** legt eine Aufgabe für den Wohnbereich an; die Liste zeigt „Hinweis gesendet am … / erledigt am …“. **„Als geprüft vermerken“** mit Verlauf. **Nachweis Ziele und Maßnahmen** zum Drucken. In der Bereichswahl gibt es **„QM“** (ganzes Haus, beginnt mit der Prüfseite). Prüfpunkte und die Tage für „Maßnahmen werden bestätigt“ in den Einstellungen.
+
+**Nächster Schritt:** Bauplan Schritt 45 (Küchendienst im Tagesplan).
 
 ## Fertig
 
@@ -1588,6 +1590,7 @@ Neu in 0.47.0: **Ziele der Bewohner** (Bauplan 43). Akte, Reiter **„Ziele und 
 - 0.45.0 — Bauplan Schritt 41: `Zeitauswertung.cs` (Posten, Zeilen, geplant, CSV), `SpeicherZeitauswertung.cs`, Datenbank-Schritt 42 (`bericht_dauer`), `AuswertungSeite`, `TabellenDruck` (allgemeiner Druck A4 quer), Recht „Zeitauswertung ansehen“, Feld „Dauer“ im Berichtsformular.
 - 0.46.0 — Bauplan Schritt 42: `Medikamentenausgabe.cs` (Einnahmezeit, fällig, Zeilen, Texte, Verlauf), `SpeicherAusgabe.cs` (Datenbank-Schritt 43, Setzen mit Bericht, Sammeleintrag, Demo), `AusgabeSeite`, `AusgabeEinzelnFenster`, Recht „Medikamente ausgeben“, Kennzeichen `Bericht.Ausgabe`, Eintrag im Kasten der Übersicht, Verlauf im Medikamentenplan.
 - 0.47.0 — Ziele der Bewohner (Bauplan 43): Reiter „Ziele und Maßnahmen“, Zielleiste, Bericht/Maßnahme zu einem Ziel, drei Zustände, Marken, Einstellung Mindestzahl
+- 0.48.0 — Qualitätsmanagement (Bauplan 44): Position QMB, Seite „Qualität“ mit Kennzahlen, Prüfliste, Hinweis als Aufgabe, Prüfvermerk, Nachweis; Bereichswahl „QM“
 
 ## Offene Punkte
 
@@ -1691,6 +1694,13 @@ Neu in 0.47.0: **Ziele der Bewohner** (Bauplan 43). Akte, Reiter **„Ziele und 
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.48.0): „QM“ in der Bereichswahl zeigt wie „Alle“ das ganze Haus und öffnet die Seite „Qualität“; die Prüfliste hat dazu einen eigenen Bereichsfilter. Ein eigener Seitenleisten-Satz wie bei „Therapie“ wäre mehr Aufwand ohne Nutzen.
+- 14.11.2026 (0.48.0): Prüfpunkt „Maßnahmen werden bestätigt“: eine laufende, regelmäßige Maßnahme, die in den letzten n Tagen (Vorgabe 14) fällig war und in dieser Zeit nie bestätigt wurde. Bedarfsmaßnahmen zählen nicht.
+- 14.11.2026 (0.48.0): Prüfpunkt „Berichte je Lebensbereich“ nutzt dieselbe Regel wie die Akte („seit n Wochen kein Bericht“), damit Prüfseite und Akte dasselbe sagen.
+- 14.11.2026 (0.48.0): „Reflexion aktuell“: die Reflexion des Vormonats ist fertig (später Aufgenommene ausgenommen). „HEB aktuell“: dieselbe Regel wie „HEB fällig“ auf der Übersicht.
+- 14.11.2026 (0.48.0): „Kein Ziel benennen“ gilt bei Leitziel und Nahzielen als dokumentiert (Haken mit „kein Ziel benannt“).
+- 14.11.2026 (0.48.0): Der Hinweis an den Wohnbereich ist eine Aufgabe „wer Zeit hat“ beim Bewohner; „erledigt“ kommt aus der Aufgabe. Welche Mängel hineinkommen, wählt der QMB (alle vorbelegt).
+- 14.11.2026 (0.48.0): Die Position QMB kommt in bestehenden Datenbanken einmal dazu (am Ende der Liste, mit Vorbelegung); danach gilt die Rechte-Tabelle. Leitungen und Verwaltung haben das neue Recht wie alle Rechte vorbelegt.
 - 14.11.2026 (0.47.0): Ziele anlegen und ändern dürfen, die auch Maßnahmen anlegen dürfen (Fachkräfte und die Bezugspflege) – dieselbe Regel, weil beides zusammen mit dem Bewohner erarbeitet wird.
 - 14.11.2026 (0.47.0): „Kein Ziel benennen“ geht nur, solange kein aktives Ziel eingetragen ist, und gilt, bis danach ein Ziel eingetragen wird – so widersprechen sich Liste und Vermerk nie.
 - 14.11.2026 (0.47.0): Ein Ziel ist abgeschlossen, sobald sein Stand „erreicht“, „geändert“ oder „beendet“ ist (mit kurzem Satz); danach wird ein neues vereinbart. Den Wortlaut zu ändern ist eine neue Fassung mit Stand „aktiv“.
@@ -2657,6 +2667,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.48.0: Als TST oder QS anmelden → in der Bereichswahl „QM“ → Seite „Qualität“: Kennzahlen je Bereich, Prüfliste mit Haken und Mängeln (orange). „nur mit Mängeln“ und Bereich „R1“ filtern. Bewohner wählen → „Hinweis senden …“ (Mängel auswählen) → Aufgaben-Seite des Bereichs zeigt die Aufgabe; nach „erledigt“ steht in der Prüfliste „erledigt am …“. „Als geprüft vermerken“, „Prüfverlauf …“, „Nachweis Ziele und Maßnahmen …“ (Druckvorschau). Als QS: keine Berichte schreiben, keine Maßnahmen bestätigen. Einstellungen → „Qualität: Prüfpunkte“: einen Punkt abwählen → Spalte verschwindet.
 
 Version 0.47.0: Akte eines Bewohners öffnen → unter der Auskunftsleiste die Zielleiste; Reiter „Ziele und Maßnahmen“: Ziele oben, Maßnahmen nach Ziel gruppiert. „Neues Ziel …“ (überprüfen-bis-Vorschlag folgt der Art), „Ziel ändern …“ mit Stand „erreicht“ und Satz → Ziel verschwindet, mit „frühere Ziele zeigen“ wieder sichtbar; „Verlauf …“. Ziel wählen → „Berichte zu diesem Ziel“ öffnet die Dokumentation gefiltert. Neuer Bericht: Feld „Ziel (freiwillig)“. Bewohner ohne Ziele: Zielleiste „Ziele: nicht erfasst“ in Achtung-Farbe; „Kein Ziel benennen …“ mit Grund. Reflexion: „Ziele im Monat“; HEB-Bogen, Seite „Ziele“: Ziele aus der Akte. Einstellungen → „Ziele: wie viele je Bewohner“.
 

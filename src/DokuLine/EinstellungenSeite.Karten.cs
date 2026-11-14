@@ -82,6 +82,18 @@ public sealed partial class EinstellungenSeite
             Reihe(new Label { Text = "Leitziele", AutoSize = true, Margin = new Padding(0, Stil.AbstandKlein, Stil.AbstandKlein, 0) }, ZieleLeit,
                 new Label { Text = "Nahziele", AutoSize = true, Margin = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandKlein, 0) }, ZieleNah),
             Funktionen.EinstellungenBereich);
+        Pruefpunkte.Items.AddRange([.. QualitaetRegeln.Alle.Select(QualitaetRegeln.Name)]);
+        // ItemCheck meldet den neuen Zustand erst danach: die Liste nach dem Wechsel lesen.
+        Pruefpunkte.ItemCheck += (_, e) =>
+        {
+            if (laedt || !Darf(Funktionen.Qualitaet)) return;
+            var aus = QualitaetRegeln.Alle.Where((_, i) => i == e.Index ? e.NewValue != CheckState.Checked : !Pruefpunkte.GetItemChecked(i));
+            Einstellungen.Aendern(w => w with { QmAus = QualitaetRegeln.AusText(aus) });
+        };
+        QmTage.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.Qualitaet)) Einstellungen.Aendern(w => w with { QmTage = (int)QmTage.Value }); };
+        Karte("Wohnbereich", "Qualität: Prüfpunkte", "Welche Punkte die Prüfliste der Seite „Qualität“ zeigt. „Maßnahmen werden bestätigt“: keine fällige Maßnahme so viele Tage ohne Bestätigung.",
+            Reihe(Pruefpunkte, new Label { Text = "Tage", AutoSize = true, Margin = new Padding(Stil.AbstandGross, Stil.AbstandKlein, Stil.AbstandKlein, 0) }, QmTage),
+            Funktionen.Qualitaet);
         MassnahmenListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Massnahmenarten, Liste.Massnahmenvorlagen]));
         Karte("Wohnbereich", "Maßnahmen: Arten und Vorlagen", "Arten (z. B. Anleitung, Begleitung) und Vorlagen für häufige Maßnahmen, damit nicht jeder anders benennt.",
             MassnahmenListenKnopf, Funktionen.MassnahmenAnlegen);

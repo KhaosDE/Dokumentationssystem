@@ -1130,6 +1130,28 @@ public sealed partial class Speicher : IDisposable
             ziel_id    INTEGER NOT NULL REFERENCES ziele(id) ON DELETE CASCADE
         );
         """,
+        // 45 – Qualität: Prüfvermerke mit Verlauf und Hinweise an den Wohnbereich (beide nie geändert).
+        """
+        CREATE TABLE IF NOT EXISTS qm_vermerke (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            zeit        TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            bemerkung   TEXT NOT NULL DEFAULT ''
+        );
+        CREATE TABLE IF NOT EXISTS qm_hinweise (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            aufgabe_id  INTEGER NOT NULL REFERENCES aufgaben(id) ON DELETE CASCADE,
+            text        TEXT NOT NULL,
+            gesendet    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS qm_vermerke_bleiben BEFORE UPDATE ON qm_vermerke
+            BEGIN SELECT RAISE(ABORT, 'Prüfvermerke werden nicht geändert.'); END;
+        CREATE TRIGGER IF NOT EXISTS qm_hinweise_bleiben BEFORE UPDATE ON qm_hinweise
+            BEGIN SELECT RAISE(ABORT, 'Hinweise werden nicht geändert.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;

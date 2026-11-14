@@ -150,7 +150,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
         var jeder = speicher.Heute(jetzt, werte.HebFristMonate);
         // Der gewählte Bereich; „Alle“ und Bereiche ohne eigene Bewohner (z. B. „Therapie“) zeigen alle, mit Hinweis.
         var eigene = jeder.Where(h => h.Bewohner.Wohnbereich == gewaehlt).ToList();
-        bool allesZeigen = gewaehlt == BereichswahlRegeln.Alle || eigene.Count == 0;
+        bool allesZeigen = BereichswahlRegeln.GanzesHaus(gewaehlt) || eigene.Count == 0;
         var alle = allesZeigen ? jeder : eigene;
         List<string> meine = allesZeigen ? [.. speicher.Wohnbereiche().Select(w => w.Name)] : [gewaehlt];
         var bezuege = speicher.Bezuege();
@@ -164,7 +164,7 @@ public sealed class UebersichtSeite : Panel, IBereichSeite
                                     ((meineBp && Meins(b.Bezugspflege)) || (meineEt && Meins(b.Einzeltrainer)))).ToList();
             allesZeigen = true;
         }
-        BereichHinweis.Visible = gewaehlt != BereichswahlRegeln.Alle && eigene.Count == 0 && jeder.Count > 0;
+        BereichHinweis.Visible = !BereichswahlRegeln.GanzesHaus(gewaehlt) && eigene.Count == 0 && jeder.Count > 0;
         BereichHinweis.Text = $"Für „{gewaehlt}“ gibt es keine eigenen Bewohner – gezeigt werden alle Bereiche.";
         string bereichText = meineBp || meineEt
             ? string.Join(" und ", new[] { meineBp ? "meine Bezugsbewohner" : null, meineEt ? "meine Einzeltrainings" : null }.OfType<string>())

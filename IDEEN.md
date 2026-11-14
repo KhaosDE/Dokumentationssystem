@@ -2521,7 +2521,7 @@ Umfang (Vorschlag):
   etwas zeigt.
 
 ## Qualitätsmanagement: Position QMB mit eigener Prüfseite
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.48.0; Bauplan Schritt 44)
 Datum: 10.11.2026
 Was: Eine Position „Qualitätsmanagement (QMB)“ mit einer eigenen Startseite, die zeigt, wo bei
 Zielen, Maßnahmen und Fristen etwas fehlt.

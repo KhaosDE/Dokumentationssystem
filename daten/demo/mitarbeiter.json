@@ -37,6 +37,7 @@
     {"kuerzel": "PS", "farbe": "#6D28D9", "vorname": "Paul", "nachname": "Sperling", "fachkraft": true, "bereiche": ["R3"], "positionen": ["Mitarbeiter Wohnbereich"]},
     {"kuerzel": "LK", "farbe": "#047857", "vorname": "Lisa", "nachname": "Kiebitz", "fachkraft": false, "bereiche": ["R3"], "positionen": ["Mitarbeiter Wohnbereich"]},
     {"kuerzel": "FM", "farbe": "#9D174D", "vorname": "Finn", "nachname": "Möwe", "fachkraft": true, "bereiche": ["R3"], "positionen": ["Mitarbeiter Wohnbereich"]},
-    {"kuerzel": "GS", "farbe": "#854D0E", "vorname": "Greta", "nachname": "Storch", "fachkraft": false, "bereiche": ["R3"], "positionen": ["Mitarbeiter Wohnbereich"]}
+    {"kuerzel": "GS", "farbe": "#854D0E", "vorname": "Greta", "nachname": "Storch", "fachkraft": false, "bereiche": ["R3"], "positionen": ["Mitarbeiter Wohnbereich"]},
+    {"kuerzel": "QS", "vorname": "Quirin", "nachname": "Specht", "fachkraft": true, "bereiche": ["Leitung"], "positionen": ["Qualitätsmanagement (QMB)"]}
   ]
 }

@@ -52,7 +52,8 @@ public sealed partial class Hauptfenster
         KopfBereichSetzen();
         AufgabenZaehlen();
         NavigationRechte();
-        if (vorher != TherapieListe.Aktiv) BereichWaehlen(Entsprechung(AktiverBereich), filterBehalten: true);
+        if (bereich == QualitaetRegeln.BereichQm && !Ausgeblendet("Qualität")) BereichWaehlen("Qualität");   // QM beginnt mit der Prüfseite
+        else if (vorher != TherapieListe.Aktiv) BereichWaehlen(Entsprechung(AktiverBereich), filterBehalten: true);
         else if (AktiverBereich.Length > 0) BereichWaehlen(AktiverBereich, filterBehalten: true);
     }
 
@@ -96,7 +97,7 @@ public sealed partial class Hauptfenster
 
     // Bereiche mit eigenem Recht; ohne dieses Recht verschwinden sie aus der Seitenleiste.
     private static readonly (string Bereich, string Funktion)[] BereichsRechte = [("Visiten", Funktionen.Visiten), ("Auswertung", Funktionen.Zeitauswertung),
-        ("Medikamentenausgabe", Funktionen.MedikamenteAusgeben)];
+        ("Medikamentenausgabe", Funktionen.MedikamenteAusgeben), ("Qualität", Funktionen.Qualitaet)];
 
     public HashSet<string> OhneRechtAusgeblendet { get; } = [];
 

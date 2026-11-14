@@ -66,6 +66,8 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public NumericUpDown KeinBericht { get; } = new() { Minimum = 1, Maximum = 26, Width = 80, AccessibleName = "Wochen ohne Bericht" };
     public NumericUpDown ZieleLeit { get; } = new() { Minimum = 0, Maximum = 3, Width = 60, AccessibleName = "Mindestzahl Leitziele" };
     public NumericUpDown ZieleNah { get; } = new() { Minimum = 0, Maximum = 6, Width = 60, AccessibleName = "Mindestzahl Nahziele" };
+    public CheckedListBox Pruefpunkte { get; } = new() { Width = 340, Height = 170, CheckOnClick = true, IntegralHeight = false, AccessibleName = "Prüfpunkte der Qualität" };
+    public NumericUpDown QmTage { get; } = new() { Minimum = 1, Maximum = 90, Width = 60, AccessibleName = "Tage ohne Bestätigung" };
     public Button MassnahmenListenKnopf { get; } = Stil.NebenKnopf("Arten und Vorlagen …");
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
@@ -182,6 +184,9 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
             KeinBericht.Value = Math.Clamp(werte.KeinBerichtWochen, (int)KeinBericht.Minimum, (int)KeinBericht.Maximum);
             ZieleLeit.Value = Math.Clamp(werte.ZieleLeitziele, 0, 3);
             ZieleNah.Value = Math.Clamp(werte.ZieleNahziele, 0, 6);
+            var aus = QualitaetRegeln.AusLesen(werte.QmAus);
+            for (int i = 0; i < QualitaetRegeln.Alle.Length; i++) Pruefpunkte.SetItemChecked(i, !aus.Contains(QualitaetRegeln.Alle[i]));
+            QmTage.Value = Math.Clamp(werte.QmTage, 1, 90);
             HebFrist.Value = Math.Clamp(werte.HebFristMonate, (int)HebFrist.Minimum, (int)HebFrist.Maximum);
             LogoLaden(Einstellungen.LogoPfad());
             foreach (var (schluessel, haken) in Module) haken.Checked = speicher.ModulAn(schluessel);

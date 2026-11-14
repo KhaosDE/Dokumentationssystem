@@ -45,6 +45,7 @@ Fenster → Kern → Speicher → SQLite-Datei im Datenordner (`%APPDATA%\DokuLi
 | Ziele und Maßnahmen | `Ziele.cs`, `SpeicherZiele.cs`, `Massnahmen.cs`, `SpeicherMassnahmen.cs` | `MassnahmenAnsicht.cs` (Reiter „Ziele und Maßnahmen“), `ZielFenster.cs`, `ZielLeiste.cs`, `MassnahmeFenster.cs`, `MassnahmenListe.cs` |
 | Medikamentenausgabe | `Medikamentenausgabe.cs`, `SpeicherAusgabe.cs` | `AusgabeSeite.cs` |
 | Zeitauswertung | `Zeitauswertung.cs`, `SpeicherZeitauswertung.cs` | `AuswertungSeite.cs`, `TabellenDruck.cs` |
+| Qualität (QMB) | `Qualitaet.cs`, `SpeicherQualitaet.cs` | `QualitaetSeite.cs` |
 | Visiten | `Visiten.cs`, `VisitenEntwurf.cs` | `VisitenSeite.cs`, `VisitenRundgang.cs` |
 | Therapie, Tagesplan | `Therapie.cs`, `Tagesplan.cs`, `LaufendeTherapien.cs` | `TherapieSeite.cs`, `TagesplanSeite.cs`, `LaufendeTherapienAnsicht.cs` |
 | Kalender, .ics | `Kalender.cs`, `Ics.cs` | `KalenderSeite.cs` |

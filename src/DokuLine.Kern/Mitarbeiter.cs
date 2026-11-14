@@ -60,6 +60,7 @@ public static class Funktionen
     public const string MassnahmenAnlegen = "massnahmen_anlegen";   // dazu die Bezugspflege des Bewohners
     public const string Zeitauswertung = "zeitauswertung";          // nur je Bewohner, nie je Mitarbeiter
     public const string MedikamenteAusgeben = "medikamente_ausgeben";   // Ausgabe abhaken (Bauplan 42)
+    public const string Qualitaet = "qualitaet";                       // Prüfseite, Prüfvermerke, Hinweise (Bauplan 44)
 
     public static readonly (string Schluessel, string Name)[] Alle =
     [
@@ -97,6 +98,7 @@ public static class Funktionen
         (MassnahmenAnlegen, "Maßnahmen anlegen und ändern"),
         (Zeitauswertung, "Zeitauswertung ansehen"),
         (MedikamenteAusgeben, "Medikamente ausgeben (abhaken)"),
+        (Qualitaet, "Qualität prüfen (Prüfseite, Prüfvermerke, Hinweise)"),
         (Zugriffsprotokoll, "Zugriffsprotokoll ansehen"),
         (BetriebVerwalten, "Betrieb verwalten (Sicherung, Update, Häuser)"),
         (AndereHaeuser, "Bereiche anderer Häuser wählen"),
@@ -136,7 +138,13 @@ public static partial class RechteRegeln
     // bearbeiten“ nur die Position Therapie (und die drei Leitungen).
     public static readonly string[] Positionen =
         [Administrator, "Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung", "Mitarbeiter Wohnbereich",
-         "Psychologischer Fachdienst", "Pädagogischer Fachdienst", "Therapie"];
+         "Psychologischer Fachdienst", "Pädagogischer Fachdienst", "Therapie", QualitaetRegeln.Position];
+
+    // Positionen, die nach der ersten Vorbelegung dazukamen: in bestehenden Datenbanken einmal anlegen und vorbelegen.
+    public static readonly string[] PositionenNachtraeglich = [QualitaetRegeln.Position];
+
+    // QMB (Bauplan 44): liest überall, ändert nichts außer Prüfvermerken und Hinweisen (und Nachrichten, die jeder schreibt).
+    private static readonly string[] QmbVorgabe = [Funktionen.Qualitaet, Funktionen.BereicheWohnbereiche, Funktionen.BereicheAlle, Funktionen.DokumenteAnsehen];
 
     // Assistenzkräfte machen keine Visiten.
     public static readonly string[] NurFachkraftVorgabe = [Funktionen.MedikationBearbeiten, Funktionen.MedikamentAnlegen, Funktionen.AerztlicheBearbeiten, Funktionen.Visiten,
@@ -186,12 +194,13 @@ public static partial class RechteRegeln
         Funktionen.BedarfGeben, Funktionen.BereicheWohnbereiche, Funktionen.BereichTherapie, Funktionen.BereicheAlle,
         Funktionen.AnzeigeVerwalten, Funktionen.DokumenteAnsehen, Funktionen.DokumenteHinzufuegen, Funktionen.DokumenteLoeschen,
         Funktionen.VitalwerteErfassen, Funktionen.VitalGrenzen, Funktionen.Zugriffsprotokoll, Funktionen.BetriebVerwalten, Funktionen.AndereHaeuser,
-        Funktionen.MassnahmenBestaetigen, Funktionen.MassnahmenAnlegen, Funktionen.Zeitauswertung, Funktionen.MedikamenteAusgeben];
+        Funktionen.MassnahmenBestaetigen, Funktionen.MassnahmenAnlegen, Funktionen.Zeitauswertung, Funktionen.MedikamenteAusgeben, Funktionen.Qualitaet];
 
     // Ärztliche Informationen ansehen alle außer Verwaltung; bearbeiten ebenso, aber nur
     // Fachkräfte (Häkchen „nur Fachkräfte“) – so sind die Leitungen dabei, wenn sie Fachkraft sind.
     // Vitalwerte erfassen alle; Grenzen und Messaufträge alle mit Fachaufgaben (dazu „nur Fachkräfte“), nicht Therapie.
     public static bool Vorbelegt(string position, string funktion) =>
+        position == QualitaetRegeln.Position ? QmbVorgabe.Contains(funktion) :
         funktion is Funktionen.AerztlicheAnsehen or Funktionen.AerztlicheBearbeiten ? position != "Verwaltung" :
         funktion is Funktionen.VitalwerteErfassen or Funktionen.MassnahmenBestaetigen ? true :
         funktion == Funktionen.MassnahmenAnlegen ? position is not ("Therapie" or "Verwaltung") :
