@@ -10,6 +10,7 @@ public sealed class MassnahmeFenster : Form
     private readonly Speicher speicher;
     private readonly long bewohnerId;
     private readonly Massnahme? alt;
+    private readonly List<Ziel> ziele;
 
     public ComboBox Titel { get; } = new() { DropDownStyle = ComboBoxStyle.DropDown, Width = 340, AccessibleName = "Titel" };
     public TextBox Beschreibung { get; } = new() { Width = 420, Height = 60, Multiline = true, AccessibleName = "Beschreibung" };
@@ -40,8 +41,6 @@ public sealed class MassnahmeFenster : Form
         var heute = DateOnly.FromDateTime(Jetzt());
         Titel.Items.AddRange([.. speicher.Listeneintraege(Kern.Liste.Massnahmenvorlagen).Where(e => e.Aktiv).Select(e => e.Name)]);
         Lebensbereich.Items.AddRange([.. Enumerable.Range(1, 5).Select(n => $"{n} {BerichtRegeln.Lebensbereiche[n - 1]}")]);
-        Ziel.Items.Add(MassnahmenRegeln.OhneZiel);
-        Ziel.SelectedIndex = 0;
         Art.Items.AddRange([.. speicher.Listeneintraege(Kern.Liste.Massnahmenarten).Where(e => e.Aktiv).Select(e => e.Name)]);
         var tage = Formular.Reihe();
         foreach (var t in new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday })
@@ -51,6 +50,10 @@ public sealed class MassnahmeFenster : Form
             tage.Controls.Add(box);
         }
         var f = alt?.Aktuell(heute);
+        ziele = ZielRegeln.Waehlbar(speicher.Ziele(bewohnerId), f?.ZielId);
+        Ziel.Items.Add(MassnahmenRegeln.OhneZiel);
+        Ziel.Items.AddRange([.. ziele.Select(ZielRegeln.Text)]);
+        Ziel.SelectedIndex = f?.ZielId is long zid ? ziele.FindIndex(z => z.Id == zid) + 1 : 0;
         Titel.Text = f?.Titel ?? titel;
         Beschreibung.Text = f?.Beschreibung ?? "";
         Lebensbereich.SelectedIndex = f is null ? -1 : f.Lebensbereich - 1;
@@ -134,6 +137,7 @@ public sealed class MassnahmeFenster : Form
             Art = Art.SelectedItem as string ?? "", Rhythmus = GewaehlterRhythmus,
             Wochentage = [.. Wochentage.Where(b => b.Checked && b.Enabled).Select(b => (DayOfWeek)b.Tag!)], AlleWochen = (int)AlleWochen.Value,
             MonatsTag = (int)MonatsTag.Value, Schicht = (Schicht)Math.Max(0, Schicht_.SelectedIndex), Uhrzeit = uhrzeit, Minuten = (int)Minuten.Value,
+            ZielId = Ziel.SelectedIndex > 0 ? ziele[Ziel.SelectedIndex - 1].Id : null,
         };
     }
 

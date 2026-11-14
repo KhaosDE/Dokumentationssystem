@@ -214,7 +214,7 @@ public sealed partial class Speicher
     {
         // Aufgaben aus früheren Demo-Visiten zuerst (sie verweisen auf die Visiten).
         Ausfuehren("DELETE FROM aufgaben WHERE visite_anordnung_id IS NOT NULL OR visite_eintrag_id IS NOT NULL; DELETE FROM visiten; DELETE FROM visite_entwuerfe", transaktion);
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         var medikamente = MedikamenteLesen(transaktion, "");
         foreach (var v in Demodaten.Visiten(bewohner, medikamente, Uhr()))
             VisiteEinfuegen(v, transaktion, mitBerichtUndAufgaben: true, [], erledigt: true);

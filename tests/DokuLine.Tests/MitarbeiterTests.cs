@@ -28,7 +28,7 @@ public sealed class MitarbeiterTests : IDisposable
             RechteRegeln.Positionen.Where(rechte[Funktionen.MitarbeiterBereich].Contains));
         Assert.Contains("Psychologischer Fachdienst", rechte[Funktionen.MedikamenteVerwalten]);
         Assert.DoesNotContain("Mitarbeiter Wohnbereich", rechte[Funktionen.MedikamenteVerwalten]);
-        Assert.Equal([Funktionen.AerztlicheBearbeiten, Funktionen.MassnahmenAnlegen, Funktionen.MedikamentAnlegen, Funktionen.MedikationBearbeiten, Funktionen.Visiten, Funktionen.VitalGrenzen],
+        Assert.Equal([Funktionen.AerztlicheBearbeiten, Funktionen.MassnahmenAnlegen, Funktionen.MedikamentAnlegen, Funktionen.MedikamenteAusgeben, Funktionen.MedikationBearbeiten, Funktionen.Visiten, Funktionen.VitalGrenzen],
             s.NurFachkraft().Order());   // Visiten seit 0.33.0 (Assistenzkräfte machen keine Visiten), Grenzen der Vitalwerte seit 0.40.0
         Assert.Equal(["Administrator", "Geschäftsführung", "Hausleitung", "Verwaltung", "Bereichsleitung", "Mitarbeiter Wohnbereich"],
             RechteRegeln.Positionen.Where(rechte[Funktionen.BedarfGeben].Contains));
@@ -41,7 +41,7 @@ public sealed class MitarbeiterTests : IDisposable
     {
         s.DemoBeimErstenStart();
         var alle = s.AlleMitarbeiter();
-        Assert.Equal(29, alle.Count);   // mit TST (Schritt 26a2), 14 weiteren für die Bezugspflege (26h) und TH (Therapie)
+        Assert.Equal(30, alle.Count);   // mit TST (Schritt 26a2), 14 weiteren für die Bezugspflege (26h), TH (Therapie) und QS (QMB)
         Assert.Equal(["R1", "R2", "R3", "Therapie", "Leitung", "Verwaltung"], s.Bereichsliste().Select(b => b.Name));
         Assert.All(RechteRegeln.Positionen, p => Assert.Contains(alle, m => m.Positionen.Contains(p)));   // je Position mindestens einer
         Assert.Contains(alle, m => m.Fachkraft);
@@ -97,7 +97,7 @@ public sealed class MitarbeiterTests : IDisposable
         Assert.Contains("Bitte mindestens einen Bereich wählen.", fehler);
         Assert.Contains("Eine der Positionen gibt es nicht.", fehler);
         s.MitarbeiterSpeichern(neu, neu: true);
-        Assert.Equal(30, s.AlleMitarbeiter().Count);
+        Assert.Equal(31, s.AlleMitarbeiter().Count);
         Assert.Contains(s.Kollegen(), k => k.Kuerzel == "QX" && k.Teams.Contains("R2"));   // auch für Nachrichten
         s.MitarbeiterSpeichern(neu with { Fachkraft = true, Aktiv = false, Bereiche = ["R1", "R2"] }, neu: false);
         var gelesen = s.MitarbeiterLesen("QX")!;
@@ -171,6 +171,6 @@ public sealed class MitarbeiterTests : IDisposable
         s.DemoZuruecksetzen();
         Assert.True(s.Darf("CD", Funktionen.BerichteSchreiben));
         Assert.DoesNotContain(s.Bereichsliste(), b => b.Name == "R4");
-        Assert.Equal(29, s.AlleMitarbeiter().Count);
+        Assert.Equal(30, s.AlleMitarbeiter().Count);
     }
 }

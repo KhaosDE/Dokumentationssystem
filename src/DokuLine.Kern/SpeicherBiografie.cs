@@ -46,7 +46,7 @@ public sealed partial class Speicher
     // Demo: ausgedachte, kurze und wertneutrale Biografien; einige Abschnitte bleiben leer.
     private void DemoBiografieEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM biografie", transaktion);
         foreach (var (bewohnerId, f) in Demodaten.Biografien(bewohner, Uhr()))
             BiografieEinfuegen(bewohnerId, f, transaktion);

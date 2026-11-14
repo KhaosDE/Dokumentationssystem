@@ -233,7 +233,7 @@ public sealed partial class Speicher
     // Demo: Kollegen, Teams und Nachrichten neu laden (Zeiten relativ zu jetzt).
     private void DemoNachrichtenEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         var demo = Demodaten.Nachrichten(bewohner, Uhr());
         // Die Kolleginnen und Kollegen (Mitarbeiter) und ihre Bereiche lädt DemoMitarbeiterEinfuegen.
         Ausfuehren("DELETE FROM verlauf_archiv; DELETE FROM nachricht_gelesen; DELETE FROM nachricht_empfaenger; DELETE FROM nachrichten;", transaktion);

@@ -140,3 +140,11 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 14.11.2026 — Alle offenen Vorschläge freigegeben: Schritte 39–49 (Maßnahmen, Arbeitscheckliste, Zeitauswertung, Medikamentenausgabe, Ziele, QMB, Küchendienst, Archiv, Hilfeplangespräche, Schlüsselwörter, Rechtschreibprüfung) (Chat „Programme/Apps“).
 - 14.11.2026 — Claude Code: 0.42.0 Wohnbereich als Auswahlliste in der Seitenleiste über „Übersicht“ (Bauplan 38).
 - 14.11.2026 — Claude Code: 0.43.0 Maßnahmen je Bewohner mit Zeitwert: Reiter „Maßnahmen“, Bestätigen auf der Seite „Aufgaben“, Dokumentation zusammengefasst, Reflexion gezählt (Bauplan 39).
+- 14.11.2026 — Claude Code: 0.44.0 Maßnahmen in der Übersicht: zweiter Abschnitt im Kasten „Laufender Dienst“, Spalte „Maßnahmen“, Sammeleintrag in die Übergabe (Bauplan 40).
+- 14.11.2026 — Claude Code: 0.45.0 Zeitauswertung je Bewohner: Bereich „Auswertung“ mit Druck und CSV, Dauer an Berichten (Bauplan 41).
+- 14.11.2026 — Claude Code: 0.46.0 Medikamentenausgabe abhaken: Bereich mit Einnahmezeiten, Status je Bewohner oder Medikament, Übersicht, Übergabe, Verlauf (Bauplan 42).
+- 14.11.2026 — Claude Code: 0.47.0 Ziele der Bewohner (Bauplan 43): Reiter „Ziele und Maßnahmen“, Zielleiste, Bericht zu einem Ziel, drei Zustände, Marken.
+- 14.11.2026 — Claude Code: 0.48.0 Qualitätsmanagement (Bauplan 44): Position QMB, Seite „Qualität“, Hinweis an den Wohnbereich, Prüfvermerk, Nachweis.
+- 14.11.2026 — Claude Code: 0.49.0 Küchendienst im Tagesplan (Bauplan 45): Zeile mit Tausch und „unbesetzt“, bestätigen, Marke beim Bewohner.
+- 14.11.2026 — Claude Code: 0.50.0 Archiv (Bauplan 46): Entlassen, Seite „Archiv“, Akte nur lesend, Wiederaufnahme, Löschen zu zweit mit Protokoll.
+- 14.11.2026 — Claude Code: 0.51.0 Hilfeplangespräche (Bauplan 47): Seite nach Fälligkeit, Termin, Einladung, Vorbereitung, „geführt“, Prüfpunkt QMB.

@@ -28,6 +28,8 @@ public sealed class TagesplanSeite : Panel, IBereichSeite
     public List<TagesplanZeile> Zeilen { get; private set; } = [];
     public List<TafelZeile> TafelZeilen { get; private set; } = [];
     public List<string> Gruppen => Tafel.Ueberschriften;
+    // Zeilen der Module oben (z. B. Küchendienst, Bauplan 45); ein ausgeschaltetes Modul zeigt nichts.
+    public List<(IModul Modul, TagesplanTeil Teil)> Teile { get; } = [];
     public event Action? Geaendert;
 
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
@@ -46,6 +48,13 @@ public sealed class TagesplanSeite : Panel, IBereichSeite
         NachBewohner.CheckedChanged += (_, _) => { if (NachBewohner.Checked) Aktualisieren(); };
         VollbildKnopf.Click += (_, _) => VollbildZeigen();
         Controls.Add(Tafel);
+        foreach (var m in Modulverwaltung.Alle)
+            if (m.TagesplanBauen(speicher) is TagesplanTeil teil)
+            {
+                teil.Geaendert += () => Geaendert?.Invoke();
+                Teile.Add((m, teil));
+                Controls.Add(teil);
+            }
         Controls.Add(leiste);
         // Jede Minute: Uhr, Status und Reihenfolge (nur wenn die Tafel zu sehen ist).
         takt.Tick += (_, _) => Takt();
@@ -83,6 +92,11 @@ public sealed class TagesplanSeite : Panel, IBereichSeite
         var gezeigt = BereichswahlRegeln.Bewohner(alle, Arbeitsbereich.Gewaehlt);
         bereichText = gezeigt.Count == alle.Count ? "alle Bereiche" : Arbeitsbereich.Gewaehlt;
         var zeilen = speicher.Tagesplan(heute, gezeigt);
+        foreach (var (modul, teil) in Teile)
+        {
+            teil.Visible = speicher.ModulAn(modul.Daten.Schluessel);
+            if (teil.Visible) teil.Zeigen(jetzt);
+        }
         TafelZeilen = NachBewohner.Checked ? TafelRegeln.NachBewohner(zeilen, jetzt) : TafelRegeln.Tafel(zeilen, jetzt);
         Zeilen = TafelZeilen.Select(z => z.Zeile).ToList();
         string? grund = Recht.Grund(speicher, Funktionen.TeilnahmeBestaetigen);

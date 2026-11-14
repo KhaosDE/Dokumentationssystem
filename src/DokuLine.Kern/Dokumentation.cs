@@ -21,6 +21,8 @@ public sealed record DokuFilter
     public bool Uebergabe { get; init; }
     public bool MitNachtrag { get; init; }
     public bool OhneMassnahmen { get; init; }   // die kurzen Einträge der bestätigten Maßnahmen ausblenden
+    public long? ZielId { get; init; }          // nur Berichte zu diesem Ziel (Bauplan 43)
+    public string ZielText { get; init; } = "";
     public string? Art { get; init; }
     public int? Bereich { get; init; }    // 0 = allgemein
     public Schicht? Schicht { get; init; }
@@ -35,12 +37,12 @@ public static class DokuRegeln
     public const string ArtAlltag = "Alltag", ArtVisite = "Visite", ArtMedikation = "Medikation", ArtTherapie = "Therapie",
         ArtAbgaengigkeit = "Ausgang/Abgängigkeit", ArtMassnahme = MassnahmenRegeln.ArtBericht;
 
-    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie, ArtAbgaengigkeit, ArtMassnahme];
+    public static readonly string[] FesteArten = [ArtAlltag, ArtVisite, ArtMedikation, ArtTherapie, ArtAbgaengigkeit, ArtMassnahme, HilfeplanRegeln.ArtBericht];
 
     public static readonly string[] Berichtsarten =
     [
         ArtAlltag, "Krise", "Arztkontakt", ArtVisite, ArtMedikation, "Konflikt", ArtAbgaengigkeit,
-        "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis", ArtTherapie, ArtMassnahme,
+        "Angehörigenkontakt", "Betreuer/Behörde", "Besonderes Vorkommnis", ArtTherapie, ArtMassnahme, HilfeplanRegeln.ArtBericht,
     ];
 
     public static string ZeitraumText(Zeitraum z) => z switch
@@ -64,7 +66,7 @@ public static class DokuRegeln
     {
         var marken = new List<DokuMarke>();
         if (b.Wichtig) marken.Add(DokuMarke.Wichtig);
-        if (b.Art == ArtMedikation && !b.Bedarfsgabe) marken.Add(DokuMarke.MedikationGeaendert);
+        if (b.Art == ArtMedikation && !b.Bedarfsgabe && !b.Ausgabe) marken.Add(DokuMarke.MedikationGeaendert);
         if (b.Bedarfsgabe) marken.Add(DokuMarke.Bedarfsgabe);
         return marken;
     }
@@ -89,6 +91,7 @@ public static class DokuRegeln
         if (f.Uebergabe && !b.Uebergabe) return false;
         if (f.MitNachtrag && b.Nachtraege.Count == 0) return false;
         if (f.OhneMassnahmen && b.Art == ArtMassnahme) return false;
+        if (f.ZielId is long ziel && b.ZielId != ziel) return false;
         if (f.Art is string art && b.Art != art) return false;
         if (f.Bereich is int bereich
             && (bereich == BerichtFilter.Allgemein ? !b.Allgemein : !b.Bereiche.Contains(bereich))) return false;
@@ -165,6 +168,7 @@ public static class DokuRegeln
         if (f.Uebergabe) liste.Add(("Übergabe", f with { Uebergabe = false }));
         if (f.MitNachtrag) liste.Add(("mit Nachtrag", f with { MitNachtrag = false }));
         if (f.OhneMassnahmen) liste.Add(("ohne Maßnahmen", f with { OhneMassnahmen = false }));
+        if (f.ZielId is not null) liste.Add(($"Ziel: {f.ZielText}", f with { ZielId = null, ZielText = "" }));
         if (f.Art is string art) liste.Add(($"Art: {art}", f with { Art = null }));
         if (f.Bereich is int b) liste.Add((b == BerichtFilter.Allgemein ? "allgemein" : $"Lebensbereich {b}",
             f with { Bereich = null }));

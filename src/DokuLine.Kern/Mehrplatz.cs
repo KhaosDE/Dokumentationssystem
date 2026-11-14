@@ -250,7 +250,7 @@ public sealed partial class Speicher
     // Demo: Statusmeldungen aus daten/demo/status.json, relativ zur Uhrzeit.
     private void DemoStatusEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM statusmeldungen", transaktion);
         foreach (var m in Demodaten.Statusmeldungen(bewohner, Uhr()))
             StatusmeldungEinfuegen(m.BewohnerId, m.Text, m.Bereich, m.Kuerzel, m.Erstellt, m.GiltBis, transaktion);

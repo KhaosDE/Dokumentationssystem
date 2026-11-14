@@ -25,6 +25,8 @@ public sealed class ReflexionAnsicht : Panel
     public Button VerlaufKnopf { get; } = Stil.NebenKnopf("Verlauf …");
     public Label Therapien { get; } = new() { AutoSize = true, ForeColor = Stil.TextNormal, BackColor = Stil.Flaeche, UseMnemonic = false };
     public Label Meldung { get; } = new() { AutoSize = true, BackColor = Stil.Seite, Visible = false };
+    // Je Ziel die zugeordneten Berichte und Maßnahmen des Monats (Bauplan 43), nur gezählt.
+    public Label ZieleText { get; } = new() { AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Flaeche, UseMnemonic = false };
     public List<ReflexionBereich> Bereiche { get; } = [];
 
     // Zum Testen ersetzbar: Rückfrage bei ungespeicherten Änderungen (Ja = speichern, Nein = verwerfen).
@@ -60,7 +62,7 @@ public sealed class ReflexionAnsicht : Panel
             Bereiche.Add(b);
             Controls.Add(b);
         }
-        therapieKarte.Controls.AddRange([therapieTitel, Therapien]);
+        therapieKarte.Controls.AddRange([therapieTitel, Therapien, ZieleText]);
         Controls.Add(leiste);
         Controls.Add(therapieKarte);
     }
@@ -112,6 +114,9 @@ public sealed class ReflexionAnsicht : Panel
         Therapien.Text = therapien.Count == 0
             ? "Keine Therapien im Wochenplan dieses Monats."
             : string.Join(Environment.NewLine, therapien.Select(ReflexionRegeln.TherapieText));
+        var ziele = ZielRegeln.Zusammenfassung(speicher.Ziele(id), speicher.Berichte(id, new BerichtFilter(Monat, ReflexionRegeln.MonatBis(Monat))),
+            speicher.Massnahmen(id, auchBeendete: true), speicher.MassnahmeBestaetigungen(id, Monat, ReflexionRegeln.MonatBis(Monat)));
+        ZieleText.Text = "Ziele im Monat: " + (ziele.Count == 0 ? "keine aktiven Ziele eingetragen." : Environment.NewLine + string.Join(Environment.NewLine, ziele));
         PerformLayout();
     }
 
@@ -170,7 +175,9 @@ public sealed class ReflexionAnsicht : Panel
         therapieTitel.Location = new Point(innen, innen);
         Therapien.MaximumSize = new Size(breite - 2 * innen, 0);
         Therapien.Location = new Point(innen, therapieTitel.Bottom + Stil.Px(this, Stil.AbstandMini));
-        therapieKarte.Bounds = new Rectangle(0, y, breite, Therapien.Bottom + innen);
+        ZieleText.MaximumSize = new Size(breite - 2 * innen, 0);
+        ZieleText.Location = new Point(innen, Therapien.Bottom + Stil.Px(this, Stil.AbstandKlein));
+        therapieKarte.Bounds = new Rectangle(0, y, breite, ZieleText.Bottom + innen);
         y = therapieKarte.Bottom + abstand;
         foreach (var b in Bereiche)
         {

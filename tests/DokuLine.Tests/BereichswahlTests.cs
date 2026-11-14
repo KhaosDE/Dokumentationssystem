@@ -38,7 +38,7 @@ public sealed class BereichswahlTests : IDisposable
     {
         Assert.Equal(["R1", "R2", "R3"], Knoepfe("CD"));                   // Mitarbeiter Wohnbereich: kein „Therapie“
         Assert.Equal(["R1", "R2", "R3", "Therapie"], Knoepfe("OP"));       // Therapie springt auf den Wohnbereichen ein
-        Assert.Equal(["R1", "R2", "R3", "Therapie", "Alle"], Knoepfe("TST"));   // Administrator
+        Assert.Equal(["R1", "R2", "R3", "Therapie", "Alle", "QM"], Knoepfe("TST"));   // Administrator
         Assert.Empty(Knoepfe(""));                                         // ohne Anmeldung
     }
 

@@ -5,8 +5,8 @@ namespace DokuLine.Kern;
 
 // Medikation je Bewohner. Die Grundverordnung bleibt immer erhalten; Pausen, Stufenpläne
 // (ansetzen, umstellen, absetzen in Etappen) und Absetzen liegen als eigene Einträge darüber.
-// „Was gilt heute“ wird daraus berechnet. Ausdrücklich nicht: Dosisvorschläge, Wechselwirkungen,
-// Stellen und Ausgabe, Bestand. Demo — nicht zum Stellen verwenden.
+// „Was gilt heute“ wird daraus berechnet. Ausdrücklich nicht: Dosisvorschläge, Wechselwirkungen, Stellen.
+// Die Ausgabe wird nur abgehakt (Medikamentenausgabe.cs). Demo — nicht zum Stellen verwenden.
 
 // Dosis je Einnahmezeit als Text, wie auf einem Medikamentenplan („1“, „½“, „0,5“, „2“).
 public sealed record Dosis(string Morgens, string Mittags, string Abends, string Nachts)

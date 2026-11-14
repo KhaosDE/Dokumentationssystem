@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.43.0** (Bauplan Schritt 39: Maßnahmen je Bewohner mit Zeitwert).
+Stand: 14.11.2026. Version: **0.51.0** (Hilfeplangespräche planen und vergeben).
 
 ## Aktuell
 
@@ -450,7 +450,46 @@ Lebensbereich eine Zeile je Maßnahme („11 von 13 durchgeführt, 2 abgelehnt, 
 „Maßnahmen bestätigen“ (alle), „Maßnahmen anlegen und ändern“ (Fachkräfte und die Bezugspflege des Bewohners). Einstellungen:
 Arten und Vorlagen. Demo: je Bewohner zwei bis fünf Maßnahmen seit drei Wochen, mit Bestätigungen (einige abgelehnt).
 
-**Nächster Schritt:** Bauplan Schritt 40 (Kasten „Maßnahmen heute“ in der Übersicht, 0.44.0); danach 41–52 der Reihe nach.
+Neu in 0.44.0: In der **Übersicht** ist der Kasten **„Laufender Dienst · noch offen“** jetzt die eine Arbeitscheckliste: oben wie bisher
+die Aufgaben, darunter die **Maßnahmen** des Dienstes mit „Maßnahmen: 7 von 12 bestätigt“ und Balken, Umschalter **„alle“ ·
+„meine Bezugsbewohner“**. Offene stehen nach Uhrzeit, je Zeile „08:30 · Name · Maßnahme“ mit den Knöpfen „durchgeführt“
+(ein Klick), „abgelehnt …“ und „nicht möglich …“; ist die Uhrzeit vorbei, die Marke **„überfällig“**. Bestätigte stehen
+blass darunter („✓ 08:31 AB · … (durchgeführt)“), einklappbar. Die **Bewohnerliste** hat eine schmale Spalte „Maßnahmen“
+(„2 offen“ bzw. „✓“). Was am **Dienstende** offen bleibt, geht als **ein Sammeleintrag je Wohnbereich** in die Übergabe
+(„R1 · 3 Maßnahmen aus dem Frühdienst … offen: …“), nicht jede einzeln.
+
+Neu in 0.45.0: Neuer Bereich **„Auswertung“** (nur mit dem Recht „Zeitauswertung ansehen“, vorbelegt für Leitungen und Verwaltung):
+Zeitraum wählen, je Bewohner des gewählten Bereichs die erfassten **Minuten nach Lebensbereich** (LB 1–5, ohne LB), **nach Art**
+(Maßnahmen, Therapie, Gespräche/Sonstiges) und die **Summe**, dazu **„Maßnahmen geplant“** zum Vergleich. Quellen:
+bestätigte Maßnahmen (durchgeführt), Therapie-Teilnahmen „gegangen“ (Dauer des Termins) und Berichte mit der neuen,
+freiwilligen **„Dauer“** (Feld im Berichtsformular). **Drucken** (A4 quer) und **„Als CSV speichern …“** für Excel. Hinweis im
+Programm: eine Zählung, keine Abrechnung. Eine Auswertung nach Mitarbeiter gibt es ausdrücklich nicht (steht in der Liste
+der Freigaben, `docs/betrieb.md`). Die Berichtsart „Maßnahme“ ist im Berichtsformular nicht mehr wählbar (vergibt das
+Programm).
+
+Neu in 0.46.0: Neuer Bereich **„Medikamentenausgabe“** (Seitenleiste, nur Wohnbereiche, nur mit dem Recht „Medikamente ausgeben“):
+Einnahmezeit **morgens · mittags · abends · nachts** (vorgewählt die laufende; nachts nach Mitternacht gehört zum Vortag), je
+Bewohner des Bereichs Zimmer, Name, die **Medikamente dieser Zeit** (Name, Stärke, Menge laut Tagesstand des Plans) und der
+Stand. Ein Klick: **ausgegeben** · **nicht abgeholt** · **abgelehnt** · **abwesend** · **mitgegeben**; „Einzeln …“ kennzeichnet
+einzelne Medikamente getrennt. Kürzel und Uhrzeit setzt das Programm; ein späterer Eintrag gilt, nichts wird überschrieben.
+Oben „18 von 21 ausgegeben“; **„nicht abgeholt“ steht oben** in der Liste und im Kasten „Laufender Dienst“ der Übersicht
+(„Medikamente morgens: 2 noch nicht abgeholt“). Abwesende laut Ausgangsliste sind gekennzeichnet. In der letzten Stunde
+des Dienstes ein Hinweis, wenn noch etwas offen ist; was offen bleibt, geht als **Sammeleintrag je Wohnbereich** in die
+Übergabe. „Abgelehnt“ und „nicht abgeholt“ stehen als kurzer Bericht (Art „Medikation“, ohne Marke „Medikation geändert“) in
+der Dokumentation. Im Medikamentenplan „Ausgabe der letzten 14 Tage …“. Pausierte, abgesetzte und Bedarfsmedikamente
+stehen nicht in der Liste; das Programm bestätigt nur die Ausgabe.
+
+Neu in 0.47.0: **Ziele der Bewohner** (Bauplan 43). Akte, Reiter **„Ziele und Maßnahmen“** (ersetzt „Maßnahmen“): oben die Ziele (Leitziel, dann Nahziele; Wortlaut in den Worten des Bewohners, Lebensbereich, vereinbart am/mit, überprüfen bis, Stand), darunter die Maßnahmen nach Ziel gruppiert, am Ende „Maßnahmen ohne Ziel“ und die Lebensbereiche. Änderungen sind neue Fassungen („Verlauf …“). Drei Zustände: Ziele eingetragen · „Bewohner möchte derzeit kein Ziel benennen“ (mit Datum und Grund) · nicht erfasst. Marken „Ziel fehlt“, „Nahziel ohne Maßnahme“, „Überprüfung der Ziele fällig“. **Zielleiste** über der Berichtsliste (einklappbar) und im Akte-Kopf. Bericht und Maßnahme einem Ziel zuordnen; Filter „Berichte zu diesem Ziel“; Reflexion und HEB-Bogen (Seite „Ziele“) zeigen je Ziel Berichte und Maßnahmen. Mindestzahl der Ziele in den Einstellungen (Vorgabe 1 + 2).
+
+Neu in 0.48.0: **Qualitätsmanagement** (Bauplan 44). Neue Position **„Qualitätsmanagement (QMB)“**: liest überall, ändert nichts außer Prüfvermerken und Hinweisen (Demo: QS, Quirin Specht). Neue Seite **„Qualität“** (Recht „Qualität prüfen“): oben die Kennzahlen je Wohnbereich (Ziele vollständig, Nahziele mit Maßnahme, Überprüfung/Reflexion/HEB fällig), darunter die **Prüfliste** je Bewohner mit Haken oder Mangel je Prüfpunkt, Filter Bereich und „nur mit Mängeln“. **„Hinweis senden …“** legt eine Aufgabe für den Wohnbereich an; die Liste zeigt „Hinweis gesendet am … / erledigt am …“. **„Als geprüft vermerken“** mit Verlauf. **Nachweis Ziele und Maßnahmen** zum Drucken. In der Bereichswahl gibt es **„QM“** (ganzes Haus, beginnt mit der Prüfseite). Prüfpunkte und die Tage für „Maßnahmen werden bestätigt“ in den Einstellungen.
+
+Neu in 0.49.0: **Küchendienst im Tagesplan** (Bauplan 45). Oben im Tagesplan die Zeile **„Küchendienst heute: … (Zi. …)“** aus dem Küchendienstplan des Moduls Ausgangsliste (ein Datensatz, kein zweiter); getauschte Dienste mit „getauscht mit Zi. …“, Abwesende mit Namen. Ist niemand vom Dienst da: **„Küchendienst unbesetzt“** in Achtung-Farbe, auch als Marke beim Bewohner (Übersicht, Akte). Bestätigen wie andere Termine: **gemacht · nicht gemacht · vertreten durch …** mit Kürzel und Uhrzeit. Untermodul Küchendienst aus: keine Zeile, keine Marke.
+
+Neu in 0.50.0: **Archiv für ehemalige Bewohner** (Bauplan 46). In der Akte **„Entlassen …“** (Datum, Grund: Auszug, Verlegung, verstorben, Sonstiges): Offene Aufgaben, laufende Maßnahmen und Therapien enden (Liste zum Bestätigen), das Bett wird frei, die Akte verschwindet aus Übersicht, Dokumentation, Listen und Zählern. Neue Seite **„Archiv“** (Recht „Archiv einsehen“): Name, Bereich, Zimmer, Aufenthalt, Grund, **Aufbewahrung bis**; Suche, „nur Aufbewahrung abgelaufen“. **Akte nur lesend** (Stammdaten mit Aufenthalten, Berichte, Ziele und Maßnahmen, Medikamentenplan, Reflexion und HEB, Dokumente) mit Drucken; Öffnen und Drucken im Zugriffsprotokoll. **„Wieder aufnehmen …“** mit freiem Bett; der alte Aufenthalt bleibt. **Aufbewahrungsfrist** in den Einstellungen, **ohne Vorgabe** (leer = nicht festgelegt). Nach Ablauf **Löschen nur zu zweit** (Freigabe und Löschen durch verschiedene Personen mit Recht „Archiv löschen“) mit Löschprotokoll ohne Inhalte. Demo: drei ehemalige Bewohner, einer mit abgelaufener Frist (Demo-Frist 10 Jahre, ausgedacht).
+
+Neu in 0.51.0: **Hilfeplangespräche** (Bauplan 47). Neue Seite **„Hilfeplangespräche“** (nach „Kalender“): Bewohner des Bereichs nach Fälligkeit, Marke „fällig in n Wochen“ bzw. „überfällig“. **„Termin vergeben …“**: Zeit, Ort, Teilnehmer aus der Akte (Bewohner, Bezugspflege, Betreuer, Forensik/FOSA, Sachbearbeiter des Kostenträgers, Angehörige nur mit wirksamer Entbindung), weitere frei; der Termin steht im Kalender, Wochen- und Tagesplan; Warnung bei Überschneidung. **„Einladen …“**: E-Mail-Programm (Betreuer, Kostenträger) mit Text ohne Gesundheitsangaben und `.ics`-Datei. **„Vorbereitung …“** erzeugt Aufgaben für den Bereich. **„Geführt …“**: Ergebnis als Bericht der neuen Art „Hilfeplangespräch“, nächste Fälligkeit. Im Reiter „Kostenträger“ die Zeile „Hilfeplangespräch: letztes · nächstes fällig bis (Vorschlag aus der Bewilligung) · Stand“. Die Prüfseite des QMB hat den Prüfpunkt „Hilfeplangespräch nicht überfällig“.
+
+**Nächster Schritt:** Bauplan Schritt 48 (Schlüsselwörter bieten den nächsten Arbeitsschritt an).
 
 ## Fertig
 
@@ -1553,9 +1592,18 @@ Arten und Vorlagen. Demo: je Bewohner zwei bis fünf Maßnahmen seit drei Wochen
   einen Lauf über eine halbe Stunde aufgehalten).
 - 0.42.0 — Bauplan Schritt 38: `BereichsAuswahl` in der Seitenleiste (Auswahlliste, eingeklappt Kürzel mit Menü), `BereichswahlRegeln.Kuerzel`; `BereichUmschalter` entfernt.
 - 0.43.0 — Bauplan Schritt 39: `Massnahmen.cs` (Fassungen, Fälligkeit, Prüfen, Texte, Lebensbereiche, Reflexion), `SpeicherMassnahmen.cs` (Datenbank-Schritt 41, Bestätigen mit Bericht, Demo), `MassnahmenAnsicht`, `MassnahmeFenster`, `MassnahmeBestaetigenFenster`, `MassnahmenListe` (Aufgaben-Seite), `MassnahmenTagZeile` (Dokumentation), Reflexion, Einstellungen.
+- 0.44.0 — Bauplan Schritt 40: `MassnahmeKastenZeile`, Abschnitt im Kasten „Laufender Dienst“ (`UebersichtSeite.MassnahmenKasten`), Spalte „Maßnahmen“ (`BewohnerZeile`), `MassnahmenRegeln.ListenText`/`StandText`/`UebergabeText`, `Speicher.MassnahmenUebergabeErzeugen` (beim Dienstwechsel, einmal je Dienst).
+- 0.45.0 — Bauplan Schritt 41: `Zeitauswertung.cs` (Posten, Zeilen, geplant, CSV), `SpeicherZeitauswertung.cs`, Datenbank-Schritt 42 (`bericht_dauer`), `AuswertungSeite`, `TabellenDruck` (allgemeiner Druck A4 quer), Recht „Zeitauswertung ansehen“, Feld „Dauer“ im Berichtsformular.
+- 0.46.0 — Bauplan Schritt 42: `Medikamentenausgabe.cs` (Einnahmezeit, fällig, Zeilen, Texte, Verlauf), `SpeicherAusgabe.cs` (Datenbank-Schritt 43, Setzen mit Bericht, Sammeleintrag, Demo), `AusgabeSeite`, `AusgabeEinzelnFenster`, Recht „Medikamente ausgeben“, Kennzeichen `Bericht.Ausgabe`, Eintrag im Kasten der Übersicht, Verlauf im Medikamentenplan.
+- 0.47.0 — Ziele der Bewohner (Bauplan 43): Reiter „Ziele und Maßnahmen“, Zielleiste, Bericht/Maßnahme zu einem Ziel, drei Zustände, Marken, Einstellung Mindestzahl
+- 0.48.0 — Qualitätsmanagement (Bauplan 44): Position QMB, Seite „Qualität“ mit Kennzahlen, Prüfliste, Hinweis als Aufgabe, Prüfvermerk, Nachweis; Bereichswahl „QM“
+- 0.49.0 — Küchendienst im Tagesplan (Bauplan 45): Zeile oben mit Tausch und „unbesetzt“, bestätigen, Marke beim Bewohner
+- 0.50.0 — Archiv (Bauplan 46): Entlassen mit Folgen, Seite „Archiv“, Akte nur lesend, Wiederaufnahme, Frist ohne Vorgabe, Löschen zu zweit mit Protokoll
+- 0.51.0 — Hilfeplangespräche (Bauplan 47): Seite nach Fälligkeit, Termin mit Teilnehmern im Kalender, Einladung, Vorbereitung, „geführt“ mit Bericht, Prüfpunkt QMB
 
 ## Offene Punkte
 
+- 14.11.2026 (0.50.0): Aufbewahrungsfrist des Archivs mit Träger und Datenschutz klären (in `docs/betrieb.md`, Liste der Freigaben); bis dahin bleibt sie leer und es wird nichts gelöscht.
 - 09.11.2026 (0.41.1), **Restrisiko Betrieb:** Die DokuLine-Benutzer müssen die Datenbankdatei lesen und schreiben
   können; wer am Server angemeldet ist, könnte sie an DokuLine vorbei öffnen. Gegenmaßnahmen außerhalb des Programms
   (AppLocker, Ordner ausblenden) stehen in `docs/betrieb.md`, Abschnitt 8; ganz schließt es erst ein eigener Serverdienst.
@@ -1656,6 +1704,54 @@ Arten und Vorlagen. Demo: je Bewohner zwei bis fünf Maßnahmen seit drei Wochen
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.51.0): Vorschlag für „fällig bis“: das Ende der jüngsten Bewilligung im Reiter „Kostenträger“; eine eingetragene Fälligkeit geht vor. „Geführt“ ohne neue Fälligkeit zeigt „geführt“ ohne Marke.
+- 14.11.2026 (0.51.0): Der Termin ist ein Kalendereintrag des Bewohners (Art „Termin“, Dauer 60 Minuten) – so erscheint er ohne Zusatz im Wochen- und Tagesplan. Überschneidungen werden mit den Terminen der Woche des Bewohners geprüft (Therapie, Kalender, Regelwoche); Fahrzeuge braucht ein Gespräch im Haus nicht.
+- 14.11.2026 (0.51.0): Die Einladung geht an Betreuer und Kostenträger, soweit eine gültige E-Mail-Adresse eingetragen ist; Text: Anlass, Name, Zeit, Ort – keine Gesundheitsangaben. Die `.ics`-Datei wird gespeichert und von Hand angehängt (mailto kann keine Anhänge).
+- 14.11.2026 (0.51.0): Das Protokoll des Gesprächs legt man wie andere Unterlagen im Reiter „Dokumente“ ab; eine eigene Ablage dafür gibt es nicht.
+- 14.11.2026 (0.51.0): Rechte: wie „Bewohner bearbeiten“ (Termin, Fälligkeit, geführt); der QMB sieht die Fälligkeit über seine Prüfseite.
+- 14.11.2026 (0.50.0): Archiviert ist, wessen letzter Aufenthalt entlassen und nicht wieder aufgenommen ist (Datenbank-Sicht `archiviert`). `AlleBewohner()` lässt diese weg – so verschwinden sie aus allen Listen, Zählern und der Belegung, ohne jede Stelle einzeln anzupassen. `Bewohner(id)` liest sie weiter (Archiv, Protokolle).
+- 14.11.2026 (0.50.0): Beim Entlassen enden offene Aufgaben (begründet geschlossen „Entlassung“), laufende Maßnahmen und Therapie-Teilnahmen in einem Zug mit dem Archiveintrag (alles oder nichts), ohne die Einzelrechte dieser Bereiche – wer entlassen darf („Bewohner bearbeiten“), beendet das Dazugehörige mit.
+- 14.11.2026 (0.50.0): Die nur-lesende Akte zeigt die Teile als Text (je Reiter) und die Dokumente als Liste (Doppelklick öffnet); die Bearbeitungs-Reiter der lebenden Akte werden nicht wiederverwendet, damit dort nichts versehentlich änderbar ist.
+- 14.11.2026 (0.50.0): Die Aufbewahrungsfrist gilt für das ganze Haus und liegt in der Datenbank (nicht je Rechner). In neuen Datenbanken leer; in der Demo 10 Jahre (ausgedacht, rechtlich nicht geprüft). Eintragen dürfen, die auch löschen dürfen.
+- 14.11.2026 (0.50.0): Rechte: „Archiv einsehen“ vorbelegt für Leitungen, Verwaltung, Bereichsleitung und QMB; „Archiv löschen“ für Geschäftsführung, Hausleitung und Verwaltung.
+- 14.11.2026 (0.50.0): Das Löschprotokoll enthält nur Bewohner-Nummer, Zeitraum, Freigabe, Löschung und Zeit; es lässt sich weder ändern noch löschen (auch nicht über „Demo-Daten zurücksetzen“).
+- 14.11.2026 (0.49.0): Der Küchendienstplan hat einen Dienst je Tag (keine Mahlzeiten); deshalb eine Zeile je Tag. Bestätigt wird in dieser Zeile statt in einem eigenen Termin je Bewohner – der Dienst gehört dem Zimmer bzw. der Zimmergruppe, nicht einer Person.
+- 14.11.2026 (0.49.0): Die Bestätigung liegt in einer eigenen Tabelle des Moduls (`al_kuechendienst_erledigt`, nie geändert, der neueste Eintrag gilt); Recht wie bei der Therapie-Teilnahme („Therapie-Teilnahme bestätigen“).
+- 14.11.2026 (0.49.0): „Küchendienst unbesetzt“ nur, wenn niemand aus dem Zimmer bzw. der Gruppe anwesend ist; ist der Zimmer-Partner da, übernimmt er (wie im Plan der Ausgangsliste).
+- 14.11.2026 (0.49.0): Module steuern Zeilen im Tagesplan über `IModul.TagesplanBauen` bei; der Kern kennt den Küchendienst nicht.
+- 14.11.2026 (0.48.0): „QM“ in der Bereichswahl zeigt wie „Alle“ das ganze Haus und öffnet die Seite „Qualität“; die Prüfliste hat dazu einen eigenen Bereichsfilter. Ein eigener Seitenleisten-Satz wie bei „Therapie“ wäre mehr Aufwand ohne Nutzen.
+- 14.11.2026 (0.48.0): Prüfpunkt „Maßnahmen werden bestätigt“: eine laufende, regelmäßige Maßnahme, die in den letzten n Tagen (Vorgabe 14) fällig war und in dieser Zeit nie bestätigt wurde. Bedarfsmaßnahmen zählen nicht.
+- 14.11.2026 (0.48.0): Prüfpunkt „Berichte je Lebensbereich“ nutzt dieselbe Regel wie die Akte („seit n Wochen kein Bericht“), damit Prüfseite und Akte dasselbe sagen.
+- 14.11.2026 (0.48.0): „Reflexion aktuell“: die Reflexion des Vormonats ist fertig (später Aufgenommene ausgenommen). „HEB aktuell“: dieselbe Regel wie „HEB fällig“ auf der Übersicht.
+- 14.11.2026 (0.48.0): „Kein Ziel benennen“ gilt bei Leitziel und Nahzielen als dokumentiert (Haken mit „kein Ziel benannt“).
+- 14.11.2026 (0.48.0): Der Hinweis an den Wohnbereich ist eine Aufgabe „wer Zeit hat“ beim Bewohner; „erledigt“ kommt aus der Aufgabe. Welche Mängel hineinkommen, wählt der QMB (alle vorbelegt).
+- 14.11.2026 (0.48.0): Die Position QMB kommt in bestehenden Datenbanken einmal dazu (am Ende der Liste, mit Vorbelegung); danach gilt die Rechte-Tabelle. Leitungen und Verwaltung haben das neue Recht wie alle Rechte vorbelegt.
+- 14.11.2026 (0.47.0): Ziele anlegen und ändern dürfen, die auch Maßnahmen anlegen dürfen (Fachkräfte und die Bezugspflege) – dieselbe Regel, weil beides zusammen mit dem Bewohner erarbeitet wird.
+- 14.11.2026 (0.47.0): „Kein Ziel benennen“ geht nur, solange kein aktives Ziel eingetragen ist, und gilt, bis danach ein Ziel eingetragen wird – so widersprechen sich Liste und Vermerk nie.
+- 14.11.2026 (0.47.0): Ein Ziel ist abgeschlossen, sobald sein Stand „erreicht“, „geändert“ oder „beendet“ ist (mit kurzem Satz); danach wird ein neues vereinbart. Den Wortlaut zu ändern ist eine neue Fassung mit Stand „aktiv“.
+- 14.11.2026 (0.47.0): Der Bericht zu einem Ziel ist freiwillig und als eigene Tabelle `bericht_ziel` gespeichert (Berichte selbst bleiben unverändert). Die kurzen Einträge bestätigter Maßnahmen tragen das Ziel ihrer Maßnahme mit.
+- 14.11.2026 (0.47.0): Marken der Ziele erscheinen in der Zielleiste und im Reiter, nicht als eigene Marken im Akte-Kopf – die volle Prüfliste kommt mit der Prüfseite (Schritt 44).
+- 14.11.2026 (0.47.0): Mindestzahl „1 Leitziel + 2 Nahziele“ als Vorgabe; in den Einstellungen 0–3 Leitziele und 0–6 Nahziele (Tobi nannte einmal „mindestens 3 Nahziele“).
+- 14.11.2026 (0.46.0): Einnahmezeiten nach der Uhr: morgens 5–11, mittags 11–15, abends 15–21, nachts 21–5 Uhr; „nachts“ nach Mitternacht gehört
+  zum Vortag. Dienste: Früh gibt morgens und mittags aus, Spät abends, Nacht nachts (für Hinweis und Übergabe).
+- 14.11.2026 (0.46.0): Recht „Medikamente ausgeben“ mit derselben Vorbelegung wie „Medikation bearbeiten“, auch „nur Fachkräfte“ („wie bisher
+  beim Medikamentenplan“). Wenn Assistenzkräfte ausgeben sollen: in der Rechte-Tabelle das Häkchen „nur Fachkräfte“ abnehmen.
+- 14.11.2026 (0.46.0): „Abwesend laut Ausgangsliste“ wird angezeigt, aber nicht von selbst gesetzt: Gesetzt wird nur, was jemand anklickt.
+- 14.11.2026 (0.46.0): Ausgabe-Berichte tragen ein eigenes Kennzeichen; sonst erschienen sie als „Medikation geändert“ oder als „Bedarfsgabe“.
+- 14.11.2026 (0.45.0): Ein Bericht mit Dauer zählt in der Spalte seines **ersten** Lebensbereichs; mehrere Lebensbereiche zu teilen hieße,
+  Minuten zu erfinden. Therapie-Teilnahmen haben keinen Lebensbereich („ohne LB“).
+- 14.11.2026 (0.45.0): „Maßnahmen geplant“ zählt die fälligen Termine bis heute (nicht in der Zukunft) mit dem Zeitwert der jeweils geltenden
+  Fassung; „bei Bedarf“ ist nicht geplant. Abgelehnte und nicht mögliche Durchführungen zählen nicht als Zeit.
+- 14.11.2026 (0.45.0): Die Dauer eines Berichts steht in einer eigenen Tabelle (`bericht_dauer`), nicht als neue Spalte: Berichte werden nie
+  geändert, und der Datenbank-Schritt bleibt wiederholbar.
+- 14.11.2026 (0.45.0): Das Recht ist vorbelegt für Administrator, Geschäftsführung, Hausleitung, Verwaltung und Bereichsleitung („Leitung und
+  Verwaltung“).
+- 14.11.2026 (0.44.0): Der Sammeleintrag am Dienstende ist eine **allgemeine** Übergabe-Notiz je Wohnbereich (der Bereich steht vorn im Text):
+  Übergaben haben keinen eigenen Bereich, nur einen Bewohner oder „allgemein“. Verfasser ist „AUTO“ – sonst stünde das
+  Kürzel dessen da, der zufällig als Erster nach dem Dienstwechsel die Übersicht öffnet. Er gilt bis zum Ende des nächsten
+  Dienstes; ein Eintrag in „meta“ sorgt dafür, dass er auch an mehreren Rechnern nur einmal entsteht.
+- 14.11.2026 (0.44.0): Kasten statt eigener Kasten: Die Maßnahmen sind der zweite Abschnitt von „Laufender Dienst · noch offen“ (Wunsch
+  „nur eine Checkliste“); der Zähler im Kopf zählt offene Aufgaben und offene Maßnahmen zusammen.
 - 14.11.2026 (0.43.0): Die Marke „seit … Wochen kein Bericht“ und die Zahl im Quartal zählen nur **geschriebene** Berichte, nicht die
   kurzen Einträge der bestätigten Maßnahmen – sonst hielte ein täglich abgehakter Punkt einen Lebensbereich „aktuell“, in dem
   niemand etwas geschrieben hat. Die Maßnahmen stehen daneben gezählt (Reflexion).
@@ -2596,6 +2692,33 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.51.0: Seite „Hilfeplangespräche“ (Bereich R1): Liste nach Fälligkeit, überfällige orange. Bewohner wählen → „Termin vergeben …“ (TT.MM.JJJJ SS:MM, Ort, Teilnehmer ankreuzen) → im Tagesplan des Tages und im Kalender sichtbar. „Einladen …“ → .ics speichern, E-Mail-Programm öffnet sich. „Vorbereitung …“ → Aufgaben für den Bereich. „Geführt …“ → Bericht „Hilfeplangespräch“ in der Dokumentation. Akte → Reiter „Kostenträger“: Zeile „Hilfeplangespräch“. Seite „Qualität“: Spalte „Hilfeplan“.
+
+Version 0.50.0: Als EF: Akte eines Bewohners → „Entlassen …“ → Liste „Das endet“ prüfen → Entlassen → Bewohner fehlt in Übersicht und Dokumentation. Seite „Archiv“: vier Einträge, Suche, „Akte ansehen …“ (nur lesen, Reiter, Drucken), „Wieder aufnehmen …“ mit Bett. Als TST: „nur Aufbewahrung abgelaufen“ → „Löschen freigeben“; als RS anmelden → „Endgültig löschen …“ → „Löschprotokoll …“. Einstellungen → „Archiv: Aufbewahrungsfrist“ leeren → Archiv zeigt den Hinweis „nicht festgelegt“.
+
+Version 0.49.0: Tagesplan öffnen → oben „Küchendienst heute: … (Zi. …)“, rechts „noch offen“ und die Knöpfe „gemacht“, „nicht gemacht“, „vertreten durch …“ → danach Stand mit Kürzel und Uhrzeit. In der Ausgangsliste einen Tausch für übermorgen setzen → am Tag „getauscht mit Zi. …“. Alle Bewohner des Dienst-Zimmers abwesend melden → „Küchendienst unbesetzt“ (orange) im Tagesplan und als Marke auf der Übersicht. Einstellungen → Module → Küchendienst aus → Zeile verschwindet.
+
+Version 0.48.0: Als TST oder QS anmelden → in der Bereichswahl „QM“ → Seite „Qualität“: Kennzahlen je Bereich, Prüfliste mit Haken und Mängeln (orange). „nur mit Mängeln“ und Bereich „R1“ filtern. Bewohner wählen → „Hinweis senden …“ (Mängel auswählen) → Aufgaben-Seite des Bereichs zeigt die Aufgabe; nach „erledigt“ steht in der Prüfliste „erledigt am …“. „Als geprüft vermerken“, „Prüfverlauf …“, „Nachweis Ziele und Maßnahmen …“ (Druckvorschau). Als QS: keine Berichte schreiben, keine Maßnahmen bestätigen. Einstellungen → „Qualität: Prüfpunkte“: einen Punkt abwählen → Spalte verschwindet.
+
+Version 0.47.0: Akte eines Bewohners öffnen → unter der Auskunftsleiste die Zielleiste; Reiter „Ziele und Maßnahmen“: Ziele oben, Maßnahmen nach Ziel gruppiert. „Neues Ziel …“ (überprüfen-bis-Vorschlag folgt der Art), „Ziel ändern …“ mit Stand „erreicht“ und Satz → Ziel verschwindet, mit „frühere Ziele zeigen“ wieder sichtbar; „Verlauf …“. Ziel wählen → „Berichte zu diesem Ziel“ öffnet die Dokumentation gefiltert. Neuer Bericht: Feld „Ziel (freiwillig)“. Bewohner ohne Ziele: Zielleiste „Ziele: nicht erfasst“ in Achtung-Farbe; „Kein Ziel benennen …“ mit Grund. Reflexion: „Ziele im Monat“; HEB-Bogen, Seite „Ziele“: Ziele aus der Akte. Einstellungen → „Ziele: wie viele je Bewohner“.
+
+Version 0.46.0: Als AB (Fachkraft): Seitenleiste „Medikamentenausgabe“ → laufende Einnahmezeit vorgewählt, je Bewohner die Medikamente;
+einen wählen, „nicht abgeholt“ → steht oben, gelb; in der Übersicht im Kasten „Laufender Dienst“ „Medikamente … noch nicht
+abgeholt“. „Einzeln …“: eines ankreuzen, „abgelehnt“ → Stand „teilweise …“, in der Dokumentation ein Bericht „Medikamente …:
+abgelehnt (…)“ ohne Marke „Medikation geändert“. Akte → Medikamentenplan → „Ausgabe der letzten 14 Tage …“. Als KL
+(Assistenzkraft) fehlt der Bereich. Nach dem Dienstwechsel in „Übergabe“ (allgemein) „R1 · Medikamente aus dem … offen: …“.
+
+Version 0.45.0: Als EF (Bereichsleitung): Seitenleiste „Auswertung“ → Zeitraum, „Auswerten“: je Bewohner Minuten nach LB, Art,
+Summe, „Maßnahmen geplant“; oben der Hinweis „keine Abrechnung“. „Drucken …“ (quer) und „Als CSV speichern …“ → in Excel
+öffnen. Als KL (Assistenzkraft) fehlt „Auswertung“. Neuer Bericht mit „Dauer (freiwillig)“ 20 → zählt unter
+„Gespräche/Sonstiges“; „abc“ → Fehler. „Maßnahme“ ist als Berichtsart nicht wählbar.
+
+Version 0.44.0: Übersicht: Im Kasten „Laufender Dienst · noch offen“ unter den Aufgaben „Maßnahmen: … von … bestätigt“ mit Balken,
+„alle“ · „meine Bezugsbewohner“, darunter die offenen Maßnahmen mit drei Knöpfen; eine mit vergangener Uhrzeit trägt
+„überfällig“. „durchgeführt“ → Zeile verschwindet, „▸ Bestätigt (n)“ klappt sie blass mit Kürzel auf. „abgelehnt …“ → Fenster
+mit Grund. In der Bewohnerliste Spalte „Maßnahmen“ („2 offen“, „✓“). Nach dem Dienstwechsel steht in „Übergabe“ unter
+„allgemein“ ein Eintrag „R1 · … Maßnahmen aus dem … offen: …“ von „AUTO“.
 
 Version 0.43.0: Akte (z. B. Ahorn) → Reiter „Maßnahmen“: oben fünf Lebensbereiche mit Zahl, letztem Bericht, „Reflexion bis“
 und Hinweis; darunter die Maßnahmen; unten „Aus dem Medikamentenplan“. „Neue Maßnahme …“: Titel „Morgens Movicol“ →

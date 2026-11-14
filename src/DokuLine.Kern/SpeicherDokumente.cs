@@ -205,7 +205,7 @@ public sealed partial class Speicher
         // Zeilen wieder da – ihre Dateien müssen es auch sein.
         var jetzt = Uhr();
         var heute = DateOnly.FromDateTime(jetzt);
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         foreach (var (b, kategorie, titel, datum, bis, zeilen) in Demodaten.Dokumente(bewohner, heute))
         {
             string ordner = Path.Combine(wurzel, b.Id!.Value.ToString(CultureInfo.InvariantCulture));

@@ -176,7 +176,7 @@ public sealed partial class Speicher
     // eine Änderung „gilt ab“).
     private void DemoTherapieEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         Ausfuehren("DELETE FROM angebote", transaktion);
         foreach (var d in Demodaten.Therapie(bewohner, Uhr()))
         {

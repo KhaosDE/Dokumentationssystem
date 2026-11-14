@@ -23,6 +23,8 @@ public sealed class HebFenster : Form, IEntwurfFenster
     public Dictionary<string, Label> Hinweise { get; } = [];
     public Dictionary<int, RadioButton[]> Hilfebedarf { get; } = [];   // [0] = noch nicht eingeschätzt, [1..6] = Stufe
     public Dictionary<int, Label> Quellen { get; } = [];
+    // Zum Nachsehen: die Ziele aus der Akte mit ihren Berichten und Maßnahmen im Zeitraum (Bauplan 43).
+    public Label ZielQuellen { get; } = new() { AutoSize = true, ForeColor = Stil.TextMittel, BackColor = Stil.Seite, Font = Stil.Klein, UseMnemonic = false };
     public Label Kopf { get; } = new() { AutoSize = true, ForeColor = Stil.TextNormal, BackColor = Stil.Fensterhintergrund, UseMnemonic = false };
     public MarkenFeld Status { get; } = new("Entwurf", Stil.Achtung);
     public Label Meldung { get; } = new() { AutoSize = true, BackColor = Stil.Fensterhintergrund, Visible = false, MaximumSize = new Size(700, 0) };
@@ -124,7 +126,8 @@ public sealed class HebFenster : Form, IEntwurfFenster
         }
         var zusatz = HebRegeln.Zusatzfelder(a);
         if (a != Bogenart.C)
-            seiten["Ziele"] = [Abschnitt("LEITZIEL UND NAHZIELE"), .. zusatz.Where(f => f.Schluessel.StartsWith("leitziel") || f.Schluessel.StartsWith("nahziel")).SelectMany(FeldBauen)];
+            seiten["Ziele"] = [Abschnitt("LEITZIEL UND NAHZIELE"), .. zusatz.Where(f => f.Schluessel.StartsWith("leitziel") || f.Schluessel.StartsWith("nahziel")).SelectMany(FeldBauen),
+                Abschnitt("AUS DER AKTE: ZIELE MIT BERICHTEN UND MASSNAHMEN IM ZEITRAUM"), ZielQuellen];
         seiten["Weiteres"] =
         [
             Abschnitt("WEITERE ANGABEN"), .. zusatz.Where(f => !f.Schluessel.StartsWith("leitziel") && !f.Schluessel.StartsWith("nahziel")).SelectMany(FeldBauen),
@@ -213,6 +216,9 @@ public sealed class HebFenster : Form, IEntwurfFenster
             zeilen.Add(planText);
             Quellen[b].Text = string.Join(Environment.NewLine, zeilen);
         }
+        var ziele = ZielRegeln.Zusammenfassung(speicher.Ziele(id), speicher.Berichte(id, new BerichtFilter(Bogen.Von, Bogen.Bis)),
+            speicher.Massnahmen(id, auchBeendete: true), speicher.MassnahmeBestaetigungen(id, Bogen.Von, Bogen.Bis));
+        ZielQuellen.Text = ziele.Count == 0 ? "In der Akte sind keine aktiven Ziele eingetragen." : string.Join(Environment.NewLine, ziele);
     }
 
     public void SeiteZeigen()

@@ -69,6 +69,12 @@ public sealed class AngabenAnsicht : KartenFlaeche
             var titel = speicher.Dokumente(b.Id!.Value, auchEntfernte: true).ToDictionary(d => d.Id, d => d.Titel);
             Zeilen = SchweigepflichtRegeln.Zeilen(sp, speicher.PersonenNamen(), id => titel.GetValueOrDefault(id), Heute);
         }
+        // Kostenträger (Bauplan 47): das Hilfeplangespräch – letztes, nächstes fällig bis, Stand.
+        if (art == Angabe.Kostentraeger)
+        {
+            var h = speicher.Hilfeplan(b.Id!.Value, Heute);
+            Zeilen = [.. Zeilen, ("Hilfeplangespräch", HilfeplanRegeln.KurzText(h), h.FaelligBis is null || HilfeplanRegeln.Marke(h, Heute) is not null)];
+        }
         ZustaendigkeitKnopf.Visible = betreuung;
         DokumenteKnopf.Visible = DokumentRegeln.KategorieFuer(art) is not null;
         if (DokumentRegeln.KategorieFuer(art) is string kategorie)

@@ -313,6 +313,18 @@ public sealed partial class Speicher
             }
         }
         AdministratorPruefen();
+        // Später dazugekommene Positionen einmal anlegen und vorbelegen (am Ende der Liste).
+        foreach (var p in RechteRegeln.PositionenNachtraeglich.Where(p => Meta(PositionSchluessel(p)) is null))
+        {
+            using var transaktion = db.BeginTransaction();
+            if (WertIn(transaktion, "SELECT wert FROM meta WHERE schluessel = $s", ("$s", PositionSchluessel(p))) is not null) continue;
+            Ausfuehren("INSERT OR IGNORE INTO positionen (name, nr) VALUES ($n, (SELECT COALESCE(MAX(nr), 0) + 1 FROM positionen))", transaktion, ("$n", p));
+            foreach (var (f, _) in Funktionen.Alle)
+                if (RechteRegeln.Vorbelegt(p, f))
+                    Ausfuehren("INSERT OR IGNORE INTO rechte (funktion, position) VALUES ($f, $p)", transaktion, ("$f", f), ("$p", p));
+            SetzeMeta(PositionSchluessel(p), "1", transaktion);
+            transaktion.Commit();
+        }
         // Später dazugekommene Funktionen einmal vorbelegen (bestehende Häkchen bleiben, wie sie sind).
         foreach (var f in RechteRegeln.Nachtraeglich.Where(f => Meta(NachtraeglichSchluessel(f)) is null))
         {
@@ -332,6 +344,7 @@ public sealed partial class Speicher
     }
 
     private static string NachtraeglichSchluessel(string funktion) => $"rechte_vorbelegt_{funktion}";
+    private static string PositionSchluessel(string position) => $"position_angelegt_{position}";
     private static string FachkraftSchluessel(string funktion) => $"nur_fachkraft_vorbelegt_{funktion}";
 
     // Einmal je Datenbank: Position „Administrator“ (an erster Stelle, alle Häkchen) und –
@@ -390,6 +403,7 @@ public sealed partial class Speicher
         SetzeMeta(Grundbestand, "1", transaktion);
         foreach (var f in RechteRegeln.Nachtraeglich) SetzeMeta(NachtraeglichSchluessel(f), "1", transaktion);   // oben schon vorbelegt
         foreach (var f in RechteRegeln.NurFachkraftNachtraeglich) SetzeMeta(FachkraftSchluessel(f), "1", transaktion);
+        foreach (var p in RechteRegeln.PositionenNachtraeglich) SetzeMeta(PositionSchluessel(p), "1", transaktion);
     }
 
     // Demo: Mitarbeiter, Bereiche, Positionen und Rechte wie neu (daten/demo/mitarbeiter.json).

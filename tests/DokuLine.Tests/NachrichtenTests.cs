@@ -30,8 +30,8 @@ public sealed class NachrichtenTests : IDisposable
     [Fact]
     public void Demo_Kollegen_Teams_und_Posteingang()
     {
-        Assert.Equal(29, s.Kollegen().Count);                      // Mitarbeiter aus mitarbeiter.json, mit einem Ausgeschiedenen, TST und TH (Therapie)
-        Assert.Equal(28, s.Kollegen(nurAktive: true).Count);
+        Assert.Equal(30, s.Kollegen().Count);                      // Mitarbeiter aus mitarbeiter.json, mit einem Ausgeschiedenen, TST, TH (Therapie) und QS (QMB)
+        Assert.Equal(29, s.Kollegen(nurAktive: true).Count);
         Assert.Equal(["Leitung", "R1", "R2", "R3", "Therapie", "Verwaltung"], s.Teams());
         Assert.Equal("Anna Bachstelze (AB)", s.Kollege("ab")!.Anzeige);
         // AB: zwei ungelesene im Team-Verlauf „Arzttermin“, eine direkte von OP.
@@ -170,11 +170,11 @@ public sealed class NachrichtenTests : IDisposable
             befehl.ExecuteNonQuery();
         }
         Assert.True(s.DemoBeimErstenStart());
-        Assert.Equal(29, s.Kollegen().Count);
+        Assert.Equal(30, s.Kollegen().Count);
         Assert.Equal(3, s.UngeleseneNachrichten("AB"));
         Assert.False(s.DemoBeimErstenStart());
         s.DemoZuruecksetzen();   // zweimal laden verdoppelt nichts
-        Assert.Equal(29, s.Kollegen().Count);
+        Assert.Equal(30, s.Kollegen().Count);
         Assert.Equal(3, s.UngeleseneNachrichten("AB"));
     }
 }

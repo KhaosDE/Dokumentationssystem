@@ -151,6 +151,7 @@ public sealed partial class Speicher
         {
             BewohnerId = m.BewohnerId, Zeitpunkt = jetzt, Schicht = dienst.Schicht, Verfasser = kuerzel.Trim(), Bereiche = [f.Lebensbereich],
             Text = MassnahmenRegeln.BerichtText(f.Titel, ergebnis, grund, minuten, bemerkung), Erfasst = jetzt, Art = MassnahmenRegeln.ArtBericht,
+            ZielId = f.ZielId,
         }, transaktion);
         long id = BestaetigungEinfuegen(m, f, dienst, bedarf, ergebnis, grund, ergebnis == MassnahmeErgebnis.Durchgefuehrt ? minuten : 0, bemerkung,
             kuerzel.Trim(), jetzt, bericht, transaktion);
@@ -172,6 +173,31 @@ public sealed partial class Speicher
         return Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
     }
 
+    // Nach dem Dienstwechsel einmal: Was im vorigen Dienst offen blieb, geht als Sammeleintrag je Wohnbereich in die
+    // Übergabe (bis zum Ende des nächsten Dienstes). Der Eintrag in „meta“ sorgt dafür, dass es auch an mehreren Rechnern
+    // nur einmal geschieht. Rückgabe: Zahl der Einträge.
+    public int MassnahmenUebergabeErzeugen(DateTime jetzt)
+    {
+        var vorher = SchichtTermin.Zu(SchichtTermin.Zu(jetzt).Beginn.AddMinutes(-1));
+        string schluessel = $"massnahmen_uebergabe:{Iso(vorher.Tag)}:{BerichtRegeln.Kuerzel(vorher.Schicht)}";
+        if (Meta(schluessel) is not null) return 0;
+        var offen = MassnahmenImDienst(vorher).Where(t => t.Offen).ToList();
+        var bewohner = AlleBewohner().ToDictionary(b => b.Id!.Value);
+        using var transaktion = db.BeginTransaction();
+        Ausfuehren("INSERT OR IGNORE INTO meta (schluessel, wert) VALUES ($s, '1')", transaktion, ("$s", schluessel));
+        if (Convert.ToInt32(WertIn(transaktion, "SELECT changes()"), CultureInfo.InvariantCulture) == 0) return 0;   // ein anderer Rechner war schneller
+        int neu = 0;
+        foreach (var gruppe in offen.Where(t => bewohner.ContainsKey(t.Massnahme.BewohnerId)).GroupBy(t => bewohner[t.Massnahme.BewohnerId].Wohnbereich).OrderBy(g => g.Key))
+        {
+            string text = MassnahmenRegeln.UebergabeText(gruppe.Key, vorher, [.. gruppe.Select(t => (bewohner[t.Massnahme.BewohnerId].Name, t.Fassung.Titel))]);
+            UebergabeEinfuegen(null, null, text, jetzt, MassnahmenRegeln.UebergabeVerfasser,
+                UebergabeRegeln.GiltBis(UebergabeDauer.NaechsteSchicht, jetzt, null), transaktion);
+            neu++;
+        }
+        transaktion.Commit();
+        return neu;
+    }
+
     // Für die Frage „Ist das ärztlich verordnet?“: Wirkstoffe und Handelsnamen der Medikamentendatenbank.
     public List<string> MedikamentNamen() =>
         [.. Medikamente().SelectMany(m => m.Aktuell.Handelsnamen.Append(m.Aktuell.Wirkstoff)).Where(n => n.Trim().Length > 0).Distinct(StringComparer.OrdinalIgnoreCase)];
@@ -184,11 +210,15 @@ public sealed partial class Speicher
             DELETE FROM massnahme_bestaetigungen; DELETE FROM massnahme_fassungen; DELETE FROM massnahmen;
             """, transaktion);
         var jetzt = Uhr();
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         bewohner.Sort(BewohnerRegeln.NachName);
         var dienstJetzt = SchichtTermin.Zu(jetzt);
-        foreach (var (b, fassung, nr) in Demodaten.Massnahmen(bewohner, DateOnly.FromDateTime(jetzt)))
+        var ziele = ZieleLesen(transaktion, null).Where(z => z.Aktiv).ToLookup(z => z.BewohnerId);
+        foreach (var (b, ohneZiel, nr) in Demodaten.Massnahmen(bewohner, DateOnly.FromDateTime(jetzt)))
         {
+            // Die erste Maßnahme zum ersten Nahziel, die zweite zum zweiten, die dritte zum Leitziel; weitere ohne Ziel.
+            var eigene = ziele[b.Id!.Value].OrderByDescending(z => z.Art).ThenBy(z => z.Id).ToList();
+            var fassung = ohneZiel with { ZielId = nr < eigene.Count && nr < 3 ? eigene[nr].Id : null };
             Ausfuehren("INSERT INTO massnahmen (bewohner_id, erstellt, kuerzel) VALUES ($b, $e, $k)", transaktion,
                 ("$b", b.Id), ("$e", Zeit(fassung.Erfasst)), ("$k", fassung.Kuerzel));
             long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
@@ -207,6 +237,7 @@ public sealed partial class Speicher
                 {
                     BewohnerId = m.BewohnerId, Zeitpunkt = zeit, Schicht = dienst.Schicht, Verfasser = kuerzel, Bereiche = [fassung.Lebensbereich],
                     Text = MassnahmenRegeln.BerichtText(fassung.Titel, ergebnis, grund, Math.Max(0, minuten), ""), Erfasst = zeit, Art = MassnahmenRegeln.ArtBericht,
+                    ZielId = fassung.ZielId,
                 }, transaktion);
                 BestaetigungEinfuegen(m, fassung, dienst, false, ergebnis, grund, Math.Max(0, minuten), "", kuerzel, zeit, bericht, transaktion);
             }

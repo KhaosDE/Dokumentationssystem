@@ -52,6 +52,11 @@ public sealed partial class Hauptfenster
             case "Tagesplan": Tagesplan.Aktualisieren(); break;
             case "Übergabe": Uebergabe.Aktualisieren(); break;
             case "Visiten": Visiten.Aktualisieren(); break;
+            case "Auswertung": Auswertung.Aktualisieren(); break;
+            case "Qualität": Qualitaet.Aktualisieren(filterBehalten: true); break;
+            case "Archiv": Archiv.Aktualisieren(); break;
+            case "Hilfeplangespräche": Hilfeplan.Aktualisieren(); break;
+            case "Medikamentenausgabe": Ausgabe.Aktualisieren(); break;
             case "Aufgaben": Aufgaben.Aktualisieren(); break;
             case "Nachrichten": Nachrichten.Aktualisieren(); break;
             case "Kalender": Kalender.Aktualisieren(); break;

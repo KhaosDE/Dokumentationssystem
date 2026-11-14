@@ -1064,6 +1064,155 @@ public sealed partial class Speicher : IDisposable
         INSERT INTO berichtsarten (name, nr) SELECT 'Maßnahme', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
             WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Maßnahme');
         """,
+        // 42 – Zeitauswertung: freiwillige Dauer eines Berichts in Minuten (eigene Tabelle: Berichte werden nie geändert).
+        """
+        CREATE TABLE IF NOT EXISTS bericht_dauer (
+            bericht_id INTEGER PRIMARY KEY REFERENCES berichte(id) ON DELETE CASCADE,
+            minuten    INTEGER NOT NULL CHECK (minuten BETWEEN 1 AND 600)
+        );
+        CREATE TRIGGER IF NOT EXISTS bericht_dauer_bleibt BEFORE UPDATE ON bericht_dauer
+            BEGIN SELECT RAISE(ABORT, 'Die Dauer eines Berichts wird nicht geändert.'); END;
+        """,
+        // 43 – Medikamentenausgabe: je Medikament, Tag und Einnahmezeit ein Eintrag (nie geändert; der neueste gilt).
+        """
+        CREATE TABLE IF NOT EXISTS medikamentenausgaben (
+            id            INTEGER PRIMARY KEY,
+            bewohner_id   INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            tag           TEXT NOT NULL,
+            zeit          TEXT NOT NULL CHECK (zeit IN ('morgens', 'mittags', 'abends', 'nachts')),
+            verordnung_id INTEGER NOT NULL REFERENCES verordnungen(id) ON DELETE CASCADE,
+            status        TEXT NOT NULL CHECK (status IN ('ausgegeben', 'nichtabgeholt', 'abgelehnt', 'abwesend', 'mitgegeben')),
+            kuerzel       TEXT NOT NULL,
+            erfasst       TEXT NOT NULL,
+            bericht_id    INTEGER REFERENCES berichte(id) ON DELETE SET NULL
+        );
+        CREATE INDEX IF NOT EXISTS medikamentenausgaben_tag ON medikamentenausgaben (tag, zeit);
+        CREATE INDEX IF NOT EXISTS medikamentenausgaben_bewohner ON medikamentenausgaben (bewohner_id, tag);
+        CREATE TRIGGER IF NOT EXISTS medikamentenausgaben_bleiben
+            BEFORE UPDATE OF bewohner_id, tag, zeit, verordnung_id, status, kuerzel, erfasst ON medikamentenausgaben
+            BEGIN SELECT RAISE(ABORT, 'Einträge der Medikamentenausgabe werden nicht geändert – ein neuer Eintrag gilt.'); END;
+        """,
+        // 44 – Ziele: Leitziel und Nahziele mit Fassungen (nie überschrieben), „kein Ziel benennen“, Bericht zu einem Ziel.
+        """
+        CREATE TABLE IF NOT EXISTS ziele (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('leitziel', 'nahziel')),
+            erstellt    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS ziel_fassungen (
+            id               INTEGER PRIMARY KEY,
+            ziel_id          INTEGER NOT NULL REFERENCES ziele(id) ON DELETE CASCADE,
+            wortlaut         TEXT NOT NULL CHECK (length(wortlaut) > 0),
+            lebensbereich    INTEGER NOT NULL CHECK (lebensbereich BETWEEN 1 AND 5),
+            vereinbart_am    TEXT NOT NULL,
+            mit_wem          TEXT NOT NULL,
+            ueberpruefen_bis TEXT NOT NULL,
+            stand            TEXT NOT NULL CHECK (stand IN ('aktiv', 'erreicht', 'geaendert', 'beendet')),
+            stand_am         TEXT,
+            stand_satz       TEXT NOT NULL DEFAULT '',
+            kuerzel          TEXT NOT NULL,
+            erfasst          TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS ziel_fassungen_bleiben BEFORE UPDATE ON ziel_fassungen
+            BEGIN SELECT RAISE(ABORT, 'Ziele werden nicht überschrieben – jede Änderung ist eine neue Fassung.'); END;
+        CREATE TABLE IF NOT EXISTS ziel_verzicht (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            ab          TEXT NOT NULL,
+            grund       TEXT NOT NULL CHECK (length(grund) > 0),
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS bericht_ziel (
+            bericht_id INTEGER PRIMARY KEY REFERENCES berichte(id) ON DELETE CASCADE,
+            ziel_id    INTEGER NOT NULL REFERENCES ziele(id) ON DELETE CASCADE
+        );
+        """,
+        // 45 – Qualität: Prüfvermerke mit Verlauf und Hinweise an den Wohnbereich (beide nie geändert).
+        """
+        CREATE TABLE IF NOT EXISTS qm_vermerke (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            zeit        TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            bemerkung   TEXT NOT NULL DEFAULT ''
+        );
+        CREATE TABLE IF NOT EXISTS qm_hinweise (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            aufgabe_id  INTEGER NOT NULL REFERENCES aufgaben(id) ON DELETE CASCADE,
+            text        TEXT NOT NULL,
+            gesendet    TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS qm_vermerke_bleiben BEFORE UPDATE ON qm_vermerke
+            BEGIN SELECT RAISE(ABORT, 'Prüfvermerke werden nicht geändert.'); END;
+        CREATE TRIGGER IF NOT EXISTS qm_hinweise_bleiben BEFORE UPDATE ON qm_hinweise
+            BEGIN SELECT RAISE(ABORT, 'Hinweise werden nicht geändert.'); END;
+        """,
+        // 46 – Archiv: Entlassung und Wiederaufnahme als eigene Einträge, Löschfreigabe (Vier-Augen) und Löschprotokoll ohne Inhalte.
+        """
+        CREATE TABLE IF NOT EXISTS archiv (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            aufgenommen TEXT NOT NULL,
+            entlassen   TEXT NOT NULL,
+            grund       TEXT NOT NULL CHECK (grund IN ('auszug', 'verlegung', 'verstorben', 'sonstiges')),
+            bemerkung   TEXT NOT NULL DEFAULT '',
+            wohnbereich TEXT NOT NULL,
+            zimmer      TEXT NOT NULL,
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS archiv_wiederaufnahmen (
+            archiv_id INTEGER PRIMARY KEY REFERENCES archiv(id) ON DELETE CASCADE,
+            datum     TEXT NOT NULL,
+            kuerzel   TEXT NOT NULL,
+            erfasst   TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS archiv_loeschfreigaben (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            kuerzel     TEXT NOT NULL,
+            zeit        TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS loeschprotokoll (
+            id          INTEGER PRIMARY KEY,
+            bewohner_nr INTEGER NOT NULL,
+            zeitraum    TEXT NOT NULL,
+            freigabe    TEXT NOT NULL,
+            geloescht   TEXT NOT NULL,
+            zeit        TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS archiv_bleibt BEFORE UPDATE ON archiv
+            BEGIN SELECT RAISE(ABORT, 'Archiveinträge werden nicht geändert.'); END;
+        CREATE TRIGGER IF NOT EXISTS loeschprotokoll_bleibt BEFORE UPDATE ON loeschprotokoll
+            BEGIN SELECT RAISE(ABORT, 'Das Löschprotokoll wird nicht geändert.'); END;
+        CREATE TRIGGER IF NOT EXISTS loeschprotokoll_nicht_loeschen BEFORE DELETE ON loeschprotokoll
+            BEGIN SELECT RAISE(ABORT, 'Das Löschprotokoll wird nicht gelöscht.'); END;
+        CREATE VIEW IF NOT EXISTS archiviert AS
+            SELECT a.bewohner_id FROM archiv a
+            WHERE a.id = (SELECT MAX(x.id) FROM archiv x WHERE x.bewohner_id = a.bewohner_id)
+              AND NOT EXISTS (SELECT 1 FROM archiv_wiederaufnahmen w WHERE w.archiv_id = a.id);
+        """,
+        // 47 – Hilfeplangespräche: Fälligkeit, Termin (Kalender) und „geführt“ als Ereignisse; Berichtsart „Hilfeplangespräch“.
+        """
+        CREATE TABLE IF NOT EXISTS hilfeplan (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('faellig', 'termin', 'gefuehrt')),
+            datum       TEXT NOT NULL,
+            kalender_id INTEGER REFERENCES kalender(id) ON DELETE SET NULL,
+            teilnehmer  TEXT NOT NULL DEFAULT '',
+            bericht_id  INTEGER REFERENCES berichte(id) ON DELETE SET NULL,
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        INSERT INTO berichtsarten (name, nr) SELECT 'Hilfeplangespräch', (SELECT COALESCE(MAX(nr), 0) + 1 FROM berichtsarten)
+            WHERE NOT EXISTS (SELECT 1 FROM berichtsarten WHERE name = 'Hilfeplangespräch');
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1134,9 +1283,10 @@ public sealed partial class Speicher : IDisposable
 
     // ------------------------------------------------------------------ Bewohner
 
+    // Ohne die archivierten (Bauplan 46); das Archiv liest sie über Bewohner(id).
     public List<Bewohner> AlleBewohner()
     {
-        var liste = Lesen($"SELECT id, {Spalten} FROM bewohner");
+        var liste = Lesen($"SELECT id, {Spalten} FROM bewohner WHERE id NOT IN (SELECT bewohner_id FROM archiviert)");
         liste.Sort(BewohnerRegeln.NachName);
         return liste;
     }
@@ -1144,7 +1294,7 @@ public sealed partial class Speicher : IDisposable
     // Für Module, die innerhalb einer eigenen Transaktion lesen (z. B. beim Laden der Demo-Daten).
     public List<Bewohner> AlleBewohner(SqliteTransaction transaktion)
     {
-        var liste = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var liste = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner WHERE id NOT IN (SELECT bewohner_id FROM archiviert)");
         liste.Sort(BewohnerRegeln.NachName);
         return liste;
     }
@@ -1239,10 +1389,11 @@ public sealed partial class Speicher : IDisposable
              biografie = Meta(DemoBiografie) is null, reflexion = Meta(DemoReflexion) is null, heb = Meta(DemoHeb) is null,
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
              akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
-             vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null;
+             vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null, ausgabe = Meta(DemoAusgabe) is null,
+             ziele = Meta(DemoZiele) is null, archiv = Meta(DemoArchiv) is null, hilfeplan = Meta(DemoHilfeplan) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !archiv && !hilfeplan && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1267,15 +1418,19 @@ public sealed partial class Speicher : IDisposable
         if (akte || personen || betreuer || aerzte) DemoAkteAngabenEinfuegen(transaktion);   // hängt an Personen und Betreuern
         if (schweigepflicht || akte || personen || betreuer || aerzte) DemoSchweigepflichtEinfuegen(transaktion);   // hängt an den Angaben der Akte
         if (vital || aerzte) DemoVitalEinfuegen(transaktion);   // die Grenzen nennen einen Arzt
-        if (massnahmen) DemoMassnahmenEinfuegen(transaktion);
+        if (ziele) DemoZieleEinfuegen(transaktion);
+        if (massnahmen || ziele) DemoMassnahmenEinfuegen(transaktion);   // die Maßnahmen hängen an den Zielen
         if (dokumente) DemoDokumenteEinfuegen(transaktion);
         if (bedarf || medikamente || medikation) DemoBedarfEinfuegen(transaktion);   // hängt an den Bedarfsverordnungen
+        if (ausgabe || medikamente || medikation) DemoAusgabeEinfuegen(transaktion);   // hängt an den Verordnungen
         if (biografie) DemoBiografieEinfuegen(transaktion);
         if (reflexion) DemoReflexionEinfuegen(transaktion);
         if (heb) DemoHebEinfuegen(transaktion);
         if (status) DemoStatusEinfuegen(transaktion);
         if (bezug || mitarbeiter) DemoBezugEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
+        if (hilfeplan) DemoHilfeplanEinfuegen(transaktion);
+        if (archiv) DemoArchivEinfuegen(transaktion);
         transaktion.Commit();
         if (dokumente) AblageAufraeumen();
         if (modulNeu) ModuleGeaendert?.Invoke();
@@ -1298,7 +1453,7 @@ public sealed partial class Speicher : IDisposable
     {
         if (Betrieb.Aktiv || IstBetriebsdatenbank) throw new SpeicherFehler(Betrieb.DemoVerbotenText);
         var demo = Demodaten.Bewohner();   // erst lesen: Ist etwas kaputt, bleibt alles, wie es war
-        var alteBilder = AlleBewohner().Select(b => b.Bild).Where(b => b is not null).ToList();
+        var alteBilder = Lesen($"SELECT id, {Spalten} FROM bewohner").Select(b => b.Bild).Where(b => b is not null).ToList();   // auch die archivierten
         using (var transaktion = db.BeginTransaction())
         {
             Ausfuehren("DELETE FROM bewohner", transaktion);   // Berichte und Nachträge folgen (CASCADE)
@@ -1326,15 +1481,19 @@ public sealed partial class Speicher : IDisposable
             DemoAkteAngabenEinfuegen(transaktion);
             DemoSchweigepflichtEinfuegen(transaktion);
             DemoVitalEinfuegen(transaktion);
+            DemoZieleEinfuegen(transaktion);
             DemoMassnahmenEinfuegen(transaktion);
             DemoDokumenteEinfuegen(transaktion);
             DemoBedarfEinfuegen(transaktion);
+            DemoAusgabeEinfuegen(transaktion);
             DemoBiografieEinfuegen(transaktion);
             DemoReflexionEinfuegen(transaktion);
             DemoHebEinfuegen(transaktion);
             DemoStatusEinfuegen(transaktion);
             DemoBezugEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
+            DemoHilfeplanEinfuegen(transaktion);
+            DemoArchivEinfuegen(transaktion);   // zuletzt: die ehemaligen Bewohner bekommen keine Demo-Daten der Lebenden
             transaktion.Commit();
         }
         foreach (var bild in alteBilder) Bilder.Loeschen(bild);
@@ -1353,7 +1512,7 @@ public sealed partial class Speicher : IDisposable
 
     private void DemoBerichteEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         bewohner.Sort(BewohnerRegeln.NachName);
         Ausfuehren("DELETE FROM uebergaben WHERE bewohner_id IS NULL", transaktion);   // allgemeine Notizen der Demo
         var demo = Demodaten.Berichte(bewohner, Uhr());
@@ -1391,6 +1550,7 @@ public sealed partial class Speicher : IDisposable
     {
         if (Bewohner(b.BewohnerId) is null) throw new Eingabefehler(["Diesen Bewohner gibt es nicht mehr."]);
         if (b.Id is not null) throw new InvalidOperationException("Berichte werden nicht überschrieben – Korrekturen sind Nachträge.");
+        if (b.ZielId is long ziel && Ziele(b.BewohnerId).All(z => z.Id != ziel)) throw new Eingabefehler(["Das gewählte Ziel gehört nicht zu diesem Bewohner."]);
         if (uebergabe is not null) UebergabeRegeln.Pruefen(uebergabe, b.Erfasst);
         using var transaktion = db.BeginTransaction();
         long id = BerichtEinfuegen(b, transaktion);
@@ -1410,6 +1570,8 @@ public sealed partial class Speicher : IDisposable
             ("$bereiche", string.Join(",", b.Bereiche)), ("$t", b.Text), ("$w", b.Wichtig ? 1 : 0), ("$e", Zeit(b.Erfasst)),
             ("$art", b.Art));
         long id = Convert.ToInt64(WertIn(transaktion, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
+        if (b.Dauer is int dauer) Ausfuehren("INSERT INTO bericht_dauer (bericht_id, minuten) VALUES ($b, $m)", transaktion, ("$b", id), ("$m", dauer));
+        if (b.ZielId is long ziel) Ausfuehren("INSERT INTO bericht_ziel (bericht_id, ziel_id) VALUES ($b, $z)", transaktion, ("$b", id), ("$z", ziel));
         foreach (var n in b.Nachtraege)
             NachtragEinfuegen(id, n.Verfasser, n.Text, n.Erfasst, transaktion);
         return id;
@@ -1605,7 +1767,10 @@ public sealed partial class Speicher : IDisposable
         var berichte = new List<Bericht>();
         using (var befehl = Befehl("SELECT id, bewohner_id, zeitpunkt, schicht, verfasser, bereiche, text, wichtig, erfasst, " +
                                    "EXISTS (SELECT 1 FROM uebergaben u WHERE u.bericht_id = berichte.id), art, " +
-                                   $"EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id) FROM berichte {bedingung}",
+                                   "EXISTS (SELECT 1 FROM bedarfsgaben g WHERE g.bericht_id = berichte.id), " +
+                                   "(SELECT minuten FROM bericht_dauer d WHERE d.bericht_id = berichte.id), " +
+                                   "EXISTS (SELECT 1 FROM medikamentenausgaben a WHERE a.bericht_id = berichte.id), " +
+                                   $"(SELECT ziel_id FROM bericht_ziel z WHERE z.bericht_id = berichte.id) FROM berichte {bedingung}",
                                    null, parameter))
         using (var leser = befehl.ExecuteReader())
         {
@@ -1626,6 +1791,9 @@ public sealed partial class Speicher : IDisposable
                     Uebergabe = leser.GetInt64(9) != 0,
                     Art = leser.GetString(10),
                     Bedarfsgabe = leser.GetInt64(11) != 0,
+                    Dauer = leser.IsDBNull(12) ? null : leser.GetInt32(12),
+                    Ausgabe = leser.GetInt64(13) != 0,
+                    ZielId = leser.IsDBNull(14) ? null : leser.GetInt64(14),
                 });
             }
         }
@@ -1649,6 +1817,9 @@ public sealed partial class Speicher : IDisposable
     private static DateTime AusZeit(string s) => DateTime.ParseExact(s, ["yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm"], CultureInfo.InvariantCulture);
 
     // ------------------------------------------------------------------ Hilfen
+
+    // Die nicht archivierten Bewohner in Reihenfolge der Anlage (Demo-Daten verteilen sich danach).
+    private static string AktiveBewohnerSql => $"SELECT id, {Spalten} FROM bewohner WHERE id NOT IN (SELECT bewohner_id FROM archiviert)";
 
     private static string Platzhalter => string.Join(", ", Spalten.Split(", ").Select(s => "$" + s));
 

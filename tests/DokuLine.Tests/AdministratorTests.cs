@@ -80,7 +80,7 @@ public sealed class AdministratorTests : IDisposable
         Assert.True(RechteRegeln.IstAdministrator(tst));
         Assert.Equal(s.Bereichsliste().Select(b => b.Name).Order(), tst.Bereiche.Order());
         Assert.Contains(s.Startprotokoll, z => z.Contains("TST"));
-        Assert.Equal(29, s.AlleMitarbeiter().Count);
+        Assert.Equal(30, s.AlleMitarbeiter().Count);
         // Ein vorhandener TST wird nicht verändert, auch nicht bei erneuter Prüfung.
         s.MitarbeiterSpeichern(tst with { Vorname = "Probe", Positionen = ["Administrator", "Verwaltung"] }, neu: false);
         Sql("DELETE FROM meta WHERE schluessel = 'admin_tst'");

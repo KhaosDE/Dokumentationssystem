@@ -18,12 +18,14 @@ public sealed class BewohnerZeile
     // Spalte „Auskunft“ (Bauplan 35): Kurzform; die Namen stehen im Hinweis.
     public (string Kurz, string Namen, Entbindungsstand Art)? Auskunft { get; }
     public Marke? WoMarke { get; }
+    public string MassnahmenText { get; }   // Übersicht: „2 offen“, „✓“ oder leer (Bauplan 40)
     public bool ImHaus => Wo == HeuteWichtigRegeln.ImHaus;
 
     public BewohnerZeile(Bewohner bewohner, DateOnly heute, IReadOnlyList<Marke> marken,
         (string Kuerzel, Color Farbe)? bezugspflege, (string Text, Color Farbe)? trainer,
-        (string Text, MarkenArt Art, Marke? Quelle)? wo = null, (string Kurz, string Namen, Entbindungsstand Art)? auskunft = null)
+        (string Text, MarkenArt Art, Marke? Quelle)? wo = null, (string Kurz, string Namen, Entbindungsstand Art)? auskunft = null, string massnahmen = "")
     {
+        MassnahmenText = massnahmen;
         Auskunft = auskunft;
         Bewohner = bewohner;
         Marken = marken;
@@ -34,7 +36,7 @@ public sealed class BewohnerZeile
         WoMarke = wo?.Quelle;
         string bezug = bezugspflege is { } b ? $"● {b.Kuerzel}" : "";
         string[] spalten = wo is null ? [ZimmerText, bewohner.Name, bezug] : [ZimmerText, bewohner.Name, bezug, Wo!];
-        if (wo is not null && auskunft is { } a) spalten = [.. spalten, a.Kurz];
+        if (wo is not null) spalten = [.. spalten, auskunft is { } a ? a.Kurz : "", massnahmen];
         Eintrag = new ListViewItem([.. spalten, HinweisText])
         {
             Tag = this, UseItemStyleForSubItems = false, ToolTipText = Beschreibung,

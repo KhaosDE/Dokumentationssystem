@@ -31,6 +31,8 @@ public sealed class DokumentationAnsicht : Panel
     public List<BerichtZeile> Zeilen { get; } = [];
     public List<TagKopf> Tage { get; } = [];
     public List<MassnahmenTagZeile> MassnahmenZeilen { get; } = [];
+    // Zielleiste (Bauplan 43): beim Durchgehen der Bewohner sofort sehen, was jemand erreichen will.
+    public ZielLeiste Zielleiste { get; } = new();
 
     public ComboBox Zeitraum { get; } = Auswahl(140, "Zeitraum", "Heute", "7 Tage", "30 Tage", "frei …");
     public DatumFeld Von { get; } = new() { Width = 100, PlaceholderText = "von", Visible = false };
@@ -88,7 +90,7 @@ public sealed class DokumentationAnsicht : Panel
         Farbschluessel.Paint += (_, e) => FarbschluesselZeichnen(e.Graphics);
         liste.Controls.Add(leer);
         liste.Layout += (_, _) => ListeAnordnen();
-        Controls.AddRange([leiste, weitere, gespeichert, gesetzt, liste]);
+        Controls.AddRange([leiste, weitere, gespeichert, gesetzt, Zielleiste, liste]);
         FelderSetzen();
     }
 
@@ -186,6 +188,8 @@ public sealed class DokumentationAnsicht : Panel
     {
         var heute = DateOnly.FromDateTime(Jetzt());
         Berichte = Bewohner?.Id is long id ? speicher.Berichte(id, Filter, heute) : [];
+        Zielleiste.Visible = Bewohner is not null;
+        if (Bewohner?.Id is long bid) Zielleiste.Zeigen(speicher, bid, heute);
         if (Bewohner?.Id is long b)
         {
             fuellt = true;
@@ -377,6 +381,11 @@ public sealed class DokumentationAnsicht : Panel
             teil.MaximumSize = new Size(breite, 0);
             teil.Location = new Point(0, y);
             y = teil.Bottom;
+        }
+        if (Zielleiste.Visible)
+        {
+            Zielleiste.SetBounds(0, y, breite, Zielleiste.HoeheFuer(breite));
+            y = Zielleiste.Bottom + Stil.Px(this, Stil.AbstandMini);
         }
         liste.SetBounds(0, y, breite, Math.Max(Stil.Px(this, 120), ClientSize.Height - y));
     }

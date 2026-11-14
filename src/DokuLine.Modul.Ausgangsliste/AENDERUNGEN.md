@@ -60,7 +60,13 @@ Angepasst an DokuLine:
   `al_`), keine eigene Datei. Einstellungen in den Verwaltungsangaben (`ausgangsliste:…`).
   Änderungen am Platz prüfen dort die Regeln und schreiben den Verlauf (mit Kürzel statt
   Windows-Anmeldenamen).
-- **Küchendienst:** Regel für Einzelzimmer entfällt (keine Zimmerart).
+- **Küchendienst:** Regel für Einzelzimmer entfällt (keine Zimmerart). Neu (Bauplan 45): Der Tagesplan von
+  DokuLine zeigt oben „Küchendienst heute: …“ aus demselben Plan (`KuechendienstTagesplan`, über
+  `IModul.TagesplanBauen`), getauschte Dienste mit Hinweis und „Küchendienst unbesetzt“, wenn niemand vom
+  Dienst anwesend ist. Bestätigt wird dort (gemacht · nicht gemacht · vertreten durch …) in der neuen Tabelle
+  `al_kuechendienst_erledigt` (nie geändert, der neueste Eintrag gilt). Die Bewohnerkarten des Kerns tragen
+  „Küchendienst heute“ bzw. „Küchendienst unbesetzt“. In der eigenständigen Ausgangsliste gibt es diese
+  Bestätigung nicht – beim Abgleich als neue Funktion übernehmen oder weglassen.
 - **Digitaler Ausgang:** Beginn und Ende zur aktuellen Uhrzeit, Handzeichen = Kürzel des
   angemeldeten Benutzers (statt `UhrzeitFenster`).
 - **Karten:** `PlatzKarte` (in der Ausgangsliste `BewohnerKarte`) im Aufbau der Karten in

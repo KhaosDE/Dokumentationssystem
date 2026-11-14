@@ -44,7 +44,7 @@ public class UebersichtOberflaechenTests
         Assert.Contains("dienst · Stand ", f.Statusleiste.StatusText);
 
         // Rechts die Liste: eine Zeile je Bewohner, nach Zimmer; Kopf „Bewohner R1 · 23 · … im Haus“.
-        Assert.Equal(["Zimmer", "Name", "Bezug", "Wo", "Auskunft", "Hinweise"], s.Liste.Columns.Cast<ColumnHeader>().Select(c => c.Text));
+        Assert.Equal(["Zimmer", "Name", "Bezug", "Wo", "Auskunft", "Maßnahmen", "Hinweise"], s.Liste.Columns.Cast<ColumnHeader>().Select(c => c.Text));
         Assert.Equal(23, s.Zeilen.Count);
         Assert.Equal(s.Zeilen.Select(z => z.Bewohner.Zimmer.PadLeft(8)).Order(StringComparer.Ordinal), s.Zeilen.Select(z => z.Bewohner.Zimmer.PadLeft(8)));
         int imHaus = s.Zeilen.Count(z => z.Wo == HeuteWichtigRegeln.ImHaus);
@@ -72,7 +72,7 @@ public class UebersichtOberflaechenTests
         Assert.StartsWith("seit ", notiz.Text2!.Text);
         Assert.EndsWith(" · AB", notiz.Text2.Text);
         var dienst = s.DienstStand!;
-        Assert.Equal(dienst.Offen.Count, s.Dienst.Zeilen.Count);
+        Assert.Equal(dienst.Offen.Count, s.Dienst.Zeilen.OfType<CheckBox>().Count());   // dazu Maßnahmen und Medikamente (Bauplan 40, 42)
         Assert.EndsWith(dienst.Text, s.DienstText.Text);
         Assert.Equal(dienst.Erledigt, s.DienstBalken.Value);
         Hilfe.Foto(f, "114_uebersicht");

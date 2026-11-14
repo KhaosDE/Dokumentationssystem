@@ -10,9 +10,13 @@ public sealed partial class Speicher
     public event Action? MedikationGeaendert;
 
     public List<Verordnung> Verordnungen(long bewohnerId) =>
-        VerordnungenLesen("WHERE v.bewohner_id = $b", ("$b", bewohnerId));
+        VerordnungenLesen("WHERE v.bewohner_id = $b", null, ("$b", bewohnerId));
 
-    public Verordnung? Verordnung(long id) => VerordnungenLesen("WHERE v.id = $id", ("$id", id)).FirstOrDefault();
+    // In einer laufenden Transaktion (Demo-Daten).
+    private List<Verordnung> VerordnungenIn(long bewohnerId, SqliteTransaction transaktion) =>
+        VerordnungenLesen("WHERE v.bewohner_id = $b", transaktion, ("$b", bewohnerId));
+
+    public Verordnung? Verordnung(long id) => VerordnungenLesen("WHERE v.id = $id", null, ("$id", id)).FirstOrDefault();
 
     public Verordnung VerordnungSpeichern(Verordnung v)
     {
@@ -56,7 +60,7 @@ public sealed partial class Speicher
     }
 
     // Die Änderungen der letzten sieben Tage aller Bewohner (Marken, Übersicht).
-    public List<Medikamentenaenderung> Medikamentenaenderungen(DateOnly heute) => MedikationsAenderungen.Liste(VerordnungenLesen(""), heute);
+    public List<Medikamentenaenderung> Medikamentenaenderungen(DateOnly heute) => MedikationsAenderungen.Liste(VerordnungenLesen("", null), heute);
 
     private long VerordnungEinfuegen(Verordnung v, SqliteTransaction transaktion)
     {
@@ -90,15 +94,15 @@ public sealed partial class Speicher
         }
     }
 
-    private List<Verordnung> VerordnungenLesen(string bedingung, params (string, object?)[] parameter)
+    private List<Verordnung> VerordnungenLesen(string bedingung, SqliteTransaction? transaktion, params (string, object?)[] parameter)
     {
-        var namen = Medikamente().ToDictionary(m => m.Id, m => m.Anzeige);
+        var namen = MedikamenteLesen(transaktion, "").ToDictionary(m => m.Id, m => m.Anzeige);
         var liste = new List<Verordnung>();
         using (var befehl = Befehl($"""
             SELECT v.id, v.bewohner_id, v.medikament_id, v.staerke, v.einheit, v.morgens, v.mittags, v.abends, v.nachts, v.bedarf,
                    v.bedarf_anlass, v.bedarf_hoechstens, v.beginn, v.arzt, v.angeordnet_am, v.hinweis, v.erstellt, v.kuerzel
             FROM verordnungen v {bedingung} ORDER BY v.bedarf, v.id
-            """, null, parameter))
+            """, transaktion, parameter))
         using (var leser = befehl.ExecuteReader())
             while (leser.Read())
                 liste.Add(new Verordnung
@@ -126,7 +130,7 @@ public sealed partial class Speicher
         using (var befehl = Befehl($"""
             SELECT s.aenderung_id, s.ab, s.morgens, s.mittags, s.abends, s.nachts FROM stufen s
             JOIN verordnung_aenderungen a ON a.id = s.aenderung_id WHERE a.verordnung_id IN ({ids}) ORDER BY s.aenderung_id, s.nr
-            """, null, []))
+            """, transaktion, []))
         using (var leser = befehl.ExecuteReader())
             while (leser.Read())
             {
@@ -136,7 +140,7 @@ public sealed partial class Speicher
         using (var befehl = Befehl($"""
             SELECT id, verordnung_id, art, von, bis, arzt, angeordnet_am, hinweis, erstellt, kuerzel
             FROM verordnung_aenderungen WHERE verordnung_id IN ({ids}) ORDER BY erstellt, id
-            """, null, []))
+            """, transaktion, []))
         using (var leser = befehl.ExecuteReader())
             while (leser.Read())
             {
@@ -161,7 +165,7 @@ public sealed partial class Speicher
     // Demo: Verordnungen relativ zu heute (mit Pause, Stufenplänen, Absetzen, Bedarf).
     private void DemoMedikationEinfuegen(SqliteTransaction transaktion)
     {
-        var bewohner = LesenIn(transaktion, $"SELECT id, {Spalten} FROM bewohner");
+        var bewohner = LesenIn(transaktion, AktiveBewohnerSql);
         // Erst die Berichte der Bedarfsgaben: Das Löschen der Verordnungen nähme die Gaben mit, ihre
         // Berichte blieben ohne Gabe in der Akte stehen.
         Ausfuehren("DELETE FROM berichte WHERE id IN (SELECT bericht_id FROM bedarfsgaben WHERE bericht_id IS NOT NULL); DELETE FROM verordnungen", transaktion);

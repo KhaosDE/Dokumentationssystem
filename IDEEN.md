@@ -2418,7 +2418,7 @@ Umfang (Vorschlag):
   über mehrere Wochen, einige abgelehnt.
 
 ## Übersicht: Kasten „Maßnahmen heute“ als Arbeitscheckliste
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.44.0; Bauplan Schritt 40)
 Datum: 10.11.2026
 Was: In der Übersicht ein Kasten, der zeigt, welche Maßnahmen im laufenden Dienst noch offen und
 welche erledigt sind, zum direkten Abhaken.
@@ -2439,7 +2439,7 @@ Umfang (Vorschlag):
   damit es nur eine Checkliste gibt.
 
 ## Zeitauswertung je Bewohner
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.45.0; Bauplan Schritt 41)
 Datum: 10.11.2026
 Was: Eine Auswertung der erfassten Zeiten je Bewohner und Zeitraum.
 Warum: Tobi (10.11.2026): Der Bezirk Oberbayern will die Vergütung künftig nach erbrachter Zeit
@@ -2460,7 +2460,7 @@ Umfang (Vorschlag):
   der Freigaben (`docs/betrieb.md`) aufnehmen.
 
 ## Medikamentenausgabe abhaken
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.46.0; Bauplan Schritt 42)
 Datum: 10.11.2026
 Was: Eine Ausgabeliste je Einnahmezeit, in der für jeden Bewohner abgehakt wird, ob die
 Medikamente ausgegeben wurden.
@@ -2489,7 +2489,7 @@ Umfang (Vorschlag):
 - Recht „Medikamente ausgeben“ (Vorbelegung wie bisher beim Medikamentenplan).
 
 ## Ziele der Bewohner: Leitziel und Nahziele
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.47.0; Bauplan Schritt 43)
 Datum: 10.11.2026
 Was: Jeder Bewohner hat ein Leitziel und zwei Nahziele. Sie stehen gut sichtbar bei der Akte und
 in der Dokumentation, und Maßnahmen hängen an ihnen.
@@ -2521,7 +2521,7 @@ Umfang (Vorschlag):
   etwas zeigt.
 
 ## Qualitätsmanagement: Position QMB mit eigener Prüfseite
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.48.0; Bauplan Schritt 44)
 Datum: 10.11.2026
 Was: Eine Position „Qualitätsmanagement (QMB)“ mit einer eigenen Startseite, die zeigt, wo bei
 Zielen, Maßnahmen und Fristen etwas fehlt.
@@ -2551,7 +2551,7 @@ Umfang (Vorschlag):
   Kürzel (Liste der Freigaben, `docs/betrieb.md`).
 
 ## Küchendienst im Tagesplan
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.49.0; Bauplan Schritt 45)
 Datum: 12.11.2026
 Was: Der Küchendienst des Tages erscheint im Tagesplan.
 Warum: Notiz Tobi (12.11.2026): „Küchendienst auf den Tagesplan“.
@@ -2568,7 +2568,7 @@ Umfang (Vorschlag):
 - Abgleich mit der eigenständigen Ausgangsliste in `AENDERUNGEN.md` vermerken.
 
 ## Archiv für ehemalige Bewohner mit Aufbewahrungsfrist
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.50.0; Bauplan Schritt 46)
 Datum: 12.11.2026
 Was: Ausgezogene oder verstorbene Bewohner wandern mit ihrer ganzen Akte in ein Archiv. Dort
 bleibt sie lesbar, bis die Aufbewahrungsfrist endet.
@@ -2594,7 +2594,7 @@ Umfang (Vorschlag):
 - Demo: einige ausgedachte ehemalige Bewohner, einer mit abgelaufener Frist.
 
 ## Hilfeplangespräche: Termine planen und vergeben
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.51.0; Bauplan Schritt 47)
 Datum: 12.11.2026
 Was: Eine Übersicht, für welchen Bewohner wann ein Hilfeplangespräch fällig ist, mit Vergabe des
 Termins und Einladung der Beteiligten.

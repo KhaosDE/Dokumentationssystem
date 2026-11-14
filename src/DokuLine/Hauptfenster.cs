@@ -22,8 +22,8 @@ public sealed partial class Hauptfenster : Form
 
     // Die Einträge des Bereichs „Therapie“ stehen nur dort in der Seitenleiste, in eigener Reihenfolge.
     public static readonly string[] Bereiche =
-        ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Therapie",
-         .. TherapieBereiche, "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
+        ["Übersicht", "Tagesplan", "Dokumentation", "Übergabe", "Medikamentenausgabe", "Visiten", "Aufgaben", "Nachrichten", "Kalender", "Hilfeplangespräche", "Therapie",
+         .. TherapieBereiche, "Auswertung", "Qualität", "Archiv", "Einstellungen"];   // die Medikamentendatenbank steht in den Einstellungen
 
     private readonly Speicher speicher;
     private readonly Panel leiste = new();
@@ -45,6 +45,11 @@ public sealed partial class Hauptfenster : Form
     public UebersichtSeite Uebersicht { get; }
     public TagesplanSeite Tagesplan { get; }
     public VisitenSeite Visiten { get; }
+    public AuswertungSeite Auswertung { get; }
+    public QualitaetSeite Qualitaet { get; }
+    public ArchivSeite Archiv { get; }
+    public HilfeplanSeite Hilfeplan { get; }
+    public AusgabeSeite Ausgabe { get; }
     public EinstellungenSeite Einstellungsseite { get; }
     public AnzeigeDienst Anzeige { get; }
 
@@ -121,6 +126,22 @@ public sealed partial class Hauptfenster : Form
         seiten["Visiten"] = Visiten;
         Visiten.Geaendert += () => { if (AktiverBereich == "Visiten") Kopf.TexteSetzen(Visiten.KopfText, "Visiten"); };
         Visiten.AufgabeGewuenscht += a => VisitenAufgabe(a);
+        Ausgabe = new AusgabeSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Medikamentenausgabe"] = Ausgabe;
+        Ausgabe.Geaendert += () => { if (AktiverBereich == "Medikamentenausgabe") Kopf.TexteSetzen(Ausgabe.KopfText, "Medikamentenausgabe"); };
+        Auswertung = new AuswertungSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Auswertung"] = Auswertung;
+        Auswertung.Geaendert += () => { if (AktiverBereich == "Auswertung") Kopf.TexteSetzen(Auswertung.KopfText, "Auswertung"); };
+        Qualitaet = new QualitaetSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Qualität"] = Qualitaet;
+        Qualitaet.Geaendert += () => { if (AktiverBereich == "Qualität") Kopf.TexteSetzen(Qualitaet.KopfText, "Qualität"); };
+        Qualitaet.AkteGewuenscht += id => { BereichWaehlen("Dokumentation"); Bewohner.AkteZeigen(id); };
+        Archiv = new ArchivSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Archiv"] = Archiv;
+        Archiv.Geaendert += () => { if (AktiverBereich == "Archiv") Kopf.TexteSetzen(Archiv.KopfText, "Archiv"); };
+        Hilfeplan = new HilfeplanSeite(speicher) { Dock = DockStyle.Fill, Visible = false };
+        seiten["Hilfeplangespräche"] = Hilfeplan;
+        Hilfeplan.Geaendert += () => { if (AktiverBereich == "Hilfeplangespräche") Kopf.TexteSetzen(Hilfeplan.KopfText, "Hilfeplangespräche"); };
         Aufgaben.VisitenAufgabeGewuenscht += a => { VisitenAufgabe(a); if (AktiverBereich == "Aufgaben") Aufgaben.Aktualisieren(); };
         Anzeige = new AnzeigeDienst(speicher);
         Einstellungsseite = new EinstellungenSeite(speicher) { Dock = DockStyle.Fill, Visible = false, Anzeige = Anzeige };

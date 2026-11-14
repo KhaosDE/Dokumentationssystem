@@ -196,6 +196,42 @@ public sealed class MassnahmenTests : IDisposable
         Assert.Equal(MassnahmenRegeln.VorlagenVorgabe, s.Listeneintraege(Liste.Massnahmenvorlagen).Select(e => e.Name));
     }
 
+    // Bauplan 40: Spalte der Übersicht, Stand im Kasten, Sammeleintrag in die Übergabe am Dienstende (einmal).
+    [Fact]
+    public void Uebersicht_Spalte_Stand_und_Sammeleintrag_am_Dienstende()
+    {
+        long id = Leer();
+        var dienst = SchichtTermin.Zu(Jetzt);
+        var m = s.MassnahmeAnlegen(id, F(), "EF", Jetzt);
+        var zweite = s.MassnahmeAnlegen(id, F() with { Titel = "Wäsche (Test)" }, "EF", Jetzt);
+        var termine = s.MassnahmenImDienst(dienst, [id]).Where(t => t.Massnahme.Id == m.Id || t.Massnahme.Id == zweite.Id).ToList();
+        Assert.Equal("2 offen", MassnahmenRegeln.ListenText(termine));
+        Assert.Equal("Maßnahmen: 0 von 2 bestätigt", MassnahmenRegeln.StandText(termine));
+        Assert.Equal("", MassnahmenRegeln.ListenText([]));
+        s.MassnahmeBestaetigen(m.Id, dienst, MassnahmeErgebnis.Durchgefuehrt, "", 30, "", "AB", Jetzt);
+        termine = s.MassnahmenImDienst(dienst, [id]).Where(t => t.Massnahme.Id == m.Id || t.Massnahme.Id == zweite.Id).ToList();
+        Assert.Equal("1 offen", MassnahmenRegeln.ListenText(termine));
+        s.MassnahmeBestaetigen(zweite.Id, dienst, MassnahmeErgebnis.Abgelehnt, "keine Lust", 0, "", "AB", Jetzt);
+        termine = s.MassnahmenImDienst(dienst, [id]).Where(t => t.Massnahme.Id == m.Id || t.Massnahme.Id == zweite.Id).ToList();
+        Assert.Equal("✓", MassnahmenRegeln.ListenText(termine));
+
+        // Spätdienst: was im Frühdienst offen blieb, steht einmal je Wohnbereich in der Übergabe – auch beim zweiten Aufruf
+        // nur einmal. Die Demo bestätigt alle vergangenen Dienste, offen ist nur der laufende Frühdienst.
+        var spaet = dienst.Ende.AddMinutes(10);
+        int offen = s.MassnahmenImDienst(dienst).Count(t => t.Offen);
+        Assert.True(offen > 0);
+        int bereiche = s.MassnahmenImDienst(dienst).Where(t => t.Offen).Select(t => s.Bewohner(t.Massnahme.BewohnerId)!.Wohnbereich).Distinct().Count();
+        Assert.Equal(bereiche, s.MassnahmenUebergabeErzeugen(spaet));
+        Assert.Equal(0, s.MassnahmenUebergabeErzeugen(spaet.AddMinutes(30)));
+        var eintraege = s.Uebergaben(spaet).Where(u => u.Verfasser == MassnahmenRegeln.UebergabeVerfasser).ToList();
+        Assert.Equal(bereiche, eintraege.Count);
+        Assert.All(eintraege, u => Assert.True(u.Allgemein));
+        Assert.Contains(eintraege, u => u.Text.Contains("aus dem Frühdienst", StringComparison.Ordinal) && u.Text.Contains(" offen: ", StringComparison.Ordinal));
+        Assert.DoesNotContain(eintraege, u => u.Text.Contains("Zimmerhygiene (Test)", StringComparison.Ordinal));   // bestätigt
+        Assert.Equal($"R1 · 1 Maßnahme aus dem {dienst.Text} offen: Ahorn, Anton – Zimmer",
+            MassnahmenRegeln.UebergabeText("R1", dienst, [("Ahorn, Anton", "Zimmer")]));
+    }
+
     private void Sql(string text)
     {
         using var befehl = s.Verbindung.CreateCommand();
