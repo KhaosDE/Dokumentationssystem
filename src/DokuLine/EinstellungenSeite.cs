@@ -84,6 +84,8 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public CheckBox Autokorrektur { get; } = new() { Text = "Autokorrektur typischer Vertipper (für mich)", AutoSize = true };
     public Label RechtschreibStand { get; } = new() { AutoSize = true, MaximumSize = new Size(420, 0), UseMnemonic = false };
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
+    public NumericUpDown HebErinnern { get; } = new() { Minimum = 1, Maximum = 26, Width = 70, AccessibleName = "Erste Stufe: Wochen vorher" };
+    public NumericUpDown HebAchtung { get; } = new() { Minimum = 1, Maximum = 26, Width = 70, AccessibleName = "Zweite Stufe: Wochen vorher" };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");
     // Module, Aufgaben, Fahrzeuge, Vorlagen, Medikamente, Verwaltung
@@ -213,6 +215,8 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
             ArchivFristMeldung.Text = ArchivFrist.Text.Length == 0 ? "nicht festgelegt" : "";
             ArchivFristMeldung.ForeColor = Stil.Achtung.Text;
             HebFrist.Value = Math.Clamp(werte.HebFristMonate, (int)HebFrist.Minimum, (int)HebFrist.Maximum);
+            HebErinnern.Value = Math.Clamp(werte.HebErinnernWochen, 1, 26);
+            HebAchtung.Value = Math.Clamp(werte.HebAchtungWochen, 1, 26);
             LogoLaden(Einstellungen.LogoPfad());
             foreach (var (schluessel, haken) in Module) haken.Checked = speicher.ModulAn(schluessel);
             foreach (var art in Vorlagen.Keys) VorlageAnzeigen(art);

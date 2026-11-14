@@ -69,11 +69,15 @@ public sealed class AngabenAnsicht : KartenFlaeche
             var titel = speicher.Dokumente(b.Id!.Value, auchEntfernte: true).ToDictionary(d => d.Id, d => d.Titel);
             Zeilen = SchweigepflichtRegeln.Zeilen(sp, speicher.PersonenNamen(), id => titel.GetValueOrDefault(id), Heute);
         }
-        // Kostenträger (Bauplan 47): das Hilfeplangespräch – letztes, nächstes fällig bis, Stand.
+        // Kostenträger (Bauplan 47, 52): das Hilfeplangespräch – letztes, nächstes fällig bis, Stand – und die HEB-Frist.
         if (art == Angabe.Kostentraeger)
         {
             var h = speicher.Hilfeplan(b.Id!.Value, Heute);
-            Zeilen = [.. Zeilen, ("Hilfeplangespräch", HilfeplanRegeln.KurzText(h), h.FaelligBis is null || HilfeplanRegeln.Marke(h, Heute) is not null)];
+            var heb = speicher.HebFrist(b.Id!.Value, Heute);
+            var w = Einstellungen.Laden();
+            Zeilen = [.. Zeilen, ("Hilfeplangespräch", HilfeplanRegeln.KurzText(h), h.FaelligBis is null || HilfeplanRegeln.Marke(h, Heute) is not null),
+                ("Nächster HEB", HebFristRegeln.KurzText(heb), HebFristRegeln.Stufe(heb, Heute, w.HebErinnernWochen, w.HebAchtungWochen) >= HebStufe.Achtung
+                                                             || heb.Zustand == HebFristZustand.NichtErfasst)];
         }
         ZustaendigkeitKnopf.Visible = betreuung;
         DokumenteKnopf.Visible = DokumentRegeln.KategorieFuer(art) is not null;

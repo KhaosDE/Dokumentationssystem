@@ -43,13 +43,15 @@ Lesbare Datei `einstellungen.json` im Datenordner:
 | `kuerzel` | eigenes Kürzel (Anmeldung) | leer |
 | `logo` | Dateiname des eigenen Bildes für den Kopf im Ordner „logo“ | keins |
 | `beschluss_frist_tage` | Startseite: „Beschluss endet bald“ ab so vielen Tagen vorher | 90 |
-| `heb_frist_monate` | Startseite: „HEB fällig“, wenn der letzte Bogen so alt ist | 12 |
+| `heb_frist_monate` | HEB-Frist: Vorschlag „letzter Bogen plus so viele Monate“ (ohne Bewilligung) | 12 |
 | `bereich` | Mehrplatz: Bereichskennung dieses Rechners (bis 0.29.6 „Wohnbereich A“) | „R1“ |
 | `datenbank_ordner` | Mehrplatz: gemeinsamer Ordner der Datenbank; leer = lokal im Datenordner | leer |
 | `menue_eingeklappt` | Seitenmenü nur mit Symbolen | nein |
 | `nachschlage_ansicht` | Formular „Medikament“: eingebettete Nachschlage-Ansicht des BfArM | ja |
 | `wartezeit_minuten` | Ausgangsliste: so viele Minuten nach der Rückkehrzeit „Abgängigkeit melden?“ (5–240) | 30 |
 | `kein_bericht_wochen` | Akte, Reiter „Maßnahmen“: „seit … Wochen kein Bericht“ je Lebensbereich (1–26) | 4 |
+| `heb_erinnern_wochen` | HEB-Frist: erste Stufe (Aufgabe, Marke in Hinweis-Farbe) so viele Wochen vorher (1–26) | 8 |
+| `heb_achtung_wochen` | HEB-Frist: zweite Stufe (Achtung-Farbe, Übersicht) so viele Wochen vorher (1–26, höchstens wie oben) | 4 |
 
 Eine kaputte oder fremde Datei führt nie zum Absturz; dann gelten die Vorgaben. Dieselbe Datei hat schon die
 Python-Version (bis 0.2.0) benutzt.

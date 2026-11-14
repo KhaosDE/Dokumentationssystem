@@ -39,6 +39,7 @@ public sealed class AkteAnsicht : Panel
     public MassnahmenAnsicht Massnahmen { get; }
     public Label KrankenkasseText { get; } = new() { Cursor = Cursors.Hand };
     public Label KostentraegerText { get; } = new() { Cursor = Cursors.Hand };
+    public Label HebText { get; } = new() { Cursor = Cursors.Hand, UseMnemonic = false };
     // Personenbeschreibung (Bauplan 34): für das Meldeblatt; Marke, wenn älter als 12 Monate.
     public Label BeschreibungText { get; } = new() { Cursor = Cursors.Hand };
     public Button BeschreibungKnopf { get; } = Stil.NebenKnopf("Personenbeschreibung …");
@@ -95,6 +96,7 @@ public sealed class AkteAnsicht : Panel
         Angaben.Geaendert += () => { if (Bewohner is not null) BetreuerZeigen(Bewohner); };
         KrankenkasseText.Click += (_, _) => Reiter.Waehlen("Krankenkasse");
         KostentraegerText.Click += (_, _) => Reiter.Waehlen("Kostenträger");
+        HebText.Click += (_, _) => Reiter.Waehlen("HEB");
         BeschreibungText.Click += (_, _) => BeschreibungBearbeiten();
         BeschreibungKnopf.Click += (_, _) => BeschreibungBearbeiten();
         AutoScroll = true;
@@ -126,7 +128,8 @@ public sealed class AkteAnsicht : Panel
                      ("Geburtsdatum", Geburtsdatum), ("Aufnahmedatum", Aufnahmedatum), ("Beschlussende", Beschlussende),
                      ("Offen geführt", OffenGefuehrt), ("Wohnbereich", Wohnbereich),
                      ("Bezugspflege", Bezugspflege), ("Einzeltrainer", Einzeltrainer), ("Betreuer", BetreuerText),
-                     ("Krankenkasse", KrankenkasseText), ("Kostenträger", KostentraegerText), ("Personenbeschreibung", BeschreibungText),
+                     ("Krankenkasse", KrankenkasseText), ("Kostenträger", KostentraegerText), ("Nächster HEB", HebText),
+                     ("Personenbeschreibung", BeschreibungText),
                  })
         {
             tabelle.Controls.Add(new Label
@@ -293,6 +296,13 @@ public sealed class AkteAnsicht : Panel
             feld.Font = f is null ? Stil.FettKursiv : Stil.Fett;
             feld.AccessibleName = $"{AngabenRegeln.Name(art)}: {feld.Text} (öffnet den Reiter)";
         }
+        var w = Einstellungen.Laden();
+        var heb = speicher.HebFrist(b.Id!.Value, heute);
+        var hebMarke = HebFristRegeln.Marke(heb, heute, w.HebErinnernWochen, w.HebAchtungWochen);
+        HebText.Text = HebFristRegeln.KurzText(heb) + (hebMarke is null || heb.Zustand == HebFristZustand.NichtErfasst ? "" : $" · {hebMarke.Text}");
+        HebText.ForeColor = Stil.TextFarbe(hebMarke?.Art) ?? Stil.Akzent;
+        HebText.Font = heb.Zustand == HebFristZustand.NichtErfasst ? Stil.FettKursiv : Stil.Fett;
+        HebText.AccessibleName = $"Nächster HEB: {HebText.Text} (öffnet den Reiter)";
         var beschreibung = angaben.GetValueOrDefault(Angabe.Personenbeschreibung);
         var marke = AbgaengigkeitRegeln.BeschreibungMarke(beschreibung, heute);
         BeschreibungText.Text = AbgaengigkeitRegeln.BeschreibungKurz(beschreibung) + (beschreibung is not null && marke is not null ? " – älter als 12 Monate, bitte prüfen" : "");

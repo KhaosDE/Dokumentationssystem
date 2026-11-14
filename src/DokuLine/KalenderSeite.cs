@@ -150,7 +150,11 @@ public sealed class KalenderSeite : Panel, IBereichSeite
         var sichtbar = speicher.SichtbareWohnbereiche(Recht.Kuerzel).Select(w => hausVon.GetValueOrDefault(w)).OfType<string>().ToHashSet();
         var terminHaus = speicher.KalenderHaeuser();
         bool ImHaus(KalenderTermin k) => !k.Aktuell.Haus || !terminHaus.TryGetValue(k.Id, out var h) || sichtbar.Count == 0 || sichtbar.Contains(h);
-        return speicher.Kalender(von, bis, BewohnerFilter).Where(k => KalenderRegeln.Passt(k.Aktuell, Wahl) && ImBereich(k) && ImHaus(k)).ToList();
+        var termine = speicher.Kalender(von, bis, BewohnerFilter).Where(k => KalenderRegeln.Passt(k.Aktuell, Wahl) && ImBereich(k) && ImHaus(k)).ToList();
+        // HEB-Fristen als Ganztagseintrag im Bereichskalender (nur gezeigt, nicht gespeichert; nur Name und „HEB fällig“).
+        if (Wahl != KalenderWahl.Haus)
+            termine.AddRange(speicher.HebFristKalender(von, bis).Where(k => ImBereich(k) && (BewohnerFilter is null || k.Aktuell.Bewohner.Contains(BewohnerFilter.Value))));
+        return termine;
     }
 
     private Dictionary<long, string> Namen() => speicher.AlleBewohner().ToDictionary(b => b.Id!.Value, b => b.Name);
@@ -251,7 +255,7 @@ public sealed class KalenderSeite : Panel, IBereichSeite
     // Die gezeigten Termine (Zeitraum, Bewohner, Bereich/Haus) als .ics-Datei.
     public string? Exportieren()
     {
-        var termine = Termine();
+        var termine = Termine().Where(k => k.Id > 0).ToList();   // ohne HEB-Fristen (nur gezeigt)
         if (termine.Count == 0)
         {
             MessageBox.Show(FindForm(), "In diesem Zeitraum stehen keine Termine.", "Als .ics speichern", MessageBoxButtons.OK, MessageBoxIcon.Information);

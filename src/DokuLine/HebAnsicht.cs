@@ -2,8 +2,8 @@ using DokuLine.Kern;
 
 namespace DokuLine;
 
-// Reiter „HEB“ in der Akte: die Bögen des Bewohners (neueste oben) mit Art, Zeitraum, Nummer und
-// Status; „Neuer HEB-Bogen …“ schlägt Zeitraum und Nummer vor. Ist ein HEB fällig, steht das oben.
+// Reiter „HEB“ in der Akte: oben die HEB-Frist (fällig am, Stand, Stufe der Erinnerung) mit „Fälligkeit ändern …“,
+// „Kein HEB nötig …“ und „Abgegeben …“; darunter die Bögen (neueste oben) mit Art, Zeitraum, Nummer und Status.
 public sealed class HebAnsicht : Panel
 {
     private readonly Speicher speicher;
@@ -11,26 +11,38 @@ public sealed class HebAnsicht : Panel
     private Bewohner? bewohner;
 
     public Button NeuKnopf { get; } = Stil.HauptKnopf("Neuer HEB-Bogen …");
-    public HinweisFeld Faellig { get; } = new() { Visible = false };
+    public Button FaelligKnopf { get; } = Stil.NebenKnopf("Fälligkeit ändern …");
+    public Button KeinKnopf { get; } = Stil.NebenKnopf("Kein HEB nötig …");
+    public Button AbgegebenKnopf { get; } = Stil.NebenKnopf("Abgegeben …");
+    public HinweisFeld Faellig { get; } = new();
+    public HebFristStand? Frist { get; private set; }
     public List<HebKarte> Karten { get; } = [];
     public Label Leer { get; } = new() { Text = "Noch kein HEB-Bogen im Programm.", AutoSize = true, ForeColor = Stil.TextLeise, BackColor = Stil.Seite };
     internal Func<DateTime> Jetzt { get; set; } = () => DateTime.Now;
+    internal Func<string, string, string?> Fragen { get; set; }
 
     public HebAnsicht(Speicher speicher)
     {
         this.speicher = speicher;
         BackColor = Stil.Seite;
-        NeuKnopf.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
+        Fragen = (titel, frage) => Eingabe.Fragen(FindForm(), titel, frage);
         NeuKnopf.Width = 200;
+        foreach (var k in new[] { NeuKnopf, FaelligKnopf, KeinKnopf, AbgegebenKnopf })
+        {
+            k.Margin = new Padding(0, 0, Stil.AbstandKlein, Stil.AbstandKlein);
+            leiste.Controls.Add(k);
+        }
         NeuKnopf.Click += (_, _) => Neu();
-        leiste.Controls.Add(NeuKnopf);
+        FaelligKnopf.Click += (_, _) => FaelligAendern();
+        KeinKnopf.Click += (_, _) => KeinHeb();
+        AbgegebenKnopf.Click += (_, _) => Abgegeben();
         Controls.AddRange([leiste, Faellig, Leer]);
     }
 
     public void Zeigen(Bewohner b)
     {
         bewohner = speicher.Bewohner(b.Id!.Value) ?? b;
-        Recht.Anwenden(speicher, Funktionen.Heb, NeuKnopf);   // Rechte
+        Recht.Anwenden(speicher, Funktionen.Heb, NeuKnopf, FaelligKnopf, KeinKnopf, AbgegebenKnopf);
         var boegen = speicher.HebBoegen(b.Id!.Value);
         SuspendLayout();
         foreach (var k in Karten) { Controls.Remove(k); k.Dispose(); }
@@ -48,10 +60,14 @@ public sealed class HebAnsicht : Panel
             Controls.Add(karte);
         }
         Leer.Visible = Karten.Count == 0;
-        string? faellig = HebRegeln.Faellig(bewohner, boegen, DateOnly.FromDateTime(Jetzt()), Einstellungen.Laden().HebFristMonate);
-        if (faellig is not null) Faellig.Setzen(faellig, Stil.Achtung, false);
-        Faellig.Visible = faellig is not null;
-        Faellig.Tag = faellig is not null;
+        var heute = DateOnly.FromDateTime(Jetzt());
+        var w = Einstellungen.Laden();
+        Frist = speicher.HebFrist(b.Id!.Value, heute);
+        var marke = HebFristRegeln.Marke(Frist, heute, w.HebErinnernWochen, w.HebAchtungWochen);
+        Faellig.Setzen($"Nächster HEB: {HebFristRegeln.KurzText(Frist)}" + (marke is null ? "" : $" · {marke.Text}"),
+            marke is null ? Stil.Offen : Stil.MarkeFuer(marke.Art), Frist.Zustand == HebFristZustand.NichtErfasst);
+        if (Recht.Grund(speicher, Funktionen.Heb) is null)
+            Stil.Sperren(AbgegebenKnopf, HebFristAblauf.AbgegebenGesperrt(Frist));
         ResumeLayout(false);
         PerformLayout();
     }
@@ -64,6 +80,21 @@ public sealed class HebAnsicht : Panel
         Zeigen(bewohner);
         Oeffnen(neu.Id);
         return neu;
+    }
+
+    public bool FaelligAendern() => bewohner is not null && Frist is not null && Stil.Sperrgrund(FaelligKnopf) is null
+        && HebFristAblauf.FaelligAendern(speicher, Frist, Fragen, Jetzt(), FindForm()) && NeuZeigen();
+
+    public bool KeinHeb() => bewohner is not null && Frist is not null && Stil.Sperrgrund(KeinKnopf) is null
+        && HebFristAblauf.KeinHeb(speicher, Frist, Fragen, Jetzt(), FindForm()) && NeuZeigen();
+
+    public bool Abgegeben() => bewohner is not null && Frist is not null && Stil.Sperrgrund(AbgegebenKnopf) is null
+        && HebFristAblauf.Abgegeben(speicher, Frist, Fragen, Jetzt(), FindForm()) && NeuZeigen();
+
+    private bool NeuZeigen()
+    {
+        Zeigen(bewohner!);
+        return true;
     }
 
     public void Oeffnen(long bogenId)
@@ -80,11 +111,8 @@ public sealed class HebAnsicht : Panel
         int breite = Math.Max(200, ClientSize.Width), abstand = Stil.Px(this, Stil.AbstandMittel);
         leiste.Bounds = new Rectangle(Point.Empty, leiste.GetPreferredSize(new Size(breite, 0)));
         int y = leiste.Bottom + Stil.Px(this, Stil.AbstandMini);
-        if (Faellig.Tag is true)
-        {
-            Faellig.Bounds = new Rectangle(0, y, breite, Stil.Px(this, 52));
-            y = Faellig.Bottom + abstand;
-        }
+        Faellig.Bounds = new Rectangle(0, y, breite, Stil.Px(this, 52));
+        y = Faellig.Bottom + abstand;
         Leer.Location = new Point(Stil.Px(this, Stil.AbstandMini), y);
         if (Karten.Count == 0) y = Leer.Bottom + abstand;
         foreach (var k in Karten)

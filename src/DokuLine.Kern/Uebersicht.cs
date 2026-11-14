@@ -9,7 +9,7 @@ namespace DokuLine.Kern;
 public sealed record HeuteFuer(Bewohner Bewohner, IReadOnlyList<Termin> Termine,
     IReadOnlyList<(Verordnung Verordnung, string Aenderung)> Medikation, KalenderTermin? Heimfahrt)
 {
-    public string? HebFaellig { get; init; }   // z. B. „HEB fällig (letzter 10/2025)“
+    public Marke? Heb { get; init; }   // HEB-Frist in der ersten Stufe oder nicht erfasst (ab der zweiten Stufe unter Fristen)
     public IReadOnlyList<Marke> Fristen { get; init; } = [];   // Betreuung, Befreiung, Kostenzusage (Bauplan 30)
     public IReadOnlyList<Marke> Zustaendig { get; init; } = [];   // Forensik, FOSA (Bauplan 30a)
     // Spalte „Auskunft“ (Bauplan 35): „2 entbunden · 1 keine Auskunft“, die Namen für den Hinweis.
@@ -59,7 +59,7 @@ public static class UebersichtRegeln
         if (b.Allergie == AllergieZustand.NichtErfasst) marken.Add(new Marke(MarkenArt.NichtErfasst, "Allergien nicht erfasst"));
         if (b.Beschluss == BeschlussZustand.NichtErfasst) marken.Add(new Marke(MarkenArt.NichtErfasst, "Beschluss nicht erfasst"));
         if (Kennzeichen.OffenGefuehrtMarke(b) is Marke offen) marken.Add(offen);
-        if (h.HebFaellig is string heb) marken.Add(new Marke(MarkenArt.NichtErfasst, heb));
+        if (h.Heb is Marke heb) marken.Add(heb);
         marken.AddRange(h.Zustaendig);
         marken.AddRange(h.Fristen);
         if (HeuteWichtigRegeln.Geburtstag(b, heute) is Marke geburtstag) marken.Add(geburtstag);

@@ -67,7 +67,13 @@ public sealed partial class EinstellungenSeite
         BeschlussFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { BeschlussFristTage = (int)BeschlussFrist.Value }); };
         Karte("Wohnbereich", "Beschluss endet bald", "So viele Tage vorher zeigt die Übersicht „Beschluss endet in …“.", BeschlussFrist, Funktionen.EinstellungenBereich);
         HebFrist.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { HebFristMonate = (int)HebFrist.Value }); };
-        Karte("Wohnbereich", "HEB fällig", "So viele Monate nach dem letzten Bogen gilt der HEB-Bogen als fällig.", HebFrist, Funktionen.EinstellungenBereich);
+        Karte("Wohnbereich", "HEB fällig", "Vorschlag für die nächste Fälligkeit, wenn keine Bewilligung eingetragen ist: so viele Monate nach dem letzten Bogen.",
+            HebFrist, Funktionen.EinstellungenBereich);
+        HebErinnern.ValueChanged += (_, _) => HebStufenUebernehmen();
+        HebAchtung.ValueChanged += (_, _) => HebStufenUebernehmen();
+        Karte("Wohnbereich", "HEB-Frist: Erinnerung", "So viele Wochen vor der Fälligkeit: erste Stufe (Aufgabe, Hinweis) und zweite Stufe (Achtung-Farbe, Übersicht).",
+            Reihe(new Label { Text = "erste Stufe", AutoSize = true, Margin = new Padding(0, 6, 4, 0) }, HebErinnern,
+                  new Label { Text = "zweite Stufe", AutoSize = true, Margin = new Padding(12, 6, 4, 0) }, HebAchtung), Funktionen.EinstellungenBereich);
         Wartezeit.ValueChanged += (_, _) => { if (!laedt && Darf(Funktionen.EinstellungenBereich)) Einstellungen.Aendern(w => w with { WartezeitMinuten = (int)Wartezeit.Value }); };
         Karte("Wohnbereich", "Abgängigkeit: Wartezeit", "So viele Minuten nach der Rückkehrzeit fragt die Ausgangsliste „Abgängigkeit melden?“.", Wartezeit, Funktionen.EinstellungenBereich);
         MeldestellenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Meldestellen]));

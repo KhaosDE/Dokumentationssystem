@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.55.0** (Medikamentenbestellung).
+Stand: 14.11.2026. Version: **0.56.0** (HEB-Fälligkeit).
 
 ## Aktuell
 
@@ -497,7 +497,9 @@ Neu in 0.54.0: **Abwesenheit in der Dokumentation** (Bauplan 50). Über der Beri
 
 Neu in 0.55.0: **Medikamentenbestellung** (Bauplan 51). Neue Seite **„Bestellung“** (nach „Medikamentenausgabe“, Recht „Medikamente ausgeben“): die regelmäßigen Verordnungen der Bewohner nach **Empfänger** gruppiert (Arzt der Verordnung bzw. Hausarzt, Forensik, FOSA, sonst die heimversorgende Apotheke), ankreuzen, Menge anpassen, **„Anforderung erstellen …“** – je Empfänger eine Liste mit Name, Geburtsdatum, Medikament, Stärke und Menge (keine Diagnosen, keine Berichte). Übergabe als **Ausdruck/Fax-Vorlage** oder **E-Mail** über das E-Mail-Programm, vorher der Hinweis zum Datenschutz – außer der Empfänger ist in den Einstellungen freigegeben. **Verlauf**: angefordert → Rezept/Bestätigung da → geliefert (mit Bestand: Mengen einbuchen) → erledigt; nach 5 Tagen ohne Lieferung eine **Erinnerung** als Aufgabe. **Bestandsführung zuschaltbar** (Einstellungen, je Bereich, Vorgabe aus): „Bestand zählen …“, Vorrat aus Zählung, Lieferungen und abgehakten Ausgaben, **„reicht bis“** (reine Zählung); gezeigt wird dann, was in den nächsten 7 Tagen (einstellbar) ausgeht.
 
-**Nächster Schritt:** Bauplan Schritt 52 (HEB-Fälligkeit vermerken und rechtzeitig erinnern).
+Neu in 0.56.0: **HEB-Fälligkeit vermerken und rechtzeitig erinnern** (Bauplan 52). Je Bewohner **„nächster HEB fällig am“** mit drei Zuständen: Datum eingetragen (mit Grund) · „kein HEB nötig“ (mit Grund) · nicht erfasst (Achtung-Farbe, Vorschlag aus dem Ende der Bewilligung bzw. letzter Bogen plus Frist). **Stand des Bogens**: offen · in Arbeit · fertig · abgegeben am … (Kürzel); **„Abgegeben …“** schließt die Fälligkeit und setzt die nächste (Vorschlag). **Erinnerung in Stufen** (Wochen in den Einstellungen): 8 Wochen vorher Aufgabe „HEB-Bogen für … beginnen“ und Marke in Hinweis-Farbe; 4 Wochen vorher Achtung-Farbe und Kasten „Fristen“ der Übersicht; überfällig in Gefahr-Farbe mit Wort. Mit Entwurf wird die Aufgabe erledigt. Neue Seite **„HEB-Fristen“** (nach „Hilfeplangespräche“): alle Bewohner nach Fälligkeit, „Bogen öffnen …“ bzw. „Neuer HEB-Bogen …“, ändern, abgegeben, drucken. Reiter „HEB“ der Akte mit Fristzeile und Knöpfen, Zeile „Nächster HEB“ in den Stammdaten und im Reiter „Kostenträger“, Spalte auf der Seite „Hilfeplangespräche“, Ganztagseintrag „HEB fällig“ im Bereichskalender, Prüfseite des QMB („HEB aktuell“).
+
+**Nächster Schritt:** Abschließende Fehlersuche; Auslieferung 0.52.0–0.56.0.
 
 ## Fertig
 
@@ -1612,6 +1614,7 @@ Neu in 0.55.0: **Medikamentenbestellung** (Bauplan 51). Neue Seite **„Bestellu
 - 0.53.0 — Rechtschreibprüfung (Bauplan 49): Windows-Prüfung mit Wellenlinie und Vorschlägen, eigene Wörter und Fachwörterbuch, Autokorrektur wahlweise
 - 0.54.0 — Abwesenheit in der Dokumentation (Bauplan 50): Zeile über der Liste, Balken, Beginn/Ende-Einträge, Hinweis im Bericht, leise Namen
 - 0.55.0 — Medikamentenbestellung (Bauplan 51): Seite „Bestellung“, Anforderung je Empfänger, Ausdruck/E-Mail, Verlauf mit Erinnerung, Bestand zuschaltbar
+- 0.56.0 — HEB-Fälligkeit (Bauplan 52): Frist je Bewohner, Erinnerung in Stufen, Seite „HEB-Fristen“, Kalender, Prüfseite
 
 ## Offene Punkte
 
@@ -1717,6 +1720,13 @@ Neu in 0.55.0: **Medikamentenbestellung** (Bauplan 51). Neue Seite **„Bestellu
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.56.0): Die Erinnerung der ersten Stufe ist eine Aufgabe „wer Zeit hat“ des Bereichs (Verfasser AUTO); die Bezugspflege steht im Text. Aufgaben lassen sich keiner einzelnen Person zuweisen.
+- 14.11.2026 (0.56.0): Der Kalendereintrag „HEB fällig“ wird nicht gespeichert, sondern aus der eingetragenen Frist gezeigt: Er stimmt so immer mit der Frist überein, steht nicht im Wochen- und Tagesplan und geht nicht in die .ics-Ausgabe.
+- 14.11.2026 (0.56.0): Nicht erfasst: Die Erinnerung richtet sich nach dem Vorschlag; die Marke ist mindestens in Achtung-Farbe und trägt „(Vorschlag)“, ohne Stufe heißt sie „HEB-Frist nicht erfasst“.
+- 14.11.2026 (0.56.0): Welcher Bogen zur Frist gehört: der jüngste nicht abgegebene, nach der letzten Abgabe angelegte; ohne Abgabe im Programm (Bögen aus der Zeit vor 0.56.0) höchstens eine halbe Frist vor der Fälligkeit angelegt.
+- 14.11.2026 (0.56.0): „Abgegeben …“ geht nicht, solange der Bogen ein Entwurf ist; ohne Bogen im Programm (z. B. auf Papier) geht es.
+- 14.11.2026 (0.56.0): „HEB-Fristen“ ist ein eigener Bereich in der Seitenleiste (Recht „HEB-Bögen bearbeiten“); eine Übersicht aller HEB-Bögen mit Reitern gibt es nicht.
+- 14.11.2026 (0.56.0): Die bisherige Regel „HEB fällig, wenn der letzte Bogen älter als die Frist ist“ entfällt; die Einstellung „HEB fällig“ (Monate) gilt für den Vorschlag.
 - 14.11.2026 (0.55.0): Bestand wird auf der Seite „Bestellung“ gezählt (nicht im Medikamentenplan): Dort steht alles, was man dafür braucht, und der Plan bleibt übersichtlich.
 - 14.11.2026 (0.55.0): Empfänger: Arzt der Verordnung (sonst „Hausarzt“), Forensik bzw. FOSA aus dem Bestellweg der Akte, sonst die heimversorgende Apotheke aus den Einstellungen. Die E-Mail-Adresse kommt aus dem Personenverzeichnis bzw. den Einstellungen.
 - 14.11.2026 (0.55.0): „Versichertennummer mitsenden“ gibt es nicht: DokuLine übermittelt keine Krankenkassendaten (die kommen über das E-Rezept zur Apotheke).
@@ -2726,6 +2736,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.56.0: Seite „HEB-Fristen“ (R1): überfällig oben (rot mit Wort), „4 Wochen“ in Achtung-Farbe; Zeile wählen → „Fälligkeit ändern …“ (Datum, Grund), „Neuer HEB-Bogen …“, nach „fertig“ „Abgegeben …“ (leer = heute, nächste aus dem Vorschlag), „Drucken …“. Übersicht: Kasten „Fristen“ zeigt HEB überfällig/bald fällig. Akte → Stammdaten „Nächster HEB“, Reiter „HEB“ mit Fristzeile und Knöpfen, Reiter „Kostenträger“ mit Zeile „Nächster HEB“. Kalender (Monat): „HEB fällig (Vorname)“ am Fälligkeitstag. Aufgaben: „HEB-Bogen für … beginnen (fällig …)“. Einstellungen → „HEB-Frist: Erinnerung“ (Wochen der beiden Stufen).
 
 Version 0.55.0: Seite „Bestellung“ (Bereich R1): Medikamente nach Empfänger, ankreuzen, „Menge ändern …“, „Anforderung erstellen …“ → unten die Anforderung; „Ausdruck …“ (Druckvorschau), „E-Mail …“ (erst Hinweis zum Datenschutz, dann E-Mail-Programm), „Weiter im Verlauf …“ bis erledigt. Einstellungen → „Medikamentenbestellung“: Bestand führen einschalten, Apotheke mit E-Mail (…@example.org) eintragen, Freigabe setzen → „Bestand zählen …“ erscheint, „reicht bis“ wird gerechnet; die E-Mail an die Apotheke kommt ohne Hinweis.
 

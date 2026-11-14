@@ -10,7 +10,8 @@ public sealed record EinstellungsWerte(bool AutoUpdate = true, string Kuerzel = 
     string Bereich = Bereiche.Vorgabe, string? DatenbankOrdner = null, bool MenueEingeklappt = false, bool NachschlageAnsicht = true,
     int WartezeitMinuten = AbgaengigkeitRegeln.WartezeitVorgabe, int KeinBerichtWochen = MassnahmenRegeln.KeinBerichtWochenVorgabe,
     int ZieleLeitziele = ZielRegeln.LeitzieleVorgabe, int ZieleNahziele = ZielRegeln.NahzieleVorgabe,
-    string QmAus = "", int QmTage = QualitaetRegeln.TageVorgabe);
+    string QmAus = "", int QmTage = QualitaetRegeln.TageVorgabe, int HebErinnernWochen = HebFristRegeln.ErinnernVorgabe,
+    int HebAchtungWochen = HebFristRegeln.AchtungVorgabe);
 
 public static partial class Einstellungen
 {
@@ -70,6 +71,10 @@ public static partial class Einstellungen
             if (knoten["ziele_nahziele"] is JsonValue zn && zn.TryGetValue(out int nah) && nah is >= 0 and <= 6) werte = werte with { ZieleNahziele = nah };
             if (knoten["qm_aus"] is JsonValue qa && qa.TryGetValue(out string? aus)) werte = werte with { QmAus = QualitaetRegeln.AusText(QualitaetRegeln.AusLesen(aus ?? "")) };
             if (knoten["qm_tage"] is JsonValue qt && qt.TryGetValue(out int qtage) && qtage is >= 1 and <= 90) werte = werte with { QmTage = qtage };
+            if (knoten["heb_erinnern_wochen"] is JsonValue he && he.TryGetValue(out int erinnern) && erinnern is >= 1 and <= 26)
+                werte = werte with { HebErinnernWochen = erinnern };
+            if (knoten["heb_achtung_wochen"] is JsonValue ha && ha.TryGetValue(out int achtung) && achtung is >= 1 and <= 26)
+                werte = werte with { HebAchtungWochen = Math.Min(achtung, werte.HebErinnernWochen) };
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
@@ -106,6 +111,8 @@ public static partial class Einstellungen
             ["ziele_nahziele"] = Math.Clamp(werte.ZieleNahziele, 0, 6),
             ["qm_aus"] = QualitaetRegeln.AusText(QualitaetRegeln.AusLesen(werte.QmAus)),
             ["qm_tage"] = Math.Clamp(werte.QmTage, 1, 90),
+            ["heb_erinnern_wochen"] = Math.Clamp(werte.HebErinnernWochen, 1, 26),
+            ["heb_achtung_wochen"] = Math.Clamp(Math.Min(werte.HebAchtungWochen, werte.HebErinnernWochen), 1, 26),
         };
         File.WriteAllText(zwischen, inhalt.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n");
         File.Move(zwischen, ziel, overwrite: true);   // erst ganz schreiben, dann tauschen

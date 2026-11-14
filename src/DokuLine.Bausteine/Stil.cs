@@ -154,7 +154,16 @@ public static class Stil
         Kern.MarkenArt.Zustaendig => Hinweis,   // Forensik, FOSA
         Kern.MarkenArt.Abgaengig => MedikationGeaendert,   // Gefahr-Farbe, immer mit Wort
         Kern.MarkenArt.Vital => MedikationGeaendert,       // außerhalb des angeordneten Bereichs
+        Kern.MarkenArt.Ueberfaellig => MedikationGeaendert,   // Frist überschritten (HEB)
         _ => Achtung,
+    };
+
+    // Schriftfarbe auf heller Fläche für eine Marke (Gefahr als dunkles Rot statt Weiß auf Rot); null = keine Marke.
+    public static Color? TextFarbe(Kern.MarkenArt? art) => art switch
+    {
+        null => null,
+        Kern.MarkenArt.Ueberfaellig or Kern.MarkenArt.Abgaengig or Kern.MarkenArt.Vital or Kern.MarkenArt.Medikation => Beschluss.Text,
+        _ => MarkeFuer(art.Value).Text,
     };
 
     // Auskunftsleiste (Schweigepflicht): grün entbunden, rot keine Auskunft, gelb nicht erfasst – immer mit Zeichen und Wort.

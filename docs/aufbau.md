@@ -52,6 +52,7 @@ Fenster → Kern → Speicher → SQLite-Datei im Datenordner (`%APPDATA%\DokuLi
 | Rechtschreibung | `Rechtschreibung.cs`, `SpeicherRechtschreibung.cs` | `Rechtschreibpruefung.cs` (Windows-Prüfung, Wellenlinie, Rechtsklick), `FachwoerterFenster.cs` |
 | Abwesenheit in der Dokumentation | `Abwesenheit.cs`, `SpeicherKalender.cs` (Zeiträume), Ausgangsliste `Datenbank.cs` (Beginn/Ende) | `AbwesenheitAnzeige.cs`, `DokumentationAnsicht.cs` (Zeile, Balken) |
 | Medikamentenbestellung | `Bestellung.cs`, `SpeicherBestellung.cs` | `BestellungSeite.cs`, Karte in den Einstellungen |
+| HEB-Fristen | `HebFrist.cs`, `SpeicherHebFrist.cs` | `HebFristenSeite.cs`, `HebFristAblauf.cs`, Reiter „HEB“ der Akte |
 | Visiten | `Visiten.cs`, `VisitenEntwurf.cs` | `VisitenSeite.cs`, `VisitenRundgang.cs` |
 | Therapie, Tagesplan | `Therapie.cs`, `Tagesplan.cs`, `LaufendeTherapien.cs` | `TherapieSeite.cs`, `TagesplanSeite.cs`, `LaufendeTherapienAnsicht.cs` |
 | Kalender, .ics | `Kalender.cs`, `Ics.cs` | `KalenderSeite.cs` |

@@ -218,16 +218,6 @@ public static class HebRegeln
         AlleTextfelder(a).Where(x => x.Grenze is int g && f.Text(x.Schluessel).Length > g)
             .Select(x => $"Bereich {x.Bereich} {x.Titel[..2]} {f.Text(x.Schluessel).Length} / {x.Grenze}").ToList();
 
-    // „HEB fällig“ (Startseite): letzter Bogen älter als die Frist, oder kein HEB A drei Monate
-    // nach der Aufnahme.
-    public static string? Faellig(Bewohner b, IReadOnlyList<HebBogen> boegen, DateOnly heute, int fristMonate)
-    {
-        var letzter = boegen.Where(x => x.Fertig).OrderBy(x => x.Bis).LastOrDefault();
-        if (letzter is null)
-            return b.Aufnahmedatum.AddMonths(3) <= heute ? "HEB fällig (kein HEB A)" : null;
-        return letzter.Bis.AddMonths(fristMonate) <= heute ? $"HEB fällig (letzter {letzter.Bis.ToString("MM/yyyy", De)})" : null;
-    }
-
     public static string ZeitraumText(HebBogen h) => $"{Datum.Text(h.Von)} – {Datum.Text(h.Bis)}";
 
     public static List<string> Verlauf(HebBogen h) =>

@@ -1273,6 +1273,22 @@ public sealed partial class Speicher : IDisposable
         CREATE TRIGGER IF NOT EXISTS med_bestand_bleibt BEFORE UPDATE ON med_bestand
             BEGIN SELECT RAISE(ABORT, 'Bestandseinträge werden nicht geändert.'); END;
         """,
+        // 51 – HEB-Fristen: fällig am, kein HEB nötig, abgegeben, Erinnerung als Aufgabe (nie geändert).
+        """
+        CREATE TABLE IF NOT EXISTS heb_frist (
+            id          INTEGER PRIMARY KEY,
+            bewohner_id INTEGER NOT NULL REFERENCES bewohner(id) ON DELETE CASCADE,
+            art         TEXT NOT NULL CHECK (art IN ('faellig', 'kein', 'abgegeben', 'aufgabe')),
+            datum       TEXT,
+            grund       TEXT NOT NULL DEFAULT '',
+            bogen_id    INTEGER,
+            aufgabe_id  INTEGER,
+            kuerzel     TEXT NOT NULL,
+            erfasst     TEXT NOT NULL
+        );
+        CREATE TRIGGER IF NOT EXISTS heb_frist_bleibt BEFORE UPDATE ON heb_frist
+            BEGIN SELECT RAISE(ABORT, 'Einträge zur HEB-Frist werden nicht geändert.'); END;
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
@@ -1450,10 +1466,11 @@ public sealed partial class Speicher : IDisposable
              status = Meta(DemoStatus) is null, mitarbeiter = Meta(DemoMitarbeiterSchluessel) is null, bezug = Meta(DemoBezug) is null,
              akte = Meta(DemoAkte) is null, dokumente = Meta(DemoDokumente) is null, schweigepflicht = Meta(DemoSchweigepflicht) is null,
              vital = Meta(DemoVital) is null, massnahmen = Meta(DemoMassnahmen) is null, ausgabe = Meta(DemoAusgabe) is null,
-             ziele = Meta(DemoZiele) is null, archiv = Meta(DemoArchiv) is null, hilfeplan = Meta(DemoHilfeplan) is null;
+             ziele = Meta(DemoZiele) is null, archiv = Meta(DemoArchiv) is null, hilfeplan = Meta(DemoHilfeplan) is null,
+             hebfrist = Meta(DemoHebFrist) is null;
         var neueModule = ModuleOhneDemo();
         bool modulNeu = neueModule.Count > 0;
-        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !archiv && !hilfeplan && !modulNeu)
+        if (!berichte && !aufgaben && !nachrichten && !medikamente && !medikation && !therapie && !wochenplan && !kalender && !biografie && !reflexion && !heb && !status && !mitarbeiter && !bezug && !fahrten && !standard && !visiten && !aerzte && !aerztlich && !betreuer && !personen && !bedarf && !akte && !dokumente && !schweigepflicht && !vital && !massnahmen && !ausgabe && !ziele && !archiv && !hilfeplan && !hebfrist && !modulNeu)
             return false;
         // Vorher eine Kopie: Manche Teile ersetzen vorhandene Einträge (z. B. die Therapie-Angebote).
         string kopie = SicherungAnlegen("vor-demo-nachholen");
@@ -1490,6 +1507,7 @@ public sealed partial class Speicher : IDisposable
         if (bezug || mitarbeiter) DemoBezugEinfuegen(transaktion);
         DemoModuleEinfuegen(transaktion, neueModule);
         if (hilfeplan) DemoHilfeplanEinfuegen(transaktion);
+        if (hebfrist || heb) DemoHebFristEinfuegen(transaktion);   // hängt an den HEB-Bögen
         if (archiv) DemoArchivEinfuegen(transaktion);
         transaktion.Commit();
         if (dokumente) AblageAufraeumen();
@@ -1553,6 +1571,7 @@ public sealed partial class Speicher : IDisposable
             DemoBezugEinfuegen(transaktion);
             DemoModuleEinfuegen(transaktion, module);
             DemoHilfeplanEinfuegen(transaktion);
+            DemoHebFristEinfuegen(transaktion);
             DemoArchivEinfuegen(transaktion);   // zuletzt: die ehemaligen Bewohner bekommen keine Demo-Daten der Lebenden
             transaktion.Commit();
         }

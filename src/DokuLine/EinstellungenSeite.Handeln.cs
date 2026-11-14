@@ -241,4 +241,12 @@ public sealed partial class EinstellungenSeite
         rechts.PerformLayout();
         return false;
     }
+
+    // Die zweite Stufe hat höchstens so viele Wochen wie die erste.
+    private void HebStufenUebernehmen()
+    {
+        if (laedt || !Darf(Funktionen.EinstellungenBereich)) return;
+        if (HebAchtung.Value > HebErinnern.Value) HebAchtung.Value = HebErinnern.Value;
+        Einstellungen.Aendern(w => w with { HebErinnernWochen = (int)HebErinnern.Value, HebAchtungWochen = (int)HebAchtung.Value });
+    }
 }

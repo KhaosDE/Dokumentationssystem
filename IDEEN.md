@@ -2783,7 +2783,7 @@ Umfang:
   von Medikamenten könnte später hier dazukommen.
 
 ## HEB-Fälligkeit vermerken und rechtzeitig erinnern
-Status: freigegeben (Bauplan Schritt 52; Vorgabe Tobi 13.11.2026)
+Status: erledigt (14.11.2026, 0.56.0; Bauplan Schritt 52)
 Datum: 13.11.2026
 Was: Je Bewohner steht, bis wann der nächste HEB-Bogen beim Kostenträger sein muss. Das Programm
 erinnert rechtzeitig vorher, nicht erst, wenn es zu spät ist.

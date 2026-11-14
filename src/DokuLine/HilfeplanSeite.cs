@@ -40,7 +40,7 @@ public sealed class HilfeplanSeite : Panel, IBereichSeite
         Waehlen = texte => MehrfachWahl.Zeigen(FindForm(), "Hilfeplangespräch", "Bitte wählen:", texte);
         Warnen = text => MessageBox.Show(FindForm(), text + "\n\nTrotzdem eintragen?", "Überschneidung", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes;
         IcsSpeichern = vorschlag => KalenderAustausch.SpeichernUnter(FindForm(), vorschlag);
-        foreach (var (titel, breite) in new[] { ("Zimmer", 70), ("Name", 180), ("Letztes", 100), ("Fällig bis", 130), ("Stand", 130), ("Termin", 150), ("Hinweis", 230) })
+        foreach (var (titel, breite) in new[] { ("Zimmer", 70), ("Name", 180), ("Letztes", 100), ("Fällig bis", 130), ("Stand", 130), ("Termin", 150), ("Hinweis", 230), ("Nächster HEB", 150) })
             Liste.Columns.Add(titel, breite);
         Liste.SelectedIndexChanged += (_, _) => KnoepfeSetzen();
         TerminKnopf.Click += (_, _) => TerminVergeben();
@@ -58,13 +58,15 @@ public sealed class HilfeplanSeite : Panel, IBereichSeite
         var heute = DateOnly.FromDateTime(Jetzt());
         var bewohner = BereichswahlRegeln.Bewohner(speicher.AlleBewohner(), Arbeitsbereich.Gewaehlt);
         Zeilen = [.. speicher.Hilfeplaene(bewohner, heute).OrderBy(z => z.FaelligBis ?? DateOnly.MaxValue).ThenBy(z => z.Bewohner.Zimmer.PadLeft(8), StringComparer.Ordinal)];
+        var heb = speicher.HebFristen(bewohner, heute).ToDictionary(h => h.Bewohner.Id!.Value);
         Liste.BeginUpdate();
         Liste.Items.Clear();
         foreach (var z in Zeilen)
         {
             string? marke = HilfeplanRegeln.Marke(z, heute);
             var zeile = new ListViewItem([z.Bewohner.Zimmer, z.Bewohner.Name, Datum.Text(z.LetztesAm), z.FaelligBis is DateOnly f ? Datum.Text(f) + (z.Vorschlag ? " (Vorschlag)" : "") : "nicht erfasst",
-                HilfeplanRegeln.StandText(z.Stand), z.Termin is KalenderTermin t ? $"{t.Aktuell.Beginn:dd.MM.yyyy HH:mm}" : "", marke ?? ""])
+                HilfeplanRegeln.StandText(z.Stand), z.Termin is KalenderTermin t ? $"{t.Aktuell.Beginn:dd.MM.yyyy HH:mm}" : "", marke ?? "",
+                heb.TryGetValue(z.Bewohner.Id!.Value, out var h) ? HebFristenSeite.FaelligText(h) : ""])
             { Tag = z, UseItemStyleForSubItems = false };
             if (marke is not null) zeile.SubItems[6].ForeColor = Stil.Achtung.Text;
             if (z.FaelligBis is null) zeile.SubItems[3].ForeColor = Stil.Achtung.Text;

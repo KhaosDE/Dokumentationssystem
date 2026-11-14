@@ -19,12 +19,13 @@ public sealed partial class Speicher
         var liste = new List<PruefDaten>();
         var bewohnerListe = bewohner.ToList();
         var hilfeplaene = Hilfeplaene(bewohnerListe, heute).ToDictionary(h => h.Bewohner.Id!.Value);
+        var hebFristen = HebFristen(bewohnerListe, heute).ToDictionary(h => h.Bewohner.Id!.Value);
         foreach (var b in bewohnerListe)
         {
             long id = b.Id!.Value;
             var berichte = Berichte(id, new BerichtFilter(vonBerichte, heute)).Where(x => x.Art != MassnahmenRegeln.ArtBericht).ToList();
             liste.Add(new PruefDaten(b, [.. ziele[id]], verzichte.GetValueOrDefault(id), [.. massnahmen[id]], [.. bestaetigungen[id]], berichte,
-                Reflexion(id, ReflexionRegeln.Vorschlag(heute)), HebRegeln.Faellig(b, HebBoegen(id), heute, w.HebFristMonate), Angaben(id, heute),
+                Reflexion(id, ReflexionRegeln.Vorschlag(heute)), HebFristRegeln.QmText(hebFristen[id], heute), Angaben(id, heute),
                 hilfeplaene.GetValueOrDefault(id)));
         }
         return liste;
