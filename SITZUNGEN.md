@@ -149,3 +149,4 @@ Ein Einzeiler pro Sitzung, nur anhängen.
 - 14.11.2026 — Claude Code: 0.50.0 Archiv (Bauplan 46): Entlassen, Seite „Archiv“, Akte nur lesend, Wiederaufnahme, Löschen zu zweit mit Protokoll.
 - 14.11.2026 — Claude Code: 0.51.0 Hilfeplangespräche (Bauplan 47): Seite nach Fälligkeit, Termin, Einladung, Vorbereitung, „geführt“, Prüfpunkt QMB.
 - 14.11.2026 — Claude Code: 0.52.0 Schlüsselwörter (Bauplan 48): Vorschlagszeile, Zielformular nach dem Speichern mit Verweis, Einstellungsfenster mit Probefeld.
+- 14.11.2026 — Claude Code: 0.53.0 Rechtschreibprüfung (Bauplan 49): Windows-Prüfung mit Wellenlinie, eigene Wörter, Fachwörterbuch, Autokorrektur.

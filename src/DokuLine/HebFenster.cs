@@ -142,6 +142,7 @@ public sealed class HebFenster : Form, IEntwurfFenster
     {
         var titel = new Label { Text = feld.Titel, AutoSize = true, Font = Stil.Fett, ForeColor = Stil.TextNormal, BackColor = Stil.Seite, UseMnemonic = false };
         var box = new TextBox { Multiline = true, ScrollBars = ScrollBars.Vertical, AcceptsReturn = true, Height = feld.Grenze is int g ? Math.Clamp(g / 6, 90, 180) : 90 };
+        Rechtschreibpruefung.Anbinden(box, speicher);
         var zaehler = new Label { AutoSize = true, Font = Stil.Klein, BackColor = Stil.Seite };
         var hinweise = new Label { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.Achtung.Text, BackColor = Stil.Achtung.Flaeche, Padding = new Padding(Stil.AbstandMini), Visible = false };
         box.Enter += (_, _) => zuletzt = box;

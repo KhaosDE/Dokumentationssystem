@@ -219,6 +219,7 @@ public sealed class VisitenRundgang : Panel
         OffeneAufgaben.Visible = offen.Count > 0;
         if (Feld is not null) { rechts.Controls.Remove(Feld); Feld.Dispose(); }
         Feld = new VisiteEintragFeld(b, speicher.Medikamente().Where(m => !m.Gesperrt).ToList());
+        Rechtschreibpruefung.Anbinden(Feld.Besprochen, speicher);
         Feld.EntfernenKnopf.Visible = false;
         Feld.Leave += (_, _) => Merken();   // verlässt man die Eingabe, steht sie schon im Entwurf
         Feld.Besprochen.TextChanged += (_, _) => { NachTippen(); NaechsterSperren(); };

@@ -98,6 +98,10 @@ public sealed partial class EinstellungenSeite
         Karte("Wohnbereich", "Archiv: Aufbewahrungsfrist", "Jahre ab Entlassung, bis eine archivierte Akte gelöscht werden darf. Keine Vorgabe: Die Frist muss mit Träger und Datenschutz geklärt werden. Leer = nicht festgelegt.",
             Reihe(ArchivFrist, ArchivFristKnopf, ArchivFristMeldung), Funktionen.ArchivLoeschen);
         SchluesselwoerterKnopf.Click += (_, _) => FensterZeigen(new SchluesselwoerterFenster(speicher));
+        FachwoerterKnopf.Click += (_, _) => FensterZeigen(new FachwoerterFenster(speicher));
+        Autokorrektur.CheckedChanged += (_, _) => { if (!laedt) speicher.AutokorrekturSetzen(Recht.Kuerzel, Autokorrektur.Checked); };
+        Karte("Wohnbereich", "Rechtschreibung", "Rote Wellenlinie unter unbekannten Wörtern, Vorschläge per Rechtsklick. Namen, Medikamente und Fachwörter gelten als richtig. Grammatik und Stil prüft das Programm nicht.",
+            Reihe(FachwoerterKnopf, Autokorrektur, RechtschreibStand), null);
         Karte("Wohnbereich", "Schlüsselwörter", "Wörter, bei denen „Neuer Bericht“ den nächsten Schritt anbietet (z. B. „Arzttermin“ → Termin im Kalender). Ansehen alle; ändern mit Recht „Schlüsselwörter verwalten“.",
             SchluesselwoerterKnopf, null);
         MassnahmenListenKnopf.Click += (_, _) => FensterZeigen(new ListenFenster(speicher, [Liste.Massnahmenarten, Liste.Massnahmenvorlagen]));

@@ -25,6 +25,9 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
     private List<Ziel> ziele = [];
     // Schlüsselwörter (Bauplan 48): die leise Zeile unter dem Text; vorgemerkte Schritte öffnen nach dem Speichern.
     public VorschlagLeiste Vorschlaege { get; }
+    // Rechtschreibung (Bauplan 49): leiser Hinweis „2 Wörter unbekannt“ – kein Zwang beim Speichern.
+    public Unterstreichung InhaltPruefung { get; }
+    public Label RechtschreibHinweis { get; } = new() { AutoSize = true, Font = Stil.Klein, ForeColor = Stil.TextLeise, Visible = false, UseMnemonic = false };
     public IReadOnlyList<Vorschlag> Folgeschritte => Vorschlaege.Vorgemerkt;
     public bool AngebotGefragt => Art.SelectedItem as string == DokuRegeln.ArtTherapie;
     public Label Verfasser { get; } = Recht.KuerzelAnzeige();   // aus der Anmeldung
@@ -139,6 +142,9 @@ public sealed class BerichtFormular : Form, IEntwurfFenster
         Inhalt.Dock = DockStyle.Fill;
         Zeile("Text", Inhalt);
         Zeile(null, Vorschlaege);
+        Zeile(null, RechtschreibHinweis);
+        InhaltPruefung = Rechtschreibpruefung.Anbinden(Inhalt, speicher, RechtschreibHinweis);
+        Rechtschreibpruefung.Anbinden(UebergabeText, speicher);
         Inhalt.TextChanged += (_, _) => Vorschlaege.Pruefen(Inhalt.Text + "\n" + UebergabeText.Text);
         UebergabeText.TextChanged += (_, _) => Vorschlaege.Pruefen(Inhalt.Text + "\n" + UebergabeText.Text);
         Vorschlaege.Sofort += _ =>
@@ -351,6 +357,7 @@ public sealed class NachtragFormular : Form
     public NachtragFormular(Speicher speicher, Bericht bericht)
     {
         this.speicher = speicher;
+        Rechtschreibpruefung.Anbinden(Inhalt, speicher);
         this.bericht = bericht;
         Text = $"Nachtrag ({KopfBereich.DemoHinweis})";
         FormBorderStyle = FormBorderStyle.FixedDialog;

@@ -1,6 +1,6 @@
 # STAND — DokuLine
 
-Stand: 14.11.2026. Version: **0.52.0** (Schlüsselwörter bieten den nächsten Schritt an).
+Stand: 14.11.2026. Version: **0.53.0** (Rechtschreibprüfung mit Fachwörterbuch).
 
 ## Aktuell
 
@@ -491,7 +491,9 @@ Neu in 0.51.0: **Hilfeplangespräche** (Bauplan 47). Neue Seite **„Hilfeplange
 
 Neu in 0.52.0: **Schlüsselwörter** (Bauplan 48). Im Fenster „Neuer Bericht“ (Text und Übergabe-Satz) erscheint unter dem Text eine **leise Zeile**, z. B. „„Arzttermin“ erkannt — Termin im Kalender?“ mit **„Nach dem Speichern anlegen …“** und **„×“** – höchstens zwei Angebote, ein weggeklicktes kommt für diesen Text nicht wieder, nie ein Fenster beim Schreiben. Nach dem Speichern öffnet das **Zielformular vorbelegt** (Bewohner, erkanntes Datum und Uhrzeit, Bezug zum Bericht); der Bericht trägt danach den Verweis „→ Termin 14.11. 10:30“ bzw. „→ Aufgabe …“. Feste Regelliste (keine KI) mit 12 Schritten: Termin, Aufgabe, Medikamentenplan, Bedarf gegeben, Vitalwerte, Besonderes Vorkommnis (kennzeichnet sofort), Abgängigkeit, Überleitungsbogen, Wiedervorlage, Schweigepflicht, Hilfeplangespräch, Ziele. Einstellungen → **„Schlüsselwörter …“**: je Schritt die Wörter mit ein/aus, Art des Treffers (ganzes Wort · Wortanfang · Wortgruppe), Schritt ändern, hinzufügen, entfernen (mitgelieferte nur aus), Werkseinstellung, **Probefeld**; „Für mich keine Vorschläge anzeigen“.
 
-**Nächster Schritt:** Bauplan Schritt 49 (Rechtschreibprüfung mit Fachwörterbuch).
+Neu in 0.53.0: **Rechtschreibprüfung** (Bauplan 49) mit der Rechtschreibprüfung von Windows (ohne Internet, ohne KI, ohne neue Abhängigkeit): **rote Wellenlinie** unter unbekannten Wörtern in Bericht, Nachtrag, Übergabe-Satz, Visite, Reflexion, HEB-Bogen, Biografie und Zielen; **Rechtsklick** mit bis zu fünf Vorschlägen, „Ignorieren“ (nur diese Sitzung) und „Zum Fachwörterbuch hinzufügen“ (Recht „Fachwörter verwalten“). **Eigene Wörter** gelten automatisch als richtig: Namen der Bewohner, Mitarbeiter und Verzeichnisse, Kürzel, Wirkstoffe und Handelsnamen, Therapieangebote und Orte – sie verlassen DokuLine nicht. **Fachwörterbuch** der Einrichtung (Einstellungen → „Fachwörter …“) mit selbst zusammengestellter Grundliste. Wahlweise **Autokorrektur** typischer Vertipper (je Mitarbeiter, aus). Unter dem Berichtstext ein leiser Hinweis „2 Wörter unbekannt“ – kein Zwang beim Speichern. Ohne deutsches Sprachpaket zeigt das Programm das an und läuft ohne Prüfung weiter.
+
+**Nächster Schritt:** Bauplan Schritt 50 (Abwesenheit in der Dokumentation sichtbar machen).
 
 ## Fertig
 
@@ -1603,6 +1605,7 @@ Neu in 0.52.0: **Schlüsselwörter** (Bauplan 48). Im Fenster „Neuer Bericht�
 - 0.50.0 — Archiv (Bauplan 46): Entlassen mit Folgen, Seite „Archiv“, Akte nur lesend, Wiederaufnahme, Frist ohne Vorgabe, Löschen zu zweit mit Protokoll
 - 0.51.0 — Hilfeplangespräche (Bauplan 47): Seite nach Fälligkeit, Termin mit Teilnehmern im Kalender, Einladung, Vorbereitung, „geführt“ mit Bericht, Prüfpunkt QMB
 - 0.52.0 — Schlüsselwörter (Bauplan 48): Vorschlagszeile im „Neuer Bericht“, Zielformular nach dem Speichern mit Verweis, Einstellungsfenster mit Probefeld
+- 0.53.0 — Rechtschreibprüfung (Bauplan 49): Windows-Prüfung mit Wellenlinie und Vorschlägen, eigene Wörter und Fachwörterbuch, Autokorrektur wahlweise
 
 ## Offene Punkte
 
@@ -1707,6 +1710,11 @@ Neu in 0.52.0: **Schlüsselwörter** (Bauplan 48). Im Fenster „Neuer Bericht�
 
 Von Claude Code (Begründungen; gelten weiter, sofern nicht anders vermerkt):
 
+- 14.11.2026 (0.53.0): Die eigenen Wörter (Namen, Medikamente, Fachwörter) werden in DokuLine herausgefiltert statt an Windows übergeben – so landet kein Personenname in einer Datei oder Sitzung von Windows; „Ignorieren“ gilt ebenfalls nur in DokuLine.
+- 14.11.2026 (0.53.0): Die Wellenlinie zeichnet DokuLine über das normale Textfeld (kein Austausch gegen ein anderes Steuerelement); geprüft wird 0,4 Sekunden nach dem letzten Tippen. Grammatik und Stil prüft das Programm nicht (dafür bräuchte es LanguageTool – nicht erlaubte Lizenz – oder KI).
+- 14.11.2026 (0.53.0): Die Anbindung an Windows (`ISpellChecker`) folgt der Schnittstelle aus `spellcheck.h`; ob sie auf einem Rechner läuft, prüft ein Oberflächentest mit Englisch. Hier unter Linux nicht ausführbar – ungetestet bis zum Windows-Test.
+- 14.11.2026 (0.53.0): Fachwörterbuch: eine Liste für das ganze Haus; ergänzen dürfen Administrator, Geschäftsführung, Hausleitung und Bereichsleitung.
+- 14.11.2026 (0.53.0): Autokorrektur nur nach einem Leerzeichen und nur aus einer festen Liste typischer Vertipper; rückgängig mit Strg+Z.
 - 14.11.2026 (0.52.0): Das Zielformular öffnet direkt nach dem Speichern des Berichts statt während des Schreibens: So kennt es den Bericht für den Rückverweis (Aufgabe „aus einem Bericht“, Termin mit Hinweis „aus dem Bericht vom …“), und der Bericht geht nicht verloren, wenn man das Zielformular abbricht. Angelegt wird erst dort, vom Menschen.
 - 14.11.2026 (0.52.0): „Besonderes Vorkommnis“ ist kein Formular: Der Knopf „Kennzeichnen“ setzt Berichtsart und „Wichtig“ im offenen Bericht – auf Klick, nie von selbst.
 - 14.11.2026 (0.52.0): Treffer auch bei Verneinung („kein Arzttermin nötig“) sind hingenommen, weil nur angeboten wird.
@@ -2701,6 +2709,8 @@ mehr. Ohne Recht „Dokumente hinzufügen“ entsteht keine Kopie, der Bogen lä
   …)“ oder „fehlt“). Einen eigenen Abschnitt „Über“ gibt es erst mit Schritt 29.
 
 ## Testliste für Tobi
+
+Version 0.53.0: „Neuer Bericht“: „Herr Ahorn wra ruhig“ tippen → „wra“ rot unterschlängelt, „Ahorn“ nicht; Rechtsklick auf „wra“ → Vorschläge, „Ignorieren“, „Zum Fachwörterbuch hinzufügen“. Unter dem Text „1 Wort unbekannt“. Medikamentennamen und Fachwörter wie „Bezugspflege“ bleiben ohne Linie. Einstellungen → „Rechtschreibung“: Stand (verfügbar/nicht), „Fachwörter …“, Autokorrektur einschalten → „udn “ wird zu „und “. Ohne deutsches Sprachpaket: Hinweis in den Einstellungen.
 
 Version 0.52.0: „Neuer Bericht“: „Arzttermin am 20.11. um 14:30, Blutdruck gemessen“ tippen → zwei Angebote unter dem Text; eines mit „×“ wegklicken; „Nach dem Speichern anlegen …“ beim Termin → Speichern → Kalenderfenster mit Titel, Datum und Uhrzeit → Speichern → im Bericht steht „→ Termin 20.11. 14:30“. „Im Flur gestürzt“ → „Kennzeichnen“ setzt „Besonderes Vorkommnis“. Einstellungen → „Schlüsselwörter …“: Probefeld ausprobieren, ein Wort abschalten, Werkseinstellung; „Für mich keine Vorschläge anzeigen“.
 

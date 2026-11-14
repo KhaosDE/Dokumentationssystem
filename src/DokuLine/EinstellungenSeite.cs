@@ -73,6 +73,9 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
     public Label ArchivFristMeldung { get; } = new() { AutoSize = true, UseMnemonic = false };
     public Button MassnahmenListenKnopf { get; } = Stil.NebenKnopf("Arten und Vorlagen …");
     public Button SchluesselwoerterKnopf { get; } = Stil.NebenKnopf("Schlüsselwörter …");
+    public Button FachwoerterKnopf { get; } = Stil.NebenKnopf("Fachwörter …");
+    public CheckBox Autokorrektur { get; } = new() { Text = "Autokorrektur typischer Vertipper (für mich)", AutoSize = true };
+    public Label RechtschreibStand { get; } = new() { AutoSize = true, MaximumSize = new Size(420, 0), UseMnemonic = false };
     public NumericUpDown HebFrist { get; } = new() { Minimum = 1, Maximum = 60, Width = 80 };
     public Button LogoKnopf { get; } = Stil.NebenKnopf("Bild wählen …");
     public Button LogoWeg { get; } = Stil.NebenKnopf("Bild entfernen");
@@ -191,6 +194,10 @@ public sealed partial class EinstellungenSeite : Panel, IBereichSeite
             var aus = QualitaetRegeln.AusLesen(werte.QmAus);
             for (int i = 0; i < QualitaetRegeln.Alle.Length; i++) Pruefpunkte.SetItemChecked(i, !aus.Contains(QualitaetRegeln.Alle[i]));
             QmTage.Value = Math.Clamp(werte.QmTage, 1, 90);
+            Autokorrektur.Checked = speicher.AutokorrekturAn(Recht.Kuerzel);
+            Autokorrektur.Enabled = Recht.Angemeldet;
+            RechtschreibStand.Text = Rechtschreibpruefung.Verfuegbar ? "Rechtschreibprüfung von Windows (Deutsch): verfügbar." : RechtschreibRegeln.NichtVerfuegbar;
+            RechtschreibStand.ForeColor = Rechtschreibpruefung.Verfuegbar ? Stil.TextMittel : Stil.Achtung.Text;
             ArchivFrist.Text = speicher.ArchivFrist()?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "";
             ArchivFristMeldung.Text = ArchivFrist.Text.Length == 0 ? "nicht festgelegt" : "";
             ArchivFristMeldung.ForeColor = Stil.Achtung.Text;

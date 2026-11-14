@@ -2668,7 +2668,7 @@ Umfang (Vorschlag):
   aus — das ist hingenommen, weil nur angeboten wird; in `STAND.md` vermerken).
 
 ## Rechtschreibprüfung mit Fachwörterbuch
-Status: freigegeben (Freigabe Tobi 14.11.2026: „Alle Schritte freigeben“)
+Status: erledigt (14.11.2026, 0.53.0; Bauplan Schritt 49)
 Datum: 13.11.2026
 Was: Beim Schreiben von Berichten werden Tippfehler rot unterschlängelt, mit Vorschlägen per
 Rechtsklick — und Fachwörter, Namen und Medikamente gelten nicht als Fehler.

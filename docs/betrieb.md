@@ -126,6 +126,10 @@ Rechner, dafür ist SQLite gebaut. DokuLine schaltet im Betrieb den WAL-Modus ei
 3. Eine Verknüpfung zu `DokuLine.exe` auf den Desktop der Benutzer (oder ins Startmenü für alle).
 4. Windows SmartScreen warnt beim ersten Start („unbekannter Herausgeber“), weil die Datei nicht signiert ist:
    „Weitere Informationen“ → „Trotzdem ausführen“.
+5. **Rechtschreibprüfung:** DokuLine nutzt die Rechtschreibprüfung von Windows. Auf dem Terminalserver muss das
+   Sprachpaket bzw. die Funktion „Deutsch (Deutschland) – Rechtschreibung“ installiert sein (Einstellungen →
+   Zeit und Sprache → Sprache). Fehlt sie, zeigt DokuLine das in den Einstellungen an und läuft ohne Prüfung weiter.
+   Fachwörter speichert DokuLine in seiner eigenen Datenbank, nie in Wörterbuchdateien von Windows.
 
 ## 4. Erster Start und Benutzer
 

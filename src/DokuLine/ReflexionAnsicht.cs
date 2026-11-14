@@ -60,6 +60,7 @@ public sealed class ReflexionAnsicht : Panel
         {
             var b = new ReflexionBereich(i);
             Bereiche.Add(b);
+            Rechtschreibpruefung.Anbinden(b.Feld, speicher);
             Controls.Add(b);
         }
         therapieKarte.Controls.AddRange([therapieTitel, Therapien, ZieleText]);

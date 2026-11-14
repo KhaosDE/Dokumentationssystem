@@ -1230,6 +1230,13 @@ public sealed partial class Speicher : IDisposable
             erfasst   TEXT NOT NULL
         );
         """,
+        // 49 – Fachwörterbuch der Einrichtung (Rechtschreibung).
+        """
+        CREATE TABLE IF NOT EXISTS fachwoerter (
+            wort         TEXT PRIMARY KEY COLLATE NOCASE,
+            mitgeliefert INTEGER NOT NULL DEFAULT 0 CHECK (mitgeliefert IN (0, 1))
+        );
+        """,
     ];
 
     public static int AktuellerStand => Schritte.Length;
