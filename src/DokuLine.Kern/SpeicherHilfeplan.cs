@@ -116,7 +116,7 @@ public sealed partial class Speicher
         });
         using var transaktion = db.BeginTransaction();
         HilfeplanEreignisEinfuegen(bewohnerId, "gefuehrt", am, null, "", bericht.Id, kuerzel, jetzt, transaktion);
-        if (naechstes is DateOnly bis) HilfeplanEreignisEinfuegen(bewohnerId, "faellig", bis, null, "", null, kuerzel, jetzt.AddSeconds(1), transaktion);
+        if (naechstes is DateOnly bis) HilfeplanEreignisEinfuegen(bewohnerId, "faellig", bis, null, "", null, kuerzel, jetzt, transaktion);   // Reihenfolge über die Nummer
         transaktion.Commit();
         HilfeplanGeaendert?.Invoke();
         return bericht;

@@ -138,7 +138,7 @@ public sealed class HebFristTests : IDisposable
         Assert.Equal((HebFristZustand.Eingetragen, Heute.AddYears(1), HebBogenStand.Offen, (long?)null), (danach.Zustand, danach.FaelligAm, danach.Stand, danach.AufgabeId));
         Assert.Equal(entwurf.Id, danach.LetzteAbgabe!.BogenId);
 
-        s.HebKeinerNoetig(id, "Auszug geplant", "RS", Jetzt.AddMinutes(1));
+        s.HebKeinerNoetig(id, "Auszug geplant", "RS", Jetzt);   // in derselben Sekunde wie die Abgabe: gilt trotzdem
         Assert.Equal(HebFristZustand.KeinHeb, s.HebFrist(id, Heute).Zustand);
         Assert.Throws<Eingabefehler>(() => s.HebAbgegeben(id, Heute, null, "RS", Jetzt.AddMinutes(2)));
 

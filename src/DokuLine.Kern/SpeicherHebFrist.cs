@@ -92,7 +92,8 @@ public sealed partial class Speicher
         using var transaktion = db.BeginTransaction();
         HebFristEinfuegen(bewohnerId, "abgegeben", am, "", stand.Bogen?.Id, null, kuerzel, jetzt, transaktion);
         if (naechste is DateOnly bis)
-            HebFristEinfuegen(bewohnerId, "faellig", bis, $"nach Abgabe am {Datum.Text(am)}", null, null, kuerzel, jetzt.AddSeconds(1), transaktion);
+            // Dieselbe Zeit wie die Abgabe: Die Reihenfolge ergibt die Nummer; eine Sekunde später überholte sie sonst eine Eingabe danach.
+            HebFristEinfuegen(bewohnerId, "faellig", bis, $"nach Abgabe am {Datum.Text(am)}", null, null, kuerzel, jetzt, transaktion);
         transaktion.Commit();
         HebFristGeaendert?.Invoke();
     }

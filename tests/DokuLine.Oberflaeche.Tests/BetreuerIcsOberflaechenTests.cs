@@ -96,7 +96,7 @@ public class BetreuerIcsOberflaechenTests
             KalenderAustausch.SpeichernUnter = (_, v) => { vorschlag = v; return export; };
             k.ExportKnopf.PerformClick();
             Assert.EndsWith(".ics", vorschlag);
-            Assert.Equal(k.Termine().Count, Ics.Lesen(File.ReadAllText(export)).Count);
+            Assert.Equal(k.Termine().Count(t => t.Id > 0), Ics.Lesen(File.ReadAllText(export)).Count);   // ohne die gezeigten HEB-Fristen
 
             var tag = DateTime.Today.AddDays(3);
             string datei = Path.Combine(u.Ordner, "einladung.ics");
